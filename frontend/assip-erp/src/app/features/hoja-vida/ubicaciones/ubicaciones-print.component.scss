@@ -1,0 +1,236 @@
+/* ====== Ubicaciones Print — hoja-vida ====== */
+
+/* Contenedor principal */
+.print-container {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 10px 12px;
+  background: #fff;
+  color: #111;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+/* Acciones (solo visibles en pantalla) */
+.print-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-bottom: 6px;
+}
+
+/* Encabezado con logo y títulos */
+.print-header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 0; /* el <hr> maneja espaciado */
+
+  .logo {
+    /* Tamaño en pantalla */
+    width: 90px;
+    max-height: 60px;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .titles {
+    flex: 1;
+
+    .empresa-sigla {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .3px;
+      margin-bottom: 2px;
+      line-height: 1.1;
+    }
+
+    .empresa-nit {
+      font-size: 10px;
+      color: #444;
+      margin-bottom: 3px;
+      line-height: 1.1;
+    }
+
+    h1 {
+      margin: 0 0 2px;
+      font-size: 16px;
+      line-height: 1.1;
+    }
+
+    .meta {
+      font-size: 10px;
+      color: #555;
+      line-height: 1.1;
+    }
+  }
+}
+
+/* Línea clara y fiable en impresión */
+.hr-print {
+  border: 0;
+  border-top: 1px solid #000;
+  margin: 6px 0 8px;
+}
+
+/* Estado / vacíos */
+.loading { padding: 8px 0; }
+.empty-global { padding: 10px 0; color: #666; }
+
+/* BLOQUES POR PERSONA */
+.person-block {
+  page-break-inside: avoid;
+  margin-bottom: 10px;
+}
+
+/* Etiquetas de corte */
+.cut-label {
+  font-size: 11px;
+  color: #444;
+  margin-top: 6px;
+}
+
+/* Encabezado de persona (nombre / doc) */
+.person-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 4px 0 6px;
+
+  .person-name {
+    font-weight: 700;
+    font-size: 13px;
+  }
+
+  .person-doc {
+    font-size: 12px;
+    color: #444;
+    white-space: nowrap;
+  }
+}
+
+/* Tabla compacta */
+.print-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;     /* fija anchos, evita saltos raros */
+  font-size: 11px;
+  line-height: 1.15;
+
+  th, td {
+    border: 0;
+    padding: 4px 6px;
+    text-align: left;
+    vertical-align: top;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  thead th {
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  thead tr {
+    border-bottom: 1px solid #e5e7eb; /* única línea bajo títulos */
+  }
+
+  .code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 10px;
+  }
+}
+
+/* Separador entre cortes */
+.section-hr {
+  border: 0;
+  border-top: 1px dashed #999;
+  margin: 10px 0 6px;
+}
+
+/* BOTONES (solo en pantalla) */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fafafa;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+
+  &.primary {
+    background: #0d6efd;
+    color: #fff;
+    border-color: #0d6efd;
+  }
+}
+
+/* Footer n/m y visibilidad */
+.page-footer { display: none; }
+.no-print { display: block; }  /* lo ocultamos solo al imprimir */
+.no-screen { display: none; }
+
+/* ====== Modo impresión ====== */
+@media print {
+  :root { --total-pages: "…"; }
+
+  /* Márgenes y tamaño carta */
+  @page { size: Letter; margin: 12mm 10mm; }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: #fff;
+  }
+
+  /* Logo más compacto en papel */
+  .print-header .logo {
+    width: 80px;
+    max-height: 50px;
+    height: auto;
+    object-fit: contain;
+  }
+
+  /* Encabezados de tabla repetibles */
+  thead { display: table-header-group; }
+  tr, img { page-break-inside: avoid; }
+
+  /* Ajustes de densidad en impresión */
+  .print-container {
+    padding: 6px 8px;
+    font-size: 11px;
+    line-height: 1.15;
+    padding-bottom: 20mm; /* espacio para el footer fijo n/m */
+  }
+  .print-table { font-size: 10.5px; }
+  .print-header .titles h1 { font-size: 14px; }
+
+  /* Footer fijo “Página X / Y” */
+  .page-footer {
+    display: block;
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 14mm;
+    font-size: 10.5px;
+    text-align: right;
+    padding-right: 10mm;
+  }
+  .page-footer:not(.static) .page-text::after {
+    content: "Página " counter(page) " / " var(--total-pages);
+  }
+  .page-footer.static .page-text::after {
+    content: attr(data-content);
+  }
+
+  /* Oculta solo lo marcado como no imprimible */
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
+}

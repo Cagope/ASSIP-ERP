@@ -1,0 +1,52 @@
+<div class="print-container">
+  <div class="print-actions no-print">
+    <a class="btn" [routerLink]="['/general/sub-zonas']">Regresar</a>
+    <button class="btn btn--print" (click)="imprimir()">Imprimir</button>
+  </div>
+
+  <header class="print-header">
+    <img class="logo" [src]="logoUrl()" alt="Logo empresa" />
+    <div class="titles">
+      <div class="empresa-sigla" *ngIf="empresaSigla()">{{ empresaSigla() }}</div>
+      <div class="empresa-nit" *ngIf="empresaNit()">NIT: {{ empresaNit() }}</div>
+      <h1>Listado de Sub Zonas</h1>
+      <div class="meta-row">
+        <span class="date">{{ nowStr() }}</span>
+        <span class="filters">
+          <ng-container *ngIf="idZona() !== null">Zona: {{ zonaNombre() }}</ng-container>
+          <ng-container *ngIf="q()"> • Filtro: {{ q() }}</ng-container>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Línea debajo de los títulos -->
+  <hr class="hr-print" />
+
+  <table class="print-table">
+    <thead>
+    <tr>
+      <th style="width:150px;">Zona</th>
+      <th style="width:90px;">Código</th>
+      <th>Nombre</th>
+      <th>Comentario</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let s of subZonas()">
+      <td>{{ s.nombreZona }}</td>
+      <td>{{ s.codigoSubZona }}</td>
+      <td>{{ s.nombreSubZona }}</td>
+      <td>{{ s.comentarioSubZona }}</td>
+    </tr>
+    <tr *ngIf="subZonas().length === 0">
+      <td colspan="4" class="empty">Sin resultados</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Pie de página (n/m) -->
+<div id="pageFooter" class="page-footer no-screen">
+  <span class="page-text"></span>
+</div>

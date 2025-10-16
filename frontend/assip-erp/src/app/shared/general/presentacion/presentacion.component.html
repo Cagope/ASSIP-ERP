@@ -1,0 +1,27 @@
+<div class="wrap">
+  <div class="hero">
+    <img class="logo" src="assets/LOGO_EMPRESA.png" alt="Logo empresa" />
+    <div class="info">
+      <h1 class="empresa">{{ empresaNombre() }}</h1>
+      <div class="meta">
+        <div><b>NIT:</b> {{ empresaNit() }}</div>
+        <div><b>Dirección:</b> {{ empresaDir() }}</div>
+        <div><b>Teléfono:</b> {{ empresaTel() }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="hello">
+      <div class="emoji">👋</div>
+      <div>
+        <div class="title">Bienvenido(a)</div>
+        <div class="user">{{ usuario() }}</div>
+      </div>
+    </div>
+
+    <p class="hint">
+      Selecciona una opción en el menú lateral para comenzar.
+    </p>
+  </div>
+</div>

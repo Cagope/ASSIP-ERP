@@ -1,0 +1,19 @@
+<div class="grid">
+  <div class="field">
+    <label>Departamento</label>
+    <select [formControl]="deptoCtrl">
+      <option [ngValue]="null">Seleccione...</option>
+      <option *ngFor="let d of departamentos()" [ngValue]="d.id">{{ d.nombre }}</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>Ciudad</label>
+    <select [formControl]="ciudadCtrl">
+      <option [ngValue]="null">Seleccione...</option>
+      <option *ngFor="let c of ciudades()" [ngValue]="c.id">{{ c.nombre }}</option>
+    </select>
+  </div>
+</div>
+
+<small class="msg error" *ngIf="error()">{{ error() }}</small>

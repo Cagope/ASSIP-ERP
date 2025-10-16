@@ -1,0 +1,40 @@
+.layout { height: 100vh; }
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+
+  img {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+  }
+
+  .title { font-weight: 600; }
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  .app-title { font-weight: 600; }
+}
+
+.flex-1 { flex: 1 1 auto; }
+
+.content {
+  padding: 16px;
+  min-height: calc(100vh - 64px);
+  box-sizing: border-box;
+}
+
+.active { background: rgba(0, 0, 0, 0.06); }
+
+.sidenav-footer {
+  margin-top: auto;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: flex-start;
+}

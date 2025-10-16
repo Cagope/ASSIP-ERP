@@ -1,0 +1,189 @@
+<mat-sidenav-container class="layout">
+  <!-- Lateral izquierdo: menú -->
+  <mat-sidenav mode="side" opened>
+    <div class="brand">
+      <img src="assets/logo-web.png" alt="logo" />
+      <div class="title">{{ appTitle }}</div>
+    </div>
+
+    <mat-nav-list>
+
+      <!-- General -->
+      <h3 mat-subheader>
+        <mat-icon aria-hidden="true">widgets</mat-icon>
+        <span>General</span>
+      </h3>
+
+      <a mat-list-item
+         [routerLink]="['/general/agencias']"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
+        <mat-icon matListItemIcon>store</mat-icon>
+        <span matListItemTitle>Agencias</span>
+      </a>
+
+      <a mat-list-item
+         [routerLink]="['/general/directivos']"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
+        <mat-icon matListItemIcon>groups</mat-icon>
+        <span matListItemTitle>Directivos (Organos de control)</span>
+      </a>
+
+      <!-- NUEVO: Privilegiados -->
+      <a mat-list-item
+         [routerLink]="['/general/privilegiados']"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
+        <mat-icon matListItemIcon>verified_user</mat-icon>
+        <span matListItemTitle>Privilegiados</span>
+      </a>
+
+      <a mat-list-item
+         [routerLink]="['/general/zonas']"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
+        <mat-icon matListItemIcon>map</mat-icon>
+        <span matListItemTitle>Zonas</span>
+      </a>
+
+      <a mat-list-item
+         [routerLink]="['/general/sub-zonas']"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
+        <mat-icon matListItemIcon>place</mat-icon>
+        <span matListItemTitle>Sub Zonas</span>
+      </a>
+
+      <a mat-list-item
+         [routerLink]="['/general/parametros']"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
+        <mat-icon matListItemIcon>tune</mat-icon>
+        <span matListItemTitle>Parámetros</span>
+      </a>
+
+      <!-- Hoja de Vida -->
+      <h3 mat-subheader>
+        <mat-icon aria-hidden="true">badge</mat-icon>
+        <span>Hoja de Vida</span>
+      </h3>
+
+      <!-- NUEVO: Captura única (wizard) -->
+      <a mat-list-item
+         [routerLink]="['/hoja-vida/captura']"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: false }">
+        <mat-icon matListItemIcon>assignment</mat-icon>
+        <span matListItemTitle>Captura única (wizard)</span>
+      </a>
+
+      <!-- 1. Datos personas naturales -->
+      <a mat-list-item
+         [routerLink]="['/hoja-vida/datos-personales']"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
+        <mat-icon matListItemIcon>person</mat-icon>
+        <span matListItemTitle>Datos personas naturales</span>
+      </a>
+
+      <!-- 2. Datos de dirección y ubicación -->
+      <a mat-list-item
+         [routerLink]="['/hoja-vida/ubicaciones']"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: false }">
+        <mat-icon matListItemIcon>home_pin</mat-icon>
+        <span matListItemTitle>Datos de dirección y ubicación</span>
+      </a>
+
+      <!-- 3. Datos Laborales -->
+      <a mat-list-item
+         [routerLink]="['/hoja-vida/laborales']"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: false }">
+        <mat-icon matListItemIcon>work</mat-icon>
+        <span matListItemTitle>Datos Laborales</span>
+      </a>
+
+      <!-- 4. Datos económicos y financieros -->
+      <a mat-list-item
+         [routerLink]="['/hoja-vida/financieros']"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: false }">
+        <mat-icon matListItemIcon>attach_money</mat-icon>
+        <span matListItemTitle>Datos económicos y financieros</span>
+      </a>
+
+      <!-- 5. Datos referencia familiar -->
+      <a mat-list-item
+         [routerLink]="['/hoja-vida/datos-familiares']"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: false }">
+        <mat-icon matListItemIcon>family_restroom</mat-icon>
+        <span matListItemTitle>Datos referencia familiar</span>
+      </a>
+
+      <!-- 6. Datos Referencia personal -->
+      <a mat-list-item
+         [routerLink]="['/hoja-vida/referencias-personales']"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: false }">
+        <mat-icon matListItemIcon>contact_phone</mat-icon>
+        <span matListItemTitle>Datos Referencia personal</span>
+      </a>
+
+      <!-- 7. Datos lavado activos (SARLAFT) -->
+      <a mat-list-item
+         [routerLink]="['/hoja-vida/sarlaft']"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: false }">
+        <mat-icon matListItemIcon>policy</mat-icon>
+        <span matListItemTitle>Datos lavado activos (SARLAFT)</span>
+      </a>
+
+      <!-- 8. Datos permisos especiales -->
+      <a mat-list-item
+         [routerLink]="['/hoja-vida/permisos-especiales']"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: false }">
+        <mat-icon matListItemIcon>fact_check</mat-icon>
+        <span matListItemTitle>Datos permisos especiales</span>
+      </a>
+
+      <!-- Seguridad -->
+      <h3 mat-subheader>
+        <mat-icon aria-hidden="true">security</mat-icon>
+        <span>Seguridad</span>
+      </h3>
+
+      <a mat-list-item
+         [routerLink]="['/seguridad/usuarios']"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }">
+        <mat-icon matListItemIcon>group</mat-icon>
+        <span matListItemTitle>Usuarios</span>
+      </a>
+    </mat-nav-list>
+
+    <div class="sidenav-footer">
+      <button mat-button (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        Cerrar sesión
+      </button>
+    </div>
+  </mat-sidenav>
+
+  <!-- Contenido central -->
+  <mat-sidenav-content>
+    <mat-toolbar color="primary" class="topbar">
+      <span class="app-title">{{ appTitle }}</span>
+      <span class="flex-1"></span>
+      <span class="user">👤 {{ username() }}</span>
+    </mat-toolbar>
+
+    <main class="content">
+      <!-- Aquí se renderiza la Presentación por defecto u otras páginas -->
+      <router-outlet></router-outlet>
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

@@ -1,0 +1,295 @@
+@use 'tokens' as *;
+
+/* Fallback si no existe en tokens */
+$color-success: #16a34a !default;
+
+/* =========================
+   Placeholders (herencia limpia)
+   ========================= */
+%btn-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 $space-4;
+  border-radius: $radius-md;
+  border: 1px solid transparent;
+  background: $color-surface;
+  color: $color-text;
+  box-shadow: $shadow-sm;
+  cursor: pointer;
+  transition: all .15s ease-in-out;
+  line-height: 1;
+}
+
+%btn-size-sm { height: 32px; padding: 0 $space-4; }
+%btn-size-lg { height: 48px; padding: 0 $space-5; }
+
+/* =========================
+   Base
+   ========================= */
+.btn { @extend %btn-base; }
+
+/* Tamaños alias */
+.btn.sm { @extend %btn-size-sm; }
+.btn.lg { @extend %btn-size-lg; }
+
+/* Los skins NO dependen del contenedor ni requieren .btn */
+.btn--print         { @extend %btn-base; }
+.btn--ghost         { @extend %btn-base; }
+.btn--secondary     { @extend %btn-base; }
+.btn--primary       { @extend %btn-base; }
+
+/* Aliases legacy: conviven sin duplicar estilos */
+.btn.print          { @extend .btn--print; }
+.btn.ghost          { @extend .btn--ghost; }
+.btn.secondary      { @extend .btn--secondary; }
+.btn.primary        { @extend .btn--primary; }
+
+/* =========================
+   Primary
+   ========================= */
+.btn--primary {
+  background: #3b82f6;       /* blue-500 */
+  border-color: #3b82f6;
+  color: #fff;
+
+  &:hover {
+    background: #2563eb;     /* blue-600 */
+    border-color: #2563eb;
+  }
+}
+
+/* =========================
+   Secondary / Ghost
+   ========================= */
+.btn--secondary {
+  background: #eef2ff;
+  color: $color-text;
+  border-color: #e0e7ff;
+
+  &:hover { filter: brightness(0.98); }
+}
+
+.btn--ghost {
+  background: transparent;
+  border: 1px solid $color-border;
+  color: $color-text;
+
+  &:hover { background: #f3f4f6; }
+}
+
+/* =========================
+   Danger sólido (legacy)
+   ========================= */
+.btn.danger {
+  @extend %btn-base;
+  background: $color-danger;
+  color: #fff;
+
+  &:hover { filter: brightness(0.95); }
+}
+
+/* =========================
+   Estados globales
+   ========================= */
+.btn:disabled,
+.btn--print:disabled,
+.btn--ghost:disabled,
+.btn--secondary:disabled,
+.btn--primary:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+/* Enlaces como botón sin subrayado */
+a.btn,
+a.btn:link,
+a.btn:visited,
+a.btn--print,
+a.btn--print:link,
+a.btn--print:visited,
+a.btn--ghost,
+a.btn--ghost:link,
+a.btn--ghost:visited,
+a.btn--secondary,
+a.btn--secondary:link,
+a.btn--secondary:visited,
+a.btn--primary,
+a.btn--primary:link,
+a.btn--primary:visited {
+  text-decoration: none;
+}
+
+/* =========================
+   Skins “soft”
+   ========================= */
+
+/* Soft Danger — rojo MUY suave y estable */
+$soft-danger-text:   $color-danger;
+$soft-danger-bg:     rgba($color-danger, 0.04);  // antes 0.06
+$soft-danger-hover:  rgba($color-danger, 0.08);  // antes 0.12
+$soft-danger-active: rgba($color-danger, 0.12);  // antes 0.20
+$soft-danger-border: rgba($color-danger, 0.25);  // antes 0.35
+
+.btn.sm.danger {
+  @extend .btn;          /* hereda base */
+  height: 32px;
+  padding: 0 $space-4;
+  border-radius: $radius-md;
+
+  background: $soft-danger-bg !important;
+  color: $soft-danger-text !important;
+  border: 1px solid $soft-danger-border !important;
+  box-shadow: $shadow-sm !important;
+
+  /* transiciones suaves sin cambiar el tono */
+  transition: background-color .15s ease-in-out, border-color .15s ease-in-out;
+
+  &:hover  { background: $soft-danger-hover !important; }
+  &:active { background: $soft-danger-active !important; }
+
+  &:focus-visible {
+    outline: 2px solid rgba($color-danger, 0.30);
+    outline-offset: 2px;
+  }
+
+  &:disabled { opacity: .6; cursor: not-allowed; }
+
+  .btn__icon {
+    display: inline-flex;
+    margin-right: 6px;
+    line-height: 0;
+  }
+}
+
+
+/* Soft Success (verde muy suave) */
+$soft-success-text:   $color-success;
+$soft-success-bg:     rgba($color-success, 0.06);
+$soft-success-hover:  rgba($color-success, 0.12);
+$soft-success-active: rgba($color-success, 0.20);
+$soft-success-border: rgba($color-success, 0.35);
+
+.btn.sm.success {
+  @extend %btn-base;
+  @extend %btn-size-sm;
+  background: $soft-success-bg;
+  color: $soft-success-text;
+  border: 1px solid $soft-success-border;
+  box-shadow: $shadow-sm;
+
+  &:hover  { background: $soft-success-hover; }
+  &:active { background: $soft-success-active; }
+
+  &:focus-visible {
+    outline: 2px solid rgba($color-success, 0.35);
+    outline-offset: 2px;
+  }
+
+  .btn__icon {
+    display: inline-flex;
+    margin-right: 6px;
+    line-height: 0;
+  }
+}
+
+/* =========================
+   Botón "Imprimir" (naranja suave)
+   ========================= */
+$color-print: #f59e0b !default;       /* amber-500 como tono base */
+$print-text:   #b45309;               /* amber-700 para contraste del texto */
+$print-bg:     rgba($color-print, 0.10);
+$print-hover:  rgba($color-print, 0.16);
+$print-active: rgba($color-print, 0.24);
+$print-border: rgba($color-print, 0.35);
+
+.btn--print {
+  background: $print-bg;
+  color: $print-text;
+  border: 1px solid $print-border;
+  box-shadow: $shadow-sm;
+
+  &:hover  { background: $print-hover; }
+  &:active { background: $print-active; }
+
+  .btn__icon {
+    display: inline-flex;
+    margin-right: 6px;
+    line-height: 0;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba($color-print, 0.45);
+    outline-offset: 2px;
+  }
+}
+
+
+/* Botón Eliminar (semántico): misma paleta que .btn.sm.danger */
+.btn--delete {
+  @extend %btn-base; /* trae la estructura base */
+  background: $soft-danger-bg;
+  color: $soft-danger-text;
+  border: 1px solid $soft-danger-border;
+  box-shadow: $shadow-sm;
+
+  &:hover  { background: $soft-danger-hover; }
+  &:active { background: $soft-danger-active; }
+
+  &:focus-visible {
+    outline: 2px solid rgba($color-danger, 0.30);
+    outline-offset: 2px;
+  }
+
+  .btn__icon { display:inline-flex; margin-right:6px; line-height:0; }
+}
+
+/* Tamaños para que coincida con "Cancelar" según se use */
+.btn--delete.sm { @extend %btn-size-sm; }
+.btn--delete.lg { @extend %btn-size-lg; }
+
+/* Alias legacy opcional (si prefieres .btn delete) */
+.btn.delete      { @extend .btn--delete; }
+.btn.delete.sm   { @extend %btn-size-sm; }
+.btn.delete.lg   { @extend %btn-size-lg; }
+
+/* Soft Primary (azul suave) para "Nuevo" */
+$soft-primary-text:   $color-primary;
+$soft-primary-bg:     rgba($color-primary, 0.06);
+$soft-primary-hover:  rgba($color-primary, 0.12);
+$soft-primary-active: rgba($color-primary, 0.20);
+$soft-primary-border: rgba($color-primary, 0.35);
+
+.btn--new {
+  @extend %btn-base;
+  @extend %btn-size-sm;
+  background: $soft-primary-bg;
+  color: $soft-primary-text;
+  border: 1px solid $soft-primary-border;
+
+  &:hover  { background: $soft-primary-hover; }
+  &:active { background: $soft-primary-active; }
+
+  .btn__icon { display:inline-flex; margin-right:6px; line-height:0; }
+
+  &:focus-visible {
+    outline: 2px solid rgba(59,130,246,.45);
+    outline-offset: 2px;
+  }
+}
+
+/* Tamaños para igualar "Gestionar" según necesites */
+.btn--new.sm { @extend %btn-size-sm; }
+.btn--new.lg { @extend %btn-size-lg; }
+
+/* Alias legacy opcional */
+.btn.new { @extend .btn--new; }
+a.btn--new,
+a.btn--new:link,
+a.btn--new:visited,
+a.btn.new,
+a.btn.new:link,
+a.btn.new:visited {
+  text-decoration: none;
+}

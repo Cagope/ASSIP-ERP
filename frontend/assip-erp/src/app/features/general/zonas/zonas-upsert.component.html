@@ -1,0 +1,66 @@
+<div class="card">
+  <div class="card-header">
+    <h2>{{ id() ? 'Editar zona' : 'Nueva zona' }}</h2>
+    <!-- antes apuntaba a /app/general/zonas -->
+    <a class="btn" [routerLink]="['/general/zonas']">Regresar</a>
+  </div>
+
+  <div class="card-body">
+    <div class="alert error" *ngIf="errorMsg()">{{ errorMsg() }}</div>
+
+    <form [formGroup]="form" (ngSubmit)="guardar()">
+      <div class="grid">
+
+        <!-- Código (3 dígitos) -->
+        <div class="field">
+          <label for="codigoZona">Código (3 dígitos) *</label>
+          <input
+            id="codigoZona"
+            type="text"
+            maxlength="3"
+            inputmode="numeric"
+            pattern="\d{3}"
+            placeholder="Ej: 007"
+            formControlName="codigoZona"
+            (keypress)="onlyDigits($event)"
+          />
+          <small class="error"
+                 *ngIf="form.controls.codigoZona.touched && form.controls.codigoZona.invalid">
+            <span *ngIf="form.controls.codigoZona.hasError('required')">
+              El código es obligatorio.
+            </span>
+            <span *ngIf="form.controls.codigoZona.hasError('pattern')">
+              Debe tener exactamente 3 dígitos (0–9).
+            </span>
+          </small>
+        </div>
+
+        <!-- Nombre -->
+        <div class="field">
+          <label for="nombreZona">Nombre *</label>
+          <input id="nombreZona" type="text" formControlName="nombreZona" placeholder="Nombre de la zona" />
+          <small class="error"
+                 *ngIf="form.controls.nombreZona.touched && form.controls.nombreZona.invalid">
+            <span *ngIf="form.controls.nombreZona.hasError('required')">Requerido.</span>
+            <span *ngIf="form.controls.nombreZona.hasError('maxlength')">Máximo 100 caracteres.</span>
+          </small>
+        </div>
+
+        <!-- Comentario -->
+        <div class="field">
+          <label for="comentarioZona">Comentario</label>
+          <input id="comentarioZona" type="text" formControlName="comentarioZona" placeholder="Opcional" />
+          <small class="error"
+                 *ngIf="form.controls.comentarioZona.touched && form.controls.comentarioZona.invalid">
+            <span *ngIf="form.controls.comentarioZona.hasError('maxlength')">Máximo 100 caracteres.</span>
+          </small>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn primary" [disabled]="guardando()">Guardar</button>
+        <button type="button" class="btn ghost" (click)="cancelar()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,34 @@
+﻿{
+  "tipoDocumento": "C",
+  "documento": "93000100",
+  "tieneRut": true,
+  "digitoVerificacion": "1",
+  "tipoPersona": "1",
+
+  "nombres": "AAAAAAA",
+  "primerApellido": "BBBBBB",
+  "segundoApellido": "CCCC",
+
+  "fechaNacimiento": "1968-09-22",
+  "fechaDocumento": "2025-09-29",
+
+  "idPaisDocumento": 40,
+  "idPaisNacimiento": 40,
+
+  "idCiudadExpedicion": 854,
+  "idCiudadNacimiento": 867,
+
+  "comentario": "pruebas (actualizado)",
+  "codigoGenero": "1",
+  "codigoEstadoCivil": "1",
+  "codigoEscolaridad": "4",
+  "codigoTipoVivienda": "P",
+  "estratoSocial": 1,
+  "numeroHijos": 3,
+  "codigoOcupacion": "2",
+  "codigoSectorEconomico": "1",
+  "codigoActividadSes": "6201",
+  "codigoActividadDian": "6201",
+  "codigoRetencion": "2",
+  "cabezaFamilia": "0"
+}

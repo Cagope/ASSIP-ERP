@@ -1,0 +1,52 @@
+<div class="card">
+  <div class="card-header">
+    <h2>Zonas</h2>
+    <div class="actions">
+      <a class="btn--new" [routerLink]="['/general/zonas/new']">Nuevo</a>
+      <button class="btn--print" (click)="imprimir()">Imprimir</button>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="toolbar">
+      <input
+        [ngModel]="q()"
+        (ngModelChange)="q.set($event)"
+        type="text"
+        placeholder="Buscar por nombre o código..."
+      />
+      <button class="btn" (click)="buscar()" [disabled]="loading()">Buscar</button>
+    </div>
+
+    <table class="table">
+      <colgroup>
+        <col style="width: 100px;"> <!-- Código -->
+        <col>                       <!-- Nombre -->
+        <col>                       <!-- Comentario -->
+        <col style="width: 160px;"> <!-- Acciones -->
+      </colgroup>
+      <thead>
+      <tr>
+        <th>Código</th>
+        <th>Nombre</th>
+        <th>Comentario</th>
+        <th class="th-acciones">Acciones</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let z of zonas()">
+        <td>{{ z.codigoZona }}</td>
+        <td>{{ z.nombreZona }}</td>
+        <td>{{ z.comentarioZona }}</td>
+        <td class="acciones">
+          <button class="btn sm success" (click)="editar(z.idZona)">Editar</button>
+          <button class="btn sm danger" (click)="eliminar(z.idZona)" [disabled]="loading()">Eliminar</button>
+        </td>
+      </tr>
+      <tr *ngIf="!zonas().length && !loading()">
+        <td colspan="4" class="empty">Sin resultados</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

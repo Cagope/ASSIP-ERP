@@ -1,0 +1,127 @@
+<!-- ======= MODO SELECTOR DE PERSONAS (sin :idDatosPersonales) ======= -->
+<div *ngIf="!idDatosPersonales(); else referenciaView">
+  <div class="hdr">
+    <div>
+      <h2>Referencias personales</h2>
+      <input
+        class="search"
+        type="text"
+        placeholder="Buscar por documento o nombre…"
+        (input)="onSearch($event)" />
+    </div>
+
+    <div class="actions" style="display:flex; gap:6px; align-items:center;">
+      <a class="btn btn--print" [routerLink]="['/hoja-vida/referencias-personales/print']">Imprimir</a>
+      <app-referencias-personales-export-button [q]="term()"></app-referencias-personales-export-button>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="st">Cargando…</div>
+  <div *ngIf="!loading() && error()" class="st st--err">{{ error() }}</div>
+
+  <table *ngIf="!loading() && !error()" class="tbl">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Documento</th>
+      <th>Nombre</th>
+      <th class="actions">Acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let p of filteredPersonas()">
+      <td>{{ personaId(p) }}</td>
+      <td>{{ p.documento }}</td>
+      <td>
+        {{ p.nombres || (p.primerNombre + (p.segundoNombre ? ' ' + p.segundoNombre : '')) }}
+        {{ p.apellidos || (p.primerApellido + (p.segundoApellido ? ' ' + p.segundoApellido : '')) }}
+      </td>
+      <td class="actions">
+        <ng-container [ngSwitch]="estadoPersona(personaId(p))">
+          <button *ngSwitchCase="'loading'" type="button" class="btn btn--ghost" disabled>Cargando…</button>
+          <button *ngSwitchCase="'yes'" type="button" class="btn sm success" (click)="irReferencia(p)">Gestionar</button>
+          <button *ngSwitchCase="'no'" type="button" class="btn--new" (click)="irNuevaReferencia(p)">+ Nueva</button>
+          <button *ngSwitchDefault type="button" class="btn btn--ghost" disabled>—</button>
+        </ng-container>
+      </td>
+    </tr>
+
+    <tr *ngIf="filteredPersonas().length === 0">
+      <td colspan="4" class="empty">Sin resultados.</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ======= MODO REFERENCIA (1:1, con :idDatosPersonales) ======= -->
+<ng-template #referenciaView>
+  <div class="hdr">
+    <div>
+      <h2>Referencia personal</h2>
+      <div class="sub">Afiliado : <b>{{ afiliadoNombre() || '—' }}</b></div>
+    </div>
+
+    <div class="actions" style="display:flex; gap:6px; align-items:center;">
+      <a class="btn"
+         [routerLink]="['/hoja-vida/referencias-personales/print']"
+         [queryParams]="{ idDatosPersonales: idDatosPersonales() }"
+         target="_blank">
+        Imprimir
+      </a>
+
+      <a class="btn btn--primary"
+         *ngIf="!item()
+"
+         [routerLink]="['/hoja-vida/referencias-personales', idDatosPersonales(), 'new']">
+        + Nueva
+      </a>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="st">Cargando…</div>
+  <div *ngIf="!loading() && error()" class="st st--err">{{ error() }}</div>
+
+  <table *ngIf="!loading() && !error()" class="tbl">
+    <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Dirección</th>
+      <th>Teléfono</th>
+      <th>Celular</th>
+      <th>Ciudad</th>
+      <th class="actions">Acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Caso SÍ hay referencia -->
+    <tr *ngIf="item(); else noRef">
+      <td>{{ item()?.nombre_referencia_personal }}</td>
+      <td>{{ item()?.direccion_referencia_personal }}</td>
+      <td>{{ item()?.telefono_referencia_personal }}</td>
+      <td>{{ item()?.celular_referencia_personal }}</td>
+
+      <!-- Mostrar nombre de ciudad; si el back no lo trae aún, cae a id_ciudad; si tampoco, '—' -->
+      <td>{{ item()?.nombre_ciudad || '—' }}</td>
+
+      <td class="actions">
+        <a class="btn sm success"
+           [routerLink]="['/hoja-vida/referencias-personales', idDatosPersonales(), 'edit', idRef()]">
+          Editar
+        </a>
+        <button type="button" class="btn sm danger" (click)="onDelete()">Eliminar</button>
+      </td>
+    </tr>
+
+    <!-- Caso NO hay referencia -->
+    <ng-template #noRef>
+      <tr>
+        <td colspan="6" class="empty">No hay referencia registrada.</td>
+      </tr>
+    </ng-template>
+    </tbody>
+  </table>
+
+  <div class="actions">
+    <button type="button" class="btn" (click)="goBackToSelector()">Regresar</button>
+  </div>
+</ng-template>

@@ -1,0 +1,168 @@
+<div class="card">
+  <div class="card-header">
+    <h2>Información laboral</h2>
+    <a class="btn" [routerLink]="['/hoja-vida/laborales']">Regresar</a>
+  </div>
+
+  <div class="card-body">
+    <div class="alert" *ngIf="afiliadoNombre()">Afiliado: <b>{{ afiliadoNombre() }}</b></div>
+    <div class="alert error" *ngIf="error()">{{ error() }}</div>
+
+    <div *ngIf="loading()" class="st">Cargando…</div>
+
+    <form *ngIf="!loading()" [formGroup]="form" (ngSubmit)="guardar()">
+      <!-- Datos y ubicación de la empresa -->
+      <h3 class="section">Datos y ubicación de la empresa</h3>
+      <div class="grid cols-4">
+        <div class="field col-span-2">
+          <label>Nombre de la empresa *</label>
+          <input type="text" formControlName="nombreEmpresa" maxlength="100" />
+          <small class="error" *ngIf="form.controls['nombreEmpresa'].touched && form.controls['nombreEmpresa'].invalid">
+            Requerido (máx 100).
+          </small>
+        </div>
+
+        <div class="field col-span-2">
+          <label>Dirección *</label>
+          <input type="text" formControlName="direccion" maxlength="100" />
+          <small class="error" *ngIf="form.controls['direccion'].touched && form.controls['direccion'].invalid">
+            Requerido (máx 100).
+          </small>
+        </div>
+
+        <div class="field">
+          <label>País</label>
+          <select formControlName="idPais">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let p of paises()" [ngValue]="p.id">{{ p.nombre }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Depto/Ciudad -->
+      <app-depto-ciudad
+        [deptoCtrl]="depCtrl"
+        [ciudadCtrl]="ciuCtrl">
+      </app-depto-ciudad>
+      <div class="grid cols-4">
+        <div class="field">
+          <small class="error" *ngIf="form.get('id_departamento')?.touched && form.get('id_departamento')?.invalid">
+            Departamento requerido.
+          </small>
+          <small class="error" *ngIf="form.get('id_ciudad')?.touched && form.get('id_ciudad')?.invalid">
+            Ciudad requerida.
+          </small>
+        </div>
+      </div>
+
+      <div class="grid cols-4">
+        <div class="field">
+          <label>Teléfono</label>
+          <input type="text" inputmode="numeric" maxlength="7" placeholder="7 dígitos" formControlName="telefonoEmpresa" />
+          <small class="help">Opcional. 7 dígitos.</small>
+          <small class="error" *ngIf="form.controls['telefonoEmpresa'].touched && form.controls['telefonoEmpresa'].errors?.['pattern']">
+            Debe tener exactamente 7 dígitos.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Celular</label>
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="10 dígitos" formControlName="celularEmpresa" />
+          <small class="help">Opcional. 10 dígitos.</small>
+          <small class="error" *ngIf="form.controls['celularEmpresa'].touched && form.controls['celularEmpresa'].errors?.['pattern']">
+            Debe tener exactamente 10 dígitos.
+          </small>
+        </div>
+
+        <div class="field col-span-2">
+          <label>Correo</label>
+          <input type="email" formControlName="correoEmpresa" maxlength="100" placeholder="usuario@dominio.com" />
+          <small class="help">Opcional. Formato válido.</small>
+          <small class="error" *ngIf="form.controls['correoEmpresa'].touched && form.controls['correoEmpresa'].errors?.['email']">
+            Correo inválido.
+          </small>
+          <small class="error" *ngIf="form.controls['correoEmpresa'].touched && form.controls['correoEmpresa'].errors?.['maxlength']">
+            Máximo 100 caracteres.
+          </small>
+        </div>
+      </div>
+
+      <!-- Empleado de la entidad -->
+      <h3 class="section">Empleado de la entidad</h3>
+      <div class="grid cols-4">
+        <div class="field col-span-4">
+          <label class="inline-flex items-center gap-2">
+            <input type="checkbox" formControlName="empleadoEntidad" />
+            <span>Empleado de la entidad</span>
+          </label>
+        </div>
+
+        <div class="field">
+          <label>Tipo de empresa *</label>
+          <select formControlName="codigoTipoEmpresa">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let t of tiposEmpresas()" [ngValue]="t.codigo">{{ t.nombre }}</option>
+          </select>
+          <small class="error" *ngIf="form.controls['codigoTipoEmpresa'].touched && form.controls['codigoTipoEmpresa'].invalid">
+            Requerido.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Tipo de contrato *</label>
+          <select formControlName="codigoTipoContrato">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let t of tiposContratos()" [ngValue]="t.codigo">{{ t.nombre }}</option>
+          </select>
+          <small class="error" *ngIf="form.controls['codigoTipoContrato'].touched && form.controls['codigoTipoContrato'].invalid">
+            Requerido.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Jornada *</label>
+          <select formControlName="codigoJornada">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let j of jornadas()" [ngValue]="j.codigo">{{ j.nombre }}</option>
+          </select>
+          <small class="error" *ngIf="form.controls['codigoJornada'].touched && form.controls['codigoJornada'].invalid">
+            Requerido.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Fecha de vinculación</label>
+          <input type="date" formControlName="fechaVinculacion" />
+        </div>
+      </div>
+
+      <!-- Contacto -->
+      <h3 class="section">Contacto de la empresa</h3>
+      <div class="grid cols-4">
+        <div class="field col-span-2">
+          <label>Nombre de contacto *</label>
+          <input type="text" formControlName="nombreContacto" maxlength="100" />
+          <small class="error" *ngIf="form.controls['nombreContacto'].touched && form.controls['nombreContacto'].invalid">
+            Requerido (máx 100).
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Celular de contacto</label>
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="10 dígitos" formControlName="celularContacto" />
+          <small class="help">Opcional. 10 dígitos.</small>
+          <small class="error" *ngIf="form.controls['celularContacto'].touched && form.controls['celularContacto'].errors?.['pattern']">
+            Debe tener exactamente 10 dígitos.
+          </small>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn primary" [disabled]="loading() || form.invalid">Guardar</button>
+        <button type="button" class="btn--delete" *ngIf="item()" (click)="eliminar()">Eliminar</button>
+        <button type="button" class="btn ghost" (click)="cancelar()">Cancelar</button>
+
+      </div>
+    </form>
+  </div>
+</div>

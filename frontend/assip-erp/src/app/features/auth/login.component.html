@@ -1,0 +1,60 @@
+<div class="auth-wrap">
+  <header class="auth-header">
+    <img
+      src="assets/logo-web.png"
+      alt="Logo de la empresa"
+      class="logo"
+    />
+    <h1 class="auth-title">Iniciar sesión</h1>
+  </header>
+
+  <form class="auth-form" (ngSubmit)="submit()" [formGroup]="form" novalidate>
+    <div class="form-row">
+      <label for="username">Usuario</label>
+      <input id="username" type="text" formControlName="username" autocomplete="username" />
+      <small *ngIf="f.username.touched && f.username.invalid">Requerido</small>
+    </div>
+
+    <div class="form-row">
+      <label for="password">Contraseña</label>
+
+      <div class="password-field">
+        <input
+          id="password"
+          [type]="showPassword() ? 'text' : 'password'"
+          formControlName="password"
+          autocomplete="current-password"
+        />
+        <button
+          type="button"
+          class="eye-btn"
+          (click)="toggleShowPassword()"
+          [attr.aria-pressed]="showPassword()"
+          [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          title="Mostrar / ocultar contraseña"
+        >
+          {{ showPassword() ? '🙈' : '👁️' }}
+        </button>
+      </div>
+
+      <small *ngIf="f.password.touched && f.password.invalid">Requerida</small>
+    </div>
+
+    <div class="form-row inline">
+      <label class="checkbox">
+        <input
+          type="checkbox"
+          [checked]="remember()"
+          (change)="onRememberChange($any($event.target).checked)"
+        />
+        Recordar usuario y clave (temporal)
+      </label>
+    </div>
+
+    <div class="msg error" *ngIf="!loading() && errorMsg()">{{ errorMsg() }}</div>
+
+    <div class="actions">
+      <button type="submit" class="btn" (click)="submit()" [disabled]="loading()">Entrar</button>
+    </div>
+  </form>
+</div>

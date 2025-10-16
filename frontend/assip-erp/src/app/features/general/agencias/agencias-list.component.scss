@@ -1,0 +1,42 @@
+.list-header {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+
+  input { flex: 1 1 auto; }
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: .6rem .8rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  th { text-align: left; color: #6b7280; font-weight: 600; }
+
+  .empty { text-align: center; color: #6b7280; }
+}
+
+.col-actions { width: 1%; white-space: nowrap; }
+
+/* SOLO layout para el contenedor de acciones */
+.actions {
+  display: inline-flex;
+  gap: .5rem;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+/* --- Eliminado:
+.actions .btn { padding, border, background, border-radius, cursor }
+.actions .btn.sm { font-size }
+.actions .btn.primary { border-color }
+.actions .btn.danger  { border-color, color }
+   -> La piel la definen las variantes globales:
+      .btn--print, .btn--ghost, .btn--primary, .btn--secondary,
+      .btn.sm.success, .btn.sm.danger, etc.
+*/

@@ -1,0 +1,68 @@
+.card { background:#fff; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+
+.card-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 16px;
+  border-bottom:1px solid #eee;
+}
+
+/* Solo layout para contenedor de acciones en el header */
+.card-header .actions {
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:nowrap;
+}
+
+.card-body { padding:12px 16px; }
+
+.toolbar {
+  display:flex;
+  gap:8px;
+  margin-bottom:12px;
+
+  select, input {
+    padding:8px 10px;
+    border:1px solid #ddd;
+    border-radius:6px;
+  }
+
+  select { max-width:360px; }
+  input[type="text"] { flex:1; }
+  .codigo { width:140px; }
+}
+
+.table {
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+
+  th, td {
+    padding:8px 10px;
+    border-bottom:1px solid #eee;
+    text-align:left;
+    vertical-align:top;
+    box-sizing:border-box;
+    word-wrap:break-word;
+  }
+
+  .num { text-align:right; }         /* números alineados a la derecha */
+  .th-acciones, td.acciones { text-align:center; }
+  .empty { text-align:center; color:#777; padding:12px 0; }
+}
+
+/* Solo layout en celda Acciones */
+.acciones {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:6px;
+  white-space:nowrap;
+}
+
+/* Eliminado:
+.btn { ... } &.primary { ... } &.danger { ... } &.sm { ... }
+→ Usa las variantes globales: .btn--print, .btn primary, .btn sm success/danger, etc.
+*/

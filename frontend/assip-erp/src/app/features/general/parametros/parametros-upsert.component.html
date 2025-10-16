@@ -1,0 +1,74 @@
+<div class="card">
+  <div class="card-header">
+    <h2>{{ id() ? 'Editar parámetro' : 'Nuevo parámetro' }}</h2>
+    <button class="btn" type="button" (click)="cancelar()">Regresar</button>
+  </div>
+
+  <div class="card-body">
+    <div class="alert error" *ngIf="errorMsg()">{{ errorMsg() }}</div>
+
+    <form [formGroup]="form" (ngSubmit)="guardar()">
+      <div class="grid">
+        <!-- Agencia (sin [disabled] en el template) -->
+        <div class="field">
+          <label for="idAgencia">Agencia *</label>
+          <select id="idAgencia" formControlName="idAgencia">
+            <option [ngValue]="null">-- Seleccione --</option>
+            <option *ngFor="let a of agencias()" [ngValue]="a.idAgencia">
+              {{ a.nombreAgencia }} ({{ a.siglaAgencia || a.codigoAgencia }})
+            </option>
+          </select>
+          <small class="error" *ngIf="form.controls.idAgencia.touched && form.controls.idAgencia.invalid">
+            Seleccione una agencia.
+          </small>
+        </div>
+
+        <!-- Código (sin [disabled] en el template, sin ayuda) -->
+        <div class="field">
+          <label for="codigoParametro">Código *</label>
+          <input id="codigoParametro" type="number" min="0" step="1" formControlName="codigoParametro" />
+        </div>
+
+        <!-- Nombre -->
+        <div class="field">
+          <label for="nombreParametro">Nombre *</label>
+          <input id="nombreParametro" type="text" formControlName="nombreParametro" />
+          <small class="error" *ngIf="form.controls.nombreParametro.touched && form.controls.nombreParametro.invalid">
+            <span *ngIf="form.controls.nombreParametro.hasError('required')">Requerido.</span>
+            <span *ngIf="form.controls.nombreParametro.hasError('maxlength')">Máximo 100 caracteres.</span>
+          </small>
+        </div>
+
+        <!-- Valor (alineado a derecha, sin ayuda, con máscara) -->
+        <div class="field">
+          <label for="valorParametro">Valor *</label>
+          <input
+            id="valorParametro"
+            class="num"
+            type="text"
+            [value]="valorDisplay()"
+            (input)="onValorInput($event)"
+            (blur)="onValorBlur()"
+            inputmode="decimal"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+
+        <!-- Tipo -->
+        <div class="field">
+          <label for="tipoValor">Tipo *</label>
+          <select id="tipoValor" formControlName="tipoValor">
+            <option [ngValue]="true">Valor</option>
+            <option [ngValue]="false">Porcentaje</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn primary" [disabled]="guardando()">Guardar</button>
+        <button type="button" class="btn ghost" (click)="cancelar()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>

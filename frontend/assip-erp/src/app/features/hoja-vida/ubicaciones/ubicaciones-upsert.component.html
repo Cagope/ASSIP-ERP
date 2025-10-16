@@ -1,0 +1,132 @@
+<div class="card">
+  <div class="card-header">
+    <h2>{{ idDatosPersonales() ? 'Editar Ubicación' : 'Nueva Ubicación' }}</h2>
+    <a class="btn" [routerLink]="['/hoja-vida/ubicaciones']">Regresar</a>
+  </div>
+
+  <div class="card-body">
+    <form [formGroup]="form" (ngSubmit)="save()">
+      <!-- Dirección y contacto -->
+      <h3 class="section">Dirección y contacto</h3>
+      <div class="grid cols-4">
+        <div class="field col-span-2">
+          <label>Dirección *</label>
+          <input type="text" formControlName="direccion" maxlength="100" />
+          <small class="error" *ngIf="form.controls.direccion.touched && form.controls.direccion.invalid">
+            Requerido (máx 100).
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Barrio *</label>
+          <input type="text" formControlName="barrio" maxlength="100" />
+          <small class="error" *ngIf="form.controls.barrio.touched && form.controls.barrio.invalid">
+            Requerido (máx 100).
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Teléfono</label>
+          <input type="text" inputmode="numeric" maxlength="7" placeholder="7 dígitos" formControlName="telefono" />
+          <small class="help">Opcional. 7 dígitos.</small>
+          <small class="error" *ngIf="form.controls.telefono.touched && form.controls.telefono.errors?.['pattern']">
+            Debe tener exactamente 7 dígitos.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Celular 1</label>
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="10 dígitos" formControlName="celular_uno" />
+          <small class="help">Opcional. 10 dígitos.</small>
+          <small class="error" *ngIf="form.controls.celular_uno.touched && form.controls.celular_uno.errors?.['pattern']">
+            Debe tener exactamente 10 dígitos.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Celular 2</label>
+          <input type="text" inputmode="numeric" maxlength="10" placeholder="10 dígitos" formControlName="celular_dos" />
+          <small class="help">Opcional. 10 dígitos.</small>
+          <small class="error" *ngIf="form.controls.celular_dos.touched && form.controls.celular_dos.errors?.['pattern']">
+            Debe tener exactamente 10 dígitos.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Correo</label>
+          <input type="email" formControlName="correo" maxlength="100" placeholder="usuario@dominio.com" />
+          <small class="help">Opcional. Formato válido.</small>
+          <small class="error" *ngIf="form.controls.correo.touched && form.controls.correo.errors?.['email']">
+            Correo inválido.
+          </small>
+          <small class="error" *ngIf="form.controls.correo.touched && form.controls.correo.errors?.['maxlength']">
+            Máximo 100 caracteres.
+          </small>
+        </div>
+      </div>
+
+      <!-- Ubicación geográfica -->
+      <h3 class="section">Ubicación geográfica</h3>
+      <div class="grid cols-4">
+        <div class="field">
+          <label>País *</label>
+          <select formControlName="id_pais">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let p of paises()" [ngValue]="p.id_pais">{{ p.nombre_pais }}</option>
+          </select>
+          <small class="error" *ngIf="form.controls.id_pais.touched && form.controls.id_pais.invalid">
+            País requerido.
+          </small>
+        </div>
+      </div>
+
+      <!-- Depto/Ciudad -->
+      <app-depto-ciudad
+        [deptoCtrl]="depCtrl"
+        [ciudadCtrl]="ciuCtrl">
+      </app-depto-ciudad>
+      <div class="grid cols-4">
+        <div class="field">
+          <small class="error" *ngIf="form.get('id_departamento')?.touched && form.get('id_departamento')?.invalid">
+            Departamento requerido.
+          </small>
+          <small class="error" *ngIf="form.get('id_ciudad')?.touched && form.get('id_ciudad')?.invalid">
+            Ciudad requerida.
+          </small>
+        </div>
+      </div>
+
+      <!-- Zona y sub-zona (UI) -->
+      <h3 class="section">Zona y Sub-zona</h3>
+      <div class="grid cols-4">
+        <div class="field">
+          <label>Zona</label>
+          <select formControlName="id_zona">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let z of zonas()" [ngValue]="z.idZona">
+              {{ z.nombreZona }}
+            </option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Sub-zona *</label>
+          <select formControlName="id_sub_zona">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let s of subZonas()" [ngValue]="s.idSubZona">
+              {{ s.codigoSubZona || (s.idSubZona + '') }} - {{ s.nombreSubZona }}
+            </option>
+          </select>
+          <small class="error" *ngIf="form.controls.id_sub_zona.touched && form.controls.id_sub_zona.invalid">
+            Sub-zona requerida.
+          </small>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn primary" [disabled]="form.invalid">Guardar</button>
+        <button type="button" class="btn ghost" (click)="cancel()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>

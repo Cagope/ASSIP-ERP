@@ -1,0 +1,56 @@
+<div class="print-container">
+  <div class="print-actions no-print">
+    <a class="btn" [routerLink]="['/hoja-vida/referencias-personales']">Regresar</a>
+    <button class="btn btn--print" (click)="imprimir()">Imprimir</button>
+  </div>
+
+  <header class="print-header">
+    <img class="logo" src="assets/logo-print.png" alt="ASSIP ERP" />
+    <div class="titles">
+      <div class="empresa">
+        <div class="sigla">{{ empresaSigla() }}</div>
+        <div class="nit" *ngIf="empresaNit()">NIT: {{ empresaNit() }}</div>
+      </div>
+      <h1>Listado de Referencias Personales</h1>
+      <div class="date">{{ nowStr() }}</div>
+      <div class="filters" *ngIf="q()">Filtro: {{ q() }}</div>
+    </div>
+  </header>
+
+  <!-- Línea debajo de los títulos -->
+  <div class="under-titles-line"></div>
+
+  <!-- CORTES POR PERSONA (solo las que tienen referencia) -->
+  <section *ngFor="let c of cortes(); let i = index" class="corte">
+    <div class="corte-head">
+      <div class="doc"><b>Documento:</b> {{ c.documento }}</div>
+      <div class="nom"><b>Afiliado:</b> {{ c.nombreCompleto }}</div>
+    </div>
+
+    <table class="print-table">
+      <thead>
+      <tr>
+        <th>Nombre referencia</th>
+        <th>Dirección</th>
+        <th>Teléfono</th>
+        <th>Celular</th>
+        <th>Departamento</th>
+        <th>Ciudad</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td>{{ c.ref.nombre_referencia_personal }}</td>
+        <td>{{ c.ref.direccion_referencia_personal }}</td>
+        <td>{{ c.ref.telefono_referencia_personal }}</td>
+        <td>{{ c.ref.celular_referencia_personal }}</td>
+        <td>{{ c.ref.id_departamento }}</td>
+        <td>{{ c.ref.id_ciudad }}</td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- Paginación n/m -->
+  <div class="page-footer"><span class="page-num"></span></div>
+</div>

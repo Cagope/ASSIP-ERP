@@ -1,0 +1,42 @@
+<div class="hdr">
+  <div>
+    <h2>{{ mode() === 'new' ? 'Nuevo permiso especial' : 'Editar permiso especial' }}</h2>
+    <div class="sub">Afiliado : <b>{{ afiliadoNombre() || '—' }}</b></div>
+  </div>
+</div>
+
+<div *ngIf="loading()" class="st">Cargando…</div>
+<div *ngIf="!loading() && error()" class="st st--err">{{ error() }}</div>
+
+<form *ngIf="!loading()" (ngSubmit)="onSubmit()" class="frm">
+
+  <div class="check">
+    <input id="ch1" type="checkbox" [checked]="view.recibeLlamadas" (change)="onToggle('recibeLlamadas', $event)" />
+    <label for="ch1">Recibe llamadas</label>
+  </div>
+
+  <div class="check">
+    <input id="ch2" type="checkbox" [checked]="view.recibeMsm" (change)="onToggle('recibeMsm', $event)" />
+    <label for="ch2">Recibe SMS</label>
+  </div>
+
+  <div class="check">
+    <input id="ch3" type="checkbox" [checked]="view.recibeEmails" (change)="onToggle('recibeEmails', $event)" />
+    <label for="ch3">Recibe emails</label>
+  </div>
+
+  <div class="check">
+    <input id="ch4" type="checkbox" [checked]="view.recibeCartas" (change)="onToggle('recibeCartas', $event)" />
+    <label for="ch4">Recibe cartas</label>
+  </div>
+
+  <div class="check">
+    <input id="ch5" type="checkbox" [checked]="view.recibeRedesSociales" (change)="onToggle('recibeRedesSociales', $event)" />
+    <label for="ch5">Recibe redes sociales</label>
+  </div>
+
+  <div class="actions">
+    <button type="submit" class="btn btn--primary">{{ mode() === 'new' ? 'Crear' : 'Guardar' }}</button>
+    <a class="btn ghost" [routerLink]="['/hoja-vida/permisos-especiales', idDatosPersonales()]">Cancelar</a>
+  </div>
+</form>

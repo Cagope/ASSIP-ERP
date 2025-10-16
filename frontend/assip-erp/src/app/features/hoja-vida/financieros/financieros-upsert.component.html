@@ -1,0 +1,197 @@
+<div class="card">
+  <div class="card-header">
+    <h2>{{ mode() === 'new' ? 'Nuevo financiero' : 'Editar financiero' }}</h2>
+    <a class="btn sm" [routerLink]="['/hoja-vida/financieros']" *ngIf="!captureMode">Regresar</a>
+  </div>
+
+  <div class="card-body">
+    <div class="alert" *ngIf="afiliadoNombre()">Afiliado: <b>{{ afiliadoNombre() }}</b></div>
+    <div class="alert error" *ngIf="error()">{{ error() }}</div>
+    <div *ngIf="loading()" class="st">Cargando…</div>
+
+    <form *ngIf="!loading()" [formGroup]="form" (ngSubmit)="onSubmit()">
+      <!-- INGRESOS -->
+      <h3 class="section">Datos ingresos mensuales</h3>
+      <div class="grid cols-2">
+        <div class="field">
+          <label>Valor salario *</label>
+          <input type="text" inputmode="decimal" class="num-right no-spin"
+                 formControlName="valorSalario"
+                 (input)="persistNow()"
+                 (focus)="onFocus('valorSalario')"
+                 (blur)="onBlur('valorSalario')" />
+          <small class="error" *ngIf="fc.valorSalario.touched && fc.valorSalario.invalid">Requerido (≥ 0)</small>
+        </div>
+
+        <div class="field">
+          <label>Valor pensión *</label>
+          <input type="text" inputmode="decimal" class="num-right no-spin"
+                 formControlName="valorPension"
+                 (input)="persistNow()"
+                 (focus)="onFocus('valorPension')"
+                 (blur)="onBlur('valorPension')" />
+          <small class="error" *ngIf="fc.valorPension.touched && fc.valorPension.invalid">Requerido (≥ 0)</small>
+        </div>
+
+        <div class="field">
+          <label>Ingresos arriendo *</label>
+          <input type="text" inputmode="decimal" class="num-right no-spin"
+                 formControlName="ingresosArriendo"
+                 (input)="persistNow()"
+                 (focus)="onFocus('ingresosArriendo')"
+                 (blur)="onBlur('ingresosArriendo')" />
+          <small class="error" *ngIf="fc.ingresosArriendo.touched && fc.ingresosArriendo.invalid">Requerido (≥ 0)</small>
+        </div>
+
+        <div class="field">
+          <label>Ingresos comisiones *</label>
+          <input type="text" inputmode="decimal" class="num-right no-spin"
+                 formControlName="ingresosComisiones"
+                 (input)="persistNow()"
+                 (focus)="onFocus('ingresosComisiones')"
+                 (blur)="onBlur('ingresosComisiones')" />
+          <small class="error" *ngIf="fc.ingresosComisiones.touched && fc.ingresosComisiones.invalid">Requerido (≥ 0)</small>
+        </div>
+
+        <div class="field">
+          <label>Otros ingresos *</label>
+          <input type="text" inputmode="decimal" class="num-right no-spin"
+                 formControlName="otrosIngresos"
+                 (input)="persistNow()"
+                 (focus)="onFocus('otrosIngresos')"
+                 (blur)="onBlur('otrosIngresos')" />
+          <small class="error" *ngIf="fc.otrosIngresos.touched && fc.otrosIngresos.invalid">Requerido (≥ 0)</small>
+        </div>
+
+        <div class="field">
+          <label>Comentario otros ingresos *</label>
+          <input type="text" maxlength="100" formControlName="comentarioOtrosIngresos" (input)="persistNow()" />
+          <small class="help">Obligatorio cuando “Otros ingresos” &gt; 0</small>
+          <small class="error" *ngIf="errors()?.['comentarioOtrosIngresos']">{{ errors()?.['comentarioOtrosIngresos'] }}</small>
+        </div>
+
+        <div class="field col-span-2">
+          <label>Origen de fondos *</label>
+          <input type="text" maxlength="100" formControlName="origenFondos" (input)="persistNow()" />
+          <small class="help">Obligatorio cuando el total de ingresos &gt; 0</small>
+          <small class="error" *ngIf="errors()?.['origenFondos']">{{ errors()?.['origenFondos'] }}</small>
+        </div>
+
+        <div class="field col-span-2">
+          <label><b>Total ingresos</b></label>
+          <input type="text" class="num-right" [value]="fmt(totalIngresos())" readonly />
+        </div>
+      </div>
+
+      <!-- EGRESOS -->
+      <h3 class="section">Datos egresos mensuales</h3>
+      <div class="grid cols-2">
+        <div class="field">
+          <label>Egresos familiares *</label>
+          <input type="text" inputmode="decimal" class="num-right no-spin"
+                 formControlName="egresosFamiliares"
+                 (input)="persistNow()"
+                 (focus)="onFocus('egresosFamiliares')"
+                 (blur)="onBlur('egresosFamiliares')" />
+          <small class="error" *ngIf="fc.egresosFamiliares.touched && fc.egresosFamiliares.invalid">Requerido (≥ 0)</small>
+        </div>
+
+        <div class="field">
+          <label>Egresos arriendo *</label>
+          <input type="text" inputmode="decimal" class="num-right no-spin"
+                 formControlName="egresosArriendo"
+                 (input)="persistNow()"
+                 (focus)="onFocus('egresosArriendo')"
+                 (blur)="onBlur('egresosArriendo')" />
+          <small class="error" *ngIf="fc.egresosArriendo.touched && fc.egresosArriendo.invalid">Requerido (≥ 0)</small>
+        </div>
+
+        <div class="field">
+          <label>Egresos crédito *</label>
+          <input type="text" inputmode="decimal" class="num-right no-spin"
+                 formControlName="egresosCredito"
+                 (input)="persistNow()"
+                 (focus)="onFocus('egresosCredito')"
+                 (blur)="onBlur('egresosCredito')" />
+          <small class="help">Si &gt; 0, “Relación financiera” y “Deuda relación financiera” son obligatorios.</small>
+          <small class="error" *ngIf="fc.egresosCredito.touched && fc.egresosCredito.invalid">Requerido (≥ 0)</small>
+        </div>
+
+        <div class="field">
+          <label>Otros egresos *</label>
+          <input type="text" inputmode="decimal" class="num-right no-spin"
+                 formControlName="otrosEgresos"
+                 (input)="persistNow()"
+                 (focus)="onFocus('otrosEgresos')"
+                 (blur)="onBlur('otrosEgresos')" />
+          <small class="error" *ngIf="fc.otrosEgresos.touched && fc.otrosEgresos.invalid">Requerido (≥ 0)</small>
+        </div>
+
+        <div class="field">
+          <label>Relación financiera *</label>
+          <input type="text" maxlength="100" formControlName="relacionFinanciera" (input)="persistNow()" />
+          <small class="error" *ngIf="errors()?.['relacionFinanciera']">{{ errors()?.['relacionFinanciera'] }}</small>
+        </div>
+
+        <div class="field">
+          <label>Deuda relación financiera *</label>
+          <input type="text" inputmode="decimal" class="num-right no-spin"
+                 formControlName="deudaRelacionFinanciera"
+                 (input)="persistNow()"
+                 (focus)="onFocus('deudaRelacionFinanciera')"
+                 (blur)="onBlur('deudaRelacionFinanciera')" />
+          <small class="error" *ngIf="errors()?.['deudaRelacionFinanciera']">{{ errors()?.['deudaRelacionFinanciera'] }}</small>
+        </div>
+
+        <div class="field col-span-2">
+          <label>Comentario otros egresos *</label>
+          <input type="text" maxlength="100" formControlName="comentarioOtrosEgresos" (input)="persistNow()" />
+          <small class="help">Obligatorio cuando “Otros egresos” &gt; 0</small>
+          <small class="error" *ngIf="errors()?.['comentarioOtrosEgresos']">{{ errors()?.['comentarioOtrosEgresos'] }}</small>
+        </div>
+
+        <div class="field col-span-2">
+          <label><b>Total egresos</b></label>
+          <input type="text" class="num-right" [value]="fmt(totalEgresos())" readonly />
+        </div>
+      </div>
+
+      <!-- PATRIMONIO -->
+      <h3 class="section">Valor del patrimonio</h3>
+      <div class="grid cols-2">
+        <div class="field">
+          <label>Total activos *</label>
+          <input type="text" inputmode="decimal" class="num-right no-spin"
+                 formControlName="totalActivos"
+                 (input)="persistNow()"
+                 (focus)="onFocus('totalActivos')"
+                 (blur)="onBlur('totalActivos')" />
+          <small class="error" *ngIf="fc.totalActivos.touched && fc.totalActivos.invalid">Requerido (≥ 0)</small>
+        </div>
+
+        <div class="field">
+          <label>Total pasivos *</label>
+          <input type="text" inputmode="decimal" class="num-right no-spin"
+                 formControlName="totalPasivos"
+                 (input)="persistNow()"
+                 (focus)="onFocus('totalPasivos')"
+                 (blur)="onBlur('totalPasivos')" />
+          <small class="error" *ngIf="fc.totalPasivos.touched && fc.totalPasivos.invalid">Requerido (≥ 0)</small>
+        </div>
+
+        <div class="field col-span-2">
+          <label><b>Total patrimonio</b></label>
+          <input type="text" class="num-right" [value]="fmt(totalPatrimonio())" readonly />
+        </div>
+      </div>
+
+      <div class="actions" >
+        <button type="submit" class="btn primary" [disabled]="guardando()">
+          {{ mode() === 'new' ? 'Guardar' : 'Guardar' }}
+        </button>
+        <button *ngIf="mode() === 'edit' && !captureMode" type="button" class="btn--delete" (click)="onDelete()">Eliminar</button>
+        <a *ngIf="!captureMode" class="btn ghost" [routerLink]="['/hoja-vida/financieros']">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>

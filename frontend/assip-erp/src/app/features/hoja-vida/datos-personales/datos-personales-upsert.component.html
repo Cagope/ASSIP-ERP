@@ -1,0 +1,334 @@
+<div class="card">
+  <div class="card-header">
+    <h2>{{ id() ? 'Editar Datos Personales' : 'Nuevo Datos Personales' }}</h2>
+    <a class="btn" [routerLink]="['/hoja-vida/datos-personales']">Regresar</a>
+  </div>
+
+  <div class="card-body">
+    <div class="alert error" *ngIf="errorMsg()">{{ errorMsg() }}</div>
+
+    <form [formGroup]="form" (ngSubmit)="guardar()">
+      <!-- Identificación -->
+      <h3 class="section">Identificación</h3>
+      <div class="grid cols-4">
+        <div class="field">
+          <label>Tipo documento *</label>
+          <select formControlName="tipoDocumento" (blur)="checkDupOnBlur(); checkDocImmediate()">
+            <option value="">Seleccione...</option>
+            <option *ngFor="let t of tiposDocumento()" [value]="t.codigo">{{ t.nombre }}</option>
+          </select>
+          <small class="error" *ngIf="form.get('tipoDocumento')?.touched && form.get('tipoDocumento')?.invalid">
+            Requerido.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Número documento *</label>
+          <input
+            type="text"
+            formControlName="documento"
+            maxlength="20"
+            inputmode="numeric"
+            (blur)="checkDupOnBlur(); checkDocImmediate()"
+          />
+          <small class="error" *ngIf="form.get('documento')?.touched && form.get('documento')?.errors?.['required']">
+            Requerido.
+          </small>
+          <small class="error" *ngIf="form.get('documento')?.touched && form.get('documento')?.errors?.['pattern']">
+            Solo dígitos.
+          </small>
+          <small class="error" *ngIf="form.get('documento')?.touched && form.get('documento')?.errors?.['maxlength']">
+            Máximo 20 caracteres.
+          </small>
+
+          <!-- Estado en vivo del chequeo -->
+          <small class="help" *ngIf="docChecking()">Verificando documento…</small>
+          <small class="error" *ngIf="!docChecking() && form.hasError('docDuplicado')">
+            Ya existe una persona con ese tipo y número de documento.
+          </small>
+          <small class="help" *ngIf="!docChecking() && !form.hasError('docDuplicado') && docInfo()">
+            {{ docInfo() }}
+          </small>
+        </div>
+
+        <div class="field">
+          <label><input type="checkbox" formControlName="tieneRut" /> ¿Tiene RUT?</label>
+        </div>
+
+        <div class="field">
+          <label>DV <span *ngIf="form.get('digitoVerificacion')?.enabled">*</span></label>
+          <input
+            type="text"
+            formControlName="digitoVerificacion"
+            [readonly]="!form.get('digitoVerificacion')?.enabled"
+            [placeholder]="form.get('digitoVerificacion')?.enabled ? '1-2 dígitos' : 'Se calcula automático'"
+          />
+          <small class="error" *ngIf="form.get('digitoVerificacion')?.touched && form.get('digitoVerificacion')?.invalid">
+            Requerido (1-2 dígitos) cuando aplica.
+          </small>
+        </div>
+      </div>
+
+      <div class="grid cols-4">
+        <div class="field">
+          <label>Tipo de persona</label>
+          <input
+            type="text"
+            [value]="(form.get('tipoPersona')?.value ?? '') === '2' ? 'Jurídica (2)' : 'Natural (1)'"
+            readonly
+          />
+        </div>
+
+        <div class="field">
+          <label>Fecha documento *</label>
+          <input type="date" formControlName="fechaDocumento" />
+          <small class="error" *ngIf="form.get('fechaDocumento')?.touched && form.get('fechaDocumento')?.invalid">
+            Requerida y no futura.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>País (expedición) *</label>
+          <select formControlName="idPaisDocumento">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let p of paises()" [ngValue]="p.id">{{ p.nombre }}</option>
+          </select>
+          <small class="error" *ngIf="form.get('idPaisDocumento')?.touched && form.get('idPaisDocumento')?.invalid">
+            Requerido.
+          </small>
+        </div>
+      </div>
+
+      <!-- Depto/Ciudad Expedición -->
+      <app-depto-ciudad
+        [deptoCtrl]="depExpCtrl"
+        [ciudadCtrl]="ciuExpCtrl">
+      </app-depto-ciudad>
+      <div class="grid cols-4">
+        <div class="field">
+          <small class="error" *ngIf="depExpCtrl.touched && depExpCtrl.invalid">Departamento expedición requerido.</small>
+          <small class="error" *ngIf="ciuExpCtrl.touched && ciuExpCtrl.invalid">Ciudad expedición requerida.</small>
+        </div>
+      </div>
+
+      <!-- Nombres -->
+      <h3 class="section">Nombres</h3>
+      <div class="grid cols-3">
+        <div class="field">
+          <label>Nombres *</label>
+          <input type="text" formControlName="nombres" maxlength="100"/>
+          <small class="error" *ngIf="form.get('nombres')?.touched && form.get('nombres')?.invalid">
+            Requerido (máx 100).
+          </small>
+        </div>
+        <div class="field">
+          <label>Primer apellido *</label>
+          <input type="text" formControlName="primerApellido" maxlength="50"/>
+          <small class="error" *ngIf="form.get('primerApellido')?.touched && form.get('primerApellido')?.invalid">
+            Requerido (máx 50).
+          </small>
+        </div>
+        <div class="field">
+          <label>Segundo apellido</label>
+          <input type="text" formControlName="segundoApellido" maxlength="50"/>
+          <small class="error" *ngIf="form.get('segundoApellido')?.touched && form.get('segundoApellido')?.invalid">
+            Máx 50.
+          </small>
+        </div>
+      </div>
+
+      <!-- Nacimiento -->
+      <h3 class="section">Nacimiento</h3>
+      <div class="grid cols-4">
+        <div class="field">
+          <label>Fecha nacimiento *</label>
+          <input type="date" formControlName="fechaNacimiento" />
+          <small class="error" *ngIf="form.get('fechaNacimiento')?.touched && form.get('fechaNacimiento')?.invalid">
+            Requerida y no futura.
+          </small>
+        </div>
+        <div class="field">
+          <label>País (nacimiento) *</label>
+          <select formControlName="idPaisNacimiento">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let p of paises()" [ngValue]="p.id">{{ p.nombre }}</option>
+          </select>
+          <small class="error" *ngIf="form.get('idPaisNacimiento')?.touched && form.get('idPaisNacimiento')?.invalid">
+            Requerido.
+          </small>
+        </div>
+      </div>
+
+      <!-- Depto/Ciudad Nacimiento -->
+      <app-depto-ciudad
+        [deptoCtrl]="depNacCtrl"
+        [ciudadCtrl]="ciuNacCtrl">
+      </app-depto-ciudad>
+      <div class="grid cols-4">
+        <div class="field">
+          <small class="error" *ngIf="depNacCtrl.touched && depNacCtrl.invalid">Departamento nacimiento requerido.</small>
+          <small class="error" *ngIf="ciuNacCtrl.touched && ciuNacCtrl.invalid">Ciudad nacimiento requerida.</small>
+        </div>
+      </div>
+
+      <!-- Info personal -->
+      <h3 class="section">Información personal</h3>
+      <div class="grid cols-4">
+        <div class="field">
+          <label>Género *</label>
+          <select formControlName="codigoGenero">
+            <option value="">Seleccione...</option>
+            <option *ngFor="let g of generos()" [value]="g.codigo">{{ g.nombre }}</option>
+          </select>
+          <small class="error" *ngIf="form.get('codigoGenero')?.touched && form.get('codigoGenero')?.invalid">
+            Requerido.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Estado civil *</label>
+          <select formControlName="codigoEstadoCivil">
+            <option value="">Seleccione...</option>
+            <option *ngFor="let e of estadosCiviles()" [value]="e.codigo">{{ e.nombre }}</option>
+          </select>
+          <small class="error" *ngIf="form.get('codigoEstadoCivil')?.touched && form.get('codigoEstadoCivil')?.invalid">
+            Requerido.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Escolaridad *</label>
+          <select formControlName="codigoEscolaridad">
+            <option value="">Seleccione...</option>
+            <option *ngFor="let n of nivelesEscolares()" [value]="n.codigo">{{ n.nombre }}</option>
+          </select>
+          <small class="error" *ngIf="form.get('codigoEscolaridad')?.touched && form.get('codigoEscolaridad')?.invalid">
+            Requerido.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Tipo vivienda *</label>
+          <select formControlName="codigoTipoVivienda">
+            <option value="">Seleccione...</option>
+            <option *ngFor="let v of tiposVivienda()" [value]="v.codigo">{{ v.nombre }}</option>
+          </select>
+          <small class="error" *ngIf="form.get('codigoTipoVivienda')?.touched && form.get('codigoTipoVivienda')?.invalid">
+            Requerido.
+          </small>
+        </div>
+      </div>
+
+      <div class="grid cols-4">
+        <div class="field">
+          <label>Cabeza de familia</label>
+          <select formControlName="cabezaFamilia">
+            <option value="0">No</option>
+            <option value="1">Sí</option>
+          </select>
+          <small class="help" *ngIf="!isFemenino()">Solo editable si el género es Femenino.</small>
+        </div>
+
+        <div class="field">
+          <label>Estrato social</label>
+          <input type="number" formControlName="estratoSocial" min="0" max="6"/>
+        </div>
+
+        <div class="field">
+          <label>Número de hijos</label>
+          <input type="number" formControlName="numeroHijos" min="0" max="99"/>
+        </div>
+      </div>
+
+      <!-- Actividad económica -->
+      <h3 class="section">Actividad económica</h3>
+      <div class="grid cols-4">
+        <div class="field">
+          <label>Ocupación *</label>
+          <select formControlName="codigoOcupacion">
+            <option value="">Seleccione...</option>
+            <option *ngFor="let o of ocupaciones()" [value]="o.codigo">{{ o.nombre }}</option>
+          </select>
+          <small class="error" *ngIf="form.get('codigoOcupacion')?.touched && form.get('codigoOcupacion')?.invalid">
+            Requerido.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Sector económico *</label>
+          <select formControlName="codigoSectorEconomico">
+            <option value="">Seleccione...</option>
+            <option *ngFor="let s of sectores()" [value]="s.codigo">{{ s.nombre }}</option>
+          </select>
+          <small class="error" *ngIf="form.get('codigoSectorEconomico')?.touched && form.get('codigoSectorEconomico')?.invalid">
+            Requerido.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Tipo régimen *</label>
+          <select formControlName="codigoRetencion">
+            <option value="">Seleccione...</option>
+            <option *ngFor="let r of tiposRegimen()" [value]="r.codigo">{{ r.nombre }}</option>
+          </select>
+          <small class="error" *ngIf="form.get('codigoRetencion')?.touched && form.get('codigoRetencion')?.invalid">
+            Requerido.
+          </small>
+        </div>
+      </div>
+
+      <div class="grid cols-2">
+        <div class="field">
+          <label>Actividad económica SES *</label>
+          <div class="searchbar">
+            <input type="text" [value]="sesQuery()" (input)="sesQuery.set($any($event.target).value)" placeholder="Buscar por nombre o código..." />
+            <button type="button" class="btn sm" (click)="buscarSES()" [disabled]="buscandoSES()">Buscar</button>
+          </div>
+          <ul class="results" *ngIf="sesResultados().length">
+            <li *ngFor="let a of sesResultados()" (click)="seleccionarSES(a.codigo)">
+              <span class="code">{{ a.codigo }}</span> <span>{{ a.nombre }}</span>
+            </li>
+          </ul>
+          <input class="mt-4" type="text" formControlName="codigoActividadSes" maxlength="4" placeholder="Código seleccionado" />
+          <small class="error" *ngIf="form.get('codigoActividadSes')?.touched && form.get('codigoActividadSes')?.invalid">
+            Requerido.
+          </small>
+        </div>
+
+        <div class="field">
+          <label>Actividad económica DIAN *</label>
+          <div class="searchbar">
+            <input type="text" [value]="dianQuery()" (input)="dianQuery.set($any($event.target).value)" placeholder="Buscar por nombre o código..." />
+            <button type="button" class="btn sm" (click)="buscarDIAN()" [disabled]="buscandoDIAN()">Buscar</button>
+          </div>
+          <ul class="results" *ngIf="dianResultados().length">
+            <li *ngFor="let a of dianResultados()" (click)="seleccionarDIAN(a.codigo)">
+              <span class="code">{{ a.codigo }}</span> <span>{{ a.nombre }}</span>
+            </li>
+          </ul>
+          <input class="mt-4" type="text" formControlName="codigoActividadDian" maxlength="4" placeholder="Código seleccionado" />
+          <small class="error" *ngIf="form.get('codigoActividadDian')?.touched && form.get('codigoActividadDian')?.invalid">
+            Requerido.
+          </small>
+        </div>
+      </div>
+
+      <!-- Comentario -->
+      <div class="grid">
+        <div class="field">
+          <label>Comentario *</label>
+          <input type="text" formControlName="comentario" maxlength="250" />
+          <small class="error" *ngIf="form.get('comentario')?.touched && form.get('comentario')?.invalid">
+            Requerido (máx 250).
+          </small>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn primary" [disabled]="guardando() || form.invalid">Guardar</button>
+        <button type="button" class="btn ghost" (click)="cancelar()">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+

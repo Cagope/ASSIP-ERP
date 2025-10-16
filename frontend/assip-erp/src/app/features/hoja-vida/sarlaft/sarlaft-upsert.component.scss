@@ -1,0 +1,113 @@
+/* Encabezado y estados */
+.hdr { margin-bottom: 12px; }
+.hdr .sub { color:#555; margin-top:4px; font-size:.95rem; }
+.st { padding: 12px 0; }
+.st--err { color: #b00020; }
+
+/* Contenedor del formulario */
+.frm { max-width: 920px; }
+
+/* Título de cada grupo (como en el ejemplo) */
+.group-title {
+  margin: 12px 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Grid base + utilidades de columnas (ajusta a tu HTML actual) */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 12px;
+}
+.col { display: flex; flex-direction: column; gap: 6px; }
+.col-2 { grid-column: span 2; }
+
+/* Fila separadora entre grupos */
+.break { grid-column: 1 / -1; height: 0; }
+
+/* Etiquetas y campos */
+.col label { font-weight: 500; }
+.col input[type="text"],
+.col input[type="date"],
+.col select {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.col input:disabled,
+.col select:disabled {
+  background: #f5f7fa;
+  color: #888;
+  cursor: not-allowed;
+}
+
+/* Checkbox en línea con label fuerte */
+.chk {
+  display: flex;
+  align-items: center;
+}
+.chk > label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: #222;
+  user-select: none;
+  cursor: pointer;
+}
+.chk input[type="checkbox"] {
+  width: 20px; height: 20px; margin: 0;
+  accent-color: #0d6efd;
+  border-radius: 4px;
+  appearance: auto;
+  -webkit-appearance: auto;
+}
+.chk input[type="checkbox"]:focus-visible {
+  outline: 2px solid #84b5ff;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Ayudas y errores (si decides mostrarlos) */
+.help { color:#6b7280; font-size:.8rem; }
+.error { color:#b91c1c; font-size:.8rem; }
+
+/* Estados de validación Angular (por si activas required en inputs/selects) */
+input.ng-invalid.ng-touched,
+select.ng-invalid.ng-touched {
+  border-color: #ef4444;
+  background: #fff7f7;
+}
+
+/* Botones */
+.actions {
+  margin-top: 14px;
+  display: flex;
+  gap: 8px;
+}
+.btn {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fafafa;
+  cursor: pointer;
+}
+.btn.btn--primary {
+  background: #0d6efd;
+  color: #fff;
+  border-color: #0d6efd;
+}
+.btn.btn--ghost {
+  background: transparent;
+  color: #333;
+}
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+
+/* Responsivo */
+@media (max-width: 720px) {
+  .grid { grid-template-columns: 1fr !important; }
+  .col-2 { grid-column: auto; }
+}

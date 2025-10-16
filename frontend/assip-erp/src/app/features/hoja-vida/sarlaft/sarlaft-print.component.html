@@ -1,0 +1,161 @@
+<!-- Asegura ocultar .no-print en impresión, incluso si el SCSS del componente no aplica -->
+<style>
+  @media print { .no-print { display: none !important; } }
+</style>
+
+<div class="print-container">
+  <div class="print-actions no-print">
+    <a class="btn" [routerLink]="['/hoja-vida/sarlaft']">Regresar</a>
+    <button class="btn btn--print" (click)="imprimir()">Imprimir</button>
+  </div>
+
+  <header class="print-header">
+    <img class="logo" [src]="logoUrl()" alt="Logo empresa" />
+    <div class="titles">
+      <div class="empresa-sigla" *ngIf="empresaSigla()">{{ empresaSigla() }}</div>
+      <div class="empresa-nit" *ngIf="empresaNit()">NIT: {{ empresaNit() }}</div>
+      <h1>Declaración SARLAFT (cortes por persona)</h1>
+      <div class="meta">
+        <span class="date">{{ nowStr() }}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Línea debajo del título -->
+  <hr class="hr-print" />
+
+  <!-- Estado global -->
+  <div *ngIf="loading()" class="loading">Cargando…</div>
+  <div *ngIf="!loading() && bloques().length === 0" class="empty-global">
+    No hay personas con SARLAFT registrado.
+  </div>
+
+  <!-- Bloques por persona -->
+  <section *ngFor="let b of bloques()" class="person-block">
+    <div class="cut-label">Encabezado del corte:</div>
+    <div class="person-header">
+      <div class="person-name">{{ personaNombre(b.persona) }}</div>
+      <div class="person-doc">{{ personaDocumento(b.persona) }}</div>
+    </div>
+
+    <div class="cut-label">Cuerpo del corte:</div>
+    <table class="print-table">
+      <thead>
+      <tr>
+        <th style="width:220px;">Campo</th>
+        <th>Valor</th>
+      </tr>
+      </thead>
+      <tbody>
+      <!-- Exoneración UIAF -->
+      <tr><td colspan="2"><b>Exonerado de transacciones en efectivo</b></td></tr>
+      <tr>
+        <td>Exonerado</td>
+        <td>{{ yesno(b.sarlaft.exoneracion_uiaf) }}</td>
+      </tr>
+      <tr *ngIf="b.sarlaft.exoneracion_uiaf">
+        <td>Fecha exoneración</td>
+        <td>{{ b.sarlaft.fecha_exoneracion || '' }}</td>
+      </tr>
+
+      <!-- PEP (asociado) -->
+      <tr><td colspan="2"><b>El asociado es PEP</b></td></tr>
+      <tr>
+        <td>¿Es PEP?</td>
+        <td>{{ yesno(b.sarlaft.asociado_peps) }}</td>
+      </tr>
+      <ng-container *ngIf="b.sarlaft.asociado_peps">
+        <tr>
+          <td>Tipo PEP (asociado)</td>
+          <td>{{ nombreTipoPeps(b.sarlaft.tipo_peps) }}</td>
+        </tr>
+        <tr>
+          <td>Observaciones</td>
+          <td>{{ b.sarlaft.observaciones_peps || '' }}</td>
+        </tr>
+        <tr>
+          <td>Fecha inicio</td>
+          <td>{{ b.sarlaft.fecha_inicial_peps || '' }}</td>
+        </tr>
+        <tr>
+          <td>Fecha fin</td>
+          <td>{{ b.sarlaft.fecha_final_peps || '' }}</td>
+        </tr>
+      </ng-container>
+
+      <!-- PEP (familiar) -->
+      <tr><td colspan="2"><b>El asociado tiene familiar PEP</b></td></tr>
+      <tr>
+        <td>¿Tiene familiar PEP?</td>
+        <td>{{ yesno(b.sarlaft.familia_peps) }}</td>
+      </tr>
+      <ng-container *ngIf="b.sarlaft.familia_peps">
+        <tr>
+          <td>Tipo PEP (familiar)</td>
+          <td>{{ nombreTipoPeps(b.sarlaft.tipo_familia_peps) }}</td>
+        </tr>
+        <tr>
+          <td>Cédula (familiar)</td>
+          <td class="code">{{ b.sarlaft.cedula_familia_peps || '' }}</td>
+        </tr>
+        <tr>
+          <td>Nombre (familiar)</td>
+          <td>{{ b.sarlaft.nombre_familia_peps || '' }}</td>
+        </tr>
+        <tr>
+          <td>Parentesco</td>
+          <td>{{ nombreParentesco(b.sarlaft.codigo_parentesco) }}</td>
+        </tr>
+      </ng-container>
+
+      <!-- Moneda extranjera (negocios) -->
+      <tr><td colspan="2"><b>Negocios en moneda extranjera</b></td></tr>
+      <tr>
+        <td>¿Tiene negocios?</td>
+        <td>{{ yesno(b.sarlaft.moneda_extranjera) }}</td>
+      </tr>
+      <tr *ngIf="b.sarlaft.moneda_extranjera">
+        <td>Observación</td>
+        <td>{{ b.sarlaft.observacion_moneda_extranjera || '' }}</td>
+      </tr>
+
+      <!-- Cuenta en el extranjero -->
+      <tr><td colspan="2"><b>Cuentas en el extranjero</b></td></tr>
+      <tr>
+        <td>¿Tiene cuenta?</td>
+        <td>{{ yesno(b.sarlaft.cuenta_extranjero) }}</td>
+      </tr>
+      <ng-container *ngIf="b.sarlaft.cuenta_extranjero">
+        <tr>
+          <td>Tipo de moneda</td>
+          <td>{{ b.sarlaft.tipo_moneda_extranjera || '' }}</td>
+        </tr>
+        <tr>
+          <td>Número de cuenta</td>
+          <td class="code">{{ b.sarlaft.numero_cuenta_extranjero || '' }}</td>
+        </tr>
+        <tr>
+          <td>Banco</td>
+          <td>{{ b.sarlaft.nombre_banco_extranjero || '' }}</td>
+        </tr>
+        <tr>
+          <td>Ciudad</td>
+          <td>{{ b.sarlaft.ciudad_cuenta_extranjero || '' }}</td>
+        </tr>
+        <tr>
+          <td>País</td>
+          <td>{{ b.sarlaft.pais_cuenta_extranjero || '' }}</td>
+        </tr>
+      </ng-container>
+      </tbody>
+    </table>
+
+    <!-- Separador entre cortes -->
+    <hr class="section-hr" />
+  </section>
+</div>
+
+<!-- Pie de página (n/m) -->
+<div id="pageFooter" class="page-footer no-screen">
+  <span class="page-text"></span>
+</div>

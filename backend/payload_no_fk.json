@@ -1,0 +1,14 @@
+﻿{
+  "tipoDocumento": "C",
+  "documento": "93000011",
+  "tieneRut": false,
+  "tipoPersona": "1",
+
+  "nombres": "AAAAAAA",
+  "primerApellido": "BBBBBB",
+
+  "fechaNacimiento": "1968-09-22",
+
+  "codigoGenero": "1",
+  "codigoEstadoCivil": "1"
+}

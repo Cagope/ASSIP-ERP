@@ -1,0 +1,45 @@
+.hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 8px 0 16px;
+
+  .sub { font-size: .9rem; color: #555; }
+  .search {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 8px 12px;
+    min-width: 280px;
+  }
+}
+
+.st { padding: 8px 0; }
+.st--err { color: #b91c1c; }
+
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+
+  th, td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+  }
+
+  thead th {
+    font-weight: 600;
+    background: #f9fafb;
+  }
+
+  .actions {
+    white-space: nowrap;
+    display: flex;
+    gap: 6px;
+  }
+
+  .empty {
+    text-align: center;
+    color: #6b7280;
+    padding: 12px 0;
+  }
+}

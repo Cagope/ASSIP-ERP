@@ -1,0 +1,151 @@
+<div class="wrap">
+  <h2>{{ titulo() }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="grid">
+
+      <!-- === DIRECTIVO (origen: general/directivos) === -->
+      <div class="field row-2">
+        <label>Directivo</label>
+
+        <!-- Buscador de Directivo -->
+        <div class="persona-box">
+          <input
+            type="text"
+            autocomplete="off"
+            placeholder="Buscar directivo por documento o nombre…"
+            [ngModel]="buscarDir()"
+            (ngModelChange)="buscarDir.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+            name="buscarDirectivo"
+            (keyup.enter)="buscarDirectivo()"
+            (keydown)="onSearchDirKeydown($event)"
+          />
+          <button type="button" class="btn" (click)="buscarDirectivo()" [disabled]="buscandoDir()">Buscar</button>
+        </div>
+
+        <!-- Panel resultados DIRECTIVO -->
+        <div class="search-panel" *ngIf="directivos().length || buscandoDir()">
+          <div class="loading" *ngIf="buscandoDir()">Buscando…</div>
+
+          <div class="search-list" *ngIf="!buscandoDir() && directivos().length">
+            <div
+              class="search-row"
+              *ngFor="let d of directivos(); let i = index"
+              [class.active]="i === activeDirIndex()"
+              (mouseenter)="setActiveDir(i)"
+              (mousedown)="elegirDirectivo(d); $event.preventDefault()"
+            >
+              <div class="col-main">
+                <div class="doc" [innerHTML]="hl(buscarDir(), d.documento)"></div>
+                <div class="name" [innerHTML]="hl(buscarDir(), d.nombrePersona)"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="empty" *ngIf="!buscandoDir() && !directivos().length">Sin resultados</div>
+        </div>
+      </div>
+
+      <!-- Mostrar SOLO el directivo seleccionado (no editable) -->
+      <div class="field row-2">
+        <label>Directivo seleccionado</label>
+        <div class="display-box">
+          <div><strong>ID Directivo:</strong> {{ (selectedDirectivo()?.idDirectivo ?? f.idDirectivo.value) || '—' }}</div>
+          <div><strong>Cédula:</strong> {{ selectedDirectivo()?.documento || '—' }}</div>
+          <div><strong>Nombre:</strong> {{ selectedDirectivo()?.nombrePersona || '—' }}</div>
+        </div>
+        <!-- Mantener el valor en el form pero oculto -->
+        <input type="hidden" formControlName="idDirectivo" />
+        <small class="msg error" *ngIf="f.idDirectivo.invalid && (f.idDirectivo.touched || f.idDirectivo.dirty)">
+          Debe seleccionar un directivo.
+        </small>
+      </div>
+
+      <!-- === PERSONA (origen: hoja_vida/datos_personales) === -->
+      <div class="field row-2">
+        <label>Persona (datos personales)</label>
+
+        <!-- Buscador de Persona -->
+        <div class="persona-box">
+          <input
+            type="text"
+            autocomplete="off"
+            placeholder="Buscar persona por documento o nombre…"
+            [ngModel]="buscarPer()"
+            (ngModelChange)="buscarPer.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+            name="buscarPersona"
+            (keyup.enter)="buscarPersona()"
+            (keydown)="onSearchPerKeydown($event)"
+          />
+          <button type="button" class="btn" (click)="buscarPersona()" [disabled]="buscandoPer()">Buscar</button>
+        </div>
+
+        <!-- Panel resultados PERSONA -->
+        <div class="search-panel" *ngIf="personas().length || buscandoPer()">
+          <div class="loading" *ngIf="buscandoPer()">Buscando…</div>
+
+          <div class="search-list" *ngIf="!buscandoPer() && personas().length">
+            <div
+              class="search-row"
+              *ngFor="let p of personas(); let i = index"
+              [class.active]="i === activePerIndex()"
+              (mouseenter)="setActivePer(i)"
+              (mousedown)="elegirPersona(p); $event.preventDefault()"
+            >
+              <div class="col-main">
+                <div class="doc" [innerHTML]="hl(buscarPer(), p.documento)"></div>
+                <div class="name" [innerHTML]="hl(buscarPer(), nombreDisplayPersona(p))"></div>
+              </div>
+              <div class="col-meta">
+                <span class="chip" [class.chip-juridica]="p.tipoPersona === '2'">
+                  {{ p.tipoPersona === '2' ? 'Jurídica' : 'Natural' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="empty" *ngIf="!buscandoPer() && !personas().length">Sin resultados</div>
+        </div>
+      </div>
+
+      <!-- Mostrar SOLO la persona seleccionada (no editable) -->
+      <div class="field row-2">
+        <label>Persona seleccionada</label>
+        <div class="display-box">
+          <div><strong>ID Persona:</strong> {{ (selectedPersona()?.idDatosPersonal ?? f.idDatosPersonal.value) || '—' }}</div>
+          <div><strong>Cédula:</strong> {{ selectedPersona()?.documento || '—' }}</div>
+          <div><strong>Nombre:</strong> {{ selectedPersona() ? nombreDisplayPersona(selectedPersona()!) : '—' }}</div>
+        </div>
+        <!-- Mantener valor en el form pero oculto -->
+        <input type="hidden" formControlName="idDatosPersonal" />
+        <small class="msg error" *ngIf="f.idDatosPersonal.invalid && (f.idDatosPersonal.touched || f.idDatosPersonal.dirty)">
+          Debe seleccionar una persona.
+        </small>
+      </div>
+
+      <!-- === PARENTESCO === -->
+      <div class="field">
+        <label for="codigoParentesco">Parentesco</label>
+        <select id="codigoParentesco" formControlName="codigoParentesco">
+          <option value="" disabled>Seleccione…</option>
+          <option *ngFor="let t of parentescos()" [value]="t.codigo">
+            {{ t.codigo }} — {{ t.nombre }}
+          </option>
+        </select>
+        <small *ngIf="f.codigoParentesco.touched && f.codigoParentesco.invalid" class="msg error">
+          Seleccione un parentesco válido.
+        </small>
+      </div>
+
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" type="submit" [disabled]="guardando() || form.invalid">Guardar</button>
+      <button class="btn ghost" type="button" (click)="cancelar()">Cancelar</button>
+    </div>
+
+    <div class="msg error" *ngIf="error()">{{ error() }}</div>
+  </form>
+</div>

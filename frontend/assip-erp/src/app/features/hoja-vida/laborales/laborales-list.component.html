@@ -1,0 +1,68 @@
+<!-- src/app/features/hoja-vida/laborales/laborales-list.component.html -->
+
+<!-- Encabezado: IZQ (título + filtro) · DER (Imprimir + Exportar) -->
+<div class="hdr">
+  <div>
+    <h2>Información laboral</h2>
+    <input
+      class="search"
+      type="text"
+      placeholder="Buscar por documento o nombre…"
+      (input)="onSearch($event)" />
+  </div>
+
+  <div class="actions" style="display:flex; gap:6px; align-items:center;">
+    <a class="bnt btn--print" [routerLink]="['/hoja-vida/laborales/print']">Imprimir</a>
+    <app-laborales-export-button [q]="term()"></app-laborales-export-button>
+  </div>
+</div>
+
+<div *ngIf="loading()" class="st">Cargando…</div>
+<div *ngIf="!loading() && error()" class="st st--err">{{ error() }}</div>
+
+<table *ngIf="!loading() && !error()" class="tbl">
+  <thead>
+  <tr>
+    <th style="width:80px;">ID</th>
+    <th style="width:160px;">Documento</th>
+    <th>Nombre</th>
+    <th class="actions" style="width:220px;">Acciones</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr *ngFor="let p of filteredPersonas()">
+    <td>{{ personaId(p) }}</td>
+    <td>{{ p.documento }}</td>
+    <td>
+      {{ p.nombres || ( (p.primerNombre || '') + (p.segundoNombre ? ' ' + p.segundoNombre : '') ) }}
+      {{ p.apellidos || ( (p.primerApellido || '') + (p.segundoApellido ? ' ' + p.segundoApellido : '') ) }}
+    </td>
+    <td class="actions">
+      <ng-container [ngSwitch]="estadoPersona(personaId(p))">
+        <button *ngSwitchCase="'loading'" type="button" class="btn btn--ghost" disabled>
+          Cargando…
+        </button>
+
+        <!-- Editar/Gestionar existente -->
+        <button *ngSwitchCase="'yes'" type="button" class="btn btn sm success" (click)="gestionar(p, false)">
+          Gestionar
+        </button>
+
+        <!-- Crear nuevo -->
+        <button *ngSwitchCase="'no'" type="button" class="btn--new" (click)="gestionar(p, true)">
+          + Nuevo
+        </button>
+
+        <!-- Fallback SIN PROBE: por defecto mostramos “+ Nuevo” para NO disparar 500s -->
+        <button *ngSwitchDefault type="button" class="btn btn--primary" (click)="gestionar(p, true)">
+          + Nuevo
+        </button>
+      </ng-container>
+    </td>
+  </tr>
+
+  <tr *ngIf="filteredPersonas().length === 0">
+    <td colspan="4" class="empty">Sin resultados.</td>
+  </tr>
+  </tbody>
+</table>

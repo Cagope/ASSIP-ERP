@@ -1,0 +1,55 @@
+<div class="print-container">
+  <div class="print-actions no-print">
+    <a class="btn" [routerLink]="['/general/parametros']">Regresar</a>
+    <button class="btn btn--print" (click)="imprimir()">Imprimir</button>
+  </div>
+
+  <header class="print-header">
+    <img class="logo" [src]="logoUrl()" alt="Logo empresa" />
+    <div class="titles">
+      <div class="empresa-sigla" *ngIf="empresaSigla()">{{ empresaSigla() }}</div>
+      <div class="empresa-nit" *ngIf="empresaNit()">NIT: {{ empresaNit() }}</div>
+      <h1>Listado de Parámetros</h1>
+      <div class="meta-row">
+        <span class="date">{{ nowStr() }}</span>
+        <span class="filters">
+          <ng-container *ngIf="idAgencia() !== null">Agencia: {{ agenciaNombre() }}</ng-container>
+          <ng-container *ngIf="codigo() !== null"> • Código: {{ codigo() }}</ng-container>
+          <ng-container *ngIf="q()"> • Filtro: {{ q() }}</ng-container>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Línea debajo de los títulos -->
+  <hr class="hr-print" />
+
+  <table class="print-table">
+    <thead>
+    <tr>
+      <th style="width:90px;">Código</th>
+      <th>Nombre</th>
+      <th>Valor</th>
+      <th>Agencia</th>
+      <th>Comentario</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let p of parametros()">
+      <td>{{ p.codigoParametro }}</td>
+      <td>{{ p.nombreParametro }}</td>
+      <td>{{ p.valorParametro }}</td>
+      <td>{{ getAgenciaNombre(p) }}</td>
+      <td>{{ getComentario(p) }}</td>
+    </tr>
+    <tr *ngIf="parametros().length === 0">
+      <td colspan="5" class="empty">Sin resultados</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Pie de página (n/m) -->
+<div id="pageFooter" class="page-footer no-screen">
+  <span class="page-text"></span>
+</div>

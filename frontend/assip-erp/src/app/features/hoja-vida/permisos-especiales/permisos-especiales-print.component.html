@@ -1,0 +1,71 @@
+<!-- Asegura ocultar .no-print en impresión, incluso si el SCSS del componente no aplica -->
+<style>
+  @media print { .no-print { display: none !important; } }
+</style>
+
+<div class="print-container">
+  <div class="print-actions no-print">
+    <a class="btn" [routerLink]="['/hoja-vida/permisos-especiales']">Regresar</a>
+    <button class="btn btn--print" (click)="imprimir()">Imprimir</button>
+  </div>
+
+  <header class="print-header">
+    <img class="logo" [src]="logoUrl()" alt="Logo empresa" />
+    <div class="titles">
+      <div class="empresa-sigla" *ngIf="empresaSigla()">{{ empresaSigla() }}</div>
+      <div class="empresa-nit" *ngIf="empresaNit()">NIT: {{ empresaNit() }}</div>
+      <h1>Permisos especiales (cortes por persona)</h1>
+      <div class="meta">
+        <span class="date">{{ nowStr() }}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Línea debajo del título -->
+  <hr class="hr-print" />
+
+  <!-- Estado global -->
+  <div *ngIf="loading()" class="loading">Cargando…</div>
+  <div *ngIf="!loading() && bloques().length === 0" class="empty-global">
+    No hay personas con permisos especiales registrados.
+  </div>
+
+  <!-- Bloques por persona -->
+  <section *ngFor="let b of bloques()" class="person-block">
+    <div class="cut-label">Encabezado del corte:</div>
+    <div class="person-header">
+      <div class="person-name">{{ personaNombre(b.persona) }}</div>
+      <div class="person-doc">{{ personaDocumento(b.persona) }}</div>
+    </div>
+
+    <div class="cut-label">Cuerpo del corte:</div>
+    <table class="print-table">
+      <thead>
+      <tr>
+        <th style="width:150px;">Recibe llamadas</th>
+        <th style="width:120px;">Recibe SMS</th>
+        <th style="width:130px;">Recibe emails</th>
+        <th style="width:120px;">Recibe cartas</th>
+        <th style="width:170px;">Recibe redes sociales</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td>{{ b.permiso.recibe_llamadas ? 'Sí' : 'No' }}</td>
+        <td>{{ b.permiso.recibe_msm ? 'Sí' : 'No' }}</td>
+        <td>{{ b.permiso.recibe_emails ? 'Sí' : 'No' }}</td>
+        <td>{{ b.permiso.recibe_cartas ? 'Sí' : 'No' }}</td>
+        <td>{{ b.permiso.recibe_redes_sociales ? 'Sí' : 'No' }}</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <!-- Separador entre cortes -->
+    <hr class="section-hr" />
+  </section>
+</div>
+
+<!-- Pie de página (n/m) -->
+<div id="pageFooter" class="page-footer no-screen">
+  <span class="page-text"></span>
+</div>

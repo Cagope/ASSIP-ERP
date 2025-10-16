@@ -1,0 +1,76 @@
+<div class="wrap">
+  <h2>{{ titulo() }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="grid">
+      <div class="field">
+        <label for="codigoAgencia">Código (2 dígitos)</label>
+        <input id="codigoAgencia" type="text" formControlName="codigoAgencia" placeholder="01" maxlength="2" />
+        <small *ngIf="f.codigoAgencia.touched && f.codigoAgencia.invalid" class="msg error">
+          Debe ser un código de 2 dígitos (ej: 01, 02).
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="siglaAgencia">Sigla</label>
+        <input id="siglaAgencia" type="text" formControlName="siglaAgencia" maxlength="100" />
+        <small *ngIf="f.siglaAgencia.touched && f.siglaAgencia.invalid" class="msg error">
+          La sigla es obligatoria.
+        </small>
+      </div>
+
+      <div class="field row-2">
+        <label for="nombreAgencia">Nombre</label>
+        <input id="nombreAgencia" type="text" formControlName="nombreAgencia" maxlength="100" />
+        <small *ngIf="f.nombreAgencia.touched && f.nombreAgencia.invalid" class="msg error">
+          El nombre es obligatorio.
+        </small>
+      </div>
+
+      <div class="field row-2">
+        <label for="direccionAgencia">Dirección</label>
+        <input id="direccionAgencia" type="text" formControlName="direccionAgencia" maxlength="100" />
+        <small *ngIf="f.direccionAgencia.touched && f.direccionAgencia.invalid" class="msg error">
+          La dirección es obligatoria.
+        </small>
+      </div>
+
+      <!-- Reutilizable: Departamento / Ciudad -->
+      <app-depto-ciudad
+        [deptoCtrl]="deptoCtrl"
+        [ciudadCtrl]="ciudadCtrl">
+      </app-depto-ciudad>
+
+      <div class="field">
+        <label for="correoAgencia">Correo</label>
+        <input id="correoAgencia" type="email" formControlName="correoAgencia" maxlength="100" />
+        <small *ngIf="f.correoAgencia.touched && f.correoAgencia.invalid" class="msg error">
+          Debe ser un correo válido.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="celularAgencia">Celular (10 dígitos)</label>
+        <input id="celularAgencia" type="tel" formControlName="celularAgencia" placeholder="3112345678" />
+        <small *ngIf="f.celularAgencia.touched && f.celularAgencia.invalid" class="msg error">
+          Debe tener 10 dígitos.
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="telefonoAgencia">Teléfono (7 dígitos)</label>
+        <input id="telefonoAgencia" type="tel" formControlName="telefonoAgencia" placeholder="2345678" />
+        <small *ngIf="f.telefonoAgencia.touched && f.telefonoAgencia.invalid" class="msg error">
+          Debe tener 7 dígitos.
+        </small>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" type="submit" [disabled]="guardando() || form.invalid">Guardar</button>
+      <button class="btn ghost" type="button" (click)="cancelar()">Cancelar</button>
+    </div>
+
+    <div class="msg error" *ngIf="error()">{{ error() }}</div>
+  </form>
+</div>

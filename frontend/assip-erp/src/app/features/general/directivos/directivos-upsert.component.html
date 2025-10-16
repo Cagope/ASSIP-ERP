@@ -1,0 +1,140 @@
+<div class="wrap">
+  <h2>{{ titulo() }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="grid">
+
+      <!-- Persona -->
+      <div class="field row-2">
+        <label>Persona (datos personales)</label>
+
+        <!-- Buscador -->
+        <div class="persona-box">
+          <input
+            type="text"
+            placeholder="Buscar por documento o nombre…"
+            [ngModel]="buscar()"
+            (ngModelChange)="buscar.set($event)"
+            [ngModelOptions]="{ standalone: true }"
+            name="buscarPersona"
+            (keyup.enter)="buscarPersona()"
+            (keydown)="onSearchKeydown($event)"
+          />
+          <button type="button" class="btn" (click)="buscarPersona()" [disabled]="buscando()">Buscar</button>
+        </div>
+
+        <!-- Panel de resultados -->
+        <div class="search-panel" *ngIf="personas().length || buscando()">
+          <div class="loading" *ngIf="buscando()">Buscando…</div>
+
+          <div class="search-list" *ngIf="!buscando() && personas().length">
+            <div
+              class="search-row"
+              *ngFor="let p of personas(); let i = index"
+              [class.active]="i === activeIndex()"
+              (mouseenter)="setActive(i)"
+              (click)="elegirPersona(p)"
+            >
+              <div class="col-main">
+                <div class="doc" [innerHTML]="hl(p.documento)"></div>
+                <div class="name" [innerHTML]="hl(nombreDisplay(p))"></div>
+              </div>
+              <div class="col-meta">
+                <span class="chip" [class.chip-juridica]="p.tipoPersona === '2'">
+                  {{ p.tipoPersona === '2' ? 'Jurídica' : 'Natural' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="empty" *ngIf="!buscando() && !personas().length">Sin resultados</div>
+        </div>
+      </div>
+
+      <!-- Mostrar SOLO la persona seleccionada (no editable) -->
+      <div class="field row-2">
+        <label>Persona seleccionada</label>
+        <div class="display-box">
+          <div><strong>ID:</strong> {{ (selectedPersona()?.idDatosPersonal ?? f.idDatosPersonal.value) || '—' }}</div>
+          <div><strong>Cédula:</strong> {{ selectedPersona()?.documento || '—' }}</div>
+          <div><strong>Nombre:</strong> {{ selectedPersona() ? nombreDisplay(selectedPersona()!) : '—' }}</div>
+        </div>
+        <!-- Mantener el valor en el form pero oculto -->
+        <input type="hidden" formControlName="idDatosPersonal" />
+        <small class="msg error" *ngIf="f.idDatosPersonal.invalid && (f.idDatosPersonal.touched || f.idDatosPersonal.dirty)">
+          Debe seleccionar una persona.
+        </small>
+      </div>
+
+      <!-- Tipo directivo con catálogo -->
+      <div class="field">
+        <label for="codigoTipoDirectivo">Tipo directivo</label>
+        <select id="codigoTipoDirectivo" formControlName="codigoTipoDirectivo">
+          <option value="" disabled>Seleccione…</option>
+          <option *ngFor="let t of tiposDirectivos()" [value]="t.codigo">
+            {{ t.codigo }} — {{ t.nombre }}
+          </option>
+        </select>
+        <small *ngIf="f.codigoTipoDirectivo.touched && f.codigoTipoDirectivo.invalid" class="msg error">
+          Seleccione un tipo válido.
+        </small>
+      </div>
+
+      <div class="field">
+        <label>Calidad</label>
+        <select formControlName="calidadDirectivo">
+          <option value="1">Principal</option>
+          <option value="2">Suplente</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Estado</label>
+        <select formControlName="estadoDirectivo">
+          <option value="1">Nombrado</option>
+          <option value="2">Retirado</option>
+          <option value="3">Excluido</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="actaAsamblea">Acta Asamblea</label>
+        <input id="actaAsamblea" type="text" formControlName="actaAsamblea" maxlength="10" />
+      </div>
+
+      <div class="field">
+        <label for="fechaAsamblea">Fecha Asamblea</label>
+        <input id="fechaAsamblea" type="date" formControlName="fechaAsamblea" />
+      </div>
+
+      <div class="field">
+        <label for="resolucionSes">Resolución SES</label>
+        <input id="resolucionSes" type="text" formControlName="resolucionSes" maxlength="10" />
+      </div>
+
+      <div class="field">
+        <label for="fechaResolucion">Fecha Resolución</label>
+        <input id="fechaResolucion" type="date" formControlName="fechaResolucion" />
+      </div>
+
+      <div class="field">
+        <label for="fechaRetiro">Fecha Retiro (si Retirado/Excluido)</label>
+        <input id="fechaRetiro" type="date" formControlName="fechaRetiro" />
+      </div>
+
+      <div class="field">
+        <label for="periodosVigencia">Períodos de vigencia</label>
+        <input id="periodosVigencia" type="number" formControlName="periodosVigencia" min="0" />
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" type="submit" [disabled]="guardando() || form.invalid">
+        Guardar
+      </button>
+      <button class="btn ghost" type="button" (click)="cancelar()">Cancelar</button>
+    </div>
+
+    <div class="msg error" *ngIf="error()">{{ error() }}</div>
+  </form>
+</div>

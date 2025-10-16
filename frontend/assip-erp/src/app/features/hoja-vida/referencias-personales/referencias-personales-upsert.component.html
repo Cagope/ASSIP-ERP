@@ -1,0 +1,59 @@
+<div class="hdr">
+  <div></div>
+  <div>
+    <h2>{{ titulo() }}</h2>
+    <div class="sub">Afiliado : <b>{{ afiliadoNombre() || '—' }}</b></div>
+  </div>
+  <div></div>
+</div>
+
+<div *ngIf="loading()" class="st">Cargando…</div>
+<div *ngIf="!loading() && errorMsg()" class="st st--err">{{ errorMsg() }}</div>
+
+<form *ngIf="!loading()" [formGroup]="form" (ngSubmit)="save()" class="frm">
+  <div class="grid">
+    <div class="col col-2">
+      <label>Nombre *</label>
+      <input type="text" formControlName="nombre_referencia_personal" maxlength="100" />
+      <div class="err" *ngIf="form.controls['nombre_referencia_personal'].touched && form.controls['nombre_referencia_personal'].invalid">
+        Obligatorio (máx. 100).
+      </div>
+    </div>
+
+    <div class="col col-2">
+      <label>Dirección *</label>
+      <input type="text" formControlName="direccion_referencia_personal" maxlength="100" />
+      <div class="err" *ngIf="form.controls['direccion_referencia_personal'].touched && form.controls['direccion_referencia_personal'].invalid">
+        Obligatorio (máx. 100).
+      </div>
+    </div>
+
+    <!-- Depto/Ciudad (el componente hijo maneja su UX; el form tiene el validador de grupo) -->
+    <app-depto-ciudad [deptoCtrl]="depCtrl" [ciudadCtrl]="ciuCtrl"></app-depto-ciudad>
+
+    <div class="break"></div>
+
+    <div class="col">
+      <label>Teléfono (7 dígitos)</label>
+      <input type="text" formControlName="telefono_referencia_personal" placeholder="#######" />
+      <div class="err" *ngIf="form.controls['telefono_referencia_personal'].touched && form.controls['telefono_referencia_personal'].invalid">
+        Debe tener 7 dígitos.
+      </div>
+    </div>
+
+    <div class="col">
+      <label>Celular (10 dígitos)</label>
+      <input type="text" formControlName="celular_referencia_personal" placeholder="##########" />
+      <div class="err" *ngIf="form.controls['celular_referencia_personal'].touched && form.controls['celular_referencia_personal'].invalid">
+        Debe tener 10 dígitos.
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button type="submit" class="btn btn--primary" [disabled]="guardando()">
+      {{ tieneRegistro() ? 'Guardar' : 'Crear' }}
+    </button>
+    <button type="button" class="btn--ghost" (click)="goBack()" [disabled]="guardando()">Cancelar</button>
+  </div>
+</form>

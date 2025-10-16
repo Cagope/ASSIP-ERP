@@ -1,0 +1,112 @@
+<!-- ======= SELECTOR ======= -->
+<div *ngIf="!idDatosPersonales(); else detalleView">
+  <div class="hdr">
+    <div>
+      <h2>Permisos especiales</h2>
+      <input class="search" type="text" placeholder="Buscar por documento o nombre…" (input)="onSearch($event)" />
+    </div>
+    <div class="actions" style="display:flex; gap:6px; align-items:center;">
+      <!-- Imprimir (principal) -->
+      <a class="btn print" [routerLink]="['/hoja-vida/permisos-especiales/print']">Imprimir</a>
+      <!-- Exportar XLSX (principal) -->
+      <app-permisos-especiales-export-button></app-permisos-especiales-export-button>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="st">Cargando…</div>
+  <div *ngIf="!loading() && error()" class="st st--err">{{ error() }}</div>
+
+  <table *ngIf="!loading() && !error()" class="tbl">
+    <thead><tr><th>ID</th><th>Documento</th><th>Nombre</th><th class="actions">Acciones</th></tr></thead>
+    <tbody>
+    <tr *ngFor="let p of filteredPersonas()">
+      <td>{{ personaId(p) }}</td>
+      <td>{{ p.documento }}</td>
+      <td>
+        {{ p.nombres || (p.primerNombre + (p.segundoNombre ? ' ' + p.segundoNombre : '')) }}
+        {{ p.apellidos || (p.primerApellido + (p.segundoApellido ? ' ' + p.segundoApellido : '')) }}
+      </td>
+      <td class="actions">
+        <ng-container [ngSwitch]="estadoPersona(personaId(p))">
+          <button *ngSwitchCase="'loading'" class="btn btn--ghost" disabled>Cargando…</button>
+          <!-- Cambiado a "Gestionar" -->
+          <button *ngSwitchCase="'yes'" class="btn sm success" (click)="irDetalle(p)">Gestionar</button>
+          <button *ngSwitchCase="'no'" class="btn--new" (click)="irNueva(p)">+ Nueva</button>
+          <button *ngSwitchDefault class="btn btn--ghost" disabled>—</button>
+        </ng-container>
+      </td>
+    </tr>
+    <tr *ngIf="filteredPersonas().length === 0">
+      <td colspan="4" class="empty">Sin resultados.</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ======= DETALLE (1:1) ======= -->
+<ng-template #detalleView>
+  <div class="hdr">
+    <div>
+      <h2>Permiso especial</h2>
+      <div class="sub">Afiliado : <b>{{ afiliadoNombre() || '—' }}</b></div>
+    </div>
+    <div class="actions" style="display:flex; gap:6px; align-items:center;">
+      <!-- En detalle NO hay Imprimir ni Exportar -->
+      <a class="btn--new" *ngIf="!item()" [routerLink]="['/hoja-vida/permisos-especiales', idDatosPersonales(), 'new']">+ Nueva</a>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="st">Cargando…</div>
+  <div *ngIf="!loading() && error()" class="st st--err">{{ error() }}</div>
+
+  <table *ngIf="!loading() && !error()" class="tbl">
+    <thead>
+    <tr>
+      <th>Recibe llamadas</th>
+      <th>Recibe SMS</th>
+      <th>Recibe emails</th>
+      <th>Recibe cartas</th>
+      <th>Recibe redes sociales</th>
+      <th class="actions">Acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngIf="item(); else noRow">
+      <td>
+        <span [class.badge-yes]="item()?.recibe_llamadas" [class.badge-no]="!item()?.recibe_llamadas">
+          {{ item()?.recibe_llamadas ? '✓ Sí' : '— No' }}
+        </span>
+      </td>
+      <td>
+        <span [class.badge-yes]="item()?.recibe_msm" [class.badge-no]="!item()?.recibe_msm">
+          {{ item()?.recibe_msm ? '✓ Sí' : '— No' }}
+        </span>
+      </td>
+      <td>
+        <span [class.badge-yes]="item()?.recibe_emails" [class.badge-no]="!item()?.recibe_emails">
+          {{ item()?.recibe_emails ? '✓ Sí' : '— No' }}
+        </span>
+      </td>
+      <td>
+        <span [class.badge-yes]="item()?.recibe_cartas" [class.badge-no]="!item()?.recibe_cartas">
+          {{ item()?.recibe_cartas ? '✓ Sí' : '— No' }}
+        </span>
+      </td>
+      <td>
+        <span [class.badge-yes]="item()?.recibe_redes_sociales" [class.badge-no]="!item()?.recibe_redes_sociales">
+          {{ item()?.recibe_redes_sociales ? '✓ Sí' : '— No' }}
+        </span>
+      </td>
+      <td class="actions">
+        <a class="btn sm success" [routerLink]="['/hoja-vida/permisos-especiales', idDatosPersonales(), 'edit', idPermiso()]">Editar</a>
+        <button class="btn sm danger" (click)="onDelete()">Eliminar</button>
+      </td>
+    </tr>
+    <ng-template #noRow>
+      <tr><td colspan="6" class="empty">No hay registro.</td></tr>
+    </ng-template>
+    </tbody>
+  </table>
+
+  <div class="actions"><button class="btn" (click)="goBackToSelector()">Regresar</button></div>
+</ng-template>

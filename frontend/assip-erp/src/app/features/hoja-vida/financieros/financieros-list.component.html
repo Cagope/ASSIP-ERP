@@ -1,0 +1,110 @@
+<!-- SELECTOR -->
+<div *ngIf="!idDatosPersonales(); else detalleView">
+  <div class="hdr">
+    <div>
+      <h2>Financieros</h2>
+      <input
+        class="search"
+        type="text"
+        placeholder="Buscar por documento o nombre…"
+        (input)="onSearch($event)" />
+    </div>
+
+    <div class="actions" style="display:flex; gap:6px; align-items:center;">
+      <a class="btn btn--print" [routerLink]="['/hoja-vida/financieros/print']">Imprimir</a>
+      <app-financieros-export-button [q]="term()"></app-financieros-export-button>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="st">Cargando…</div>
+  <div *ngIf="!loading() && error()" class="st st--err">{{ error() }}</div>
+
+  <table *ngIf="!loading() && !error()" class="tbl">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Documento</th>
+      <th>Nombre</th>
+      <th class="actions">Acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let p of filteredPersonas()">
+      <td>{{ personaId(p) }}</td>
+      <td>{{ p.documento }}</td>
+      <td>
+        {{ p.nombres || (p.primerNombre + (p.segundoNombre ? ' ' + p.segundoNombre : '')) }}
+        {{ p.apellidos || (p.primerApellido + (p.segundoApellido ? ' ' + p.segundoApellido : '')) }}
+      </td>
+      <td class="actions">
+        <ng-container [ngSwitch]="estadoPersona(personaId(p))">
+          <button *ngSwitchCase="'loading'" class="btn btn--ghost" disabled>Cargando…</button>
+
+          <!-- Gestionar: ahora va DIRECTO al upsert en /:id/edit -->
+          <a *ngSwitchCase="'yes'"
+             class="btn sm success"
+             [routerLink]="['/hoja-vida/financieros', personaId(p), 'edit']">
+            Gestionar
+          </a>
+
+          <!-- Nueva: upsert en /:id/new -->
+          <a *ngSwitchCase="'no'"
+             class="btn--new"
+             [routerLink]="['/hoja-vida/financieros', personaId(p), 'new']">
+            + Nueva
+          </a>
+
+          <button *ngSwitchDefault class="btn btn--ghost" disabled>—</button>
+        </ng-container>
+      </td>
+    </tr>
+    <tr *ngIf="filteredPersonas().length === 0">
+      <td colspan="4" class="empty">Sin resultados.</td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- DETALLE 1:1 (se mantiene tu vista read-only si navegas a /financieros/:idDatosPersonales) -->
+<ng-template #detalleView>
+  <div class="hdr">
+    <div>
+      <h2>Financiero</h2>
+      <div class="sub">Afiliado : <b>{{ afiliadoNombre() || '—' }}</b></div>
+    </div>
+    <div class="actions" style="display:flex; gap:6px; align-items:center;">
+      <a class="btn"
+         [routerLink]="['/hoja-vida/financieros/print']"
+         [queryParams]="{ idDatosPersonales: idDatosPersonales() }"
+         target="_blank">Imprimir</a>
+
+      <app-financieros-export-button
+        *ngIf="idDatosPersonales()"
+        [idDatosPersonal]="idDatosPersonales()!"
+        [afiliadoNombre]="afiliadoNombre() || undefined">
+      </app-financieros-export-button>
+
+      <!-- Si no hay registro, ofrecer crear -->
+      <a class="btn--new"
+         *ngIf="!item()"
+         [routerLink]="['/hoja-vida/financieros', idDatosPersonales(), 'new']">+ Nueva</a>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="st">Cargando…</div>
+  <div *ngIf="!loading() && error()" class="st st--err">{{ error() }}</div>
+
+  <div *ngIf="!loading() && !error()">
+    <!-- (tu tabla de lectura) -->
+
+    <div class="actions" *ngIf="item()">
+      <!-- Editar también va al mismo upsert -->
+      <a class="btn sm success" [routerLink]="['/hoja-vida/financieros', idDatosPersonales(), 'edit']">Editar</a>
+      <button class="btn sm dangert" (click)="onDelete()">Eliminar</button>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn" (click)="goBackToSelector()">Regresar</button>
+    </div>
+  </div>
+</ng-template>

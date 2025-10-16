@@ -1,0 +1,87 @@
+<!-- Ocultar .no-print en impresión -->
+<style>
+  @media print { .no-print { display: none !important; } }
+</style>
+
+<div class="print-container">
+  <div class="print-actions no-print">
+    <a class="btn" [routerLink]="['/hoja-vida/ubicaciones']">Regresar</a>
+    <button class="btn btn--print" (click)="imprimir()">Imprimir</button>
+  </div>
+
+  <header class="print-header">
+    <img class="logo" [src]="logoUrl()" alt="Logo empresa" />
+    <div class="titles">
+      <div class="empresa-sigla" *ngIf="empresaSigla()">{{ empresaSigla() }}</div>
+      <div class="empresa-nit" *ngIf="empresaNit()">NIT: {{ empresaNit() }}</div>
+      <h1>Referencias de ubicación (cortes por persona)</h1>
+      <div class="meta"><span class="date">{{ nowStr() }}</span></div>
+    </div>
+  </header>
+
+  <hr class="hr-print" />
+
+  <div *ngIf="loading()" class="loading">Cargando…</div>
+  <div *ngIf="!loading() && bloques().length === 0" class="empty-global">
+    No hay personas con referencia de ubicación registrada.
+  </div>
+
+  <section *ngFor="let b of bloques()" class="person-block">
+    <div class="cut-label">Encabezado del corte:</div>
+    <div class="person-header">
+      <div class="person-name">{{ personaNombre(b.persona) }}</div>
+      <div class="person-doc">{{ personaDocumento(b.persona) }}</div>
+    </div>
+
+    <div class="cut-label">Cuerpo del corte:</div>
+    <table class="print-table">
+      <thead>
+      <tr>
+        <th>Dirección</th>
+        <th>Barrio</th>
+        <th style="width:110px;">Teléfono</th>
+        <th style="width:130px;">Celular 1</th>
+        <th style="width:130px;">Celular 2</th>
+        <th>Correo</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td>{{ b.ubicacion.direccion || '' }}</td>
+        <td>{{ b.ubicacion.barrio || '' }}</td>
+        <td class="code">{{ b.ubicacion.telefono || '' }}</td>
+        <td class="code">{{ b.ubicacion.celular_uno || '' }}</td>
+        <td class="code">{{ b.ubicacion.celular_dos || '' }}</td>
+        <td>{{ b.ubicacion.correo || '' }}</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <table class="print-table" style="margin-top:6px;">
+      <thead>
+      <tr>
+        <th>País</th>
+        <th>Departamento</th>
+        <th>Ciudad</th>
+        <th>Zona</th>
+        <th>Sub-zona</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td>{{ nomPais(b.ubicacion.id_pais) }}</td>
+        <td>{{ nomDpto(b.ubicacion.id_departamento) }}</td>
+        <td>{{ nomCiudad(b.ubicacion.id_ciudad) }}</td>
+        <td>{{ nomZonaFromSub(b.ubicacion.id_sub_zona) }}</td>
+        <td>{{ nomSubZona(b.ubicacion.id_sub_zona) }}</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <hr class="section-hr" />
+  </section>
+</div>
+
+<div id="pageFooter" class="page-footer no-screen">
+  <span class="page-text"></span>
+</div>

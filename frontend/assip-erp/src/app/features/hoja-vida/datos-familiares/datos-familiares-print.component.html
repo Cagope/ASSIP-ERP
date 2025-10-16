@@ -1,0 +1,77 @@
+<!-- Asegura ocultar .no-print en impresión, incluso si el SCSS del componente no aplica -->
+<style>
+  @media print { .no-print { display: none !important; } }
+</style>
+
+<div class="print-container">
+  <div class="print-actions no-print">
+    <a class="btn" [routerLink]="['/hoja-vida/datos-familiares']">Regresar</a>
+    <button class="btn btn--print" (click)="imprimir()">Imprimir</button>
+  </div>
+
+  <header class="print-header">
+    <img class="logo" [src]="logoUrl()" alt="Logo empresa" />
+    <div class="titles">
+      <div class="empresa-sigla" *ngIf="empresaSigla()">{{ empresaSigla() }}</div>
+      <div class="empresa-nit" *ngIf="empresaNit()">NIT: {{ empresaNit() }}</div>
+      <h1>Datos familiares (cortes por persona)</h1>
+      <div class="meta">
+        <span class="date">{{ nowStr() }}</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Línea debajo del título -->
+  <hr class="hr-print" />
+
+  <!-- Estado global -->
+  <div *ngIf="loading()" class="loading">Cargando…</div>
+  <div *ngIf="!loading() && bloques().length === 0" class="empty-global">
+    No hay personas con datos familiares vinculados.
+  </div>
+
+  <!-- Bloques por persona -->
+  <section *ngFor="let b of bloques()" class="person-block">
+    <div class="cut-label">Encabezado del corte:</div>
+    <div class="person-header">
+      <div class="person-name">{{ personaNombre(b.persona) }}</div>
+      <div class="person-doc">{{ personaDocumento(b.persona) }}</div>
+    </div>
+
+    <div class="cut-label">Cuerpo del corte:</div>
+    <table class="print-table">
+      <thead>
+      <tr>
+        <th style="width:130px;">Parentesco</th>
+        <th>Nombre</th>
+        <th style="width:150px;">Documento</th>
+        <th style="width:105px;">F. Nac.</th>
+        <th style="width:110px;">Teléfono</th>
+        <th style="width:130px;">Celular</th>
+        <th>Dirección</th>
+        <th style="width:70px;">Ref.</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let f of b.familiares">
+        <td>{{ nombreParentescoFromItem(f) }}</td>
+        <td>{{ nom(f) }}</td>
+        <td class="code">{{ doc(f) }}</td>
+        <td>{{ f.fecha_nacimiento || '' }}</td>
+        <td class="code">{{ tel(f) }}</td>
+        <td class="code">{{ cel(f) }}</td>
+        <td>{{ dir(f) }}</td>
+        <td>{{ ref(f) ? 'Sí' : '' }}</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <!-- Separador entre cortes -->
+    <hr class="section-hr" />
+  </section>
+</div>
+
+<!-- Pie de página (n/m) -->
+<div id="pageFooter" class="page-footer no-screen">
+  <span class="page-text"></span>
+</div>

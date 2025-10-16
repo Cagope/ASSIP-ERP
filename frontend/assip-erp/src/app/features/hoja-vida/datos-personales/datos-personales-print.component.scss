@@ -1,0 +1,162 @@
+/* CONTENEDOR Y ENCABEZADO */
+.print-container {
+  max-width: 860px;         /* más angosto */
+  margin: 0 auto;
+  padding: 8px 10px;        /* menos padding */
+  background: #fff;
+  color: #111;
+  font-size: 12px;          /* base más pequeña */
+  line-height: 1.2;         /* más compacto */
+}
+
+.print-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-bottom: 6px;
+}
+
+.print-header {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 0;         /* el <hr> maneja el espaciado */
+
+  .logo { width: 90px; height: auto; } /* logo más pequeño */
+
+  .titles {
+    flex: 1;
+
+    .empresa-sigla {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .3px;
+      margin-bottom: 2px;
+      line-height: 1.1;
+    }
+
+    .empresa-nit {
+      font-size: 10px;
+      color: #444;
+      margin-bottom: 3px;
+      line-height: 1.1;
+    }
+
+    h1 { margin: 0 0 2px; font-size: 16px; line-height: 1.1; }
+
+    .meta { font-size: 10px; color: #555; line-height: 1.1; }
+  }
+}
+
+/* Línea clara y fiable en impresión */
+.hr-print {
+  border: 0;
+  border-top: 1px solid #000;
+  margin: 6px 0 8px;
+}
+
+/* TABLA ULTRA COMPACTA */
+.print-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;   /* evita desbordes y mejora ajuste en ancho */
+  font-size: 11px;
+  line-height: 1.15;
+
+  th, td {
+    border: 0;
+    padding: 4px 6px;    /* menos padding en celdas */
+    text-align: left;
+    vertical-align: top;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  thead th {
+    font-weight: 600;
+    white-space: nowrap; /* títulos en una línea si se puede */
+  }
+
+  thead tr {
+    border-bottom: 1px solid #e5e7eb; /* única línea bajo títulos */
+  }
+
+  /* cuerpo sin líneas para máxima compactación */
+  tbody tr {}
+
+  /* celdas con códigos/identificadores monoespaciadas */
+  .code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-size: 10px;
+  }
+
+  .empty { text-align: center; color: #777; padding: 10px 0; font-size: 11px; }
+}
+
+/* BOTONES (solo en pantalla) - unificados */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;           /* unificado */
+  padding: 0 10px;        /* unificado */
+  border: 1px solid #ccc;
+  border-radius: 6px;     /* igual en ambos */
+  background: #fafafa;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;         /* uniforma alto visual */
+
+  &.primary {
+    background: #0d6efd;
+    color: #fff;
+    border-color: #0d6efd;
+  }
+}
+
+/* Footer n/m y visibilidad */
+.page-footer { display: none; } /* oculto en pantalla */
+.no-print { display: block; }
+.no-screen { display: none; }
+
+@media print {
+  :root { --total-pages: "…"; }
+
+  /* Márgenes y tamaño de página */
+  @page { size: Letter; margin: 10mm 8mm; }
+
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: #fff; }
+
+  /* Evitar cortes feos en encabezados */
+  thead { display: table-header-group; }
+  tr, img { page-break-inside: avoid; }
+
+  /* Todavía más compacto en impresión real */
+  .print-container { padding: 4px 6px; font-size: 11px; line-height: 1.15; }
+  .print-table { font-size: 10.5px; }
+  .print-header .titles h1 { font-size: 14px; }
+  .print-header .logo { width: 80px; }
+
+  /* Reservar espacio para el footer fijo y alinearlo a la derecha */
+  .print-container { padding-bottom: 20mm; }
+  .page-footer {
+    display: block;
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 14mm;
+    font-size: 10.5px;
+    text-align: right;
+    padding-right: 8mm;
+  }
+
+  /* Dinámico n/m (si el navegador soporta counter(page)) */
+  .page-footer:not(.static) .page-text::after {
+    content: "Página " counter(page) " / " var(--total-pages);
+  }
+
+  /* Estático 1/1 (fallback) */
+  .page-footer.static .page-text::after {
+    content: attr(data-content);
+  }
+}
