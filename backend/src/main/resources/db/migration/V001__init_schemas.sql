@@ -1,0 +1,16 @@
+-- ==========================================
+-- ERP ASSIP SOLIDARIA Y FINANCIERA
+-- MIGRACIÓN V001 — CREACIÓN DE ESQUEMAS BASE
+-- Fecha: 22/10/2025
+-- ==========================================
+
+CREATE SCHEMA IF NOT EXISTS seguridad;
+CREATE SCHEMA IF NOT EXISTS general;
+CREATE SCHEMA IF NOT EXISTS hoja_vida;
+CREATE SCHEMA IF NOT EXISTS contabilidad;
+CREATE SCHEMA IF NOT EXISTS depositos;
+CREATE SCHEMA IF NOT EXISTS cartera;
+CREATE SCHEMA IF NOT EXISTS activos_fijos;
+CREATE SCHEMA IF NOT EXISTS nomina;
+CREATE SCHEMA IF NOT EXISTS tesoreria;
+CREATE SCHEMA IF NOT EXISTS reporting;

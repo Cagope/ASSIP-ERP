@@ -1,0 +1,115 @@
+# REFERENCIA OFICIAL ASSIP-ERP
+**Fecha de creación / actualización:** 21/10/2025  
+**Versión:** 1.0  
+**Frase clave para retomar:** RETOMAR ASSIP-ERP
+
+---
+
+## 1. Propósito
+Este archivo sirve como punto de referencia único para:
+- Retomar conversaciones sobre el proyecto ASSIP-ERP.
+- Proporcionar contexto completo sobre arquitectura, módulos, esquemas y reglas.
+- Garantizar que cualquier desarrollador, analista o IA tenga claridad sin ambigüedad.
+
+---
+
+## 2. Arquitectura General
+- **Backend:** Java 17, Spring Boot.
+- **Frontend:** Angular Standalone (20+), servicios REST.
+- **Base de datos:** PostgreSQL, con esquemas independientes por dominio.
+- **Comunicación:** API REST JSON, autenticación JWT.
+- **Entornos:** DEV (desarrollo local), PROD (producción segura).
+
+---
+
+## 3. Esquemas y Módulos
+| Módulo / Esquema | Función principal |
+|-----------------|-----------------|
+| seguridad       | Usuarios, roles, permisos, sesiones, auditoría |
+| general         | Agencias, zonas, subzonas, parámetros, empresa |
+| hoja_vida       | Datos personales, familiares, laborales, SARLAFT, referencias |
+| contabilidad    | Catálogo de cuentas, comprobantes, tipos, auxiliares |
+| depositos       | Aportes, ahorros, movimientos, extractos |
+| cdats           | Certificados de depósito a término fijo, tasas |
+| cartera         | Créditos, abonos, pagos, garantías |
+| activos_fijos   | Bienes, depreciación, ubicación |
+| nomina          | Empleados, pagos, deducciones |
+| tesoreria       | Bancos, egresos, cuentas por pagar/cobrar |
+| tarjetas        | Tarjetas débito/crédito, switch transaccional |
+| reporting       | Metadatos, vistas, control de informes |
+
+---
+
+## 4. Seguridad y Control de Acceso
+- **Autenticación:** JWT, con información de usuario, rol y agencia.
+- **Roles y alcance por módulo:**
+  - Contabilidad: usuario solo registra transacciones de su agencia.
+  - Depósitos / Cartera: puede recibir transacciones de otras agencias.
+  - Hoja de vida: se puede consultar/actualizar en cualquier agencia, registro de quién y qué modificó.
+- **Contraseñas:** Hashing con BCrypt.
+- **Auditoría de seguridad:** Todos los eventos registrados con usuario, fecha, IP y User-Agent.
+
+---
+
+## 5. Gestión Multi-Agencia
+- Cada entidad registra el código de agencia.
+- Jerarquía:
+  - Agencia Central (principal)
+  - Agencias sede A, B, C, etc.
+- Permite consolidar información o filtrar por agencia.
+- Ejemplo: balance contable unificado, listado de afiliados de todas las agencias.
+
+---
+
+## 6. Auditoría y Trazabilidad
+- Campos estándar:
+  - `usuario_creacion`, `usuario_actualizacion`
+  - `fecha_creacion`, `fecha_actualizacion`
+  - `agencia`, `origen` (IP, User-Agent)
+- Eventos almacenados en `seguridad.log_evento`
+- Consultables desde el módulo de reporting.
+
+---
+
+## 7. Reporting Dinámico
+- Los usuarios pueden construir listados e informes seleccionando campos disponibles.
+- Metadatos se registran automáticamente (tablas, campos, relaciones).
+- No requiere cambios de backend para agregar nuevos campos a los informes.
+
+---
+
+## 8. Filosofía y Reglas de Desarrollo
+- Prioridad: claridad, estabilidad, mantenibilidad.
+- Fases de trabajo: `[ANÁLISIS]`, `[DISEÑO]`, `[IMPLEMENTAR]`.
+- Antes de aplicar cambios:
+  1. Crear copia de seguridad.
+  2. Sincronizar BD con Flyway.
+  3. Verificar rutas, nombres y versiones.
+- Un tema por hilo y documentación previa antes de código.
+
+---
+
+## 9. Protocolo de Comunicación
+- Uso de la frase clave: `RETOMAR ASSIP-ERP` para retomar cualquier conversación o tarea.
+- Documentar toda decisión y cambio antes de implementarlo.
+- Mantener registro de versiones de backend, frontend y BD.
+
+---
+
+## 10. Escalabilidad y Futuras Integraciones
+- Modularidad permite:
+  - Nuevos esquemas y microservicios.
+  - API pública para integraciones externas.
+  - Switch transaccional de tarjetas.
+  - Migración desde sistemas VB6 con JSON y procedimientos almacenados.
+  - Adopción de contenedores Docker y servicios cloud.
+
+---
+
+## 11. Notas Adicionales
+- Toda documentación futura, ya sea frontend, backend o BD, debe referenciar este archivo como **fuente de contexto oficial**.
+- Las nuevas funcionalidades o módulos deben registrar claramente su relación con los esquemas existentes y la seguridad.
+
+---
+
+**ERP ASSIP SOLIDARIA Y FINANCIERA — REFERENCIA OFICIAL ASSIP‑ERP ©2025**
