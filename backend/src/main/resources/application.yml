@@ -11,10 +11,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: true
+    show-sql: false        # 👈 oculta consultas SQL de Hibernate
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false   # 👈 evita formato multilínea
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   flyway:
@@ -22,7 +22,22 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
+    # 👇 Control total de migraciones dentro del esquema seguridad
+    schemas: seguridad
+    default-schema: seguridad
+    table: flyway_schema_history
+    validate-on-migrate: true
+
 server:
   port: 8080
   servlet:
     context-path: /api/v1
+
+logging:
+  level:
+    root: info                        # 👈 muestra solo información esencial
+    org.hibernate.SQL: off            # 👈 oculta SQL
+    org.hibernate.type.descriptor.sql: off
+    org.hibernate.orm.jdbc.bind: off
+    org.springframework.orm.jpa: warn
+    org.springframework.jdbc.core: warn
