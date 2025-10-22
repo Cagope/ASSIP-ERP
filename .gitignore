@@ -1,0 +1,41 @@
+### === GENERAL === ###
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+### === MAVEN / JAVA / SPRING BOOT === ###
+/target/
+/out/
+/build/
+*.class
+*.jar
+*.war
+*.ear
+
+### === INTELLIJ IDEA / ECLIPSE === ###
+.idea/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+
+### === ANGULAR / NODE === ###
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.vscode/
+
+### === OPERATING SYSTEM === ###
+ehthumbs.db
+Icon?
+desktop.ini
+
+### === ENVIRONMENT FILES === ###
+.env
+.env.*
