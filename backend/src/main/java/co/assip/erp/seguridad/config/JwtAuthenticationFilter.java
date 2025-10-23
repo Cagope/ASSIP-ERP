@@ -1,7 +1,7 @@
 package co.assip.erp.seguridad.config;
 
-import co.assip.erp.seguridad.service.JwtService;
 import co.assip.erp.seguridad.repository.UsuarioRepository;
+import co.assip.erp.seguridad.service.JwtService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,9 +19,8 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Filtro de autenticación JWT.
- * Intercepta todas las solicitudes HTTP y valida el token JWT en el encabezado Authorization.
- * Excluye automáticamente las rutas públicas: /api/v1/auth/**
+ * 🔐 Filtro de autenticación JWT.
+ * Valida el token en cada petición y establece el usuario autenticado en el contexto.
  */
 @Component
 @RequiredArgsConstructor
@@ -36,24 +35,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 🔹 Excluir rutas públicas (login y register)
-        String path = request.getServletPath();
+        final String path = request.getServletPath();
+
+        // ✅ Rutas públicas (no requieren autenticación)
         if (path.startsWith("/api/v1/auth/") || path.startsWith("/error")) {
             filterChain.doFilter(request, response);
             return;
         }
 
         final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String username;
-
-        // 🔹 Si no hay encabezado Authorization o no empieza con Bearer, continúa sin validar
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwt = authHeader.substring(7);
+        final String jwt = authHeader.substring(7);
+        final String username;
 
         try {
             username = jwtService.extraerUsername(jwt);
@@ -67,20 +64,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 🔹 Si el usuario existe y no está autenticado aún, establecer autenticación en contexto
+        // ✅ Si el usuario no está autenticado aún
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             var usuarioOpt = usuarioRepository.findByUsername(username);
+
             if (usuarioOpt.isPresent() && jwtService.validarToken(jwt)) {
-                var authorities = List.of(new SimpleGrantedAuthority("ROLE_USER")); // ✅ Autoridad básica
+
+                // 🔸 Rol básico o dinámico (según la BD)
+                var rol = usuarioOpt.get().getRol() != null
+                        ? usuarioOpt.get().getRol().getNombre()
+                        : "USER";
+
+                var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + rol.toUpperCase()));
+
                 var authToken = new UsernamePasswordAuthenticationToken(
                         usuarioOpt.get(), null, authorities
                 );
+
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
 
-        // 🔹 Continuar con la cadena de filtros
         filterChain.doFilter(request, response);
     }
 }

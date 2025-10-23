@@ -1,0 +1,18 @@
+<div class="hv-layout">
+  <!-- menú interno -->
+  <aside class="hv-sidebar">
+    <h2>🧾 Hoja de Vida</h2>
+    <ul>
+      <li><a routerLink="datos-personales" routerLinkActive="active">👤 Datos Personales</a></li>
+      <li><a routerLink="ubicaciones" routerLinkActive="active">🏠 Ubicaciones</a></li>
+      <li><a routerLink="economicos" routerLinkActive="active">💰 Datos Económicos</a></li>
+      <li><a routerLink="referencias" routerLinkActive="active">📞 Referencias</a></li>
+      <li><a routerLink="familiares" routerLinkActive="active">👪 Familiares</a></li>
+    </ul>
+  </aside>
+
+  <!-- área de trabajo -->
+  <section class="hv-content">
+    <router-outlet></router-outlet>
+  </section>
+</div>

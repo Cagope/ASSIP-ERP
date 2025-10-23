@@ -22,8 +22,11 @@ public class Permiso {
     @Column(name = "descripcion")
     private String descripcion;
 
-    // 🔗 Relación con Rol
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Column(name = "activo")
+    private Boolean activo = true;
+
+    // 🔗 Relación con Rol (EAGER para que se cargue siempre)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_rol", referencedColumnName = "id_rol")
     private Rol rol;
 }

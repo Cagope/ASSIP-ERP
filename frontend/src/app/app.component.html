@@ -1,0 +1,22 @@
+<header class="app-header">
+  <div class="header-left">
+    <img src="assets/logo_empresa.jpeg" alt="Logo Coopvalle" class="logo" />
+    <h1>COOPVALLE ERP</h1>
+  </div>
+
+  <div class="header-right">
+    <span class="username">👤 {{ username() }}</span>
+    <button class="logout-btn" (click)="logout()">Cerrar sesión</button>
+  </div>
+</header>
+
+<main class="app-main">
+  <nav class="sidebar">
+    <ul>
+      <li><a routerLink="/hoja-vida/datos-personales" routerLinkActive="active">Datos Personales</a></li>
+      <li><a routerLink="/hoja-vida/ubicaciones" routerLinkActive="active">Ubicaciones</a></li>
+      <li><a routerLink="/hoja-vida/financieros" routerLinkActive="active">Financieros</a></li>
+      <li><a routerLink="/hoja-vida/sarlaft" routerLinkActive="active">SARLAFT</a></li>
+    </ul>
+  </nav>
+</main>

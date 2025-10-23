@@ -3,6 +3,7 @@ package co.assip.erp.seguridad.web;
 import co.assip.erp.seguridad.domain.Usuario;
 import co.assip.erp.seguridad.service.UsuarioService;
 import co.assip.erp.seguridad.service.LogEventoService;
+import co.assip.erp.seguridad.service.AccessValidator;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,22 +19,30 @@ public class UsuarioController {
 
     private final UsuarioService usuarioService;
     private final LogEventoService logEventoService; // ✅ Auditoría
+    private final AccessValidator accessValidator;   // ✅ Validación de permisos
 
     // ✅ Listar todos los usuarios
     @GetMapping
-    public ResponseEntity<List<Usuario>> listar() {
+    public ResponseEntity<List<Usuario>> listar(HttpServletRequest req) {
+        Usuario usuarioActual = usuarioService.getUsuarioActual(req);
+        accessValidator.validarAcceso(usuarioActual, "USUARIOS_VIEW");
         return ResponseEntity.ok(usuarioService.listar());
     }
 
     // ✅ Buscar usuario por username
     @GetMapping("/{username}")
-    public ResponseEntity<Optional<Usuario>> buscar(@PathVariable String username) {
+    public ResponseEntity<Optional<Usuario>> buscar(@PathVariable String username, HttpServletRequest req) {
+        Usuario usuarioActual = usuarioService.getUsuarioActual(req);
+        accessValidator.validarAcceso(usuarioActual, "USUARIOS_VIEW");
         return ResponseEntity.ok(usuarioService.buscarPorUsername(username));
     }
 
     // ✅ Crear o actualizar usuario
     @PostMapping
     public ResponseEntity<Usuario> guardar(@RequestBody Usuario usuario, HttpServletRequest req) {
+        Usuario usuarioActual = usuarioService.getUsuarioActual(req);
+        accessValidator.validarAcceso(usuarioActual, "USUARIOS_EDIT");
+
         Usuario guardado = usuarioService.guardar(usuario);
 
         // 🟡 Determinar tipo de acción
@@ -57,6 +66,9 @@ public class UsuarioController {
     // ✅ Eliminar usuario
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id, HttpServletRequest req) {
+        Usuario usuarioActual = usuarioService.getUsuarioActual(req);
+        accessValidator.validarAcceso(usuarioActual, "USUARIOS_EDIT");
+
         usuarioService.eliminar(id);
 
         // 🔴 Registrar eliminación
@@ -73,7 +85,9 @@ public class UsuarioController {
 
     // 🔹 Endpoint de prueba rápida
     @GetMapping("/ping")
-    public ResponseEntity<String> ping() {
+    public ResponseEntity<String> ping(HttpServletRequest req) {
+        Usuario usuarioActual = usuarioService.getUsuarioActual(req);
+        accessValidator.validarAcceso(usuarioActual, "USUARIOS_VIEW");
         return ResponseEntity.ok("✅ Token válido y acceso autorizado");
     }
 }

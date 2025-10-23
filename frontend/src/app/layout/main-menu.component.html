@@ -1,0 +1,21 @@
+<aside class="menu">
+  <!-- 🔹 Menú principal (sin encabezado) -->
+  <nav class="menu-content">
+    <ul>
+      <li *ngFor="let section of menu">
+        <h3 class="menu-section">{{ section.title }}</h3>
+        <ul class="submenu">
+          <li *ngFor="let item of section.items">
+            <a
+              routerLink="{{ item.route }}"
+              routerLinkActive="active"
+              class="menu-item"
+            >
+              {{ item.label }}
+            </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </nav>
+</aside>

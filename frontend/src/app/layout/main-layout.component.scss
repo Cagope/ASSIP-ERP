@@ -1,0 +1,97 @@
+/* ============= 🌐 LAYOUT PRINCIPAL ============= */
+.layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f9fafb;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* ---------- 🟩 Encabezado superior ---------- */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(to right, #1e7e34, #facc15);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.header .left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header .logo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.header .title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.header .right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ---------- ✨ Mejora tipográfica ---------- */
+.header .user {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  opacity: 0.95;
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+}
+
+.header .logout {
+  background: #ffffff;
+  color: #166534;
+  border: 1px solid #22c55e;
+  border-radius: 6px;
+  padding: 0.35rem 0.9rem;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease-in-out;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    background: #22c55e;
+    color: #fff;
+    border-color: #15803d;
+  }
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+/* ---------- 📑 Cuerpo (menú lateral + contenido) ---------- */
+.main {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  flex: 1;
+  overflow: hidden;
+}
+
+.sidebar {
+  background: #ffffff;
+  border-right: 1px solid #e5e7eb;
+  overflow-y: auto;
+  padding: 1rem 0.75rem;
+}
+
+.content {
+  background: #f9fafb;
+  overflow-y: auto;
+  padding: 1.5rem;
+}

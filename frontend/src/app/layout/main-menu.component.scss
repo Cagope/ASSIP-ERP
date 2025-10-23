@@ -1,0 +1,107 @@
+.menu {
+  width: 270px;
+  height: 100vh;
+  background: #ffffff; /* 🔸 Fondo blanco limpio */
+  color: #222; /* texto gris oscuro legible */
+  display: flex;
+  flex-direction: column;
+  font-family: 'Poppins', sans-serif;
+  overflow-y: auto;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05); /* sombra sutil */
+}
+
+/* 🔹 Encabezado (por si lo reactivas en el futuro) */
+.menu-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1rem 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+  gap: 0.5rem;
+
+  .logo {
+    width: 72px;
+    height: auto;
+    border-radius: 10px;
+    background: white;
+    padding: 4px;
+  }
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+
+    .username {
+      font-size: 13px;
+      color: #374151;
+    }
+
+    .logout {
+      background: #f3f4f6;
+      color: #111827;
+      border: 0;
+      border-radius: 6px;
+      padding: 0.3rem 0.75rem;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #e5e7eb;
+      }
+    }
+  }
+}
+
+/* 🔹 Secciones */
+.menu-content {
+  flex: 1;
+  padding: 1rem 0.75rem;
+
+  .menu-section {
+    font-size: 14px;
+    font-weight: 600;
+    color: #166534; /* verde corporativo */
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .submenu {
+    list-style: none;
+    margin: 0;
+    padding-left: 1rem;
+
+    .menu-item {
+      display: block;
+      padding: 0.4rem 0.6rem;
+      border-radius: 6px;
+      color: #374151; /* texto gris oscuro */
+      font-size: 13px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #f0fdf4; /* verde muy claro al pasar */
+      }
+
+      &.active {
+        background: #dcfce7;
+        border-left: 3px solid #16a34a;
+        font-weight: 600;
+        color: #14532d;
+      }
+    }
+  }
+}
+
+/* 🔹 Scroll estético */
+.menu::-webkit-scrollbar {
+  width: 6px;
+}
+.menu::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}

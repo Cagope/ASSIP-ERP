@@ -2,7 +2,10 @@ package co.assip.erp.seguridad.service;
 
 import co.assip.erp.seguridad.domain.Usuario;
 import co.assip.erp.seguridad.repository.UsuarioRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +17,7 @@ import java.util.Optional;
  * Encapsula la lógica de negocio para listar, buscar, guardar y eliminar usuarios.
  * - Cifra contraseñas con BCrypt.
  * - Valida duplicados.
- * - Facilita mantenimiento y reutilización.
+ * - Permite obtener el usuario autenticado desde el token JWT.
  */
 @Service
 @RequiredArgsConstructor
@@ -70,9 +73,24 @@ public class UsuarioService {
 
     /**
      * Eliminar usuario por ID (eliminación física).
-     * Puede cambiarse a lógica según políticas del sistema.
      */
     public void eliminar(Integer id) {
         usuarioRepository.deleteById(id);
+    }
+
+    /**
+     * Obtener el usuario autenticado actual a partir del token JWT.
+     * Usa el contexto de seguridad cargado por JwtAuthenticationFilter.
+     */
+    public Usuario getUsuarioActual(HttpServletRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("No hay usuario autenticado en el contexto");
+        }
+
+        String username = authentication.getName();
+        return usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + username));
     }
 }

@@ -1,0 +1,25 @@
+<div *ngIf="isAuthenticated(); else notAuth" class="home-wrapper">
+
+  <!-- Encabezado superior -->
+  <header class="home-header">
+    <div class="header-left">
+      <img src="assets/logo-web.png" alt="logo" class="logo" />
+      <span class="title">ASSIP-ERP</span>
+    </div>
+    <div class="header-right">
+      <span class="user">👤 {{ username }}</span>
+      <button class="logout" (click)="logout()">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <!-- Contenido -->
+  <main class="home-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>
+
+<ng-template #notAuth>
+  <p class="no-access">
+    No tiene una sesión activa. <a routerLink="/login">Inicie sesión</a>.
+  </p>
+</ng-template>

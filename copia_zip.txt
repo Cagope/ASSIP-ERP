@@ -1,0 +1,36 @@
+Se copia desde :
+# 🗓 Fecha y hora actual para el nombre del backup
+
+y se corre en power
+
+
+# 🗓 Fecha y hora actual para el nombre del backup
+$timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+
+# 📁 Carpeta de origen
+$source = "D:\assip-erp"
+
+# 📦 Carpeta de destino para los backups
+$backupDir = "D:\backups_assip"
+
+# 🧾 Nombre del archivo ZIP con la fecha
+$zipFile = "$backupDir\assip-erp_backup_$timestamp.zip"
+
+# 🛠 Crear carpeta de backup si no existe
+if (-not (Test-Path $backupDir)) {
+    New-Item -ItemType Directory -Path $backupDir | Out-Null
+}
+
+# 🧩 Patrones a excluir (carpetas pesadas)
+$excludePatterns = @("node_modules", "target", ".idea", ".git")
+
+# 🔍 Buscar todos los archivos y excluir los no deseados
+$itemsToZip = Get-ChildItem -Path $source -Recurse -File | Where-Object {
+    $pathParts = $_.FullName.Split('\')
+    -not ($pathParts | Where-Object { $excludePatterns -contains $_ })
+}
+
+# 📦 Crear el archivo ZIP con todos los archivos válidos
+Compress-Archive -Path $itemsToZip.FullName -DestinationPath $zipFile -CompressionLevel Optimal -Force
+
+Write-Host "`n✅ Backup creado correctamente:`n$zipFile`n"
