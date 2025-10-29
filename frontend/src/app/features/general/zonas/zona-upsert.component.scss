@@ -1,0 +1,26 @@
+.zona-upsert {
+  h5 {
+    margin-bottom: 1rem;
+    font-weight: 600;
+    text-transform: lowercase;
+    color: #1f2937;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.8rem;
+    margin-top: 1rem;
+  }
+
+  .error {
+    color: #dc2626;
+    font-size: 0.75rem;
+  }
+}

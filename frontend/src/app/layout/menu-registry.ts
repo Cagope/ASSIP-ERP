@@ -3,6 +3,7 @@
 // Cada esquema mantiene su propio archivo de menú.
 // ========================================================
 
+import { generalMenu } from '../features/general/general-menu';
 import { hojaVidaMenu } from '../features/hoja-vida/hoja-vida-menu';
 
 // En el futuro aquí se agregan más:
@@ -10,6 +11,7 @@ import { hojaVidaMenu } from '../features/hoja-vida/hoja-vida-menu';
 // import { activosFijosMenu } from '../features/activos-fijos/activos-fijos-menu';
 
 export const MENU_REGISTRY = [
+  generalMenu,
   hojaVidaMenu,
   // contabilidadMenu,
   // activosFijosMenu,

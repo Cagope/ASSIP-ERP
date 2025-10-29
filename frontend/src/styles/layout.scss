@@ -1,0 +1,101 @@
+/* ==========================================================================
+   🧱 ASSIP-ERP — SISTEMA DE LAYOUT Y CONTENEDORES
+   Archivo: src/styles/layout.scss
+   Autor: Dirección de Tecnología — ERP ASSIP Solidaria y Financiera
+   Fecha: Octubre 2025
+
+   📘 Propósito:
+   Define la estructura visual general de todas las vistas:
+   contenedores, tarjetas, cabeceras, toolbars y grillas de formularios.
+   ========================================================================== */
+
+@use 'tokens' as t;
+
+/* === 📦 CONTENEDOR PRINCIPAL ============================================ */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: t.$space-6;
+}
+
+/* === 🧩 TARJETAS (CARD) ================================================== */
+.card {
+  background: t.$color-surface;
+  border: 1px solid t.$color-border;
+  border-radius: t.$radius-lg;
+  padding: t.$space-6;
+  box-shadow: t.$shadow-md;
+}
+
+/* === 🏷️ CABECERA DE TARJETA ============================================ */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: t.$space-4;
+  border-bottom: 1px solid t.$color-border;
+
+  h2 {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: t.$space-3;
+
+    .btn {
+      height: 40px;
+      padding: 0 t.$space-4;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    /* Botones secundarios estilo “ghost” */
+    .btn:not(.btn--primary):not(.btn--new) {
+      background: transparent;
+      border: 1px solid t.$color-border;
+      color: t.$color-text;
+      box-shadow: none;
+
+      &:hover {
+        background: #f3f4f6;
+      }
+    }
+  }
+}
+
+/* === 🧰 TOOLBAR INTERNA (BUSCADORES / FILTROS) ========================== */
+.toolbar {
+  display: flex;
+  gap: t.$space-3;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: t.$space-6;
+
+  input {
+    flex: 1 1 auto;
+    padding: t.$space-2 t.$space-3;
+    border: 1px solid t.$color-border;
+    border-radius: t.$radius-sm;
+    font-size: 0.95rem;
+  }
+}
+
+/* === 🧮 GRILLA DE FORMULARIOS =========================================== */
+.form-grid {
+  display: grid;
+  gap: t.$space-4;
+  grid-template-columns: repeat(12, 1fr);
+
+  .field {
+    grid-column: span 6; // medio ancho
+  }
+
+  .field-full {
+    grid-column: 1 / -1; // ancho completo
+  }
+}

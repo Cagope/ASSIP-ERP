@@ -1,18 +1,18 @@
 // ========================================================
 // 🧾 Menú del esquema Hoja de Vida
-// Este archivo es mantenido solo por el equipo de Hoja de Vida.
+// --------------------------------------------------------
+// Este archivo pertenece exclusivamente al equipo del esquema HOJA DE VIDA.
+// Aquí se definen las opciones del submenú visible en el panel lateral.
 // ========================================================
 
 export const hojaVidaMenu = {
   title: '🧾 Hoja de Vida',
   items: [
     { label: 'Datos Personales', route: '/hoja-vida/datos-personales' },
-    { label: 'Ubicación y Dirección', route: '/hoja-vida/ubicaciones' },
-    { label: 'Datos Laborales', route: '/hoja-vida/laborales' },
-    { label: 'Económicos y Financieros', route: '/hoja-vida/economicos' },
-    { label: 'Referencia Familiar', route: '/hoja-vida/referencias-familiares' },
-    { label: 'Referencia Personal', route: '/hoja-vida/referencias-personales' },
-    { label: 'Datos para SARLAFT', route: '/hoja-vida/sarlaft' },
-    { label: 'Permisos Especiales', route: '/hoja-vida/permisos-especiales' },
+    { label: 'Ubicaciones', route: '/hoja-vida/ubicaciones' },
+    { label: 'Información Laboral', route: '/hoja-vida/laborales' }, // 🆕 NUEVO
+    { label: 'Datos Económicos', route: '/hoja-vida/economicos' },
+    { label: 'Datos Familiares', route: '/hoja-vida/familiares' },
+    { label: 'Referencias', route: '/hoja-vida/referencias' },
   ],
 };

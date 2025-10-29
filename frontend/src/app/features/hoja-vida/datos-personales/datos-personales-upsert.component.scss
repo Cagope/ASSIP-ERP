@@ -1,0 +1,232 @@
+.form-container {
+  max-width: 1000px;
+  margin: 1.5rem auto;
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  h3 {
+    margin-bottom: 1.5rem;
+    font-size: 1.25rem;
+    text-align: center;
+    color: #1f2937;
+  }
+
+  fieldset {
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+
+    legend {
+      font-weight: 600;
+      color: #374151;
+      padding: 0 0.5rem;
+    }
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    position: relative; /* necesario para dropdowns */
+    margin-bottom: 0.5rem;
+
+    label {
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+      color: #374151;
+    }
+
+    input,
+    select,
+    textarea {
+      padding: 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.25rem;
+      font-size: 0.95rem;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+      &:focus {
+        border-color: #2563eb;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+      }
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    .error-text {
+      color: #dc3545;
+      font-size: 12px;
+      margin-top: 2px;
+      display: block;
+    }
+  }
+
+  /* === 🎨 Validación visual === */
+  input.ng-invalid.ng-touched,
+  select.ng-invalid.ng-touched,
+  textarea.ng-invalid.ng-touched {
+    border: 1px solid #dc3545; /* rojo */
+    background-color: #fff5f5;
+  }
+
+  input.ng-valid.ng-touched,
+  select.ng-valid.ng-touched,
+  textarea.ng-valid.ng-touched {
+    border: 1px solid #28a745; /* verde */
+    background-color: #f6fff6;
+  }
+
+  /* === Botones === */
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1rem;
+
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      border: 1px solid transparent;
+      font-size: 0.95rem;
+      transition: background 0.15s ease;
+
+      &.btn-primary {
+        background: #2563eb;
+        color: #fff;
+        &:hover {
+          background: #1e40af;
+        }
+      }
+
+      &.btn-secondary {
+        background: #e5e7eb;
+        color: #111827;
+        &:hover {
+          background: #d1d5db;
+        }
+      }
+    }
+  }
+}
+
+/* === 🔘 Radio buttons y checks === */
+.radio-group {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+
+  input[type='radio'],
+  input[type='checkbox'] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: #2563eb;
+  }
+}
+
+/* === 🔹 Campo "Tiene RUT" y similares === */
+.rut-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  .rut-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+
+    input[type='checkbox'] {
+      width: 18px;
+      height: 18px;
+      accent-color: #2563eb;
+    }
+
+    span {
+      font-size: 0.9rem;
+      color: #374151;
+    }
+  }
+}
+
+/* === 🔍 Filtro con lista desplegable === */
+.filter-input {
+  width: 100%;
+  padding: 4px 6px;
+  margin-bottom: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+
+  &:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 3px rgba(0, 123, 255, 0.3);
+  }
+}
+
+/* 📜 Lista de resultados del filtro */
+.filter-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 20;
+
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-top: 2px;
+  list-style: none;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+
+  li {
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 0.9rem;
+
+    &:hover {
+      background-color: #f0f4ff;
+    }
+  }
+}
+
+.selected-value {
+  font-size: 0.85rem;
+  color: #2a4c8a;
+  margin-top: 4px;
+}
+
+/* === Campos readonly === */
+.readonly-input {
+  background-color: #f8f9fa;
+  border: 1px solid #ccc;
+  color: #555;
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 4px;
+  pointer-events: none;
+}

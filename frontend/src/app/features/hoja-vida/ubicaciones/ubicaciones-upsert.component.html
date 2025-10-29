@@ -1,0 +1,152 @@
+<div class="form-container">
+  <h3>{{ editando ? 'Editar Ubicación' : 'Nueva Ubicación' }}</h3>
+
+  <!-- ==========================================================
+       FORMULARIO PRINCIPAL — UBICACIONES
+       ========================================================== -->
+  <form [formGroup]="form" (ngSubmit)="guardar()" autocomplete="off">
+
+    <!-- 🟩 SECCIÓN: DIRECCIÓN Y CONTACTO -->
+    <fieldset>
+      <legend>Dirección y Contacto</legend>
+
+      <!-- 🏠 Dirección -->
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Dirección *</label>
+          <input type="text" maxlength="100" formControlName="direccion" required />
+          <small class="error-text"
+                 *ngIf="form.get('direccion')?.invalid && form.get('direccion')?.touched">
+            Campo requerido (máx. 100 caracteres)
+          </small>
+        </div>
+      </div>
+
+      <!-- 🏘️ Barrio -->
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Barrio</label>
+          <input type="text" maxlength="100" formControlName="barrio" />
+        </div>
+      </div>
+
+      <!-- ☎️ Teléfonos -->
+      <div class="form-row">
+        <div class="form-group sm">
+          <label>Teléfono</label>
+          <input type="text" maxlength="7" formControlName="telefono" placeholder="Ej: 6543210" />
+          <small class="error-text"
+                 *ngIf="form.get('telefono')?.invalid && form.get('telefono')?.touched">
+            Debe tener 7 dígitos numéricos
+          </small>
+        </div>
+
+        <div class="form-group sm">
+          <label>Celular 1</label>
+          <input type="text" maxlength="10" formControlName="celularUno" />
+          <small class="error-text"
+                 *ngIf="form.get('celularUno')?.invalid && form.get('celularUno')?.touched">
+            Debe tener 10 dígitos numéricos
+          </small>
+        </div>
+
+        <div class="form-group sm">
+          <label>Celular 2</label>
+          <input type="text" maxlength="10" formControlName="celularDos" />
+          <small class="error-text"
+                 *ngIf="form.get('celularDos')?.invalid && form.get('celularDos')?.touched">
+            Debe tener 10 dígitos numéricos
+          </small>
+        </div>
+      </div>
+
+      <!-- 📧 Correo -->
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Correo</label>
+          <input type="email" formControlName="correo" placeholder="usuario@dominio.com" />
+          <small class="error-text"
+                 *ngIf="form.get('correo')?.invalid && form.get('correo')?.touched">
+            Ingrese un correo válido
+          </small>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 🟦 SECCIÓN: UBICACIÓN GEOGRÁFICA -->
+    <fieldset>
+      <legend>Ubicación Geográfica</legend>
+
+      <!-- 🌎 País / Departamento / Ciudad -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>País *</label>
+          <select formControlName="idPais" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let p of paises" [value]="p.codigo">{{ p.nombre }}</option>
+          </select>
+          <small class="error-text"
+                 *ngIf="form.get('idPais')?.invalid && form.get('idPais')?.touched">
+            Campo requerido
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Departamento *</label>
+          <select formControlName="idDepartamento" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let d of departamentos"
+                    [value]="d.idDepartamento">{{ d.nombreDepartamento }}</option>
+          </select>
+          <small class="error-text"
+                 *ngIf="form.get('idDepartamento')?.invalid && form.get('idDepartamento')?.touched">
+            Campo requerido
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Ciudad *</label>
+          <select formControlName="idCiudad" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let c of ciudades" [value]="c.idCiudad">{{ c.nombreCiudad }}</option>
+          </select>
+          <small class="error-text"
+                 *ngIf="form.get('idCiudad')?.invalid && form.get('idCiudad')?.touched">
+            Campo requerido
+          </small>
+        </div>
+      </div>
+
+      <!-- 🧭 Zona / Sub Zona -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Zona</label>
+          <select formControlName="idZona">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let z of zonas" [value]="z.idZona">{{ z.nombreZona }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Sub Zona</label>
+          <select formControlName="idSubZona">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let s of subZonasFiltradas" [value]="s.idSubZona">
+              {{ s.nombreSubZona }}
+            </option>
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 🟨 Acciones -->
+    <div class="form-actions full">
+      <button type="submit" class="btn sm primary" [disabled]="form.invalid">
+        💾 {{ editando ? 'actualizar' : 'guardar' }}
+      </button>
+      <button type="button" class="btn sm danger" (click)="volver()">
+        ↩️ cancelar
+      </button>
+    </div>
+  </form>
+</div>

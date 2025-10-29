@@ -11,22 +11,32 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: false        # 👈 oculta consultas SQL de Hibernate
+    show-sql: false
     properties:
       hibernate:
-        format_sql: false   # 👈 evita formato multilínea
+        format_sql: false
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   flyway:
     enabled: true
-    locations: classpath:db/migration
+    create-schemas: true
     baseline-on-migrate: true
-
-    # 👇 Control total de migraciones dentro del esquema seguridad
-    schemas: seguridad
-    default-schema: seguridad
-    table: flyway_schema_history
     validate-on-migrate: true
+    group: true
+
+    # 📁 Ruta única para que lea todas las migraciones
+    locations: classpath:db/migration
+
+    # 🧩 Esquemas manejados en orden
+    default-schema: seguridad
+    schemas: seguridad, catalogos, general, hoja_vida
+
+    # 🏷️ Control de versión dentro del esquema seguridad
+    table: flyway_schema_history
+
+    # 🪶 Log de diagnóstico extendido
+    placeholders:
+      app_user: postgres
 
 server:
   port: 8080
@@ -35,9 +45,11 @@ server:
 
 logging:
   level:
-    root: info                        # 👈 muestra solo información esencial
-    org.hibernate.SQL: off            # 👈 oculta SQL
+    root: info
+    org.hibernate.SQL: off
     org.hibernate.type.descriptor.sql: off
     org.hibernate.orm.jdbc.bind: off
     org.springframework.orm.jpa: warn
     org.springframework.jdbc.core: warn
+    org.flywaydb.core.internal.command: debug   # 🔍 muestra detalle de migraciones
+    org.flywaydb.core.internal.sqlscript: debug

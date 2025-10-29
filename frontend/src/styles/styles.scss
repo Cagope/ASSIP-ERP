@@ -1,0 +1,25 @@
+/* ==========================================================================
+   🌐 ASSIP-ERP — ESTILOS GLOBALES DEL SISTEMA
+   Archivo: src/styles.scss
+   Fecha: Octubre 2025
+
+   📘 Propósito:
+   Punto de entrada principal del sistema de estilos global.
+   Carga todos los módulos Sass modernos usando `@use`.
+   ========================================================================== */
+
+@use 'sass:color';
+@use './styles/tokens';
+@use './styles/base';
+@use './styles/layout';
+@use './styles/buttons';
+
+/* === ⚙️ ACTIVACIÓN DE ICONOS MATERIAL =================================== */
+.mat-icon {
+  font-family: 'Material Symbols Outlined' !important;
+  font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24;
+}

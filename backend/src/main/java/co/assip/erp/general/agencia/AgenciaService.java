@@ -1,0 +1,50 @@
+package co.assip.erp.general.agencia;
+
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class AgenciaService {
+
+    private final AgenciaRepository repository;
+
+    public AgenciaService(AgenciaRepository repository) {
+        this.repository = repository;
+    }
+
+    public List<Agencia> listar() {
+        return repository.findAll();
+    }
+
+    public Agencia obtenerPorId(Integer id) {
+        return repository.findById(id).orElseThrow(
+                () -> new RuntimeException("Agencia no encontrada con id: " + id)
+        );
+    }
+
+    public Agencia guardar(Agencia agencia) {
+        return repository.save(agencia);
+    }
+
+    public Agencia actualizar(Integer id, Agencia entrada) {
+        Agencia actual = obtenerPorId(id);
+
+        actual.setCodigoAgencia(entrada.getCodigoAgencia());
+        actual.setNombreAgencia(entrada.getNombreAgencia());
+        actual.setSiglaAgencia(entrada.getSiglaAgencia());
+        actual.setDireccionAgencia(entrada.getDireccionAgencia());
+        actual.setIdDepartamento(entrada.getIdDepartamento());
+        actual.setIdCiudad(entrada.getIdCiudad());
+        actual.setCorreoAgencia(entrada.getCorreoAgencia());
+        actual.setCelularAgencia(entrada.getCelularAgencia());
+        actual.setTelefonoAgencia(entrada.getTelefonoAgencia());
+
+        // Auditoría automática por @PreUpdate en BaseAudit
+        return repository.save(actual);
+    }
+
+    public void eliminar(Integer id) {
+        repository.deleteById(id);
+    }
+}

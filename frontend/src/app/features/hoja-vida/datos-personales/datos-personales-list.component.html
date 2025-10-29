@@ -1,0 +1,68 @@
+<div class="datos-personales-list">
+
+  <!-- 🧭 ENCABEZADO — mismo formato que Ubicaciones -->
+  <app-header-actions
+    titulo="Datos Personales"
+    [mostrarNuevo]="true"
+    [mostrarImprimir]="true"
+    [mostrarExportar]="true"
+    (nuevo)="nuevo()"
+    (imprimir)="imprimir()"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <!-- 🔍 Filtro de búsqueda -->
+  <div class="filtro mb-3">
+    <input
+      type="text"
+      placeholder="Buscar por nombre o documento..."
+      [(ngModel)]="filtro"
+      (input)="filtrar()"
+      class="form-control"
+    />
+  </div>
+
+  <!-- 📋 Tabla principal -->
+  <table *ngIf="!cargando && filtrados.length > 0" class="table table-striped table-hover">
+    <thead>
+    <tr>
+      <th>Documento</th>
+      <th>Nombre completo</th>
+      <th>Tipo Persona</th>
+      <th>Fecha Nacimiento</th>
+      <th>Fecha Actualización</th>
+      <th>Comentario</th>
+      <th>Acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let d of filtrados">
+      <td>{{ d.tipoDocumento }} {{ d.documento }}</td>
+      <td>{{ d.nombres }} {{ d.primerApellido }} {{ d.segundoApellido }}</td>
+      <td>{{ d.tipoPersona === '1' ? 'Natural' : 'Jurídica' }}</td>
+      <td>{{ d.fechaNacimiento | date:'dd/MM/yyyy' }}</td>
+      <td>{{ d.fechaActualizacion | date:'dd/MM/yyyy' }}</td>
+      <td>{{ d.comentario }}</td>
+      <td>
+        <div class="acciones">
+          <button class="btn sm" (click)="editar(d.idDatosPersonal!)">✏️</button>
+          <button class="btn sm danger" (click)="eliminar(d.idDatosPersonal!)">🗑️</button>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- ⚙️ Estados -->
+  <div *ngIf="cargando" class="loading">
+    <i class="bi bi-hourglass-split"></i> Cargando datos...
+  </div>
+
+  <div *ngIf="!cargando && filtrados.length === 0" class="empty">
+    <i class="bi bi-inbox"></i> No hay registros de datos personales.
+  </div>
+
+  <div *ngIf="error" class="error">
+    <i class="bi bi-exclamation-triangle"></i> {{ error }}
+  </div>
+</div>

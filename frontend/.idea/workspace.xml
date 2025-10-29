@@ -5,52 +5,233 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f7dc21a8-45a4-4140-a7e2-a5ded858c06e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/domain/RolPermiso.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/repository/RolPermisoRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/service/AccessValidator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/service/PermisoService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/service/RolPermisoService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/web/PermisoController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/web/RolPermisoController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/core/auth/auth.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/core/auth/auth.guard.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/core/auth/auth.interceptor.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/core/auth/login/login.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/core/auth/login/login.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/core/auth/login/login.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/core/auth/session.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/activos-fijos-menu.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/contabilidad/contabilidad-menu.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/economicos/economicos.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/familiares/familiares.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/hoja-vida-menu.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/hoja-vida-menu.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/hoja-vida-menu.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/hoja-vida-menu.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/referencias/referencias.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/ubicaciones/ubicaciones.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/home/home.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/home/home.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/home/home.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/layout/main-layout.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/layout/main-layout.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/layout/main-layout.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/layout/main-menu.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/layout/main-menu.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/layout/main-menu.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/layout/menu-registry.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/config/JwtAuthenticationFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/config/JwtAuthenticationFilter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/config/MappingInspector.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/general/agencia/Agencia.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/general/agencia/AgenciaController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/general/agencia/AgenciaRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/general/agencia/AgenciaService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/general/subzona/SubZona.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/general/subzona/SubZonaController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/general/subzona/SubZonaRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/general/subzona/SubZonaService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/general/zona/Zona.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/general/zona/ZonaController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/general/zona/ZonaRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/general/zona/ZonaService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/datos_personales/DatosPersonales.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/datos_personales/DatosPersonalesController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/datos_personales/DatosPersonalesRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/datos_personales/DatosPersonalesService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/laboral/Laboral.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/laboral/LaboralController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/laboral/LaboralRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/laboral/LaboralService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/ubicaciones/Ubicacion.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/ubicaciones/UbicacionController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/ubicaciones/UbicacionRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/ubicaciones/UbicacionService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/domain/BaseAudit.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/actividad_economica_dian/ActividadEconomicaDian.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/actividad_economica_dian/ActividadEconomicaDianController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/actividad_economica_dian/ActividadEconomicaDianRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/actividad_economica_dian/ActividadEconomicaDianService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/actividad_economica_ses/ActividadEconomicaSes.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/actividad_economica_ses/ActividadEconomicaSesController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/actividad_economica_ses/ActividadEconomicaSesRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/actividad_economica_ses/ActividadEconomicaSesService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/ciudad/Ciudad.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/ciudad/CiudadRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/ciudad/CiudadService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/departamento/Departamento.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/departamento/DepartamentoController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/departamento/DepartamentoRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/departamento/DepartamentoService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/estado_civil/EstadoCivil.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/estado_civil/EstadoCivilController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/estado_civil/EstadoCivilRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/estado_civil/EstadoCivilService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/genero/Genero.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/genero/GeneroController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/genero/GeneroRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/genero/GeneroService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/jornada_laboral/JornadaLaboral.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/jornada_laboral/JornadaLaboralController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/jornada_laboral/JornadaLaboralRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/jornada_laboral/JornadaLaboralService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/nivel_escolar/NivelEscolar.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/nivel_escolar/NivelEscolarController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/nivel_escolar/NivelEscolarRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/nivel_escolar/NivelEscolarService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/nivel_ingreso/NivelIngreso.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/nivel_ingreso/NivelIngresoController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/nivel_ingreso/NivelIngresoRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/nivel_ingreso/NivelIngresoService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/ocupacion/Ocupacion.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/ocupacion/OcupacionController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/ocupacion/OcupacionRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/ocupacion/OcupacionService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/pais/Pais.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/pais/PaisController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/pais/PaisRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/pais/PaisService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/parentesco/Parentesco.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/parentesco/ParentescoController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/parentesco/ParentescoRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/parentesco/ParentescoService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/sector_economico/SectorEconomico.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/sector_economico/SectorEconomicoController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/sector_economico/SectorEconomicoRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/sector_economico/SectorEconomicoService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_bien/TipoBien.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_bien/TipoBienController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_bien/TipoBienRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_bien/TipoBienService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_contrato/TipoContrato.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_contrato/TipoContratoController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_contrato/TipoContratoRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_contrato/TipoContratoService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_directivo/TipoDirectivo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_directivo/TipoDirectivoController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_directivo/TipoDirectivoRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_directivo/TipoDirectivoService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_documento/TipoDocumento.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_documento/TipoDocumentoController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_documento/TipoDocumentoRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_documento/TipoDocumentoService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_empresa/TipoEmpresa.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_empresa/TipoEmpresaController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_empresa/TipoEmpresaRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_empresa/TipoEmpresaService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_peps/TipoPeps.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_peps/TipoPepsController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_peps/TipoPepsRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_peps/TipoPepsService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_regimen/TipoRegimen.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_regimen/TipoRegimenController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_regimen/TipoRegimenRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_regimen/TipoRegimenService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_vivienda/TipoVivienda.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_vivienda/TipoViviendaController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_vivienda/TipoViviendaRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/tipo_vivienda/TipoViviendaService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/web/CatalogosController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/general/web/GeneralController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/resources/db/migration/V004__estructura_inicial.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/resources/db/migration/V005__migracion_catalogos_1.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/resources/db/migration/V006__migracion_catalogos_2.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/resources/db/migration/V007__triggers_fechas_global.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/resources/db/migration/V008__catalogos_globales.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/resources/db/migration/V009__catalogos_enriquecidos.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/agencias/agencia-list.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/agencias/agencia-list.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/agencias/agencia-list.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/agencias/agencia-upsert.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/agencias/agencia-upsert.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/agencias/agencia-upsert.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/agencias/agencia.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/agencias/agencia.routes.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/agencias/agencias-exporter.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/agencias/agencias-print.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/general-menu.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/general.routes.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/sub-zonas/sub-zona-list.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/sub-zonas/sub-zona-list.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/sub-zonas/sub-zona-list.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/sub-zonas/sub-zona-upsert.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/sub-zonas/sub-zona-upsert.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/sub-zonas/sub-zona-upsert.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/sub-zonas/sub-zona.routes.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/sub-zonas/sub-zonas-exporter.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/sub-zonas/sub-zonas-print.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/sub-zonas/sub-zonas.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/zonas/zona-list.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/zonas/zona-list.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/zonas/zona-list.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/zonas/zona-upsert.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/zonas/zona-upsert.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/zonas/zona-upsert.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/zonas/zonas-exporter.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/zonas/zonas-print.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/zonas/zonas.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/general/zonas/zonas.routes.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales-exporter.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales-list.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales-list.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales-list.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales-print.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales-upsert.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales-upsert.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales-upsert.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales.routes.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/hoja-vida.routes.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/laborales/laborales-exporter.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/laborales/laborales-list.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/laborales/laborales-list.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/laborales/laborales-list.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/laborales/laborales-print.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/laborales/laborales-upsert.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/laborales/laborales-upsert.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/laborales/laborales-upsert.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/laborales/laborales.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/laborales/laborales.routes.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/ubicaciones/ubicaciones-exporter.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/ubicaciones/ubicaciones-list.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/ubicaciones/ubicaciones-list.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/ubicaciones/ubicaciones-list.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/ubicaciones/ubicaciones-print.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/ubicaciones/ubicaciones-upsert.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/ubicaciones/ubicaciones-upsert.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/ubicaciones/ubicaciones-upsert.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/ubicaciones/ubicaciones.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/ubicaciones/ubicaciones.routes.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/shared/catalogos/catalogos.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/shared/catalogos/depto-ciudad/depto-ciudad.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/shared/catalogos/depto-ciudad/depto-ciudad.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/shared/catalogos/depto-ciudad/depto-ciudad.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/shared/general/general.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/shared/header-actions/header-actions.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/shared/header-actions/header-actions.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/shared/header-actions/header-actions.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/shared/models/catalogo.model.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/shared/models/entidad-base.model.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/shared/models/laboral.model.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/shared/models/persona.model.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/shared/models/ubicacion.model.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/shared/print/print-base.template.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/shared/print/print-template.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/shared/print/print.styles.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/shared/utils/calcular-dv-nit.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/environments/environment.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/styles/base.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/styles/buttons.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/styles/forms.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/styles/layout.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/styles/styles.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/styles/tokens.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/AssipErpApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/AssipErpApplication.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/domain/Permiso.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/domain/Permiso.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/repository/PermisoRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/repository/PermisoRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/repository/RolRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/repository/RolRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/service/RolService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/service/RolService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/service/UsuarioService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/service/UsuarioService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/web/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/web/AuthController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/web/RolController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/web/RolController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/web/UsuarioController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/web/UsuarioController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/repository/UsuarioRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/seguridad/repository/UsuarioRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/resources/application.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/app.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/app.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales.component.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/hoja-vida-menu.component.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/hoja-vida-menu.component.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/hoja-vida-menu.component.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/hoja-vida-menu.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/hoja-vida-menu.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/ubicaciones/ubicaciones.component.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/layout/main-layout.component.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/layout/main-layout.component.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/layout/main-layout.component.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/layout/main-menu.component.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/layout/main-menu.component.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/layout/main-menu.component.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/layout/menu-registry.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/styles.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/styles.scss" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -92,6 +273,12 @@
     "last_opened_file_path": "D:/assip-erp/frontend"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\assip-erp\frontend\src\app\features\hoja-vida\datos-personales" />
+      <recent name="D:\assip-erp\frontend\src\app\shared\catalogos" />
+    </key>
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="f7dc21a8-45a4-4140-a7e2-a5ded858c06e" name="Changes" comment="" />

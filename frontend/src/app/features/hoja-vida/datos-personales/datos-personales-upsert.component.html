@@ -1,0 +1,307 @@
+<div class="form-container">
+  <h3>{{ editando ? 'Editar Datos Personales' : 'Nuevo Registro de Persona' }}</h3>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()">
+
+    <!-- 🟩 IDENTIFICACIÓN -->
+    <fieldset>
+      <legend>Identificación</legend>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo Documento *</label>
+          <select formControlName="tipoDocumento" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let t of tiposDocumento" [value]="t.codigo">{{ t.nombre }}</option>
+          </select>
+          <small class="error-text" *ngIf="form.get('tipoDocumento')?.invalid && form.get('tipoDocumento')?.touched">
+            Campo requerido
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Número Documento *</label>
+          <input type="text" formControlName="documento" required />
+          <small class="error-text" *ngIf="form.get('documento')?.invalid && form.get('documento')?.touched">
+            Ingrese un número válido
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Tipo Persona</label>
+          <input type="text" value="Natural" readonly class="readonly-input" />
+        </div>
+
+        <div class="form-group rut-group">
+          <label>Tiene RUT *</label>
+          <div class="radio-group">
+            <label><input type="radio" formControlName="tieneRut" [value]="true" /> Sí</label>
+            <label><input type="radio" formControlName="tieneRut" [value]="false" /> No</label>
+          </div>
+          <small class="error-text" *ngIf="form.get('tieneRut')?.invalid && form.get('tieneRut')?.touched">
+            Seleccione una opción
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Dígito Verificación</label>
+          <input type="text" formControlName="digitoVerificacion" maxlength="2" readonly class="readonly-input" />
+        </div>
+
+        <div class="form-group">
+          <label>Fecha Documento *</label>
+          <input type="date" formControlName="fechaDocumento" required />
+          <small class="error-text" *ngIf="form.get('fechaDocumento')?.invalid && form.get('fechaDocumento')?.touched">
+            Campo requerido
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>País Expedición *</label>
+          <select formControlName="idPaisDocumento" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let p of paises" [value]="p.codigo">{{ p.nombre }}</option>
+          </select>
+          <small class="error-text" *ngIf="form.get('idPaisDocumento')?.invalid && form.get('idPaisDocumento')?.touched">
+            Campo requerido
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Departamento Expedición *</label>
+          <select formControlName="idDepartamentoExpedicion" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let d of departamentos" [value]="d.idDepartamento">{{ d.nombreDepartamento }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Ciudad Expedición *</label>
+          <select formControlName="idCiudadExpedicion" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let c of ciudadesExpedicion" [value]="c.idCiudad">{{ c.nombreCiudad }}</option>
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 🟦 NOMBRES Y DATOS DE NACIMIENTO -->
+    <fieldset>
+      <legend>Nombres y datos de nacimiento</legend>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombres *</label>
+          <input type="text" formControlName="nombres" required />
+          <small class="error-text" *ngIf="form.get('nombres')?.invalid && form.get('nombres')?.touched">
+            Campo requerido
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Primer Apellido *</label>
+          <input type="text" formControlName="primerApellido" required />
+          <small class="error-text" *ngIf="form.get('primerApellido')?.invalid && form.get('primerApellido')?.touched">
+            Campo requerido
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Segundo Apellido *</label>
+          <input type="text" formControlName="segundoApellido" required />
+          <small class="error-text" *ngIf="form.get('segundoApellido')?.invalid && form.get('segundoApellido')?.touched">
+            Campo requerido
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Fecha Nacimiento *</label>
+          <input type="date" formControlName="fechaNacimiento" required />
+          <small class="error-text" *ngIf="form.get('fechaNacimiento')?.invalid && form.get('fechaNacimiento')?.touched">
+            Campo requerido
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>País Nacimiento *</label>
+          <select formControlName="idPaisNacimiento" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let p of paises" [value]="p.codigo">{{ p.nombre }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Departamento Nacimiento *</label>
+          <select formControlName="idDepartamentoNacimiento" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let d of departamentos" [value]="d.idDepartamento">{{ d.nombreDepartamento }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Ciudad Nacimiento *</label>
+          <select formControlName="idCiudadNacimiento" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let c of ciudadesNacimiento" [value]="c.idCiudad">{{ c.nombreCiudad }}</option>
+          </select>
+        </div>
+
+        <div class="form-group sm">
+          <label>Fecha de Apertura</label>
+          <input type="date" formControlName="fechaApertura" readonly class="readonly-input" />
+        </div>
+
+        <div class="form-group sm">
+          <label>Última Actualización</label>
+          <input type="date" formControlName="fechaActualizacion" readonly class="readonly-input" />
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 🟨 DEMOGRÁFICOS -->
+    <fieldset>
+      <legend>Datos demográficos</legend>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Género *</label>
+          <select formControlName="codigoGenero" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let g of generos" [value]="g.codigo">{{ g.nombre }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Estado Civil *</label>
+          <select formControlName="codigoEstadoCivil" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let e of estadosCiviles" [value]="e.codigo">{{ e.nombre }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Escolaridad *</label>
+          <select formControlName="codigoEscolaridad" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let n of nivelesEscolares" [value]="n.codigo">{{ n.nombre }}</option>
+          </select>
+        </div>
+
+        <div class="form-group rut-group">
+          <label>Cabeza de Familia *</label>
+          <div class="radio-group">
+            <label><input type="radio" formControlName="cabezaFamilia" value="1" /> Sí</label>
+            <label><input type="radio" formControlName="cabezaFamilia" value="0" /> No</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Estrato Social *</label>
+          <input type="number" min="0" max="6" formControlName="estratoSocial" required />
+        </div>
+
+        <div class="form-group">
+          <label>Tipo Vivienda *</label>
+          <select formControlName="codigoTipoVivienda" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let v of tiposVivienda" [value]="v.codigo">{{ v.nombre }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Número Hijos *</label>
+          <input type="number" min="0" max="99" formControlName="numeroHijos" required />
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 🟧 ECONÓMICOS -->
+    <fieldset>
+      <legend>Datos económicos</legend>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Ocupación *</label>
+          <select formControlName="codigoOcupacion" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let o of ocupaciones" [value]="o.codigo">{{ o.nombre }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Sector Económico *</label>
+          <select formControlName="codigoSectorEconomico" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let s of sectoresEconomicos" [value]="s.codigo">{{ s.nombre }}</option>
+          </select>
+        </div>
+
+        <!-- 🔍 Búsqueda SES -->
+        <div class="form-group">
+          <label>Actividad económica para la SES</label>
+          <input
+            type="search"
+            class="filter-input"
+            placeholder="Buscar (ej: cultivo)"
+            [(ngModel)]="filtroSes"
+            [ngModelOptions]="{ standalone: true }"
+            (input)="filtrarSes()"
+          />
+          <ul class="filter-results" *ngIf="actividadesSesFiltradas.length > 0">
+            <li *ngFor="let item of actividadesSesFiltradas" (click)="seleccionarActividadSes(item)">
+              {{ item.codigo }} - {{ item.nombre }}
+            </li>
+          </ul>
+          <input type="hidden" formControlName="codigoActividadSes" />
+          <div class="selected-value" *ngIf="form.get('codigoActividadSes')?.value">
+            Seleccionado: {{ form.get('codigoActividadSes')?.value }}
+          </div>
+        </div>
+
+        <!-- 🔍 Búsqueda DIAN -->
+        <div class="form-group">
+          <label>Actividad económica para la DIAN</label>
+          <input
+            type="search"
+            class="filter-input"
+            placeholder="Buscar (ej: cultivo)"
+            [(ngModel)]="filtroDian"
+            [ngModelOptions]="{ standalone: true }"
+            (input)="filtrarDian()"
+          />
+          <ul class="filter-results" *ngIf="actividadesDianFiltradas.length > 0">
+            <li *ngFor="let item of actividadesDianFiltradas" (click)="seleccionarActividadDian(item)">
+              {{ item.codigo }} - {{ item.nombre }}
+            </li>
+          </ul>
+          <input type="hidden" formControlName="codigoActividadDian" />
+          <div class="selected-value" *ngIf="form.get('codigoActividadDian')?.value">
+            Seleccionado: {{ form.get('codigoActividadDian')?.value }}
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 🟪 OBSERVACIONES -->
+    <fieldset>
+      <legend>Observaciones</legend>
+      <div class="form-group full">
+        <label>Comentario *</label>
+        <textarea rows="3" formControlName="comentario" required></textarea>
+        <small class="error-text" *ngIf="form.get('comentario')?.invalid && form.get('comentario')?.touched">
+          Campo requerido
+        </small>
+      </div>
+    </fieldset>
+
+    <!-- 🟨 Acciones -->
+    <div class="form-actions full">
+      <button type="submit" class="btn sm primary" [disabled]="form.invalid">
+        💾 {{ editando ? 'actualizar' : 'guardar' }}
+      </button>
+      <button type="button" class="btn sm danger" (click)="volver()">
+        ↩️ cancelar
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,38 @@
+<div class="sub-zona-list">
+  <app-header-actions
+    titulo="Subzonas"
+    (nuevo)="nuevaSubZona()"
+    (imprimir)="imprimirListado()"
+    (exportar)="exportarExcel()">
+  </app-header-actions>
+
+  <table id="tabla-subzonas" *ngIf="!cargando && subzonas.length > 0" class="table table-striped">
+    <thead>
+    <tr>
+      <th>código</th>
+      <th>nombre</th>
+      <th>zona</th>
+      <th>comentario</th>
+      <th>acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let s of subzonas">
+      <td>{{ s.codigoSubZona }}</td>
+      <td>{{ s.nombreSubZona }}</td>
+      <td>{{ s.zona?.nombreZona }}</td>
+      <td>{{ s.comentarioSubZona }}</td>
+      <td>
+        <div class="acciones">
+          <button class="btn sm" (click)="editarSubZona(s.idSubZona!)">✏️</button>
+          <button class="btn sm danger" (click)="eliminarSubZona(s.idSubZona!)">🗑️</button>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="cargando" class="loading">Cargando...</div>
+  <div *ngIf="!cargando && subzonas.length === 0" class="empty">No hay subzonas registradas.</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+</div>

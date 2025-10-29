@@ -1,0 +1,89 @@
+<div class="ubicaciones-list">
+
+  <!-- ==========================================================
+       🧭 ENCABEZADO — Título + Botones globales
+       Usa el componente genérico de acciones de cabecera.
+       ========================================================== -->
+  <app-header-actions
+    titulo="Ubicaciones"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="true"
+    [mostrarExportar]="true"
+    (imprimir)="imprimir()"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <!-- ==========================================================
+       🔍 FILTRO DE BÚSQUEDA
+       Permite buscar por nombre o documento.
+       ========================================================== -->
+  <div class="filtro mb-3">
+    <input
+      type="text"
+      placeholder="Buscar por nombre o documento..."
+      [(ngModel)]="filtro"
+      (input)="filtrar()"
+      class="form-control"
+    />
+  </div>
+
+  <!-- ==========================================================
+       📋 TABLA PRINCIPAL — Listado de personas + ubicaciones
+       ========================================================== -->
+  <table *ngIf="!cargando && filtradas.length > 0" class="table table-striped table-hover">
+    <thead>
+    <tr>
+      <th>Documento</th>
+      <th>Nombre completo</th>
+      <th>Dirección</th>
+      <th>Fecha edición</th>
+      <th>Estado</th>
+      <th>Acción</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <!-- 🔁 Recorre personas filtradas -->
+    <tr *ngFor="let p of filtradas">
+      <td>{{ p.tipoDocumento }} {{ p.documento }}</td>
+      <td>{{ p.nombres }} {{ p.primerApellido }} {{ p.segundoApellido }}</td>
+      <td>{{ p.ubicacion?.direccion || '—' }}</td>
+      <td>{{ p.fechaEdicion | date: 'dd/MM/yyyy' }}</td>
+
+      <!-- Estado de ubicación -->
+      <td>
+          <span *ngIf="p.ubicacion; else sinUbicacion" class="text-success fw-semibold">
+            Con ubicación
+          </span>
+        <ng-template #sinUbicacion>
+          <span class="text-danger fw-semibold">Sin ubicación</span>
+        </ng-template>
+      </td>
+
+      <!-- Botón de gestión -->
+      <td>
+        <button
+          class="btn btn-sm btn-outline-primary"
+          (click)="gestionar(p, p.ubicacion)">
+          {{ p.ubicacion ? 'Gestionar' : 'Crear' }}
+        </button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- ==========================================================
+       ⚙️ ESTADOS Y MENSAJES DEL LISTADO
+       ========================================================== -->
+  <div *ngIf="cargando" class="loading">
+    <i class="bi bi-hourglass-split"></i> Cargando datos...
+  </div>
+
+  <div *ngIf="!cargando && filtradas.length === 0" class="empty">
+    <i class="bi bi-inbox"></i> No hay registros para mostrar.
+  </div>
+
+  <div *ngIf="error" class="error">
+    <i class="bi bi-exclamation-triangle"></i> {{ error }}
+  </div>
+</div>

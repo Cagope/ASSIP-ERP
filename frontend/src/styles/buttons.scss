@@ -1,0 +1,134 @@
+/* ==========================================================================
+   🎨 ASSIP-ERP — SISTEMA GLOBAL DE BOTONES
+   Archivo: src/styles/buttons.scss
+   Autor: Dirección de Tecnología — ERP ASSIP Solidaria y Financiera
+   Fecha: Octubre 2025
+
+   📘 Propósito:
+   Establece las variantes visuales de todos los botones del sistema.
+   Se utiliza en cabeceras, formularios, toolbars y tablas.
+   ========================================================================== */
+
+@use 'sass:color';
+@use 'tokens' as t;
+
+/* === ⚙️ BASE GENERAL ==================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: t.$radius-sm;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}
+
+/* === 🎯 VARIANTES TEMÁTICAS ============================================ */
+.btn--primary {
+  background: linear-gradient(180deg,
+    color.adjust(t.$color-primary, $lightness: 5%), t.$color-primary);
+  color: t.$color-surface;
+  box-shadow: t.$shadow-sm;
+}
+
+.btn--new {
+  background: linear-gradient(180deg,
+    color.adjust(t.$color-success, $lightness: 8%), t.$color-success);
+  color: t.$color-surface;
+}
+
+.btn--edit {
+  background: linear-gradient(180deg,
+    color.adjust(t.$color-warning, $lightness: 10%), t.$color-warning);
+  color: t.$color-text;
+}
+
+.btn--delete, .btn--danger {
+  background: linear-gradient(180deg,
+    color.adjust(t.$color-danger, $lightness: 6%), t.$color-danger);
+  color: t.$color-surface;
+}
+
+.btn--print {
+  background: linear-gradient(180deg,
+    color.adjust(t.$color-info, $lightness: 6%), t.$color-info);
+  color: t.$color-surface;
+}
+
+/* === 🧊 BOTONES TRANSPARENTES (“GHOST”) ================================ */
+.btn--ghost {
+  background: transparent;
+  color: t.$color-text;
+  border: 1px solid t.$color-border;
+  box-shadow: none;
+
+  &:hover {
+    background: #f8f8f8;
+  }
+}
+
+/* === 🧩 BOTONES DE CABECERA ============================================ */
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: t.$space-4;
+
+  h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: t.$color-text;
+    margin: 0;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}
+
+/* === 📋 BOTONES DE TABLAS ============================================== */
+.table .btn {
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: t.$radius-sm;
+  line-height: 1;
+
+  &--edit {
+    background: t.$color-warning;
+    color: t.$color-text;
+  }
+
+  &--delete {
+    background: t.$color-danger;
+    color: t.$color-surface;
+  }
+}
+
+/* === 🖨️ MODO IMPRESIÓN ================================================ */
+@media print {
+  .btn,
+  .header-actions {
+    display: none !important;
+  }
+}

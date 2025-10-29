@@ -1,0 +1,34 @@
+<div class="form-container">
+  <h5>{{ id ? 'editar zona' : 'nueva zona' }}</h5>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="form-grid">
+
+    <!-- 🟩 Identificación -->
+    <div class="form-group sm">
+      <label for="codigoZona">código *</label>
+      <input id="codigoZona" type="text" formControlName="codigoZona" maxlength="5" />
+    </div>
+
+    <div class="form-group full">
+      <label for="nombreZona">nombre *</label>
+      <input id="nombreZona" type="text" formControlName="nombreZona" maxlength="100" />
+    </div>
+
+    <!-- 🟦 Comentario -->
+    <div class="form-group full">
+      <label for="comentarioZona">comentario</label>
+      <input id="comentarioZona" type="text" formControlName="comentarioZona" maxlength="150" />
+    </div>
+
+    <!-- 🟨 Acciones -->
+    <div class="form-actions full">
+      <button type="submit" class="btn sm primary" [disabled]="cargando">
+        💾 {{ id ? 'actualizar' : 'guardar' }}
+      </button>
+      <button type="button" class="btn sm danger" (click)="cancelar()">↩️ cancelar</button>
+    </div>
+  </form>
+
+  <div *ngIf="cargando" class="loading">procesando...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+</div>

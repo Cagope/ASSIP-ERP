@@ -2,12 +2,12 @@
   width: 270px;
   height: 100vh;
   background: #ffffff; /* 🔸 Fondo blanco limpio */
-  color: #222; /* texto gris oscuro legible */
+  color: #222;
   display: flex;
   flex-direction: column;
   font-family: 'Poppins', sans-serif;
   overflow-y: auto;
-  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05); /* sombra sutil */
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
 }
 
 /* 🔹 Encabezado (por si lo reactivas en el futuro) */
@@ -35,8 +35,9 @@
     gap: 4px;
 
     .username {
-      font-size: 13px;
+      font-size: 14px; /* antes 13px */
       color: #374151;
+      font-weight: 500;
     }
 
     .logout {
@@ -44,8 +45,8 @@
       color: #111827;
       border: 0;
       border-radius: 6px;
-      padding: 0.3rem 0.75rem;
-      font-size: 12px;
+      padding: 0.35rem 0.9rem;
+      font-size: 13px; /* antes 12px */
       cursor: pointer;
       transition: background 0.2s;
 
@@ -62,11 +63,13 @@
   padding: 1rem 0.75rem;
 
   .menu-section {
-    font-size: 14px;
+    font-size: 15px; /* antes 14px */
     font-weight: 600;
-    color: #166534; /* verde corporativo */
-    margin-top: 1rem;
-    margin-bottom: 0.25rem;
+    color: #166534;
+    margin-top: 1.2rem;
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
   }
 
   .submenu {
@@ -76,15 +79,15 @@
 
     .menu-item {
       display: block;
-      padding: 0.4rem 0.6rem;
+      padding: 0.5rem 0.7rem; /* un poco más de aire */
       border-radius: 6px;
-      color: #374151; /* texto gris oscuro */
-      font-size: 13px;
+      color: #374151;
+      font-size: 14px; /* antes 13px */
       text-decoration: none;
       transition: all 0.2s ease;
 
       &:hover {
-        background: #f0fdf4; /* verde muy claro al pasar */
+        background: #f0fdf4;
       }
 
       &.active {

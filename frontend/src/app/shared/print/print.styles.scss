@@ -1,0 +1,69 @@
+@page {
+  size: Letter portrait;
+  margin: 18mm;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  color: #111;
+  margin: 20px;
+  font-size: 12px;
+}
+
+header {
+  text-align: center;
+  border-bottom: 2px solid #003366;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+
+  img {
+    height: 60px;
+    margin-bottom: 8px;
+  }
+
+  h2 {
+    margin: 4px 0;
+    font-size: 16px;
+    color: #003366;
+  }
+
+  .meta {
+    font-size: 11px;
+    color: #555;
+    margin-bottom: 10px;
+  }
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+
+  th, td {
+    border: 1px solid #ccc;
+    padding: 6px 8px;
+    text-align: left;
+  }
+
+  th {
+    background: #f3f4f6;
+    color: #222;
+  }
+
+  tr:nth-child(even) {
+    background: #fafafa;
+  }
+}
+
+footer {
+  text-align: center;
+  font-size: 10px;
+  color: #777;
+  margin-top: 30px;
+
+  @media print {
+    position: fixed;
+    bottom: 10px;
+    width: 100%;
+  }
+}

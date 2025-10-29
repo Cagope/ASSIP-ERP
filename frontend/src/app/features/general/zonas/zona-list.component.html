@@ -1,0 +1,37 @@
+<div class="zona-list">
+  <app-header-actions
+    titulo="Zonas"
+    (nuevo)="nuevaZona()"
+    (imprimir)="imprimirListado()"
+    (exportar)="exportarExcel()">
+  </app-header-actions>
+
+  <table id="tabla-zonas" *ngIf="!cargando && zonas.length > 0" class="table table-striped">
+    <thead>
+    <tr>
+      <th>código</th>
+      <th>nombre</th>
+      <th>comentario</th>
+      <th>acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let z of zonas">
+      <td>{{ z.codigoZona }}</td>
+      <td>{{ z.nombreZona }}</td>
+      <td>{{ z.comentarioZona }}</td>
+      <td>
+        <div class="acciones">
+          <button class="btn sm" (click)="editarZona(z.idZona!)">✏️</button>
+          <button class="btn sm danger" (click)="eliminarZona(z.idZona!)">🗑️</button>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="cargando" class="loading">Cargando...</div>
+  <div *ngIf="!cargando && zonas.length === 0" class="empty">No hay zonas registradas.</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+</div>

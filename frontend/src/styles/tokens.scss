@@ -1,0 +1,45 @@
+/* ==========================================================================
+   🎨 ASSIP-ERP — DESIGN TOKENS GLOBALES
+   Archivo: src/styles/tokens.scss
+   Autor: Dirección de Tecnología — ERP ASSIP Solidaria y Financiera
+   Fecha: Octubre 2025
+
+   📘 Propósito:
+   Este archivo define las variables maestras (Design Tokens) que sirven
+   de base para todo el sistema de diseño de ASSIP-ERP. Los valores aquí
+   definidos son reutilizados en botones, formularios, tablas, layouts y
+   temas generales de color.
+   ========================================================================== */
+
+/* === 🎯 PALETA PRINCIPAL INSTITUCIONAL ================================== */
+$color-primary: #0f62fe;         // Azul corporativo principal
+$color-primary-600: #0353e9;     // Variante más intensa para hover o foco
+$color-secondary: #6c757d;       // Gris medio, para elementos neutrales
+$color-success: #2e7d32;         // Verde (acciones exitosas)
+$color-danger: #d32f2f;          // Rojo (errores, eliminar)
+$color-warning: #f9a825;         // Amarillo (advertencias)
+$color-info: #009688;            // Turquesa (acciones informativas)
+
+/* === 🎨 SUPERFICIES Y TIPOGRAFÍA ======================================== */
+$color-bg: #f7f9fc;              // Fondo general de la aplicación
+$color-surface: #ffffff;         // Superficies (tarjetas, paneles)
+$color-text: #111827;            // Texto principal
+$color-text-muted: #6b7280;      // Texto secundario o deshabilitado
+$color-border: #e5e7eb;          // Bordes, divisores y líneas suaves
+
+/* === 🧱 RADIOS Y SOMBRAS ================================================= */
+$radius-sm: 6px;
+$radius-md: 10px;
+$radius-lg: 14px;
+
+$shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);   // Pequeña sombra sutil
+$shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);  // Sombra media (tarjetas)
+
+/* === 📏 ESPACIADOS BASE ================================================== */
+$space-1: 4px;
+$space-2: 8px;
+$space-3: 12px;
+$space-4: 16px;
+$space-5: 20px;
+$space-6: 24px;
+$space-8: 32px;

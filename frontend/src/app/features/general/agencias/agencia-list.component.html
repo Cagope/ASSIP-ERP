@@ -1,0 +1,49 @@
+<div class="agencia-list">
+  <app-header-actions
+    titulo="Agencias"
+    (nuevo)="nuevaAgencia()"
+    (imprimir)="imprimirListado()"
+    (exportar)="exportarExcel()">
+  </app-header-actions>
+
+  <table id="tabla-agencias" *ngIf="!cargando && agencias.length > 0" class="table table-striped">
+    <thead>
+    <tr>
+      <th>código</th>
+      <th>nombre</th>
+      <th>sigla</th>
+      <th>dirección</th>
+      <th>departamento</th>
+      <th>ciudad</th>
+      <th>correo</th>
+      <th>celular</th>
+      <th>teléfono</th>
+      <th>acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let a of agencias">
+      <td>{{ a.codigoAgencia }}</td>
+      <td>{{ a.nombreAgencia }}</td>
+      <td>{{ a.siglaAgencia }}</td>
+      <td>{{ a.direccionAgencia }}</td>
+      <td>{{ a.nombreDepartamento || a.idDepartamento }}</td>
+      <td>{{ a.nombreCiudad || a.idCiudad }}</td>
+      <td>{{ a.correoAgencia }}</td>
+      <td>{{ a.celularAgencia }}</td>
+      <td>{{ a.telefonoAgencia }}</td>
+      <td>
+        <div class="acciones">
+          <button class="btn sm" (click)="editarAgencia(a.idAgencia!)">✏️</button>
+          <button class="btn sm danger" (click)="eliminarAgencia(a.idAgencia!)">🗑️</button>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="cargando" class="loading">Cargando...</div>
+  <div *ngIf="!cargando && agencias.length === 0" class="empty">No hay agencias registradas.</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+</div>

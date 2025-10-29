@@ -1,0 +1,8 @@
+<div class="header-actions">
+  <h2>{{ titulo }}</h2>
+  <div class="actions">
+    <button *ngIf="mostrarNuevo" class="btn btn--new" (click)="onNuevo()">➕ Nueva</button>
+    <button *ngIf="mostrarImprimir" class="btn btn--print" (click)="onImprimir()">🖨️ Imprimir</button>
+    <button *ngIf="mostrarExportar" class="btn btn--excel" (click)="onExportar()">📤 Exportar</button>
+  </div>
+</div>

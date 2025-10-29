@@ -1,0 +1,165 @@
+<div class="form-container">
+  <h3>{{ editando ? 'Editar Información Laboral' : 'Nueva Información Laboral' }}</h3>
+
+  <!-- ==========================================================
+       FORMULARIO PRINCIPAL — LABORALES
+       ========================================================== -->
+  <form [formGroup]="form" (ngSubmit)="guardar()" autocomplete="off">
+
+    <!-- 🏢 SECCIÓN: DATOS DE LA EMPRESA -->
+    <fieldset>
+      <legend>Datos de la Empresa o Actividad</legend>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Nombre Empresa / Actividad *</label>
+          <input type="text" maxlength="100" formControlName="nombreEmpresa" required />
+          <small class="error-text"
+                 *ngIf="form.get('nombreEmpresa')?.invalid && form.get('nombreEmpresa')?.touched">
+            Campo requerido (máx. 100 caracteres)
+          </small>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Dirección *</label>
+          <input type="text" maxlength="100" formControlName="direccion" required />
+          <small class="error-text"
+                 *ngIf="form.get('direccion')?.invalid && form.get('direccion')?.touched">
+            Campo requerido (máx. 100 caracteres)
+          </small>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>País *</label>
+          <select formControlName="idPais" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let p of paises" [value]="p.codigo">{{ p.nombre }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Departamento *</label>
+          <select formControlName="idDepartamento" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let d of departamentos" [value]="d.idDepartamento">{{ d.nombreDepartamento }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Ciudad *</label>
+          <select formControlName="idCiudad" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let c of ciudades" [value]="c.idCiudad">{{ c.nombreCiudad }}</option>
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- ☎️ SECCIÓN: CONTACTO -->
+    <fieldset>
+      <legend>Contacto</legend>
+
+      <div class="form-row">
+        <div class="form-group sm">
+          <label>Teléfono</label>
+          <input type="text" maxlength="7" formControlName="telefonoEmpresa" placeholder="Ej: 6543210" />
+        </div>
+
+        <div class="form-group sm">
+          <label>Celular</label>
+          <input type="text" maxlength="10" formControlName="celularEmpresa" placeholder="Ej: 3123456789" />
+        </div>
+
+        <div class="form-group full">
+          <label>Correo</label>
+          <input type="email" formControlName="correoEmpresa" placeholder="usuario@dominio.com" />
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- ⚙️ SECCIÓN: CONTRATO Y TIPO -->
+    <fieldset>
+      <legend>Contrato y Tipo de Empresa</legend>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Tipo de Empresa</label>
+          <select formControlName="codigoTipoEmpresa">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let t of tiposEmpresas" [value]="t.codigo">{{ t.nombre }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Tipo de Contrato</label>
+          <select formControlName="codigoTipoContrato">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let t of tiposContratos" [value]="t.codigo">{{ t.nombre }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Jornada Laboral</label>
+          <select formControlName="codigoJornada">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let j of jornadasLaborales" [value]="j.codigo">{{ j.nombre }}</option>
+          </select>
+        </div>
+
+        <!-- ✅ Campo empleadoEntidad tipo radio -->
+        <div class="form-group empleado-entidad-group">
+          <label>Empleado de la entidad *</label>
+          <div class="radio-group">
+            <label>
+              <input type="radio" formControlName="empleadoEntidad" [value]="true" /> Sí
+            </label>
+            <label>
+              <input type="radio" formControlName="empleadoEntidad" [value]="false" /> No
+            </label>
+          </div>
+          <small class="error-text"
+                 *ngIf="form.get('empleadoEntidad')?.invalid && form.get('empleadoEntidad')?.touched">
+            Seleccione una opción
+          </small>
+        </div>
+
+        <!-- ✅ Campo fecha dentro del mismo grupo -->
+        <div class="form-group sm">
+          <label>Fecha de Vinculación</label>
+          <input type="date" formControlName="fechaVinculacion" />
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 👤 SECCIÓN: CONTACTO DE REFERENCIA -->
+    <fieldset>
+      <legend>Persona de Contacto</legend>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre de Contacto</label>
+          <input type="text" maxlength="100" formControlName="nombreContacto" />
+        </div>
+
+        <div class="form-group">
+          <label>Celular Contacto</label>
+          <input type="text" maxlength="10" formControlName="celularContacto" placeholder="Ej: 3101234567" />
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 🟨 Acciones -->
+    <div class="form-actions full">
+      <button type="submit" class="btn sm primary" [disabled]="form.invalid">
+        💾 {{ editando ? 'actualizar' : 'guardar' }}
+      </button>
+      <button type="button" class="btn sm danger" (click)="volver()">
+        ↩️ cancelar
+      </button>
+    </div>
+  </form>
+</div>

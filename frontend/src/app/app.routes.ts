@@ -11,17 +11,31 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       {
+        path: 'general',
+        loadChildren: () =>
+          import('./features/general/general.routes')
+            .then(m => m.GENERAL_ROUTES),
+      },
+
+      {
         path: 'hoja-vida',
-        canActivate: [authGuard],
-        children: [
-          { path: 'datos-personales', loadComponent: () => import('./features/hoja-vida/datos-personales/datos-personales.component').then(m => m.DatosPersonalesComponent) },
-          { path: 'ubicaciones', loadComponent: () => import('./features/hoja-vida/ubicaciones/ubicaciones.component').then(m => m.UbicacionesComponent) },
-          { path: 'economicos', loadComponent: () => import('./features/hoja-vida/economicos/economicos.component').then(m => m.EconomicosComponent) },
-          { path: 'referencias', loadComponent: () => import('./features/hoja-vida/referencias/referencias.component').then(m => m.ReferenciasComponent) },
-          { path: 'familiares', loadComponent: () => import('./features/hoja-vida/familiares/familiares.component').then(m => m.FamiliaresComponent) },
-          { path: '**', redirectTo: 'datos-personales' }
-        ]
-      }
+        loadChildren: () =>
+          import('./features/hoja-vida/hoja-vida.routes')
+            .then(m => m.HOJA_VIDA_ROUTES),
+      },
+      // 👇 futuros esquemas
+      // {
+      //   path: 'contabilidad',
+      //   loadChildren: () =>
+      //     import('./features/contabilidad/contabilidad.routes')
+      //       .then(m => m.CONTABILIDAD_ROUTES),
+      // },
+      // {
+      //   path: 'activos-fijos',
+      //   loadChildren: () =>
+      //     import('./features/activos-fijos/activos-fijos.routes')
+      //       .then(m => m.ACTIVOS_FIJOS_ROUTES),
+      // },
     ],
   },
   { path: '**', redirectTo: '' },
