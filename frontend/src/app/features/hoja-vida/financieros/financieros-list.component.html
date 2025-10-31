@@ -1,0 +1,123 @@
+<div class="financieros-list">
+
+  <!-- ==========================================================
+       💰 ENCABEZADO — Título + Botones globales
+       ========================================================== -->
+  <app-header-actions
+    titulo="Información Financiera"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="true"
+    [mostrarExportar]="true"
+    (imprimir)="imprimir()"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <!-- ==========================================================
+       🔍 FILTRO DE BÚSQUEDA
+       ========================================================== -->
+  <div class="filtro mb-3">
+    <input
+      type="text"
+      placeholder="Buscar por nombre o documento..."
+      [(ngModel)]="filtro"
+      (input)="filtrar()"
+      class="form-control"
+    />
+  </div>
+
+  <!-- ==========================================================
+       📋 TABLA PRINCIPAL — Listado de personas + financieros
+       ========================================================== -->
+  <table
+    *ngIf="!cargando && filtradas.length > 0"
+    class="table table-striped table-hover align-middle"
+  >
+    <thead class="table-light">
+    <tr>
+      <th>Documento</th>
+      <th>Nombre completo</th>
+      <th>Ingresos (Total)</th>
+      <th>Egresos (Total)</th>
+      <th>Patrimonio Neto</th>
+      <th>Relación Financiera</th>
+      <th>Estado</th>
+      <th class="text-center">Acción</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let p of filtradas">
+      <td>{{ p.tipoDocumento }} {{ p.documento }}</td>
+      <td>{{ p.nombres }} {{ p.primerApellido }} {{ p.segundoApellido }}</td>
+
+      <!-- Ingresos -->
+      <td>
+        {{
+        (p.financiero?.valorSalario ?? 0)
+        + (p.financiero?.valorPension ?? 0)
+        + (p.financiero?.ingresosArriendo ?? 0)
+        + (p.financiero?.ingresosComisiones ?? 0)
+        + (p.financiero?.otrosIngresos ?? 0)
+        | number: '1.0-0'
+        }}
+      </td>
+
+      <!-- Egresos -->
+      <td>
+        {{
+        (p.financiero?.egresosFamiliares ?? 0)
+        + (p.financiero?.egresosArriendo ?? 0)
+        + (p.financiero?.egresosCredito ?? 0)
+        + (p.financiero?.otrosEgresos ?? 0)
+        | number: '1.0-0'
+        }}
+      </td>
+
+      <!-- Patrimonio -->
+      <td>
+        {{
+        ((p.financiero?.totalActivos ?? 0) - (p.financiero?.totalPasivos ?? 0))
+        | number: '1.0-0'
+        }}
+      </td>
+
+      <!-- Relación financiera -->
+      <td>{{ p.financiero?.relacionFinanciera || '—' }}</td>
+
+      <!-- Estado -->
+      <td>
+        <span *ngIf="p.financiero; else sinFinanciero" class="text-success fw-semibold">
+          Con información
+        </span>
+        <ng-template #sinFinanciero>
+          <span class="text-danger fw-semibold">Sin información</span>
+        </ng-template>
+      </td>
+
+      <!-- Botón acción -->
+      <td class="text-center">
+        <button
+          class="btn btn-sm btn-outline-primary"
+          (click)="gestionar(p, p.financiero)">
+          {{ p.financiero ? 'Gestionar' : 'Crear' }}
+        </button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- ==========================================================
+       ⚙️ ESTADOS Y MENSAJES DEL LISTADO
+       ========================================================== -->
+  <div *ngIf="cargando" class="text-center my-3 text-secondary">
+    <i class="bi bi-hourglass-split"></i> Cargando datos financieros...
+  </div>
+
+  <div *ngIf="!cargando && filtradas.length === 0" class="text-center my-3 text-muted">
+    <i class="bi bi-inbox"></i> No hay registros financieros para mostrar.
+  </div>
+
+  <div *ngIf="error" class="text-center text-danger my-3">
+    <i class="bi bi-exclamation-triangle"></i> {{ error }}
+  </div>
+</div>

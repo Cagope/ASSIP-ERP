@@ -1,0 +1,98 @@
+<div class="form-container">
+  <h3>{{ editando ? 'Editar Referencia Personal' : 'Nueva Referencia Personal' }}</h3>
+
+  <!-- ==========================================================
+       FORMULARIO PRINCIPAL — REFERENCIAS PERSONALES
+       ========================================================== -->
+  <form [formGroup]="form" (ngSubmit)="guardar()" autocomplete="off">
+
+    <!-- 🟩 SECCIÓN: DATOS DE LA REFERENCIA -->
+    <fieldset>
+      <legend>Datos de la Referencia</legend>
+
+      <!-- 👤 Nombre completo -->
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Nombre completo *</label>
+          <input type="text" maxlength="100" formControlName="nombreReferenciaPersonal" required />
+          <small class="error-text"
+                 *ngIf="form.get('nombreReferenciaPersonal')?.invalid && form.get('nombreReferenciaPersonal')?.touched">
+            Campo requerido (máx. 100 caracteres)
+          </small>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 🟦 SECCIÓN: UBICACIÓN DEL CONTACTO -->
+    <fieldset>
+      <legend>Ubicación del Contacto</legend>
+
+      <!-- 🏠 Dirección -->
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Dirección *</label>
+          <input type="text" maxlength="100" formControlName="direccionReferenciaPersonal" required />
+          <small class="error-text"
+                 *ngIf="form.get('direccionReferenciaPersonal')?.invalid && form.get('direccionReferenciaPersonal')?.touched">
+            Campo requerido (máx. 100 caracteres)
+          </small>
+        </div>
+      </div>
+
+      <!-- 🌎 Departamento / Ciudad -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Departamento</label>
+          <select formControlName="idDepartamento">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let d of departamentos"
+                    [value]="d.idDepartamento">{{ d.nombreDepartamento }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Ciudad</label>
+          <select formControlName="idCiudad">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let c of ciudades" [value]="c.idCiudad">{{ c.nombreCiudad }}</option>
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 🟨 SECCIÓN: INFORMACIÓN DE CONTACTO -->
+    <fieldset>
+      <legend>Información de Contacto</legend>
+
+      <div class="form-row">
+        <div class="form-group sm">
+          <label>Teléfono</label>
+          <input type="text" maxlength="7" formControlName="telefonoReferenciaPersonal" placeholder="Ej: 6543210" />
+          <small class="error-text"
+                 *ngIf="form.get('telefonoReferenciaPersonal')?.invalid && form.get('telefonoReferenciaPersonal')?.touched">
+            Debe tener 7 dígitos numéricos
+          </small>
+        </div>
+
+        <div class="form-group sm">
+          <label>Celular</label>
+          <input type="text" maxlength="10" formControlName="celularReferenciaPersonal" />
+          <small class="error-text"
+                 *ngIf="form.get('celularReferenciaPersonal')?.invalid && form.get('celularReferenciaPersonal')?.touched">
+            Debe tener 10 dígitos numéricos
+          </small>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 🟨 ACCIONES -->
+    <div class="form-actions full">
+      <button type="submit" class="btn btn--primary" [disabled]="form.invalid">
+        💾 {{ editando ? 'Actualizar' : 'Guardar' }}
+      </button>
+      <button type="button" class="btn btn--cancel" (click)="volver()">
+        ↩️ Cancelar
+      </button>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,19 @@
+/* =============================================================================
+   📱 RESPONSIVIDAD GLOBAL — ERP ASSIP
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  html, body {
+    font-size: 14px;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 14px;
+  }
+
+  table {
+    font-size: 0.9rem;
+  }
+}

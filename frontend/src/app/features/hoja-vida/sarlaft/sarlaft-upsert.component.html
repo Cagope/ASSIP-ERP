@@ -1,0 +1,184 @@
+<div class="form-container">
+  <h3>{{ editando ? 'Editar Información SARLAFT' : 'Nueva Información SARLAFT' }}</h3>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()" autocomplete="off">
+
+    <!-- 🟩 SECCIÓN: EXONERACIÓN UIAF -->
+    <fieldset>
+      <legend>Exonerado de Transacciones en Efectivo (UIAF)</legend>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>¿Exonerado de UIAF?</label>
+          <div class="radio-group">
+            <label><input type="radio" formControlName="exoneracionUiaf" [value]="true" /> Sí</label>
+            <label><input type="radio" formControlName="exoneracionUiaf" [value]="false" /> No</label>
+          </div>
+        </div>
+
+        <div class="form-group sm">
+          <label>Fecha de Exoneración</label>
+          <input type="date" formControlName="fechaExoneracion" />
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 🟦 SECCIÓN: ASOCIADO PEPS -->
+    <fieldset>
+      <legend>El Asociado Trabajado es PEPS</legend>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>¿Es PEPS?</label>
+          <div class="radio-group">
+            <label><input type="radio" formControlName="asociadoPeps" [value]="true" /> Sí</label>
+            <label><input type="radio" formControlName="asociadoPeps" [value]="false" /> No</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Tipo de PEPS</label>
+          <select formControlName="tipoPeps">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let t of tiposPeps" [value]="t.codigo">{{ t.nombre }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Observaciones</label>
+          <textarea formControlName="observacionesPeps" maxlength="300" rows="2"></textarea>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group sm">
+          <label>Fecha Inicial</label>
+          <input type="date" formControlName="fechaInicialPeps" />
+        </div>
+
+        <div class="form-group sm">
+          <label>Fecha Final</label>
+          <input type="date" formControlName="fechaFinalPeps" />
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 🟧 SECCIÓN: FAMILIARES PEPS -->
+    <fieldset>
+      <legend>Familiares del Asociado con Condición PEPS</legend>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>¿Tiene Familiares PEPS?</label>
+          <div class="radio-group">
+            <label><input type="radio" formControlName="familiaPeps" [value]="true" /> Sí</label>
+            <label><input type="radio" formControlName="familiaPeps" [value]="false" /> No</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Tipo de PEPS (Familiar)</label>
+          <select formControlName="tipoFamiliaPeps">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let t of tiposPeps" [value]="t.codigo">{{ t.nombre }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Parentesco</label>
+          <select formControlName="codigoParentesco">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let p of parentescos" [value]="p.codigo">{{ p.nombre }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group sm">
+          <label>Cédula Familiar</label>
+          <input type="text" maxlength="20" formControlName="cedulaFamiliaPeps" />
+        </div>
+
+        <div class="form-group full">
+          <label>Nombre del Familiar</label>
+          <input type="text" maxlength="100" formControlName="nombreFamiliaPeps" />
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 🟨 SECCIÓN: MONEDA EXTRANJERA -->
+    <fieldset>
+      <legend>Transacciones en Moneda Extranjera</legend>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>¿Realiza transacciones en moneda extranjera?</label>
+          <div class="radio-group">
+            <label><input type="radio" formControlName="monedaExtranjera" [value]="true" /> Sí</label>
+            <label><input type="radio" formControlName="monedaExtranjera" [value]="false" /> No</label>
+          </div>
+        </div>
+
+        <div class="form-group full">
+          <label>Observación</label>
+          <input type="text" maxlength="200" formControlName="observacionMonedaExtranjera" />
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 🟫 SECCIÓN: CUENTA EN EL EXTRANJERO -->
+    <fieldset>
+      <legend>Cuenta Bancaria en el Extranjero</legend>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>¿Posee cuenta en el extranjero?</label>
+          <div class="radio-group">
+            <label><input type="radio" formControlName="cuentaExtranjero" [value]="true" /> Sí</label>
+            <label><input type="radio" formControlName="cuentaExtranjero" [value]="false" /> No</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Tipo de Moneda</label>
+          <input type="text" maxlength="20" formControlName="tipoMonedaExtranjera" />
+        </div>
+
+        <div class="form-group">
+          <label>Número de Cuenta</label>
+          <input type="text" maxlength="30" formControlName="numeroCuentaExtranjero" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Banco</label>
+          <input type="text" maxlength="100" formControlName="nombreBancoExtranjero" />
+        </div>
+
+        <div class="form-group sm">
+          <label>Ciudad</label>
+          <input type="text" maxlength="50" formControlName="ciudadCuentaExtranjero" />
+        </div>
+
+        <div class="form-group sm">
+          <label>País</label>
+          <input type="text" maxlength="50" formControlName="paisCuentaExtranjero" />
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 🟦 Acciones -->
+    <div class="form-actions full">
+      <button type="submit" class="btn btn--primary" [disabled]="form.invalid">
+        💾 {{ editando ? 'Actualizar' : 'Guardar' }}
+      </button>
+      <button type="button" class="btn btn--cancel" (click)="volver()">
+        ↩️ Cancelar
+      </button>
+    </div>
+
+  </form>
+</div>

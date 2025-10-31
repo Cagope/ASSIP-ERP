@@ -10,6 +10,7 @@ import { UbicacionesExporterService } from './ubicaciones-exporter.service';
 import { UbicacionesApi } from './ubicaciones.api';
 import { Ubicacion } from '../../../shared/models/ubicacion.model';
 
+
 /**
  * 🧭 COMPONENTE: Listado de Ubicaciones
  * ------------------------------------------------------------

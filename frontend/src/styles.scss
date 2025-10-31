@@ -1,12 +1,11 @@
-/* ==========================================================================
+/* =============================================================================
    🌐 ASSIP-ERP — Estilos globales del sistema Angular
-   Archivo: src/styles.scss
-   Descripción:
-     Punto de entrada único para los estilos globales.
-     Usa el sistema moderno de módulos Sass (`@use`).
+   -----------------------------------------------------------------------------
+   Archivo maestro de estilos.
+   Solo importa módulos Sass temáticos organizados en /styles.
    ========================================================================== */
 
-/* === Importar módulos base del sistema (en orden jerárquico) ============= */
+/* === Importar módulos base (orden jerárquico) ============================ */
 @use 'sass:color';
 @use './styles/tokens';
 @use './styles/base';
@@ -14,23 +13,7 @@
 @use './styles/buttons';
 @use './styles/forms';
 
-
-/* === Configuración adicional ============================================= */
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  background: tokens.$color-bg;
-  color: tokens.$color-text;
-  font-family: "Inter", "Roboto", system-ui, sans-serif;
-}
-
-/* === Activación global de íconos Material === */
-.mat-icon {
-  font-family: 'Material Symbols Outlined' !important;
-  font-variation-settings:
-    'FILL' 0,
-    'wght' 400,
-    'GRAD' 0,
-    'opsz' 24;
-}
+/* === Módulos temáticos adicionales ======================================= */
+@use './styles/icons';
+@use './styles/numbers';
+@use './styles/responsive';

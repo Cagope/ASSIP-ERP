@@ -26,6 +26,12 @@
   cursor: pointer;
   border: none;
   transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+
+  i, svg {
+    font-size: 16px;
+    line-height: 1;
+  }
 
   &:hover {
     transform: translateY(-1px);
@@ -42,36 +48,74 @@
   }
 }
 
-/* === 🎯 VARIANTES TEMÁTICAS ============================================ */
+/* === 💾 BOTÓN PRINCIPAL (Guardar / Actualizar) ===========================
+   Azul degradado con sombra ligera y respuesta de hover/active.
+   ======================================================================== */
 .btn--primary {
-  background: linear-gradient(180deg,
-    color.adjust(t.$color-primary, $lightness: 5%), t.$color-primary);
+  background: linear-gradient(90deg,
+    color.adjust(t.$color-primary, $lightness: -5%),
+    color.adjust(t.$color-primary, $lightness: 10%)
+  );
   color: t.$color-surface;
-  box-shadow: t.$shadow-sm;
+  box-shadow: 0 2px 4px rgba(0, 80, 255, 0.25);
+  font-weight: 700;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.4px;
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.07);
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 80, 255, 0.2);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 }
 
-.btn--new {
-  background: linear-gradient(180deg,
-    color.adjust(t.$color-success, $lightness: 8%), t.$color-success);
-  color: t.$color-surface;
-}
-
-.btn--edit {
-  background: linear-gradient(180deg,
-    color.adjust(t.$color-warning, $lightness: 10%), t.$color-warning);
+/* === ⚪️ BOTÓN DE CANCELAR (Neutral gris) ================================
+   Fondo gris suave, borde definido y cambio sutil al pasar el mouse.
+   ======================================================================== */
+.btn--cancel {
+  background: #e9ecef;
   color: t.$color-text;
+  border: 1.5px solid color.adjust(t.$color-border, $lightness: -10%);
+  font-weight: 600;
+  border-radius: t.$radius-sm;
+  transition: all 0.25s ease;
+
+  &:hover:not(:disabled) {
+    background: #dee2e6;
+    color: color.adjust(t.$color-text, $lightness: -10%);
+  }
+
+  &:active:not(:disabled) {
+    background: #d3d7da;
+    color: t.$color-text;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    background: #f3f3f3;
+    border-color: color.adjust(t.$color-border, $lightness: 10%);
+    color: color.adjust(t.$color-text, $lightness: 25%);
+  }
 }
 
-.btn--delete, .btn--danger {
-  background: linear-gradient(180deg,
-    color.adjust(t.$color-danger, $lightness: 6%), t.$color-danger);
-  color: t.$color-surface;
-}
-
+/* === 🖨️ IMPRIMIR ====================================================== */
 .btn--print {
   background: linear-gradient(180deg,
     color.adjust(t.$color-info, $lightness: 6%), t.$color-info);
   color: t.$color-surface;
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.05);
+  }
 }
 
 /* === 🧊 BOTONES TRANSPARENTES (“GHOST”) ================================ */
@@ -83,6 +127,32 @@
 
   &:hover {
     background: #f8f8f8;
+  }
+}
+
+/* === 💚 NUEVO ========================================================== */
+.btn--new {
+  background: linear-gradient(180deg,
+    color.adjust(t.$color-success, $lightness: 8%), t.$color-success);
+  color: t.$color-surface;
+}
+
+/* === 🟧 EDITAR ========================================================= */
+.btn--edit {
+  background: linear-gradient(180deg,
+    color.adjust(t.$color-warning, $lightness: 10%), t.$color-warning);
+  color: t.$color-text;
+}
+
+/* === 🔴 ELIMINAR / PELIGRO ============================================ */
+.btn--delete, .btn--danger {
+  background: linear-gradient(180deg,
+    color.adjust(t.$color-danger, $lightness: 6%), t.$color-danger);
+  color: t.$color-surface;
+  box-shadow: t.$shadow-sm;
+
+  &:hover {
+    background: color.adjust(t.$color-danger, $lightness: -4%);
   }
 }
 
@@ -131,4 +201,81 @@
   .header-actions {
     display: none !important;
   }
+}
+
+/* === 🟨 ÁREA DE ACCIONES DE FORMULARIO ================================ */
+/* Uso:
+   <div class="form-actions">
+     <button type="submit" class="btn btn--primary">💾 Guardar</button>
+     <button type="button" class="btn btn--cancel">↩️ Cancelar</button>
+   </div>
+   ----------------------------------------------------------------------
+   Se utiliza en todos los CRUDs y formularios del sistema.
+   Mantiene alineación uniforme, márgenes y proporciones.
+   ====================================================================== */
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px; /* igual que header-actions */
+  margin-top: t.$space-5;
+  width: 100%;
+
+  button {
+    @extend .btn;
+    min-width: 130px; /* mismo ancho visual que los de cabecera */
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: t.$radius-sm;
+  }
+}
+
+
+/* === ⚙️ BOTONES EN TABLAS — ACCIONES COMPACTAS ==========================
+   Aplica a botones tipo "Gestionar", "Crear", "Ver", etc.
+   Mejora los de Bootstrap manteniendo proporciones pequeñas.
+   ====================================================================== */
+.btn-outline-primary {
+  background: #f8f9fa;
+  color: color.adjust(t.$color-primary, $lightness: -10%);
+  border: 1.5px solid color.adjust(t.$color-primary, $lightness: 10%);
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: t.$radius-sm;
+  transition: all 0.25s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+  &:hover:not(:disabled) {
+    background: color.adjust(t.$color-primary, $lightness: 45%);
+    color: color.adjust(t.$color-primary, $lightness: -10%);
+    border-color: color.adjust(t.$color-primary, $lightness: 15%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 102, 255, 0.25);
+  }
+
+  &:active:not(:disabled) {
+    background: color.adjust(t.$color-primary, $lightness: 38%);
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    background: #f2f2f2;
+    border-color: #ddd;
+    color: #999;
+    cursor: not-allowed;
+  }
+}
+
+/* Tamaño reducido uniforme (sm) */
+.btn-sm {
+  font-size: 12px;
+  padding: 4px 10px;
+  line-height: 1.1;
 }

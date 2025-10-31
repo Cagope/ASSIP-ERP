@@ -296,12 +296,13 @@
 
     <!-- 🟨 Acciones -->
     <div class="form-actions full">
-      <button type="submit" class="btn sm primary" [disabled]="form.invalid">
-        💾 {{ editando ? 'actualizar' : 'guardar' }}
+      <button type="submit" class="btn btn--primary" [disabled]="form.invalid">
+        💾 {{ editando ? 'Actualizar' : 'Guardar' }}
       </button>
-      <button type="button" class="btn sm danger" (click)="volver()">
-        ↩️ cancelar
+      <button type="button" class="btn btn--cancel" (click)="volver()">
+        ↩️ Cancelar
       </button>
     </div>
+
   </form>
 </div>

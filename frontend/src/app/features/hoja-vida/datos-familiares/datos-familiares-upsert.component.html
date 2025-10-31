@@ -1,0 +1,139 @@
+<div class="form-container">
+  <h3>{{ editando ? 'Editar Datos Familiares' : 'Nuevo Dato Familiar' }}</h3>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()" autocomplete="off">
+
+    <!-- 🧍‍♂️ SECCIÓN: DATOS DEL FAMILIAR -->
+    <fieldset>
+      <legend>Datos del Familiar</legend>
+
+      <!-- Nombre completo -->
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Nombre completo *</label>
+          <input type="text" maxlength="100" formControlName="nombreDatosFamiliar" required />
+          <small class="error-text"
+                 *ngIf="form.get('nombreDatosFamiliar')?.invalid && form.get('nombreDatosFamiliar')?.touched">
+            Campo requerido (máx. 100 caracteres)
+          </small>
+        </div>
+      </div>
+
+      <!-- 📄 Documento y Parentesco -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Documento</label>
+          <input type="text" maxlength="20" formControlName="documentoDatosFamiliar" placeholder="Opcional" />
+        </div>
+
+        <div class="form-group">
+          <label>Parentesco *</label>
+          <select formControlName="codigoParentesco" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let p of parentescos" [value]="p.codigo">{{ p.nombre }}</option>
+          </select>
+          <small class="error-text"
+                 *ngIf="form.get('codigoParentesco')?.invalid && form.get('codigoParentesco')?.touched">
+            Campo obligatorio
+          </small>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 🌍 SECCIÓN: UBICACIÓN DEL FAMILIAR -->
+    <fieldset>
+      <legend>Ubicación del Familiar</legend>
+
+      <!-- Dirección -->
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Dirección *</label>
+          <input type="text" maxlength="100" formControlName="direccionDatosFamiliar" required />
+          <small class="error-text"
+                 *ngIf="form.get('direccionDatosFamiliar')?.invalid && form.get('direccionDatosFamiliar')?.touched">
+            Campo obligatorio (máx. 100 caracteres)
+          </small>
+        </div>
+      </div>
+
+      <!-- Departamento, Ciudad -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Departamento *</label>
+          <select formControlName="idDepartamento" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let d of departamentos" [value]="d.idDepartamento">{{ d.nombreDepartamento }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Ciudad *</label>
+          <select formControlName="idCiudad" required>
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let c of ciudades" [value]="c.idCiudad">{{ c.nombreCiudad }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Teléfono y Celular -->
+      <div class="form-row">
+        <div class="form-group sm">
+          <label>Teléfono</label>
+          <input type="text" maxlength="7" formControlName="telefonoDatosFamiliar" placeholder="Ej: 6543210" />
+        </div>
+
+        <div class="form-group sm">
+          <label>Celular</label>
+          <input type="text" maxlength="10" formControlName="celularDatosFamiliar" placeholder="Ej: 3123456789" />
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 💰 SECCIÓN: DATOS ECONÓMICOS -->
+    <fieldset>
+      <legend>Información Económica</legend>
+
+      <div class="form-row">
+        <div class="form-group sm">
+          <label>Ingresos</label>
+          <input type="text" formControlName="ingresosDatosFamiliar" numericFormat />
+        </div>
+
+        <div class="form-group sm">
+          <label>Egresos</label>
+          <input type="text" formControlName="egresosDatosFamiliar" numericFormat />
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 🌟 SECCIÓN: REFERENCIA -->
+    <fieldset>
+      <legend>Referencia Familiar</legend>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label>¿Este familiar es una referencia?</label>
+          <div class="radio-group">
+            <label>
+              <input type="radio" formControlName="referenciaFamiliar" [value]="true" /> Sí
+            </label>
+            <label>
+              <input type="radio" formControlName="referenciaFamiliar" [value]="false" /> No
+            </label>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 🟨 Acciones -->
+    <div class="form-actions full">
+      <button type="submit" class="btn btn--primary" [disabled]="form.invalid">
+        💾 {{ editando ? 'Actualizar' : 'Guardar' }}
+      </button>
+      <button type="button" class="btn btn--cancel" (click)="volver()">
+        ↩️ Cancelar
+      </button>
+    </div>
+
+  </form>
+</div>

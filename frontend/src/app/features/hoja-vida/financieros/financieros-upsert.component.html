@@ -1,0 +1,163 @@
+<div class="form-container">
+  <h3>{{ editando ? 'Editar Información Financiera' : 'Nueva Información Financiera' }}</h3>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()" autocomplete="off">
+
+    <!-- 🔒 Campo oculto — idDatosPersonal (requerido para validación) -->
+    <input type="hidden" formControlName="idDatosPersonal" />
+
+    <!-- 💵 INGRESOS -->
+    <fieldset>
+      <legend>Ingresos</legend>
+
+      <div class="form-row">
+        <div class="form-group sm">
+          <label>Salario</label>
+          <input type="text" formControlName="valorSalario" numericFormat />
+        </div>
+
+        <div class="form-group sm">
+          <label>Pensión</label>
+          <input type="text" formControlName="valorPension" numericFormat />
+        </div>
+
+        <div class="form-group sm">
+          <label>Ingresos por Arriendo</label>
+          <input type="text" formControlName="ingresosArriendo" numericFormat />
+        </div>
+
+        <div class="form-group sm">
+          <label>Comisiones</label>
+          <input type="text" formControlName="ingresosComisiones" numericFormat />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group sm">
+          <label>Otros Ingresos</label>
+          <input type="text" formControlName="otrosIngresos" numericFormat />
+        </div>
+
+        <div class="form-group full" *ngIf="form.get('otrosIngresos')?.value > 0">
+          <label>Comentario (Otros Ingresos)</label>
+          <input type="text" maxlength="100" formControlName="comentarioOtrosIngresos" />
+        </div>
+
+        <div class="form-group full">
+          <label>Origen de Fondos</label>
+          <input type="text" maxlength="100" formControlName="origenFondos" />
+        </div>
+      </div>
+
+      <div class="form-row total">
+        <label>Total Ingresos:</label>
+        <span class="monto">
+          {{
+            (form.get('valorSalario')?.value || 0)
+            + (form.get('valorPension')?.value || 0)
+            + (form.get('ingresosArriendo')?.value || 0)
+            + (form.get('ingresosComisiones')?.value || 0)
+            + (form.get('otrosIngresos')?.value || 0)
+            | number: '1.0-0'
+          }}
+        </span>
+      </div>
+    </fieldset>
+
+    <!-- 💸 EGRESOS -->
+    <fieldset>
+      <legend>Egresos</legend>
+
+      <div class="form-row">
+        <div class="form-group sm">
+          <label>Egresos Familiares</label>
+          <input type="text" formControlName="egresosFamiliares" numericFormat />
+        </div>
+
+        <div class="form-group sm">
+          <label>Arriendo</label>
+          <input type="text" formControlName="egresosArriendo" numericFormat />
+        </div>
+
+        <div class="form-group sm">
+          <label>Créditos</label>
+          <input type="text" formControlName="egresosCredito" numericFormat />
+        </div>
+
+        <div class="form-group sm">
+          <label>Otros Egresos</label>
+          <input type="text" formControlName="otrosEgresos" numericFormat />
+        </div>
+      </div>
+
+      <div class="form-row" *ngIf="form.get('otrosEgresos')?.value > 0">
+        <div class="form-group full">
+          <label>Comentario (Otros Egresos)</label>
+          <input type="text" maxlength="100" formControlName="comentarioOtrosEgresos" />
+        </div>
+      </div>
+
+      <div class="form-row total">
+        <label>Total Egresos:</label>
+        <span class="monto">
+          {{
+            (form.get('egresosFamiliares')?.value || 0)
+            + (form.get('egresosArriendo')?.value || 0)
+            + (form.get('egresosCredito')?.value || 0)
+            + (form.get('otrosEgresos')?.value || 0)
+            | number: '1.0-0'
+          }}
+        </span>
+      </div>
+    </fieldset>
+
+    <!-- 💰 PATRIMONIO -->
+    <fieldset>
+      <legend>Patrimonio</legend>
+
+      <div class="form-row">
+        <div class="form-group sm">
+          <label>Total Activos</label>
+          <input type="text" formControlName="totalActivos" numericFormat />
+        </div>
+
+        <div class="form-group sm">
+          <label>Total Pasivos</label>
+          <input type="text" formControlName="totalPasivos" numericFormat />
+        </div>
+
+        <div class="form-group sm">
+          <label>Deuda Relación Financiera</label>
+          <input type="text" formControlName="deudaRelacionFinanciera" numericFormat />
+        </div>
+
+        <div class="form-group full" *ngIf="form.get('deudaRelacionFinanciera')?.value > 0">
+          <label>Relación Financiera</label>
+          <input type="text" maxlength="100" formControlName="relacionFinanciera" />
+        </div>
+      </div>
+
+      <div class="form-row total">
+        <label>Patrimonio Neto (Activos - Pasivos):</label>
+        <span class="monto">
+          {{
+            (form.get('totalActivos')?.value || 0)
+            - (form.get('totalPasivos')?.value || 0)
+            | number: '1.0-0'
+          }}
+        </span>
+      </div>
+    </fieldset>
+
+    <!-- 🟨 Acciones -->
+    <div class="form-actions full">
+      <button type="submit" class="btn btn--primary" [disabled]="form.invalid">
+        💾 {{ editando ? 'Actualizar' : 'Guardar' }}
+      </button>
+      <button type="button" class="btn btn--cancel" (click)="volver()">
+        ↩️ Cancelar
+      </button>
+    </div>
+
+  </form>
+</div>

@@ -1,0 +1,23 @@
+/* ===========================================================
+   🧾 LISTADO SARLAFT — Estilos específicos
+   Basado en el listado de Datos Personales del ERP ASSIP.
+   =========================================================== */
+
+/* 🧩 Importa las reglas base de estilo de los listados generales */
+@use '../datos-personales/datos-personales-list.component' as *;
+
+/* ===========================================================
+   🎨 COLORES SEMÁNTICOS PERSONALIZADOS
+   =========================================================== */
+
+/* ✅ Texto para registros con información SARLAFT */
+.text-success {
+  color: #16a34a; /* Verde intenso */
+  font-weight: 500;
+}
+
+/* ❌ Texto para registros sin información SARLAFT */
+.text-danger {
+  color: #dc2626; /* Rojo vibrante */
+  font-weight: 500;
+}

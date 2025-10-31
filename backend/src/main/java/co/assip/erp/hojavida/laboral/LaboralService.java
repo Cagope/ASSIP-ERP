@@ -16,11 +16,7 @@ public class LaboralService {
         this.repository = repository;
     }
 
-    // ================================================================
-    // 🔹 OPERACIONES BÁSICAS
-    // ================================================================
-
-    /** 🔹 Listar todos los registros ordenados por fecha de edición */
+    /** 🔹 Listar todos los registros ordenados por fecha de edición descendente */
     public List<Laboral> listar() {
         return repository.findAllByOrderByFechaEdicionDesc();
     }
@@ -39,8 +35,8 @@ public class LaboralService {
     public Laboral crear(Laboral nuevo) {
         validarDatos(nuevo);
 
-        nuevo.setFechaCreacion(LocalDateTime.now());
-        nuevo.setFechaEdicion(LocalDateTime.now());
+        nuevo.setFechaCreacion(java.sql.Timestamp.valueOf(LocalDateTime.now()));
+        nuevo.setFechaEdicion(java.sql.Timestamp.valueOf(LocalDateTime.now()));
         return repository.save(nuevo);
     }
 
@@ -51,7 +47,7 @@ public class LaboralService {
 
             actualizado.setIdLaboral(id);
             actualizado.setFechaCreacion(existente.getFechaCreacion());
-            actualizado.setFechaEdicion(LocalDateTime.now());
+            actualizado.setFechaEdicion(java.sql.Timestamp.valueOf(LocalDateTime.now()));
             return repository.save(actualizado);
         });
     }
@@ -68,17 +64,14 @@ public class LaboralService {
     // ================================================================
 
     private void validarDatos(Laboral l) {
-        // --- Nombre empresa obligatorio ---
         if (l.getNombreEmpresa() == null || l.getNombreEmpresa().isBlank()) {
             throw new IllegalArgumentException("El nombre de la empresa es obligatorio.");
         }
 
-        // --- Dirección obligatoria ---
         if (l.getDireccion() == null || l.getDireccion().isBlank()) {
             throw new IllegalArgumentException("La dirección de la empresa es obligatoria.");
         }
 
-        // --- Teléfono de empresa ---
         if (l.getTelefonoEmpresa() != null && !l.getTelefonoEmpresa().isBlank()) {
             if (!l.getTelefonoEmpresa().matches("^[0-9]{7}$")) {
                 throw new IllegalArgumentException("El teléfono de la empresa debe tener exactamente 7 dígitos numéricos.");
@@ -87,7 +80,6 @@ public class LaboralService {
             l.setTelefonoEmpresa(null);
         }
 
-        // --- Celular empresa ---
         if (l.getCelularEmpresa() != null && !l.getCelularEmpresa().isBlank()) {
             if (!l.getCelularEmpresa().matches("^[0-9]{10}$")) {
                 throw new IllegalArgumentException("El celular de la empresa debe tener 10 dígitos numéricos.");
@@ -96,7 +88,6 @@ public class LaboralService {
             l.setCelularEmpresa(null);
         }
 
-        // --- Celular contacto ---
         if (l.getCelularContacto() != null && !l.getCelularContacto().isBlank()) {
             if (!l.getCelularContacto().matches("^[0-9]{10}$")) {
                 throw new IllegalArgumentException("El celular de contacto debe tener 10 dígitos numéricos.");
@@ -105,7 +96,6 @@ public class LaboralService {
             l.setCelularContacto(null);
         }
 
-        // --- Correo empresa ---
         if (l.getCorreoEmpresa() != null && !l.getCorreoEmpresa().isBlank()) {
             if (!l.getCorreoEmpresa().matches("^[^@]+@[^@]+\\.[^@]+$")) {
                 throw new IllegalArgumentException("El correo electrónico de la empresa no tiene un formato válido.");
@@ -114,12 +104,10 @@ public class LaboralService {
             l.setCorreoEmpresa(null);
         }
 
-        // --- Fechas ---
         if (l.getFechaVinculacion() == null) {
             l.setFechaVinculacion(LocalDateTime.now().toLocalDate());
         }
 
-        // --- Datos de auditoría ---
         if (l.getFkSeguridadCreacion() == null) l.setFkSeguridadCreacion(1);
         if (l.getFkSeguridadEdicion() == null) l.setFkSeguridadEdicion(1);
     }

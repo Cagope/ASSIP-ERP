@@ -1,0 +1,96 @@
+<div class="form-container">
+  <h3>{{ editando ? 'Editar Permisos Especiales' : 'Nuevos Permisos Especiales' }}</h3>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()" autocomplete="off">
+
+    <!-- 🟩 SECCIÓN: AUTORIZACIONES DE CONTACTO -->
+    <fieldset>
+      <legend>Autorizaciones para Contacto y Comunicación</legend>
+
+      <!-- Llamadas -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>¿Autoriza recibir llamadas telefónicas?</label>
+          <div class="radio-group">
+            <label><input type="radio" formControlName="recibeLlamadas" [value]="true" /> Sí</label>
+            <label><input type="radio" formControlName="recibeLlamadas" [value]="false" /> No</label>
+          </div>
+        </div>
+        <div class="form-group sm">
+          <label>Fecha de autorización</label>
+          <input type="date" formControlName="fechaLlamadas" />
+        </div>
+      </div>
+
+      <!-- SMS -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>¿Autoriza recibir mensajes de texto (SMS)?</label>
+          <div class="radio-group">
+            <label><input type="radio" formControlName="recibeSms" [value]="true" /> Sí</label>
+            <label><input type="radio" formControlName="recibeSms" [value]="false" /> No</label>
+          </div>
+        </div>
+        <div class="form-group sm">
+          <label>Fecha de autorización</label>
+          <input type="date" formControlName="fechaSms" />
+        </div>
+      </div>
+
+      <!-- Emails -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>¿Autoriza recibir correos electrónicos?</label>
+          <div class="radio-group">
+            <label><input type="radio" formControlName="recibeEmails" [value]="true" /> Sí</label>
+            <label><input type="radio" formControlName="recibeEmails" [value]="false" /> No</label>
+          </div>
+        </div>
+        <div class="form-group sm">
+          <label>Fecha de autorización</label>
+          <input type="date" formControlName="fechaEmails" />
+        </div>
+      </div>
+
+      <!-- Correspondencia física -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>¿Autoriza recibir correspondencia física (cartas)?</label>
+          <div class="radio-group">
+            <label><input type="radio" formControlName="recibeCartas" [value]="true" /> Sí</label>
+            <label><input type="radio" formControlName="recibeCartas" [value]="false" /> No</label>
+          </div>
+        </div>
+        <div class="form-group sm">
+          <label>Fecha de autorización</label>
+          <input type="date" formControlName="fechaCartas" />
+        </div>
+      </div>
+
+      <!-- Redes Sociales -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>¿Autoriza recibir información a través de redes sociales?</label>
+          <div class="radio-group">
+            <label><input type="radio" formControlName="recibeRedesSociales" [value]="true" /> Sí</label>
+            <label><input type="radio" formControlName="recibeRedesSociales" [value]="false" /> No</label>
+          </div>
+        </div>
+        <div class="form-group sm">
+          <label>Fecha de autorización</label>
+          <input type="date" formControlName="fechaRedesSociales" />
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- 🟦 ACCIONES -->
+    <div class="form-actions full">
+      <button type="submit" class="btn btn--primary" [disabled]="form.invalid">
+        💾 {{ editando ? 'Actualizar' : 'Guardar' }}
+      </button>
+      <button type="button" class="btn btn--cancel" (click)="volver()">
+        ↩️ Cancelar
+      </button>
+    </div>
+  </form>
+</div>
