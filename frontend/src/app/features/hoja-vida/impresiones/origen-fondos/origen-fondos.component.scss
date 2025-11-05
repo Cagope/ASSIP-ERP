@@ -1,0 +1,395 @@
+/* ============================================================
+   🎨 FORMULARIOS DE IMPRESIÓN — Estilo Corporativo ASSIP-ERP
+   Compatible con impresión A4 (márgenes 15 mm, fuente 12 px)
+   ============================================================ */
+
+/* ===== Base general ===== */
+:root {
+  --line-gap: .18rem;
+}
+
+.sheet {
+  padding: .75rem;
+  max-width: 1024px;
+  margin: 0 auto;
+  font-size: 12px;
+  background: #fff;
+  color: #111;
+  font-family: "Arial", sans-serif;
+}
+
+/* ===== Barra de acciones (solo vista previa) ===== */
+.actions-top {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: .6rem;
+}
+
+.actions-top .btn {
+  padding: .38rem .65rem;
+  border-radius: .5rem;
+  border: 1px solid #12903e;
+  background: #12903e;
+  color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: .85rem;
+  transition: all .15s ease-in-out;
+}
+
+.actions-top .btn:hover {
+  filter: brightness(1.1);
+}
+
+.actions-top .btn.secondary {
+  border-color: #5a5a5a;
+  background: #6b6b6b;
+}
+
+/* ===== Encabezado institucional ===== */
+.header {
+  display: grid;
+  grid-template-columns: 110px 1fr 130px;
+  gap: 1rem;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: .75rem;
+  padding: .5rem .75rem;
+  background: #fff;
+}
+
+.logo img {
+  display: block;
+  max-width: 120px;
+  max-height: 80px;
+  object-fit: contain;
+  margin: 0 auto;
+}
+
+.header > .info {
+  border-left: 1px solid #ddd;
+  padding-left: .75rem;
+  text-align: center;
+}
+
+.header > .ver {
+  border-left: 1px solid #ddd;
+  padding-left: .75rem;
+  text-align: center;
+}
+
+.info {
+  font-size: .82rem;
+  line-height: 1.3;
+}
+
+.info .rs {
+  font-weight: 700;
+  font-size: .95rem;
+  text-transform: uppercase;
+}
+
+.info .nit {
+  font-size: .8rem;
+  color: #333;
+}
+
+.form-title {
+  display: block;
+  margin-top: .25rem;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #000;
+  letter-spacing: .3px;
+}
+
+.form-title-large {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-top: 0.3rem;
+  text-align: center;
+  letter-spacing: 0.3px;
+}
+
+.ver {
+  color: #666;
+}
+
+.ver .ver-txt {
+  font-size: .72rem;
+  line-height: 1;
+  font-weight: 500;
+}
+
+.ver .ver-fecha {
+  font-size: .8rem;
+  font-weight: 600;
+  color: #222;
+}
+
+/* Línea divisoria */
+.header-line {
+  margin: .45rem 0 .6rem;
+  border: none;
+  border-top: 1px solid #ccc;
+}
+
+/* ===== Secciones ===== */
+.title {
+  text-align: center;
+  margin: .8rem 0 .6rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0d5728;
+  text-transform: uppercase;
+}
+
+.block {
+  margin-top: .65rem;
+}
+
+.block h2 {
+  font-size: 1rem;
+  margin: 0 0 .35rem;
+  font-weight: 600;
+  color: #12903e;
+  text-transform: uppercase;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: .2rem;
+}
+
+/* ===== Tarjetas internas ===== */
+.card {
+  border: 1px solid #ddd;
+  border-radius: .5rem;
+  padding: .55rem .6rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--line-gap);
+  background: #fff;
+}
+
+/* ===== Líneas clave-valor ===== */
+.line {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.kv {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .22rem;
+  margin-right: 1rem;
+  min-width: 0;
+}
+
+.kv .lbl {
+  font-weight: 400;
+  font-size: .9rem;
+  white-space: nowrap;
+}
+
+.kv .val {
+  font-weight: 700;
+}
+
+.kv.span2 {
+  flex: 2 1 0;
+}
+
+/* ===== Firmas y huellas ===== */
+.signatures {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-top: 1rem;
+}
+
+.sig {
+  flex: 1;
+  min-width: 220px;
+}
+
+.sig-area {
+  width: 50%;
+  border-bottom: 2px solid #222;
+  margin: 2rem 0 .35rem 0;
+}
+
+.sig-meta {
+  display: grid;
+  row-gap: .15rem;
+}
+
+.meta-row {
+  display: flex;
+  align-items: baseline;
+  gap: .35rem;
+  font-size: .78rem;
+}
+
+.sig-label {
+  font-weight: 600;
+}
+
+.sig-id {
+  color: #444;
+}
+
+.finger {
+  width: 260px;
+  text-align: center;
+}
+
+.finger-box {
+  width: 260px;
+  height: 240px;
+  border: 1.8px solid #222;
+  border-radius: .25rem;
+  margin: 0 auto .35rem;
+  background: #fff;
+}
+
+.finger-label {
+  font-size: .78rem;
+  font-weight: 600;
+}
+
+/* ===== Botones inferiores ===== */
+.actions {
+  margin-top: .7rem;
+  display: flex;
+  gap: .5rem;
+  justify-content: flex-end;
+}
+
+.btn {
+  padding: .38rem .65rem;
+  border-radius: .5rem;
+  border: 1px solid #12903e;
+  background: #12903e;
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+  font-size: .85rem;
+}
+
+.btn.secondary {
+  border-color: #5a5a5a;
+  background: #6b6b6b;
+}
+
+/* ===== Impresión ===== */
+/* ===== Paginación y reglas de impresión ===== */
+
+/* ===== Configuración de impresión fija a tamaño Carta ===== */
+@page {
+  size: Letter; /* o "8.5in 11in" */
+  margin: 15mm; /* márgenes equilibrados */
+}
+
+/* ===== Reglas de impresión ===== */
+@media print {
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: #fff;
+    margin: 0;
+    padding: 0;
+  }
+
+  .actions,
+  .actions-top,
+  .no-print,
+  .print-footer {
+    display: none !important;
+  }
+
+  .sheet {
+    width: 100%;
+    max-width: 210mm; /* asegura que quepa dentro de Carta */
+    margin: 0 auto;
+    padding: 12mm 15mm;
+    box-sizing: border-box;
+    page-break-inside: avoid;
+  }
+
+  .block,
+  .card,
+  .grid,
+  .line.one-line,
+  .signatures {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Título del formulario */
+  .form-title-large {
+    font-size: 1.6rem;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 0.3px;
+  }
+}
+
+
+/* ===== Título grande de formulario ===== */
+.form-title-large {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-top: 0.3rem;
+  text-align: center;
+  letter-spacing: 0.3px;
+}
+
+.line.one-line {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: baseline;
+}
+
+
+.aprobacion-consejo {
+  margin-top: 2.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+
+  .titulo-aprobacion {
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin: 0.8rem 0;
+    letter-spacing: 0.5px;
+  }
+
+  p {
+    margin: 0.4rem 0;
+  }
+
+  /* 🔹 Mayor espacio entre texto y líneas de firma */
+  .firmas-linea {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 3.5rem; /* ⬆️ aumentado de 2rem a 3.5rem */
+
+    .firma {
+      width: 45%;
+      text-align: center;
+
+      .linea-firma {
+        border-top: 1px solid #000;
+        width: 100%;
+        height: 1px;
+        margin-bottom: 0.3rem;
+      }
+
+      .cargo {
+        font-size: 0.85rem;
+      }
+    }
+  }
+}

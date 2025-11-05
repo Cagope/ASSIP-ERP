@@ -8,6 +8,7 @@ import { Financiero } from '../../../shared/models/financiero.model'; // ✅ mod
 
 // ✅ Directiva global de formato numérico
 import { NumericFormatDirective } from '@shared/utils/numeric-format.directive';
+import { Output, EventEmitter, Input, OnChanges, SimpleChanges } from '@angular/core';
 
 /**
  * 💰 Componente Upsert (Crear / Editar) — Financieros
@@ -25,10 +26,12 @@ import { NumericFormatDirective } from '@shared/utils/numeric-format.directive';
   templateUrl: './financieros-upsert.component.html',
   styleUrls: ['./financieros-upsert.component.scss']
 })
-export class FinancierosUpsertComponent implements OnInit {
+export class FinancierosUpsertComponent implements OnInit, OnChanges {
   // ================================================================
   // 🧩 Inyección de dependencias
   // ================================================================
+  @Output() formularioValido = new EventEmitter<boolean>();
+  @Input() idDatosPersonal?: number;
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -53,14 +56,48 @@ export class FinancierosUpsertComponent implements OnInit {
       // 🟡 Editar registro existente
       this.editando = true;
       this.api.obtener(+id).subscribe({
-        next: (data) => this.form.patchValue(data),
+        next: (data) => {
+          this.form.patchValue(data);
+
+          // ✅ Emitir validez inicial solo después de cargar los datos
+          queueMicrotask(() => {
+            this.formularioValido.emit(this.form.valid);
+          });
+        },
         error: (err) => console.error('❌ Error al cargar datos financieros:', err)
       });
-    } else if (idDatosPersonalParam) {
-      // 🟢 Creación asociada a una persona
-      const idDatosPersonal = Number(idDatosPersonalParam);
-      this.form.get('idDatosPersonal')?.setValue(idDatosPersonal);
-      // 🔹 No se deshabilita para que el formulario sea válido
+    } else {
+      // 🟢 Creación asociada a una persona (desde wizard o ruta con query param)
+      const idDatosPersonal = idDatosPersonalParam
+        ? Number(idDatosPersonalParam)
+        : this.idDatosPersonal;
+
+      if (idDatosPersonal) {
+        this.form.get('idDatosPersonal')?.setValue(idDatosPersonal);
+        this.form.updateValueAndValidity({ emitEvent: true }); // 🔹 nueva línea
+      }
+
+      // ✅ Emitir estado inicial del formulario vacío
+      queueMicrotask(() => {
+        this.formularioValido.emit(this.form.valid);
+      });
+    }
+
+    // 🟡 Escuchar cambios de validez (reactivo)
+    this.form.statusChanges.subscribe(() => {
+      this.formularioValido.emit(this.form.valid);
+    });
+  }
+
+  // ================================================================
+  // 🔗 Detectar cambios en el ID recibido desde el wizard
+  // ================================================================
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['idDatosPersonal'] && this.idDatosPersonal) {
+      console.log('🔗 Recibido idDatosPersonal desde wizard:', this.idDatosPersonal);
+      this.form.get('idDatosPersonal')?.setValue(this.idDatosPersonal);
+      this.form.updateValueAndValidity();
+      this.formularioValido.emit(this.form.valid);
     }
   }
 
@@ -96,9 +133,18 @@ export class FinancierosUpsertComponent implements OnInit {
 
       // === Auditoría ===
       fkSeguridadCreacion: [1],
-      fkSeguridadActualizacion: [1], // ✅ singular coherente con backend
+      fkSeguridadActualizacion: [1], // ✅ coherente con backend
+    });
+
+    // ✅ Emitir estado inicial
+    this.formularioValido.emit(this.form.valid);
+
+    // ✅ Detectar cambios en tiempo real
+    this.form.statusChanges.subscribe(() => {
+      this.formularioValido.emit(this.form.valid);
     });
   }
+
 
   // ================================================================
   // 💾 Guardar o actualizar registro
@@ -110,10 +156,15 @@ export class FinancierosUpsertComponent implements OnInit {
       return;
     }
 
+    // ✅ Si el formulario NO tiene idDatosPersonal y el wizard lo pasó, lo asignamos
+    if (!this.form.get('idDatosPersonal')?.value && this.idDatosPersonal) {
+      this.form.get('idDatosPersonal')?.setValue(this.idDatosPersonal);
+    }
+
     const raw = { ...this.form.getRawValue() } as Financiero;
     const id = this.form.get('idFinanciero')?.value;
 
-    // Recuperar idDatosPersonal si vino por query param
+    // 🔹 Recuperar idDatosPersonal si vino por query param (caso CRUD individual)
     if (!raw.idDatosPersonal) {
       const idDP = this.route.snapshot.queryParamMap.get('idDatosPersonal');
       if (idDP) raw.idDatosPersonal = +idDP;
@@ -126,11 +177,19 @@ export class FinancierosUpsertComponent implements OnInit {
     accion.subscribe({
       next: () => {
         alert('✅ Información financiera guardada correctamente.');
-        this.router.navigate(['/hoja-vida/financieros']);
+
+        if (this.idDatosPersonal) {
+          // 🟢 Caso wizard (no navegar, solo log)
+          console.log('🟢 Registro financiero vinculado al ID:', this.idDatosPersonal);
+        } else {
+          // 🟡 Caso CRUD individual
+          this.router.navigate(['/hoja-vida/financieros']);
+        }
       },
       error: (err) => console.error('❌ Error al guardar información financiera:', err)
     });
   }
+
 
   // ================================================================
   // 🔙 Volver al listado

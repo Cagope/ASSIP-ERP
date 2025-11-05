@@ -32,7 +32,7 @@ export class PermisosEspecialesExporterService {
         ? new Date(p.fechaLlamadas).toLocaleDateString()
         : '',
 
-      'Recibe Mensajes SMS': p.recibeSms ? 'Sí' : 'No',
+      'Recibe Mensajes SMS': p.recibeMsm ? 'Sí' : 'No',
       'Fecha Autorización SMS': p.fechaSms
         ? new Date(p.fechaSms).toLocaleDateString()
         : '',

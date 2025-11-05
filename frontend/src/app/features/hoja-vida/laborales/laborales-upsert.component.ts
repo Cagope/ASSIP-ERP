@@ -8,6 +8,7 @@ import { tap } from 'rxjs/operators';
 import { LaboralesApi } from './laborales.api';
 import { Laboral } from '../../../shared/models/laboral.model';
 import { CatalogosApi, CodigoNombreDTO, Departamento, Ciudad } from '../../../shared/catalogos/catalogos.api';
+import { Output, EventEmitter, Input, OnChanges, SimpleChanges } from '@angular/core';
 
 /**
  * 💼 Componente Upsert (Crear / Editar) — Laborales
@@ -25,10 +26,12 @@ import { CatalogosApi, CodigoNombreDTO, Departamento, Ciudad } from '../../../sh
   templateUrl: './laborales-upsert.component.html',
   styleUrls: ['./laborales-upsert.component.scss']
 })
-export class LaboralesUpsertComponent implements OnInit {
+export class LaboralesUpsertComponent implements OnInit, OnChanges {
   // ================================================================
   // 🧩 Inyección de dependencias
   // ================================================================
+  @Output() formularioValido = new EventEmitter<boolean>();
+  @Input() idDatosPersonal?: number;
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -65,15 +68,37 @@ export class LaboralesUpsertComponent implements OnInit {
         if (id) {
           this.editando = true;
           this.api.obtener(+id).subscribe({
-            next: (data) => this.form.patchValue(data),
+            next: (data) => {
+              this.form.patchValue(data);
+              // ✅ Emitir validez tras cargar datos
+              queueMicrotask(() => {
+                this.formularioValido.emit(this.form.valid);
+              });
+            },
             error: (err) => console.error('❌ Error al cargar datos laborales:', err)
           });
-        } else if (idDatosPersonalParam) {
-          // Si viene desde el listado de personas (relación 1:1)
-          const idDatosPersonal = Number(idDatosPersonalParam);
-          this.form.get('idDatosPersonal')?.setValue(idDatosPersonal);
-          this.form.get('idDatosPersonal')?.disable();
+        } else {
+          // 🟩 Caso NUEVO (desde wizard o creación directa)
+          const idDatosPersonal = idDatosPersonalParam
+            ? Number(idDatosPersonalParam)
+            : this.idDatosPersonal;
+
+          if (idDatosPersonal) {
+            this.form.get('idDatosPersonal')?.setValue(idDatosPersonal);
+            this.form.get('idDatosPersonal')?.disable({ emitEvent: false });
+            this.form.updateValueAndValidity({ emitEvent: true }); // 🔹 nueva línea
+          }
+
+          // ✅ Emitir validez inicial (form vacío o parcial)
+          queueMicrotask(() => {
+            this.formularioValido.emit(this.form.valid);
+          });
         }
+
+        // 🟡 Escuchar cambios de validez (en tiempo real)
+        this.form.statusChanges.subscribe(() => {
+          this.formularioValido.emit(this.form.valid);
+        });
       },
       error: (err) => console.error('❌ Error cargando catálogos:', err)
     });
@@ -91,6 +116,19 @@ export class LaboralesUpsertComponent implements OnInit {
       }
     });
   }
+
+  // ================================================================
+  // 🔗 Detectar cambios en el ID recibido desde el wizard
+  // ================================================================
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['idDatosPersonal'] && this.idDatosPersonal) {
+      console.log('🔗 Recibido idDatosPersonal desde wizard:', this.idDatosPersonal);
+      this.form.get('idDatosPersonal')?.setValue(this.idDatosPersonal);
+      this.form.updateValueAndValidity();
+      this.formularioValido.emit(this.form.valid);
+    }
+  }
+
 
   // ================================================================
   // 🧱 Configuración del formulario reactivo
@@ -127,6 +165,10 @@ export class LaboralesUpsertComponent implements OnInit {
       fkSeguridadCreacion: [1],
       fkSeguridadEdicion: [1],
     });
+
+    // ✅ Emitir estado inicial
+    this.formularioValido.emit(this.form.valid);
+
   }
 
   // ================================================================
@@ -160,6 +202,11 @@ export class LaboralesUpsertComponent implements OnInit {
       return;
     }
 
+    // ✅ Si el formulario NO tiene idDatosPersonal y el wizard lo pasó, lo asignamos
+    if (!this.form.get('idDatosPersonal')?.value && this.idDatosPersonal) {
+      this.form.get('idDatosPersonal')?.setValue(this.idDatosPersonal);
+    }
+
     const raw = { ...this.form.getRawValue() } as Laboral;
     const id = this.form.get('idLaboral')?.value;
 
@@ -176,7 +223,14 @@ export class LaboralesUpsertComponent implements OnInit {
     accion.subscribe({
       next: () => {
         alert('✅ Información laboral guardada correctamente.');
-        this.router.navigate(['/hoja-vida/laborales']);
+
+        // 🔹 Si se ejecuta dentro del wizard (recibe idDatosPersonal desde @Input)
+        if (this.idDatosPersonal) {
+          console.log('🟢 Registro laboral vinculado al ID de persona:', this.idDatosPersonal);
+        } else {
+          // 🔹 Si se ejecuta en modo CRUD individual
+          this.router.navigate(['/hoja-vida/laborales']);
+        }
       },
       error: (err) => console.error('❌ Error al guardar información laboral:', err)
     });

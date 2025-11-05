@@ -36,7 +36,7 @@ public class PermisosEspecialesService {
         return repository.findById(id);
     }
 
-    /** 🔹 Buscar por persona (idDatosPersonal) */
+    /** 🔹 Buscar por persona (id_datos_personal) */
     public Optional<PermisosEspeciales> buscarPorPersona(Integer idDatosPersonal) {
         return repository.findByIdDatosPersonal(idDatosPersonal);
     }
@@ -55,7 +55,7 @@ public class PermisosEspecialesService {
         if (Boolean.TRUE.equals(nuevo.getRecibeCartas())) nuevo.setFechaCartas(hoy);
         if (Boolean.TRUE.equals(nuevo.getRecibeRedesSociales())) nuevo.setFechaRedes(hoy);
 
-        // 🕓 Auditoría (mantiene LocalDateTime)
+        // 🕓 Auditoría
         nuevo.setFechaCreacion(java.sql.Timestamp.valueOf(ahora));
         nuevo.setFechaEdicion(java.sql.Timestamp.valueOf(ahora));
 
@@ -71,35 +71,30 @@ public class PermisosEspecialesService {
             LocalDateTime ahora = LocalDateTime.now();
 
             // 🔸 Actualiza fecha solo si cambió el valor del permiso
-            if (!actualizado.getRecibeLlamadas().equals(existente.getRecibeLlamadas())) {
+            if (!actualizado.getRecibeLlamadas().equals(existente.getRecibeLlamadas()))
                 actualizado.setFechaLlamadas(hoy);
-            } else {
+            else
                 actualizado.setFechaLlamadas(existente.getFechaLlamadas());
-            }
 
-            if (!actualizado.getRecibeMsm().equals(existente.getRecibeMsm())) {
+            if (!actualizado.getRecibeMsm().equals(existente.getRecibeMsm()))
                 actualizado.setFechaSms(hoy);
-            } else {
+            else
                 actualizado.setFechaSms(existente.getFechaSms());
-            }
 
-            if (!actualizado.getRecibeEmails().equals(existente.getRecibeEmails())) {
+            if (!actualizado.getRecibeEmails().equals(existente.getRecibeEmails()))
                 actualizado.setFechaEmails(hoy);
-            } else {
+            else
                 actualizado.setFechaEmails(existente.getFechaEmails());
-            }
 
-            if (!actualizado.getRecibeCartas().equals(existente.getRecibeCartas())) {
+            if (!actualizado.getRecibeCartas().equals(existente.getRecibeCartas()))
                 actualizado.setFechaCartas(hoy);
-            } else {
+            else
                 actualizado.setFechaCartas(existente.getFechaCartas());
-            }
 
-            if (!actualizado.getRecibeRedesSociales().equals(existente.getRecibeRedesSociales())) {
+            if (!actualizado.getRecibeRedesSociales().equals(existente.getRecibeRedesSociales()))
                 actualizado.setFechaRedes(hoy);
-            } else {
+            else
                 actualizado.setFechaRedes(existente.getFechaRedes());
-            }
 
             // 🧩 Auditoría
             actualizado.setIdPermisoEspecial(id);
@@ -117,9 +112,9 @@ public class PermisosEspecialesService {
         return true;
     }
 
-    // ==============================================================
-    // 🧠 VALIDACIONES DE NEGOCIO
-    // ==============================================================
+    // ============================================================== //
+    // 🧠 VALIDACIONES DE NEGOCIO                                     //
+    // ============================================================== //
     private void validarDatos(PermisosEspeciales p) {
 
         // 🟩 Si algún valor booleano viene nulo, establecerlo en falso

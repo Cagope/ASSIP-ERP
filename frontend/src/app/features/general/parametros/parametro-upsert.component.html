@@ -1,0 +1,86 @@
+<div class="form-container">
+  <h5>{{ route.snapshot.paramMap.get('id') ? 'editar parámetro' : 'nuevo parámetro' }}</h5>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="form-grid">
+
+    <!-- 🟩 Agencia -->
+    <div class="form-group full">
+      <label for="idAgencia">agencia *</label>
+      <select id="idAgencia" formControlName="idAgencia">
+        <option [ngValue]="null">Seleccione una agencia</option>
+        <option *ngFor="let a of agencias" [ngValue]="a.idAgencia">
+          {{ a.nombreAgencia }}
+        </option>
+      </select>
+      <div *ngIf="form.get('idAgencia')?.invalid && form.get('idAgencia')?.touched" class="error">
+        Seleccione una agencia válida.
+      </div>
+    </div>
+
+    <!-- 🟦 Código -->
+    <div class="form-group sm">
+      <label for="codigoParametro">código *</label>
+      <input
+        id="codigoParametro"
+        type="number"
+        formControlName="codigoParametro"
+        min="1"
+        max="2147483647"
+      />
+      <div *ngIf="form.get('codigoParametro')?.hasError('max')" class="error">
+        ⚠️ El código no puede superar 2,147,483,647.
+      </div>
+      <div *ngIf="form.get('codigoParametro')?.hasError('min')" class="error">
+        ⚠️ El código debe ser mayor que 0.
+      </div>
+    </div>
+
+    <!-- 🟩 Nombre -->
+    <div class="form-group full">
+      <label for="nombreParametro">nombre *</label>
+      <input
+        id="nombreParametro"
+        type="text"
+        formControlName="nombreParametro"
+        maxlength="100"
+      />
+      <div *ngIf="form.get('nombreParametro')?.hasError('required') && form.get('nombreParametro')?.touched" class="error">
+        Este campo es obligatorio.
+      </div>
+    </div>
+
+    <!-- 🟧 Valor -->
+    <div class="form-group sm">
+      <label for="valorParametro">valor *</label>
+      <input
+        id="valorParametro"
+        type="text"
+        formControlName="valorParametro"
+        numericFormat
+        style="text-align: right;"
+      />
+      <div *ngIf="form.get('valorParametro')?.hasError('max')" class="error">
+        ⚠️ El valor es demasiado alto.
+      </div>
+    </div>
+
+    <!-- 🟨 Tipo de valor -->
+    <div class="form-group sm">
+      <label for="tipoValor">tipo de valor *</label>
+      <select id="tipoValor" formControlName="tipoValor">
+        <option [ngValue]="true">Porcentaje</option>
+        <option [ngValue]="false">Valor</option>
+      </select>
+    </div>
+
+    <!-- 🟫 Acciones -->
+    <div class="form-actions full">
+      <button type="submit" class="btn sm primary" [disabled]="form.invalid">
+        💾 {{ route.snapshot.paramMap.get('id') ? 'actualizar' : 'guardar' }}
+      </button>
+      <button type="button" class="btn sm danger" (click)="router.navigate(['/general/parametros'])">
+        ↩️ cancelar
+      </button>
+    </div>
+  </form>
+</div>

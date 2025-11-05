@@ -103,6 +103,11 @@ public class DatosPersonalesService {
             p.setSegundoApellido(null);
         if (p.getComentario() != null)
             p.setComentario(p.getComentario().trim());
+
+        // ✅ Nueva regla: si no tiene RUT, limpiar el dígito
+        if (Boolean.FALSE.equals(p.getTieneRut())) {
+            p.setDigitoVerificacion(null);
+        }
     }
 
     /**

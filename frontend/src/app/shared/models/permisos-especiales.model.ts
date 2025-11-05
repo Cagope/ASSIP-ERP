@@ -13,7 +13,7 @@ export interface PermisoEspecial {
   recibeLlamadas?: boolean;
   fechaLlamadas?: string | null;
 
-  recibeSms?: boolean;
+  recibeMsm?: boolean;
   fechaSms?: string | null;
 
   recibeEmails?: boolean;

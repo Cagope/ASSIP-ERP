@@ -1,0 +1,155 @@
+<div class="sheet" #sheet>
+
+  <!-- 🟦 Botones superiores -->
+  <div class="actions-top no-print">
+    <button class="btn secondary" (click)="onBack()">Regresar</button>
+    <button class="btn" (click)="onPrint()">Imprimir</button>
+  </div>
+
+  <!-- 🏢 Encabezado institucional estándar -->
+  <header class="header">
+    <div class="logo">
+      <img src="assets/LOGO_EMPRESA.png" alt="Logo empresa" width="110" height="70" />
+    </div>
+
+    <div class="info">
+      <div class="rs">ERP ASSIP SOLIDARIA Y FINANCIERA</div>
+      <div class="nit">NIT: 999999999</div>
+      <div class="form-title form-title-large">AUTORIZACIÓN PARA EL TRATAMIENTO DE DATOS PERSONALES</div>
+    </div>
+
+    <div class="ver">
+      <div class="ver-txt">Versión 1.0</div>
+      <div class="ver-fecha">{{ today | date:'yyyy-MM-dd' }}</div>
+    </div>
+  </header>
+
+  <hr class="header-line" />
+
+  <!-- ✅ Todo el contenido original permanece igual -->
+  <!-- Encabezado de impresión fijo -->
+
+  <!-- Texto original completo -->
+  <section class="block">
+    <div class="card">
+      <p class="txt">
+        La protección y el buen manejo de la información personal de sus ASOCIADOS son muy importantes para COOPVALLE,
+        por cuanto la misma le permite atender de mejor manera las necesidades que ellos tienen, así como cumplir con las
+        obligaciones a su cargo. Es por ello que COOPVALLE ha diseñado políticas y procedimientos que en conjunto con la
+        presente autorización permiten hacer uso de sus datos personales conforme a la ley. Así, lo invitamos a leer
+        cuidadosamente el siguiente texto mediante el cual autoriza el tratamiento de su información personal.
+      </p>
+
+      <ol class="num">
+        <li style="text-align: justify;">
+          <b>En relación con mis Datos Personales: ¿Para qué se utilizará mi información?</b>
+          Por vía de este documento, en mi calidad de titular de la información o representante legal del mismo, autorizo a
+          COOPVALLE a dar tratamiento a mis datos personales para: 1) El desarrollo de su objeto social y de la relación
+          contractual es nos vincula, lo que supone el ejercicio de sus derechos y deberes dentro de los que están, sin
+          limitarse a {{ '{' }}{{ '}' }}; entre otros; 2) La administración de los productos o servicios comercializados a través de COOPVALLE
+          de los que soy titular; 3) La estructuración de ofertas comerciales y la remisión de información comercial sobre
+          productos y/o servicios a través de los canales o medios que COOPVALLE establezca para tal fin; 4) La adopción de
+          medidas tendientes a la prevención de actividades ilícitas. Así mismo, COOPVALLE podrá transferir mis datos
+          personales a otros países, con el fin de posibilitar la realización de las finalidades previstas en la presente
+          autorización. <i>¿Quiénes están autorizados para utilizar mi información?</i> La presente autorización se hace
+          extensiva a quien represente los derechos de COOPVALLE, a quien ésta contrate para el ejercicio de los mismos o a
+          quien ésta ceda sus derechos, sus obligaciones o su posición contractual a cualquier título, en relación con los
+          productos o servicios de los que soy titular. Así mismo, a las Entidades que forman parte del Estado Colombiano y
+          que ejercen vigilancia, control y protección a los Ahorradores (SUPERSOLIDARIA, DIAN, FOGACOOP y quienes lleguen a
+          ser delegadas por el gobierno nacional) y a los terceros con quien COOPVALLE establezca alianzas comerciales, a
+          partir de las cuales se ofrezcan productos o servicios que puedan ser de su interés. <i>¿Por cuánto tiempo estará
+          vigente esta autorización?</i> Esta autorización permanecerá vigente, hasta tanto sea revocada y podrá ser revocada
+          en los eventos previstos en la ley, y siempre y cuando no exista ningún tipo de relación con COOPVALLE o no se
+          encuentre vigente algún producto o servicio derivado de esta autorización.
+        </li>
+
+        <li style="text-align: justify;">
+          <b>En relación con la información relativa a mi comportamiento crediticio, financiero, comercial, de servicios y la proveniente de terceros países:</b>
+          Así mismo, en mi calidad de titular de la información o representante legal del mismo, autorizo de manera
+          irrevocable a COOPVALLE para que consulte, solicite, suministre, reporte, procese, obtenga, recolecte, compile,
+          confirme, intercambie, modifique, emplee, analice, estudie, conserve, reciba y envíe toda la información que se
+          refiere a mi comportamiento crediticio, financiero, comercial, de servicios y la proveniente de terceros países de
+          la misma naturaleza a cualquier Operador de Información debidamente constituido o entidad que maneje o administre
+          bases de datos con fines similares a los de tales Operadores, dentro y fuera del territorio nacional, de
+          conformidad con lo establecido en el ordenamiento jurídico. Esta autorización implica que esos datos serán
+          registrados con el objeto de suministrar información suficiente y adecuada al mercado sobre el estado de mis
+          obligaciones crediticias, financieras, comerciales, de servicios y la proveniente de terceros países de la misma
+          naturaleza. En consecuencia, quienes tengan acceso a esos Operadores de Información podrán conocer esa información
+          de conformidad con la legislación vigente.
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- BLOQUE LEY 2300 -->
+  <section class="block card permisos-ley2300">
+    <h4>Canales autorizados (Ley 2300)</h4>
+    <p class="txt legal-intro">
+      En virtud del artículo 2 de la Ley 2300 de julio 10 de 2023
+      <strong>AUTORIZO</strong> a COOOPVALLE para realizar las actividades
+      de cobranza y comerciales a través de los siguientes canales o medios:
+    </p>
+
+    <ng-container *ngIf="!cargandoPermisos(); else cargandoPermisosTpl">
+      <div *ngIf="permisos(); else permisosVacios" class="perm-grid">
+        <div class="perm-item"><span class="label">Llamadas:</span><span class="val">{{ siNo(permisos()!.recibeLlamadas) }}</span></div>
+        <div class="perm-item"><span class="label">Mensajes SMS:</span><span class="val">{{ siNo(permisos()!.recibeMsm) }}</span></div>
+        <div class="perm-item"><span class="label">Emails:</span><span class="val">{{ siNo(permisos()!.recibeEmails) }}</span></div>
+        <div class="perm-item"><span class="label">Cartas:</span><span class="val">{{ siNo(permisos()!.recibeCartas) }}</span></div>
+        <div class="perm-item"><span class="label">Redes sociales:</span><span class="val">{{ siNo(permisos()!.recibeRedesSociales) }}</span></div>
+      </div>
+
+      <ng-template #permisosVacios>
+        <div class="perm-grid">
+          <div class="perm-item"><span class="label">Llamadas:</span><span class="val">No</span></div>
+          <div class="perm-item"><span class="label">Mensajes SMS:</span><span class="val">No</span></div>
+          <div class="perm-item"><span class="label">Emails:</span><span class="val">No</span></div>
+          <div class="perm-item"><span class="label">Cartas:</span><span class="val">No</span></div>
+          <div class="perm-item"><span class="label">Redes sociales:</span><span class="val">No</span></div>
+        </div>
+        <div class="empty small" style="margin-top:.35rem">
+          Sin registro de permisos especiales. Se considera “No” en todos los canales.
+        </div>
+      </ng-template>
+
+      <div *ngIf="errPermisos()" class="msg err" style="margin-top:.35rem">{{ errPermisos() }}</div>
+    </ng-container>
+
+    <ng-template #cargandoPermisosTpl>
+      <div class="msg">Cargando permisos…</div>
+    </ng-template>
+  </section>
+
+  <!-- ✍️ FIRMAS -->
+  <section class="block">
+    <h2>Firmas y huellas</h2>
+
+    <div class="signatures">
+      <div class="sig">
+        <div class="sig-area"></div>
+        <div class="sig-meta">
+          <div class="meta-row"><span class="sig-label">Firma</span></div>
+          <div class="meta-row">
+            <span class="sig-label">Documento:</span>
+            <span class="sig-id">{{ persona()?.documento || '________________' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="finger">
+        <div class="finger-box"></div>
+        <div class="finger-label">HUELLA</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="print-footer" aria-hidden="true"></div>
+
+  <div class="actions no-print">
+    <a class="btn secondary" href="javascript:history.back()">Regresar</a>
+    <button class="btn" (click)="onPrint()">Imprimir</button>
+  </div>
+</div>
+
+<div class="page-counter no-print">Página {{ pageNow() }} / {{ pageCount() }}</div>
+<div class="empty" *ngIf="!empresa()">Cargando…</div>

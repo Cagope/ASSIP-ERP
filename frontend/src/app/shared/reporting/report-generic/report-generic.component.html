@@ -1,0 +1,34 @@
+<div class="report-generic">
+  <h2>🔎 Explorador de vistas Reporting</h2>
+
+  <div class="filters">
+    <label>Vista:</label>
+    <select [(ngModel)]="vistaSeleccionada">
+      <option value="">-- Seleccione --</option>
+      <option *ngFor="let v of vistas()" [value]="v.view">
+        {{ v.view }}
+      </option>
+    </select>
+
+    <button (click)="ejecutar()" [disabled]="!vistaSeleccionada() || cargando()">Ejecutar</button>
+  </div>
+
+  <div *ngIf="cargando()" class="loading">Cargando resultados...</div>
+
+  <table *ngIf="!cargando() && resultados().length > 0" class="data-table">
+    <thead>
+    <tr>
+      <th *ngFor="let col of (resultados()[0] | keyvalue)">{{ col.key }}</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let row of resultados()">
+      <td *ngFor="let col of (row | keyvalue)">{{ col.value }}</td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="!cargando() && resultados().length === 0" class="empty">
+    No hay datos disponibles.
+  </div>
+</div>

@@ -1,0 +1,307 @@
+/* ============================================================
+   🔒 FORMULARIO DE TRATAMIENTO DE DATOS — Estilo ASSIP-ERP
+   Basado 100 % en el diseño del Formulario de Afiliación
+   Compatible con impresión A4 (márgenes 15mm, fuente 12px)
+   ============================================================ */
+
+/* ===== Base general ===== */
+:root {
+  --line-gap: .18rem;
+}
+
+.sheet {
+  padding: .75rem;
+  max-width: 1024px;
+  margin: 0 auto;
+  font-size: 12px;
+  background: #fff;
+  color: #111;
+  font-family: "Arial", sans-serif;
+}
+
+/* ===== Barra de acciones (solo vista previa) ===== */
+.actions-top {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: .6rem;
+}
+
+.actions-top .btn {
+  padding: .38rem .65rem;
+  border-radius: .5rem;
+  border: 1px solid #12903e;
+  background: #12903e;
+  color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: .85rem;
+  transition: all .15s ease-in-out;
+}
+
+.actions-top .btn:hover {
+  filter: brightness(1.1);
+}
+
+.actions-top .btn.secondary {
+  border-color: #5a5a5a;
+  background: #6b6b6b;
+}
+
+/* Oculta toolbars viejas */
+.sheet > .toolbar,
+.sheet > .btn-bar {
+  display: none !important;
+}
+
+/* ===== Encabezado ===== */
+.header {
+  display: grid;
+  grid-template-columns: 110px 1fr 120px;
+  gap: 1rem;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: .75rem;
+  padding: .5rem .75rem;
+}
+
+.logo img {
+  max-width: 120px;
+  max-height: 80px;
+  object-fit: contain;
+}
+
+.header > .info {
+  border-left: 1px solid #ddd;
+  padding-left: .75rem;
+}
+
+.header > .ver {
+  border-left: 1px solid #ddd;
+  padding-left: .75rem;
+}
+
+.info {
+  font-size: .82rem;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.info .rs {
+  font-weight: 700;
+  font-size: .95rem;
+}
+
+.info .nit {
+  font-size: .82rem;
+  color: #444;
+}
+
+.ver {
+  color: #666;
+  text-align: center;
+}
+
+.ver .ver-txt {
+  font-size: .68rem;
+}
+
+.ver .ver-fecha {
+  font-size: .72rem;
+}
+
+/* ===== Título principal ===== */
+.title {
+  text-align: center;
+  margin: .8rem 0 .6rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0d5728;
+  text-transform: uppercase;
+}
+
+/* ===== Bloques y secciones ===== */
+.block {
+  margin-top: .65rem;
+}
+
+.block h2 {
+  font-size: 1rem;
+  margin: 0 0 .35rem;
+  font-weight: 600;
+  color: #12903e;
+  text-transform: uppercase;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: .2rem;
+}
+
+/* ===== Tarjetas internas ===== */
+.card {
+  border: 1px solid #ddd;
+  border-radius: .5rem;
+  padding: .55rem .6rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--line-gap);
+  background: #fff;
+}
+
+.txt {
+  text-align: justify;
+  line-height: 1.45;
+  font-size: .9rem;
+}
+
+/* ===== Firmas y huellas ===== */
+.signatures {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-top: 1rem;
+}
+
+.sig {
+  flex: 1;
+  min-width: 220px;
+}
+
+.sig-area {
+  width: 48%;
+  height: 0;
+  border-bottom: 2px solid #222;
+  margin: 2rem 0 .35rem 0;
+}
+
+.sig-meta {
+  display: grid;
+  grid-auto-rows: minmax(18px, auto);
+  row-gap: .15rem;
+}
+
+.meta-row {
+  display: flex;
+  align-items: baseline;
+  gap: .35rem;
+  font-size: .78rem;
+}
+
+.sig-label {
+  font-weight: 600;
+}
+
+.sig-id {
+  color: #444;
+}
+
+.finger {
+  width: 260px;
+  text-align: center;
+}
+
+.finger-box {
+  width: 260px;
+  height: 240px;
+  border: 1.8px solid #222;
+  border-radius: .25rem;
+  margin: 0 auto .35rem;
+  background: #fff;
+}
+
+.finger-label {
+  font-size: .78rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* ===== Grillas / Listas de canales ===== */
+.perm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: .35rem .75rem;
+  margin-top: .4rem;
+  font-size: .88rem;
+}
+
+.perm-item {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dashed #ddd;
+  padding-bottom: .1rem;
+}
+
+.perm-item .label {
+  font-weight: 500;
+  color: #333;
+}
+
+.perm-item .val {
+  font-weight: 700;
+}
+
+/* ===== Botones inferiores ===== */
+.actions {
+  margin-top: .7rem;
+  display: flex;
+  gap: .5rem;
+  justify-content: flex-end;
+}
+
+.btn {
+  padding: .38rem .65rem;
+  border-radius: .5rem;
+  border: 1px solid #12903e;
+  background: #12903e;
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+  font-size: .85rem;
+}
+
+.btn.secondary {
+  border-color: #5a5a5a;
+  background: #6b6b6b;
+}
+
+/* ===== Reglas de impresión ===== */
+@media print {
+  .actions,
+  .actions-top,
+  .no-print {
+    display: none !important;
+  }
+
+  .print-footer {
+    display: block !important;
+    position: fixed;
+    right: 12mm;
+    bottom: 6mm;
+    font-size: 10px;
+    color: #333;
+    z-index: 9999;
+    pointer-events: none;
+  }
+
+  .print-footer::after {
+    content: "Página " counter(page);
+  }
+
+  .sheet {
+    padding-bottom: 14mm !important;
+  }
+
+  .block,
+  .card,
+  .grid,
+  .line.one-line,
+  .signatures {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: #fff;
+  }
+}

@@ -1,0 +1,47 @@
+<div class="list-container">
+  <div class="header">
+    <h2>🧾 Afiliaciones registradas</h2>
+
+    <div class="actions">
+      <input
+        type="text"
+        [(ngModel)]="filtro"
+        (input)="filtrar()"
+        placeholder="Buscar por nombre o documento"
+      />
+      <button type="button" class="btn refresh" (click)="refrescar()">🔄 Actualizar</button>
+    </div>
+  </div>
+
+  <div *ngIf="cargando" class="msg info">Cargando registros…</div>
+  <div *ngIf="error && !cargando" class="msg err">{{ error }}</div>
+
+  <table class="data-table" *ngIf="filtrados.length > 0; else vacio">
+    <thead>
+    <tr>
+      <th>#</th>
+      <th>Documento</th>
+      <th>Nombres</th>
+      <th>Apellidos</th>
+      <th>Fecha datos</th>
+      <th>Acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let d of filtrados; let i = index">
+      <td>{{ i + 1 }}</td>
+      <td>{{ d.documento }}</td>
+      <td>{{ d.nombres }}</td>
+      <td>{{ d.primerApellido }} {{ d.segundoApellido }}</td>
+      <td>{{ d.fechaActualizacion | date:'yyyy-MM-dd' }}</td>
+      <td class="actions">
+        <button class="btn print" (click)="abrirMenu($event, d)">🖨️ Imprimir ▾</button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <ng-template #vacio>
+    <div class="empty">No hay afiliaciones registradas.</div>
+  </ng-template>
+</div>

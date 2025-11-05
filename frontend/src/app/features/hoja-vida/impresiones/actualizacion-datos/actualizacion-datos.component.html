@@ -1,0 +1,259 @@
+<div class="sheet" *ngIf="persona() as p">
+
+  <!-- Botones superiores -->
+  <div class="actions-top no-print" id="top-actions">
+    <button class="btn secondary" (click)="onBack()">Regresar</button>
+    <button class="btn" (click)="onPrint()">Imprimir</button>
+  </div>
+
+  <!-- Encabezado -->
+  <header class="header" *ngIf="empresa() as e">
+    <div class="logo">
+      <img
+        *ngIf="e.logoUrl"
+        [src]="toLogoUrl(e.logoUrl)"
+        alt="Logo empresa"
+        width="120" height="80"
+        loading="lazy" decoding="async"
+      />
+    </div>
+
+    <div class="info">
+      <div class="rs">{{ e.razonSocial }}</div>
+      <div *ngIf="e.nombreComercial">{{ e.nombreComercial }}</div>
+
+      <div class="nit">
+        <ng-container *ngIf="e.digitoVerificacion; else sinNitDv">
+          Nit: {{ e.documento }}-{{ e.digitoVerificacion }}
+        </ng-container>
+        <ng-template #sinNitDv>Nit: {{ e.documento }}</ng-template>
+      </div>
+    </div>
+
+    <div class="ver">
+      <div class="ver-name">LAFT-F-002</div>
+      <div class="ver-txt">Versión 1.0</div>
+      <div class="ver-fecha">{{ today | date:'yyyy-MM-dd' }}</div>
+    </div>
+  </header>
+
+  <h1 class="title">ACTUALIZACIÓN DE DATOS PERSONA NATURALES</h1>
+
+  <!-- Fecha afiliación / Fecha actualización -->
+  <table class="grid single-row">
+    <tr>
+      <td><span class="lbl">Fecha afiliación</span></td>
+      <td class="text">{{ p.fecha_apertura | date:'yyyy-MM-dd' }}</td>
+      <td><span class="lbl">Fecha actualización</span></td>
+      <td class="text">{{ p.fecha_actualizacion | date:'yyyy-MM-dd' }}</td>
+    </tr>
+  </table>
+
+  <!-- =================== DATOS PERSONALES =================== -->
+  <section class="block">
+    <h2>Datos personales</h2>
+
+    <div class="card">
+      <div class="line one-line">
+        <span class="kv">
+          <span class="lbl">Número documento:</span>
+          <span class="val num">{{ p.documento }}</span>
+        </span>
+        <span class="kv">
+          <span class="lbl">Tipo documento:</span>
+          <span class="val text">{{ orDash(p.nombre_tipo_documento) }}</span>
+        </span>
+        <span class="kv">
+          <span class="lbl">Fecha documento:</span>
+          <span class="val text">{{ p.fecha_documento | date:'yyyy-MM-dd' }}</span>
+        </span>
+      </div>
+
+      <div class="line one-line">
+        <span class="kv"><span class="lbl">País:</span><span class="val text">{{ orDash(p.pais_documento) }}</span></span>
+        <span class="kv"><span class="lbl">Departamento:</span><span class="val text">{{ orDash(p.departamento_expedicion) }}</span></span>
+        <span class="kv"><span class="lbl">Ciudad:</span><span class="val text">{{ orDash(p.ciudad_expedicion) }}</span></span>
+      </div>
+
+      <div class="line one-line">
+        <span class="kv"><span class="lbl">Nombres:</span><span class="val text">{{ orDash(p.nombres) }}</span></span>
+        <span class="kv"><span class="lbl">Primer apellido:</span><span class="val text">{{ orDash(p.primer_apellido) }}</span></span>
+        <span class="kv"><span class="lbl">Segundo apellido:</span><span class="val text">{{ orDash(p.segundo_apellido) }}</span></span>
+      </div>
+
+      <div class="line one-line">
+        <span class="kv"><span class="lbl">Género:</span><span class="val text">{{ orDash(p.nombre_genero) }}</span></span>
+        <span class="kv"><span class="lbl">Cabeza de familia:</span><span class="val text">{{ yn(p.cabeza_familia) }}</span></span>
+        <span class="kv"><span class="lbl">Número hijos:</span><span class="val num">{{ orDash(p.numero_hijos) }}</span></span>
+      </div>
+
+      <div class="line one-line">
+        <span class="kv"><span class="lbl">Estrato:</span><span class="val num">{{ orDash(p.estrato_social) }}</span></span>
+        <span class="kv"><span class="lbl">Escolaridad:</span><span class="val text">{{ orDash(p.nombre_escolaridad) }}</span></span>
+        <span class="kv"><span class="lbl">Estado civil:</span><span class="val text">{{ orDash(p.nombre_estado_civil) }}</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- =================== DATOS DE UBICACIÓN =================== -->
+  <section class="block">
+    <h2>Datos de ubicación</h2>
+    <ng-container *ngIf="persona() as p; else sinUbi">
+      <div class="card">
+        <div class="line one-line">
+          <span class="kv span2"><span class="lbl">Dirección:</span><span class="val text">{{ orDash(p.direccion_residencia) }}</span></span>
+          <span class="kv"><span class="lbl">Barrio:</span><span class="val text">{{ orDash(p.barrio_residencia) }}</span></span>
+        </div>
+        <div class="line one-line">
+          <span class="kv"><span class="lbl">País:</span><span class="val text">{{ orDash(p.pais_residencia) }}</span></span>
+          <span class="kv"><span class="lbl">Departamento:</span><span class="val text">{{ orDash(p.departamento_residencia) }}</span></span>
+          <span class="kv"><span class="lbl">Ciudad:</span><span class="val text">{{ orDash(p.ciudad_residencia) }}</span></span>
+        </div>
+        <div class="line one-line">
+          <span class="kv"><span class="lbl">Zona:</span><span class="val text">{{ orDash(p.zona_residencia) }}</span></span>
+          <span class="kv"><span class="lbl">Sub-zona:</span><span class="val text">{{ orDash(p.sub_zona_residencia) }}</span></span>
+          <span class="kv"><span class="lbl">Teléfono:</span><span class="val text">{{ orDash(p.telefono_residencia) }}</span></span>
+        </div>
+        <div class="line one-line">
+          <span class="kv"><span class="lbl">Celular #1:</span><span class="val text">{{ orDash(p.celular_uno) }}</span></span>
+          <span class="kv"><span class="lbl">Celular #2:</span><span class="val text">{{ orDash(p.celular_dos) }}</span></span>
+          <span class="kv"><span class="lbl">Correo:</span><span class="val text">{{ orDash(p.correo_principal) }}</span></span>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #sinUbi><div class="empty small">Sin referencia de ubicación registrada.</div></ng-template>
+  </section>
+
+  <!-- =================== DATOS ECONÓMICOS =================== -->
+  <section class="block">
+    <h2>Datos económicos</h2>
+    <ng-container *ngIf="persona() as p; else sinLaboral">
+      <div class="card">
+        <div class="line one-line">
+          <span class="kv"><span class="lbl">Ocupación:</span><span class="val text">{{ orDash(p.nombre_ocupacion) }}</span></span>
+          <span class="kv"><span class="lbl">Sector económico:</span><span class="val text">{{ orDash(p.nombre_sector_economico) }}</span></span>
+          <span class="kv"><span class="lbl">Actividad DIAN:</span><span class="val text">{{ orDash(p.nombre_actividad_dian) }}</span></span>
+        </div>
+        <div class="line one-line">
+          <span class="kv"><span class="lbl">Empresa:</span><span class="val text">{{ orDash(p.nombre_empresa) }}</span></span>
+          <span class="kv"><span class="lbl">Dirección:</span><span class="val text">{{ orDash(p.direccion_empresa) }}</span></span>
+          <span class="kv"><span class="lbl">Celular empresa:</span><span class="val text">{{ orDash(p.celular_empresa) }}</span></span>
+        </div>
+        <div class="line one-line">
+          <span class="kv"><span class="lbl">País (empresa):</span><span class="val text">{{ orDash(p.pais_empresa) }}</span></span>
+          <span class="kv"><span class="lbl">Departamento (empresa):</span><span class="val text">{{ orDash(p.departamento_empresa) }}</span></span>
+          <span class="kv"><span class="lbl">Ciudad (empresa):</span><span class="val text">{{ orDash(p.ciudad_empresa) }}</span></span>
+        </div>
+        <div class="line one-line">
+          <span class="kv"><span class="lbl">Fecha vinculación:</span><span class="val text">{{ p.fecha_vinculacion | date:'yyyy-MM-dd' }}</span></span>
+          <span class="kv"><span class="lbl"></span><span class="val"></span></span>
+          <span class="kv"><span class="lbl"></span><span class="val"></span></span>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #sinLaboral><div class="empty small">Sin referencia laboral registrada.</div></ng-template>
+  </section>
+
+  <!-- =================== DATOS FINANCIEROS =================== -->
+  <section class="block">
+    <h2>Datos financieros</h2>
+    <ng-container *ngIf="persona() as p; else sinRefFin">
+      <div class="card">
+        <div class="line two-col">
+          <div class="pair tighter">
+            <span class="lbl">Total ingresos:</span>
+            <span class="val num">{{ p.valor_salario | number:'1.0-2' }}</span>
+          </div>
+          <div class="pair tighter">
+            <span class="lbl">Total egresos:</span>
+            <span class="val num">{{ p.egresos_credito | number:'1.0-2' }}</span>
+          </div>
+        </div>
+        <div class="line two-col">
+          <div class="pair tighter">
+            <span class="lbl">Total activos:</span>
+            <span class="val num">{{ p.total_activos | number:'1.0-2' }}</span>
+          </div>
+          <div class="pair tighter">
+            <span class="lbl">Total pasivos:</span>
+            <span class="val num">{{ p.total_pasivos | number:'1.0-2' }}</span>
+          </div>
+        </div>
+        <div class="line one-line">
+          <span class="kv span2">
+            <span class="lbl">Origen de fondos:</span>
+            <span class="val text">{{ orDash(p.origen_fondos) }}</span>
+          </span>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #sinRefFin><div class="empty small">Sin referencias financieras registradas.</div></ng-template>
+  </section>
+
+  <!-- =================== SARLAFT =================== -->
+  <section class="block">
+    <h2>Lavado de activos · SARLAFT</h2>
+    <ng-container *ngIf="persona() as p; else sinSarlaft">
+      <div class="card">
+        <div class="line one-line">
+          <span class="kv"><span class="lbl">Asociado PEP:</span><span class="val text">{{ yn(p.asociado_peps) }}</span></span>
+          <span class="kv span2"><span class="lbl">Tipo PEP:</span><span class="val text">{{ orDash(p.nombre_tipo_peps) }}</span></span>
+        </div>
+        <div class="line one-line">
+          <span class="kv"><span class="lbl">¿Tiene familiar PEP?:</span><span class="val text">{{ yn(p.familia_peps) }}</span></span>
+          <span class="kv"><span class="lbl">Nombre PEP:</span><span class="val text">{{ orDash(p.nombre_familia_peps) }}</span></span>
+          <span class="kv"><span class="lbl">Cédula PEP:</span><span class="val text">{{ orDash(p.cedula_familia_peps) }}</span></span>
+        </div>
+        <div class="line one-line">
+          <span class="kv"><span class="lbl">¿Moneda extranjera?:</span><span class="val text">{{ yn(p.moneda_extranjera) }}</span></span>
+          <span class="kv"><span class="lbl">Tipo moneda ext.:</span><span class="val text">{{ orDash(p.tipo_moneda_extranjera) }}</span></span>
+          <span class="kv"><span class="lbl">Cuenta en el extranjero:</span><span class="val text">{{ yn(p.cuenta_extranjero) }}</span></span>
+        </div>
+        <div class="line one-line">
+          <span class="kv span2"><span class="lbl">Observación moneda ext.:</span><span class="val text">{{ orDash(p.observacion_moneda_extranjera) }}</span></span>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #sinSarlaft><div class="empty small">Sin información SARLAFT registrada.</div></ng-template>
+  </section>
+
+  <!-- =================== DECLARACIÓN =================== -->
+  <section class="block">
+    <div class="card">
+      <div class="line">Certifico que la información suministrada es verídica y autorizo a la cooperativa para que la verifique.</div>
+      <div class="line">Estoy informado de mi obligación de actualizar anualmente la información que la cooperativa solicite.</div>
+      <div class="line">Autorizo a la Cooperativa a consultar y reportar información a las centrales de riesgo.</div>
+      <div class="line">Declaro que mis ingresos y bienes provienen de: <b>{{ orDash(p.origen_fondos) }}</b></div>
+    </div>
+  </section>
+
+  <!-- =================== FIRMAS =================== -->
+  <section class="block">
+    <h2>Firmas y huellas</h2>
+    <div class="signatures">
+      <div class="sig">
+        <div class="sig-area"></div>
+        <div class="sig-meta">
+          <div class="meta-row"><span class="sig-label">Firma</span></div>
+          <div class="meta-row">
+            <span class="sig-label">Documento:</span>
+            <span class="sig-id">{{ p.documento || '________________' }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="finger">
+        <div class="finger-box"></div>
+        <div class="finger-label">HUELLA</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="print-footer"></div>
+
+  <div class="actions no-print">
+    <a class="btn secondary" href="javascript:history.back()">Regresar</a>
+    <button class="btn" (click)="onPrint()">Imprimir</button>
+  </div>
+</div>
+
+<div class="empty" *ngIf="!persona()">Cargando…</div>

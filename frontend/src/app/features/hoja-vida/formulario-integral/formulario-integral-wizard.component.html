@@ -1,0 +1,107 @@
+<div class="wizard-container">
+
+  <!-- 🧭 Encabezado -->
+  <div class="wizard-header">
+    <h2>Formulario Integral — Hoja de Vida</h2>
+
+    <div class="wizard-steps">
+      <div
+        *ngFor="let paso of pasos; let i = index"
+        class="wizard-step"
+        [class.active]="pasoActual === i + 1"
+        [class.completed]="pasoActual > i + 1"
+        (click)="irA(i + 1)">
+        <div class="step-number">{{ i + 1 }}</div>
+        <div class="step-label">{{ paso }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🧱 Cuerpo -->
+  <div class="wizard-body">
+
+    <!-- Paso 1 -->
+    <app-datos-personales-upsert
+      (formularioValido)="actualizarEstadoPaso(1, $event)"
+      (registroCreado)="onRegistroCreado($event)"
+      [enWizard]="true"
+      [hidden]="pasoActual !== 1">
+    </app-datos-personales-upsert>
+
+    <!-- Paso 2 -->
+    <app-ubicaciones-upsert
+      (formularioValido)="actualizarEstadoPaso(2, $event)"
+      [idDatosPersonal]="idDatosPersonalCreado"
+      [hidden]="pasoActual !== 2">
+    </app-ubicaciones-upsert>
+
+    <!-- Paso 3 -->
+    <app-laborales-upsert
+      (formularioValido)="actualizarEstadoPaso(3, $event)"
+      [idDatosPersonal]="idDatosPersonalCreado"
+      [hidden]="pasoActual !== 3">
+    </app-laborales-upsert>
+
+    <!-- Paso 4 -->
+    <app-financieros-upsert
+      (formularioValido)="actualizarEstadoPaso(4, $event)"
+      [idDatosPersonal]="idDatosPersonalCreado"
+      [hidden]="pasoActual !== 4">
+    </app-financieros-upsert>
+
+    <!-- Paso 5 -->
+    <app-datos-familiares-upsert
+      (formularioValido)="actualizarEstadoPaso(5, $event)"
+      [idDatosPersonal]="idDatosPersonalCreado"
+      [hidden]="pasoActual !== 5">
+    </app-datos-familiares-upsert>
+
+    <!-- Paso 6 -->
+    <app-referencias-personales-upsert
+      (formularioValido)="actualizarEstadoPaso(6, $event)"
+      [idDatosPersonal]="idDatosPersonalCreado"
+      [hidden]="pasoActual !== 6">
+    </app-referencias-personales-upsert>
+
+    <!-- Paso 7 -->
+    <app-sarlaft-upsert
+      (formularioValido)="actualizarEstadoPaso(7, $event)"
+      [idDatosPersonal]="idDatosPersonalCreado"
+      [hidden]="pasoActual !== 7">
+    </app-sarlaft-upsert>
+
+    <!-- Paso 8 -->
+    <app-permisos-especiales-upsert
+      (formularioValido)="actualizarEstadoPaso(8, $event)"
+      [idDatosPersonal]="idDatosPersonalCreado"
+      [hidden]="pasoActual !== 8">
+    </app-permisos-especiales-upsert>
+
+  </div>
+
+  <!-- 🟨 Acciones -->
+  <div class="wizard-actions">
+    <button
+      class="btn btn--cancel"
+      [disabled]="pasoActual === 1"
+      (click)="anterior()">
+      ⬅️ Anterior
+    </button>
+
+    <button
+      *ngIf="pasoActual < pasos.length"
+      class="btn btn--primary"
+      (click)="siguiente()"
+      [disabled]="!formValidoPorPaso[pasoActual - 1]">
+      Siguiente ➡️
+    </button>
+
+    <button
+      *ngIf="pasoActual === pasos.length"
+      class="btn btn--primary"
+      (click)="finalizar()"
+      [disabled]="!todosValidos()">
+      ✅ Finalizar
+    </button>
+  </div>
+</div>

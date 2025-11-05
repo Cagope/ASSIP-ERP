@@ -29,7 +29,7 @@ export class PermisosEspecialesPrintService {
           <td>${r.nombrePersona ?? ''}</td>
           <td>${r.recibeLlamadas ? 'Sí' : 'No'}</td>
           <td>${r.fechaLlamadas ?? ''}</td>
-          <td>${r.recibeSms ? 'Sí' : 'No'}</td>
+          <td>${r.recibeMsm ? 'Sí' : 'No'}</td>
           <td>${r.fechaSms ?? ''}</td>
           <td>${r.recibeEmails ? 'Sí' : 'No'}</td>
           <td>${r.fechaEmails ?? ''}</td>

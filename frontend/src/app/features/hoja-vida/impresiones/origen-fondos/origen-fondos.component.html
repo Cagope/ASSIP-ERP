@@ -1,0 +1,147 @@
+<div class="sheet" *ngIf="persona() as p">
+
+  <!-- 🟩 Botones superiores -->
+  <div class="actions-top no-print">
+    <button class="btn secondary" (click)="onBack()">Regresar</button>
+    <button class="btn" (click)="onPrint()">Imprimir</button>
+  </div>
+
+  <!-- 🏢 Encabezado institucional estandarizado -->
+  <header class="header">
+    <div class="logo">
+      <img src="assets/LOGO_EMPRESA.png" alt="Logo empresa" width="110" height="70" />
+    </div>
+
+    <div class="info">
+      <div class="rs">ERP ASSIP SOLIDARIA Y FINANCIERA</div>
+      <div class="nit">NIT: 999999999</div>
+      <div class="form-title form-title-large">DECLARACIÓN DE ORIGEN DE FONDOS</div>
+    </div>
+
+    <div class="ver">
+      <div class="ver-txt">Versión 1.0</div>
+      <div class="ver-fecha">{{ today | date:'yyyy-MM-dd' }}</div>
+    </div>
+  </header>
+
+  <!-- 🧾 Título -->
+  <h1 class="title">DECLARACIÓN DE ORIGEN DE FONDOS</h1>
+
+  <!-- 📜 Contenido principal -->
+  <!-- 📜 Contenido principal -->
+  <section class="block">
+    <div class="card">
+      <p class="txt" style="text-align: justify;">
+        Yo, <span class="uline long">{{ nombreCompleto() || '\u00A0' }}</span>,
+        identificado con el documento de identidad número
+        <span class="uline med">{{ docConDv() || '\u00A0' }}</span>,
+        obrando en nombre propio y dando certeza de que todo lo que aquí asignado es cierto,
+        realizo la presente <b>Declaración de Origen de Fondos</b> a
+        <b>COOPVALLE</b>, con el propósito de dar cumplimiento a lo dispuesto
+        en la Circular Externa 07 del 30 de julio de 1997 expedida por la
+        <b>Superintendencia de la Economía Solidaria</b> y demás normas concordantes para la apertura
+        y manejo de cuentas y productos financieros.
+        Igualmente me obligo a actualizar anualmente mis datos o dentro de los ocho (8) días
+        calendario siguientes a cualquier cambio que se produzca.
+      </p>
+
+      <ol class="num" style="text-align: justify;">
+        <li>
+          Los recursos que entrego en depósitos provienen de las siguientes fuentes
+          (detalle de ocupación, oficio, profesión, actividad o negocio):
+          <br />
+          <b><span class="uline block full">{{ orDash(p.origen_fondos) }}</span></b>
+        </li>
+        <li>
+          Declaro que los recursos entregados no provienen de ninguna actividad ilícita
+          de las contempladas en el Código Penal Colombiano o normas que lo modifiquen.
+        </li>
+        <li>
+          No admitiré que terceros efectúen depósitos o transacciones con fondos provenientes de actividades ilícitas.
+        </li>
+        <li>
+          En caso de infringir lo anterior o suministrar información falsa o inexacta,
+          autorizo a <b>COOPVALLE</b> a saldar las cuentas y depósitos
+          sin que ello genere responsabilidad para la entidad.
+        </li>
+      </ol>
+
+      <h3 class="subtitle">CERTIFICO QUE:</h3>
+      <ul class="checks" style="text-align: justify;">
+        <li>
+          Pagué al ingresar $
+          <span class="line-amt">
+            {{ valorIngreso() > 0 ? (valorIngreso() | number:'1.0-0') : '_____________' }}
+          </span>.
+          Por la presente solicito ser admitido como asociado de <b>COOPVALLE</b>,
+          y declaro someterme a la ley, estatutos y reglamentos de la entidad.
+        </li>
+
+        <li>La información suministrada es verídica y autorizo su verificación.</li>
+        <li>Declaro que no realizo operaciones en moneda extranjera.</li>
+        <li>Estoy informado de mi obligación de actualizar anualmente mi información.</li>
+        <li>Autorizo a la entidad a consultar y reportar información a las centrales de riesgo.</li>
+      </ul>
+    </div>
+  </section>
+
+
+
+  <!-- ✍️ Firmas estandarizadas -->
+  <section class="block">
+    <h2>Firmas y huellas</h2>
+
+    <div class="signatures">
+      <div class="sig">
+        <div class="sig-area"></div>
+        <div class="sig-meta">
+          <div class="meta-row"><span class="sig-label">Firma</span></div>
+          <div class="meta-row">
+            <span class="sig-label">Documento:</span>
+            <span class="sig-id">{{ docConDv() || '________________' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="finger">
+        <div class="finger-box"></div>
+        <div class="finger-label">HUELLA</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🏛️ Aprobación del Consejo -->
+  <section class="block aprobacion-consejo">
+    <p>Admitida por el representante legal: ________________________________</p>
+
+    <h3 class="titulo-aprobacion">APROBACIÓN CONSEJO DE ADMINISTRACIÓN</h3>
+
+    <p>
+      Aprobado en reunión del consejo de administración el día
+      ______________________ &nbsp;&nbsp; Acta Nro: ____________________
+    </p>
+
+    <div class="firmas-linea">
+      <div class="firma">
+        <div class="linea-firma"></div>
+        <div class="cargo">Presidente Consejo de Administración</div>
+      </div>
+
+      <div class="firma">
+        <div class="linea-firma"></div>
+        <div class="cargo">Secretario Consejo de Administración</div>
+      </div>
+    </div>
+  </section>
+
+
+
+  <div class="print-footer" aria-hidden="true"></div>
+
+  <div class="actions no-print">
+    <button class="btn secondary" (click)="onBack()">Regresar</button>
+    <button class="btn" (click)="onPrint()">Imprimir</button>
+  </div>
+</div>
+
+<div class="empty" *ngIf="!persona()">Cargando…</div>

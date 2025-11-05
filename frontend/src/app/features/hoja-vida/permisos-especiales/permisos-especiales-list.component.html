@@ -61,7 +61,7 @@
 
       <!-- Recibe SMS -->
       <td>
-        <span *ngIf="p.permisos?.recibeSms; else noSms" class="text-success fw-semibold">Sí</span>
+        <span *ngIf="p.permisos?.recibeMsm; else noSms" class="text-success fw-semibold">Sí</span>
         <ng-template #noSms><span class="text-danger">No</span></ng-template>
       </td>
 

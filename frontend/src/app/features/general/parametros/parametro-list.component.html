@@ -1,0 +1,40 @@
+<div class="parametro-list">
+  <app-header-actions
+    titulo="Parámetros"
+    (nuevo)="nuevoParametro()"
+    (imprimir)="imprimirListado()"
+    (exportar)="exportarExcel()">
+  </app-header-actions>
+
+  <table id="tabla-parametros" *ngIf="!cargando && parametros.length > 0" class="table table-striped">
+    <thead>
+    <tr>
+      <th>Agencia</th>
+      <th>Código</th>
+      <th>Nombre</th>
+      <th>Valor</th>
+      <th>Tipo de Valor</th>
+      <th>Acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let p of parametros">
+      <td>{{ p.idAgencia }}</td>
+      <td>{{ p.codigoParametro }}</td>
+      <td>{{ p.nombreParametro }}</td>
+      <td>{{ p.valorParametro | number:'1.2-2' }}</td>
+      <td>{{ p.tipoValor ? 'Porcentaje' : 'Valor' }}</td>
+      <td>
+        <div class="acciones">
+          <button class="btn sm" (click)="editarParametro(p.idParametro!)">✏️</button>
+          <button class="btn sm danger" (click)="eliminarParametro(p.idParametro!)">🗑️</button>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="cargando" class="loading">Cargando...</div>
+  <div *ngIf="!cargando && parametros.length === 0" class="empty">No hay parámetros registrados.</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+</div>

@@ -9,6 +9,7 @@ import { UbicacionesApi } from './ubicaciones.api';
 import { Ubicacion } from '../../../shared/models/ubicacion.model';
 import { CatalogosApi, CodigoNombreDTO, Departamento, Ciudad } from '../../../shared/catalogos/catalogos.api';
 import { GeneralApi, ZonaDTO, SubZonaDTO } from '../../../shared/general/general.api';
+import { Output, EventEmitter, Input, OnChanges, SimpleChanges } from '@angular/core';
 
 /**
  * 🏠 Componente Upsert (Crear / Editar) — Ubicaciones
@@ -25,8 +26,10 @@ import { GeneralApi, ZonaDTO, SubZonaDTO } from '../../../shared/general/general
   templateUrl: './ubicaciones-upsert.component.html',
   styleUrls: ['./ubicaciones-upsert.component.scss']
 })
-export class UbicacionesUpsertComponent implements OnInit {
+export class UbicacionesUpsertComponent implements OnInit, OnChanges {
   // === 🧩 Inyección de dependencias ===
+  @Output() formularioValido = new EventEmitter<boolean>();
+  @Input() idDatosPersonal?: number;
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -48,6 +51,7 @@ export class UbicacionesUpsertComponent implements OnInit {
   // ================================================================
   // 🚀 Inicialización
   // ================================================================
+
   ngOnInit(): void {
     this.crearFormulario();
 
@@ -74,22 +78,45 @@ export class UbicacionesUpsertComponent implements OnInit {
                   error: () => (this.subZonasFiltradas = [])
                 });
               }
+
+              // ✅ Emitir solo después de aplicar los valores reales
+              queueMicrotask(() => {
+                this.formularioValido.emit(this.form.valid);
+              });
             },
             error: (err) => console.error('❌ Error al cargar ubicación:', err)
           });
-        } else if (idDatosPersonalParam) {
-          // Si viene desde el listado de personas
-          const idDatosPersonal = Number(idDatosPersonalParam);
-          this.form.get('idDatosPersonal')?.setValue(idDatosPersonal);
-          this.form.get('idDatosPersonal')?.disable();
+        } else {
+          // 🟩 Caso NUEVO (desde wizard)
+          const idDatosPersonal = idDatosPersonalParam
+            ? Number(idDatosPersonalParam)
+            : this.idDatosPersonal;
+
+          if (idDatosPersonal) {
+            console.log('🔗 ID recibido (wizard o parámetro):', idDatosPersonal);
+            this.form.get('idDatosPersonal')?.setValue(idDatosPersonal);
+            this.form.get('idDatosPersonal')?.disable();
+          }
+
+          // ✅ Emitir estado inicial (formulario vacío o con ID recibido)
+          queueMicrotask(() => {
+            this.formularioValido.emit(this.form.valid);
+          });
         }
+
+        // ✅ Emitir estado final tras cargar catálogos (seguridad adicional)
+        this.formularioValido.emit(this.form.valid);
+
+        // 🟡 Escuchar cambios de validez (después de inicialización)
+        this.form.statusChanges.subscribe(() => {
+          this.formularioValido.emit(this.form.valid);
+        });
       },
       error: (err) => console.error('❌ Error cargando catálogos:', err)
     });
 
     // === Escuchar dependencias ===
 
-    // 🟩 Departamento → Ciudades
     this.form.get('idDepartamento')?.valueChanges.subscribe((idDepto) => {
       if (idDepto) {
         this.catalogos.listarCiudadesPorDepartamento(idDepto).subscribe({
@@ -101,7 +128,6 @@ export class UbicacionesUpsertComponent implements OnInit {
       }
     });
 
-    // 🟦 Zona → SubZonas
     this.form.get('idZona')?.valueChanges.subscribe((idZona) => {
       if (idZona) {
         this.general.listarSubZonasPorZona(idZona).subscribe({
@@ -113,6 +139,19 @@ export class UbicacionesUpsertComponent implements OnInit {
         this.form.get('idSubZona')?.setValue(null);
       }
     });
+  }
+
+
+  // ================================================================
+  // 🔗 Detectar cambios en el ID recibido desde el wizard
+  // ================================================================
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['idDatosPersonal'] && this.idDatosPersonal) {
+      console.log('🔗 Recibido idDatosPersonal desde wizard:', this.idDatosPersonal);
+      this.form.get('idDatosPersonal')?.setValue(this.idDatosPersonal);
+      this.form.updateValueAndValidity();
+      this.formularioValido.emit(this.form.valid);
+    }
   }
 
   // ================================================================
@@ -169,6 +208,11 @@ export class UbicacionesUpsertComponent implements OnInit {
       this.form.markAllAsTouched();
       alert('⚠️ Complete los campos obligatorios o revise los formatos.');
       return;
+    }
+
+    // ✅ Si el formulario NO tiene idDatosPersonal y el wizard lo pasó, lo asignamos
+    if (!this.form.get('idDatosPersonal')?.value && this.idDatosPersonal) {
+      this.form.get('idDatosPersonal')?.setValue(this.idDatosPersonal);
     }
 
     const raw = { ...this.form.getRawValue() } as Ubicacion;

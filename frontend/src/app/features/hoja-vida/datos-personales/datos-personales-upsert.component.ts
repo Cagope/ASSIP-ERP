@@ -8,6 +8,8 @@ import { forkJoin } from 'rxjs';
 import { DatosPersonalesApi, DatosPersonales } from './datos-personales.api';
 import { CatalogosApi, CodigoNombreDTO, Departamento, Ciudad } from '../../../shared/catalogos/catalogos.api';
 import { calcularDvNit } from '../../../shared/utils/calcular-dv-nit';
+import { EventEmitter, Output, Input } from '@angular/core';
+
 
 @Component({
   selector: 'app-datos-personales-upsert',
@@ -17,11 +19,16 @@ import { calcularDvNit } from '../../../shared/utils/calcular-dv-nit';
   styleUrls: ['./datos-personales-upsert.component.scss']
 })
 export class DatosPersonalesUpsertComponent implements OnInit {
+  @Output() formularioValido = new EventEmitter<boolean>();
+  @Output() registroCreado = new EventEmitter<number>();  // 👈 NUEVO
+  @Input() enWizard = false;
+
   private readonly fb = inject(FormBuilder);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly api = inject(DatosPersonalesApi);
   private readonly catalogos = inject(CatalogosApi);
+
 
   form!: FormGroup;
   editando = false;
@@ -123,6 +130,10 @@ export class DatosPersonalesUpsertComponent implements OnInit {
     this.actividadesSesFiltradas = [...this.actividadesSes];
     this.actividadesDianFiltradas = [...this.actividadesDian];
 
+    this.form.statusChanges.subscribe(status => {
+      this.formularioValido.emit(status === 'VALID');
+    });
+
   }
 
   // ======================================================
@@ -176,6 +187,9 @@ export class DatosPersonalesUpsertComponent implements OnInit {
       // ⚙️ Auditoría
       fkSeguridadCreacion: [1],
       fkSeguridadEdicion: [1],
+    });
+    this.form.statusChanges.subscribe(status => {
+      this.formularioValido.emit(status === 'VALID');
     });
   }
 
@@ -336,6 +350,9 @@ export class DatosPersonalesUpsertComponent implements OnInit {
 
     // Si todo está correcto
     const datos: DatosPersonales = this.form.getRawValue();
+    if (!datos.tieneRut) {
+      datos.digitoVerificacion = ''; // Limpio y coherente
+    }
     const id = this.form.get('idDatosPersonal')?.value;
 
     const accion = this.editando && id
@@ -343,9 +360,18 @@ export class DatosPersonalesUpsertComponent implements OnInit {
       : this.api.crear(datos);
 
     accion.subscribe({
-      next: () => {
+      next: (res) => {
+        const nuevoId = res.idDatosPersonal;
+        if (nuevoId) {
+          this.registroCreado.emit(nuevoId); // 🔗 Notifica al wizard
+        }
+
         alert('✅ Registro guardado correctamente.');
-        this.router.navigate(['/hoja-vida/datos-personales']);
+
+        // 🧭 Solo redirige si NO está en el wizard
+        if (!this.enWizard) {
+          this.router.navigate(['/hoja-vida/datos-personales']);
+        }
       },
       error: (err) => console.error('Error al guardar', err)
     });
