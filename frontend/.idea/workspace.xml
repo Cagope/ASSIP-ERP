@@ -5,39 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f7dc21a8-45a4-4140-a7e2-a5ded858c06e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/resources/db/migration/V011__contabilidad_core.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/resources/db/migration/V012__depositos_core.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/styles/_pagination.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/resources/application.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-familiares/datos-familiares-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-familiares/datos-familiares-list.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-familiares/datos-familiares-list.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-familiares/datos-familiares-list.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-familiares/datos-familiares-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-familiares/datos-familiares-list.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales-list.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales-list.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales-list.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales-list.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/financieros/financieros-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/financieros/financieros-list.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/financieros/financieros-list.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/financieros/financieros-list.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/financieros/financieros-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/financieros/financieros-list.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/actualizacion-datos/actualizacion-datos.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/actualizacion-datos/actualizacion-datos.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/afiliacion-list/afiliacion-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/afiliacion-list/afiliacion-list.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/laborales/laborales-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/laborales/laborales-list.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/laborales/laborales-list.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/laborales/laborales-list.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/laborales/laborales-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/laborales/laborales-list.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/permisos-especiales/permisos-especiales-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/permisos-especiales/permisos-especiales-list.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/permisos-especiales/permisos-especiales-list.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/permisos-especiales/permisos-especiales-list.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/permisos-especiales/permisos-especiales-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/permisos-especiales/permisos-especiales-list.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/referencias-personales/referencias-personales-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/referencias-personales/referencias-personales-list.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/referencias-personales/referencias-personales-list.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/referencias-personales/referencias-personales-list.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/referencias-personales/referencias-personales-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/referencias-personales/referencias-personales-list.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/sarlaft/sarlaft-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/sarlaft/sarlaft-list.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/sarlaft/sarlaft-list.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/sarlaft/sarlaft-list.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/sarlaft/sarlaft-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/sarlaft/sarlaft-list.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/ubicaciones/ubicaciones-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/ubicaciones/ubicaciones-list.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/ubicaciones/ubicaciones-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/ubicaciones/ubicaciones-list.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/styles.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/styles.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/styles/styles.scss" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
