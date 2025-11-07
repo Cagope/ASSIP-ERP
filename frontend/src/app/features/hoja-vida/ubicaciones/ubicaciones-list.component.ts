@@ -10,19 +10,11 @@ import { UbicacionesExporterService } from './ubicaciones-exporter.service';
 import { UbicacionesApi } from './ubicaciones.api';
 import { Ubicacion } from '../../../shared/models/ubicacion.model';
 
-
 /**
  * 🧭 COMPONENTE: Listado de Ubicaciones
  * ------------------------------------------------------------
- * Este componente combina la información personal con las
- * ubicaciones asociadas a cada persona.
- *
- * Permite:
- *  - Listar todas las personas con su dirección y contactos.
- *  - Crear o editar la ubicación de cada persona.
- *  - Filtrar por documento o nombre.
- *  - Exportar el listado a Excel.
- *  - Imprimir un informe en formato horizontal.
+ * Muestra la lista de personas (datos personales) y permite
+ * gestionar la ubicación asociada a cada una.
  */
 @Component({
   selector: 'app-ubicaciones-list',
@@ -52,45 +44,48 @@ export class UbicacionesListComponent implements OnInit {
   filtro = '';
   error = '';
 
+  // 🔹 Paginación
+  pagina = 1;
+  tamanoPagina = 20;
+
   // ============================================================
-  // 🚀 Ciclo de vida: Inicialización
+  // 🚀 Ciclo de vida
   // ============================================================
   ngOnInit(): void {
     this.cargar();
   }
 
   // ============================================================
-  // 🔄 Cargar datos personales y ubicaciones (en paralelo)
+  // 🔄 Cargar datos personales y ubicaciones
   // ============================================================
   cargar(): void {
     this.cargando = true;
     this.error = '';
 
-    // Combinar consultas: datos personales + ubicaciones
     Promise.all([
       this.dpApi.listar().toPromise(),
       this.ubApi.listar().toPromise()
     ])
       .then(([personas, ubicaciones]) => {
-        // Crear un mapa para acceder rápidamente a ubicaciones por ID de persona
+        // Crear un mapa para acceder rápidamente a las ubicaciones
         const mapaUbicaciones = new Map<number, Ubicacion>();
         (ubicaciones ?? []).forEach(u => {
           if (u.idDatosPersonal) mapaUbicaciones.set(u.idDatosPersonal, u);
         });
 
-        // Unir personas + ubicaciones, ordenadas por fecha de edición
+        // 🔹 Unir datos personales y ubicaciones, ordenando por fechaActualizacion
         this.personas = (personas ?? [])
-          .sort((a, b) => {
-            const fa = a.fechaEdicion ? new Date(a.fechaEdicion).getTime() : 0;
-            const fb = b.fechaEdicion ? new Date(b.fechaEdicion).getTime() : 0;
-            return fb - fa;
-          })
           .map(p => ({
             ...p,
             ubicacion: p.idDatosPersonal
               ? mapaUbicaciones.get(p.idDatosPersonal) ?? null
               : null
-          }));
+          }))
+          .sort((a, b) => {
+            const fa = a.fechaActualizacion ? new Date(a.fechaActualizacion).getTime() : 0;
+            const fb = b.fechaActualizacion ? new Date(b.fechaActualizacion).getTime() : 0;
+            return fb - fa;
+          });
 
         this.filtrar();
       })
@@ -102,7 +97,7 @@ export class UbicacionesListComponent implements OnInit {
   }
 
   // ============================================================
-  // 🔍 Filtrado por documento o nombre
+  // 🔍 Filtrado local
   // ============================================================
   filtrar(): void {
     const term = this.filtro.toLowerCase().trim();
@@ -113,17 +108,33 @@ export class UbicacionesListComponent implements OnInit {
             .toLowerCase()
             .includes(term)
         );
+    this.pagina = 1;
   }
 
   // ============================================================
-  // 🟢 Crear o editar ubicación asociada
+  // 📄 Paginación local (20 registros)
+  // ============================================================
+  get paginadas(): (DatosPersonales & { ubicacion?: Ubicacion | null })[] {
+    const inicio = (this.pagina - 1) * this.tamanoPagina;
+    return this.filtradas.slice(inicio, inicio + this.tamanoPagina);
+  }
+
+  totalPaginas(): number {
+    return Math.ceil(this.filtradas.length / this.tamanoPagina);
+  }
+
+  cambiarPagina(p: number): void {
+    if (p < 1 || p > this.totalPaginas()) return;
+    this.pagina = p;
+  }
+
+  // ============================================================
+  // 🟢 Crear o editar ubicación
   // ============================================================
   gestionar(persona: DatosPersonales, ubicacion?: Ubicacion | null): void {
     if (ubicacion?.idUbicacion) {
-      // Si ya tiene una ubicación, redirige al formulario de edición
       this.router.navigate(['/hoja-vida/ubicaciones', ubicacion.idUbicacion, 'editar']);
     } else {
-      // Si no tiene ubicación, abre el formulario en modo creación
       this.router.navigate(['/hoja-vida/ubicaciones/nuevo'], {
         queryParams: { idDatosPersonal: persona.idDatosPersonal }
       });
@@ -131,7 +142,7 @@ export class UbicacionesListComponent implements OnInit {
   }
 
   // ============================================================
-  // 🖨️ Imprimir listado de ubicaciones
+  // 🖨️ Impresión
   // ============================================================
   imprimir(): void {
     const datos = this.personas.map(p => ({
@@ -155,7 +166,7 @@ export class UbicacionesListComponent implements OnInit {
   }
 
   // ============================================================
-  // 📤 Exportar listado a Excel
+  // 📤 Exportación
   // ============================================================
   exportar(): void {
     const datos = this.personas.map(p => ({

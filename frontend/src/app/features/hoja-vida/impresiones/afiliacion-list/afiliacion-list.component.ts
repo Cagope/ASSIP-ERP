@@ -2,9 +2,17 @@ import { Component, OnInit, inject, Renderer2 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+
 import { DatosPersonalesApi, DatosPersonales } from '../../datos-personales/datos-personales.api';
 import { FORMATOS_IMPRESION } from '../impresiones-menu.config';
 
+/**
+ * 🧾 COMPONENTE: Listado de Afiliaciones
+ * ------------------------------------------------------------
+ * Muestra el listado de personas registradas en el sistema,
+ * permitiendo imprimir diferentes formatos relacionados con
+ * la afiliación (formularios, cartas, actualizaciones, etc.).
+ */
 @Component({
   selector: 'app-afiliacion-list',
   standalone: true,
@@ -23,7 +31,7 @@ export class AfiliacionListComponent implements OnInit {
   error = '';
   filtro = '';
 
-  // 📜 Ahora usa el menú global de formatos
+  // 📜 Menú global de formatos disponibles
   formatos = FORMATOS_IMPRESION;
 
   private overlayMenu: HTMLElement | null = null;
@@ -33,9 +41,7 @@ export class AfiliacionListComponent implements OnInit {
     document.addEventListener('click', () => this.cerrarMenu());
   }
 
-  // ===========================================================
-  // 📥 Cargar registros
-  // ===========================================================
+  /** 🔄 Cargar registros desde la API */
   private cargar(): void {
     this.cargando = true;
     this.api.listar().subscribe({
@@ -52,13 +58,12 @@ export class AfiliacionListComponent implements OnInit {
     });
   }
 
+  /** 🔁 Refrescar listado manualmente */
   refrescar(): void {
     this.cargar();
   }
 
-  // ===========================================================
-  // 🔍 Filtro local
-  // ===========================================================
+  /** 🔍 Filtrar registros por nombre o documento */
   filtrar(): void {
     const term = this.filtro.toLowerCase().trim();
     this.filtrados = !term
@@ -70,15 +75,13 @@ export class AfiliacionListComponent implements OnInit {
         );
   }
 
-  // ===========================================================
-  // 🖨️ Menú contextual de impresión
-  // ===========================================================
+  /** 🖨️ Abrir menú contextual de impresión */
   abrirMenu(event: MouseEvent, persona: DatosPersonales): void {
     event.stopPropagation();
-    this.cerrarMenu(); // Cierra si hay uno abierto
+    this.cerrarMenu();
 
     const menu = this.renderer.createElement('div');
-    this.renderer.addClass(menu, 'menu-overlay');
+    this.renderer.addClass(menu, 'global-dropdown');
 
     this.formatos.forEach(f => {
       const item = this.renderer.createElement('button');
@@ -91,12 +94,11 @@ export class AfiliacionListComponent implements OnInit {
       this.renderer.appendChild(menu, item);
     });
 
-    // Posición en pantalla
     Object.assign(menu.style, {
       position: 'fixed',
       left: `${event.clientX - 120}px`,
       top: `${event.clientY + 8}px`,
-      zIndex: '9999999'
+      zIndex: '999999'
     });
 
     document.body.appendChild(menu);
@@ -110,9 +112,7 @@ export class AfiliacionListComponent implements OnInit {
     }
   }
 
-  // ===========================================================
-  // 🧭 Navegación a formatos de impresión
-  // ===========================================================
+  /** 🧭 Abrir formato seleccionado */
   abrirFormato(formato: { id: string }, persona: DatosPersonales): void {
     const id = persona.idDatosPersonal;
     if (!id) {
@@ -124,23 +124,18 @@ export class AfiliacionListComponent implements OnInit {
       case 'afiliacion':
         this.router.navigate(['/hoja-vida/impresiones/afiliacion-formulario', id], { state: { persona } });
         break;
-
       case 'tratamiento':
         this.router.navigate(['/hoja-vida/impresiones/tratamiento-datos', id], { state: { persona } });
         break;
-
       case 'origen-fondos':
         this.router.navigate(['/hoja-vida/impresiones/origen-fondos', id], { state: { persona } });
         break;
-
       case 'carta-gmf':
         this.router.navigate(['/hoja-vida/impresiones/carta-gmf', id], { state: { persona } });
         break;
-
       case 'actualizacion-datos':
         this.router.navigate(['/hoja-vida/impresiones/actualizacion-datos', id], { state: { persona } });
         break;
-
       default:
         alert('Formato no reconocido.');
     }

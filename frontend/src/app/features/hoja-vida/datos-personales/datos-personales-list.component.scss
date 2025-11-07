@@ -94,3 +94,31 @@
 .loading { color: #3b82f6; }
 .empty { color: #6b7280; }
 .error { color: #dc2626; font-weight: 500; }
+
+/* 📄 Paginación */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+
+  button {
+    @extend .btn;
+    @extend .sm;
+    min-width: 90px;
+  }
+
+  span {
+    color: #374151;
+    font-weight: 500;
+  }
+
+  button:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    border-color: #e5e7eb;
+    cursor: not-allowed;
+  }
+}

@@ -36,42 +36,38 @@
       <th>Documento</th>
       <th>Nombre completo</th>
       <th>Dirección</th>
-      <th>Fecha edición</th>
-      <th>Estado</th>
+      <th>Fecha actualización</th>
       <th>Acción</th>
     </tr>
     </thead>
 
     <tbody>
-    <!-- 🔁 Recorre personas filtradas -->
-    <tr *ngFor="let p of filtradas">
+    <!-- 🔁 Recorre personas paginadas (20 por página) -->
+    <tr *ngFor="let p of paginadas">
       <td>{{ p.tipoDocumento }} {{ p.documento }}</td>
       <td>{{ p.nombres }} {{ p.primerApellido }} {{ p.segundoApellido }}</td>
       <td>{{ p.ubicacion?.direccion || '—' }}</td>
-      <td>{{ p.fechaEdicion | date: 'dd/MM/yyyy' }}</td>
-
-      <!-- Estado de ubicación -->
-      <td>
-          <span *ngIf="p.ubicacion; else sinUbicacion" class="text-success fw-semibold">
-            Con ubicación
-          </span>
-        <ng-template #sinUbicacion>
-          <span class="text-danger fw-semibold">Sin ubicación</span>
-        </ng-template>
-      </td>
-
-      <!-- Botón de gestión -->
+      <td>{{ p.fechaActualizacion | date: 'dd/MM/yyyy' }}</td>
       <td>
         <button
-          class="btn btn-sm btn-outline-primary"
+          class="btn btn-sm"
+          [ngClass]="p.ubicacion ? 'btn-outline-primary' : 'btn-outline-success'"
           (click)="gestionar(p, p.ubicacion)">
           {{ p.ubicacion ? 'Gestionar' : 'Crear' }}
         </button>
-
       </td>
     </tr>
     </tbody>
   </table>
+
+  <!-- ==========================================================
+       📄 PAGINACIÓN SIMPLE — 20 registros por página
+       ========================================================== -->
+  <div class="pagination-controls no-print" *ngIf="!cargando && filtradas.length > tamanoPagina">
+    <button (click)="cambiarPagina(pagina - 1)" [disabled]="pagina === 1">⬅️ Anterior</button>
+    <span>Página {{ pagina }} / {{ totalPaginas() }}</span>
+    <button (click)="cambiarPagina(pagina + 1)" [disabled]="pagina === totalPaginas()">Siguiente ➡️</button>
+  </div>
 
   <!-- ==========================================================
        ⚙️ ESTADOS Y MENSAJES DEL LISTADO

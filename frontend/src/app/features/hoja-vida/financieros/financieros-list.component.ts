@@ -10,12 +10,6 @@ import { Financiero } from '../../../shared/models/financiero.model';
 import { FinancierosPrintService } from './financieros-print.service';
 import { FinancierosExporterService } from './financieros-exporter.service';
 
-/**
- * 💰 COMPONENTE: Listado de Información Financiera
- * ------------------------------------------------------------
- * Combina la información personal con los datos financieros asociados
- * a cada persona.
- */
 @Component({
   selector: 'app-financieros-list',
   standalone: true,
@@ -37,6 +31,10 @@ export class FinancierosListComponent implements OnInit {
   filtro = '';
   error = '';
 
+  // 🔹 Paginación local
+  pagina = 1;
+  tamanoPagina = 20;
+
   ngOnInit(): void {
     this.cargar();
   }
@@ -52,7 +50,7 @@ export class FinancierosListComponent implements OnInit {
       .then(([personas, financieros]) => {
         const mapaFinancieros = new Map<number, Financiero>();
         (financieros ?? []).forEach(f => {
-          if (f.idDatosPersonal) mapaFinancieros.set(f.idDatosPersonal, f); // ✅ plural (modelo Financiero)
+          if (f.idDatosPersonal) mapaFinancieros.set(f.idDatosPersonal, f);
         });
 
         this.personas = (personas ?? [])
@@ -63,9 +61,7 @@ export class FinancierosListComponent implements OnInit {
           })
           .map(p => ({
             ...p,
-            financiero: p.idDatosPersonal // ✅ singular (modelo DatosPersonales)
-              ? mapaFinancieros.get(p.idDatosPersonal) ?? null
-              : null
+            financiero: p.idDatosPersonal ? mapaFinancieros.get(p.idDatosPersonal) ?? null : null
           }));
 
         this.filtrar();
@@ -86,6 +82,22 @@ export class FinancierosListComponent implements OnInit {
             .toLowerCase()
             .includes(term)
         );
+    this.pagina = 1;
+  }
+
+  // 🔹 Registros paginados
+  get paginadas(): (DatosPersonales & { financiero?: Financiero | null })[] {
+    const inicio = (this.pagina - 1) * this.tamanoPagina;
+    return this.filtradas.slice(inicio, inicio + this.tamanoPagina);
+  }
+
+  totalPaginas(): number {
+    return Math.ceil(this.filtradas.length / this.tamanoPagina);
+  }
+
+  cambiarPagina(p: number): void {
+    if (p < 1 || p > this.totalPaginas()) return;
+    this.pagina = p;
   }
 
   gestionar(persona: DatosPersonales, financiero?: Financiero | null): void {
@@ -93,7 +105,7 @@ export class FinancierosListComponent implements OnInit {
       this.router.navigate(['/hoja-vida/financieros', financiero.idFinanciero, 'editar']);
     } else {
       this.router.navigate(['/hoja-vida/financieros/nuevo'], {
-        queryParams: { idDatosPersonal: persona.idDatosPersonal } // ✅ singular
+        queryParams: { idDatosPersonal: persona.idDatosPersonal }
       });
     }
   }
@@ -106,9 +118,7 @@ export class FinancierosListComponent implements OnInit {
     }));
 
     this.printService.imprimir(
-      datos.filter(f => !!f) as unknown as (
-        Financiero & { documento?: string; nombrePersona?: string }
-      )[]
+      datos.filter(f => !!f) as unknown as (Financiero & { documento?: string; nombrePersona?: string })[]
     );
   }
 
@@ -120,9 +130,7 @@ export class FinancierosListComponent implements OnInit {
     }));
 
     this.exporter.exportarExcel(
-      datos.filter(f => !!f) as unknown as (
-        Financiero & { documento?: string; nombrePersona?: string }
-      )[]
+      datos.filter(f => !!f) as unknown as (Financiero & { documento?: string; nombrePersona?: string })[]
     );
   }
 }

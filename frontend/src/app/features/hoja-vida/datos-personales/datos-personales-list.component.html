@@ -36,7 +36,8 @@
     </tr>
     </thead>
     <tbody>
-    <tr *ngFor="let d of filtrados">
+    <!-- 🔹 Paginación aplicada aquí -->
+    <tr *ngFor="let d of paginados">
       <td>{{ d.tipoDocumento }} {{ d.documento }}</td>
       <td>{{ d.nombres }} {{ d.primerApellido }} {{ d.segundoApellido }}</td>
       <td>{{ d.tipoPersona === '1' ? 'Natural' : 'Jurídica' }}</td>
@@ -65,4 +66,12 @@
   <div *ngIf="error" class="error">
     <i class="bi bi-exclamation-triangle"></i> {{ error }}
   </div>
+
+  <!-- 📄 Controles de paginación -->
+  <div class="pagination-controls no-print" *ngIf="!cargando && filtrados.length > tamanoPagina">
+    <button (click)="cambiarPagina(pagina - 1)" [disabled]="pagina === 1">⬅️ Anterior</button>
+    <span>Página {{ pagina }} / {{ totalPaginas() }}</span>
+    <button (click)="cambiarPagina(pagina + 1)" [disabled]="pagina >= totalPaginas()">Siguiente ➡️</button>
+  </div>
+
 </div>

@@ -10,17 +10,6 @@ import { Sarlaft } from '../../../shared/models/sarlaft.model';
 import { SarlaftPrintService } from './sarlaft-print.service';
 import { SarlaftExporterService } from './sarlaft-exporter.service';
 
-/**
- * 🧾 COMPONENTE: Listado SARLAFT
- * ------------------------------------------------------------
- * Combina la información personal con los registros SARLAFT asociados.
- * Permite:
- *  - Listar personas con su información SARLAFT.
- *  - Crear o editar registros SARLAFT.
- *  - Filtrar por documento o nombre.
- *  - Exportar a Excel.
- *  - Imprimir listado SARLAFT.
- */
 @Component({
   selector: 'app-sarlaft-list',
   standalone: true,
@@ -29,19 +18,12 @@ import { SarlaftExporterService } from './sarlaft-exporter.service';
   styleUrls: ['./sarlaft-list.component.scss']
 })
 export class SarlaftListComponent implements OnInit {
-
-  // ============================================================
-  // ⚙️ Inyección de dependencias
-  // ============================================================
   private readonly dpApi = inject(DatosPersonalesApi);
   private readonly sarlaftApi = inject(SarlaftApi);
   private readonly router = inject(Router);
   private readonly printService = inject(SarlaftPrintService);
   private readonly exporter = inject(SarlaftExporterService);
 
-  // ============================================================
-  // 📦 Propiedades del componente
-  // ============================================================
   personas: (DatosPersonales & { sarlaft?: Sarlaft | null })[] = [];
   filtradas: (DatosPersonales & { sarlaft?: Sarlaft | null })[] = [];
 
@@ -49,16 +31,14 @@ export class SarlaftListComponent implements OnInit {
   filtro = '';
   error = '';
 
-  // ============================================================
-  // 🚀 Inicialización
-  // ============================================================
+  // 🔹 Paginación local
+  pagina = 1;
+  tamanoPagina = 20;
+
   ngOnInit(): void {
     this.cargar();
   }
 
-  // ============================================================
-  // 🔄 Cargar datos personales + SARLAFT en paralelo
-  // ============================================================
   cargar(): void {
     this.cargando = true;
     this.error = '';
@@ -68,24 +48,20 @@ export class SarlaftListComponent implements OnInit {
       this.sarlaftApi.listar().toPromise()
     ])
       .then(([personas, sarlafts]) => {
-        // Crear mapa de SARLAFT por ID de persona
         const mapaSarlaft = new Map<number, Sarlaft>();
         (sarlafts ?? []).forEach(s => {
           if (s.idDatosPersonal) mapaSarlaft.set(s.idDatosPersonal, s);
         });
 
-        // Unir datos personales con SARLAFT
         this.personas = (personas ?? [])
           .sort((a, b) => {
-            const fa = a.fechaEdicion ? new Date(a.fechaEdicion).getTime() : 0;
-            const fb = b.fechaEdicion ? new Date(b.fechaEdicion).getTime() : 0;
+            const fa = a.fechaActualizacion ? new Date(a.fechaActualizacion).getTime() : 0;
+            const fb = b.fechaActualizacion ? new Date(b.fechaActualizacion).getTime() : 0;
             return fb - fa;
           })
           .map(p => ({
             ...p,
-            sarlaft: p.idDatosPersonal
-              ? mapaSarlaft.get(p.idDatosPersonal) ?? null
-              : null
+            sarlaft: p.idDatosPersonal ? mapaSarlaft.get(p.idDatosPersonal) ?? null : null
           }));
 
         this.filtrar();
@@ -97,9 +73,6 @@ export class SarlaftListComponent implements OnInit {
       .finally(() => (this.cargando = false));
   }
 
-  // ============================================================
-  // 🔍 Filtro por documento o nombre
-  // ============================================================
   filtrar(): void {
     const term = this.filtro.toLowerCase().trim();
     this.filtradas = !term
@@ -109,26 +82,33 @@ export class SarlaftListComponent implements OnInit {
             .toLowerCase()
             .includes(term)
         );
+    this.pagina = 1;
   }
 
-  // ============================================================
-  // 🟢 Crear o editar registro SARLAFT
-  // ============================================================
+  get paginadas(): (DatosPersonales & { sarlaft?: Sarlaft | null })[] {
+    const inicio = (this.pagina - 1) * this.tamanoPagina;
+    return this.filtradas.slice(inicio, inicio + this.tamanoPagina);
+  }
+
+  totalPaginas(): number {
+    return Math.ceil(this.filtradas.length / this.tamanoPagina);
+  }
+
+  cambiarPagina(p: number): void {
+    if (p < 1 || p > this.totalPaginas()) return;
+    this.pagina = p;
+  }
+
   gestionar(persona: DatosPersonales, sarlaft?: Sarlaft | null): void {
     if (sarlaft?.idSarlaft) {
-      // Editar registro existente
       this.router.navigate(['/hoja-vida/sarlaft', sarlaft.idSarlaft, 'editar']);
     } else {
-      // Crear nuevo registro SARLAFT para esta persona
       this.router.navigate(['/hoja-vida/sarlaft/nuevo'], {
         queryParams: { idDatosPersonal: persona.idDatosPersonal }
       });
     }
   }
 
-  // ============================================================
-  // 🖨️ Imprimir listado SARLAFT
-  // ============================================================
   imprimir(): void {
     const datos = this.personas.map(p => ({
       ...p.sarlaft,
@@ -137,18 +117,10 @@ export class SarlaftListComponent implements OnInit {
     }));
 
     this.printService.imprimir(
-      datos.filter(s => !!s) as unknown as (
-        Sarlaft & {
-          documento?: string;
-          nombrePersona?: string;
-        }
-      )[]
+      datos.filter(s => !!s) as unknown as (Sarlaft & { documento?: string; nombrePersona?: string })[]
     );
   }
 
-  // ============================================================
-  // 📤 Exportar listado SARLAFT a Excel
-  // ============================================================
   exportar(): void {
     const datos = this.personas.map(p => ({
       ...p.sarlaft,
@@ -157,12 +129,7 @@ export class SarlaftListComponent implements OnInit {
     }));
 
     this.exporter.exportarExcel(
-      datos.filter(s => !!s) as unknown as (
-        Sarlaft & {
-          documento?: string;
-          nombrePersona?: string;
-        }
-      )[]
+      datos.filter(s => !!s) as unknown as (Sarlaft & { documento?: string; nombrePersona?: string })[]
     );
   }
 }

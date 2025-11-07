@@ -10,20 +10,6 @@ import { Laboral } from '../../../shared/models/laboral.model';
 import { LaboralesPrintService } from './laborales-print.service';
 import { LaboralesExporterService } from './laborales-exporter.service';
 
-
-/**
- * 💼 COMPONENTE: Listado de Información Laboral
- * ------------------------------------------------------------
- * Combina la información personal con los datos laborales asociados
- * a cada persona.
- *
- * Permite:
- *  - Listar personas con su información laboral.
- *  - Crear o editar los registros laborales.
- *  - Filtrar por documento o nombre.
- *  - Exportar a Excel.
- *  - Imprimir reporte laboral.
- */
 @Component({
   selector: 'app-laborales-list',
   standalone: true,
@@ -33,18 +19,12 @@ import { LaboralesExporterService } from './laborales-exporter.service';
 })
 export class LaboralesListComponent implements OnInit {
 
-  // ============================================================
-  // ⚙️ Inyección de dependencias
-  // ============================================================
   private readonly dpApi = inject(DatosPersonalesApi);
   private readonly labApi = inject(LaboralesApi);
   private readonly router = inject(Router);
   private readonly printService = inject(LaboralesPrintService);
   private readonly exporter = inject(LaboralesExporterService);
 
-  // ============================================================
-  // 📦 Propiedades del componente
-  // ============================================================
   personas: (DatosPersonales & { laboral?: Laboral | null })[] = [];
   filtradas: (DatosPersonales & { laboral?: Laboral | null })[] = [];
 
@@ -52,16 +32,14 @@ export class LaboralesListComponent implements OnInit {
   filtro = '';
   error = '';
 
-  // ============================================================
-  // 🚀 Ciclo de vida: Inicialización
-  // ============================================================
+  // 🔹 Paginación local
+  pagina = 1;
+  tamanoPagina = 20;
+
   ngOnInit(): void {
     this.cargar();
   }
 
-  // ============================================================
-  // 🔄 Cargar datos personales y laborales (en paralelo)
-  // ============================================================
   cargar(): void {
     this.cargando = true;
     this.error = '';
@@ -71,17 +49,16 @@ export class LaboralesListComponent implements OnInit {
       this.labApi.listar().toPromise()
     ])
       .then(([personas, laborales]) => {
-        // Mapa para relacionar datos laborales por ID de persona
         const mapaLaborales = new Map<number, Laboral>();
         (laborales ?? []).forEach(l => {
           if (l.idDatosPersonal) mapaLaborales.set(l.idDatosPersonal, l);
         });
 
-        // Unir personas + laborales, ordenadas por fecha de edición
+        // 🔸 Ordenar por fechaActualizacion (no por fechaEdicion)
         this.personas = (personas ?? [])
           .sort((a, b) => {
-            const fa = a.fechaEdicion ? new Date(a.fechaEdicion).getTime() : 0;
-            const fb = b.fechaEdicion ? new Date(b.fechaEdicion).getTime() : 0;
+            const fa = a.fechaActualizacion ? new Date(a.fechaActualizacion).getTime() : 0;
+            const fb = b.fechaActualizacion ? new Date(b.fechaActualizacion).getTime() : 0;
             return fb - fa;
           })
           .map(p => ({
@@ -100,9 +77,6 @@ export class LaboralesListComponent implements OnInit {
       .finally(() => (this.cargando = false));
   }
 
-  // ============================================================
-  // 🔍 Filtrado por documento o nombre
-  // ============================================================
   filtrar(): void {
     const term = this.filtro.toLowerCase().trim();
     this.filtradas = !term
@@ -112,26 +86,33 @@ export class LaboralesListComponent implements OnInit {
             .toLowerCase()
             .includes(term)
         );
+    this.pagina = 1;
   }
 
-  // ============================================================
-  // 🟢 Crear o editar registro laboral asociado
-  // ============================================================
+  get paginadas(): (DatosPersonales & { laboral?: Laboral | null })[] {
+    const inicio = (this.pagina - 1) * this.tamanoPagina;
+    return this.filtradas.slice(inicio, inicio + this.tamanoPagina);
+  }
+
+  totalPaginas(): number {
+    return Math.ceil(this.filtradas.length / this.tamanoPagina);
+  }
+
+  cambiarPagina(p: number): void {
+    if (p < 1 || p > this.totalPaginas()) return;
+    this.pagina = p;
+  }
+
   gestionar(persona: DatosPersonales, laboral?: Laboral | null): void {
     if (laboral?.idLaboral) {
-      // Si ya tiene un registro laboral, redirige a edición
       this.router.navigate(['/hoja-vida/laborales', laboral.idLaboral, 'editar']);
     } else {
-      // Si no tiene, redirige a modo creación
       this.router.navigate(['/hoja-vida/laborales/nuevo'], {
         queryParams: { idDatosPersonal: persona.idDatosPersonal }
       });
     }
   }
 
-  // ============================================================
-  // 🖨️ Imprimir listado laboral
-  // ============================================================
   imprimir(): void {
     const datos = this.personas.map(p => ({
       ...p.laboral,
@@ -140,24 +121,10 @@ export class LaboralesListComponent implements OnInit {
     }));
 
     this.printService.imprimir(
-      datos.filter(l => !!l) as unknown as (
-        Laboral & {
-          documento?: string;
-          nombrePersona?: string;
-          nombrePais?: string;
-          nombreDepartamento?: string;
-          nombreCiudad?: string;
-          tipoEmpresa?: string;
-          tipoContrato?: string;
-          jornadaLaboral?: string;
-        }
-      )[]
+      datos.filter(l => !!l) as unknown as Laboral[]
     );
   }
 
-  // ============================================================
-  // 📤 Exportar listado a Excel
-  // ============================================================
   exportar(): void {
     const datos = this.personas.map(p => ({
       ...p.laboral,
@@ -166,18 +133,7 @@ export class LaboralesListComponent implements OnInit {
     }));
 
     this.exporter.exportarExcel(
-      datos.filter(l => !!l) as unknown as (
-        Laboral & {
-          documento?: string;
-          nombrePersona?: string;
-          nombrePais?: string;
-          nombreDepartamento?: string;
-          nombreCiudad?: string;
-          tipoEmpresa?: string;
-          tipoContrato?: string;
-          jornadaLaboral?: string;
-        }
-      )[]
+      datos.filter(l => !!l) as unknown as Laboral[]
     );
   }
 }

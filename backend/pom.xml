@@ -20,6 +20,7 @@
 
 	<properties>
 		<java.version>17</java.version>
+		<flyway.version>11.7.2</flyway.version>
 	</properties>
 
 	<dependencies>
@@ -62,7 +63,7 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.7.3</version>
+			<scope>runtime</scope>
 		</dependency>
 
 		<!-- ========================= -->
@@ -126,11 +127,11 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
-
 	</dependencies>
 
 	<build>
 		<plugins>
+			<!-- 🔹 COMPILADOR PRINCIPAL -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -144,6 +145,7 @@
 				</configuration>
 			</plugin>
 
+			<!-- 🔹 PLUGIN SPRING BOOT -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -154,6 +156,39 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
+				</configuration>
+			</plugin>
+
+			<!-- 🔹 PLUGIN FLYWAY (para uso manual opcional) -->
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<version>${flyway.version}</version>
+				<configuration>
+					<url>jdbc:postgresql://localhost:5432/assip_erp</url>
+					<user>postgres</user>
+					<password>Cagope1234+</password>
+					<schemas>
+						<schema>seguridad</schema>
+						<schema>catalogos</schema>
+						<schema>general</schema>
+						<schema>hoja_vida</schema>
+						<schema>contabilidad</schema>
+						<schema>depositos</schema>
+						<schema>cartera</schema>
+						<schema>activos_fijos</schema>
+						<schema>nomina</schema>
+						<schema>tesoreria</schema>
+						<schema>reporting</schema>
+					</schemas>
+					<defaultSchema>seguridad</defaultSchema>
+					<locations>
+						<location>classpath:db/migration</location>
+					</locations>
+					<baselineOnMigrate>true</baselineOnMigrate>
+					<validateOnMigrate>true</validateOnMigrate>
+					<outOfOrder>true</outOfOrder>
+					<createSchemas>true</createSchemas>
 				</configuration>
 			</plugin>
 		</plugins>

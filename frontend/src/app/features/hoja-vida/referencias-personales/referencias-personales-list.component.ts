@@ -10,19 +10,6 @@ import { ReferenciasPersonalesPrintService } from './referencias-personales-prin
 import { ReferenciasPersonalesExporterService } from './referencias-personales-exporter.service';
 import { ReferenciaPersonal } from '../../../shared/models/referencia-personal.model';
 
-/**
- * 👥 COMPONENTE: Listado de Referencias Personales
- * ------------------------------------------------------------
- * Combina los datos personales con las referencias personales
- * asociadas a cada persona.
- *
- * Permite:
- *  - Listar todas las personas con sus referencias personales.
- *  - Crear o editar referencias personales.
- *  - Filtrar por documento o nombre.
- *  - Exportar a Excel.
- *  - Imprimir el listado completo.
- */
 @Component({
   selector: 'app-referencias-personales-list',
   standalone: true,
@@ -32,18 +19,12 @@ import { ReferenciaPersonal } from '../../../shared/models/referencia-personal.m
 })
 export class ReferenciasPersonalesListComponent implements OnInit {
 
-  // ============================================================
-  // ⚙️ Inyección de dependencias
-  // ============================================================
   private readonly dpApi = inject(DatosPersonalesApi);
   private readonly refApi = inject(ReferenciasPersonalesApi);
   private readonly router = inject(Router);
   private readonly printService = inject(ReferenciasPersonalesPrintService);
   private readonly exporter = inject(ReferenciasPersonalesExporterService);
 
-  // ============================================================
-  // 📦 Propiedades del componente
-  // ============================================================
   personas: (DatosPersonales & { referencias?: ReferenciaPersonal[] | null })[] = [];
   filtradas: (DatosPersonales & { referencias?: ReferenciaPersonal[] | null })[] = [];
 
@@ -51,16 +32,14 @@ export class ReferenciasPersonalesListComponent implements OnInit {
   filtro = '';
   error = '';
 
-  // ============================================================
-  // 🚀 Ciclo de vida: Inicialización
-  // ============================================================
+  // 📄 Paginación
+  pagina = 1;
+  tamanoPagina = 20;
+
   ngOnInit(): void {
     this.cargar();
   }
 
-  // ============================================================
-  // 🔄 Cargar datos personales + referencias personales
-  // ============================================================
   cargar(): void {
     this.cargando = true;
     this.error = '';
@@ -70,7 +49,6 @@ export class ReferenciasPersonalesListComponent implements OnInit {
       this.refApi.listar().toPromise()
     ])
       .then(([personas, referencias]) => {
-        // Mapa de referencias por ID de persona
         const mapaReferencias = new Map<number, ReferenciaPersonal[]>();
         (referencias ?? []).forEach(r => {
           if (r.idDatosPersonal != null) {
@@ -80,11 +58,10 @@ export class ReferenciasPersonalesListComponent implements OnInit {
           }
         });
 
-        // Unir personas + referencias, ordenadas por fecha de edición
         this.personas = (personas ?? [])
           .sort((a, b) => {
-            const fa = a.fechaEdicion ? new Date(a.fechaEdicion).getTime() : 0;
-            const fb = b.fechaEdicion ? new Date(b.fechaEdicion).getTime() : 0;
+            const fa = a.fechaActualizacion ? new Date(a.fechaActualizacion).getTime() : 0;
+            const fb = b.fechaActualizacion ? new Date(b.fechaActualizacion).getTime() : 0;
             return fb - fa;
           })
           .map(p => ({
@@ -101,9 +78,6 @@ export class ReferenciasPersonalesListComponent implements OnInit {
       .finally(() => (this.cargando = false));
   }
 
-  // ============================================================
-  // 🔍 Filtrar por documento o nombre
-  // ============================================================
   filtrar(): void {
     const term = this.filtro.toLowerCase().trim();
     this.filtradas = !term
@@ -113,11 +87,23 @@ export class ReferenciasPersonalesListComponent implements OnInit {
             .toLowerCase()
             .includes(term)
         );
+    this.pagina = 1;
   }
 
-  // ============================================================
-  // 🟢 Crear o editar referencia personal
-  // ============================================================
+  get paginadas(): (DatosPersonales & { referencias?: ReferenciaPersonal[] | null })[] {
+    const inicio = (this.pagina - 1) * this.tamanoPagina;
+    return this.filtradas.slice(inicio, inicio + this.tamanoPagina);
+  }
+
+  totalPaginas(): number {
+    return Math.ceil(this.filtradas.length / this.tamanoPagina);
+  }
+
+  cambiarPagina(p: number): void {
+    if (p < 1 || p > this.totalPaginas()) return;
+    this.pagina = p;
+  }
+
   gestionar(persona: DatosPersonales, referencia?: ReferenciaPersonal | null): void {
     if (referencia?.idReferenciaPersonal) {
       this.router.navigate(['/hoja-vida/referencias-personales', referencia.idReferenciaPersonal, 'editar']);
@@ -128,9 +114,6 @@ export class ReferenciasPersonalesListComponent implements OnInit {
     }
   }
 
-  // ============================================================
-  // 🖨️ Imprimir listado
-  // ============================================================
   imprimir(): void {
     const datos = this.personas.flatMap(p =>
       (p.referencias ?? []).map(r => ({
@@ -147,9 +130,6 @@ export class ReferenciasPersonalesListComponent implements OnInit {
     );
   }
 
-  // ============================================================
-  // 📤 Exportar listado a Excel
-  // ============================================================
   exportar(): void {
     const datos = this.personas.flatMap(p =>
       (p.referencias ?? []).map(r => ({

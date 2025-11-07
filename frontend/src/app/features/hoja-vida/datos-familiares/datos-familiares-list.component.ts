@@ -10,19 +10,6 @@ import { DatosFamiliar } from '../../../shared/models/datos-familiar.model';
 import { DatosFamiliaresPrintService } from './datos-familiares-print.service';
 import { DatosFamiliaresExporterService } from './datos-familiares-exporter.service';
 
-/**
- * 👨‍👩‍👧‍👦 COMPONENTE: Listado de Datos Familiares
- * ------------------------------------------------------------
- * Muestra las personas registradas junto con los datos familiares
- * asociados (nombre, parentesco, contacto, referencia, etc.).
- *
- * Permite:
- *  - Listar personas con sus familiares asociados.
- *  - Crear o editar registros familiares.
- *  - Filtrar por documento o nombre.
- *  - Exportar a Excel.
- *  - Imprimir reporte familiar.
- */
 @Component({
   selector: 'app-datos-familiares-list',
   standalone: true,
@@ -31,19 +18,12 @@ import { DatosFamiliaresExporterService } from './datos-familiares-exporter.serv
   styleUrls: ['./datos-familiares-list.component.scss']
 })
 export class DatosFamiliaresListComponent implements OnInit {
-
-  // ============================================================
-  // ⚙️ Inyección de dependencias
-  // ============================================================
   private readonly dpApi = inject(DatosPersonalesApi);
   private readonly famApi = inject(DatosFamiliaresApi);
   private readonly router = inject(Router);
   private readonly printService = inject(DatosFamiliaresPrintService);
   private readonly exporter = inject(DatosFamiliaresExporterService);
 
-  // ============================================================
-  // 📦 Propiedades del componente
-  // ============================================================
   personas: (DatosPersonales & { familiares?: DatosFamiliar[] | null })[] = [];
   filtradas: (DatosPersonales & { familiares?: DatosFamiliar[] | null })[] = [];
 
@@ -51,16 +31,14 @@ export class DatosFamiliaresListComponent implements OnInit {
   filtro = '';
   error = '';
 
-  // ============================================================
-  // 🚀 Inicialización
-  // ============================================================
+  // 🔹 Paginación local
+  pagina = 1;
+  tamanoPagina = 20;
+
   ngOnInit(): void {
     this.cargar();
   }
 
-  // ============================================================
-  // 🔄 Cargar datos personales y familiares
-  // ============================================================
   cargar(): void {
     this.cargando = true;
     this.error = '';
@@ -81,8 +59,8 @@ export class DatosFamiliaresListComponent implements OnInit {
 
         this.personas = (personas ?? [])
           .sort((a, b) => {
-            const fa = a.fechaEdicion ? new Date(a.fechaEdicion).getTime() : 0;
-            const fb = b.fechaEdicion ? new Date(b.fechaEdicion).getTime() : 0;
+            const fa = a.fechaActualizacion ? new Date(a.fechaActualizacion).getTime() : 0;
+            const fb = b.fechaActualizacion ? new Date(b.fechaActualizacion).getTime() : 0;
             return fb - fa;
           })
           .map(p => ({
@@ -99,9 +77,6 @@ export class DatosFamiliaresListComponent implements OnInit {
       .finally(() => (this.cargando = false));
   }
 
-  // ============================================================
-  // 🔍 Filtrar por documento o nombre
-  // ============================================================
   filtrar(): void {
     const term = this.filtro.toLowerCase().trim();
     this.filtradas = !term
@@ -111,11 +86,23 @@ export class DatosFamiliaresListComponent implements OnInit {
             .toLowerCase()
             .includes(term)
         );
+    this.pagina = 1;
   }
 
-  // ============================================================
-  // 🟢 Crear o editar registro familiar
-  // ============================================================
+  get paginadas(): (DatosPersonales & { familiares?: DatosFamiliar[] | null })[] {
+    const inicio = (this.pagina - 1) * this.tamanoPagina;
+    return this.filtradas.slice(inicio, inicio + this.tamanoPagina);
+  }
+
+  totalPaginas(): number {
+    return Math.ceil(this.filtradas.length / this.tamanoPagina);
+  }
+
+  cambiarPagina(p: number): void {
+    if (p < 1 || p > this.totalPaginas()) return;
+    this.pagina = p;
+  }
+
   gestionar(persona: DatosPersonales, familiar?: DatosFamiliar | null): void {
     if (familiar?.idDatosFamiliares) {
       this.router.navigate(['/hoja-vida/datos-familiares', familiar.idDatosFamiliares, 'editar']);
@@ -126,9 +113,6 @@ export class DatosFamiliaresListComponent implements OnInit {
     }
   }
 
-  // ============================================================
-  // 🖨️ Imprimir reporte familiar
-  // ============================================================
   imprimir(): void {
     const datos = this.personas.flatMap(p =>
       (p.familiares ?? []).map(f => ({
@@ -145,9 +129,6 @@ export class DatosFamiliaresListComponent implements OnInit {
     );
   }
 
-  // ============================================================
-  // 📤 Exportar a Excel
-  // ============================================================
   exportar(): void {
     const datos = this.personas.flatMap(p =>
       (p.familiares ?? []).map(f => ({

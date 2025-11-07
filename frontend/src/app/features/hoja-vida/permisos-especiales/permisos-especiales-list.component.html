@@ -1,8 +1,4 @@
 <div class="permisos-especiales-list">
-
-  <!-- ==========================================================
-       🧾 ENCABEZADO — Título + Botones globales
-       ========================================================== -->
   <app-header-actions
     titulo="Permisos Especiales"
     [mostrarNuevo]="false"
@@ -12,26 +8,16 @@
     (exportar)="exportar()">
   </app-header-actions>
 
-  <!-- ==========================================================
-       🔍 FILTRO DE BÚSQUEDA
-       ========================================================== -->
   <div class="filtro mb-3">
     <input
       type="text"
       placeholder="Buscar por nombre o documento..."
       [(ngModel)]="filtro"
       (input)="filtrar()"
-      class="form-control"
-    />
+      class="form-control" />
   </div>
 
-  <!-- ==========================================================
-       📋 TABLA PRINCIPAL — Listado de personas + Permisos
-       ========================================================== -->
-  <table
-    *ngIf="!cargando && filtradas.length > 0"
-    class="table table-striped table-hover align-middle"
-  >
+  <table *ngIf="!cargando && filtradas.length > 0" class="table table-striped table-hover align-middle">
     <thead class="table-light">
     <tr>
       <th>Documento</th>
@@ -41,53 +27,26 @@
       <th>Recibe Emails</th>
       <th>Recibe Cartas</th>
       <th>Recibe Redes Sociales</th>
+      <th>Fecha actualización</th>
       <th class="text-center">Acción</th>
     </tr>
     </thead>
 
     <tbody>
-    <tr *ngFor="let p of filtradas">
-      <!-- Documento -->
+    <tr *ngFor="let p of paginadas">
       <td>{{ p.tipoDocumento }} {{ p.documento }}</td>
-
-      <!-- Nombre completo -->
       <td>{{ p.nombres }} {{ p.primerApellido }} {{ p.segundoApellido }}</td>
 
-      <!-- Recibe llamadas -->
-      <td>
-        <span *ngIf="p.permisos?.recibeLlamadas; else noLlam" class="text-success fw-semibold">Sí</span>
-        <ng-template #noLlam><span class="text-danger">No</span></ng-template>
-      </td>
+      <td><span *ngIf="p.permisos?.recibeLlamadas; else noLlam" class="text-success">Sí</span><ng-template #noLlam><span class="text-danger">No</span></ng-template></td>
+      <td><span *ngIf="p.permisos?.recibeMsm; else noSms" class="text-success">Sí</span><ng-template #noSms><span class="text-danger">No</span></ng-template></td>
+      <td><span *ngIf="p.permisos?.recibeEmails; else noMail" class="text-success">Sí</span><ng-template #noMail><span class="text-danger">No</span></ng-template></td>
+      <td><span *ngIf="p.permisos?.recibeCartas; else noCarta" class="text-success">Sí</span><ng-template #noCarta><span class="text-danger">No</span></ng-template></td>
+      <td><span *ngIf="p.permisos?.recibeRedesSociales; else noRed" class="text-success">Sí</span><ng-template #noRed><span class="text-danger">No</span></ng-template></td>
 
-      <!-- Recibe SMS -->
-      <td>
-        <span *ngIf="p.permisos?.recibeMsm; else noSms" class="text-success fw-semibold">Sí</span>
-        <ng-template #noSms><span class="text-danger">No</span></ng-template>
-      </td>
+      <td>{{ p.fechaActualizacion | date: 'dd/MM/yyyy' }}</td>
 
-      <!-- Recibe Emails -->
-      <td>
-        <span *ngIf="p.permisos?.recibeEmails; else noMail" class="text-success fw-semibold">Sí</span>
-        <ng-template #noMail><span class="text-danger">No</span></ng-template>
-      </td>
-
-      <!-- Recibe Cartas -->
-      <td>
-        <span *ngIf="p.permisos?.recibeCartas; else noCarta" class="text-success fw-semibold">Sí</span>
-        <ng-template #noCarta><span class="text-danger">No</span></ng-template>
-      </td>
-
-      <!-- Recibe Redes Sociales -->
-      <td>
-        <span *ngIf="p.permisos?.recibeRedesSociales; else noRed" class="text-success fw-semibold">Sí</span>
-        <ng-template #noRed><span class="text-danger">No</span></ng-template>
-      </td>
-
-      <!-- Botón acción -->
       <td class="text-center">
-        <button
-          class="btn btn-sm btn-outline-primary"
-          (click)="gestionar(p, p.permisos)">
+        <button class="btn btn-sm btn-outline-primary" (click)="gestionar(p, p.permisos)">
           {{ p.permisos ? 'Gestionar' : 'Crear' }}
         </button>
       </td>
@@ -95,9 +54,12 @@
     </tbody>
   </table>
 
-  <!-- ==========================================================
-       ⚙️ ESTADOS Y MENSAJES DEL LISTADO
-       ========================================================== -->
+  <div class="pagination-controls" *ngIf="!cargando && filtradas.length > tamanoPagina">
+    <button (click)="cambiarPagina(pagina - 1)" [disabled]="pagina === 1">Anterior</button>
+    <span>Página {{ pagina }} / {{ totalPaginas() }}</span>
+    <button (click)="cambiarPagina(pagina + 1)" [disabled]="pagina === totalPaginas()">Siguiente</button>
+  </div>
+
   <div *ngIf="cargando" class="text-center my-3 text-secondary">
     <i class="bi bi-hourglass-split"></i> Cargando permisos especiales...
   </div>

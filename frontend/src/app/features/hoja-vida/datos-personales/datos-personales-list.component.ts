@@ -27,6 +27,10 @@ export class DatosPersonalesListComponent implements OnInit {
   error = '';
   filtro = '';
 
+  // 🔹 Paginación local
+  pagina = 1;
+  tamanoPagina = 20;
+
   ngOnInit(): void {
     this.cargar();
   }
@@ -57,6 +61,24 @@ export class DatosPersonalesListComponent implements OnInit {
             .toLowerCase()
             .includes(term)
         );
+    this.pagina = 1; // 🔹 Reiniciar a la primera página después de filtrar
+  }
+
+  // 🔹 Obtener registros de la página actual
+  get paginados(): DatosPersonales[] {
+    const inicio = (this.pagina - 1) * this.tamanoPagina;
+    return this.filtrados.slice(inicio, inicio + this.tamanoPagina);
+  }
+
+  // 🔹 Total de páginas
+  totalPaginas(): number {
+    return Math.ceil(this.filtrados.length / this.tamanoPagina);
+  }
+
+  // 🔹 Cambiar de página
+  cambiarPagina(p: number): void {
+    if (p < 1 || p > this.totalPaginas()) return;
+    this.pagina = p;
   }
 
   nuevo(): void {

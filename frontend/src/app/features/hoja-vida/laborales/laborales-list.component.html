@@ -1,8 +1,5 @@
 <div class="laborales-list">
 
-  <!-- ==========================================================
-       💼 ENCABEZADO — Título + Botones globales
-       ========================================================== -->
   <app-header-actions
     titulo="Información Laboral"
     [mostrarNuevo]="false"
@@ -12,9 +9,6 @@
     (exportar)="exportar()">
   </app-header-actions>
 
-  <!-- ==========================================================
-       🔍 FILTRO DE BÚSQUEDA
-       ========================================================== -->
   <div class="filtro mb-3">
     <input
       type="text"
@@ -25,13 +19,7 @@
     />
   </div>
 
-  <!-- ==========================================================
-       📋 TABLA PRINCIPAL — Listado de personas + laborales
-       ========================================================== -->
-  <table
-    *ngIf="!cargando && filtradas.length > 0"
-    class="table table-striped table-hover align-middle"
-  >
+  <table *ngIf="!cargando && filtradas.length > 0" class="table table-striped table-hover align-middle">
     <thead class="table-light">
     <tr>
       <th>Documento</th>
@@ -39,21 +27,16 @@
       <th>Empresa / Actividad</th>
       <th>Ciudad</th>
       <th>Teléfono / Celular</th>
-      <th>Fecha vinculación</th>
-      <th>Estado</th>
+      <th>Fecha actualización</th>
       <th class="text-center">Acción</th>
     </tr>
     </thead>
 
     <tbody>
-    <tr *ngFor="let p of filtradas">
+    <tr *ngFor="let p of paginadas">
       <td>{{ p.tipoDocumento }} {{ p.documento }}</td>
       <td>{{ p.nombres }} {{ p.primerApellido }} {{ p.segundoApellido }}</td>
-
-      <!-- Empresa -->
       <td>{{ p.laboral?.nombreEmpresa || '—' }}</td>
-
-      <!-- Ciudad -->
       <td>
         <ng-container *ngIf="p.laboral && p.laboral.idCiudad; else noCiudad">
           <i class="bi bi-geo-alt text-primary"></i>
@@ -61,35 +44,18 @@
         </ng-container>
         <ng-template #noCiudad>—</ng-template>
       </td>
-
-      <!-- Teléfonos -->
       <td>
         <ng-container *ngIf="p.laboral; else sinTelefonos">
           {{ p.laboral.telefonoEmpresa || '—' }}<br />
-          <small class="text-muted">
-            {{ p.laboral.celularEmpresa || '—' }}
-          </small>
+          <small class="text-muted">{{ p.laboral.celularEmpresa || '—' }}</small>
         </ng-container>
         <ng-template #sinTelefonos>—</ng-template>
       </td>
-
-      <!-- Fecha vinculación -->
-      <td>{{ p.laboral?.fechaVinculacion | date: 'dd/MM/yyyy' }}</td>
-
-      <!-- Estado -->
-      <td>
-          <span *ngIf="p.laboral; else sinLaboral" class="text-success fw-semibold">
-            Con información
-          </span>
-        <ng-template #sinLaboral>
-          <span class="text-danger fw-semibold">Sin información</span>
-        </ng-template>
-      </td>
-
-      <!-- Botón acción -->
+      <td>{{ p.fechaActualizacion | date: 'dd/MM/yyyy' }}</td>
       <td class="text-center">
         <button
-          class="btn btn-sm btn-outline-primary"
+          class="btn btn-sm"
+          [ngClass]="p.laboral ? 'btn-outline-primary' : 'btn-outline-success'"
           (click)="gestionar(p, p.laboral)">
           {{ p.laboral ? 'Gestionar' : 'Crear' }}
         </button>
@@ -98,9 +64,12 @@
     </tbody>
   </table>
 
-  <!-- ==========================================================
-       ⚙️ ESTADOS Y MENSAJES DEL LISTADO
-       ========================================================== -->
+  <div class="pagination-controls no-print" *ngIf="!cargando && filtradas.length > tamanoPagina">
+    <button (click)="cambiarPagina(pagina - 1)" [disabled]="pagina === 1">⬅️ Anterior</button>
+    <span>Página {{ pagina }} / {{ totalPaginas() }}</span>
+    <button (click)="cambiarPagina(pagina + 1)" [disabled]="pagina === totalPaginas()">Siguiente ➡️</button>
+  </div>
+
   <div *ngIf="cargando" class="text-center my-3 text-secondary">
     <i class="bi bi-hourglass-split"></i> Cargando datos laborales...
   </div>

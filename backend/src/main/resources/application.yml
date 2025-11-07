@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: none     # Flyway controla las migraciones, no Hibernate
     show-sql: false
     properties:
       hibernate:
@@ -19,22 +19,25 @@ spring:
 
   flyway:
     enabled: true
-    create-schemas: true
-    baseline-on-migrate: true
-    validate-on-migrate: true
-    group: true
+    create-schemas: true           # ✅ Crea esquemas si no existen
+    baseline-on-migrate: true      # ✅ Marca la base como baseline si está vacía
+    validate-on-migrate: true      # ✅ Valida integridad de migraciones
+    out-of-order: true             # ✅ Aplica migraciones aunque lleguen fuera de orden
+    ignore-missing-migrations: true  # ✅ No falla si faltan scripts antiguos
+    ignore-future-migrations: true   # ✅ No falla si hay migraciones más nuevas en la BD
+    clean-disabled: false            # ✅ Permite limpiar (solo desarrollo)
+    group: true                      # Ejecuta todas las migraciones en bloque
 
-    # 📁 Ruta única para que lea todas las migraciones
+    # 📁 Ubicación de scripts SQL de migración
     locations: classpath:db/migration
 
-    # 🧩 Esquemas manejados en orden
+    # 🧩 Configuración de esquemas
     default-schema: seguridad
-    schemas: seguridad, catalogos, general, hoja_vida
+    schemas: seguridad, catalogos, general, hoja_vida, contabilidad, depositos, cartera, activos_fijos, nomina, tesoreria, reporting
 
-    # 🏷️ Control de versión dentro del esquema seguridad
+    # 🏷️ Control de versiones dentro del esquema de seguridad
     table: flyway_schema_history
 
-    # 🪶 Log de diagnóstico extendido
     placeholders:
       app_user: postgres
 
@@ -51,5 +54,5 @@ logging:
     org.hibernate.orm.jdbc.bind: off
     org.springframework.orm.jpa: warn
     org.springframework.jdbc.core: warn
-    org.flywaydb.core.internal.command: debug   # 🔍 muestra detalle de migraciones
-    org.flywaydb.core.internal.sqlscript: debug
+    org.flywaydb.core.internal.command: debug   # 🔍 Detalle de ejecución Flyway
+    org.flywaydb.core.internal.sqlscript: debug # 🔍 Detalle línea a línea

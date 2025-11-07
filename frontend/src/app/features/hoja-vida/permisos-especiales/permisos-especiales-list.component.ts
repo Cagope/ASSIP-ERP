@@ -6,22 +6,10 @@ import { FormsModule } from '@angular/forms';
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
 import { DatosPersonalesApi, DatosPersonales } from '../datos-personales/datos-personales.api';
 import { PermisosEspecialesApi } from './permisos-especiales.api';
-import { PermisoEspecial } from '../../../shared/models/permisos-especiales.model'; // ✅ corregido (plural)
+import { PermisoEspecial } from '../../../shared/models/permisos-especiales.model';
 import { PermisosEspecialesPrintService } from './permisos-especiales-print.service';
 import { PermisosEspecialesExporterService } from './permisos-especiales-exporter.service';
 
-/**
- * 🧾 COMPONENTE: Listado Permisos Especiales
- * ------------------------------------------------------------
- * Combina la información personal con los permisos de contacto
- * asociados a cada persona.
- * Permite:
- *  - Listar personas y sus permisos especiales.
- *  - Crear o editar registros.
- *  - Filtrar por documento o nombre.
- *  - Exportar a Excel.
- *  - Imprimir el listado.
- */
 @Component({
   selector: 'app-permisos-especiales-list',
   standalone: true,
@@ -30,19 +18,12 @@ import { PermisosEspecialesExporterService } from './permisos-especiales-exporte
   styleUrls: ['./permisos-especiales-list.component.scss']
 })
 export class PermisosEspecialesListComponent implements OnInit {
-
-  // ============================================================
-  // ⚙️ Inyección de dependencias
-  // ============================================================
   private readonly dpApi = inject(DatosPersonalesApi);
   private readonly permisosApi = inject(PermisosEspecialesApi);
   private readonly router = inject(Router);
   private readonly printService = inject(PermisosEspecialesPrintService);
   private readonly exporter = inject(PermisosEspecialesExporterService);
 
-  // ============================================================
-  // 📦 Propiedades del componente
-  // ============================================================
   personas: (DatosPersonales & { permisos?: PermisoEspecial | null })[] = [];
   filtradas: (DatosPersonales & { permisos?: PermisoEspecial | null })[] = [];
 
@@ -50,16 +31,14 @@ export class PermisosEspecialesListComponent implements OnInit {
   filtro = '';
   error = '';
 
-  // ============================================================
-  // 🚀 Inicialización
-  // ============================================================
+  // 🔹 Paginación local
+  pagina = 1;
+  tamanoPagina = 20;
+
   ngOnInit(): void {
     this.cargar();
   }
 
-  // ============================================================
-  // 🔄 Cargar datos personales + Permisos Especiales
-  // ============================================================
   cargar(): void {
     this.cargando = true;
     this.error = '';
@@ -69,17 +48,15 @@ export class PermisosEspecialesListComponent implements OnInit {
       this.permisosApi.listar().toPromise()
     ])
       .then(([personas, permisos]) => {
-        // Crear mapa de permisos por ID persona
         const mapaPermisos = new Map<number, PermisoEspecial>();
         (permisos ?? []).forEach(p => {
           if (p.idDatosPersonal) mapaPermisos.set(p.idDatosPersonal, p);
         });
 
-        // Unir datos personales + permisos
         this.personas = (personas ?? [])
           .sort((a, b) => {
-            const fa = a.fechaEdicion ? new Date(a.fechaEdicion).getTime() : 0;
-            const fb = b.fechaEdicion ? new Date(b.fechaEdicion).getTime() : 0;
+            const fa = a.fechaActualizacion ? new Date(a.fechaActualizacion).getTime() : 0;
+            const fb = b.fechaActualizacion ? new Date(b.fechaActualizacion).getTime() : 0;
             return fb - fa;
           })
           .map(p => ({
@@ -98,9 +75,6 @@ export class PermisosEspecialesListComponent implements OnInit {
       .finally(() => (this.cargando = false));
   }
 
-  // ============================================================
-  // 🔍 Filtro por nombre o documento
-  // ============================================================
   filtrar(): void {
     const term = this.filtro.toLowerCase().trim();
     this.filtradas = !term
@@ -110,26 +84,33 @@ export class PermisosEspecialesListComponent implements OnInit {
             .toLowerCase()
             .includes(term)
         );
+    this.pagina = 1;
   }
 
-  // ============================================================
-  // 🟢 Crear o editar registro de Permisos
-  // ============================================================
+  get paginadas(): (DatosPersonales & { permisos?: PermisoEspecial | null })[] {
+    const inicio = (this.pagina - 1) * this.tamanoPagina;
+    return this.filtradas.slice(inicio, inicio + this.tamanoPagina);
+  }
+
+  totalPaginas(): number {
+    return Math.ceil(this.filtradas.length / this.tamanoPagina);
+  }
+
+  cambiarPagina(p: number): void {
+    if (p < 1 || p > this.totalPaginas()) return;
+    this.pagina = p;
+  }
+
   gestionar(persona: DatosPersonales, permisos?: PermisoEspecial | null): void {
     if (permisos?.idPermisoEspecial) {
-      // Editar registro existente
       this.router.navigate(['/hoja-vida/permisos-especiales', permisos.idPermisoEspecial, 'editar']);
     } else {
-      // Crear nuevo registro
       this.router.navigate(['/hoja-vida/permisos-especiales/nuevo'], {
         queryParams: { idDatosPersonal: persona.idDatosPersonal }
       });
     }
   }
 
-  // ============================================================
-  // 🖨️ Imprimir listado
-  // ============================================================
   imprimir(): void {
     const datos = this.personas.map(p => ({
       ...p.permisos,
@@ -139,17 +120,11 @@ export class PermisosEspecialesListComponent implements OnInit {
 
     this.printService.imprimir(
       datos.filter(s => !!s) as unknown as (
-        PermisoEspecial & {
-          documento?: string;
-          nombrePersona?: string;
-        }
+        PermisoEspecial & { documento?: string; nombrePersona?: string }
       )[]
     );
   }
 
-  // ============================================================
-  // 📤 Exportar listado a Excel
-  // ============================================================
   exportar(): void {
     const datos = this.personas.map(p => ({
       ...p.permisos,
@@ -159,10 +134,7 @@ export class PermisosEspecialesListComponent implements OnInit {
 
     this.exporter.exportarExcel(
       datos.filter(s => !!s) as unknown as (
-        PermisoEspecial & {
-          documento?: string;
-          nombrePersona?: string;
-        }
+        PermisoEspecial & { documento?: string; nombrePersona?: string }
       )[]
     );
   }

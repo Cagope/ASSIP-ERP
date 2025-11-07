@@ -1,8 +1,4 @@
 <div class="sarlaft-list">
-
-  <!-- ==========================================================
-       🧾 ENCABEZADO — Título + Botones globales
-       ========================================================== -->
   <app-header-actions
     titulo="Declaración SARLAFT"
     [mostrarNuevo]="false"
@@ -12,26 +8,16 @@
     (exportar)="exportar()">
   </app-header-actions>
 
-  <!-- ==========================================================
-       🔍 FILTRO DE BÚSQUEDA
-       ========================================================== -->
   <div class="filtro mb-3">
     <input
       type="text"
       placeholder="Buscar por nombre o documento..."
       [(ngModel)]="filtro"
       (input)="filtrar()"
-      class="form-control"
-    />
+      class="form-control" />
   </div>
 
-  <!-- ==========================================================
-       📋 TABLA PRINCIPAL — Listado de personas + SARLAFT
-       ========================================================== -->
-  <table
-    *ngIf="!cargando && filtradas.length > 0"
-    class="table table-striped table-hover align-middle"
-  >
+  <table *ngIf="!cargando && filtradas.length > 0" class="table table-striped table-hover align-middle">
     <thead class="table-light">
     <tr>
       <th>Documento</th>
@@ -41,63 +27,25 @@
       <th>Familiares PEPS</th>
       <th>Cuenta Exterior</th>
       <th>Moneda Extranjera</th>
+      <th>Fecha actualización</th>
       <th class="text-center">Acción</th>
     </tr>
     </thead>
 
     <tbody>
-    <tr *ngFor="let p of filtradas">
-      <!-- Documento -->
+    <tr *ngFor="let p of paginadas">
       <td>{{ p.tipoDocumento }} {{ p.documento }}</td>
-
-      <!-- Nombre completo -->
       <td>{{ p.nombres }} {{ p.primerApellido }} {{ p.segundoApellido }}</td>
 
-      <!-- Exoneración UIAF -->
-      <td>
-          <span *ngIf="p.sarlaft?.exoneracionUiaf; else noUiaf" class="text-success fw-semibold">
-            Sí
-          </span>
-        <ng-template #noUiaf><span class="text-danger">No</span></ng-template>
-      </td>
+      <td><span *ngIf="p.sarlaft?.exoneracionUiaf; else noUiaf" class="text-success">Sí</span><ng-template #noUiaf><span class="text-danger">No</span></ng-template></td>
+      <td><span *ngIf="p.sarlaft?.asociadoPeps; else noPeps" class="text-success">Sí</span><ng-template #noPeps><span class="text-danger">No</span></ng-template></td>
+      <td><span *ngIf="p.sarlaft?.familiaPeps; else noFam" class="text-success">Sí</span><ng-template #noFam><span class="text-danger">No</span></ng-template></td>
+      <td><span *ngIf="p.sarlaft?.cuentaExtranjero; else noCta" class="text-success">Sí</span><ng-template #noCta><span class="text-danger">No</span></ng-template></td>
+      <td><span *ngIf="p.sarlaft?.monedaExtranjera; else noMon" class="text-success">Sí</span><ng-template #noMon><span class="text-danger">No</span></ng-template></td>
+      <td>{{ p.fechaActualizacion | date: 'dd/MM/yyyy' }}</td>
 
-      <!-- Asociado PEPS -->
-      <td>
-          <span *ngIf="p.sarlaft?.asociadoPeps; else noPeps" class="text-success fw-semibold">
-            Sí
-          </span>
-        <ng-template #noPeps><span class="text-danger">No</span></ng-template>
-      </td>
-
-      <!-- Familiares PEPS -->
-      <td>
-          <span *ngIf="p.sarlaft?.familiaPeps; else noFam" class="text-success fw-semibold">
-            Sí
-          </span>
-        <ng-template #noFam><span class="text-danger">No</span></ng-template>
-      </td>
-
-      <!-- Cuenta exterior -->
-      <td>
-          <span *ngIf="p.sarlaft?.cuentaExtranjero; else noCta" class="text-success fw-semibold">
-            Sí
-          </span>
-        <ng-template #noCta><span class="text-danger">No</span></ng-template>
-      </td>
-
-      <!-- Moneda extranjera -->
-      <td>
-          <span *ngIf="p.sarlaft?.monedaExtranjera; else noMon" class="text-success fw-semibold">
-            Sí
-          </span>
-        <ng-template #noMon><span class="text-danger">No</span></ng-template>
-      </td>
-
-      <!-- Botón acción -->
       <td class="text-center">
-        <button
-          class="btn btn-sm btn-outline-primary"
-          (click)="gestionar(p, p.sarlaft)">
+        <button class="btn btn-sm btn-outline-primary" (click)="gestionar(p, p.sarlaft)">
           {{ p.sarlaft ? 'Gestionar' : 'Crear' }}
         </button>
       </td>
@@ -105,17 +53,18 @@
     </tbody>
   </table>
 
-  <!-- ==========================================================
-       ⚙️ ESTADOS Y MENSAJES DEL LISTADO
-       ========================================================== -->
+  <div class="pagination-controls" *ngIf="!cargando && filtradas.length > tamanoPagina">
+    <button (click)="cambiarPagina(pagina - 1)" [disabled]="pagina === 1">Anterior</button>
+    <span>Página {{ pagina }} / {{ totalPaginas() }}</span>
+    <button (click)="cambiarPagina(pagina + 1)" [disabled]="pagina === totalPaginas()">Siguiente</button>
+  </div>
+
   <div *ngIf="cargando" class="text-center my-3 text-secondary">
     <i class="bi bi-hourglass-split"></i> Cargando datos SARLAFT...
   </div>
-
   <div *ngIf="!cargando && filtradas.length === 0" class="text-center my-3 text-muted">
     <i class="bi bi-inbox"></i> No hay registros SARLAFT para mostrar.
   </div>
-
   <div *ngIf="error" class="text-center text-danger my-3">
     <i class="bi bi-exclamation-triangle"></i> {{ error }}
   </div>

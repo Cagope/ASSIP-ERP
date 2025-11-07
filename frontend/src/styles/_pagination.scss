@@ -1,0 +1,53 @@
+/* ==========================================================
+   🌐 Paginación Global — ASSIP-ERP
+   ==========================================================
+   Uso: Listados con paginación local (Datos Personales,
+   Ubicaciones, Directivos, etc.)
+   ========================================================== */
+@use 'sass:color';
+@use './tokens' as t;
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.5rem auto 0 auto;
+  width: 100%;
+  text-align: center;
+  font-size: 0.9rem;
+  color: t.$color-text-muted;
+
+  span {
+    font-weight: 500;
+  }
+
+  button {
+    background: t.$color-surface;
+    border: 1px solid t.$color-border;
+    border-radius: t.$radius-sm;
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: t.$color-text;
+    transition: background-color 0.15s ease-in-out, transform 0.1s ease-in-out;
+
+    &:hover:not(:disabled) {
+      background-color: color.scale(t.$color-surface, $lightness: -5%);
+      transform: translateY(-1px);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+/* 🔹 Responsivo: oculta el texto de página en pantallas pequeñas */
+@media (max-width: 600px) {
+  .pagination-controls span {
+    display: none;
+  }
+}
