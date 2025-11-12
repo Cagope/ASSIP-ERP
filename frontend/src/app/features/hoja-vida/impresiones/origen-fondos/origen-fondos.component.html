@@ -95,7 +95,10 @@
       <div class="sig">
         <div class="sig-area"></div>
         <div class="sig-meta">
-          <div class="meta-row"><span class="sig-label">Firma</span></div>
+          <div class="meta-row">
+            <span class="sig-label">Firma:</span>
+            <span class="sig-name">{{ nombreCompleto() || '________________' }}</span>
+          </div>
           <div class="meta-row">
             <span class="sig-label">Documento:</span>
             <span class="sig-id">{{ docConDv() || '________________' }}</span>
@@ -109,6 +112,7 @@
       </div>
     </div>
   </section>
+
 
   <!-- 🏛️ Aprobación del Consejo -->
   <section class="block aprobacion-consejo">

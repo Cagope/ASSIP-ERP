@@ -3,7 +3,7 @@ spring:
     name: assip-erp-backend
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/assip_erp
+    url: jdbc:postgresql://localhost:5432/assip_erp?currentSchema=seguridad,catalogos,general,hoja_vida,contabilidad,depositos,cartera,activos_fijos,nomina,tesoreria,reporting,public
     username: postgres
     password: Cagope1234+
     driver-class-name: org.postgresql.Driver

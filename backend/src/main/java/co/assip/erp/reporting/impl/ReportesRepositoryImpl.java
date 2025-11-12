@@ -9,15 +9,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.*;
 
 /**
- * 🧩 ReportesRepositoryImpl
+ * 🧩 ReportesRepositoryImpl — Búsquedas detalladas seguras
  * ==============================================================
- * Repositorio dinámico para ejecutar consultas seguras sobre
- * vistas del esquema `reporting`.
+ * Ejecuta consultas dinámicas sobre vistas de cualquier esquema
+ * permitido (por defecto "reporting", pero configurable).
  *
  * 🔒 Seguridad:
- * - Solo permite consultas sobre el esquema "reporting"
- * - Bloquea cualquier palabra SQL peligrosa (INSERT, UPDATE, DELETE)
- * - Construye filtros WHERE con parámetros seguros
+ * - Sanitiza nombres de esquema y vista
+ * - Construye WHERE dinámico con parámetros seguros
+ * - Aplica solo filtros explícitos enviados
+ * - Limita los resultados (máx. 2000 filas)
+ *
+ * 🧮 Filtros admitidos (combinados con AND):
+ *   id_datos_personal, documento, nombres, primer_apellido, segundo_apellido, codigo_cuenta
  * ==============================================================
  */
 @Repository
@@ -31,40 +35,90 @@ public class ReportesRepositoryImpl {
     }
 
     /**
-     * 🔹 Ejecuta una consulta dinámica sobre una vista del esquema reporting.
+     * 🔹 Ejecuta una consulta segura y dinámica sobre una vista especificada.
      */
     public ReportResult ejecutarConsultaSegura(ReportQueryRequest req) {
         if (req == null || req.getView() == null) {
             throw new IllegalArgumentException("Debe especificar la vista de reporte.");
         }
 
+        // ✅ Sanitizar nombre de esquema
         String schema = (req.getSchema() != null) ? req.getSchema() : "reporting";
-        if (!"reporting".equalsIgnoreCase(schema)) {
-            throw new SecurityException("Solo se permiten consultas al esquema 'reporting'.");
+        if (!schema.matches("^[a-zA-Z0-9_]+$")) {
+            throw new SecurityException("Nombre de esquema no válido.");
         }
 
-        // Sanitiza nombre de vista
+        // ✅ Sanitizar nombre de vista
         String vista = req.getView().replaceAll("[^a-zA-Z0-9_]", "");
-        StringBuilder sql = new StringBuilder("SELECT * FROM reporting." + vista);
+
+        StringBuilder sql = new StringBuilder("SELECT * FROM " + schema + "." + vista);
         List<Object> params = new ArrayList<>();
 
-        // Filtros dinámicos seguros
-        if (req.getFilters() != null && !req.getFilters().isEmpty()) {
-            sql.append(" WHERE ");
-            int i = 0;
-            for (Map.Entry<String, Object> entry : req.getFilters().entrySet()) {
-                if (i++ > 0) sql.append(" AND ");
-                sql.append(entry.getKey()).append(" = ?");
-                params.add(entry.getValue());
+        // ======================================================
+        // 🧠 Filtros dinámicos — modo detallado (AND)
+        // ======================================================
+        Map<String, Object> filters = req.getFilters();
+        if (filters != null && !filters.isEmpty()) {
+            StringBuilder where = new StringBuilder();
+            int count = 0;
+
+            if (filters.get("id_datos_personal") != null && !filters.get("id_datos_personal").toString().isBlank()) {
+                where.append((count++ > 0 ? " AND " : " WHERE "));
+                where.append("id_datos_personal = ?");
+                params.add(Integer.parseInt(filters.get("id_datos_personal").toString().trim()));
             }
+
+            if (filters.get("documento") != null && !filters.get("documento").toString().isBlank()) {
+                where.append((count++ > 0 ? " AND " : " WHERE "));
+                where.append("CAST(documento AS TEXT) ILIKE ?");
+                params.add("%" + filters.get("documento").toString().trim() + "%");
+            }
+            if (filters.get("nombres") != null && !filters.get("nombres").toString().isBlank()) {
+                where.append((count++ > 0 ? " AND " : " WHERE "));
+                where.append("LOWER(nombres) ILIKE LOWER(?)");
+                params.add("%" + filters.get("nombres").toString().trim() + "%");
+            }
+            if (filters.get("primer_apellido") != null && !filters.get("primer_apellido").toString().isBlank()) {
+                where.append((count++ > 0 ? " AND " : " WHERE "));
+                where.append("LOWER(primer_apellido) ILIKE LOWER(?)");
+                params.add("%" + filters.get("primer_apellido").toString().trim() + "%");
+            }
+            if (filters.get("segundo_apellido") != null && !filters.get("segundo_apellido").toString().isBlank()) {
+                where.append((count++ > 0 ? " AND " : " WHERE "));
+                where.append("LOWER(segundo_apellido) ILIKE LOWER(?)");
+                params.add("%" + filters.get("segundo_apellido").toString().trim() + "%");
+            }
+            if (filters.get("codigo_cuenta") != null && !filters.get("codigo_cuenta").toString().isBlank()) {
+                where.append((count++ > 0 ? " AND " : " WHERE "));
+                where.append("CAST(codigo_cuenta AS TEXT) ILIKE ?");
+                params.add("%" + filters.get("codigo_cuenta").toString().trim() + "%");
+            }
+
+            sql.append(where);
         }
 
-        sql.append(" LIMIT 500"); // Seguridad: evita queries masivas
+        // ======================================================
+        // 🔹 Orden y límite de seguridad — adaptado por esquema
+        // ======================================================
+        String orderClause;
+
+        if (schema.equalsIgnoreCase("reporting") || schema.equalsIgnoreCase("hoja_vida")) {
+            orderClause = " ORDER BY fecha_actualizacion DESC LIMIT 2000";
+        } else if (schema.equalsIgnoreCase("depositos")) {
+            orderClause = " ORDER BY nombres ASC LIMIT 2000";
+        } else {
+            orderClause = " ORDER BY 1 DESC LIMIT 2000";
+        }
+
+        sql.append(orderClause);
 
         long start = System.currentTimeMillis();
         List<Map<String, Object>> data = jdbc.queryForList(sql.toString(), params.toArray());
         long duration = System.currentTimeMillis() - start;
 
+        // ======================================================
+        // 📦 Resultado estructurado
+        // ======================================================
         ReportResult result = new ReportResult();
         result.setData(data);
         result.setTotal(data.size());

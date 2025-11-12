@@ -1,0 +1,82 @@
+<div class="list-container">
+  <app-header-actions title="Cuentas de Ahorro"></app-header-actions>
+
+  <!-- 🟩 Filtros de búsqueda -->
+  <div class="filters grid grid-5 gap-sm">
+    <div>
+      <label>Documento</label>
+      <input type="text" [(ngModel)]="filtros.documento" (keyup.enter)="buscar()" />
+    </div>
+
+    <div>
+      <label>Nombres</label>
+      <input type="text" [(ngModel)]="filtros.nombres" (keyup.enter)="buscar()" />
+    </div>
+
+    <div>
+      <label>Primer Apellido</label>
+      <input type="text" [(ngModel)]="filtros.primer_apellido" (keyup.enter)="buscar()" />
+    </div>
+
+    <div>
+      <label>Segundo Apellido</label>
+      <input type="text" [(ngModel)]="filtros.segundo_apellido" (keyup.enter)="buscar()" />
+    </div>
+
+    <div>
+      <label>Código Cuenta</label>
+      <input type="text" [(ngModel)]="filtros.codigo_cuenta" (keyup.enter)="buscar()" />
+    </div>
+
+    <div class="actions full">
+      <button class="btn" (click)="buscar()">🔍 Buscar</button>
+      <button class="btn secondary" (click)="limpiar()">🧹 Limpiar</button>
+    </div>
+  </div>
+
+  <!-- ⚙️ Estado -->
+  <div *ngIf="cargando" class="loading">Cargando cuentas...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <!-- 📋 Resultados -->
+  <table class="data-table" *ngIf="!cargando && cuentas.length > 0; else vacio">
+    <thead>
+    <tr>
+      <th>#</th>
+      <th>Código</th>
+      <th>Documento</th>
+      <th>Nombre del Ahorrador</th>
+      <th>Tipo de Ahorro</th>
+      <th class="right">Saldo Actual</th>
+      <th>Acciones</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let c of cuentas; let i = index">
+      <td>{{ i + 1 }}</td>
+      <td>{{ c.codigo_cuenta }}</td>
+      <td>{{ c.documento }}</td>
+      <td>{{ c.nombres }} {{ c.primer_apellido }} {{ c.segundo_apellido }}</td>
+      <td>{{ c.nombre_forma_ahorro }}</td>
+      <td class="right">{{ c.saldo_actual_cuenta | number: '1.0-2' }}</td>
+      <td>
+        <button class="btn sm" (click)="verDetalle(c)">🔍 Ver detalle</button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- 📭 Sin resultados -->
+  <ng-template #vacio>
+    <div class="empty">No se encontraron cuentas de ahorro.</div>
+  </ng-template>
+
+  <!-- 🟦 Detalle de la cuenta seleccionada -->
+  <div *ngIf="seleccionada" class="detalle-wrapper">
+    <app-cuentas-ahorro-detalle
+      [cuenta]="seleccionada"
+      (cerrar)="seleccionada = null">
+    </app-cuentas-ahorro-detalle>
+  </div>
+
+</div>

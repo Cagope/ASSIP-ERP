@@ -1,0 +1,96 @@
+<div class="detalle-container" *ngIf="cuenta">
+  <div class="acciones">
+    <button class="btn secondary" (click)="onCerrar()">⬅️ Regresar al listado</button>
+  </div>
+
+  <h2>🔍 Detalle de la Cuenta de Ahorro</h2>
+
+  <!-- 🧍 Datos del Titular -->
+  <section class="bloque">
+    <h3>👤 Titular</h3>
+    <div class="grid">
+      <div><strong>Documento:</strong> {{ cuenta.documento }}</div>
+      <div><strong>Nombre:</strong> {{ cuenta.nombres }} {{ cuenta.primer_apellido }} {{ cuenta.segundo_apellido }}</div>
+      <div><strong>Dirección:</strong> {{ cuenta.direccion ?? 'N/A' }}</div>
+      <div><strong>País:</strong> {{ cuenta.nombre_pais ?? 'N/A' }}</div>
+      <div><strong>Departamento:</strong> {{ cuenta.nombre_departamento ?? 'N/A' }}</div>
+      <div><strong>Ciudad:</strong> {{ cuenta.nombre_ciudad ?? 'N/A' }}</div>
+      <div><strong>Teléfono:</strong> {{ cuenta.telefono ?? 'N/A' }}</div>
+      <div><strong>Celular:</strong> {{ cuenta.celular ?? 'N/A' }}</div>
+      <div><strong>Zona:</strong> {{ cuenta.nombre_zona ?? 'N/A' }}</div>
+      <div><strong>Subzona:</strong> {{ cuenta.nombre_sub_zona ?? 'N/A' }}</div>
+      <div><strong>Fecha Actualización:</strong> {{ cuenta.fecha_creacion | date:'yyyy-MM-dd HH:mm' }}</div>
+    </div>
+  </section>
+
+  <!-- 💰 Información Financiera -->
+  <section class="bloque">
+    <h3>💰 Información Financiera</h3>
+    <div class="grid">
+      <div><strong>Código de Cuenta:</strong> {{ cuenta.codigo_cuenta }}</div>
+      <div><strong>Forma de Ahorro:</strong> {{ cuenta.nombre_forma_ahorro }}</div>
+      <div><strong>Estado:</strong> {{ cuenta.nombre_estado ?? 'N/A' }}</div>
+      <div><strong>Plazo:</strong> {{ cuenta.plazo_cuenta ?? '0' }}</div>
+      <div><strong>Saldo Actual:</strong> {{ cuenta.saldo_actual_cuenta | number:'1.0-2' }}</div>
+      <div><strong>GMF:</strong> {{ cuenta.nombre_tipo_gmf }}</div>
+      <div><strong>Libranza:</strong> {{ cuenta.libranza_cuenta ? 'Sí' : 'No' }}</div>
+      <div><strong>Fecha Apertura:</strong> {{ cuenta.fecha_apertura_cuenta | date: 'yyyy-MM-dd' }}</div>
+    </div>
+  </section>
+
+  <!-- 🖼️ Imágenes -->
+  <section class="bloque">
+    <h3>📸 Imágenes</h3>
+    <div class="imagenes">
+      <div>
+        <img
+          [src]="getImagen(cuenta.foto, 'foto')"
+          alt="Foto titular"
+          (error)="onImageError($event, 'foto')"
+          (click)="abrirImagen(getImagen(cuenta.foto, 'foto'))"
+        />
+        <p>Foto</p>
+      </div>
+
+      <div>
+        <img
+          [src]="getImagen(cuenta.firma_uno, 'firma')"
+          alt="Firma principal"
+          (error)="onImageError($event, 'firma')"
+          (click)="abrirImagen(getImagen(cuenta.firma_uno, 'firma'))"
+        />
+        <p>Firma 1</p>
+      </div>
+
+      <div>
+        <img
+          [src]="getImagen(cuenta.firma_dos, 'firma')"
+          alt="Firma secundaria"
+          (error)="onImageError($event, 'firma')"
+          (click)="abrirImagen(getImagen(cuenta.firma_dos, 'firma'))"
+        />
+        <p>Firma 2</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🌌 Modal de imagen ampliada -->
+  <div
+    class="modal-foto"
+    *ngIf="imagenAmpliada"
+    (click)="cerrarImagen()"
+  >
+    <img [src]="imagenAmpliada" alt="Imagen ampliada" />
+  </div>
+
+
+
+  <!-- 📅 Auditoría -->
+  <section class="bloque">
+    <h3>🕓 Auditoría</h3>
+    <div class="grid">
+      <div><strong>Creado:</strong> {{ cuenta.fecha_creacion | date:'yyyy-MM-dd HH:mm' }}</div>
+      <div><strong>Editado:</strong> {{ cuenta.fecha_edicion | date:'yyyy-MM-dd HH:mm' }}</div>
+    </div>
+  </section>
+</div>

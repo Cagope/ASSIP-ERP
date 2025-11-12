@@ -93,7 +93,7 @@ export class ActualizacionDatosComponent implements OnInit {
 
   /** 🔹 Formatea valores vacíos */
   orDash(v: any): string {
-    return v ? v : '—';
+      return v === null || v === undefined || v === '' ? '—' : v;
   }
 
   /** 🔹 Traduce booleanos a “Sí / No / —” */

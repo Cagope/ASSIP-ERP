@@ -34,6 +34,10 @@ export class AfiliacionListComponent implements OnInit {
   // 📜 Menú global de formatos disponibles
   formatos = FORMATOS_IMPRESION;
 
+  // 🔹 Paginación local
+  pagina = 1;
+  tamanoPagina = 20;
+
   private overlayMenu: HTMLElement | null = null;
 
   ngOnInit(): void {
@@ -73,6 +77,24 @@ export class AfiliacionListComponent implements OnInit {
             .toLowerCase()
             .includes(term)
         );
+    this.pagina = 1; // Reinicia la paginación después de filtrar
+  }
+
+  /** 🔹 Registros visibles según la página actual */
+  get paginados(): DatosPersonales[] {
+    const inicio = (this.pagina - 1) * this.tamanoPagina;
+    return this.filtrados.slice(inicio, inicio + this.tamanoPagina);
+  }
+
+  /** 🔹 Total de páginas */
+  totalPaginas(): number {
+    return Math.ceil(this.filtrados.length / this.tamanoPagina);
+  }
+
+  /** 🔹 Cambiar de página */
+  cambiarPagina(p: number): void {
+    if (p < 1 || p > this.totalPaginas()) return;
+    this.pagina = p;
   }
 
   /** 🖨️ Abrir menú contextual de impresión */

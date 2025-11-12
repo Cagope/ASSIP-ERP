@@ -1,5 +1,8 @@
 <div class="list-container">
 
+  <!-- ==========================================================
+       🧾 ENCABEZADO — Título y acciones principales
+       ========================================================== -->
   <div class="header">
     <h2>🧾 Afiliaciones registradas</h2>
 
@@ -14,9 +17,15 @@
     </div>
   </div>
 
+  <!-- ==========================================================
+       ⚙️ ESTADOS DEL LISTADO
+       ========================================================== -->
   <div *ngIf="cargando" class="msg info">⏳ Cargando registros…</div>
   <div *ngIf="error && !cargando" class="msg err">{{ error }}</div>
 
+  <!-- ==========================================================
+       📋 TABLA PRINCIPAL — Listado de afiliaciones
+       ========================================================== -->
   <table class="data-table" *ngIf="filtrados.length > 0; else vacio">
     <thead>
     <tr>
@@ -29,8 +38,8 @@
     </thead>
 
     <tbody>
-    <tr *ngFor="let d of filtrados; let i = index">
-      <td>{{ i + 1 }}</td>
+    <tr *ngFor="let d of paginados; let i = index">
+      <td>{{ (pagina - 1) * tamanoPagina + i + 1 }}</td>
       <td>{{ d.documento }}</td>
       <td>{{ d.nombres }} {{ d.primerApellido }} {{ d.segundoApellido }}</td>
       <td>{{ d.fechaActualizacion | date:'yyyy-MM-dd' }}</td>
@@ -41,7 +50,20 @@
     </tbody>
   </table>
 
+  <!-- ==========================================================
+       📄 PAGINACIÓN LOCAL (20 registros por página)
+       ========================================================== -->
+  <div class="pagination" *ngIf="totalPaginas() > 1">
+    <button (click)="cambiarPagina(pagina - 1)" [disabled]="pagina === 1">⬅️</button>
+    <span>Página {{ pagina }} / {{ totalPaginas() }}</span>
+    <button (click)="cambiarPagina(pagina + 1)" [disabled]="pagina === totalPaginas()">➡️</button>
+  </div>
+
+  <!-- ==========================================================
+       📭 MENSAJE SI NO HAY DATOS
+       ========================================================== -->
   <ng-template #vacio>
     <div class="empty">No hay afiliaciones registradas.</div>
   </ng-template>
+
 </div>

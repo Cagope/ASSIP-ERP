@@ -154,41 +154,64 @@
     <ng-template #sinLaboral><div class="empty small">Sin referencia laboral registrada.</div></ng-template>
   </section>
 
-  <!-- =================== DATOS FINANCIEROS =================== -->
+  <!-- 🟩 DATOS FINANCIEROS -->
   <section class="block">
     <h2>Datos financieros</h2>
-    <ng-container *ngIf="persona() as p; else sinRefFin">
+
+    <ng-container *ngIf="p.total_activos || p.total_pasivos || p.valor_pension; else sinFinancieros">
       <div class="card">
+        <!-- Totales superiores -->
         <div class="line two-col">
-          <div class="pair tighter">
+          <div class="pair tightest align-right">
             <span class="lbl">Total ingresos:</span>
-            <span class="val num">{{ p.valor_salario | number:'1.0-2' }}</span>
-          </div>
-          <div class="pair tighter">
-            <span class="lbl">Total egresos:</span>
-            <span class="val num">{{ p.egresos_credito | number:'1.0-2' }}</span>
-          </div>
-        </div>
-        <div class="line two-col">
-          <div class="pair tighter">
-            <span class="lbl">Total activos:</span>
-            <span class="val num">{{ p.total_activos | number:'1.0-2' }}</span>
-          </div>
-          <div class="pair tighter">
-            <span class="lbl">Total pasivos:</span>
-            <span class="val num">{{ p.total_pasivos | number:'1.0-2' }}</span>
-          </div>
-        </div>
-        <div class="line one-line">
-          <span class="kv span2">
-            <span class="lbl">Origen de fondos:</span>
-            <span class="val text">{{ orDash(p.origen_fondos) }}</span>
+            <span class="val num">
+            <b>{{
+              (
+                (p.valor_salario || 0) +
+                (p.valor_pension || 0) +
+                (p.ingresos_arriendo || 0) +
+                (p.ingresos_comisiones || 0) +
+                (p.otros_ingresos || 0)
+              ) | number:'1.0-0'
+            }}</b>
           </span>
+          </div>
+
+          <div class="pair tightest align-right">
+            <span class="lbl">Total egresos:</span>
+            <span class="val num">
+            <b>{{
+              (
+                (p.egresos_familiares || 0) +
+                (p.egresos_arriendo || 0) +
+                (p.egresos_credito || 0) +
+                (p.otros_egresos || 0)
+              ) | number:'1.0-0'
+            }}</b>
+          </span>
+          </div>
+        </div>
+
+        <!-- Totales inferiores -->
+        <div class="line two-col">
+          <div class="pair tightest align-right">
+            <span class="lbl">Total activos:</span>
+            <span class="val num"><b>{{ p.total_activos | number:'1.0-0' }}</b></span>
+          </div>
+
+          <div class="pair tightest align-right">
+            <span class="lbl">Total pasivos:</span>
+            <span class="val num"><b>{{ p.total_pasivos | number:'1.0-0' }}</b></span>
+          </div>
         </div>
       </div>
     </ng-container>
-    <ng-template #sinRefFin><div class="empty small">Sin referencias financieras registradas.</div></ng-template>
+
+    <ng-template #sinFinancieros>
+      <div class="empty small">Sin referencias financieras registradas.</div>
+    </ng-template>
   </section>
+
 
   <!-- =================== SARLAFT =================== -->
   <section class="block">
@@ -234,7 +257,16 @@
       <div class="sig">
         <div class="sig-area"></div>
         <div class="sig-meta">
-          <div class="meta-row"><span class="sig-label">Firma</span></div>
+          <div class="meta-row">
+            <span class="sig-label">Firma:</span>
+            <span class="sig-name">
+            {{
+              (p.nombres || '') + ' ' +
+              (p.primer_apellido || '') + ' ' +
+              (p.segundo_apellido || '')
+            }}
+          </span>
+          </div>
           <div class="meta-row">
             <span class="sig-label">Documento:</span>
             <span class="sig-id">{{ p.documento || '________________' }}</span>
@@ -247,6 +279,7 @@
       </div>
     </div>
   </section>
+
 
   <div class="print-footer"></div>
 

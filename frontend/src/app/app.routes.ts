@@ -16,12 +16,17 @@ export const routes: Routes = [
           import('./features/general/general.routes')
             .then(m => m.GENERAL_ROUTES),
       },
-
       {
         path: 'hoja-vida',
         loadChildren: () =>
           import('./features/hoja-vida/hoja-vida.routes')
             .then(m => m.HOJA_VIDA_ROUTES),
+      },
+      {
+        path: 'depositos',
+        loadChildren: () =>
+          import('./features/depositos/depositos.routes')
+            .then(m => m.DEPOSITOS_ROUTES),
       },
       // 👇 futuros esquemas
       // {

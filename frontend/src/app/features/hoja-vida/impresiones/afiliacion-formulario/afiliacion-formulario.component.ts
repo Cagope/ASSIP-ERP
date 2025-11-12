@@ -8,7 +8,7 @@ import { ReportQueryRequest, ReportResult } from '../../../../shared/reporting/r
 /**
  * 🧾 Componente — Formulario de Afiliación (Impresión)
  * --------------------------------------------------------------------
- * Recupera un registro desde la vista reporting.vw_hoja_vida_general_total
+ * Recupera un registro desde la vista reporting.vw_hoja_vida_general_total_reciente
  * usando el motor de Reporting. El resultado se muestra directamente
  * en la plantilla HTML, sin remapeos ni transformaciones.
  */
@@ -30,34 +30,34 @@ export class AfiliacionFormularioComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     console.log('🚀 AfiliacionFormularioComponent iniciado');
-    // Si viene con datos desde la lista, los usa directamente
+
+    // 1️⃣ Si viene con datos desde la lista, los usa directamente
     const personaData = history.state?.persona;
-    console.log('📦 Datos recibidos vía state:', personaData);
-    if (personaData) {
+    if (personaData && personaData.idDatosPersonal) {
       this.persona.set(personaData);
-      console.log('📄 Persona inicial (state):', personaData);
+      console.log('📄 Persona inicial (desde state):', personaData);
     }
 
-    // Recupera ID de la ruta
+    // 2️⃣ Recupera el ID de la ruta
     const id = this.route.snapshot.paramMap.get('id');
     console.log('🆔 ID en URL:', id);
     if (!id) return;
 
     try {
+      // 3️⃣ Solicitud al motor de reporting (vista estable y actualizada)
       const req: ReportQueryRequest = {
         schema: 'reporting',
-        view: 'vw_hoja_vida_general_total',
+        view: 'vw_hoja_vida_general_total_reciente',
         filters: { id_datos_personal: +id }
       };
 
       const res: ReportResult = await this.reporting.ejecutarReporte(req);
-      console.log('📦 Resultado bruto recibido:', res);
+      console.log('📦 Resultado recibido desde reporting:', res);
 
       if (Array.isArray(res.data) && res.data.length > 0) {
-        // 🔹 No se transforma nada: se usa el objeto tal cual llega
         const raw = res.data[0];
         this.persona.set(raw);
-        console.log('✅ Registro recibido desde reporting:', raw);
+        console.log('✅ Registro cargado correctamente:', raw);
       } else {
         console.warn('⚠️ No se encontró el registro en reporting.');
       }
@@ -75,7 +75,7 @@ export class AfiliacionFormularioComponent implements OnInit {
   }
 
   orDash(v: any): string {
-    return v ? v : '—';
+    return v === null || v === undefined || v === '' ? '—' : v;
   }
 
   yn(v: any): string {

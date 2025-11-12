@@ -128,7 +128,16 @@
       <div class="sig">
         <div class="sig-area"></div>
         <div class="sig-meta">
-          <div class="meta-row"><span class="sig-label">Firma</span></div>
+          <div class="meta-row">
+            <span class="sig-label">Firma:</span>
+            <span class="sig-id">
+              {{
+                (persona()?.nombres || '') + ' ' +
+                (persona()?.primerApellido || '') + ' ' +
+                (persona()?.segundoApellido || '')
+              }}
+            </span>
+          </div>
           <div class="meta-row">
             <span class="sig-label">Documento:</span>
             <span class="sig-id">{{ persona()?.documento || '________________' }}</span>
@@ -142,6 +151,7 @@
       </div>
     </div>
   </section>
+
 
   <div class="print-footer" aria-hidden="true"></div>
 

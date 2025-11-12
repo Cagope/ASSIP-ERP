@@ -162,7 +162,7 @@ CREATE TABLE IF NOT EXISTS depositos.cuentas_ahorro_conjuntas (
 COMMENT ON TABLE depositos.cuentas_ahorro_conjuntas IS 'Asociados adicionales vinculados como cotitulares o apoderados';
 
 -- 3.10 Tipo de movimiento
-CREATE TABLE IF NOT EXISTS depositos.tipo_movimiento (
+    CREATE TABLE IF NOT EXISTS depositos.tipo_movimiento (
     codigo_movimiento CHAR(3) PRIMARY KEY,
     descripcion VARCHAR(100) NOT NULL,
     accion_movimiento CHAR(1) CHECK (accion_movimiento IN ('S','R')),

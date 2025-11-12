@@ -25,6 +25,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping(value = "/reporting", produces = MediaType.APPLICATION_JSON_VALUE)
+
 public class ReportingController {
 
     private final ReportesRepositoryImpl repository;
