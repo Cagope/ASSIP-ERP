@@ -5,6 +5,24 @@
 
   <h2>🔍 Detalle de la Cuenta de Ahorro</h2>
 
+  <!-- 🔥 ALERTA SARLAFT -->
+  <div *ngIf="cuenta?.sarlaft"
+       class="sarlaft-alert"
+       [ngClass]="{
+         'alert-rojo': cuenta.sarlaft.severidad === 'ROJO',
+         'alert-amarillo': cuenta.sarlaft.severidad === 'AMARILLO',
+         'alert-verde': cuenta.sarlaft.severidad === 'VERDE'
+       }">
+
+    <div><strong>SARLAFT:</strong> {{ cuenta.sarlaft.descripcion }}</div>
+
+    <div *ngIf="cuenta.sarlaft.bloqueaOperacion"
+         class="accion">
+      <strong>Acción recomendada:</strong> {{ cuenta.sarlaft.accionRecomendada }}
+    </div>
+
+  </div>
+
   <!-- 🧍 Datos del Titular -->
   <section class="bloque">
     <h3>👤 Titular</h3>
@@ -19,7 +37,7 @@
       <div><strong>Celular:</strong> {{ cuenta.celular ?? 'N/A' }}</div>
       <div><strong>Zona:</strong> {{ cuenta.nombre_zona ?? 'N/A' }}</div>
       <div><strong>Subzona:</strong> {{ cuenta.nombre_sub_zona ?? 'N/A' }}</div>
-      <div><strong>Fecha Actualización:</strong> {{ cuenta.fecha_creacion | date:'yyyy-MM-dd HH:mm' }}</div>
+      <div><strong>Fecha Actualización:</strong> {{ cuenta.fecha_actualizacion | date:'yyyy-MM-dd' }}</div>
     </div>
   </section>
 
@@ -75,15 +93,9 @@
   </section>
 
   <!-- 🌌 Modal de imagen ampliada -->
-  <div
-    class="modal-foto"
-    *ngIf="imagenAmpliada"
-    (click)="cerrarImagen()"
-  >
+  <div class="modal-foto" *ngIf="imagenAmpliada" (click)="cerrarImagen()">
     <img [src]="imagenAmpliada" alt="Imagen ampliada" />
   </div>
-
-
 
   <!-- 📅 Auditoría -->
   <section class="bloque">
@@ -93,4 +105,12 @@
       <div><strong>Editado:</strong> {{ cuenta.fecha_edicion | date:'yyyy-MM-dd HH:mm' }}</div>
     </div>
   </section>
+
+  <app-extracto-modal
+    *ngIf="mostrarModalExtracto"
+    [codigoCuenta]="cuenta?.codigo_cuenta"
+    [visible]="mostrarModalExtracto"
+    (cerrar)="cerrarExtracto()">
+  </app-extracto-modal>
+
 </div>

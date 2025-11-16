@@ -20,8 +20,9 @@ import java.util.*;
  * - Aplica solo filtros explícitos enviados
  * - Limita los resultados (máx. 2000 filas)
  *
- * 🧮 Filtros admitidos (combinados con AND):
- *   id_datos_personal, documento, nombres, primer_apellido, segundo_apellido, codigo_cuenta
+ * 🧮 Filtros admitidos:
+ *   id_datos_personal, documento, nombres, primer_apellido,
+ *   segundo_apellido, codigo_forma, codigo_cuenta, fecha_inicial, fecha_final
  * ==============================================================
  */
 @Repository
@@ -62,6 +63,8 @@ public class ReportesRepositoryImpl {
             StringBuilder where = new StringBuilder();
             int count = 0;
 
+            // 🔹 Filtros por datos personales
+            // 🔹 Filtros por datos personales
             if (filters.get("id_datos_personal") != null && !filters.get("id_datos_personal").toString().isBlank()) {
                 where.append((count++ > 0 ? " AND " : " WHERE "));
                 where.append("id_datos_personal = ?");
@@ -73,27 +76,55 @@ public class ReportesRepositoryImpl {
                 where.append("CAST(documento AS TEXT) ILIKE ?");
                 params.add("%" + filters.get("documento").toString().trim() + "%");
             }
-            if (filters.get("nombres") != null && !filters.get("nombres").toString().isBlank()) {
+
+// 🔹 Nuevo filtro por forma de ahorro (texto)
+            if (filters.get("forma_ahorro") != null && !filters.get("forma_ahorro").toString().isBlank()) {
                 where.append((count++ > 0 ? " AND " : " WHERE "));
-                where.append("LOWER(nombres) ILIKE LOWER(?)");
-                params.add("%" + filters.get("nombres").toString().trim() + "%");
+                where.append("LOWER(forma_ahorro) ILIKE LOWER(?)");
+                params.add("%" + filters.get("forma_ahorro").toString().trim() + "%");
             }
-            if (filters.get("primer_apellido") != null && !filters.get("primer_apellido").toString().isBlank()) {
-                where.append((count++ > 0 ? " AND " : " WHERE "));
-                where.append("LOWER(primer_apellido) ILIKE LOWER(?)");
-                params.add("%" + filters.get("primer_apellido").toString().trim() + "%");
-            }
-            if (filters.get("segundo_apellido") != null && !filters.get("segundo_apellido").toString().isBlank()) {
-                where.append((count++ > 0 ? " AND " : " WHERE "));
-                where.append("LOWER(segundo_apellido) ILIKE LOWER(?)");
-                params.add("%" + filters.get("segundo_apellido").toString().trim() + "%");
-            }
+
+// 🔹 Filtro por código de cuenta
             if (filters.get("codigo_cuenta") != null && !filters.get("codigo_cuenta").toString().isBlank()) {
                 where.append((count++ > 0 ? " AND " : " WHERE "));
                 where.append("CAST(codigo_cuenta AS TEXT) ILIKE ?");
                 params.add("%" + filters.get("codigo_cuenta").toString().trim() + "%");
             }
 
+
+            // ======================================================
+            // 🔸 BLOQUE ACTUALIZADO — ORDEN CORRECTO
+            // ======================================================
+
+            // 🔹 1️⃣ Filtro por código de forma
+            if (filters.get("codigo_forma") != null && !filters.get("codigo_forma").toString().isBlank()) {
+                where.append((count++ > 0 ? " AND " : " WHERE "));
+                where.append("CAST(codigo_forma AS TEXT) ILIKE ?");
+                params.add("%" + filters.get("codigo_forma").toString().trim() + "%");
+            }
+
+            // 🔹 2️⃣ Filtro por código de cuenta
+            if (filters.get("codigo_cuenta") != null && !filters.get("codigo_cuenta").toString().isBlank()) {
+                where.append((count++ > 0 ? " AND " : " WHERE "));
+                where.append("CAST(codigo_cuenta AS TEXT) ILIKE ?");
+                params.add("%" + filters.get("codigo_cuenta").toString().trim() + "%");
+            }
+
+            // 🔹 3️⃣ Filtro por fecha inicial
+            if (filters.get("fecha_inicial") != null && !filters.get("fecha_inicial").toString().isBlank()) {
+                where.append((count++ > 0 ? " AND " : " WHERE "));
+                where.append("fecha_movimiento >= TO_DATE(?, 'YYYY-MM-DD')");
+                params.add(filters.get("fecha_inicial").toString().trim());
+            }
+
+            // 🔹 4️⃣ Filtro por fecha final
+            if (filters.get("fecha_final") != null && !filters.get("fecha_final").toString().isBlank()) {
+                where.append((count++ > 0 ? " AND " : " WHERE "));
+                where.append("fecha_movimiento <= TO_DATE(?, 'YYYY-MM-DD')");
+                params.add(filters.get("fecha_final").toString().trim());
+            }
+
+            // ======================================================
             sql.append(where);
         }
 
@@ -102,7 +133,10 @@ public class ReportesRepositoryImpl {
         // ======================================================
         String orderClause;
 
-        if (schema.equalsIgnoreCase("reporting") || schema.equalsIgnoreCase("hoja_vida")) {
+        if (vista.toLowerCase().contains("extracto")) {
+            // 🕓 Para vistas de extractos: orden cronológico
+            orderClause = " ORDER BY fecha_movimiento ASC, hora_movimiento ASC LIMIT 2000";
+        } else if (schema.equalsIgnoreCase("reporting") || schema.equalsIgnoreCase("hoja_vida")) {
             orderClause = " ORDER BY fecha_actualizacion DESC LIMIT 2000";
         } else if (schema.equalsIgnoreCase("depositos")) {
             orderClause = " ORDER BY nombres ASC LIMIT 2000";
@@ -112,6 +146,9 @@ public class ReportesRepositoryImpl {
 
         sql.append(orderClause);
 
+        // ======================================================
+        // ⚡ Ejecución segura
+        // ======================================================
         long start = System.currentTimeMillis();
         List<Map<String, Object>> data = jdbc.queryForList(sql.toString(), params.toArray());
         long duration = System.currentTimeMillis() - start;

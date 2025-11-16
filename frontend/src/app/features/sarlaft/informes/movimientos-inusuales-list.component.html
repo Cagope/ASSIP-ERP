@@ -1,0 +1,83 @@
+<div class="page">
+
+  <!-- BOTONERA -->
+  <app-header-actions
+    titulo="📊 Movimientos Inusuales"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="true"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <!-- FILTROS -->
+  <form class="filtros" (ngSubmit)="buscar()">
+
+    <div class="f-row">
+      <label>Desde</label>
+      <input type="date" [(ngModel)]="filtros.fecha_inicio" name="fecha_inicio" />
+    </div>
+
+    <div class="f-row">
+      <label>Hasta</label>
+      <input type="date" [(ngModel)]="filtros.fecha_fin" name="fecha_fin" />
+    </div>
+
+    <div class="f-buttons">
+      <button type="submit" class="btn primary">
+        <span class="material-icons">search</span>
+        Buscar
+      </button>
+
+      <button type="button" class="btn secondary" (click)="limpiar()">
+        <span class="material-icons">refresh</span>
+        Limpiar
+      </button>
+    </div>
+
+  </form>
+
+  <div *ngIf="cargando" class="loading">Cargando datos…</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <!-- RESUMEN -->
+  <section *ngIf="registros.length > 0" class="resumen">
+
+    <h3>Resumen general</h3>
+
+    <div class="cards">
+
+      <div class="card">
+        <div class="label">Total personas</div>
+        <div class="value big right">{{ resumen.total | number }}</div>
+      </div>
+
+      <div class="card red">
+        <div class="label">Inusuales</div>
+        <div class="value right">
+          {{ resumen.inusuales | number }} ({{ resumen.pctInusuales }}%)
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="label">Normales</div>
+        <div class="value right">
+          {{ resumen.normales | number }} ({{ resumen.pctNormales }}%)
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="label">Total Consignado</div>
+        <div class="value big right">
+          {{ resumen.totalConsignado | number:'1.0-0' }}
+        </div>
+      </div>
+
+    </div>
+
+    <p class="note">
+      ⚠ Detalle completo mediante exportación a Excel.
+    </p>
+
+  </section>
+
+</div>

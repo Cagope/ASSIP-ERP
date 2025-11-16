@@ -1,0 +1,131 @@
+.page {
+  padding: 2rem;
+  max-width: 1100px;
+  margin: auto;
+}
+
+.title {
+  margin-bottom: 1.5rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.filtros {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+
+  .f-row {
+    display: flex;
+    flex-direction: column;
+
+    label {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      margin-bottom: 0.3rem;
+    }
+
+    input, select {
+      height: 34px;
+      padding: 4px 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+  }
+
+  .f-buttons {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.5rem;
+
+    .btn {
+      padding: 0.45rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+    }
+
+    .secondary {
+      background: #ddd;
+    }
+
+    .export {
+      background: #007bff;
+      color: white;
+    }
+  }
+}
+
+.loading,
+.error,
+.empty {
+  margin-top: 1rem;
+  font-weight: bold;
+}
+
+.error {
+  color: #b30000;
+}
+
+.resumen {
+  margin-top: 2rem;
+
+  h3 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .card {
+    padding: 1rem;
+    border-radius: 8px;
+    background: #f5f5f5;
+    border-left: 4px solid #999;
+
+    &.green {
+      border-left-color: #28a745;
+    }
+
+    &.red {
+      border-left-color: #dc3545;
+    }
+
+    .label {
+      font-size: 0.85rem;
+      opacity: 0.7;
+      margin-bottom: 0.3rem;
+    }
+
+    .value {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .big {
+      font-size: 1.7rem;
+    }
+  }
+
+  .note {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    opacity: 0.75;
+  }
+}
+.value.right {
+  text-align: right;
+  width: 100%;
+  display: block;
+}
+
+.value.right {
+  text-align: right !important;
+  display: block;
+  width: 100%;
+}

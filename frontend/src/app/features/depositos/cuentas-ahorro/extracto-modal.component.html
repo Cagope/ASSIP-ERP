@@ -1,0 +1,143 @@
+<!-- extracto-modal.component.html -->
+<div class="modal-backdrop" *ngIf="visible" (click)="onCerrar()">
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <!-- 🔹 Encabezado de ventana -->
+    <h3 class="modal-title no-print">🧾 Informe de Extracto</h3>
+
+    <!-- 🎛️ Filtros de fechas -->
+    <div class="extracto-filtros no-print">
+      <div class="campo">
+        <label for="fechaInicial">📅 Fecha inicial</label>
+        <input
+          id="fechaInicial"
+          type="date"
+          [(ngModel)]="fechaInicial"
+          [max]="fechaFinal || undefined"
+        />
+      </div>
+
+      <div class="campo">
+        <label for="fechaFinal">📅 Fecha final</label>
+        <input
+          id="fechaFinal"
+          type="date"
+          [(ngModel)]="fechaFinal"
+          [min]="fechaInicial || undefined"
+        />
+      </div>
+    </div>
+
+    <!-- 🎯 Botones de acción -->
+    <div class="acciones no-print">
+      <button class="btn primary" (click)="consultar()" [disabled]="cargando">Consultar</button>
+      <button class="btn secondary" (click)="onCerrar()">Cerrar</button>
+      <button class="btn print" (click)="onImprimir()" [disabled]="!movimientos.length">🖨 Imprimir</button>
+    </div>
+
+    <!-- ⏳ Estado -->
+    <div *ngIf="cargando" class="cargando">⏳ Consultando información...</div>
+
+    <!-- 📄 Contenido imprimible -->
+    <div id="extracto-print-area" *ngIf="!cargando && movimientos.length">
+
+      <!-- 🏛️ Encabezado institucional -->
+      <header class="informe-header">
+        <div class="header-left">
+          <img src="assets/logo-web.png" alt="Logo" />
+        </div>
+
+        <div class="header-center">
+          <h2>ERP ASSIP SOLIDARIA Y FINANCIERA</h2>
+          <p>Calle 6 No. 3a - 22 — Tel: 3107114523</p>
+          <p>www.assip.co</p>
+          <h3>INFORME DE EXTRACTO DE CUENTA</h3>
+        </div>
+
+        <div class="header-right">
+          <p><strong>Fecha emisión:</strong></p>
+          <p>{{ hoy | date:'yyyy-MM-dd HH:mm' }}</p>
+          <p><strong>Página:</strong> 1 de 1</p>
+        </div>
+      </header>
+
+      <!-- 👤 Datos del asociado -->
+      <section class="informe-info">
+        <table>
+          <tr>
+            <td><strong>Cédula:</strong></td>
+            <td>{{ asociado?.documento || '—' }}</td>
+            <td><strong>Nombre del asociado:</strong></td>
+            <td>{{ asociado?.nombreCompleto || '—' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Forma de ahorro:</strong></td>
+            <td>{{ formaAhorro }}</td>
+            <td><strong>Código de cuenta:</strong></td>
+            <td>{{ codigoCuenta }}</td>
+          </tr>
+          <tr>
+            <td><strong>Período:</strong></td>
+            <td colspan="3">{{ fechaInicial }} al {{ fechaFinal }}</td>
+          </tr>
+        </table>
+      </section>
+
+      <!-- 📊 Totales al inicio -->
+      <section class="informe-totales">
+        <table>
+          <tr>
+            <td><strong>Saldo Inicial:</strong></td>
+            <td class="num">{{ resumen?.saldoInicial | number:'1.0-2' }}</td>
+            <td><strong>Total Débitos:</strong></td>
+            <td class="num">{{ resumen?.totalDebitos | number:'1.0-2' }}</td>
+          </tr>
+          <tr>
+            <td><strong>Total Créditos:</strong></td>
+            <td class="num">{{ resumen?.totalCreditos | number:'1.0-2' }}</td>
+            <td><strong>Saldo Final:</strong></td>
+            <td class="num">{{ resumen?.saldoFinal | number:'1.0-2' }}</td>
+          </tr>
+        </table>
+      </section>
+
+
+      <!-- 📋 Detalle de movimientos -->
+      <section class="informe-tabla">
+        <table class="tabla-extracto">
+          <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Movimiento</th>
+            <th>Comprobante</th>
+            <th>Débito</th>
+            <th>Crédito</th>
+            <th>Saldo</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let m of movimientos">
+            <td>{{ m.fecha_movimiento | date:'yyyy-MM-dd' }}</td>
+            <td>{{ m.tipo_movimiento }}</td>
+            <td>{{ m.numero_comprobante }}</td>
+            <td class="num">{{ m.valor_debito | number:'1.0-2' }}</td>
+            <td class="num">{{ m.valor_credito | number:'1.0-2' }}</td>
+            <td class="num">{{ m.saldo_resultante | number:'1.0-2' }}</td>
+          </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- 🖋️ Pie institucional -->
+      <footer class="informe-footer">
+        <p>Documento generado electrónicamente por el sistema ERP ASSIP.</p>
+        <p>No requiere firma manuscrita para su validez.</p>
+      </footer>
+    </div>
+
+    <!-- 📭 Sin resultados -->
+    <p *ngIf="!cargando && !movimientos.length" class="sin-datos">
+      No se encontraron movimientos para el rango seleccionado.
+    </p>
+  </div>
+</div>

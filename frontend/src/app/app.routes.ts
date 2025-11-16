@@ -28,6 +28,13 @@ export const routes: Routes = [
           import('./features/depositos/depositos.routes')
             .then(m => m.DEPOSITOS_ROUTES),
       },
+
+      {
+        path: 'sarlaft',
+        loadChildren: () =>
+          import('./features/sarlaft/sarlaft.routes')
+            .then(m => m.SARLAFT_ROUTES),
+      },
       // 👇 futuros esquemas
       // {
       //   path: 'contabilidad',

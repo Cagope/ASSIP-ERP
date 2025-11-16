@@ -1,5 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ExtractoModalComponent } from './extracto-modal.component'; // ✅ Import del modal
+
 
 /**
  * 🧾 Detalle de Cuenta de Ahorro
@@ -10,7 +12,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-cuentas-ahorro-detalle',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ExtractoModalComponent], // ✅ Incluir el modal aquí
   templateUrl: './cuentas-ahorro-detalle.component.html',
   styleUrls: ['./cuentas-ahorro-detalle.component.scss']
 })
@@ -18,9 +20,26 @@ export class CuentasAhorroDetalleComponent {
   @Input() cuenta: any;
   @Output() cerrar = new EventEmitter<void>();
 
+  mostrarModalExtracto = false;
+
+  ngOnInit(): void {
+    console.log("🟡 Cuenta recibida en DETALLE:", this.cuenta);
+    console.log("🟠 SARLAFT en detalle:", this.cuenta?.sarlaft);
+  }
+
   /** 🔙 Cierra la vista de detalle */
   onCerrar(): void {
     this.cerrar.emit();
+  }
+
+  /** 🧾 Abre el modal de extracto */
+  abrirExtracto(): void {
+    this.mostrarModalExtracto = true;
+  }
+
+  /** 🧾 Cierra el modal de extracto */
+  cerrarExtracto(): void {
+    this.mostrarModalExtracto = false;
   }
 
   /**
@@ -28,27 +47,21 @@ export class CuentasAhorroDetalleComponent {
    * Si el campo está vacío, usa la imagen de muestra por defecto.
    */
   getImagen(nombreArchivo: string | null, tipo: 'foto' | 'firma'): string {
-    // 🟡 Si el campo está vacío, usamos la imagen de muestra
     if (!nombreArchivo || nombreArchivo.trim() === '') {
       return tipo === 'foto'
         ? '/assets/fotos/foto_muestra.jpg'
         : '/assets/firmas/firma1_muestra.jpg';
     }
 
-    // 🔠 Corrige los nombres: fuerza FI/FT en mayúscula, extensión en minúscula
     const nombreNormalizado = nombreArchivo
       .trim()
-      .replace(/^fi/i, 'FI')   // asegura prefijo FI
-      .replace(/^ft/i, 'FT')   // asegura prefijo FT
-      .replace(/\.jpeg$/i, '.jpg'); // extensión a minúscula
+      .replace(/^fi/i, 'FI')
+      .replace(/^ft/i, 'FT')
+      .replace(/\.jpeg$/i, '.jpg');
 
-    // 📂 Selecciona la carpeta según tipo
     const carpeta = tipo === 'foto' ? 'fotos' : 'firmas';
-
-    // ✅ Devuelve la ruta que Angular puede resolver
     return `/assets/${carpeta}/${nombreNormalizado}`;
   }
-
 
   /** 🧩 Si el archivo no se encuentra, mostrar la imagen de muestra */
   onImageError(event: Event, tipo: 'foto' | 'firma'): void {
@@ -62,14 +75,11 @@ export class CuentasAhorroDetalleComponent {
   /** 🌄 Control del modal de imagen ampliada */
   imagenAmpliada: string | null = null;
 
-  /** Abre la imagen en grande */
   abrirImagen(src: string): void {
     this.imagenAmpliada = src;
   }
 
-  /** Cierra la imagen ampliada */
   cerrarImagen(): void {
     this.imagenAmpliada = null;
   }
-
 }

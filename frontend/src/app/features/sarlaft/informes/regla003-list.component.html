@@ -1,0 +1,72 @@
+<div class="page">
+
+  <!-- BOTONERA SUPERIOR -->
+  <app-header-actions
+    titulo="📘 Regla 003 — Forma 03 prohibida para mayores"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="true"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <!-- FILTROS -->
+  <form class="filtros" (ngSubmit)="buscar()">
+
+    <div class="f-row">
+      <label>Desde</label>
+      <input type="date" [(ngModel)]="filtros.desde" name="desde" />
+    </div>
+
+    <div class="f-row">
+      <label>Hasta</label>
+      <input type="date" [(ngModel)]="filtros.hasta" name="hasta" />
+    </div>
+
+    <div class="f-buttons">
+
+      <!-- Buscar -->
+      <button type="submit" class="btn primary">
+        <span class="material-icons">search</span>
+        Buscar
+      </button>
+
+      <!-- Limpiar -->
+      <button type="button" class="btn secondary" (click)="limpiar()">
+        <span class="material-icons">refresh</span>
+        Limpiar
+      </button>
+
+    </div>
+
+  </form>
+
+  <!-- MENSAJES -->
+  <div *ngIf="cargando" class="loading">Cargando...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <!-- RESUMEN -->
+  <section *ngIf="registros.length > 0" class="resumen">
+
+    <h3>Resumen general</h3>
+
+    <div class="cards">
+
+      <!-- Irregulares -->
+      <div class="card red">
+        <div class="label">Total irregulares</div>
+        <div class="value big right">{{ resumen.irregulares | number }}</div>
+      </div>
+
+      <!-- Total aportes -->
+      <div class="card">
+        <div class="label">Total aportes</div>
+        <div class="value big right">
+          {{ resumen.totalAportes | number:'1.0-0' }}
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
+</div>

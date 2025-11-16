@@ -5,35 +5,69 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f7dc21a8-45a4-4140-a7e2-a5ded858c06e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/resources/db/migration/V013__depositos_datos.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/resources/db/migration/V052__depositos_views.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/resources/db/migration/V053__depositos_vistas_cruzadas.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro-detalle.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro-detalle.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro-detalle.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro-list.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro-list.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro-list.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/depositos-menu.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/depositos.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/reporting/api/ReportQueryRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/reporting/api/ReportQueryRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/reporting/api/ReportingController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/reporting/api/ReportingController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/reporting/api/ReportingService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/reporting/api/ReportingService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/SarlaftAlertaService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/domain/Alerta.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/domain/AlertaGestion.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/domain/ReglaSarlaft.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/dto/EvaluacionResultado.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/dto/ReglasInput.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/engine/AlertaEngine.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/informes/InformeSarlaftController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/informes/InformeSarlaftRequest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/informes/InformeSarlaftService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/informes/InformeSarlaftTipo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/informes/dto/InformeDatosDemograficosDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/informes/dto/InformeMovimientosInusualesDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/informes/dto/InformePersonasDesactualizadasDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/informes/dto/InformeRegla002DTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/informes/dto/InformeRegla003DTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/repository/AlertaGestionRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/repository/AlertaRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/repository/ReglaSarlaftRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/service/AlertaGestionService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/service/AlertaService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/service/ReglaSarlaftService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/sarlaft/web/SarlaftEvaluacionController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/resources/db/migration/V014__sarlaft.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/resources/db/migration/V015__poblar_reglas_sarlaft.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/resources/db/migration/V016__sarlaft_rebuild.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/resources/db/migration/V017__poblar_reglas_sarlaft.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/extracto-modal.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/extracto-modal.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/extracto-modal.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/informes/actualizacion-exporter.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/informes/actualizacion-list.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/informes/actualizacion-list.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/informes/actualizacion-list.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/informes/demograficos-exporter.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/informes/demograficos-list.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/informes/demograficos-list.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/informes/demograficos-list.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/informes/movimientos-inusuales-exporter.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/informes/movimientos-inusuales-list.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/informes/movimientos-inusuales-list.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/informes/movimientos-inusuales-list.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/informes/regla002-exporter.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/informes/regla002-list.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/informes/regla002-list.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/informes/regla002-list.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/informes/regla003-exporter.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/informes/regla003-list.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/informes/regla003-list.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/informes/regla003-list.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/sarlaft-menu.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/sarlaft/sarlaft.routes.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/shared/sarlaft/sarlaft.api.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/reporting/impl/ReportesRepositoryImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/reporting/impl/ReportesRepositoryImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/resources/application.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/resources/db/migration/V012__depositos_core.sql" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/resources/db/migration/V012__depositos_core.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/app.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/app.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/actualizacion-datos/actualizacion-datos.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/actualizacion-datos/actualizacion-datos.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/actualizacion-datos/actualizacion-datos.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/actualizacion-datos/actualizacion-datos.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/afiliacion-formulario/afiliacion-formulario.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/afiliacion-formulario/afiliacion-formulario.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/afiliacion-formulario/afiliacion-formulario.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/afiliacion-formulario/afiliacion-formulario.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/afiliacion-list/afiliacion-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/afiliacion-list/afiliacion-list.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/afiliacion-list/afiliacion-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/afiliacion-list/afiliacion-list.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/origen-fondos/origen-fondos.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/origen-fondos/origen-fondos.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/tratamiento-datos/tratamiento-datos.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/tratamiento-datos/tratamiento-datos.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro-detalle.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro-detalle.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro-detalle.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro-detalle.component.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro-detalle.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro-detalle.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro-list.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro-list.component.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/layout/menu-registry.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout/menu-registry.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/shared/reporting/reporting.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/shared/reporting/reporting.service.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,6 +111,7 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\assip-erp\frontend\src\app\features\sarlaft" />
       <recent name="D:\assip-erp\frontend\src\app\features\hoja-vida\datos-personales" />
       <recent name="D:\assip-erp\frontend\src\app\shared\catalogos" />
     </key>

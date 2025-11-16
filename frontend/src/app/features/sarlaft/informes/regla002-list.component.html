@@ -1,0 +1,76 @@
+<div class="page">
+
+  <app-header-actions
+    titulo="📘 Regla 002 — Documento vs Edad"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="true"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <form class="filtros" (ngSubmit)="buscar()">
+
+    <div class="f-row">
+      <label>Desde</label>
+      <input type="date" [(ngModel)]="filtros.desde" name="desde" />
+    </div>
+
+    <div class="f-row">
+      <label>Hasta</label>
+      <input type="date" [(ngModel)]="filtros.hasta" name="hasta" />
+    </div>
+
+    <div class="f-buttons">
+      <button type="submit" class="btn primary">
+        <span class="material-icons">search</span>
+        Buscar
+      </button>
+
+      <button type="button" class="btn secondary" (click)="limpiar()">
+        <span class="material-icons">refresh</span>
+        Limpiar
+      </button>
+    </div>
+
+  </form>
+
+  <div *ngIf="cargando" class="loading">Cargando datos…</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <section *ngIf="registros.length > 0" class="resumen">
+
+    <h3>Resumen general</h3>
+
+    <div class="cards">
+
+      <div class="card">
+        <div class="label">Total evaluados</div>
+        <div class="value big right">{{ resumen.total | number }}</div>
+      </div>
+
+      <div class="card red">
+        <div class="label">Menores Irregulares</div>
+        <div class="value right">
+          {{ resumen.menoresIrregulares | number }} ({{ resumen.pctMenores }}%)
+        </div>
+      </div>
+
+      <div class="card red">
+        <div class="label">Adultos Irregulares</div>
+        <div class="value right">
+          {{ resumen.adultosIrregulares | number }} ({{ resumen.pctAdultos }}%)
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="label">Saldo Total Aportes</div>
+        <div class="value big right">
+          {{ resumen.totalAportes | number:'1.0-0' }}
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
+</div>

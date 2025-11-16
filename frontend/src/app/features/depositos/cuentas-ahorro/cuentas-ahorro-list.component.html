@@ -1,5 +1,7 @@
 <div class="list-container">
-  <app-header-actions title="Cuentas de Ahorro"></app-header-actions>
+  <header class="page-header">
+    <h2>💰 Cuentas de Ahorro</h2>
+  </header>
 
   <!-- 🟩 Filtros de búsqueda -->
   <div class="filters grid grid-5 gap-sm">
@@ -59,8 +61,9 @@
       <td>{{ c.nombres }} {{ c.primer_apellido }} {{ c.segundo_apellido }}</td>
       <td>{{ c.nombre_forma_ahorro }}</td>
       <td class="right">{{ c.saldo_actual_cuenta | number: '1.0-2' }}</td>
-      <td>
+      <td class="actions-cell">
         <button class="btn sm" (click)="verDetalle(c)">🔍 Ver detalle</button>
+        <button class="btn sm secondary" (click)="abrirExtracto(c)">🧾 Ver extracto</button>
       </td>
     </tr>
     </tbody>
@@ -79,4 +82,18 @@
     </app-cuentas-ahorro-detalle>
   </div>
 
+  <!-- 🧾 Modal de Extracto -->
+  <app-extracto-modal
+    [codigoCuenta]="seleccionada?.codigo_cuenta"
+    [formaAhorro]="seleccionada?.nombre_forma_ahorro"
+    [asociado]="{
+      documento: seleccionada?.documento,
+      nombreCompleto: (seleccionada?.nombres || '') + ' ' +
+                      (seleccionada?.primer_apellido || '') + ' ' +
+                      (seleccionada?.segundo_apellido || '')
+    }"
+    [visible]="modalVisible"
+    (cerrar)="modalVisible = false">
+  </app-extracto-modal>
 </div>
+

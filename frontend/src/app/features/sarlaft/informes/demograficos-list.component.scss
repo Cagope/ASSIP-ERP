@@ -1,0 +1,164 @@
+.page {
+  padding: 2rem;
+  max-width: 1300px;
+  margin: auto;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ====== FILTROS ====== */
+.filtros {
+  display: flex;
+  justify-content: flex-start;     /* ⬅ Alineados a la izquierda */
+  align-items: flex-end;           /* ⬅ Botones alineados abajo */
+  gap: 1.5rem;                     /* ⬅ Separación uniforme */
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.f-row {
+  display: flex;
+  flex-direction: column;
+  min-width: 170px;                /* Más compacto, como mov. inusuales */
+
+  label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  input {
+    height: 36px;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+}
+
+.f-buttons {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.8rem;
+
+  .btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 6px;
+    padding: 0.45rem 1.1rem;
+    border: none;
+    cursor: pointer;
+  }
+}
+
+/* ====== TITULOS CON ICONO ======= */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: 1.2rem;
+  margin-top: 2rem;
+}
+
+.icon-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.icon-btn .material-icons {
+  font-size: 22px;
+  color: #444;
+}
+
+/* ====== TARJETAS ====== */
+.cards {
+  display: grid;
+  gap: 1.2rem;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  margin-bottom: 2rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.2rem;
+  border-left: 5px solid #ccc;
+}
+
+.card.orange { border-left-color: #ea580c; }
+.card.blue   { border-left-color: #2563eb; }
+
+.value.big {
+  font-size: 1.9rem;
+  text-align: right;
+}
+
+/* ====== BARRAS ====== */
+.bar-list {
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+}
+
+.bar-item {
+  display: grid;
+  grid-template-columns: 180px 1fr 120px;
+  align-items: center;
+  gap: 1rem;
+}
+
+.bar {
+  background: #e5e7eb;
+  height: 14px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 6px;
+}
+
+.gender { background: linear-gradient(90deg,#2563eb,#3b82f6); }
+.age    { background: linear-gradient(90deg,#7c3aed,#a78bfa); }
+.house  { background: linear-gradient(90deg,#ea580c,#fb923c); }
+.zone   { background: linear-gradient(90deg,#059669,#34d399); }
+.edu    { background: linear-gradient(90deg,#0ea5e9,#38bdf8); }
+.ocu    { background: linear-gradient(90deg,#7c3aed,#c084fc); }
+.muni   { background: linear-gradient(90deg,#9333ea,#d946ef); }
+
+/* ====== VALORES (CANTIDAD + SALDO) ====== */
+.bar-values {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: flex-end;
+  gap: 1.2rem;
+  width: 100%;
+}
+
+.count {
+  font-weight: 700;
+  text-align: right;
+}
+
+.amount {
+  font-weight: 700;
+  color: #2563eb;
+  text-align: right;
+}
+
+/* ===== Espaciado entre grupos ===== */
+.dashboard h3 {
+  margin-top: 2.8rem !important;
+  padding-top: 1.2rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.bar-list {
+  margin-top: 1rem !important;
+  margin-bottom: 2.5rem !important;
+}
+
+.bar-item {
+  padding: 0.2rem 0;
+}

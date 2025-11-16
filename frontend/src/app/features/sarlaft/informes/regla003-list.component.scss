@@ -1,0 +1,119 @@
+.page {
+  padding: 2rem;
+  max-width: 1100px;
+  margin: auto;
+}
+
+/* ===========================
+   FILTROS (alineados a la izquierda)
+=========================== */
+.filtros {
+  display: flex;
+  justify-content: flex-start;   /* ⬅ alineado a la izquierda */
+  gap: 1.5rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.f-row {
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+
+  label {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    margin-bottom: 0.3rem;
+  }
+
+  input {
+    height: 34px;
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+}
+
+/* Botones */
+.f-buttons {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.7rem;
+
+  .btn {
+    padding: 0.45rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    &.primary {
+      background: #007bff;
+      color: white;
+    }
+
+    &.secondary {
+      background: #ddd;
+    }
+  }
+}
+
+/* ===========================
+   ESTADOS
+=========================== */
+.loading,
+.error,
+.empty {
+  margin-top: 1rem;
+  font-weight: bold;
+}
+
+.error {
+  color: #b30000;
+}
+
+/* ===========================
+   TARJETAS
+=========================== */
+.resumen h3 {
+  margin-top: 2rem;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.card {
+  padding: 1rem;
+  background: #f5f5f5;
+  border-radius: 8px;
+  border-left: 4px solid #999;
+
+  &.red {
+    border-left-color: #dc3545;
+  }
+
+  .label {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    margin-bottom: 0.3rem;
+  }
+
+  .value {
+    font-size: 1.3rem;
+    font-weight: 700;
+  }
+
+  .big {
+    font-size: 1.7rem;
+  }
+}
+
+.value.right {
+  text-align: right;
+}
