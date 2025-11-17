@@ -11,6 +11,9 @@ export const depositosMenu = {
     // 💰 CUENTAS DE AHORRO
     { label: 'Cuentas de Ahorro', route: '/depositos/cuentas-ahorro' },
 
+    // 📊 INFORMES
+    { label: 'Saldos a Corte', route: '/depositos/informes/saldos-corte' },
+
     // 📊 MOVIMIENTOS Y EXTRACTOS (en desarrollo)
     // { label: 'Movimientos y Extractos', route: '/depositos/movimientos' },
 
