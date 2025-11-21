@@ -15,11 +15,24 @@ export class MainMenuComponent {
   username = '';
   menu = MENU_REGISTRY;
 
+  /** 🔽 Estado del colapso (se recuerda por índice) */
+  openSections: Record<number, boolean> = {};
+
   constructor(private session: SessionService) {
     this.username = this.session.getUser() ?? '';
   }
 
   logout(): void {
     this.session.logout();
+  }
+
+  /** Saber si la sección está abierta */
+  isOpen(index: number): boolean {
+    return !!this.openSections[index];
+  }
+
+  /** Alternar la apertura/cierre */
+  toggleSection(index: number): void {
+    this.openSections[index] = !this.openSections[index];
   }
 }

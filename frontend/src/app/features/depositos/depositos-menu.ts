@@ -11,10 +11,22 @@ export const depositosMenu = {
     // 💰 CUENTAS DE AHORRO
     { label: 'Cuentas de Ahorro', route: '/depositos/cuentas-ahorro' },
 
-    // 📊 INFORMES
+    // 🏛 FORMAS DE AHORRO
+    { label: 'Formas de Ahorro', route: '/depositos/formas-ahorro' },
+
+    // 📊 SALDOS A CORTE
     { label: 'Saldos a Corte', route: '/depositos/informes/saldos-corte' },
 
-    // 📊 MOVIMIENTOS Y EXTRACTOS (en desarrollo)
+    // 🆕 CUENTAS NUEVAS O RETIRADAS
+    { label: 'Cuentas Nuevas o Retiradas', route: '/depositos/informes/cuentas-nr' },
+
+    // 🧩 INFORME — POR RANGOS
+    { label: 'Informe por Rangos', route: '/depositos/informes/rangos' },
+
+    // ⚠️ NUEVO INFORME — INCONSISTENCIAS DE SALDOS
+    { label: 'Inconsistencias de Saldos', route: '/depositos/informes/inconsistencias' },
+
+    // 📊 MOVIMIENTOS Y EXTRACTOS (pendiente)
     // { label: 'Movimientos y Extractos', route: '/depositos/movimientos' },
 
     // 🧮 LIQUIDACIÓN DE INTERESES (pendiente)

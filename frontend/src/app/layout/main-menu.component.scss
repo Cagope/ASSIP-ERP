@@ -1,7 +1,7 @@
 .menu {
   width: 270px;
   height: 100vh;
-  background: #ffffff; /* 🔸 Fondo blanco limpio */
+  background: #ffffff;
   color: #222;
   display: flex;
   flex-direction: column;
@@ -10,67 +10,52 @@
   box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
 }
 
-/* 🔹 Encabezado (por si lo reactivas en el futuro) */
-.menu-header {
+/* ============================================================
+   🔹 Nuevo: Sección clicable (colapsable)
+   ============================================================ */
+
+.menu-section {
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  text-align: center;
-  padding: 1rem 0.75rem;
-  border-bottom: 1px solid #e5e7eb;
-  gap: 0.5rem;
 
-  .logo {
-    width: 72px;
-    height: auto;
-    border-radius: 10px;
-    background: white;
-    padding: 4px;
-  }
+  font-size: 15px;
+  font-weight: 600;
+  color: #166534;
+  margin-top: 1.2rem;
+  padding: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 
-  .user-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
+  transition: color 0.2s ease;
 
-    .username {
-      font-size: 14px; /* antes 13px */
-      color: #374151;
-      font-weight: 500;
-    }
-
-    .logout {
-      background: #f3f4f6;
-      color: #111827;
-      border: 0;
-      border-radius: 6px;
-      padding: 0.35rem 0.9rem;
-      font-size: 13px; /* antes 12px */
-      cursor: pointer;
-      transition: background 0.2s;
-
-      &:hover {
-        background: #e5e7eb;
-      }
-    }
+  &:hover {
+    color: #0f3f21;
   }
 }
 
-/* 🔹 Secciones */
+.chevron {
+  transition: transform 0.25s ease;
+  display: inline-block;
+  font-size: 14px;
+}
+
+.chevron.open {
+  transform: rotate(180deg);
+}
+
+/* ============================================================
+   🔹 Submenú
+   ============================================================ */
 .menu-content {
   flex: 1;
   padding: 1rem 0.75rem;
-
-  .menu-section {
-    font-size: 15px; /* antes 14px */
-    font-weight: 600;
-    color: #166534;
-    margin-top: 1.2rem;
-    margin-bottom: 0.4rem;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-  }
 
   .submenu {
     list-style: none;
@@ -79,10 +64,10 @@
 
     .menu-item {
       display: block;
-      padding: 0.5rem 0.7rem; /* un poco más de aire */
+      padding: 0.5rem 0.7rem;
       border-radius: 6px;
       color: #374151;
-      font-size: 14px; /* antes 13px */
+      font-size: 14px;
       text-decoration: none;
       transition: all 0.2s ease;
 
@@ -100,7 +85,9 @@
   }
 }
 
-/* 🔹 Scroll estético */
+/* ============================================================
+   🔹 Scroll
+   ============================================================ */
 .menu::-webkit-scrollbar {
   width: 6px;
 }

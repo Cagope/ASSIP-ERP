@@ -1,0 +1,49 @@
+<div class="formas-ahorro-list">
+
+  <app-header-actions
+    titulo="Formas de Ahorro"
+    (nuevo)="nueva()"
+    (refrescar)="cargar()"
+    (imprimir)="imprimir()"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <table class="table" *ngIf="!cargando && formas.length > 0; else vacio">
+    <thead>
+    <tr>
+      <th>código</th>
+      <th>nombre</th>
+      <th>tipo</th>
+      <th>liq.</th>
+      <th>aut</th>
+      <th>acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let f of formas">
+      <td>{{ f.codigoForma }}</td>
+      <td>{{ f.nombreForma }}</td>
+      <td>{{ f.tipoCaptacion }}</td>
+      <td>{{ f.tiempoLiquidacion }}</td>
+      <td>{{ f.autorizadoForma ? 'SI' : 'NO' }}</td>
+
+      <td>
+        <div class="acciones">
+          <button class="btn sm" (click)="editar(f.id!)">✏️</button>
+          <button class="btn sm danger" (click)="eliminar(f)">🗑️</button>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="cargando" class="loading">
+    Cargando...
+  </div>
+
+  <ng-template #vacio>
+    <p class="empty">No hay formas de ahorro registradas.</p>
+  </ng-template>
+
+</div>

@@ -1,0 +1,66 @@
+<div class="form-container">
+  <h5>{{ route.snapshot.paramMap.get('id') ? 'editar forma de ahorro' : 'nueva forma de ahorro' }}</h5>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="form-grid">
+
+    <div class="form-group sm">
+      <label>código *</label>
+      <input type="text" formControlName="codigoForma" maxlength="2" />
+    </div>
+
+    <div class="form-group full">
+      <label>nombre *</label>
+      <input type="text" formControlName="nombreForma" />
+    </div>
+
+    <div class="form-group sm">
+      <label>tipo captación</label>
+      <input type="text" formControlName="tipoCaptacion" maxlength="1" />
+    </div>
+
+    <div class="form-group sm">
+      <label>tiempo liquidación</label>
+      <input type="number" formControlName="tiempoLiquidacion" />
+    </div>
+
+    <div class="form-group sm">
+      <label>autorizado</label>
+      <select formControlName="autorizadoForma">
+        <option [ngValue]="true">Sí</option>
+        <option [ngValue]="false">No</option>
+      </select>
+    </div>
+
+    <!-- MAS CAMPOS ↓ -->
+    <div class="form-group sm">
+      <label>cuenta corto</label>
+      <input type="number" formControlName="cuentaFormaCorto" />
+    </div>
+
+    <div class="form-group sm">
+      <label>cuenta largo</label>
+      <input type="number" formControlName="cuentaFormaLargo" />
+    </div>
+
+    <div class="form-group sm">
+      <label>periodo gracia</label>
+      <input type="number" formControlName="periodoGracia" />
+    </div>
+
+    <div class="form-group sm">
+      <label>valor mínimo</label>
+      <input type="number" formControlName="valorMinimo" />
+    </div>
+
+    <div class="form-group sm">
+      <label>tasa interés %</label>
+      <input type="number" formControlName="tasaInteresForma" step="0.01" />
+    </div>
+
+    <div class="form-actions full">
+      <button class="btn sm primary" type="submit" [disabled]="form.invalid">💾 guardar</button>
+      <button class="btn sm danger" type="button" (click)="cancelar()">↩️ cancelar</button>
+    </div>
+
+  </form>
+</div>

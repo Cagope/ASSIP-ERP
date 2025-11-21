@@ -1,0 +1,125 @@
+.page {
+  padding: 2rem;
+  max-width: 1100px;
+  margin: auto;
+}
+
+/* -------------------------------------
+   🔍 FILTROS
+-------------------------------------- */
+.filtros {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  .f-row {
+    display: flex;
+    flex-direction: column;
+
+    label {
+      font-size: 0.8rem;
+      opacity: .8;
+      margin-bottom: .3rem;
+    }
+
+    input,
+    select {
+      height: 34px;
+      border: 1px solid #ccc;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: #fff;
+    }
+  }
+
+  .f-buttons {
+    display: flex;
+    align-items: flex-end;
+    gap: .5rem;
+
+    .btn {
+      padding: .45rem 1rem;
+      border-radius: 4px;
+      font-size: .9rem;
+      cursor: pointer;
+      border: none;
+
+      &.btn--primary {
+        background: #007bff;
+        color: white;
+      }
+
+      &.btn--cancel {
+        background: #ddd;
+      }
+    }
+  }
+}
+
+/* -------------------------------------
+   🔄 ESTADOS
+-------------------------------------- */
+.loading {
+  margin-top: 1rem;
+  color: #007bff;
+  font-weight: 600;
+}
+
+.error {
+  margin-top: 1rem;
+  color: #c62828;
+  font-weight: 600;
+}
+
+/* -------------------------------------
+   📋 TABLA DE RESULTADOS
+-------------------------------------- */
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+
+  th {
+    background: #f0f0f0;
+    padding: 6px 8px;
+    border-bottom: 1px solid #ddd;
+    font-size: 0.85rem;
+    text-align: left;
+  }
+
+  td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+  }
+
+  .right {
+    text-align: right;
+  }
+
+  tbody tr:nth-child(even) {
+    background: #fafafa;
+  }
+}
+
+/* -------------------------------------
+   📥 EXPORTAR EXCEL
+-------------------------------------- */
+.export-area {
+  margin-top: 1.5rem;
+  text-align: right;
+
+  .btn {
+    padding: .45rem 1.2rem;
+    border-radius: 4px;
+    background: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+
+    &:hover {
+      background: #0069d9;
+    }
+  }
+}

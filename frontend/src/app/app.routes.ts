@@ -5,23 +5,31 @@ import { MainLayoutComponent } from './layout/main-layout.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
+
   {
     path: '',
     component: MainLayoutComponent,
     canActivate: [authGuard],
+
     children: [
+
+      // === GENERAL ===
       {
         path: 'general',
         loadChildren: () =>
           import('./features/general/general.routes')
             .then(m => m.GENERAL_ROUTES),
       },
+
+      // === HOJA DE VIDA ===
       {
         path: 'hoja-vida',
         loadChildren: () =>
           import('./features/hoja-vida/hoja-vida.routes')
             .then(m => m.HOJA_VIDA_ROUTES),
       },
+
+      // === DEPÓSITOS ===
       {
         path: 'depositos',
         loadChildren: () =>
@@ -29,26 +37,32 @@ export const routes: Routes = [
             .then(m => m.DEPOSITOS_ROUTES),
       },
 
+      // === SARLAFT ===
       {
         path: 'sarlaft',
         loadChildren: () =>
           import('./features/sarlaft/sarlaft.routes')
             .then(m => m.SARLAFT_ROUTES),
       },
-      // 👇 futuros esquemas
-      // {
-      //   path: 'contabilidad',
-      //   loadChildren: () =>
-      //     import('./features/contabilidad/contabilidad.routes')
-      //       .then(m => m.CONTABILIDAD_ROUTES),
-      // },
-      // {
-      //   path: 'activos-fijos',
-      //   loadChildren: () =>
-      //     import('./features/activos-fijos/activos-fijos.routes')
-      //       .then(m => m.ACTIVOS_FIJOS_ROUTES),
-      // },
+
+      // === CONTABILIDAD ===
+      {
+        path: 'contabilidad',
+        loadChildren: () =>
+          import('./features/contabilidad/contabilidad.routes')
+            .then(m => m.CONTABILIDAD_ROUTES),
+      },
+
+      // === SUPERINTENDENCIA SES ===
+      {
+        path: 'ses',
+        loadChildren: () =>
+          import('./features/ses/ses.routes')
+            .then(m => m.sesRoutes),   // ✔️ LA LÍNEA CORRECTA
+      },
+
     ],
   },
+
   { path: '**', redirectTo: '' },
 ];

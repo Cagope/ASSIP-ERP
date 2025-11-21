@@ -229,7 +229,4 @@ export class CatalogosApi {
       catchError(() => of([] as CodigoNombreDTO[]))
     );
   }
-
-
-
 }

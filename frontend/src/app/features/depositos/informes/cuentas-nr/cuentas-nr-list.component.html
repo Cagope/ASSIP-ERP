@@ -1,0 +1,135 @@
+<div class="page">
+
+  <app-header-actions
+    titulo="📘 Cuentas nuevas o retiradas"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <!-- ========================================================= -->
+  <!-- FILTROS -->
+  <!-- ========================================================= -->
+  <form class="filtros" (ngSubmit)="buscar()">
+
+    <!-- Agencia -->
+    <div class="f-row">
+      <label>Agencia</label>
+      <select [(ngModel)]="filtros.agencia" name="agencia">
+        <option value="0">Todas</option>
+        <option *ngFor="let a of agencias" [value]="a.idAgencia">
+          {{ a.nombreAgencia }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Forma -->
+    <div class="f-row">
+      <label>Forma</label>
+      <select [(ngModel)]="filtros.forma" name="forma">
+        <option value="">Seleccione…</option>
+        <option *ngFor="let f of formas" [value]="f.codigoForma">
+          {{ f.codigoForma }} — {{ f.nombreForma }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Tipo -->
+    <div class="f-row">
+      <label>Tipo de informe</label>
+      <select [(ngModel)]="filtros.tipoInforme" name="tipoInforme">
+        <option value="NUEVAS">Cuentas nuevas</option>
+        <option value="RETIRADAS">Cuentas retiradas</option>
+      </select>
+    </div>
+
+    <!-- Fechas -->
+    <div class="f-row">
+      <label>Fecha inicial</label>
+      <input type="date" [(ngModel)]="filtros.fechaInicial" name="fechaInicial" />
+    </div>
+
+    <div class="f-row">
+      <label>Fecha final</label>
+      <input type="date" [(ngModel)]="filtros.fechaFinal" name="fechaFinal" />
+    </div>
+
+    <!-- BOTONES -->
+    <div class="f-buttons">
+      <button class="btn btn--primary" type="submit">🔍 Buscar</button>
+      <button class="btn btn--cancel" type="button" (click)="limpiar()">🧹 Limpiar</button>
+    </div>
+
+  </form>
+
+  <!-- ========================================================= -->
+  <!-- ESTADOS -->
+  <!-- ========================================================= -->
+  <div *ngIf="cargando" class="loading">Cargando...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <!-- ========================================================= -->
+  <!-- BOTONES EXPORTAR / IMPRIMIR -->
+  <!-- ========================================================= -->
+  <div *ngIf="resultados.length > 0" class="header-actions" style="margin-top: 10px;">
+
+    <div class="actions">
+
+      <button class="btn btn--primary"
+              type="button"
+              (click)="exportar()">
+        📥 Exportar Excel
+      </button>
+
+      <button class="btn btn--print"
+              type="button"
+              (click)="imprimir()">
+        🖨️ Imprimir
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- TABLA RESULTADOS -->
+  <!-- ========================================================= -->
+  <table class="tabla-resumen" *ngIf="resultados.length > 0">
+    <thead>
+    <tr>
+      <th>Cuenta</th>
+      <th>Documento</th>
+      <th>Nombre</th>
+      <th>Agencia</th>
+      <th>Forma</th>
+      <th *ngIf="filtros.tipoInforme === 'NUEVAS'">Fecha apertura</th>
+      <th *ngIf="filtros.tipoInforme === 'RETIRADAS'">Fecha retiro</th>
+      <th class="right">Saldo</th>
+    </tr>
+    </thead>
+
+    <tbody>
+
+    <tr *ngFor="let x of resultados">
+      <td>{{ x.codigo_cuenta }}</td>
+      <td>{{ x.documento }}</td>
+      <td>{{ x.nombre_completo }}</td>
+      <td>{{ x.agencia }}</td>
+      <td>{{ x.forma }}</td>
+
+      <td *ngIf="filtros.tipoInforme === 'NUEVAS'">{{ x.fecha_apertura }}</td>
+      <td *ngIf="filtros.tipoInforme === 'RETIRADAS'">{{ x.fecha_retiro }}</td>
+
+      <td class="right">
+        {{ (x.saldo_inicial ?? x.ultimo_saldo) | number:'1.0-0' }}
+      </td>
+    </tr>
+
+    </tbody>
+  </table>
+
+  <div *ngIf="resultados.length === 0 && !cargando && !error"
+       class="empty">
+    No hay resultados para mostrar.
+  </div>
+
+</div>

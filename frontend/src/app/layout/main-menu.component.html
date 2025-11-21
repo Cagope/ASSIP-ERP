@@ -1,13 +1,16 @@
 <aside class="menu">
   <nav class="menu-content">
     <ul>
-      <!-- 🧾 Sección principal -->
-      <li *ngFor="let section of menu">
-        <h3 class="menu-section">
-          {{ section.title }}
-        </h3>
+      <li *ngFor="let section of menu; let i = index" [class.open]="isOpen(i)">
 
-        <ul class="submenu">
+        <!-- 🔽 TÍTULO CLICABLE -->
+        <button type="button" class="menu-section" (click)="toggleSection(i)">
+          <span>{{ section.title }}</span>
+          <span class="chevron" [class.open]="isOpen(i)">▾</span>
+        </button>
+
+        <!-- 🔽 SUBMENÚ SOLO SI ESTÁ ABIERTO -->
+        <ul class="submenu" *ngIf="isOpen(i)">
           <li *ngFor="let item of section.items">
             <a
               [routerLink]="item.route"
@@ -18,6 +21,7 @@
             </a>
           </li>
         </ul>
+
       </li>
     </ul>
   </nav>

@@ -5,7 +5,7 @@
 export const contabilidadMenu = {
   title: '💼 Contabilidad',
   items: [
-    { label: 'Catálogo de Cuentas', route: '/contabilidad/catalogo' },
+    { label: 'Plan de Cuentas', route: '/contabilidad/plan-cuentas' },
     { label: 'Comprobantes', route: '/contabilidad/comprobantes' },
     { label: 'Reportes Contables', route: '/contabilidad/reportes' },
   ],

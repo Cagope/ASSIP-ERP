@@ -1,0 +1,126 @@
+<!-- src/app/features/ses/aportes/aportes-list.component.html -->
+<div class="page">
+
+  <app-header-actions
+    titulo="📊 Informe Aportes — SES"
+    [mostrarNuevo]="false"
+    [mostrarExportar]="false"
+    [mostrarImprimir]="false">
+  </app-header-actions>
+
+  <!-- FILTROS -->
+  <form class="filtros" (ngSubmit)="buscar()">
+
+    <div class="f-row">
+      <label for="fechaCorte">Fecha de corte</label>
+      <input
+        id="fechaCorte"
+        type="date"
+        [(ngModel)]="fechaCorte"
+        name="fechaCorte"
+      />
+    </div>
+
+    <div class="f-buttons">
+      <button class="btn btn--primary" type="submit" [disabled]="cargando">
+        🔍 Buscar
+      </button>
+      <button
+        type="button"
+        class="btn btn--cancel"
+        (click)="limpiar()"
+        [disabled]="cargando">
+        🧹 Limpiar
+      </button>
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="exportar()"
+        [disabled]="cargando || aportes.length === 0">
+        📤 Exportar
+      </button>
+    </div>
+
+  </form>
+
+  <!-- MENSAJES -->
+  <div *ngIf="error" class="alert alert--error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="cargando" class="alert alert--info">
+    Cargando información, por favor espere...
+  </div>
+
+  <!-- RESULTADOS -->
+  <div class="results" *ngIf="!cargando">
+
+    <div class="summary" *ngIf="aportes.length > 0">
+      <div class="summary-item">
+        <span class="label">Registros:</span>
+        <span class="value">{{ totalRegistros }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">Saldo aportes:</span>
+        <span class="value">{{ totalSaldo | number:'1.0-0' }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">Revalorización:</span>
+        <span class="value">{{ totalRevalorizacion | number:'1.0-0' }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">Aportes ordinarios:</span>
+        <span class="value">{{ totalOrdinarios | number:'1.0-0' }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="label">Promedio día/año (suma):</span>
+        <span class="value">{{ totalPromedio | number:'1.0-0' }}</span>
+      </div>
+    </div>
+
+    <div class="table-container" *ngIf="aportes.length > 0; else noData">
+      <table class="data-table">
+        <thead>
+        <tr>
+          <th>#</th>
+          <th>Documento</th>
+          <th>Nombre</th>
+          <th>Fecha ingreso</th>
+          <th>Fecha último pago</th>
+          <th>Saldo aportes</th>
+          <th>Revalorización</th>
+          <th>Aportes ordinarios</th>
+          <th>Aportes extraord.</th>
+          <th>Promedio día/año</th>
+          <th>Código cuenta</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let a of aportes; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>
+            {{ a.tipoIdentificacion }} -
+            {{ a.numeroIdentificacion }}
+          </td>
+          <td>{{ a.nombreCompleto }}</td>
+          <td>{{ a.fechaIngreso }}</td>
+          <td>{{ a.fechaUltimoPago || '-' }}</td>
+          <td class="num">{{ a.saldoAportes | number:'1.0-0' }}</td>
+          <td class="num">{{ a.valorRevalorizacion | number:'1.0-0' }}</td>
+          <td class="num">{{ a.aportesOrdinarios | number:'1.0-0' }}</td>
+          <td class="num">{{ a.aportesExtraordinarios | number:'1.0-0' }}</td>
+          <td class="num">{{ a.promedioDiaAnual | number:'1.0-0' }}</td>
+          <td>{{ a.codigoCuenta }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <ng-template #noData>
+      <div class="alert alert--empty">
+        No hay datos para mostrar. Cambie la fecha de corte y vuelva a buscar.
+      </div>
+    </ng-template>
+  </div>
+
+</div>

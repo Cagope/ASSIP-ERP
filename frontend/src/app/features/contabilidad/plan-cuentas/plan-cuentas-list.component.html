@@ -1,0 +1,58 @@
+<div class="plan-cuentas-list">
+
+  <app-header-actions
+    titulo="Plan de Cuentas"
+    (nuevo)="nuevaCuenta()"
+    (imprimir)="imprimirListado()"
+    (exportar)="exportarExcel()">
+  </app-header-actions>
+
+  <table
+    id="tabla-plan-cuentas"
+    *ngIf="!cargando && cuentas.length > 0"
+    class="table table-striped">
+
+    <thead>
+    <tr>
+      <th>Agencia</th>
+      <th>Código</th>
+      <th>Nombre</th>
+      <th>Naturaleza</th>
+      <th>Nivel</th>
+      <th>Operable</th>
+      <th>Acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let c of cuentas">
+      <td>{{ c.idAgencia }}</td>
+      <td>{{ c.codigoCuenta }}</td>
+      <td>{{ c.nombre }}</td>
+      <td>{{ c.naturaleza }}</td>
+      <td>{{ c.nivel }}</td>
+      <td>{{ c.operable ? 'Sí' : 'No' }}</td>
+
+      <td>
+        <div class="acciones">
+          <button class="btn sm" (click)="editarCuenta(c.id!)">✏️</button>
+          <button class="btn sm danger" (click)="eliminarCuenta(c)">🗑️</button>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+
+  </table>
+
+  <div *ngIf="cargando" class="loading">
+    Cargando...
+  </div>
+
+  <div *ngIf="!cargando && cuentas.length === 0" class="empty">
+    No hay cuentas registradas.
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+</div>

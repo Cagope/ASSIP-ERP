@@ -56,3 +56,5 @@ logging:
     org.springframework.jdbc.core: warn
     org.flywaydb.core.internal.command: debug   # 🔍 Detalle de ejecución Flyway
     org.flywaydb.core.internal.sqlscript: debug # 🔍 Detalle línea a línea
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: warn
+    org.springframework.web.servlet.handler: warn

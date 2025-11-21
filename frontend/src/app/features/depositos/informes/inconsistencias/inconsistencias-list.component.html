@@ -1,0 +1,94 @@
+<div class="page">
+
+  <app-header-actions
+    titulo="🔍 Inconsistencias de Saldos"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <!-- FILTROS -->
+  <form class="filtros" (ngSubmit)="buscar()">
+
+    <div class="f-row">
+      <label>Agencia</label>
+      <select [(ngModel)]="filtros.agencia" name="agencia">
+        <option *ngFor="let a of agencias" [value]="a.id">
+          {{ a.nombre }}
+        </option>
+      </select>
+    </div>
+
+    <div class="f-row">
+      <label>Fecha de corte</label>
+      <input type="date" [(ngModel)]="filtros.fechaCorte" name="fechaCorte">
+    </div>
+
+    <div class="f-buttons">
+      <button class="btn btn--primary" type="submit">🔍 Buscar</button>
+      <button type="button" class="btn btn--cancel" (click)="limpiar()">🧹 Limpiar</button>
+    </div>
+
+  </form>
+
+  <!-- ESTADOS -->
+  <div *ngIf="cargando" class="loading">Cargando...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <!-- RESULTADOS -->
+  <div *ngIf="items.length > 0" class="resultados">
+
+    <h3>Resultados ({{ items.length }})</h3>
+
+    <table class="tabla">
+      <thead>
+      <tr>
+        <th>Cuenta</th>
+        <th>Agencia</th>
+        <th>Forma</th>
+        <th>Documento</th>
+        <th>Nombre</th>
+        <th class="right">Saldo tabla</th>
+        <th class="right">Saldo mov</th>
+        <th class="right">Dif.</th>
+        <th>Negativo</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr *ngFor="let x of items">
+        <td>{{ x.codigoCuenta }}</td>
+        <td>{{ x.codigoAgencia }}</td>
+        <td>{{ x.codigoForma }}</td>
+        <td>{{ x.documento }}</td>
+        <td>{{ x.nombreCompleto }}</td>
+
+        <!-- SALDO TABLA -->
+        <td class="right" [ngClass]="{'neg': x.saldoTabla < 0}">
+          {{ x.saldoTabla | number:'1.2-2' }}
+        </td>
+
+        <!-- SALDO MOV -->
+        <td class="right" [ngClass]="{'neg': x.saldoMov < 0}">
+          {{ x.saldoMov | number:'1.2-2' }}
+        </td>
+
+        <!-- DIFERENCIA -->
+        <td class="right" [ngClass]="{'neg': x.diferencia < 0}">
+          {{ x.diferencia | number:'1.2-2' }}
+        </td>
+
+        <td>
+          <span *ngIf="x.negativo" class="tag negativo">NEG</span>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="export-area">
+      <button class="btn btn--primary" (click)="exportar()">📥 Exportar Excel</button>
+    </div>
+
+  </div>
+
+</div>

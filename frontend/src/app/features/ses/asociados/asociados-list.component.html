@@ -1,0 +1,78 @@
+<div class="page">
+
+  <app-header-actions
+    titulo="📊 Informe Asociados — SES"
+    [mostrarNuevo]="false"
+    [mostrarExportar]="false"
+    [mostrarImprimir]="false">
+  </app-header-actions>
+
+  <!-- FILTROS -->
+  <form class="filtros" (ngSubmit)="buscar()">
+
+    <div class="f-row">
+      <label>Fecha de corte</label>
+      <input type="date" [(ngModel)]="fechaCorte" name="fechaCorte">
+    </div>
+
+    <div class="f-buttons">
+      <button class="btn btn--primary" type="submit">🔍 Buscar</button>
+      <button type="button" class="btn btn--cancel" (click)="limpiar()">🧹 Limpiar</button>
+    </div>
+
+  </form>
+
+  <!-- BOTÓN EXPORTAR -->
+  <div *ngIf="items.length > 0" class="export-area top">
+    <button class="btn btn--primary" (click)="exportar()">📥 Exportar Excel</button>
+  </div>
+
+  <!-- ESTADOS -->
+  <div *ngIf="cargando" class="loading">Cargando...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <!-- 📊 TABLA PROFESIONAL DE ESTADÍSTICA POR GÉNERO -->
+  <table *ngIf="estadistica" class="tabla resumen" style="margin-top: 20px; width: 100%;">
+    <thead>
+    <tr>
+      <th style="text-align: left;">Categoría</th>
+      <th style="text-align: right; width: 120px;">Cantidad</th>
+      <th style="text-align: right; width: 120px;">% sobre total</th>
+    </tr>
+    </thead>
+    <tbody>
+
+    <tr>
+      <td style="text-align: left;">Masculino</td>
+      <td style="text-align: right;">{{ estadistica.masculino }}</td>
+      <td style="text-align: right;">
+        {{ (estadistica.masculino / estadistica.total * 100) | number:'1.0-2' }}
+      </td>
+    </tr>
+
+    <tr>
+      <td style="text-align: left;">Femenino</td>
+      <td style="text-align: right;">{{ estadistica.femenino }}</td>
+      <td style="text-align: right;">
+        {{ (estadistica.femenino / estadistica.total * 100) | number:'1.0-2' }}
+      </td>
+    </tr>
+
+    <tr>
+      <td style="text-align: left;">Persona jurídica</td>
+      <td style="text-align: right;">{{ estadistica.juridica }}</td>
+      <td style="text-align: right;">
+        {{ (estadistica.juridica / estadistica.total * 100) | number:'1.0-2' }}
+      </td>
+    </tr>
+
+    <tr style="font-weight: bold;">
+      <td style="text-align: left;">Total</td>
+      <td style="text-align: right;">{{ estadistica.total }}</td>
+      <td style="text-align: right;">100.00</td>
+    </tr>
+
+    </tbody>
+  </table>
+
+</div>

@@ -1,0 +1,106 @@
+<div class="form-container">
+  <h5>{{ route.snapshot.paramMap.get('id') ? 'editar cuenta contable' : 'nueva cuenta contable' }}</h5>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="form-grid">
+
+    <!-- 🟩 Agencia -->
+    <div class="form-group full">
+      <label for="idAgencia">agencia *</label>
+      <select id="idAgencia" formControlName="idAgencia">
+        <option [ngValue]="null">Seleccione una agencia</option>
+        <option *ngFor="let a of agencias" [ngValue]="a.idAgencia">
+          {{ a.nombreAgencia }}
+        </option>
+      </select>
+      <div *ngIf="form.get('idAgencia')?.invalid && form.get('idAgencia')?.touched" class="error">
+        Seleccione una agencia válida.
+      </div>
+    </div>
+
+    <!-- 🟦 Código -->
+    <div class="form-group sm">
+      <label for="codigoCuenta">código contable *</label>
+      <input
+        id="codigoCuenta"
+        type="text"
+        maxlength="11"
+        formControlName="codigoCuenta"
+      />
+      <div *ngIf="form.get('codigoCuenta')?.hasError('required') && form.get('codigoCuenta')?.touched" class="error">
+        ⚠️ Este campo es obligatorio.
+      </div>
+      <div *ngIf="form.get('codigoCuenta')?.hasError('maxlength')" class="error">
+        ⚠️ El código no puede tener más de 11 caracteres.
+      </div>
+    </div>
+
+    <!-- 🟩 Nombre -->
+    <div class="form-group full">
+      <label for="nombre">nombre *</label>
+      <input
+        id="nombre"
+        type="text"
+        maxlength="100"
+        formControlName="nombre"
+      />
+      <div *ngIf="form.get('nombre')?.hasError('required') && form.get('nombre')?.touched" class="error">
+        Este campo es obligatorio.
+      </div>
+    </div>
+
+    <!-- 🟥 Naturaleza -->
+    <div class="form-group sm">
+      <label for="naturaleza">naturaleza *</label>
+      <select id="naturaleza" formControlName="naturaleza">
+        <option [ngValue]="null">Seleccione</option>
+        <option value="D">Débito (D)</option>
+        <option value="C">Crédito (C)</option>
+      </select>
+      <div *ngIf="form.get('naturaleza')?.invalid && form.get('naturaleza')?.touched" class="error">
+        Seleccione la naturaleza contable.
+      </div>
+    </div>
+
+    <!-- 🟧 Operable -->
+    <div class="form-group sm">
+      <label for="operable">operable *</label>
+      <select id="operable" formControlName="operable">
+        <option [ngValue]="false">No</option>
+        <option [ngValue]="true">Sí</option>
+      </select>
+    </div>
+
+    <!-- 🟦 Control entrada/salida -->
+    <div class="form-group sm">
+      <label for="controlEntradaSalida">control E/S *</label>
+      <select id="controlEntradaSalida" formControlName="controlEntradaSalida">
+        <option [ngValue]="false">No</option>
+        <option [ngValue]="true">Sí</option>
+      </select>
+    </div>
+
+    <!-- 🟪 Tipo especial -->
+    <div class="form-group sm">
+      <label for="tipoEspecial">tipo especial</label>
+      <select id="tipoEspecial" formControlName="tipoEspecial">
+        <option [ngValue]="null">Ninguno</option>
+        <!-- ✔️ corregido -->
+        <option *ngFor="let t of tiposEspeciales" [ngValue]="t.id">
+          {{ t.nombre }}
+        </option>
+      </select>
+    </div>
+
+    <!-- 🟫 Acciones -->
+    <div class="form-actions full">
+      <button type="submit" class="btn sm primary" [disabled]="form.invalid">
+        💾 {{ route.snapshot.paramMap.get('id') ? 'actualizar' : 'guardar' }}
+      </button>
+
+      <button type="button" class="btn sm danger" (click)="router.navigate(['/contabilidad/plan-cuentas'])">
+        ↩️ cancelar
+      </button>
+    </div>
+
+  </form>
+</div>
