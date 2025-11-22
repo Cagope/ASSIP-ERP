@@ -11,8 +11,20 @@ export const depositosMenu = {
     // 💰 CUENTAS DE AHORRO
     { label: 'Cuentas de Ahorro', route: '/depositos/cuentas-ahorro' },
 
-    // 🏛 FORMAS DE AHORRO
+    // 🏛 FORMAS DE Ahorro
     { label: 'Formas de Ahorro', route: '/depositos/formas-ahorro' },
+
+    // ===============================
+    // 📈 PROCESOS (NUEVA SECCIÓN)
+    // ===============================
+    { label: 'Revalorización de Aportes', route: '/depositos/procesos/revalorizacion' },
+
+    // ⭐ NUEVO — INTERÉS DIARIO SM
+    { label: 'Interés Diario SM', route: '/depositos/procesos/interes-diario-sm' },
+
+    // ===============================
+    // 🧾 INFORMES
+    // ===============================
 
     // 📊 SALDOS A CORTE
     { label: 'Saldos a Corte', route: '/depositos/informes/saldos-corte' },
@@ -23,13 +35,7 @@ export const depositosMenu = {
     // 🧩 INFORME — POR RANGOS
     { label: 'Informe por Rangos', route: '/depositos/informes/rangos' },
 
-    // ⚠️ NUEVO INFORME — INCONSISTENCIAS DE SALDOS
+    // ⚠️ INFORME — INCONSISTENCIAS
     { label: 'Inconsistencias de Saldos', route: '/depositos/informes/inconsistencias' },
-
-    // 📊 MOVIMIENTOS Y EXTRACTOS (pendiente)
-    // { label: 'Movimientos y Extractos', route: '/depositos/movimientos' },
-
-    // 🧮 LIQUIDACIÓN DE INTERESES (pendiente)
-    // { label: 'Liquidación de Intereses', route: '/depositos/liquidacion' },
   ],
 };

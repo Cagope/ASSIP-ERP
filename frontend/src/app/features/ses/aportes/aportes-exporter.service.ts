@@ -15,6 +15,11 @@ export class AportesExporterService {
 
     if (!lista || lista.length === 0) return;
 
+    // ❌ EXCLUIR REGISTROS CON SALDO 0
+    const filtrados = lista.filter(item =>
+      item.saldoAportes !== 0
+    );
+
     // ✔ ORDEN EXACTO DEL EXCEL
     const columnas = [
       'TipoIdentificacion',
@@ -31,7 +36,7 @@ export class AportesExporterService {
       'IdCuentaAhorro'
     ];
 
-    const datos = lista.map(item => {
+    const datos = filtrados.map(item => {
 
       const esJuridica = item.tipoIdentificacion === 'N';
 
@@ -55,7 +60,7 @@ export class AportesExporterService {
         NombreCompleto: item.nombreCompleto ?? '',
         CodigoCuenta: item.codigoCuenta ?? '',
 
-        // ✔ NUEVO — ID DE LA CUENTA
+        // ✔ ID de la cuenta
         IdCuentaAhorro: item.idCuentaAhorro ?? ''
       };
     });

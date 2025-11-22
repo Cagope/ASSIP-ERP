@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/depositos/formas-ahorro")
+@RequestMapping("/depositos/formas-ahorro")
 public class FormaAhorroController {
 
     private final FormaAhorroService service;

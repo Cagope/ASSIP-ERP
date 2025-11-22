@@ -12,19 +12,21 @@ import { SALDOS_CORTE_ROUTES } from './informes/saldos-corte/saldos-corte.routes
 // 📘 Submódulo: Informes — Cuentas Nuevas o Retiradas
 import { cuentasNRRoutes } from './informes/cuentas-nr/cuentas-nr.routes';
 
-// 🧩 NUEVO — Informe por Rangos (Saldos / Edad / Antigüedad)
+// 🧩 Submódulo: Informes — Rangos (Saldos / Edad / Antigüedad)
 import { RANGOS_ROUTES } from './informes/rangos/rangos.routes';
 
-// ⚠️ NUEVO — Informe de Inconsistencias de Saldos
+// ⚠️ Submódulo: Informes — Inconsistencias de Saldos
 import { INCONSISTENCIAS_ROUTES } from './informes/inconsistencias/inconsistencias.routes';
+
 
 /**
  * 🏦 Rutas principales — Módulo Depósitos
  * ------------------------------------------------------------
- * Estructura base de navegación interna del módulo:
+ * Estructura base:
  *  - Cuentas de ahorro
  *  - Formas de ahorro
- *  - Informes (Saldos a corte, Cuentas NR, Rangos)
+ *  - Informes (varios)
+ *  - Procesos (Revalorización)
  */
 export const DEPOSITOS_ROUTES: Routes = [
 
@@ -37,14 +39,30 @@ export const DEPOSITOS_ROUTES: Routes = [
   // 📊 Informes — Saldos a fecha de corte
   { path: 'informes/saldos-corte', children: SALDOS_CORTE_ROUTES },
 
-  // 🆕 Informes — Cuentas Nuevas o Retiradas
+  // 📘 Informes — Cuentas Nuevas o Retiradas
   { path: 'informes/cuentas-nr', children: cuentasNRRoutes },
 
-  // 🧩 🔥 NUEVO INFORME — Rangos
+  // 🧩 Informes — Rangos
   { path: 'informes/rangos', children: RANGOS_ROUTES },
 
-  // ⚠️ NUEVO — Informe: Inconsistencias de saldos
+  // ⚠️ Informes — Inconsistencias
   { path: 'informes/inconsistencias', children: INCONSISTENCIAS_ROUTES },
 
+  // ⚙️ Procesos — Revalorización de Aportes
+  {
+    path: 'procesos/revalorizacion',
+    loadChildren: () =>
+      import('./procesos/revalorizacion/revalorizacion.routes')
+        .then(m => m.revalorizacionRoutes)
+  },
+
+  // ⚙️ Procesos — interes diario sobre saldo minimo
+
+  {
+    path: 'procesos/interes-diario-sm',
+    loadChildren: () =>
+      import('./procesos/interes-diario-sm/interes-diario-sm.routes')
+        .then(m => m.interesDiarioSmRoutes)
+  }
 
 ];

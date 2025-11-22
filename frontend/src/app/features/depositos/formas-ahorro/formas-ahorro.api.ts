@@ -27,7 +27,8 @@ export interface FormaAhorro {
 @Injectable({ providedIn: 'root' })
 export class FormasAhorroApi {
 
-  private readonly base = `${environment.apiUrl}/api/v1/depositos/formas-ahorro`;
+  // ✔  Ruta correcta (sin repetir /api/v1)
+  private readonly base = `${environment.apiUrl}/depositos/formas-ahorro`;
 
   constructor(private http: HttpClient) {}
 
