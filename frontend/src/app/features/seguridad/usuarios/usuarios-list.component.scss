@@ -1,0 +1,48 @@
+.usuarios-list {
+  padding: 1rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 1rem;
+  font-weight: bold;
+  color: #555;
+}
+
+.empty {
+  text-align: center;
+  padding: 1rem;
+  color: #777;
+  font-style: italic;
+}
+
+.error {
+  text-align: center;
+  padding: 1rem;
+  color: #b3261e;
+  font-weight: bold;
+}
+
+.acciones {
+  display: flex;
+  gap: 0.3rem;
+
+  .btn {
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+.badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.3rem;
+  color: white;
+  font-size: 0.75rem;
+}
+
+.badge-success {
+  background-color: #28a745;
+}
+
+.badge-danger {
+  background-color: #dc3545;
+}

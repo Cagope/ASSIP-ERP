@@ -1,0 +1,318 @@
+.page {
+  padding: 1rem;
+}
+
+/* ========================================= */
+/* 🔷 CONTENEDOR GENERAL (LIST / FORM / DET) */
+/* ========================================= */
+.list-container {
+  background: #ffffff;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  margin-top: 1rem;
+}
+
+/* ============================= */
+/* 🔍 TITULOS */
+h3 {
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+/* ============================= */
+/* 🔎 FILTROS DE BÚSQUEDA */
+/* ============================= */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-bottom: 1rem;
+
+  input {
+    flex: 1;
+    min-width: 180px;
+    padding: .45rem .6rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: .9rem;
+  }
+
+  .btn {
+    padding: .45rem .8rem;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+    background: #0056b3;
+    color: #fff;
+    font-size: .9rem;
+
+    &:hover {
+      opacity: .9;
+    }
+  }
+}
+
+/* ============================= */
+/* TABLE — DATA TABLE */
+/* ============================= */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .9rem;
+
+  th {
+    background: #f3f4f6;
+    padding: .6rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    font-weight: 600;
+  }
+
+  td {
+    padding: .55rem;
+    border-bottom: 1px solid #eee;
+  }
+
+  .right {
+    text-align: right;
+  }
+
+  tr:hover {
+    background: #fafafa;
+  }
+
+  /* boton seleccionar */
+  .btn.sm {
+    background: #e8f0fe;
+    border: 1px solid #90caf9;
+    color: #0d47a1;
+    font-size: .8rem;
+    padding: .25rem .6rem;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover {
+      background: #dce9ff;
+    }
+  }
+}
+
+/* ============================= */
+/* 🔥 ESTADO – Etiquetas */
+/* ============================= */
+.estado {
+  padding: 2px 8px;
+  background: #eee;
+  border-radius: 4px;
+  font-size: .75rem;
+  font-weight: 600;
+}
+
+.estado.activa {
+  background: #d1f7d6;
+  color: #0b7a27;
+}
+
+.estado.inactiva {
+  background: #fde0e0;
+  color: #b71c1c;
+}
+
+/* ============================= */
+/* Mensajes */
+/* ============================= */
+.loading {
+  text-align: center;
+  padding: .8rem;
+  color: #555;
+}
+
+.error {
+  background: #fdecea;
+  color: #b71c1c;
+  border: 1px solid #f5c2c0;
+  padding: .7rem;
+  border-radius: 6px;
+}
+
+.empty {
+  text-align: center;
+  padding: 1rem;
+  color: #777;
+  font-style: italic;
+}
+
+/* ============================= */
+/* ← Botón regresar */
+/* ============================= */
+.btn-back,
+.btn-regresar,
+.btn[style*="background:#777"] {
+  background: #777 !important;
+  color: #fff;
+  border-radius: 6px;
+  padding: .4rem .9rem;
+  cursor: pointer;
+  font-size: .85rem;
+  margin-bottom: .8rem;
+
+  &:hover {
+    opacity: .9;
+  }
+}
+
+/* ============================= */
+/* FORMULARIO PASO 2 */
+/* ============================= */
+.f-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: .8rem;
+
+  label {
+    font-weight: 600;
+    margin-bottom: .3rem;
+  }
+
+  input, select {
+    padding: .45rem .6rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+}
+
+.f-buttons {
+  margin-top: 1rem;
+
+  .btn {
+    padding: .5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    border: none;
+
+    &.btn--primary {
+      background: #0056b3;
+      color: #fff;
+    }
+
+    &.btn--success {
+      background: #0d7a25;
+      color: #fff;
+    }
+  }
+}
+
+/* ============================= */
+/* Caja de validación */
+/* ============================= */
+.validacion-box {
+  padding: .7rem 1rem;
+  margin-top: 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+
+  &.ok {
+    background: #d6f5d6;
+    border: 1px solid #8dd88d;
+    color: #0d7a25;
+  }
+
+  &.err {
+    background: #fdecea;
+    border: 1px solid #f5c2c0;
+    color: #b71c1c;
+  }
+}
+
+/* ===========================================================
+   FORMULARIO DE EDICIÓN / CREACIÓN (PASO 2)
+   =========================================================== */
+
+.form-container {
+  padding: 1.5rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.btn-back {
+  margin-bottom: 1rem;
+  padding: 0.4rem 0.8rem;
+  background: #555;
+  color: #fff;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.persona-box {
+  background: #f7f9fc;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+  border: 1px solid #e0e6ed;
+
+  p {
+    margin: 0.2rem 0;
+  }
+}
+
+.grid {
+  display: grid;
+
+  &.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  &.gap {
+    gap: 1rem;
+  }
+}
+
+.f-row {
+  display: flex;
+  flex-direction: column;
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+  }
+
+  input, select {
+    padding: 0.45rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: #fff;
+  }
+}
+
+.f-buttons {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.validacion-box {
+  margin-top: 1rem;
+  padding: 0.8rem;
+  border-radius: 6px;
+  font-weight: 600;
+
+  &.ok {
+    background: #e8f5e9;
+    color: #1b5e20;
+    border: 1px solid #c8e6c9;
+  }
+
+  &.err {
+    background: #fdecea;
+    color: #b71c1c;
+    border: 1px solid #f5c2c0;
+  }
+}

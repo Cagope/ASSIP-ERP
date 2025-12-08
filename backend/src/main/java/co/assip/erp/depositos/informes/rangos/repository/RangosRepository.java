@@ -36,10 +36,10 @@ public class RangosRepository {
             SELECT
                 c.id_cuenta_ahorro,
                 c.codigo_cuenta,
-                c.codigo_agencia,
+                c.id_agencia,
                 a.nombre_agencia,
 
-                c.codigo_forma,
+                c.id_forma_ahorro,
                 LPAD(f.codigo_forma, 2, '0') AS codigo_forma_str,
                 f.nombre_forma,
 
@@ -75,8 +75,8 @@ public class RangosRepository {
                 )::int AS antiguedad_meses
 
             FROM depositos.cuentas_ahorro c
-            JOIN general.datos_agencias a ON a.id_agencia = c.codigo_agencia
-            JOIN depositos.formas_ahorro f ON f.id_forma_ahorro = c.codigo_forma
+            JOIN general.datos_agencias a ON a.id_agencia = c.id_agencia
+            JOIN depositos.formas_ahorro f ON f.id_forma_ahorro = c.id_forma_ahorro
             LEFT JOIN depositos.estados_ahorros ea ON ea.codigo_estado_ahorro = c.estado_cuenta_cuenta
             LEFT JOIN reporting.vw_hoja_vida_general_total_reciente hv 
                 ON hv.id_datos_personal = c.id_datos_personal
@@ -85,7 +85,7 @@ public class RangosRepository {
         SELECT *
         FROM base
         WHERE saldo > 0
-          AND (:agencia = '0' OR codigo_agencia = CAST(:agencia AS INTEGER))
+          AND (:agencia = '0' OR id_agencia = CAST(:agencia AS INTEGER))
         """;
 
     // ============================================================
@@ -110,7 +110,7 @@ public class RangosRepository {
         filtros.append(")");
 
         return jdbc.query(
-                BASE_SQL + filtros + " ORDER BY codigo_agencia, codigo_cuenta",
+                BASE_SQL + filtros + " ORDER BY id_agencia, codigo_cuenta",
                 params, this::mapRow
         );
     }
@@ -137,7 +137,7 @@ public class RangosRepository {
         filtros.append(")");
 
         return jdbc.query(
-                BASE_SQL + filtros + " ORDER BY codigo_agencia, codigo_cuenta",
+                BASE_SQL + filtros + " ORDER BY id_agencia, codigo_cuenta",
                 params, this::mapRow
         );
     }
@@ -164,7 +164,7 @@ public class RangosRepository {
         filtros.append(")");
 
         return jdbc.query(
-                BASE_SQL + filtros + " ORDER BY codigo_agencia, codigo_cuenta",
+                BASE_SQL + filtros + " ORDER BY id_agencia, codigo_cuenta",
                 params, this::mapRow
         );
     }

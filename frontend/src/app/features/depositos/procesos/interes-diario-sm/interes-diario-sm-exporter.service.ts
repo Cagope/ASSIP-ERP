@@ -34,7 +34,7 @@ export class InteresDiarioSmExporterService {
     XLSX.utils.book_append_sheet(wb, ws, 'Interes Diario SM');
 
     // ============================================================
-    // 📄 Nombre del archivo: ahora usa el CÓDIGO DE AGENCIA
+    // 📄 Nombre del archivo
     // ============================================================
     const fecha = filtros.fechaProceso + '_liq_' + filtros.fechaLiquidacion;
     const codigoAgencia = filtros.codigoAgencia ?? '00';

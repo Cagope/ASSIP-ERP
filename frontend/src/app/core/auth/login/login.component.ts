@@ -71,15 +71,45 @@ export class LoginComponent {
 
     this.authApi.login(username, password).subscribe({
       next: (result: any) => {
+
+        // === ✔ GUARDAR TOKEN Y USUARIO ===
         this.session.setToken(result.token);
         this.session.setUser(result.username || username);
-        this.loading.set(false);
-        this.router.navigate(['/']);
+
+        // === ✔ AHORA consultar /auth/me para obtener agencias y permisos ===
+        this.authApi.me().subscribe({
+          next: (info: any) => {
+
+            // ⭐⭐⭐ ¡ESTO FALTABA! — GUARDAR PERMISOS DEL USUARIO ⭐⭐⭐
+            if (info.permisos) {
+              this.session.setPermisos(info.permisos);
+            }
+
+            if (info.agencias) {
+              this.session.setAgencias(info.agencias);
+
+              if (!this.session.getAgenciaActiva()) {
+                this.session.setAgenciaActiva(info.agencias[0]);
+              }
+            }
+
+            this.loading.set(false);
+            this.router.navigate(['/']);
+          },
+
+          error: () => {
+            this.loading.set(false);
+            this.router.navigate(['/']);
+          }
+        });
+
       },
+
       error: (err) => {
         this.loading.set(false);
-        this.errorMsg.set(err?.error?.message || 'Error al iniciar sesión');
+        this.errorMsg.set(err?.error?.error || 'Error al iniciar sesión');
       },
     });
   }
+
 }

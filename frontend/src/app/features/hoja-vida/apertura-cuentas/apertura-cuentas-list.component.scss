@@ -1,0 +1,89 @@
+@use '../datos-personales/datos-personales-list.component' as *;
+
+.text-success {
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.text-danger {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.apertura-cuentas-list {
+  padding: 1rem;
+}
+
+/* ===== BUSCADOR ===== */
+.filtro input {
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  padding: 6px 10px;
+  width: 280px;
+  max-width: 100%;
+}
+
+/* ===== TABLAS ===== */
+.table {
+  font-size: 0.85rem;
+}
+
+.table thead th {
+  background: #f6f6f6;
+  font-weight: 600;
+}
+
+.table-hover tbody tr:hover {
+  background: #f0f4ff;
+}
+
+/* ===== BADGE OBLIGATORIA ===== */
+.badge {
+  font-size: 0.65rem;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+/* ===== CONTROLES DE PAGINACIÓN ===== */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding-top: 10px;
+}
+
+.pagination-controls button {
+  background: #0059b3;
+  color: white;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.pagination-controls button:disabled {
+  background: #bbb;
+  cursor: not-allowed;
+}
+
+/* ===== MENSAJES ===== */
+.loading,
+.empty,
+.error {
+  text-align: center;
+  padding: 20px 0;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.error {
+  color: #b91c1c;
+  font-weight: 500;
+}
+
+.empty {
+  color: #6b7280;
+}

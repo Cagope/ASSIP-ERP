@@ -47,17 +47,17 @@ public class InconsistenciasRepository {
 
             FROM depositos.cuentas_ahorro c
             JOIN general.datos_agencias a 
-                ON a.id_agencia = c.codigo_agencia
+                ON a.id_agencia = c.id_agencia
             JOIN depositos.formas_ahorro f 
-                ON f.id_forma_ahorro = c.codigo_forma
+                ON f.id_forma_ahorro = c.id_forma_ahorro
             LEFT JOIN reporting.vw_hoja_vida_general_total_reciente hv 
                 ON hv.id_datos_personal = c.id_datos_personal
             LEFT JOIN mov m 
                 ON m.id_cuenta_ahorro = c.id_cuenta_ahorro
             WHERE
-                (:ag = '0' OR c.codigo_agencia = CAST(:ag AS INTEGER))
+                (:ag = '0' OR c.id_agencia = CAST(:ag AS INTEGER))
                 AND c.saldo_actual_cuenta <> (COALESCE(m.total_debitos,0) - COALESCE(m.total_credits,0))
-            ORDER BY c.codigo_agencia, c.codigo_cuenta
+            ORDER BY c.id_agencia, c.codigo_cuenta
             """;
 
         Map<String, Object> params = new HashMap<>();

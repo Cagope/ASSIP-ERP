@@ -2,6 +2,7 @@ package co.assip.erp.seguridad.web;
 
 import co.assip.erp.seguridad.domain.Usuario;
 import co.assip.erp.seguridad.service.UsuarioService;
+import co.assip.erp.seguridad.service.UsuarioAgenciaService;
 import co.assip.erp.seguridad.service.LogEventoService;
 import co.assip.erp.seguridad.service.AccessValidator;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -18,40 +20,73 @@ import java.util.Optional;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
-    private final LogEventoService logEventoService; // ✅ Auditoría
-    private final AccessValidator accessValidator;   // ✅ Validación de permisos
+    private final UsuarioAgenciaService usuarioAgenciaService;
+    private final LogEventoService logEventoService;
+    private final AccessValidator accessValidator;
 
-    // ✅ Listar todos los usuarios
+    // ============================================================
+    // LISTAR (DTO)
+    // ============================================================
     @GetMapping
-    public ResponseEntity<List<Usuario>> listar(HttpServletRequest req) {
+    public ResponseEntity<List<Map<String, Object>>> listar(HttpServletRequest req) {
         Usuario usuarioActual = usuarioService.getUsuarioActual(req);
         accessValidator.validarAcceso(usuarioActual, "USUARIOS_VIEW");
+
         return ResponseEntity.ok(usuarioService.listar());
     }
 
-    // ✅ Buscar usuario por username
-    @GetMapping("/{username}")
-    public ResponseEntity<Optional<Usuario>> buscar(@PathVariable String username, HttpServletRequest req) {
+    // ============================================================
+    // BUSCAR POR ID → DTO COMPLETO PARA EDICIÓN
+    // ============================================================
+    @GetMapping("/id/{idUsuario}")
+    public ResponseEntity<Map<String, Object>> buscarPorId(
+            @PathVariable Integer idUsuario,
+            HttpServletRequest req
+    ) {
         Usuario usuarioActual = usuarioService.getUsuarioActual(req);
         accessValidator.validarAcceso(usuarioActual, "USUARIOS_VIEW");
+
+        Map<String, Object> dto = usuarioService.buscarDtoPorId(idUsuario);
+
+        if (dto == null || dto.isEmpty()) {
+            throw new RuntimeException("Usuario no encontrado");
+        }
+
+        return ResponseEntity.ok(dto);
+    }
+
+    // ============================================================
+    // BUSCAR POR USERNAME
+    // ============================================================
+    @GetMapping("/user/{username}")
+    public ResponseEntity<Optional<Usuario>> buscar(
+            @PathVariable String username,
+            HttpServletRequest req
+    ) {
+        Usuario usuarioActual = usuarioService.getUsuarioActual(req);
+        accessValidator.validarAcceso(usuarioActual, "USUARIOS_VIEW");
+
         return ResponseEntity.ok(usuarioService.buscarPorUsername(username));
     }
 
-    // ✅ Crear o actualizar usuario
+    // ============================================================
+    // GUARDAR / ACTUALIZAR
+    // ============================================================
     @PostMapping
     public ResponseEntity<Usuario> guardar(@RequestBody Usuario usuario, HttpServletRequest req) {
-        Usuario usuarioActual = usuarioService.getUsuarioActual(req);
-        accessValidator.validarAcceso(usuarioActual, "USUARIOS_EDIT");
+        Usuario userActual = usuarioService.getUsuarioActual(req);
+        accessValidator.validarAcceso(userActual, "USUARIOS_EDIT");
 
         Usuario guardado = usuarioService.guardar(usuario);
 
-        // 🟡 Determinar tipo de acción
-        String accion = (usuario.getIdUsuario() == null) ? "CREAR_USUARIO" : "ACTUALIZAR_USUARIO";
-        String descripcion = (accion.equals("CREAR_USUARIO"))
-                ? "Se creó el usuario " + guardado.getUsername()
-                : "Se actualizó el usuario " + guardado.getUsername();
+        String accion = (usuario.getIdUsuario() == null) ?
+                "CREAR_USUARIO" :
+                "ACTUALIZAR_USUARIO";
 
-        // 🧩 Registrar evento
+        String descripcion = (usuario.getIdUsuario() == null ?
+                "Se creó el usuario " :
+                "Se actualizó el usuario ") + guardado.getUsername();
+
         logEventoService.registrarEvento(
                 guardado.getIdUsuario(),
                 "SEGURIDAD",
@@ -63,7 +98,9 @@ public class UsuarioController {
         return ResponseEntity.ok(guardado);
     }
 
-    // ✅ Eliminar usuario
+    // ============================================================
+    // ELIMINAR
+    // ============================================================
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id, HttpServletRequest req) {
         Usuario usuarioActual = usuarioService.getUsuarioActual(req);
@@ -71,7 +108,6 @@ public class UsuarioController {
 
         usuarioService.eliminar(id);
 
-        // 🔴 Registrar eliminación
         logEventoService.registrarEvento(
                 id,
                 "SEGURIDAD",
@@ -83,11 +119,52 @@ public class UsuarioController {
         return ResponseEntity.noContent().build();
     }
 
-    // 🔹 Endpoint de prueba rápida
+    // ============================================================
+    // LISTAR AGENCIAS
+    // ============================================================
+    @GetMapping("/{id}/agencias")
+    public ResponseEntity<List<Map<String, Object>>> listarAgencias(
+            @PathVariable Integer id,
+            HttpServletRequest req
+    ) {
+        Usuario usuarioActual = usuarioService.getUsuarioActual(req);
+        accessValidator.validarAcceso(usuarioActual, "USUARIOS_VIEW");
+
+        return ResponseEntity.ok(usuarioAgenciaService.listarAgenciasDelUsuario(id));
+    }
+
+    // ============================================================
+    // ASIGNAR AGENCIAS
+    // ============================================================
+    @PostMapping("/{id}/agencias")
+    public ResponseEntity<Void> asignarAgencias(
+            @PathVariable Integer id,
+            @RequestBody List<Integer> agencias,
+            HttpServletRequest req
+    ) {
+        Usuario usuarioActual = usuarioService.getUsuarioActual(req);
+        accessValidator.validarAcceso(usuarioActual, "USUARIOS_EDIT");
+
+        usuarioAgenciaService.asignarAgencias(id, agencias, usuarioActual.getIdUsuario());
+
+        logEventoService.registrarEvento(
+                id,
+                "SEGURIDAD",
+                "ASIGNAR_AGENCIAS",
+                "Se asignaron agencias: " + agencias,
+                req
+        );
+
+        return ResponseEntity.ok().build();
+    }
+
+    // ============================================================
+    // PING
+    // ============================================================
     @GetMapping("/ping")
     public ResponseEntity<String> ping(HttpServletRequest req) {
         Usuario usuarioActual = usuarioService.getUsuarioActual(req);
         accessValidator.validarAcceso(usuarioActual, "USUARIOS_VIEW");
-        return ResponseEntity.ok("✅ Token válido y acceso autorizado");
+        return ResponseEntity.ok("OK");
     }
 }

@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ExtractoModalComponent } from './extracto-modal.component'; // ✅ Import del modal
+import { ExtractoModalComponent } from './consulta-extracto-modal.component'; // ✅ Import del modal
 
 
 /**
@@ -13,8 +13,8 @@ import { ExtractoModalComponent } from './extracto-modal.component'; // ✅ Impo
   selector: 'app-cuentas-ahorro-detalle',
   standalone: true,
   imports: [CommonModule, ExtractoModalComponent], // ✅ Incluir el modal aquí
-  templateUrl: './cuentas-ahorro-detalle.component.html',
-  styleUrls: ['./cuentas-ahorro-detalle.component.scss']
+  templateUrl: './consulta-cuentas-ahorro-detalle.component.html',
+  styleUrls: ['./consulta-cuentas-ahorro-detalle.component.scss']
 })
 export class CuentasAhorroDetalleComponent {
   @Input() cuenta: any;

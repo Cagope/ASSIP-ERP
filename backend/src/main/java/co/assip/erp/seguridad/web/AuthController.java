@@ -1,24 +1,25 @@
 package co.assip.erp.seguridad.web;
 
 import co.assip.erp.seguridad.domain.Usuario;
+import co.assip.erp.seguridad.domain.Rol;
+import co.assip.erp.seguridad.domain.Permiso;
 import co.assip.erp.seguridad.service.AuthService;
 import co.assip.erp.seguridad.service.LogEventoService;
 import co.assip.erp.seguridad.service.JwtService;
+import co.assip.erp.seguridad.service.UsuarioAgenciaService;
+import co.assip.erp.seguridad.repository.RolRepository;
+import co.assip.erp.seguridad.repository.PermisoRepository;
+
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-/**
- * Controlador de autenticación principal del módulo de seguridad.
- * Maneja:
- *  - /auth/login      → autenticación con JWT
- *  - /auth/register   → registro de usuarios
- *  - /auth/me         → obtención del usuario autenticado
- */
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -27,63 +28,86 @@ public class AuthController {
     private final AuthService authService;
     private final LogEventoService logEventoService;
     private final JwtService jwtService;
+    private final UsuarioAgenciaService usuarioAgenciaService;
+    private final RolRepository rolRepository;
+    private final PermisoRepository permisoRepository; // ✅ nuevo
 
-    /**
-     * Endpoint de inicio de sesión.
-     * Recibe credenciales (username y password), valida y devuelve un token JWT.
-     */
+    // =====================================================================================
+    // LOGIN
+    // =====================================================================================
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody Usuario request, HttpServletRequest httpRequest) {
+    public ResponseEntity<Map<String, Object>> login(@RequestBody Usuario request,
+                                                     HttpServletRequest httpRequest) {
         try {
-            // 🔹 Autenticar usuario y generar token
             Map<String, Object> resultado = authService.autenticarConUsuario(
                     request.getUsername(),
                     request.getPassword()
             );
 
-            Usuario usuario = (Usuario) resultado.get("usuario");
+            Integer idUsuario = (Integer) resultado.get("idUsuario");
+            String username = (String) resultado.get("username");
+            Integer idRol = (Integer) resultado.get("idRol");
             String token = (String) resultado.get("token");
 
-            // 🔹 Registrar evento de inicio de sesión
-            logEventoService.registrarLogin(usuario.getIdUsuario(), httpRequest);
+            // Buscar nombre del rol
+            String nombreRol = rolRepository.findById(idRol)
+                    .map(Rol::getNombreRol)
+                    .orElse(null);
 
-            // 🔹 Retornar token + datos mínimos del usuario
-            return ResponseEntity.ok(Map.of(
-                    "token", token,
-                    "username", usuario.getUsername(),
-                    "rol", usuario.getRol() != null ? usuario.getRol().getNombre() : null
-            ));
+            logEventoService.registrarLogin(idUsuario, httpRequest);
+
+            Map<String, Object> resp = new HashMap<>();
+            resp.put("token", token);
+            resp.put("username", username);
+            resp.put("rol", nombreRol);
+
+            return ResponseEntity.ok(resp);
 
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", ex.getMessage()));
+            ex.printStackTrace();
+
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", ex.getMessage());
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
         }
     }
 
-    /**
-     * Registro de usuario con contraseña encriptada.
-     */
+    // =====================================================================================
+    // REGISTER  (solo se usa en pruebas)
+    // =====================================================================================
     @PostMapping("/register")
     public ResponseEntity<Map<String, Object>> register(@RequestBody Usuario request) {
+
         Usuario nuevoUsuario = authService.registrar(request);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Map.of(
-                        "idUsuario", nuevoUsuario.getIdUsuario(),
-                        "username", nuevoUsuario.getUsername(),
-                        "rol", nuevoUsuario.getRol() != null ? nuevoUsuario.getRol().getNombre() : null
-                ));
+
+        String nombreRol = rolRepository.findById(nuevoUsuario.getIdRol())
+                .map(Rol::getNombreRol)
+                .orElse(null);
+
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("idUsuario", nuevoUsuario.getIdUsuario());
+        resp.put("username", nuevoUsuario.getUsername());
+        resp.put("rol", nombreRol);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(resp);
     }
 
-    /**
-     * ✅ Obtiene el usuario autenticado actual (según token JWT).
-     */
+    // =====================================================================================
+    // /auth/me — Datos del usuario autenticado + PERMISOS
+    // =====================================================================================
+    // =====================================================================================
+// /auth/me — Datos del usuario autenticado + PERMISOS
+// =====================================================================================
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> obtenerUsuarioActual(HttpServletRequest request) {
+
         final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Token no proporcionado"));
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", "Token no proporcionado");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
         }
 
         try {
@@ -92,19 +116,48 @@ public class AuthController {
             Usuario usuario = authService.buscarUsuarioPorUsername(username);
 
             if (usuario == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("error", "Usuario no encontrado"));
+                Map<String, Object> error = new HashMap<>();
+                error.put("error", "Usuario no encontrado");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
             }
 
-            return ResponseEntity.ok(Map.of(
-                    "idUsuario", usuario.getIdUsuario(),
-                    "username", usuario.getUsername(),
-                    "rol", usuario.getRol() != null ? usuario.getRol().getNombre() : null
-            ));
+            // Rol (por idRol)
+            String nombreRol = null;
+            if (usuario.getIdRol() != null) {
+                nombreRol = rolRepository.findById(usuario.getIdRol())
+                        .map(Rol::getNombreRol)
+                        .orElse(null);
+            }
+
+            // Agencias asignadas
+            var agencias = usuarioAgenciaService.listarAgenciasDelUsuario(usuario.getIdUsuario());
+
+            // PERMISOS DEL ROL
+            List<String> permisos = new java.util.ArrayList<>(); // ← FIX
+            if (usuario.getIdRol() != null) {
+                permisos = permisoRepository.findByIdRol(usuario.getIdRol())
+                        .stream()
+                        .filter(p -> p.getActivo() == null || Boolean.TRUE.equals(p.getActivo()))
+                        .map(Permiso::getCodigo)
+                        .toList();
+            }
+
+            Map<String, Object> resp = new HashMap<>();
+            resp.put("idUsuario", usuario.getIdUsuario());
+            resp.put("username", usuario.getUsername());
+            resp.put("rol", nombreRol);
+            resp.put("agencias", agencias);
+            resp.put("permisos", permisos);
+
+            return ResponseEntity.ok(resp);
 
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Token inválido o expirado"));
+            e.printStackTrace();
+
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", "Token inválido o expirado");
+
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
         }
     }
 }

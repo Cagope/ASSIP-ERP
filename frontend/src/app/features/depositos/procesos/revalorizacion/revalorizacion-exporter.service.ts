@@ -10,12 +10,9 @@ export class RevalorizacionExporterService {
       return;
     }
 
-    // ============================================================
-    // 🧾 Construcción del JSON para Excel (incluye la CÉDULA)
-    // ============================================================
     const data = items.map((x: any) => ({
       'Tipo Documento': x.tipoDocumento,
-      'Documento': x.documento,          // ✔ CÉDULA
+      'Documento': x.documento,
       'Nombre Completo': x.nombreCompleto,
       'Saldo Actual': x.saldoActual,
       'Valor Promedio': x.valorPromedio,
@@ -23,19 +20,24 @@ export class RevalorizacionExporterService {
       'Estado Cuenta': x.estadoCuenta
     }));
 
-    // ============================================================
-    // 📘 Crear libro y hoja
-    // ============================================================
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(data);
-
     XLSX.utils.book_append_sheet(wb, ws, 'Revalorizacion');
 
-    // ============================================================
-    // 📄 Nombre del archivo
-    // ============================================================
-    const fecha = filtros.fechaInicio + '_al_' + filtros.fechaFin;
+    // -----------------------------------------
+    //  📄 Nombre archivo: revalorizacion_xxx_01
+    // -----------------------------------------
+    const fecha = `${filtros.fechaInicio}_al_${filtros.fechaFin}`;
 
-    XLSX.writeFile(wb, `revalorizacion_${fecha}.xlsx`);
+    // soporte para: filtros.codigoAgencia o filtros.agenciaId
+    const codAgencia =
+      filtros.codigoAgencia
+        ? filtros.codigoAgencia.padStart(2, '0')
+        : (filtros.agenciaId === '0'
+            ? '00'
+            : String(filtros.agenciaId).padStart(2, '0')
+          );
+
+    XLSX.writeFile(wb, `revalorizacion_${fecha}_${codAgencia}.xlsx`);
   }
 }

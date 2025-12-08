@@ -22,11 +22,11 @@ public class Permiso {
     @Column(name = "descripcion")
     private String descripcion;
 
+    @Builder.Default
     @Column(name = "activo")
     private Boolean activo = true;
 
-    // 🔗 Relación con Rol (EAGER para que se cargue siempre)
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_rol", referencedColumnName = "id_rol")
-    private Rol rol;
+    // ✔ MODELO DEFINITIVO (campo plano)
+    @Column(name = "id_rol")
+    private Integer idRol;
 }

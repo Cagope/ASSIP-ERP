@@ -1,0 +1,1310 @@
+vista,view_definition
+depositos.vw_depositos_beneficiarios_total," SELECT b.id_beneficiario,
+    b.id_cuenta_ahorro,
+    c.codigo_cuenta,
+    b.documento_beneficiario,
+    b.nombre_beneficiario,
+    b.telefono_beneficiario,
+    b.celular_beneficiario,
+    b.tipo_parentesco,
+    p.nombre_parentesco,
+    b.fk_seguridad_creacion,
+    b.fecha_creacion,
+    b.fk_seguridad_edicion,
+    b.fecha_edicion
+   FROM ((depositos.beneficiarios_cuenta_ahorros b
+     LEFT JOIN depositos.cuentas_ahorro c ON ((b.id_cuenta_ahorro = c.id_cuenta_ahorro)))
+     LEFT JOIN catalogos.parentescos p ON ((b.tipo_parentesco = (p.codigo_parentesco)::bpchar)));"
+depositos.vw_depositos_canjes_total," SELECT ca.id_canje_cuenta_ahorro,
+    ca.id_cuenta_ahorro,
+    c.codigo_cuenta,
+    ca.fecha_ingreso,
+    ca.valor_canje,
+    ca.numero_cheque,
+    ca.estado_canje,
+    ca.valor_liberado,
+    ca.fk_seguridad_creacion,
+    ca.fecha_creacion,
+    ca.fk_seguridad_edicion,
+    ca.fecha_edicion
+   FROM (depositos.canjes_cuentas_ahorros ca
+     LEFT JOIN depositos.cuentas_ahorro c ON ((ca.id_cuenta_ahorro = c.id_cuenta_ahorro)));"
+depositos.vw_depositos_cuentas_ahorro_detalle," SELECT c.id_cuenta_ahorro,
+    c.codigo_cuenta,
+    c.id_datos_personal,
+    c.codigo_agencia,
+    a.nombre_agencia,
+    c.codigo_forma,
+    f.nombre_forma AS nombre_forma_ahorro,
+    c.fecha_apertura_cuenta,
+    c.saldo_inicial_cuenta,
+    c.saldo_actual_cuenta,
+    c.estado_cuenta_cuenta,
+    ea.descripcion_estado_ahorro AS nombre_estado_cuenta,
+    c.fecha_estado_cuenta,
+    c.gmf_cuenta_cuenta,
+    tg.descripcion_tipos_gmf AS nombre_tipo_gmf,
+    c.libranza_cuenta,
+    c.libranzatiempo_pago,
+    c.cuota_mensual_cuenta,
+    c.retencion_fuente_cuenta,
+    c.plazo_cuenta,
+    c.fecha_final_cuenta,
+    c.cuenta_activa,
+    c.cuenta_conjunta,
+    c.accion_conjunta,
+    acc.descripcion_accion AS nombre_accion_conjunta,
+    c.fk_seguridad_creacion,
+    c.fecha_creacion,
+    c.fk_seguridad_edicion,
+    c.fecha_edicion
+   FROM (((((depositos.cuentas_ahorro c
+     LEFT JOIN depositos.formas_ahorro f ON ((c.codigo_forma = f.id_forma_ahorro)))
+     LEFT JOIN general.datos_agencias a ON ((c.codigo_agencia = a.id_agencia)))
+     LEFT JOIN depositos.estados_ahorros ea ON ((c.estado_cuenta_cuenta = ea.codigo_estado_ahorro)))
+     LEFT JOIN depositos.tipos_gmf tg ON ((c.gmf_cuenta_cuenta = tg.codigo_tipo_gmf)))
+     LEFT JOIN depositos.acciones_cuentas_conjuntas acc ON ((c.accion_conjunta = acc.codigo_accion)));"
+depositos.vw_depositos_cuentas_ahorro_total," SELECT c.id_cuenta_ahorro,
+    c.codigo_cuenta,
+    c.id_datos_personal,
+    c.codigo_agencia,
+    a.nombre_agencia,
+    c.codigo_forma,
+    f.nombre_forma AS nombre_forma_ahorro,
+    c.plazo_cuenta,
+    c.fecha_apertura_cuenta,
+    c.fecha_final_cuenta,
+    c.estado_cuenta_cuenta AS codigo_estado,
+    ea.descripcion_estado_ahorro AS nombre_estado,
+    c.cuenta_activa,
+    c.cuenta_conjunta,
+    c.accion_conjunta,
+    acc.descripcion_accion AS nombre_accion_conjunta,
+    c.libranza_cuenta,
+    c.libranzatiempo_pago,
+    c.cuota_mensual_cuenta,
+    c.retencion_fuente_cuenta,
+    c.gmf_cuenta_cuenta,
+    tg.descripcion_tipos_gmf AS nombre_tipo_gmf,
+    c.saldo_inicial_cuenta,
+    c.saldo_actual_cuenta,
+    c.fk_seguridad_creacion,
+    c.fecha_creacion,
+    c.fk_seguridad_edicion,
+    c.fecha_edicion,
+    hv.documento,
+    hv.tipo_documento,
+    hv.nombre_tipo_documento,
+    hv.nombres,
+    hv.primer_apellido,
+    hv.segundo_apellido,
+    concat_ws(' '::text, hv.nombres, hv.primer_apellido, hv.segundo_apellido) AS nombre_completo,
+    hv.fecha_nacimiento,
+    hv.codigo_genero,
+    hv.nombre_genero,
+    hv.codigo_estado_civil,
+    hv.nombre_estado_civil,
+    hv.tipo_persona,
+    hv.tiene_rut,
+    hv.direccion_residencia AS direccion,
+    hv.barrio,
+    hv.telefono,
+    hv.celular_uno AS celular,
+    hv.celular_dos,
+    hv.correo_personal AS correo,
+    hv.pais_residencia AS nombre_pais,
+    hv.departamento_residencia AS nombre_departamento,
+    hv.ciudad_residencia AS nombre_ciudad,
+    hv.nombre_zona,
+    hv.nombre_sub_zona,
+    hv.valor_salario,
+    hv.valor_pension,
+    hv.ingresos_arriendo,
+    hv.ingresos_comisiones,
+    hv.otros_ingresos,
+    hv.total_activos,
+    hv.total_pasivos,
+    hv.origen_fondos,
+    hv.nombre_empresa,
+    hv.direccion_empresa,
+    hv.telefono_empresa,
+    hv.correo_empresa,
+    hv.foto,
+    hv.firma_uno,
+    hv.firma_dos,
+    hv.fecha_actualizacion
+   FROM ((((((depositos.cuentas_ahorro c
+     LEFT JOIN general.datos_agencias a ON ((c.codigo_agencia = a.id_agencia)))
+     LEFT JOIN depositos.formas_ahorro f ON ((c.codigo_forma = f.id_forma_ahorro)))
+     LEFT JOIN depositos.estados_ahorros ea ON ((c.estado_cuenta_cuenta = ea.codigo_estado_ahorro)))
+     LEFT JOIN depositos.tipos_gmf tg ON ((c.gmf_cuenta_cuenta = tg.codigo_tipo_gmf)))
+     LEFT JOIN depositos.acciones_cuentas_conjuntas acc ON ((c.accion_conjunta = acc.codigo_accion)))
+     LEFT JOIN reporting.vw_hoja_vida_general_total_reciente hv ON ((hv.id_datos_personal = c.id_datos_personal)));"
+depositos.vw_depositos_cuentas_conjuntas_detalle," SELECT cc.id_cuenta_conjunta,
+    cc.id_cuenta_ahorro,
+    cc.id_datos_personal,
+    c.codigo_cuenta,
+    f.nombre_forma,
+    cc.fk_seguridad_creacion,
+    cc.fecha_creacion,
+    cc.fk_seguridad_edicion,
+    cc.fecha_edicion
+   FROM ((depositos.cuentas_ahorro_conjuntas cc
+     LEFT JOIN depositos.cuentas_ahorro c ON ((cc.id_cuenta_ahorro = c.id_cuenta_ahorro)))
+     LEFT JOIN depositos.formas_ahorro f ON ((c.codigo_forma = f.id_forma_ahorro)));"
+depositos.vw_depositos_documentos_soporte_total," SELECT ds.id_documento_soporte,
+    ds.id_cuenta_ahorro,
+    c.codigo_cuenta,
+    ds.tipo_documento_soporte,
+    tds.descripcion_soporte AS nombre_tipo_documento,
+    ds.numero_inicial,
+    ds.numero_final,
+    ds.fecha_entrega,
+    ds.estado_documento,
+    eds.descripcion_codigo_documento_soporte AS nombre_estado_documento,
+    ds.fecha_estado,
+    ds.fk_seguridad_creacion,
+    ds.fecha_creacion,
+    ds.fk_seguridad_edicion,
+    ds.fecha_edicion
+   FROM (((depositos.documentos_soporte ds
+     LEFT JOIN depositos.cuentas_ahorro c ON ((ds.id_cuenta_ahorro = c.id_cuenta_ahorro)))
+     LEFT JOIN depositos.tipos_documentos_soporte tds ON ((ds.tipo_documento_soporte = tds.codigo_soporte)))
+     LEFT JOIN depositos.estados_documentos_soporte eds ON ((ds.estado_documento = eds.codigo_estado_documento_soporte)));"
+depositos.vw_depositos_empresas_libranza_total," SELECT el.id_empresa_libranza,
+    el.id_datos_personal,
+    el.documento,
+    el.cuenta_deudora,
+    cc.nombre_cuenta AS nombre_cuenta_deudora,
+    el.fk_seguridad_creacion,
+    el.fecha_creacion,
+    el.fk_seguridad_edicion,
+    el.fecha_edicion
+   FROM (depositos.empresas_libranza el
+     LEFT JOIN contabilidad.catalogo_cuentas cc ON ((el.cuenta_deudora = cc.id_catalogo_cuenta)));"
+depositos.vw_depositos_formas_ahorro_total," SELECT f.id_forma_ahorro,
+    f.codigo_forma,
+    f.nombre_forma,
+    f.tipo_captacion_forma,
+    tc.descripcion_captacion AS nombre_tipo_captacion,
+    f.tiempo_liquidacion,
+    f.tasa_interes_forma,
+    f.valor_minimo,
+    f.autorizado_forma,
+    f.fecha_ultima_liquidacion,
+    f.documento_forma,
+    ds.descripcion_soporte AS nombre_documento_soporte,
+    f.cuenta_forma_corto,
+    cc1.nombre_cuenta AS nombre_cuenta_corto,
+    f.cuenta_forma_largo,
+    cc2.nombre_cuenta AS nombre_cuenta_largo,
+    f.cuenta_gasto,
+    cc3.nombre_cuenta AS nombre_cuenta_gasto,
+    f.cuenta_cxp_forma,
+    cc4.nombre_cuenta AS nombre_cuenta_cxp,
+    f.cuenta_gmf_forma,
+    cc5.nombre_cuenta AS nombre_cuenta_gmf,
+    f.fk_seguridad_creacion,
+    f.fecha_creacion,
+    f.fk_seguridad_edicion,
+    f.fecha_edicion
+   FROM (((((((depositos.formas_ahorro f
+     LEFT JOIN depositos.tipos_captaciones tc ON ((f.tipo_captacion_forma = tc.codigo_captacion)))
+     LEFT JOIN depositos.tipos_documentos_soporte ds ON ((f.documento_forma = ds.codigo_soporte)))
+     LEFT JOIN contabilidad.catalogo_cuentas cc1 ON ((f.cuenta_forma_corto = cc1.id_catalogo_cuenta)))
+     LEFT JOIN contabilidad.catalogo_cuentas cc2 ON ((f.cuenta_forma_largo = cc2.id_catalogo_cuenta)))
+     LEFT JOIN contabilidad.catalogo_cuentas cc3 ON ((f.cuenta_gasto = cc3.id_catalogo_cuenta)))
+     LEFT JOIN contabilidad.catalogo_cuentas cc4 ON ((f.cuenta_cxp_forma = cc4.id_catalogo_cuenta)))
+     LEFT JOIN contabilidad.catalogo_cuentas cc5 ON ((f.cuenta_gmf_forma = cc5.id_catalogo_cuenta)));"
+depositos.vw_depositos_general_total," SELECT c.id_cuenta_ahorro,
+    c.codigo_cuenta,
+    c.id_datos_personal,
+    a.nombre_agencia,
+    f.nombre_forma AS forma_ahorro,
+    ea.descripcion_estado_ahorro AS estado_ahorro,
+    c.saldo_actual_cuenta,
+    c.fecha_apertura_cuenta,
+    c.gmf_cuenta_cuenta,
+    tg.descripcion_tipos_gmf AS tipo_gmf,
+    count(e.id_extracto_cuenta_ahorro) AS total_movimientos,
+    sum((e.valor_credito - e.valor_debito)) AS neto_movimientos,
+    c.fk_seguridad_creacion,
+    c.fecha_creacion,
+    c.fk_seguridad_edicion,
+    c.fecha_edicion
+   FROM (((((depositos.cuentas_ahorro c
+     LEFT JOIN general.datos_agencias a ON ((c.codigo_agencia = a.id_agencia)))
+     LEFT JOIN depositos.formas_ahorro f ON ((c.codigo_forma = f.id_forma_ahorro)))
+     LEFT JOIN depositos.estados_ahorros ea ON ((c.estado_cuenta_cuenta = ea.codigo_estado_ahorro)))
+     LEFT JOIN depositos.tipos_gmf tg ON ((c.gmf_cuenta_cuenta = tg.codigo_tipo_gmf)))
+     LEFT JOIN depositos.extractos_cuentas_ahorros e ON ((c.id_cuenta_ahorro = e.id_cuenta_ahorro)))
+  GROUP BY c.id_cuenta_ahorro, c.codigo_cuenta, c.id_datos_personal, a.nombre_agencia, f.nombre_forma, ea.descripcion_estado_ahorro, c.saldo_actual_cuenta, c.fecha_apertura_cuenta, c.gmf_cuenta_cuenta, tg.descripcion_tipos_gmf, c.fk_seguridad_creacion, c.fecha_creacion, c.fk_seguridad_edicion, c.fecha_edicion;"
+depositos.vw_extracto_cuentas_persona_total," SELECT c.codigo_cuenta,
+    dp.documento,
+    fa.nombre_forma AS forma_ahorro,
+    e.fecha_movimiento,
+    e.hora_movimiento,
+    tm.descripcion AS tipo_movimiento,
+    e.numero_comprobante,
+    e.valor_debito,
+    e.valor_credito,
+    sum((e.valor_debito - e.valor_credito)) OVER (PARTITION BY e.id_cuenta_ahorro ORDER BY e.fecha_movimiento, e.hora_movimiento, e.id_extracto_cuenta_ahorro) AS saldo_parcial,
+    round((sum((e.valor_debito - e.valor_credito)) OVER (PARTITION BY e.id_cuenta_ahorro ORDER BY e.fecha_movimiento, e.hora_movimiento, e.id_extracto_cuenta_ahorro))::numeric, 2) AS saldo_resultante,
+    tm.accion_movimiento,
+    tm.genera_gmf,
+    e.modulo,
+    m.descripcion_modulo AS nombre_modulo,
+    e.tarjeta,
+    e.establecimiento,
+    e.fk_seguridad_creacion,
+    e.fecha_creacion,
+    e.fk_seguridad_edicion,
+    e.fecha_edicion
+   FROM (((((depositos.extractos_cuentas_ahorros e
+     JOIN depositos.cuentas_ahorro c ON ((c.id_cuenta_ahorro = e.id_cuenta_ahorro)))
+     JOIN hoja_vida.datos_personales dp ON ((dp.id_datos_personal = c.id_datos_personal)))
+     LEFT JOIN depositos.formas_ahorro fa ON ((fa.id_forma_ahorro = c.codigo_forma)))
+     LEFT JOIN depositos.tipo_movimiento tm ON ((tm.codigo_movimiento = e.tipo_movimiento)))
+     LEFT JOIN depositos.modulos m ON ((m.codigo_modulo = e.modulo)));"
+reporting.vw_hoja_vida_bienes_inmuebles_total," SELECT b.id_bienes_inmuebles,
+    b.id_datos_personal,
+    b.codigo_tipo_bien,
+    tb.descripcion_tipo_bien AS nombre_tipo_bien,
+    b.descripcion_bien_inmueble,
+    b.direccion_bien,
+    b.id_departamento,
+    d.nombre_departamento,
+    b.id_ciudad,
+    c.nombre_ciudad,
+    b.fecha_adquisicion,
+    b.valor_comercial,
+    b.valor_hipoteca,
+    b.hipoteca_entidad,
+    b.codigo_garantia,
+    b.fecha_avaluo,
+    b.valor_asegurado,
+    b.fecha_vencimiento_seguro,
+    b.fk_seguridad_creacion,
+    b.fecha_creacion,
+    b.fk_seguridad_edicion,
+    b.fecha_edicion
+   FROM (((hoja_vida.bienes_inmuebles b
+     LEFT JOIN catalogos.tipos_bienes tb ON (((b.codigo_tipo_bien)::text = (tb.codigo_tipo_bien)::text)))
+     LEFT JOIN catalogos.departamentos d ON ((b.id_departamento = d.id_departamento)))
+     LEFT JOIN catalogos.ciudades c ON ((b.id_ciudad = c.id_ciudad)));"
+reporting.vw_hoja_vida_datos_familiares_total," SELECT f.id_datos_familiares,
+    f.id_datos_personal,
+    f.codigo_parentesco,
+    par.nombre_parentesco,
+    f.nombre_datos_familiar,
+    f.documento_datos_familiar,
+    f.telefono_datos_familiar,
+    f.celular_datos_familiar,
+    f.direccion_datos_familiar,
+    f.id_departamento,
+    d.nombre_departamento,
+    f.id_ciudad,
+    c.nombre_ciudad,
+    f.ingresos_datos_familiar,
+    f.egresos_datos_familiar,
+    f.referencia_familiar,
+    f.fk_seguridad_creacion,
+    f.fecha_creacion,
+    f.fk_seguridad_edicion,
+    f.fecha_edicion
+   FROM (((hoja_vida.datos_familiares f
+     LEFT JOIN catalogos.parentescos par ON (((f.codigo_parentesco)::text = (par.codigo_parentesco)::text)))
+     LEFT JOIN catalogos.departamentos d ON ((f.id_departamento = d.id_departamento)))
+     LEFT JOIN catalogos.ciudades c ON ((f.id_ciudad = c.id_ciudad)));"
+reporting.vw_hoja_vida_datos_personales_total," SELECT dp.id_datos_personal,
+    dp.tipo_documento,
+    td.nombre_tipo_documento,
+    dp.documento,
+    dp.tipo_persona,
+    dp.tiene_rut,
+    dp.digito_verificacion,
+    dp.fecha_documento,
+    dp.id_pais_documento,
+    pdoc.nombre_pais AS nombre_pais_documento,
+    dp.id_departamento_expedicion,
+    dexp.nombre_departamento AS nombre_departamento_expedicion,
+    dp.id_ciudad_expedicion,
+    cexp.nombre_ciudad AS nombre_ciudad_expedicion,
+    dp.nombres,
+    dp.primer_apellido,
+    dp.segundo_apellido,
+    dp.fecha_nacimiento,
+    dp.id_pais_nacimiento,
+    pnac.nombre_pais AS nombre_pais_nacimiento,
+    dp.id_departamento_nacimiento,
+    dnac.nombre_departamento AS nombre_departamento_nacimiento,
+    dp.id_ciudad_nacimiento,
+    cnac.nombre_ciudad AS nombre_ciudad_nacimiento,
+    dp.fecha_apertura,
+    dp.fecha_actualizacion,
+    dp.codigo_genero,
+    g.nombre_genero,
+    dp.codigo_estado_civil,
+    ec.nombre_estado_civil,
+    dp.codigo_escolaridad,
+    ne.nombre_escolaridad,
+    dp.cabeza_familia,
+    dp.estrato_social,
+    dp.codigo_tipo_vivienda,
+    tv.nombre_tipo_vivienda,
+    dp.numero_hijos,
+    dp.codigo_ocupacion,
+    o.nombre_ocupacion,
+    dp.codigo_sector_economico,
+    se.nombre_sector_economico,
+    dp.codigo_actividad_ses,
+    ase.nombre_actividad_ses,
+    dp.codigo_actividad_dian,
+    adian.nombre_actividad_dian,
+    dp.comentario,
+    dp.foto,
+    dp.firma_uno,
+    dp.firma_dos,
+    dp.fk_seguridad_creacion,
+    dp.fecha_creacion,
+    dp.fk_seguridad_edicion,
+    dp.fecha_edicion
+   FROM (((((((((((((((hoja_vida.datos_personales dp
+     LEFT JOIN catalogos.tipos_documentos td ON (((dp.tipo_documento)::text = (td.tipo_documento)::text)))
+     LEFT JOIN catalogos.paises pdoc ON ((dp.id_pais_documento = pdoc.id_pais)))
+     LEFT JOIN catalogos.departamentos dexp ON ((dp.id_departamento_expedicion = dexp.id_departamento)))
+     LEFT JOIN catalogos.ciudades cexp ON ((dp.id_ciudad_expedicion = cexp.id_ciudad)))
+     LEFT JOIN catalogos.paises pnac ON ((dp.id_pais_nacimiento = pnac.id_pais)))
+     LEFT JOIN catalogos.departamentos dnac ON ((dp.id_departamento_nacimiento = dnac.id_departamento)))
+     LEFT JOIN catalogos.ciudades cnac ON ((dp.id_ciudad_nacimiento = cnac.id_ciudad)))
+     LEFT JOIN catalogos.generos g ON (((dp.codigo_genero)::text = (g.codigo_genero)::text)))
+     LEFT JOIN catalogos.estados_civiles ec ON (((dp.codigo_estado_civil)::text = (ec.codigo_estado_civil)::text)))
+     LEFT JOIN catalogos.niveles_escolares ne ON (((dp.codigo_escolaridad)::text = (ne.codigo_escolaridad)::text)))
+     LEFT JOIN catalogos.tipos_viviendas tv ON (((dp.codigo_tipo_vivienda)::text = (tv.codigo_tipo_vivienda)::text)))
+     LEFT JOIN catalogos.ocupaciones o ON (((dp.codigo_ocupacion)::text = (o.codigo_ocupacion)::text)))
+     LEFT JOIN catalogos.sectores_economicos se ON (((dp.codigo_sector_economico)::text = (se.codigo_sector_economico)::text)))
+     LEFT JOIN catalogos.actividades_economicas_ses ase ON (((dp.codigo_actividad_ses)::text = (ase.codigo_actividad_ses)::text)))
+     LEFT JOIN catalogos.actividades_economicas_dian adian ON (((dp.codigo_actividad_dian)::text = (adian.codigo_actividad_dian)::text)));"
+reporting.vw_hoja_vida_financieros_total," SELECT id_financiero,
+    id_datos_personal,
+    valor_salario,
+    valor_pension,
+    ingresos_arriendo,
+    ingresos_comisiones,
+    otros_ingresos,
+    comentario_otros_ingresos,
+    egresos_familiares,
+    egresos_arriendo,
+    egresos_credito,
+    otros_egresos,
+    comentario_otros_egresos,
+    total_activos,
+    total_pasivos,
+    origen_fondos,
+    relacion_financiera,
+    deuda_relacion_financiera,
+    fk_seguridad_creacion,
+    fecha_creacion,
+    fk_seguridad_edicion,
+    fecha_edicion
+   FROM hoja_vida.financieros f;"
+reporting.vw_hoja_vida_general_total," SELECT dp.id_datos_personal,
+    dp.tipo_documento,
+    td.nombre_tipo_documento,
+    dp.documento,
+    dp.tipo_persona,
+    dp.tiene_rut,
+    dp.digito_verificacion,
+    dp.fecha_documento,
+    pdoc.nombre_pais AS pais_documento,
+    ddoc.nombre_departamento AS departamento_expedicion,
+    cdoc.nombre_ciudad AS ciudad_expedicion,
+    dp.nombres,
+    dp.primer_apellido,
+    dp.segundo_apellido,
+    dp.fecha_nacimiento,
+    pnac.nombre_pais AS pais_nacimiento,
+    dnac.nombre_departamento AS departamento_nacimiento,
+    cnac.nombre_ciudad AS ciudad_nacimiento,
+    dp.codigo_genero,
+    g.nombre_genero,
+    dp.codigo_estado_civil,
+    ec.nombre_estado_civil,
+    dp.codigo_escolaridad,
+    ne.nombre_escolaridad,
+    dp.cabeza_familia,
+    dp.estrato_social,
+    dp.numero_hijos,
+    dp.codigo_tipo_vivienda,
+    tv.nombre_tipo_vivienda,
+    dp.codigo_ocupacion,
+    o.nombre_ocupacion,
+    dp.codigo_sector_economico,
+    se.nombre_sector_economico,
+    dp.codigo_actividad_ses,
+    aes.nombre_actividad_ses,
+    dp.codigo_actividad_dian,
+    ad.nombre_actividad_dian,
+    dp.comentario,
+    dp.fecha_apertura,
+    dp.fecha_actualizacion,
+    dp.fecha_creacion,
+    u.direccion AS direccion_residencia,
+    u.barrio AS barrio_residencia,
+    u.telefono AS telefono_residencia,
+    u.celular_uno,
+    u.celular_dos,
+    u.correo AS correo_principal,
+    p.nombre_pais AS pais_residencia,
+    d.nombre_departamento AS departamento_residencia,
+    c.nombre_ciudad AS ciudad_residencia,
+    z.nombre_zona AS zona_residencia,
+    sz.nombre_sub_zona AS sub_zona_residencia,
+    l.nombre_empresa,
+    l.direccion AS direccion_empresa,
+    pl.nombre_pais AS pais_empresa,
+    dl.nombre_departamento AS departamento_empresa,
+    cl.nombre_ciudad AS ciudad_empresa,
+    l.telefono_empresa,
+    l.celular_empresa,
+    l.correo_empresa,
+    l.codigo_tipo_empresa,
+    te.nombre_tipo_empresa,
+    l.empleado_entidad,
+    l.codigo_tipo_contrato,
+    tc.nombre_tipo_contrato,
+    l.codigo_jornada,
+    jl.nombre_jornada,
+    l.nombre_contacto,
+    l.celular_contacto,
+    l.fecha_vinculacion,
+    f.valor_salario,
+    f.valor_pension,
+    f.ingresos_arriendo,
+    f.ingresos_comisiones,
+    f.otros_ingresos,
+    f.comentario_otros_ingresos,
+    f.egresos_familiares,
+    f.egresos_arriendo,
+    f.egresos_credito,
+    f.otros_egresos,
+    f.comentario_otros_egresos,
+    f.total_activos,
+    f.total_pasivos,
+    f.origen_fondos,
+    f.relacion_financiera,
+    f.deuda_relacion_financiera,
+    bi.codigo_tipo_bien,
+    tb.descripcion_tipo_bien AS nombre_tipo_bien,
+    bi.descripcion_bien_inmueble,
+    bi.direccion_bien,
+    dbi.nombre_departamento AS departamento_bien,
+    cbi.nombre_ciudad AS ciudad_bien,
+    bi.fecha_adquisicion,
+    bi.valor_comercial,
+    bi.valor_hipoteca,
+    bi.hipoteca_entidad,
+    bi.codigo_garantia,
+    bi.fecha_avaluo,
+    bi.valor_asegurado,
+    bi.fecha_vencimiento_seguro,
+    s.exoneracion_uiaf,
+    s.fecha_exoneracion,
+    s.asociado_peps,
+    s.tipo_peps,
+    tp.nombre_tipo_peps,
+    s.observaciones_peps,
+    s.fecha_inicial_peps,
+    s.fecha_final_peps,
+    s.familia_peps,
+    s.tipo_familia_peps,
+    s.cedula_familia_peps,
+    s.codigo_parentesco,
+    pa.nombre_parentesco,
+    s.nombre_familia_peps,
+    s.moneda_extranjera,
+    s.observacion_moneda_extranjera,
+    s.cuenta_extranjero,
+    s.tipo_moneda_extranjera,
+    s.numero_cuenta_extranjero,
+    s.nombre_banco_extranjero,
+    s.ciudad_cuenta_extranjero,
+    s.pais_cuenta_extranjero,
+    pe.recibe_llamadas,
+    pe.recibe_msm,
+    pe.recibe_emails,
+    pe.recibe_cartas,
+    pe.recibe_redes_sociales,
+    pe.fecha_llamadas,
+    pe.fecha_sms,
+    pe.fecha_emails,
+    pe.fecha_cartas,
+    pe.fecha_redes,
+    df.nombre_datos_familiar,
+    df.documento_datos_familiar,
+    df.telefono_datos_familiar,
+    df.celular_datos_familiar,
+    df.direccion_datos_familiar,
+    dff.nombre_departamento AS departamento_familiar,
+    cff.nombre_ciudad AS ciudad_familiar,
+    df.ingresos_datos_familiar,
+    df.egresos_datos_familiar,
+    df.referencia_familiar,
+    par.nombre_parentesco AS parentesco_familiar,
+    rff.nombre_datos_familiar AS nombre_referencia_familiar,
+    rff.direccion_datos_familiar AS direccion_referencia_familiar,
+    rff.celular_datos_familiar AS celular_referencia_familiar,
+    rff.nombre_parentesco_final AS parentesco_referencia_familiar,
+    rp.nombre_referencia_personal,
+    rp.direccion_referencia_personal,
+    drp.nombre_departamento AS departamento_referencia_personal,
+    crp.nombre_ciudad AS ciudad_referencia_personal,
+    rp.telefono_referencia_personal,
+    rp.celular_referencia_personal,
+    rc.nombre_referencia_comercial,
+    rc.direccion_referencia_comercial,
+    drc.nombre_departamento AS departamento_referencia_comercial,
+    crc.nombre_ciudad AS ciudad_referencia_comercial,
+    rc.telefono_referencia_comercial,
+    rc.celular_referencia_comercial,
+    rc.comentario_referencia_comercial,
+    dp.fecha_creacion AS fecha_creacion_datos,
+    dp.fecha_edicion AS fecha_edicion_datos
+   FROM ((((((((((((((((((((((((((((((((((((((((((((((((hoja_vida.datos_personales dp
+     LEFT JOIN catalogos.tipos_documentos td ON (((dp.tipo_documento)::text = (td.tipo_documento)::text)))
+     LEFT JOIN catalogos.generos g ON (((dp.codigo_genero)::text = (g.codigo_genero)::text)))
+     LEFT JOIN catalogos.estados_civiles ec ON (((dp.codigo_estado_civil)::text = (ec.codigo_estado_civil)::text)))
+     LEFT JOIN catalogos.niveles_escolares ne ON (((dp.codigo_escolaridad)::text = (ne.codigo_escolaridad)::text)))
+     LEFT JOIN catalogos.tipos_viviendas tv ON (((dp.codigo_tipo_vivienda)::text = (tv.codigo_tipo_vivienda)::text)))
+     LEFT JOIN catalogos.ocupaciones o ON (((dp.codigo_ocupacion)::text = (o.codigo_ocupacion)::text)))
+     LEFT JOIN catalogos.sectores_economicos se ON (((dp.codigo_sector_economico)::text = (se.codigo_sector_economico)::text)))
+     LEFT JOIN catalogos.actividades_economicas_ses aes ON (((dp.codigo_actividad_ses)::text = (aes.codigo_actividad_ses)::text)))
+     LEFT JOIN catalogos.actividades_economicas_dian ad ON (((dp.codigo_actividad_dian)::text = (ad.codigo_actividad_dian)::text)))
+     LEFT JOIN catalogos.paises pdoc ON ((dp.id_pais_documento = pdoc.id_pais)))
+     LEFT JOIN catalogos.departamentos ddoc ON ((dp.id_departamento_expedicion = ddoc.id_departamento)))
+     LEFT JOIN catalogos.ciudades cdoc ON ((dp.id_ciudad_expedicion = cdoc.id_ciudad)))
+     LEFT JOIN catalogos.paises pnac ON ((dp.id_pais_nacimiento = pnac.id_pais)))
+     LEFT JOIN catalogos.departamentos dnac ON ((dp.id_departamento_nacimiento = dnac.id_departamento)))
+     LEFT JOIN catalogos.ciudades cnac ON ((dp.id_ciudad_nacimiento = cnac.id_ciudad)))
+     LEFT JOIN hoja_vida.ubicaciones u ON ((dp.id_datos_personal = u.id_datos_personal)))
+     LEFT JOIN catalogos.paises p ON ((u.id_pais = p.id_pais)))
+     LEFT JOIN catalogos.departamentos d ON ((u.id_departamento = d.id_departamento)))
+     LEFT JOIN catalogos.ciudades c ON ((u.id_ciudad = c.id_ciudad)))
+     LEFT JOIN general.zonas z ON ((u.id_zona = z.id_zona)))
+     LEFT JOIN general.sub_zonas sz ON ((u.id_sub_zona = sz.id_sub_zona)))
+     LEFT JOIN hoja_vida.laborales l ON ((dp.id_datos_personal = l.id_datos_personal)))
+     LEFT JOIN catalogos.tipos_empresas te ON (((l.codigo_tipo_empresa)::text = (te.codigo_tipo_empresa)::text)))
+     LEFT JOIN catalogos.tipos_contratos tc ON (((l.codigo_tipo_contrato)::text = (tc.codigo_tipo_contrato)::text)))
+     LEFT JOIN catalogos.jornadas_laborales jl ON (((l.codigo_jornada)::text = (jl.codigo_jornada)::text)))
+     LEFT JOIN catalogos.paises pl ON ((l.id_pais = pl.id_pais)))
+     LEFT JOIN catalogos.departamentos dl ON ((l.id_departamento = dl.id_departamento)))
+     LEFT JOIN catalogos.ciudades cl ON ((l.id_ciudad = cl.id_ciudad)))
+     LEFT JOIN hoja_vida.financieros f ON ((dp.id_datos_personal = f.id_datos_personal)))
+     LEFT JOIN hoja_vida.bienes_inmuebles bi ON ((dp.id_datos_personal = bi.id_datos_personal)))
+     LEFT JOIN catalogos.tipos_bienes tb ON (((bi.codigo_tipo_bien)::text = (tb.codigo_tipo_bien)::text)))
+     LEFT JOIN catalogos.departamentos dbi ON ((bi.id_departamento = dbi.id_departamento)))
+     LEFT JOIN catalogos.ciudades cbi ON ((bi.id_ciudad = cbi.id_ciudad)))
+     LEFT JOIN hoja_vida.sarlaft s ON ((dp.id_datos_personal = s.id_datos_personal)))
+     LEFT JOIN catalogos.tipos_peps tp ON (((s.tipo_peps)::text = (tp.tipo_peps)::text)))
+     LEFT JOIN catalogos.parentescos pa ON (((s.codigo_parentesco)::text = (pa.codigo_parentesco)::text)))
+     LEFT JOIN hoja_vida.permisos_especiales pe ON ((dp.id_datos_personal = pe.id_datos_personal)))
+     LEFT JOIN hoja_vida.datos_familiares df ON ((dp.id_datos_personal = df.id_datos_personal)))
+     LEFT JOIN catalogos.departamentos dff ON ((df.id_departamento = dff.id_departamento)))
+     LEFT JOIN catalogos.ciudades cff ON ((df.id_ciudad = cff.id_ciudad)))
+     LEFT JOIN catalogos.parentescos par ON (((df.codigo_parentesco)::text = (par.codigo_parentesco)::text)))
+     LEFT JOIN LATERAL ( SELECT DISTINCT ON (df2.id_datos_personal) df2.nombre_datos_familiar,
+            df2.direccion_datos_familiar,
+            df2.celular_datos_familiar,
+            parx.nombre_parentesco AS nombre_parentesco_final
+           FROM (hoja_vida.datos_familiares df2
+             LEFT JOIN catalogos.parentescos parx ON ((TRIM(LEADING '0'::text FROM (df2.codigo_parentesco)::text) = TRIM(LEADING '0'::text FROM (parx.codigo_parentesco)::text))))
+          WHERE (df2.id_datos_personal = dp.id_datos_personal)
+          ORDER BY df2.id_datos_personal, df2.fecha_creacion DESC NULLS LAST) rff ON (true))
+     LEFT JOIN hoja_vida.referencias_personales rp ON ((dp.id_datos_personal = rp.id_datos_personal)))
+     LEFT JOIN catalogos.departamentos drp ON ((rp.id_departamento = drp.id_departamento)))
+     LEFT JOIN catalogos.ciudades crp ON ((rp.id_ciudad = crp.id_ciudad)))
+     LEFT JOIN hoja_vida.referencias_comerciales rc ON ((dp.id_datos_personal = rc.id_datos_personal)))
+     LEFT JOIN catalogos.departamentos drc ON ((rc.id_departamento = drc.id_departamento)))
+     LEFT JOIN catalogos.ciudades crc ON ((rc.id_ciudad = crc.id_ciudad)))
+  ORDER BY dp.fecha_actualizacion DESC;"
+reporting.vw_hoja_vida_general_total_extendida," SELECT dp.id_datos_personal,
+    dp.tipo_documento,
+    td.nombre_tipo_documento,
+    dp.documento,
+    dp.tipo_persona,
+    dp.tiene_rut,
+    dp.digito_verificacion,
+    dp.fecha_documento,
+    pdoc.nombre_pais AS pais_documento,
+    ddoc.nombre_departamento AS departamento_expedicion,
+    cdoc.nombre_ciudad AS ciudad_expedicion,
+    dp.nombres,
+    dp.primer_apellido,
+    dp.segundo_apellido,
+        CASE
+            WHEN (dp.tipo_persona = '2'::bpchar) THEN (dp.nombres)::text
+            ELSE TRIM(BOTH FROM (((((dp.primer_apellido)::text || ' '::text) || (COALESCE(dp.segundo_apellido, ''::character varying))::text) || ' '::text) || (dp.nombres)::text))
+        END AS nombre_completo_apellidos,
+        CASE
+            WHEN (dp.tipo_persona = '2'::bpchar) THEN (dp.nombres)::text
+            ELSE TRIM(BOTH FROM (((((dp.nombres)::text || ' '::text) || (dp.primer_apellido)::text) || ' '::text) || (COALESCE(dp.segundo_apellido, ''::character varying))::text))
+        END AS nombre_completo_nombres,
+    dp.fecha_nacimiento,
+    pnac.nombre_pais AS pais_nacimiento,
+    dnac.nombre_departamento AS departamento_nacimiento,
+    cnac.nombre_ciudad AS ciudad_nacimiento,
+    dp.codigo_genero,
+    g.nombre_genero,
+    dp.codigo_estado_civil,
+    ec.nombre_estado_civil,
+    dp.codigo_escolaridad,
+    ne.nombre_escolaridad,
+    dp.cabeza_familia,
+    dp.estrato_social,
+    dp.codigo_tipo_vivienda,
+    tv.nombre_tipo_vivienda,
+    dp.numero_hijos,
+    dp.codigo_ocupacion,
+    oc.nombre_ocupacion,
+    dp.codigo_sector_economico,
+    se.nombre_sector_economico,
+    dp.codigo_actividad_ses,
+    aes.nombre_actividad_ses,
+    dp.codigo_actividad_dian,
+    ad.nombre_actividad_dian,
+    dp.comentario,
+    dp.foto,
+    dp.firma_uno,
+    dp.firma_dos,
+    dp.fecha_apertura,
+    dp.fecha_actualizacion,
+    ub.direccion AS direccion_residencia,
+    ub.barrio,
+    ub.telefono,
+    ub.celular_uno,
+    ub.celular_dos,
+    ub.correo AS correo_personal,
+    pub.nombre_pais AS pais_residencia,
+    dub.nombre_departamento AS departamento_residencia,
+    cub.nombre_ciudad AS ciudad_residencia,
+    (lpad((dub.codigo_departamento)::text, 2, '0'::text) || lpad((cub.codigo_ciudad)::text, 3, '0'::text)) AS codigo_dane_residencia,
+    sz.nombre_sub_zona,
+    z.nombre_zona,
+    fi.valor_salario,
+    fi.valor_pension,
+    fi.ingresos_arriendo,
+    fi.ingresos_comisiones,
+    fi.otros_ingresos,
+    fi.comentario_otros_ingresos,
+    fi.egresos_familiares,
+    fi.egresos_arriendo,
+    fi.egresos_credito,
+    fi.otros_egresos,
+    fi.comentario_otros_egresos,
+    fi.total_activos,
+    fi.total_pasivos,
+    fi.origen_fondos,
+    fi.relacion_financiera,
+    fi.deuda_relacion_financiera,
+    lab.nombre_empresa,
+    lab.direccion AS direccion_empresa,
+    plab.nombre_pais AS pais_empresa,
+    dlab.nombre_departamento AS departamento_empresa,
+    clab.nombre_ciudad AS ciudad_empresa,
+    lab.telefono_empresa,
+    lab.celular_empresa,
+    lab.correo_empresa,
+    te.nombre_tipo_empresa,
+    tc.nombre_tipo_contrato,
+    jl.nombre_jornada AS jornada_laboral,
+    lab.nombre_contacto,
+    lab.celular_contacto,
+    lab.fecha_vinculacion,
+    df.nombre_datos_familiar,
+    df.documento_datos_familiar,
+    par.nombre_parentesco,
+    df.telefono_datos_familiar,
+    df.celular_datos_familiar,
+    df.direccion_datos_familiar,
+    df.ingresos_datos_familiar,
+    df.egresos_datos_familiar,
+    rp.nombre_referencia_personal,
+    rp.direccion_referencia_personal,
+    drp.nombre_departamento AS departamento_referencia_personal,
+    crp.nombre_ciudad AS ciudad_referencia_personal,
+    rp.telefono_referencia_personal,
+    rp.celular_referencia_personal,
+    pe.recibe_llamadas,
+    pe.recibe_msm,
+    pe.recibe_emails,
+    pe.recibe_cartas,
+    pe.recibe_redes_sociales,
+    sa.exoneracion_uiaf,
+    sa.fecha_exoneracion,
+    sa.asociado_peps,
+    sa.tipo_peps,
+    tpe.nombre_tipo_peps,
+    sa.observaciones_peps,
+    sa.fecha_inicial_peps,
+    sa.fecha_final_peps,
+    sa.familia_peps,
+    sa.nombre_familia_peps,
+    sa.moneda_extranjera,
+    sa.observacion_moneda_extranjera,
+    sa.cuenta_extranjero,
+    sa.tipo_moneda_extranjera,
+    sa.numero_cuenta_extranjero,
+    sa.nombre_banco_extranjero,
+    sa.ciudad_cuenta_extranjero,
+    sa.pais_cuenta_extranjero
+   FROM (((((((((((((((((((((((((((((((((((((hoja_vida.datos_personales dp
+     LEFT JOIN catalogos.tipos_documentos td ON (((dp.tipo_documento)::text = (td.tipo_documento)::text)))
+     LEFT JOIN catalogos.paises pdoc ON ((dp.id_pais_documento = pdoc.id_pais)))
+     LEFT JOIN catalogos.departamentos ddoc ON ((dp.id_departamento_expedicion = ddoc.id_departamento)))
+     LEFT JOIN catalogos.ciudades cdoc ON ((dp.id_ciudad_expedicion = cdoc.id_ciudad)))
+     LEFT JOIN catalogos.paises pnac ON ((dp.id_pais_nacimiento = pnac.id_pais)))
+     LEFT JOIN catalogos.departamentos dnac ON ((dp.id_departamento_nacimiento = dnac.id_departamento)))
+     LEFT JOIN catalogos.ciudades cnac ON ((dp.id_ciudad_nacimiento = cnac.id_ciudad)))
+     LEFT JOIN catalogos.generos g ON (((dp.codigo_genero)::text = (g.codigo_genero)::text)))
+     LEFT JOIN catalogos.estados_civiles ec ON (((dp.codigo_estado_civil)::text = (ec.codigo_estado_civil)::text)))
+     LEFT JOIN catalogos.niveles_escolares ne ON (((dp.codigo_escolaridad)::text = (ne.codigo_escolaridad)::text)))
+     LEFT JOIN catalogos.tipos_viviendas tv ON (((dp.codigo_tipo_vivienda)::text = (tv.codigo_tipo_vivienda)::text)))
+     LEFT JOIN catalogos.ocupaciones oc ON (((dp.codigo_ocupacion)::text = (oc.codigo_ocupacion)::text)))
+     LEFT JOIN catalogos.sectores_economicos se ON (((dp.codigo_sector_economico)::text = (se.codigo_sector_economico)::text)))
+     LEFT JOIN catalogos.actividades_economicas_ses aes ON (((dp.codigo_actividad_ses)::text = (aes.codigo_actividad_ses)::text)))
+     LEFT JOIN catalogos.actividades_economicas_dian ad ON (((dp.codigo_actividad_dian)::text = (ad.codigo_actividad_dian)::text)))
+     LEFT JOIN hoja_vida.ubicaciones ub ON ((dp.id_datos_personal = ub.id_datos_personal)))
+     LEFT JOIN catalogos.paises pub ON ((ub.id_pais = pub.id_pais)))
+     LEFT JOIN catalogos.departamentos dub ON ((ub.id_departamento = dub.id_departamento)))
+     LEFT JOIN catalogos.ciudades cub ON ((ub.id_ciudad = cub.id_ciudad)))
+     LEFT JOIN general.sub_zonas sz ON ((ub.id_sub_zona = sz.id_sub_zona)))
+     LEFT JOIN general.zonas z ON ((sz.id_zona = z.id_zona)))
+     LEFT JOIN hoja_vida.financieros fi ON ((dp.id_datos_personal = fi.id_datos_personal)))
+     LEFT JOIN hoja_vida.laborales lab ON ((dp.id_datos_personal = lab.id_datos_personal)))
+     LEFT JOIN catalogos.paises plab ON ((lab.id_pais = plab.id_pais)))
+     LEFT JOIN catalogos.departamentos dlab ON ((lab.id_departamento = dlab.id_departamento)))
+     LEFT JOIN catalogos.ciudades clab ON ((lab.id_ciudad = clab.id_ciudad)))
+     LEFT JOIN catalogos.tipos_empresas te ON (((lab.codigo_tipo_empresa)::text = (te.codigo_tipo_empresa)::text)))
+     LEFT JOIN catalogos.tipos_contratos tc ON (((lab.codigo_tipo_contrato)::text = (tc.codigo_tipo_contrato)::text)))
+     LEFT JOIN catalogos.jornadas_laborales jl ON (((lab.codigo_jornada)::text = (jl.codigo_jornada)::text)))
+     LEFT JOIN hoja_vida.datos_familiares df ON ((dp.id_datos_personal = df.id_datos_personal)))
+     LEFT JOIN catalogos.parentescos par ON (((df.codigo_parentesco)::text = (par.codigo_parentesco)::text)))
+     LEFT JOIN hoja_vida.referencias_personales rp ON ((dp.id_datos_personal = rp.id_datos_personal)))
+     LEFT JOIN catalogos.departamentos drp ON ((rp.id_departamento = drp.id_departamento)))
+     LEFT JOIN catalogos.ciudades crp ON ((rp.id_ciudad = crp.id_ciudad)))
+     LEFT JOIN hoja_vida.permisos_especiales pe ON ((dp.id_datos_personal = pe.id_datos_personal)))
+     LEFT JOIN hoja_vida.sarlaft sa ON ((dp.id_datos_personal = sa.id_datos_personal)))
+     LEFT JOIN catalogos.tipos_peps tpe ON (((sa.tipo_peps)::text = (tpe.tipo_peps)::text)))
+  ORDER BY dp.fecha_actualizacion DESC;"
+reporting.vw_hoja_vida_general_total_reciente," SELECT dp.id_datos_personal,
+    dp.tipo_documento,
+    td.nombre_tipo_documento,
+    dp.documento,
+    dp.tipo_persona,
+    dp.tiene_rut,
+    dp.digito_verificacion,
+    dp.fecha_documento,
+    pdoc.nombre_pais AS pais_documento,
+    ddoc.nombre_departamento AS departamento_expedicion,
+    cdoc.nombre_ciudad AS ciudad_expedicion,
+    dp.nombres,
+    dp.primer_apellido,
+    dp.segundo_apellido,
+    dp.fecha_nacimiento,
+    pnac.nombre_pais AS pais_nacimiento,
+    dnac.nombre_departamento AS departamento_nacimiento,
+    cnac.nombre_ciudad AS ciudad_nacimiento,
+    dp.codigo_genero,
+    g.nombre_genero,
+    dp.codigo_estado_civil,
+    ec.nombre_estado_civil,
+    dp.codigo_escolaridad,
+    ne.nombre_escolaridad,
+    dp.cabeza_familia,
+    dp.estrato_social,
+    dp.codigo_tipo_vivienda,
+    tv.nombre_tipo_vivienda,
+    dp.numero_hijos,
+    dp.codigo_ocupacion,
+    oc.nombre_ocupacion,
+    dp.codigo_sector_economico,
+    se.nombre_sector_economico,
+    dp.codigo_actividad_ses,
+    aes.nombre_actividad_ses,
+    dp.codigo_actividad_dian,
+    ad.nombre_actividad_dian,
+    dp.comentario,
+    dp.foto,
+    dp.firma_uno,
+    dp.firma_dos,
+    dp.fecha_apertura,
+    dp.fecha_actualizacion,
+    ub.direccion AS direccion_residencia,
+    ub.barrio,
+    ub.telefono,
+    ub.celular_uno,
+    ub.celular_dos,
+    ub.correo AS correo_personal,
+    pub.nombre_pais AS pais_residencia,
+    dub.nombre_departamento AS departamento_residencia,
+    cub.nombre_ciudad AS ciudad_residencia,
+    sz.nombre_sub_zona,
+    z.nombre_zona,
+    fi.valor_salario,
+    fi.valor_pension,
+    fi.ingresos_arriendo,
+    fi.ingresos_comisiones,
+    fi.otros_ingresos,
+    fi.comentario_otros_ingresos,
+    fi.egresos_familiares,
+    fi.egresos_arriendo,
+    fi.egresos_credito,
+    fi.otros_egresos,
+    fi.comentario_otros_egresos,
+    fi.total_activos,
+    fi.total_pasivos,
+    fi.origen_fondos,
+    fi.relacion_financiera,
+    fi.deuda_relacion_financiera,
+    lab.nombre_empresa,
+    lab.direccion AS direccion_empresa,
+    plab.nombre_pais AS pais_empresa,
+    dlab.nombre_departamento AS departamento_empresa,
+    clab.nombre_ciudad AS ciudad_empresa,
+    lab.telefono_empresa,
+    lab.celular_empresa,
+    lab.correo_empresa,
+    te.nombre_tipo_empresa,
+    tc.nombre_tipo_contrato,
+    jl.nombre_jornada AS jornada_laboral,
+    lab.nombre_contacto,
+    lab.celular_contacto,
+    lab.fecha_vinculacion,
+    df.nombre_datos_familiar,
+    df.documento_datos_familiar,
+    par.nombre_parentesco,
+    df.telefono_datos_familiar,
+    df.celular_datos_familiar,
+    df.direccion_datos_familiar,
+    df.ingresos_datos_familiar,
+    df.egresos_datos_familiar,
+    rp.nombre_referencia_personal,
+    rp.direccion_referencia_personal,
+    drp.nombre_departamento AS departamento_referencia_personal,
+    crp.nombre_ciudad AS ciudad_referencia_personal,
+    rp.telefono_referencia_personal,
+    rp.celular_referencia_personal,
+    pe.recibe_llamadas,
+    pe.recibe_msm,
+    pe.recibe_emails,
+    pe.recibe_cartas,
+    pe.recibe_redes_sociales,
+    sa.exoneracion_uiaf,
+    sa.fecha_exoneracion,
+    sa.asociado_peps,
+    sa.tipo_peps,
+    tpe.nombre_tipo_peps,
+    sa.observaciones_peps,
+    sa.fecha_inicial_peps,
+    sa.fecha_final_peps,
+    sa.familia_peps,
+    sa.nombre_familia_peps,
+    sa.moneda_extranjera,
+    sa.observacion_moneda_extranjera,
+    sa.cuenta_extranjero,
+    sa.tipo_moneda_extranjera,
+    sa.numero_cuenta_extranjero,
+    sa.nombre_banco_extranjero,
+    sa.ciudad_cuenta_extranjero,
+    sa.pais_cuenta_extranjero
+   FROM (((((((((((((((((((((((((((((((((((((hoja_vida.datos_personales dp
+     LEFT JOIN catalogos.tipos_documentos td ON (((dp.tipo_documento)::text = (td.tipo_documento)::text)))
+     LEFT JOIN catalogos.paises pdoc ON ((dp.id_pais_documento = pdoc.id_pais)))
+     LEFT JOIN catalogos.departamentos ddoc ON ((dp.id_departamento_expedicion = ddoc.id_departamento)))
+     LEFT JOIN catalogos.ciudades cdoc ON ((dp.id_ciudad_expedicion = cdoc.id_ciudad)))
+     LEFT JOIN catalogos.paises pnac ON ((dp.id_pais_nacimiento = pnac.id_pais)))
+     LEFT JOIN catalogos.departamentos dnac ON ((dp.id_departamento_nacimiento = dnac.id_departamento)))
+     LEFT JOIN catalogos.ciudades cnac ON ((dp.id_ciudad_nacimiento = cnac.id_ciudad)))
+     LEFT JOIN catalogos.generos g ON (((dp.codigo_genero)::text = (g.codigo_genero)::text)))
+     LEFT JOIN catalogos.estados_civiles ec ON (((dp.codigo_estado_civil)::text = (ec.codigo_estado_civil)::text)))
+     LEFT JOIN catalogos.niveles_escolares ne ON (((dp.codigo_escolaridad)::text = (ne.codigo_escolaridad)::text)))
+     LEFT JOIN catalogos.tipos_viviendas tv ON (((dp.codigo_tipo_vivienda)::text = (tv.codigo_tipo_vivienda)::text)))
+     LEFT JOIN catalogos.ocupaciones oc ON (((dp.codigo_ocupacion)::text = (oc.codigo_ocupacion)::text)))
+     LEFT JOIN catalogos.sectores_economicos se ON (((dp.codigo_sector_economico)::text = (se.codigo_sector_economico)::text)))
+     LEFT JOIN catalogos.actividades_economicas_ses aes ON (((dp.codigo_actividad_ses)::text = (aes.codigo_actividad_ses)::text)))
+     LEFT JOIN catalogos.actividades_economicas_dian ad ON (((dp.codigo_actividad_dian)::text = (ad.codigo_actividad_dian)::text)))
+     LEFT JOIN hoja_vida.ubicaciones ub ON ((dp.id_datos_personal = ub.id_datos_personal)))
+     LEFT JOIN catalogos.paises pub ON ((ub.id_pais = pub.id_pais)))
+     LEFT JOIN catalogos.departamentos dub ON ((ub.id_departamento = dub.id_departamento)))
+     LEFT JOIN catalogos.ciudades cub ON ((ub.id_ciudad = cub.id_ciudad)))
+     LEFT JOIN general.sub_zonas sz ON ((ub.id_sub_zona = sz.id_sub_zona)))
+     LEFT JOIN general.zonas z ON ((sz.id_zona = z.id_zona)))
+     LEFT JOIN hoja_vida.financieros fi ON ((dp.id_datos_personal = fi.id_datos_personal)))
+     LEFT JOIN hoja_vida.laborales lab ON ((dp.id_datos_personal = lab.id_datos_personal)))
+     LEFT JOIN catalogos.paises plab ON ((lab.id_pais = plab.id_pais)))
+     LEFT JOIN catalogos.departamentos dlab ON ((lab.id_departamento = dlab.id_departamento)))
+     LEFT JOIN catalogos.ciudades clab ON ((lab.id_ciudad = clab.id_ciudad)))
+     LEFT JOIN catalogos.tipos_empresas te ON (((lab.codigo_tipo_empresa)::text = (te.codigo_tipo_empresa)::text)))
+     LEFT JOIN catalogos.tipos_contratos tc ON (((lab.codigo_tipo_contrato)::text = (tc.codigo_tipo_contrato)::text)))
+     LEFT JOIN catalogos.jornadas_laborales jl ON (((lab.codigo_jornada)::text = (jl.codigo_jornada)::text)))
+     LEFT JOIN hoja_vida.datos_familiares df ON ((dp.id_datos_personal = df.id_datos_personal)))
+     LEFT JOIN catalogos.parentescos par ON (((df.codigo_parentesco)::text = (par.codigo_parentesco)::text)))
+     LEFT JOIN hoja_vida.referencias_personales rp ON ((dp.id_datos_personal = rp.id_datos_personal)))
+     LEFT JOIN catalogos.departamentos drp ON ((rp.id_departamento = drp.id_departamento)))
+     LEFT JOIN catalogos.ciudades crp ON ((rp.id_ciudad = crp.id_ciudad)))
+     LEFT JOIN hoja_vida.permisos_especiales pe ON ((dp.id_datos_personal = pe.id_datos_personal)))
+     LEFT JOIN hoja_vida.sarlaft sa ON ((dp.id_datos_personal = sa.id_datos_personal)))
+     LEFT JOIN catalogos.tipos_peps tpe ON (((sa.tipo_peps)::text = (tpe.tipo_peps)::text)))
+  ORDER BY dp.fecha_actualizacion DESC;"
+reporting.vw_hoja_vida_laborales_total," SELECT l.id_laboral,
+    l.id_datos_personal,
+    l.nombre_empresa,
+    l.direccion,
+    l.id_pais,
+    p.nombre_pais,
+    l.id_departamento,
+    d.nombre_departamento,
+    l.id_ciudad,
+    c.nombre_ciudad,
+    l.telefono_empresa,
+    l.celular_empresa,
+    l.correo_empresa,
+    l.codigo_tipo_empresa,
+    te.nombre_tipo_empresa,
+    l.empleado_entidad,
+    l.codigo_tipo_contrato,
+    tc.nombre_tipo_contrato,
+    l.codigo_jornada,
+    j.nombre_jornada,
+    l.nombre_contacto,
+    l.celular_contacto,
+    l.fecha_vinculacion,
+    l.fk_seguridad_creacion,
+    l.fecha_creacion,
+    l.fk_seguridad_edicion,
+    l.fecha_edicion
+   FROM ((((((hoja_vida.laborales l
+     LEFT JOIN catalogos.paises p ON ((l.id_pais = p.id_pais)))
+     LEFT JOIN catalogos.departamentos d ON ((l.id_departamento = d.id_departamento)))
+     LEFT JOIN catalogos.ciudades c ON ((l.id_ciudad = c.id_ciudad)))
+     LEFT JOIN catalogos.tipos_empresas te ON (((l.codigo_tipo_empresa)::text = (te.codigo_tipo_empresa)::text)))
+     LEFT JOIN catalogos.tipos_contratos tc ON (((l.codigo_tipo_contrato)::text = (tc.codigo_tipo_contrato)::text)))
+     LEFT JOIN catalogos.jornadas_laborales j ON (((l.codigo_jornada)::text = (j.codigo_jornada)::text)));"
+reporting.vw_hoja_vida_permisos_especiales_total," SELECT id_permiso_especial,
+    id_datos_personal,
+    recibe_llamadas,
+    recibe_msm,
+    recibe_emails,
+    recibe_cartas,
+    recibe_redes_sociales,
+    fecha_llamadas,
+    fecha_sms,
+    fecha_emails,
+    fecha_cartas,
+    fecha_redes,
+    fk_seguridad_creacion,
+    fecha_creacion,
+    fk_seguridad_edicion,
+    fecha_edicion
+   FROM hoja_vida.permisos_especiales pe;"
+reporting.vw_hoja_vida_referencias_comerciales_total," SELECT rc.id_referencia_comercial,
+    rc.id_datos_personal,
+    rc.nombre_referencia_comercial,
+    rc.direccion_referencia_comercial,
+    rc.id_departamento,
+    d.nombre_departamento,
+    rc.id_ciudad,
+    c.nombre_ciudad,
+    rc.telefono_referencia_comercial,
+    rc.celular_referencia_comercial,
+    rc.comentario_referencia_comercial,
+    rc.fk_seguridad_creacion,
+    rc.fecha_creacion,
+    rc.fk_seguridad_edicion,
+    rc.fecha_edicion
+   FROM ((hoja_vida.referencias_comerciales rc
+     LEFT JOIN catalogos.departamentos d ON ((rc.id_departamento = d.id_departamento)))
+     LEFT JOIN catalogos.ciudades c ON ((rc.id_ciudad = c.id_ciudad)));"
+reporting.vw_hoja_vida_referencias_personales_total," SELECT rp.id_referencia_personal,
+    rp.id_datos_personal,
+    rp.nombre_referencia_personal,
+    rp.direccion_referencia_personal,
+    rp.id_departamento,
+    d.nombre_departamento,
+    rp.id_ciudad,
+    c.nombre_ciudad,
+    rp.telefono_referencia_personal,
+    rp.celular_referencia_personal,
+    rp.fk_seguridad_creacion,
+    rp.fecha_creacion,
+    rp.fk_seguridad_edicion,
+    rp.fecha_edicion
+   FROM ((hoja_vida.referencias_personales rp
+     LEFT JOIN catalogos.departamentos d ON ((rp.id_departamento = d.id_departamento)))
+     LEFT JOIN catalogos.ciudades c ON ((rp.id_ciudad = c.id_ciudad)));"
+reporting.vw_hoja_vida_sarlaft_total," SELECT s.id_sarlaft,
+    s.id_datos_personal,
+    s.exoneracion_uiaf,
+    s.fecha_exoneracion,
+    s.asociado_peps,
+    s.tipo_peps,
+    tp.nombre_tipo_peps,
+    s.observaciones_peps,
+    s.fecha_inicial_peps,
+    s.fecha_final_peps,
+    s.familia_peps,
+    s.tipo_familia_peps,
+    tfp.nombre_tipo_peps AS nombre_tipo_familia_peps,
+    s.cedula_familia_peps,
+    s.codigo_parentesco,
+    par.nombre_parentesco,
+    s.nombre_familia_peps,
+    s.moneda_extranjera,
+    s.observacion_moneda_extranjera,
+    s.cuenta_extranjero,
+    s.tipo_moneda_extranjera,
+    s.numero_cuenta_extranjero,
+    s.nombre_banco_extranjero,
+    s.ciudad_cuenta_extranjero,
+    s.pais_cuenta_extranjero,
+    s.fk_seguridad_creacion,
+    s.fecha_creacion,
+    s.fk_seguridad_edicion,
+    s.fecha_edicion
+   FROM (((hoja_vida.sarlaft s
+     LEFT JOIN catalogos.tipos_peps tp ON (((s.tipo_peps)::text = (tp.tipo_peps)::text)))
+     LEFT JOIN catalogos.tipos_peps tfp ON (((s.tipo_familia_peps)::text = (tfp.tipo_peps)::text)))
+     LEFT JOIN catalogos.parentescos par ON (((s.codigo_parentesco)::text = (par.codigo_parentesco)::text)));"
+reporting.vw_hoja_vida_ubicaciones_total," SELECT u.id_ubicacion,
+    u.id_datos_personal,
+    u.direccion,
+    u.barrio,
+    u.telefono,
+    u.celular_uno,
+    u.celular_dos,
+    u.correo,
+    u.id_pais,
+    p.nombre_pais,
+    u.id_departamento,
+    d.nombre_departamento,
+    u.id_ciudad,
+    c.nombre_ciudad,
+    u.id_zona,
+    z.nombre_zona,
+    u.id_sub_zona,
+    sz.nombre_sub_zona,
+    u.fk_seguridad_creacion,
+    u.fecha_creacion,
+    u.fk_seguridad_edicion,
+    u.fecha_edicion
+   FROM (((((hoja_vida.ubicaciones u
+     LEFT JOIN catalogos.paises p ON ((u.id_pais = p.id_pais)))
+     LEFT JOIN catalogos.departamentos d ON ((u.id_departamento = d.id_departamento)))
+     LEFT JOIN catalogos.ciudades c ON ((u.id_ciudad = c.id_ciudad)))
+     LEFT JOIN general.zonas z ON ((u.id_zona = z.id_zona)))
+     LEFT JOIN general.sub_zonas sz ON ((u.id_sub_zona = sz.id_sub_zona)));"
+shared.vw_catalogo_actividades_economicas_dian," SELECT codigo_actividad_dian AS codigo,
+    nombre_actividad_dian AS nombre,
+    true AS activo
+   FROM catalogos.actividades_economicas_dian;"
+shared.vw_catalogo_actividades_economicas_ses," SELECT codigo_actividad_ses AS codigo,
+    nombre_actividad_ses AS nombre,
+    true AS activo
+   FROM catalogos.actividades_economicas_ses;"
+shared.vw_catalogo_ciudades," SELECT id_ciudad AS id,
+    codigo_ciudad AS codigo,
+    nombre_ciudad AS nombre,
+    id_departamento,
+    true AS activo
+   FROM catalogos.ciudades;"
+shared.vw_catalogo_ciudades_departamentos," SELECT c.id_ciudad,
+    c.codigo_ciudad,
+    c.nombre_ciudad,
+    d.id_departamento,
+    d.nombre_departamento,
+    true AS activo
+   FROM (catalogos.ciudades c
+     LEFT JOIN catalogos.departamentos d ON ((c.id_departamento = d.id_departamento)));"
+shared.vw_catalogo_departamentos," SELECT id_departamento AS id,
+    codigo_departamento AS codigo,
+    nombre_departamento AS nombre,
+    true AS activo
+   FROM catalogos.departamentos;"
+shared.vw_catalogo_departamentos_paises," SELECT d.id_departamento,
+    d.codigo_departamento,
+    d.nombre_departamento,
+    p.id_pais,
+    p.nombre_pais,
+    true AS activo
+   FROM (catalogos.departamentos d
+     LEFT JOIN catalogos.paises p ON ((p.id_pais = d.id_departamento)));"
+shared.vw_catalogo_estados_civiles," SELECT codigo_estado_civil AS codigo,
+    nombre_estado_civil AS nombre,
+    true AS activo
+   FROM catalogos.estados_civiles;"
+shared.vw_catalogo_generos," SELECT codigo_genero AS codigo,
+    nombre_genero AS nombre,
+    true AS activo
+   FROM catalogos.generos;"
+shared.vw_catalogo_jornadas_laborales," SELECT codigo_jornada AS codigo,
+    nombre_jornada AS nombre,
+    true AS activo
+   FROM catalogos.jornadas_laborales;"
+shared.vw_catalogo_niveles_escolares," SELECT codigo_escolaridad AS codigo,
+    nombre_escolaridad AS nombre,
+    true AS activo
+   FROM catalogos.niveles_escolares;"
+shared.vw_catalogo_ocupaciones," SELECT codigo_ocupacion AS codigo,
+    nombre_ocupacion AS nombre,
+    true AS activo
+   FROM catalogos.ocupaciones;"
+shared.vw_catalogo_paises," SELECT id_pais AS id,
+    codigo_pais AS codigo,
+    nombre_pais AS nombre,
+    true AS activo
+   FROM catalogos.paises;"
+shared.vw_catalogo_parentescos," SELECT codigo_parentesco AS codigo,
+    nombre_parentesco AS nombre,
+    true AS activo
+   FROM catalogos.parentescos;"
+shared.vw_catalogo_sectores_economicos," SELECT codigo_sector_economico AS codigo,
+    nombre_sector_economico AS nombre,
+    true AS activo
+   FROM catalogos.sectores_economicos;"
+shared.vw_catalogo_sub_zonas_zonas," SELECT sz.id_sub_zona,
+    sz.codigo_sub_zona,
+    sz.nombre_sub_zona,
+    z.id_zona,
+    z.nombre_zona,
+    true AS activo
+   FROM (general.sub_zonas sz
+     LEFT JOIN general.zonas z ON ((sz.id_zona = z.id_zona)));"
+shared.vw_catalogo_tipos_bienes," SELECT codigo_tipo_bien AS codigo,
+    descripcion_tipo_bien AS nombre,
+    true AS activo
+   FROM catalogos.tipos_bienes;"
+shared.vw_catalogo_tipos_contratos," SELECT codigo_tipo_contrato AS codigo,
+    nombre_tipo_contrato AS nombre,
+    true AS activo
+   FROM catalogos.tipos_contratos;"
+shared.vw_catalogo_tipos_directivos," SELECT codigo_tipo_directivo AS codigo,
+    nombre_tipo_directivo AS nombre,
+    true AS activo
+   FROM catalogos.tipos_directivos;"
+shared.vw_catalogo_tipos_empresas," SELECT codigo_tipo_empresa AS codigo,
+    nombre_tipo_empresa AS nombre,
+    true AS activo
+   FROM catalogos.tipos_empresas;"
+shared.vw_catalogo_tipos_peps," SELECT tipo_peps AS codigo,
+    nombre_tipo_peps AS nombre,
+    true AS activo
+   FROM catalogos.tipos_peps;"
+shared.vw_catalogo_tipos_regimen," SELECT codigo_regimen AS codigo,
+    nombre_regimen AS nombre,
+    porcentaje_retencion,
+    base_retencion,
+    true AS activo
+   FROM catalogos.tipos_regimen;"
+shared.vw_catalogo_tipos_viviendas," SELECT codigo_tipo_vivienda AS codigo,
+    nombre_tipo_vivienda AS nombre,
+    true AS activo
+   FROM catalogos.tipos_viviendas;"
+shared.vw_general_agencias," SELECT id_agencia AS id,
+    codigo_agencia AS codigo,
+    nombre_agencia AS nombre,
+    sigla_agencia,
+    direccion_agencia,
+    id_departamento,
+    id_ciudad,
+    correo_agencia,
+    celular_agencia,
+    telefono_agencia,
+    true AS activo
+   FROM general.datos_agencias;"
+shared.vw_general_agencias_ciudades," SELECT a.id_agencia,
+    a.codigo_agencia,
+    a.nombre_agencia,
+    a.sigla_agencia,
+    c.nombre_ciudad,
+    d.nombre_departamento,
+    true AS activo
+   FROM ((general.datos_agencias a
+     LEFT JOIN catalogos.ciudades c ON ((a.id_ciudad = c.id_ciudad)))
+     LEFT JOIN catalogos.departamentos d ON ((a.id_departamento = d.id_departamento)));"
+shared.vw_general_empresas," SELECT razon_social AS nombre,
+    tipo_documento,
+    documento_empresa AS documento,
+    sigla_empresa,
+    correo_corporativo,
+    telefono,
+    celular,
+    sitio_web,
+    true AS activo
+   FROM general.empresas;"
+shared.vw_general_parametros," SELECT id_parametro AS id,
+    codigo_parametro AS codigo,
+    nombre_parametro AS nombre,
+    valor_parametro,
+    id_agencia,
+    true AS activo
+   FROM general.parametros;"
+shared.vw_general_parametros_agencia," SELECT p.id_parametro,
+    p.codigo_parametro,
+    p.nombre_parametro,
+    p.valor_parametro,
+    a.nombre_agencia,
+    a.codigo_agencia,
+    true AS activo
+   FROM (general.parametros p
+     LEFT JOIN general.datos_agencias a ON ((p.id_agencia = a.id_agencia)));"
+shared.vw_general_sub_zonas," SELECT id_sub_zona AS id,
+    codigo_sub_zona AS codigo,
+    nombre_sub_zona AS nombre,
+    id_zona,
+    comentario_sub_zona,
+    true AS activo
+   FROM general.sub_zonas;"
+shared.vw_general_zonas," SELECT id_zona AS id,
+    codigo_zona AS codigo,
+    nombre_zona AS nombre,
+    comentario_zona,
+    true AS activo
+   FROM general.zonas;"
+shared.vw_personas_resumen," SELECT dp.id_datos_personal,
+    dp.tipo_documento,
+    dp.documento,
+    dp.nombres,
+    dp.primer_apellido,
+    dp.segundo_apellido,
+    dp.fecha_apertura,
+    dp.fecha_actualizacion,
+    g.nombre_genero AS genero,
+    ec.nombre_estado_civil AS estado_civil,
+    ne.nombre_escolaridad AS escolaridad,
+    oc.nombre_ocupacion AS ocupacion,
+    se.nombre_sector_economico AS sector_economico,
+    tv.nombre_tipo_vivienda AS tipo_vivienda,
+    ub.direccion,
+    ub.celular_uno,
+    ub.correo,
+    c.nombre_ciudad AS ciudad,
+    d.nombre_departamento AS departamento,
+    sz.nombre_sub_zona AS sub_zona,
+    z.nombre_zona AS zona,
+    f.valor_salario,
+    f.total_activos,
+    f.total_pasivos,
+    true AS activo
+   FROM ((((((((((((hoja_vida.datos_personales dp
+     LEFT JOIN hoja_vida.ubicaciones ub ON ((dp.id_datos_personal = ub.id_datos_personal)))
+     LEFT JOIN catalogos.generos g ON (((dp.codigo_genero)::text = (g.codigo_genero)::text)))
+     LEFT JOIN catalogos.estados_civiles ec ON (((dp.codigo_estado_civil)::text = (ec.codigo_estado_civil)::text)))
+     LEFT JOIN catalogos.niveles_escolares ne ON (((dp.codigo_escolaridad)::text = (ne.codigo_escolaridad)::text)))
+     LEFT JOIN catalogos.ocupaciones oc ON (((dp.codigo_ocupacion)::text = (oc.codigo_ocupacion)::text)))
+     LEFT JOIN catalogos.sectores_economicos se ON (((dp.codigo_sector_economico)::text = (se.codigo_sector_economico)::text)))
+     LEFT JOIN catalogos.tipos_viviendas tv ON (((dp.codigo_tipo_vivienda)::text = (tv.codigo_tipo_vivienda)::text)))
+     LEFT JOIN catalogos.ciudades c ON ((ub.id_ciudad = c.id_ciudad)))
+     LEFT JOIN catalogos.departamentos d ON ((ub.id_departamento = d.id_departamento)))
+     LEFT JOIN general.sub_zonas sz ON ((ub.id_sub_zona = sz.id_sub_zona)))
+     LEFT JOIN general.zonas z ON ((sz.id_zona = z.id_zona)))
+     LEFT JOIN hoja_vida.financieros f ON ((dp.id_datos_personal = f.id_datos_personal)));"

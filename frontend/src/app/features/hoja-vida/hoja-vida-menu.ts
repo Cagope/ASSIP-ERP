@@ -20,6 +20,7 @@ export const hojaVidaMenu = {
     { label: 'Referencias Personales', route: '/hoja-vida/referencias-personales' },
     { label: 'SARLAFT', route: '/hoja-vida/sarlaft' },
     { label: 'Permisos Especiales', route: '/hoja-vida/permisos-especiales' },
+    { label: 'Apertura de Cuentas', route: '/hoja-vida/apertura-cuentas' },
 
     // 🧾 IMPRESIONES
     { label: '📄 Impresiones', route: '/hoja-vida/impresiones/afiliacion-list' },

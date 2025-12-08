@@ -45,6 +45,14 @@ export const routes: Routes = [
             .then(m => m.SARLAFT_ROUTES),
       },
 
+      // === SEGURIDAD ===
+      {
+        path: 'seguridad',
+        loadChildren: () =>
+          import('./features/seguridad/seguridad.routes')
+            .then(m => m.SEGURIDAD_ROUTES),
+      },
+
       // === CONTABILIDAD ===
       {
         path: 'contabilidad',

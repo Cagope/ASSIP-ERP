@@ -38,7 +38,7 @@ public class RevalorizacionRepository {
                     c.id_cuenta_ahorro,
                     c.codigo_cuenta,
                     c.id_datos_personal,
-                    c.codigo_agencia,
+                    c.id_agencia,
                     c.estado_cuenta_cuenta AS codigo_estado,
                     ea.descripcion_estado_ahorro AS estado_cuenta,
                     hv.tipo_documento,
@@ -49,8 +49,8 @@ public class RevalorizacionRepository {
                     ON hv.id_datos_personal = c.id_datos_personal
                 LEFT JOIN depositos.estados_ahorros ea
                     ON ea.codigo_estado_ahorro = c.estado_cuenta_cuenta
-                WHERE c.codigo_forma = '01'
-                  AND c.codigo_agencia = :agenciaId
+                WHERE c.id_forma_ahorro = :formaId
+                  AND c.id_agencia = :agenciaId
             ),
 
             movs AS (
@@ -164,7 +164,7 @@ public class RevalorizacionRepository {
                 d.nombre_completo,
                 sa.saldo_actual,
                 p.valor_promedio,
-                ROUND((p.valor_promedio * :tasa / 100), 2) AS valor_revalorizacion,
+                ROUND((p.valor_promedio * :tasa / 100), 0) AS valor_revalorizacion,
                 d.estado_cuenta
             FROM datos d
             JOIN saldo_actual sa ON sa.id_cuenta_ahorro = d.id_cuenta_ahorro
@@ -179,6 +179,7 @@ public class RevalorizacionRepository {
         params.put("fechaFin", input.getFechaFin());
         params.put("fechaContabilizacion", input.getFechaContabilizacion());
         params.put("tasa", input.getTasaRevalorizacion());
+        params.put("formaId", input.getFormaId());
 
         return jdbc.queryForList(sql, params);
     }

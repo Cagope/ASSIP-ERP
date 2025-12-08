@@ -2,10 +2,10 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { ReportingService } from '../../../shared/reporting/reporting.service';
-import { ReportQueryRequest, ReportResult } from '../../../shared/reporting/reporting.api';
-import { CuentasAhorroDetalleComponent } from './cuentas-ahorro-detalle.component';
-import { ExtractoModalComponent } from './extracto-modal.component';
+import { ReportingService } from '../../../../shared/reporting/reporting.service';
+import { ReportQueryRequest, ReportResult } from '../../../../shared/reporting/reporting.api';
+import { CuentasAhorroDetalleComponent } from './consulta-cuentas-ahorro-detalle.component';
+import { ExtractoModalComponent } from './consulta-extracto-modal.component';
 
 
 // ⭐ Importar SARLAFT
@@ -13,7 +13,7 @@ import {
   SarlaftApi,
   EvaluacionSarlaftRequest,
   EvaluacionSarlaftResponse
-} from '../../../shared/sarlaft/sarlaft.api';
+} from '../../../../shared/sarlaft/sarlaft.api';
 
 @Component({
   selector: 'app-cuentas-ahorro-list',
@@ -24,8 +24,8 @@ import {
     CuentasAhorroDetalleComponent,
     ExtractoModalComponent
   ],
-  templateUrl: './cuentas-ahorro-list.component.html',
-  styleUrls: ['./cuentas-ahorro-list.component.scss']
+  templateUrl: './consulta-cuentas-ahorro-list.component.html',
+  styleUrls: ['./consulta-cuentas-ahorro-list.component.scss']
 })
 export class CuentasAhorroListComponent {
 

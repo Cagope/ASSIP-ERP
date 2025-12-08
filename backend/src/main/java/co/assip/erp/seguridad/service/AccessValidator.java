@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Valida si un usuario tiene permiso para ejecutar una acción específica,
- * según los permisos asociados a su rol en la tabla seguridad.rol_permisos.
+ * usando la tabla seguridad.rol_permisos.
  *
  * Uso:
  *   accessValidator.validarAcceso(usuarioActual, "HOJAVIDA_EDIT");
@@ -20,21 +20,33 @@ public class AccessValidator {
     }
 
     /**
-     * Valida si el rol del usuario tiene asignado un permiso por su código.
+     * Valida si el usuario tiene asignado un permiso por su código.
      * Lanza excepción si no está autorizado.
      */
     public void validarAcceso(Usuario usuario, String codigoPermiso) {
-        if (usuario == null || usuario.getRol() == null) {
-            throw new RuntimeException("Usuario o rol no válido");
+
+        // 🔥 Validación correcta con idRol
+        if (usuario == null || usuario.getIdRol() == null) {
+            throw new RuntimeException("Usuario sin rol válido");
         }
 
+        // ⭐⭐⭐ BYPASS PARA ADMIN — SIN VALIDAR PERMISOS ⭐⭐⭐
+        // Si id_rol = 1 (ADMIN), tiene acceso total
+        if (usuario.getIdRol() == 1) {
+            return;
+        }
+
+        // ⭐ Usuarios NO administradores → validar permisos
         boolean autorizado = rolPermisoService.rolTienePermiso(
-                usuario.getRol().getIdRol(),  // ✅ corregido: idRol en lugar de id
+                usuario.getIdRol(),
                 codigoPermiso
         );
 
         if (!autorizado) {
-            throw new RuntimeException("Acceso denegado: el rol no tiene permiso " + codigoPermiso);
+            throw new RuntimeException(
+                    "Acceso denegado: el rol " + usuario.getIdRol() +
+                            " no tiene permiso " + codigoPermiso
+            );
         }
     }
 }

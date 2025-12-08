@@ -1,0 +1,55 @@
+<div class="page">
+
+  <!-- ENCABEZADO -->
+  <app-header-actions
+    titulo="👤 Usuarios"
+    [mostrarNuevo]="true"
+    [mostrarExportar]="false"
+    [mostrarImprimir]="false"
+    (nuevo)="nuevo()">
+  </app-header-actions>
+
+  <!-- TABLA DE USUARIOS -->
+  <div class="table-responsive mt-3">
+
+    <table class="table table-sm table-striped align-middle">
+      <thead>
+      <tr>
+        <th>Usuario</th>
+        <th>Nombre Completo</th>
+        <th>Email</th>
+        <th>Rol</th>
+        <th>Activo</th>
+        <th style="width: 80px;"></th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr *ngFor="let u of usuarios()">
+        <td>{{ u.username }}</td>
+        <td>{{ u.nombreCompleto }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.nombreRol }}</td>
+
+        <td>
+          <span
+            class="badge"
+            [class.bg-success]="u.activo"
+            [class.bg-danger]="!u.activo">
+            {{ u.activo ? 'Sí' : 'No' }}
+          </span>
+        </td>
+
+        <td class="text-end">
+          <button
+            class="btn btn-sm btn-primary"
+            (click)="editar(u.idUsuario!)">
+            ✏️
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+  </div>
+</div>

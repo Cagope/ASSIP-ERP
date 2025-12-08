@@ -18,7 +18,11 @@
     <!-- 🏛 Agencia -->
     <div class="f-row">
       <label>Agencia</label>
-      <select [(ngModel)]="filtros.agenciaId" name="agenciaId">
+      <select
+        [(ngModel)]="filtros.agenciaId"
+        name="agenciaId"
+        (ngModelChange)="cargarFormas($event)"
+      >
         <option value="0">Todas</option>
         <option *ngFor="let a of agencias" [value]="a.idAgencia">
           {{ a.nombreAgencia }}
@@ -31,7 +35,7 @@
       <label>Forma</label>
       <select [(ngModel)]="filtros.formaId" name="formaId">
         <option value="">Seleccione</option>
-        <option *ngFor="let f of formas" [value]="f.id">
+        <option *ngFor="let f of formas" [value]="f.idFormaAhorro">
           {{ f.codigoForma }} — {{ f.nombreForma }}
         </option>
       </select>
@@ -75,9 +79,6 @@
 
     <h3 class="mt-3">Resultados del proceso</h3>
 
-    <!-- ========================================================= -->
-    <!-- BOTONES EXPORTAR / IMPRIMIR                              -->
-    <!-- ========================================================= -->
     <div class="header-actions" style="margin-top: 10px;">
       <div class="actions">
 
@@ -98,7 +99,6 @@
       </div>
     </div>
 
-    <!-- ================= TABLA DE DETALLE ====================== -->
     <table class="tabla-resumen">
       <thead>
       <tr>

@@ -50,16 +50,16 @@ public class CuentasNRRepository {
                 SELECT 
                     c.id_cuenta_ahorro,
                     c.codigo_cuenta,
-                    c.codigo_agencia,
-                    c.codigo_forma,
+                    c.id_agencia,
+                    c.id_forma_ahorro,
                     c.id_datos_personal,
                     c.fecha_apertura_cuenta
                 FROM depositos.cuentas_ahorro c
                 JOIN depositos.formas_ahorro f
-                    ON f.id_forma_ahorro = c.codigo_forma
+                    ON f.id_forma_ahorro = c.id_forma_ahorro
                 WHERE c.fecha_apertura_cuenta BETWEEN :fi AND :ff
                   AND (
-                        c.codigo_forma = :formaId
+                        c.id_forma_ahorro = :formaId
                      OR LPAD(f.codigo_forma, 2, '0') = :formaCod
                   )
             ),
@@ -91,9 +91,9 @@ public class CuentasNRRepository {
 
             FROM cuentas_filtradas cf
             JOIN general.datos_agencias a 
-                ON a.id_agencia = cf.codigo_agencia
+                ON a.id_agencia = cf.id_agencia
             JOIN depositos.formas_ahorro f 
-                ON f.id_forma_ahorro = cf.codigo_forma
+                ON f.id_forma_ahorro = cf.id_forma_ahorro
             LEFT JOIN mov m 
                 ON m.id_cuenta_ahorro = cf.id_cuenta_ahorro
             LEFT JOIN reporting.vw_hoja_vida_general_total_reciente hv 
@@ -119,14 +119,14 @@ public class CuentasNRRepository {
                 SELECT 
                     c.id_cuenta_ahorro,
                     c.codigo_cuenta,
-                    c.codigo_agencia,
-                    c.codigo_forma,
+                    c.id_agencia,
+                    c.id_forma_ahorro,
                     c.id_datos_personal
                 FROM depositos.cuentas_ahorro c
                 JOIN depositos.formas_ahorro f 
-                    ON f.id_forma_ahorro = c.codigo_forma
+                    ON f.id_forma_ahorro = c.id_forma_ahorro
                 WHERE 
-                        c.codigo_forma = :formaId
+                        c.id_forma_ahorro = :formaId
                      OR LPAD(f.codigo_forma, 2, '0') = :formaCod
             ),
             mov AS (
@@ -168,9 +168,9 @@ public class CuentasNRRepository {
             JOIN cuentas_filtradas cf 
                 ON cf.id_cuenta_ahorro = u.id_cuenta_ahorro
             JOIN general.datos_agencias a 
-                ON a.id_agencia = cf.codigo_agencia
+                ON a.id_agencia = cf.id_agencia
             JOIN depositos.formas_ahorro f 
-                ON f.id_forma_ahorro = cf.codigo_forma
+                ON f.id_forma_ahorro = cf.id_forma_ahorro
             LEFT JOIN reporting.vw_hoja_vida_general_total_reciente hv 
                 ON hv.id_datos_personal = cf.id_datos_personal
 

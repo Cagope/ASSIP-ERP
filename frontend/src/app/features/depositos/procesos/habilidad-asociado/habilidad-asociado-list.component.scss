@@ -1,0 +1,190 @@
+.page {
+  padding: 2rem;
+  max-width: 1100px;
+  margin: auto;
+}
+
+/* -----------------------------
+   FILTROS
+------------------------------ */
+.filtros {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.filtros .f-row {
+  display: flex;
+  flex-direction: column;
+}
+
+.filtros .f-row label {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin-bottom: 0.3rem;
+}
+
+.filtros .f-row input,
+.filtros .f-row select {
+  height: 34px;
+  padding: 4px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.filtros .f-buttons {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.filtros .f-buttons .btn {
+  padding: 0.45rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  font-size: 0.9rem;
+}
+
+.filtros .f-buttons .btn--primary {
+  background: #007bff;
+  color: white;
+}
+
+.filtros .f-buttons .btn--cancel {
+  background: #ddd;
+}
+
+/* -----------------------------
+   ESTADOS
+------------------------------ */
+.loading,
+.error,
+.empty {
+  margin-top: 1rem;
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+.error {
+  color: #b30000;
+}
+
+/* -----------------------------
+   RESULTADOS (solo tabla estadísticas)
+------------------------------ */
+.resultados {
+  margin-top: 2rem;
+}
+
+.resultados table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.resultados th,
+.resultados td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 0.9rem;
+}
+
+.resultados th {
+  background: #f0f0f0;
+  text-align: left;
+}
+
+.resultados .right {
+  text-align: right;
+}
+
+.resultados .total-row td {
+  font-weight: bold;
+  background: #f8f8f8;
+}
+
+/* -----------------------------
+   SECCIÓN RESUMEN (opcional)
+------------------------------ */
+.resumen {
+  margin-top: 2rem;
+}
+
+.resumen h3 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+
+.resumen .cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.resumen .card {
+  padding: 1rem;
+  border-radius: 8px;
+  background: #fafafa;
+  border-left: 4px solid #999;
+}
+
+.resumen .card.blue {
+  border-left-color: #007bff;
+}
+
+.resumen .card.green {
+  border-left-color: #28a745;
+}
+
+.resumen .card.red {
+  border-left-color: #dc3545;
+}
+
+.resumen .card .label {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin-bottom: 0.3rem;
+}
+
+.resumen .card .value {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.resumen .card .value.big {
+  font-size: 1.7rem;
+}
+
+.resumen .card .value.right {
+  text-align: right !important;
+  display: block;
+  width: 100%;
+}
+
+/* -----------------------------
+   BOTONES INFERIORES
+------------------------------ */
+.f-buttons-bottom {
+  margin-top: 1rem;
+  text-align: right;
+}
+
+.f-buttons-bottom .btn {
+  padding: 0.45rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  font-size: 0.9rem;
+  background: #007bff;
+  color: white;
+}
+
+/* -----------------------------
+   UTILIDADES
+------------------------------ */
+.right {
+  text-align: right;
+}

@@ -6,8 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -15,19 +16,48 @@ public class AuthService {
 
     private final UsuarioRepository usuarioRepository;
     private final JwtService jwtService;
+    private final UsuarioAgenciaService usuarioAgenciaService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     /**
-     * Autentica un usuario y genera un token JWT.
+     * 🔐 Autenticar y generar token con claims (agencias + idUsuario)
      */
-    public String autenticar(String username, String password) {
-        Optional<Usuario> usuarioOpt = usuarioRepository.findByUsername(username);
+    public Map<String, Object> autenticarConUsuario(String username, String password) {
 
-        if (usuarioOpt.isEmpty()) {
-            throw new RuntimeException("Usuario no encontrado");
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if (!passwordEncoder.matches(password, usuario.getPassword())) {
+            throw new RuntimeException("PASSWORD_FAIL");
         }
 
-        Usuario usuario = usuarioOpt.get();
+        // 🔹 Traer agencias asignadas
+        List<Integer> agencias = usuarioAgenciaService.listarAgenciasDelUsuario(usuario.getIdUsuario())
+                .stream()
+                .map(a -> (Integer) a.get("id_agencia"))
+                .toList();
+
+        // 🔹 Generar token con claims (firma original)
+        String token = jwtService.generarTokenConClaims(usuario, agencias);
+
+        // 🔹 Respuesta
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("idUsuario", usuario.getIdUsuario());
+        resp.put("username", usuario.getUsername());
+        resp.put("idRol", usuario.getIdRol());
+        resp.put("agencias", agencias);
+        resp.put("token", token);
+
+        return resp;
+    }
+
+    // =====================================================
+    // Métodos originales (NO SE TOCAN)
+    // =====================================================
+
+    public String autenticar(String username, String password) {
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         if (!passwordEncoder.matches(password, usuario.getPassword())) {
             throw new RuntimeException("Contraseña incorrecta");
@@ -36,35 +66,12 @@ public class AuthService {
         return jwtService.generarToken(usuario.getUsername());
     }
 
-    /**
-     * Registra un nuevo usuario cifrando la contraseña.
-     */
     public Usuario registrar(Usuario usuario) {
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         return usuarioRepository.save(usuario);
     }
 
-    /**
-     * Método auxiliar para recuperar el usuario autenticado.
-     * Usado en la auditoría (registro de login en log_evento).
-     */
     public Usuario buscarUsuarioPorUsername(String username) {
         return usuarioRepository.findByUsername(username).orElse(null);
-    }
-
-    /**
-     * ✅ Nuevo método: autentica y devuelve usuario + token
-     * Esto permitirá al AuthController registrar el login con el id real del usuario.
-     */
-    public Map<String, Object> autenticarConUsuario(String username, String password) {
-        Usuario usuario = usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        if (!passwordEncoder.matches(password, usuario.getPassword())) {
-            throw new RuntimeException("Contraseña incorrecta");
-        }
-
-        String token = jwtService.generarToken(usuario.getUsername());
-        return Map.of("usuario", usuario, "token", token);
     }
 }

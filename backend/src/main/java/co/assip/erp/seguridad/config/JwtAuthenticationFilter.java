@@ -1,7 +1,9 @@
 package co.assip.erp.seguridad.config;
 
+import co.assip.erp.seguridad.domain.Usuario;
 import co.assip.erp.seguridad.repository.UsuarioRepository;
 import co.assip.erp.seguridad.service.JwtService;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -18,10 +20,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
 
-/**
- * 🔐 Filtro de autenticación JWT.
- * Valida el token en cada petición y establece el usuario autenticado en el contexto.
- */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -30,30 +28,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UsuarioRepository usuarioRepository;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
         final String path = request.getServletPath();
 
-        // ✅ Rutas públicas (no requieren autenticación)
-        if (path.startsWith("/api/v1/auth/") || path.startsWith("/error")) {
+        // 🔓 Rutas públicas
+        if (path.startsWith("/auth") ||
+                path.startsWith("/api/v1/auth") ||
+                path.startsWith("/error")) {
+
             filterChain.doFilter(request, response);
             return;
         }
 
-        final String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        final String header = request.getHeader("Authorization");
+
+        if (header == null || !header.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        final String jwt = authHeader.substring(7);
-        final String username;
+        final String token = header.substring(7);
 
+        Claims claims;
         try {
-            username = jwtService.extraerUsername(jwt);
+            claims = jwtService.extraerTodo(token);
         } catch (ExpiredJwtException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Token expirado");
@@ -64,24 +67,40 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // ✅ Si el usuario no está autenticado aún
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        String username = claims.getSubject();
+
+        // Si no está autenticado aún
+        if (username != null &&
+                SecurityContextHolder.getContext().getAuthentication() == null) {
+
             var usuarioOpt = usuarioRepository.findByUsername(username);
 
-            if (usuarioOpt.isPresent() && jwtService.validarToken(jwt)) {
+            if (usuarioOpt.isPresent() &&
+                    jwtService.validarToken(token)) {
 
-                // 🔸 Rol básico o dinámico (según la BD)
-                var rol = usuarioOpt.get().getRol() != null
-                        ? usuarioOpt.get().getRol().getNombre()
-                        : "USER";
+                Usuario usuario = usuarioOpt.get();
 
-                var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + rol.toUpperCase()));
+                // =============================================
+                // ✔ Leer idRol como Integer desde el token
+                // =============================================
+                Integer rolId = claims.get("rol", Integer.class);
+                if (rolId == null) {
+                    rolId = 0; // rol por defecto sin permisos
+                }
+
+                // Crear autoridad con formato ROLE_{id}
+                var authority = new SimpleGrantedAuthority("ROLE_" + rolId);
 
                 var authToken = new UsernamePasswordAuthenticationToken(
-                        usuarioOpt.get(), null, authorities
+                        usuario.getUsername(),
+                        claims,
+                        List.of(authority)
                 );
 
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
+
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }

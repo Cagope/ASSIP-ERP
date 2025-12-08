@@ -12,6 +12,7 @@ import { MENU_REGISTRY } from './menu-registry';
   styleUrls: ['./main-menu.component.scss'],
 })
 export class MainMenuComponent {
+
   username = '';
   menu = MENU_REGISTRY;
 
@@ -34,5 +35,20 @@ export class MainMenuComponent {
   /** Alternar la apertura/cierre */
   toggleSection(index: number): void {
     this.openSections[index] = !this.openSections[index];
+  }
+
+  // ============================================================
+  // ⭐ Bypass para ADMIN — siempre ve todo el menú
+  // ============================================================
+  tienePermiso(item: any): boolean {
+
+    // 🔥 1. Admin ve todo
+    if (this.session.esAdmin()) return true;
+
+    // 🔥 2. El item no necesita permiso → mostrar
+    if (!item || !item.permiso) return true;
+
+    // 🔥 3. Usuarios normales sí dependen de la lista de permisos
+    return this.session.tienePermiso(item.permiso);
   }
 }

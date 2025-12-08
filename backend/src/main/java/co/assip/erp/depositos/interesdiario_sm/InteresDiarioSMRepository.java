@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -18,9 +17,6 @@ public class InteresDiarioSMRepository {
         this.jdbc = jdbc;
     }
 
-    /**
-     * 🔍 Simula el Interés Diario SM usando el SQL oficial.
-     */
     public List<InteresDiarioSMItemDTO> simular(
             Integer agenciaId,
             LocalDate fechaProceso,
@@ -35,9 +31,31 @@ public class InteresDiarioSMRepository {
                     :fechaLiquidacion::date AS fecha_liquidacion
             ),
 
-            -- 🔹 1. Forma SM
+            ag_info AS (
+                SELECT id_agencia
+                FROM general.datos_agencias
+                WHERE id_agencia = :agenciaId
+            ),
+
+            /* ✔ Cuentas por forma — (PASO 1 aplicado) */
+            cuenta AS (
+                SELECT
+                    c.id_cuenta_ahorro,
+                    c.codigo_cuenta,
+                    c.id_forma_ahorro,
+                    c.id_datos_personal,
+                    c.retencion_fuente_cuenta,
+                    hv.documento,
+                    hv.nombre_completo_apellidos AS nombre
+                FROM depositos.cuentas_ahorro c
+                JOIN reporting.vw_hoja_vida_general_total_extendida hv
+                    ON hv.id_datos_personal = c.id_datos_personal
+                WHERE c.id_forma_ahorro = :formaId
+            ),
+
+            /* ✔ Forma — una sola definición (PASO 2 aplicado) */
             forma AS (
-                SELECT 
+                SELECT
                     id_forma_ahorro,
                     codigo_forma,
                     nombre_forma,
@@ -47,10 +65,9 @@ public class InteresDiarioSMRepository {
                     fecha_ultima_liquidacion
                 FROM depositos.formas_ahorro
                 WHERE id_forma_ahorro = :formaId
-                  AND tiempo_liquidacion = 1
             ),
 
-            -- 🔹 2. Parámetros generales
+            /* ✔ Parámetros tributarios */
             param AS (
                 SELECT
                     MAX(CASE WHEN codigo_parametro = 5 THEN valor_parametro::numeric END) AS umbral_retencion,
@@ -59,27 +76,7 @@ public class InteresDiarioSMRepository {
                 WHERE id_agencia = :agenciaId
             ),
 
-            -- 🔹 3. Cuentas de la agencia
-            cuenta AS (
-                SELECT
-                    c.id_cuenta_ahorro,
-                    c.codigo_cuenta,
-                    c.codigo_forma,
-                    c.id_datos_personal,
-                    c.retencion_fuente_cuenta,
-                    hv.documento,
-                    hv.nombre_completo_apellidos AS nombre
-                FROM depositos.cuentas_ahorro c
-                JOIN reporting.vw_hoja_vida_general_total_extendida hv
-                    ON hv.id_datos_personal = c.id_datos_personal
-                WHERE c.codigo_agencia = :agenciaId
-                  AND c.codigo_forma = :formaId
-            ),
-
-            -- ============================================
-            -- 🔥 SALDO MÍNIMO REAL DEL DÍA
-            -- ============================================
-
+            /* ✔ Movimientos del día */
             movs_dia AS (
                 SELECT
                     e.id_extracto_cuenta_ahorro,
@@ -92,6 +89,7 @@ public class InteresDiarioSMRepository {
                 ORDER BY e.id_cuenta_ahorro, e.hora_movimiento
             ),
 
+            /* ✔ Saldo al día anterior */
             saldo_anterior AS (
                 SELECT
                     c.id_cuenta_ahorro,
@@ -103,32 +101,34 @@ public class InteresDiarioSMRepository {
                 GROUP BY c.id_cuenta_ahorro
             ),
 
+            /* ✔ Reconstrucción del día — (PASO 3 y 5 aplicados) */
             saldo_dia AS (
+                -- Si hay movimientos
                 SELECT
                     sa.id_cuenta_ahorro,
-                    (
-                      sa.saldo_al_dia_anterior
-                      + SUM(md.movimiento) OVER (
-                            PARTITION BY sa.id_cuenta_ahorro
-                            ORDER BY md.id_extracto_cuenta_ahorro
-                        )
+                    sa.saldo_al_dia_anterior
+                    + SUM(md.movimiento) OVER (
+                        ORDER BY md.id_extracto_cuenta_ahorro
                     ) AS saldo
                 FROM saldo_anterior sa
-                JOIN movs_dia md 
+                JOIN movs_dia md
                     ON md.id_cuenta_ahorro = sa.id_cuenta_ahorro
 
                 UNION ALL
 
+                -- Si no hay movimientos para la cuenta
                 SELECT
                     sa.id_cuenta_ahorro,
                     sa.saldo_al_dia_anterior AS saldo
                 FROM saldo_anterior sa
                 WHERE NOT EXISTS (
-                    SELECT 1 FROM movs_dia md2 
+                    SELECT 1
+                    FROM movs_dia md2
                     WHERE md2.id_cuenta_ahorro = sa.id_cuenta_ahorro
                 )
             ),
 
+            /* ✔ Saldo mínimo del día */
             saldo_diario AS (
                 SELECT
                     id_cuenta_ahorro,
@@ -137,10 +137,7 @@ public class InteresDiarioSMRepository {
                 GROUP BY id_cuenta_ahorro
             ),
 
-            -- ============================================
-            -- 🔥 CÁLCULO DE INTERÉS
-            -- ============================================
-
+            /* ✔ Cálculo del interés */
             calculo AS (
                 SELECT
                     c.id_cuenta_ahorro,
@@ -161,9 +158,10 @@ public class InteresDiarioSMRepository {
                     ) AS interes_bruto
                 FROM cuenta c
                 JOIN saldo_diario sd ON sd.id_cuenta_ahorro = c.id_cuenta_ahorro
-                JOIN forma f ON f.id_forma_ahorro = c.codigo_forma
+                JOIN forma f ON f.id_forma_ahorro = c.id_forma_ahorro
             ),
 
+            /* ✔ Validación del mínimo */
             interes_minimo AS (
                 SELECT
                     *,
@@ -174,6 +172,7 @@ public class InteresDiarioSMRepository {
                 FROM calculo
             ),
 
+            /* ✔ Aplicación de retención */
             result AS (
                 SELECT
                     i.*,
@@ -198,20 +197,20 @@ public class InteresDiarioSMRepository {
             )
 
             SELECT
-                id_cuenta_ahorro,
-                codigo_cuenta,
-                documento,
-                nombre,
-                saldo_minimo,
-                interes_bruto,
-                retencion,
-                (interes_valido - retencion) AS neto_pagar,
-                tasa_interes_forma,
-                tiempo_liquidacion,
-                minimo_forma,
-                aplica_retencion
+                  id_cuenta_ahorro,
+                  codigo_cuenta,
+                  documento,
+                  nombre,
+                  saldo_minimo,
+                  interes_bruto,
+                  retencion,
+                  (interes_valido - retencion) AS neto_pagar,
+                  tasa_interes_forma,
+                  tiempo_liquidacion,
+                  minimo_forma,
+                  aplica_retencion
             FROM result
-            WHERE interes_bruto > 0
+            WHERE interes_valido > 0
               AND saldo_minimo > 0
             ORDER BY codigo_cuenta
             """;

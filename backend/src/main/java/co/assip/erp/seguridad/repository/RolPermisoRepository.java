@@ -1,13 +1,14 @@
 package co.assip.erp.seguridad.repository;
 
 import co.assip.erp.seguridad.domain.RolPermiso;
+import co.assip.erp.seguridad.domain.RolPermisoId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface RolPermisoRepository extends JpaRepository<RolPermiso, Integer> {
+public interface RolPermisoRepository extends JpaRepository<RolPermiso, RolPermisoId> {
 
     /**
      * Lista todas las relaciones de permisos para un rol.

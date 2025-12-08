@@ -1,0 +1,52 @@
+<div class="poderes-box">
+
+  <h3>🔑 Poderes</h3>
+
+  <!-- FORM NUEVO -->
+  <div class="form-grid">
+
+    <input type="text"
+           placeholder="Documento"
+           [(ngModel)]="nuevo.documentoPoder">
+
+    <input type="text"
+           placeholder="Nombre completo"
+           [(ngModel)]="nuevo.nombrePoder">
+
+    <input type="text"
+           placeholder="Teléfono"
+           [(ngModel)]="nuevo.telefonoPoder">
+
+    <input type="text"
+           placeholder="Celular"
+           [(ngModel)]="nuevo.celularPoder">
+
+    <button class="btn-add" (click)="agregar()">➕ Agregar</button>
+  </div>
+
+  <!-- LISTADO -->
+  <table class="poderes-table" *ngIf="poderes.length > 0">
+    <thead>
+    <tr>
+      <th>Documento</th>
+      <th>Nombre</th>
+      <th>Teléfono</th>
+      <th>Celular</th>
+      <th></th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let p of poderes; let i = index">
+      <td>{{ p.documentoPoder }}</td>
+      <td>{{ p.nombrePoder }}</td>
+      <td>{{ p.telefonoPoder }}</td>
+      <td>{{ p.celularPoder }}</td>
+      <td>
+        <button class="btn-del" (click)="eliminar(i)">🗑</button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+</div>

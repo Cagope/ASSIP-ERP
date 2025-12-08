@@ -10,14 +10,14 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ReportingService } from '../../../shared/reporting/reporting.service';
+import { ReportingService } from '../../../../shared/reporting/reporting.service';
 
 @Component({
   selector: 'app-extracto-modal',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './extracto-modal.component.html',
-  styleUrls: ['./extracto-modal.component.scss']
+  styleUrls: ['./consulta-extracto-modal.component.scss']
 })
 export class ExtractoModalComponent implements OnChanges {
   @Input() formaAhorro!: string;        // ✅ Recibida desde el botón del detalle

@@ -1,0 +1,57 @@
+<div class="benef-box">
+
+  <h3>👥 Beneficiarios</h3>
+
+  <!-- FORM NUEVO -->
+  <div class="form-grid">
+
+    <input type="text"
+           placeholder="Documento"
+           [(ngModel)]="nuevo.documentoBeneficiario">
+
+    <input type="text"
+           placeholder="Nombre completo"
+           [(ngModel)]="nuevo.nombreBeneficiario">
+
+    <input type="text"
+           placeholder="Teléfono"
+           [(ngModel)]="nuevo.telefonoBeneficiario">
+
+    <input type="text"
+           placeholder="Celular"
+           [(ngModel)]="nuevo.celularBeneficiario">
+
+    <input type="text"
+           placeholder="Parentesco"
+           [(ngModel)]="nuevo.tipoParentesco">
+
+    <button class="btn-add" (click)="agregar()">➕ Agregar</button>
+  </div>
+
+  <!-- LISTADO -->
+  <table class="benef-table" *ngIf="beneficiarios.length > 0">
+    <thead>
+    <tr>
+      <th>Documento</th>
+      <th>Nombre</th>
+      <th>Teléfono</th>
+      <th>Celular</th>
+      <th>Parentesco</th>
+      <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let b of beneficiarios; let i = index">
+      <td>{{ b.documentoBeneficiario }}</td>
+      <td>{{ b.nombreBeneficiario }}</td>
+      <td>{{ b.telefonoBeneficiario }}</td>
+      <td>{{ b.celularBeneficiario }}</td>
+      <td>{{ b.tipoParentesco }}</td>
+      <td>
+        <button class="btn-del" (click)="eliminar(i)">🗑</button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+</div>

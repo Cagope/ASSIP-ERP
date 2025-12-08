@@ -10,5 +10,9 @@ public interface PermisoRepository extends JpaRepository<Permiso, Integer> {
 
     Optional<Permiso> findByCodigo(String codigo);
 
-    List<Permiso> findByRol_IdRol(Integer idRol);
+    // ✔ Buscar permisos por rol usando id_rol (NO relaciones)
+    List<Permiso> findByIdRol(Integer idRol);
+
+    // ✔ Verificar permisos directamente usando id_rol + codigo
+    boolean existsByIdRolAndCodigo(Integer idRol, String codigo);
 }

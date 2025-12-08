@@ -1,0 +1,1755 @@
+schema,function_name,definition
+contabilidad,migrar_plan_cuentas,"CREATE OR REPLACE PROCEDURE contabilidad.migrar_plan_cuentas(IN p_payload jsonb)
+ LANGUAGE plpgsql
+AS $procedure$
+DECLARE
+  j jsonb := COALESCE(p_payload, '{}'::jsonb);
+
+  -- Requeridos
+  v_id_agencia        integer;
+  v_codigo_cuenta     text;
+  v_nombre_cuenta     text;
+  v_naturaleza        text;
+  v_nivel             integer;
+
+  -- Opcionales
+  v_operable          boolean := false;
+  v_id_tipo_esp       integer;
+  v_ctrl_es           boolean := false;
+
+  -- Auditoría
+  v_fk_seg integer := 1;  -- 🧩 valor fijo o configurable si deseas
+
+  vtxt text;
+BEGIN
+  -- 🟢 Validación: id_agencia
+  vtxt := NULLIF(btrim(j->>'id_agencia'), '');
+  IF vtxt IS NULL THEN
+    RAISE EXCEPTION 'id_agencia es obligatorio';
+  END IF;
+  BEGIN
+    v_id_agencia := vtxt::integer;
+  EXCEPTION WHEN others THEN
+    RAISE EXCEPTION 'id_agencia inválido (%)', vtxt;
+  END;
+
+  -- 🟢 Validación: código cuenta
+  v_codigo_cuenta := left(NULLIF(btrim(j->>'codigo_cuenta'), ''), 11);
+  IF v_codigo_cuenta IS NULL THEN
+    RAISE EXCEPTION 'codigo_cuenta es obligatorio';
+  END IF;
+
+  -- 🟢 Validación: nombre cuenta
+  v_nombre_cuenta := left(NULLIF(btrim(j->>'nombre_cuenta'), ''), 100);
+  IF v_nombre_cuenta IS NULL THEN
+    RAISE EXCEPTION 'nombre_cuenta es obligatorio';
+  END IF;
+
+  -- 🟢 Naturaleza
+  v_naturaleza := upper(left(NULLIF(btrim(j->>'naturaleza_cuenta'), ''), 1));
+  IF v_naturaleza IS NULL OR v_naturaleza NOT IN ('D','C') THEN
+    RAISE EXCEPTION 'naturaleza_cuenta es obligatorio y debe ser D o C';
+  END IF;
+
+  -- 🟢 Nivel
+  vtxt := NULLIF(btrim(j->>'nivel_cuenta'), '');
+  IF vtxt IS NOT NULL THEN
+    BEGIN
+      v_nivel := vtxt::integer;
+    EXCEPTION WHEN others THEN
+      v_nivel := NULL;
+    END;
+  END IF;
+  IF v_nivel IS NULL OR v_nivel < 1 THEN
+    v_nivel := greatest(1, char_length(v_codigo_cuenta));
+  END IF;
+
+  -- 🟡 Opcionales
+  v_operable := COALESCE((j->>'cuenta_operable')::boolean, false);
+  v_ctrl_es  := COALESCE((j->>'control_entrada_salida')::boolean, false);
+
+  vtxt := NULLIF(btrim(j->>'id_tipo_especial_cuenta'), '');
+  IF vtxt IS NOT NULL THEN
+    BEGIN
+      v_id_tipo_esp := vtxt::integer;
+    EXCEPTION WHEN others THEN
+      v_id_tipo_esp := NULL;
+    END;
+  END IF;
+
+  -- 🔹 UPSERT (por id_agencia + codigo_cuenta)
+  INSERT INTO contabilidad.catalogo_cuentas (
+    id_agencia,
+    codigo_cuenta,
+    nombre_cuenta,
+    naturaleza_cuenta,
+    nivel_cuenta,
+    cuenta_operable,
+    id_tipo_especial_cuenta,
+    control_entrada_salida,
+    fk_seguridad_creacion,
+    fecha_creacion,
+    fk_seguridad_edicion,
+    fecha_edicion
+  )
+  VALUES (
+    v_id_agencia,
+    v_codigo_cuenta,
+    v_nombre_cuenta,
+    v_naturaleza,
+    v_nivel,
+    v_operable,
+    v_id_tipo_esp,
+    v_ctrl_es,
+    v_fk_seg, now(),
+    v_fk_seg, now()
+  )
+  ON CONFLICT (id_agencia, codigo_cuenta) DO UPDATE SET
+    nombre_cuenta           = EXCLUDED.nombre_cuenta,
+    naturaleza_cuenta       = EXCLUDED.naturaleza_cuenta,
+    nivel_cuenta            = EXCLUDED.nivel_cuenta,
+    cuenta_operable         = EXCLUDED.cuenta_operable,
+    id_tipo_especial_cuenta = EXCLUDED.id_tipo_especial_cuenta,
+    control_entrada_salida  = EXCLUDED.control_entrada_salida,
+    fk_seguridad_edicion    = EXCLUDED.fk_seguridad_edicion,
+    fecha_edicion           = now();
+
+END;
+$procedure$
+"
+depositos,fn_guardar_cuenta_ahorro_json,"CREATE OR REPLACE FUNCTION depositos.fn_guardar_cuenta_ahorro_json(p_json jsonb)
+ RETURNS integer
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+  v_codigo_agencia   INTEGER;
+  v_codigo_forma     INTEGER;
+  v_id_persona       INTEGER;
+  v_codigo_cuenta    CHAR(10);
+  v_fecha_apertura   DATE;
+  v_saldo_inicial    NUMERIC(18,2);
+  v_saldo_actual     NUMERIC(18,2);
+  v_estado           CHAR(1);
+  v_fecha_estado     DATE;
+  v_gmf              CHAR(1);
+  v_fecha_gmf        DATE;
+  v_cuota            NUMERIC(18,2);
+  v_retencion        BOOLEAN;
+  v_plazo            INTEGER;
+  v_fecha_final      DATE;
+  v_cuenta_activa    CHAR(1);
+  v_fk_seguridad     INTEGER := 1;
+  v_id_cuenta        INTEGER;
+BEGIN
+  -- 🔹 IDs requeridos
+  v_codigo_agencia := NULLIF(p_json->>'codigo_agencia','')::INT;
+  v_codigo_forma   := NULLIF(p_json->>'codigo_forma','')::INT;
+  v_id_persona     := NULLIF(p_json->>'id_datos_personal','')::INT;
+
+  IF v_codigo_agencia IS NULL OR v_codigo_forma IS NULL OR v_id_persona IS NULL THEN
+    RAISE EXCEPTION 'Faltan campos requeridos: codigo_agencia=%, codigo_forma=%, id_datos_personal=%',
+      v_codigo_agencia, v_codigo_forma, v_id_persona;
+  END IF;
+
+  -- 🔹 Código normalizado
+  v_codigo_cuenta := LPAD(REGEXP_REPLACE(COALESCE(p_json->>'codigo_cuenta',''), '\D', '', 'g'), 10, '0')::CHAR(10);
+  IF v_codigo_cuenta IS NULL OR v_codigo_cuenta !~ '^[0-9]{10}$' THEN
+    RAISE EXCEPTION 'codigo_cuenta inválido o vacío (esperado 10 dígitos)';
+  END IF;
+
+  -- 🔹 Campos base
+  v_fecha_apertura := NULLIF(p_json->>'fecha_apertura_cuenta','')::DATE;
+  IF v_fecha_apertura IS NULL THEN
+    RAISE EXCEPTION 'fecha_apertura_cuenta requerida';
+  END IF;
+
+  v_saldo_inicial := COALESCE(NULLIF(p_json->>'saldo_inicial_cuenta','')::NUMERIC, 0);
+  v_saldo_actual  := COALESCE(NULLIF(p_json->>'saldo_actual_cuenta','')::NUMERIC, 0);
+  v_estado        := NULLIF(p_json->>'estado_cuenta_cuenta','')::CHAR(1);
+  IF v_estado IS NULL THEN
+    RAISE EXCEPTION 'estado_cuenta_cuenta requerido';
+  END IF;
+
+  v_fecha_estado := NULLIF(p_json->>'fecha_estado_cuenta','')::DATE;
+
+  -- 🔹 GMF y fechas
+  v_gmf := UPPER(NULLIF(p_json->>'gmf_cuenta_cuenta',''))::CHAR(1);
+  IF v_gmf IS NULL OR v_gmf NOT IN ('S','N','U') THEN
+    v_gmf := 'S';
+  END IF;
+  v_fecha_gmf := COALESCE(NULLIF(p_json->>'fecha_gmf_cuenta','')::DATE, v_fecha_apertura);
+
+  -- 🔹 Adicionales
+  v_cuota         := COALESCE(NULLIF(p_json->>'cuota_mensual_cuenta','')::NUMERIC, 0);
+  v_retencion     := COALESCE(NULLIF(p_json->>'retencion_fuente_cuenta','')::BOOLEAN, FALSE);
+  v_plazo         := COALESCE(NULLIF(p_json->>'plazo_cuenta','')::INT, 0);
+  v_fecha_final   := NULLIF(p_json->>'fecha_final_cuenta','')::DATE;
+  v_cuenta_activa := COALESCE(NULLIF(p_json->>'cuenta_activa',''), 'A');
+
+  --------------------------------------------------------------------
+  -- 🧩 UPSERT MANUAL 100 % COMPATIBLE
+  --------------------------------------------------------------------
+  SELECT id_cuenta_ahorro
+  INTO v_id_cuenta
+  FROM depositos.cuentas_ahorro
+  WHERE codigo_agencia = v_codigo_agencia
+    AND codigo_forma = v_codigo_forma
+    AND codigo_cuenta = v_codigo_cuenta
+  LIMIT 1;
+
+  IF FOUND THEN
+    -- 🔸 Actualiza
+    UPDATE depositos.cuentas_ahorro
+    SET id_datos_personal         = v_id_persona,
+        fecha_apertura_cuenta     = v_fecha_apertura,
+        saldo_inicial_cuenta      = v_saldo_inicial,
+        saldo_actual_cuenta       = v_saldo_actual,
+        estado_cuenta_cuenta      = v_estado,
+        fecha_estado_cuenta       = v_fecha_estado,
+        gmf_cuenta_cuenta         = v_gmf,
+        fecha_gmf_cuenta          = v_fecha_gmf,
+        cuota_mensual_cuenta      = v_cuota,
+        retencion_fuente_cuenta   = v_retencion,
+        plazo_cuenta              = v_plazo,
+        fecha_final_cuenta        = v_fecha_final,
+        cuenta_activa             = v_cuenta_activa,
+        fk_seguridad_edicion      = v_fk_seguridad,
+        fecha_edicion             = NOW()
+    WHERE id_cuenta_ahorro = v_id_cuenta;
+  ELSE
+    -- 🔸 Inserta
+    INSERT INTO depositos.cuentas_ahorro (
+      codigo_agencia, codigo_forma, codigo_cuenta, id_datos_personal,
+      fecha_apertura_cuenta, saldo_inicial_cuenta, saldo_actual_cuenta,
+      estado_cuenta_cuenta, fecha_estado_cuenta,
+      gmf_cuenta_cuenta, fecha_gmf_cuenta,
+      cuota_mensual_cuenta, retencion_fuente_cuenta, plazo_cuenta,
+      fecha_final_cuenta, cuenta_activa,
+      fk_seguridad_creacion, fk_seguridad_edicion, fecha_creacion, fecha_edicion
+    )
+    VALUES (
+      v_codigo_agencia, v_codigo_forma, v_codigo_cuenta, v_id_persona,
+      v_fecha_apertura, v_saldo_inicial, v_saldo_actual,
+      v_estado, v_fecha_estado,
+      v_gmf, v_fecha_gmf,
+      v_cuota, v_retencion, v_plazo,
+      v_fecha_final, v_cuenta_activa,
+      v_fk_seguridad, v_fk_seguridad, NOW(), NOW()
+    )
+    RETURNING id_cuenta_ahorro INTO v_id_cuenta;
+  END IF;
+
+  RETURN v_id_cuenta;
+END;
+$function$
+"
+depositos,sp_migrar_beneficiario_ahorro,"CREATE OR REPLACE PROCEDURE depositos.sp_migrar_beneficiario_ahorro(IN p_payload jsonb)
+ LANGUAGE plpgsql
+AS $procedure$
+DECLARE
+    j jsonb := COALESCE(p_payload, '{}'::jsonb);
+
+    -- 🔹 Identificador de la cuenta
+    v_id_cuenta integer;
+
+    -- 🔹 Datos del beneficiario
+    v_documento varchar(20);
+    v_nombre varchar(100);
+    v_telefono varchar(7);
+    v_celular varchar(10);
+    v_parentesco char(2);
+
+    -- 🔹 Auditoría
+    v_fk_seguridad integer := 1;
+BEGIN
+    --------------------------------------------------------------------
+    -- 🟩 Validación mínima
+    --------------------------------------------------------------------
+    v_id_cuenta := NULLIF(btrim(j->>'id_cuenta_ahorro'), '')::integer;
+
+    IF v_id_cuenta IS NULL OR v_id_cuenta <= 0 THEN
+        RAISE EXCEPTION 'id_cuenta_ahorro es obligatorio y debe ser > 0';
+    END IF;
+
+    --------------------------------------------------------------------
+    -- 🟦 Normalización de campos
+    --------------------------------------------------------------------
+    v_documento := LEFT(TRIM(COALESCE(j->>'documento_beneficiario','')), 20);
+    v_nombre := LEFT(TRIM(COALESCE(j->>'nombre_beneficiario','')), 100);
+    v_telefono := LEFT(TRIM(COALESCE(j->>'telefono_beneficiario','')), 7);
+    v_celular := LEFT(TRIM(COALESCE(j->>'celular_beneficiario','')), 10);
+    v_parentesco := LEFT(TRIM(COALESCE(j->>'tipo_parentesco','')), 2);
+
+    IF v_nombre IS NULL OR v_nombre = '' THEN
+        RAISE EXCEPTION 'El campo nombre_beneficiario es obligatorio';
+    END IF;
+
+    --------------------------------------------------------------------
+    -- 🟧 Inserción directa (sin control de duplicado)
+    --------------------------------------------------------------------
+    INSERT INTO depositos.beneficiarios_cuenta_ahorros (
+        id_cuenta_ahorro,
+        documento_beneficiario, nombre_beneficiario,
+        telefono_beneficiario, celular_beneficiario, tipo_parentesco,
+        fk_seguridad_creacion, fecha_creacion,
+        fk_seguridad_edicion, fecha_edicion
+    )
+    VALUES (
+        v_id_cuenta,
+        v_documento, v_nombre,
+        v_telefono, v_celular, v_parentesco,
+        v_fk_seguridad, NOW(),
+        v_fk_seguridad, NOW()
+    );
+
+    RAISE NOTICE '✅ Beneficiario migrado: cuenta=%, documento=% (%).',
+        v_id_cuenta, v_documento, v_nombre;
+END;
+$procedure$
+"
+depositos,sp_migrar_extracto_ahorro,"CREATE OR REPLACE PROCEDURE depositos.sp_migrar_extracto_ahorro(IN p_payload jsonb)
+ LANGUAGE plpgsql
+AS $procedure$
+DECLARE
+    j jsonb := COALESCE(p_payload, '{}'::jsonb);
+
+    -- 🔹 Identificador de la cuenta
+    v_id_cuenta integer;
+
+    -- 🔹 Campos del movimiento
+    v_fecha_movimiento date;
+    v_hora_movimiento  time;
+    v_tipo_comprobante char(2);
+    v_numero_comprobante char(10);
+    v_tipo_movimiento  char(3);
+    v_valor_debito     numeric(18,2) := 0;
+    v_valor_credito    numeric(18,2) := 0;
+    v_modulo           char(2);
+    v_tarjeta          char(1) := 'N';
+    v_establecimiento  text;
+
+    -- 🔹 Auditoría (fijo por defecto)
+    v_fk_seguridad integer := 1;
+BEGIN
+    --------------------------------------------------------------------
+    -- 🔸 Validación del ID de cuenta
+    --------------------------------------------------------------------
+    v_id_cuenta := NULLIF(btrim(j->>'id_cuenta_ahorro'), '')::integer;
+
+    IF v_id_cuenta IS NULL OR v_id_cuenta <= 0 THEN
+        RAISE EXCEPTION 'id_cuenta_ahorro es obligatorio y debe ser > 0';
+    END IF;
+
+    --------------------------------------------------------------------
+    -- 🔸 Normalización de datos del movimiento
+    --------------------------------------------------------------------
+    v_fecha_movimiento  := COALESCE(NULLIF(btrim(j->>'fecha_movimiento'), '')::date, CURRENT_DATE);
+    v_hora_movimiento   := COALESCE(NULLIF(btrim(j->>'hora_movimiento'), '')::time, CURRENT_TIME);
+    v_tipo_comprobante  := left(COALESCE(j->>'tipo_comprobante',''), 2);
+    v_numero_comprobante := left(COALESCE(j->>'numero_comprobante',''), 10);
+    v_tipo_movimiento   := left(COALESCE(j->>'tipo_movimiento',''), 3);
+    v_valor_debito      := COALESCE(NULLIF(btrim(j->>'valor_debito'), '')::numeric, 0);
+    v_valor_credito     := COALESCE(NULLIF(btrim(j->>'valor_credito'), '')::numeric, 0);
+    v_modulo            := left(COALESCE(j->>'modulo',''), 2);
+    v_tarjeta           := COALESCE(NULLIF(btrim(j->>'tarjeta'), '')::char(1), 'N');
+    v_establecimiento   := left(COALESCE(j->>'establecimiento',''), 100);
+
+    IF v_tipo_movimiento IS NULL THEN
+        RAISE EXCEPTION 'El campo tipo_movimiento es obligatorio';
+    END IF;
+
+    IF v_valor_debito = 0 AND v_valor_credito = 0 THEN
+        RAISE EXCEPTION 'El movimiento debe tener algún valor (débito o crédito)';
+    END IF;
+
+    --------------------------------------------------------------------
+    -- 🔸 Inserción directa
+    --------------------------------------------------------------------
+    INSERT INTO depositos.extractos_cuentas_ahorros (
+        id_cuenta_ahorro,
+        fecha_movimiento, hora_movimiento,
+        tipo_comprobante, numero_comprobante,
+        tipo_movimiento, valor_debito, valor_credito,
+        modulo, tarjeta, establecimiento,
+        fk_seguridad_creacion, fecha_creacion,
+        fk_seguridad_edicion, fecha_edicion
+    )
+    VALUES (
+        v_id_cuenta,
+        v_fecha_movimiento, v_hora_movimiento,
+        v_tipo_comprobante, v_numero_comprobante,
+        v_tipo_movimiento, v_valor_debito, v_valor_credito,
+        v_modulo, v_tarjeta, v_establecimiento,
+        v_fk_seguridad, now(),
+        v_fk_seguridad, now()
+    );
+END;
+$procedure$
+"
+depositos,sp_migrar_poder_ahorro,"CREATE OR REPLACE PROCEDURE depositos.sp_migrar_poder_ahorro(IN p_payload jsonb)
+ LANGUAGE plpgsql
+AS $procedure$
+DECLARE
+    j jsonb := COALESCE(p_payload, '{}'::jsonb);
+
+    -- 🔹 Identificador de la cuenta
+    v_id_cuenta integer;
+
+    -- 🔹 Datos del poder
+    v_documento varchar(20);
+    v_nombre    varchar(100);
+    v_telefono  varchar(7);
+    v_celular   varchar(10);
+
+    -- 🔹 Auditoría
+    v_fk_seguridad integer := 1;
+BEGIN
+    --------------------------------------------------------------------
+    -- 🟩 Validación básica
+    --------------------------------------------------------------------
+    v_id_cuenta := NULLIF(btrim(j->>'id_cuenta_ahorro'), '')::integer;
+
+    IF v_id_cuenta IS NULL OR v_id_cuenta <= 0 THEN
+        RAISE EXCEPTION 'id_cuenta_ahorro es obligatorio y debe ser > 0';
+    END IF;
+
+    --------------------------------------------------------------------
+    -- 🟦 Normalización de campos del poder
+    --------------------------------------------------------------------
+    v_documento := LEFT(TRIM(COALESCE(j->>'documento_poder','')), 20);
+    v_nombre    := LEFT(TRIM(COALESCE(j->>'nombre_poder','')), 100);
+    v_telefono  := LEFT(TRIM(COALESCE(j->>'telefono_poder','')), 7);
+    v_celular   := LEFT(TRIM(COALESCE(j->>'celular_poder','')), 10);
+
+    IF v_documento IS NULL OR v_documento = '' OR v_nombre IS NULL OR v_nombre = '' THEN
+        RAISE EXCEPTION 'Los campos documento_poder y nombre_poder son obligatorios.';
+    END IF;
+
+    --------------------------------------------------------------------
+    -- 🟧 Inserción directa (sin control de duplicado)
+    --------------------------------------------------------------------
+    INSERT INTO depositos.poderes_cuentas_ahorro (
+        id_cuenta,
+        documento_poder, nombre_poder,
+        telefono_poder, celular_poder,
+        fk_seguridad_creacion, fecha_creacion,
+        fk_seguridad_edicion, fecha_edicion
+    )
+    VALUES (
+        v_id_cuenta,
+        v_documento, v_nombre,
+        v_telefono, v_celular,
+        v_fk_seguridad, NOW(),
+        v_fk_seguridad, NOW()
+    );
+
+    RAISE NOTICE '✅ Poder migrado: cuenta=%, documento=% (%).',
+        v_id_cuenta, v_documento, v_nombre;
+END;
+$procedure$
+"
+hoja_vida,pg_guardar_datos_familiares_json,"CREATE OR REPLACE PROCEDURE hoja_vida.pg_guardar_datos_familiares_json(IN p_id_datos_personal integer, IN p_payload jsonb, IN p_fk_seguridad integer)
+ LANGUAGE plpgsql
+AS $procedure$
+DECLARE
+    j jsonb := COALESCE(p_payload, '{}'::jsonb);
+
+    v_nombre   text;
+    v_dir      text;
+    v_id_departamento integer;
+    v_id_ciudad       integer;
+    v_tel   text;
+    v_cel   text;
+    v_cod_parentesco text;
+    v_exists int;
+    v_fk_seguridad integer := COALESCE(p_fk_seguridad, 1);
+BEGIN
+    -- 🔸 Validación del identificador principal
+    IF p_id_datos_personal IS NULL THEN
+        RAISE EXCEPTION 'id_datos_personal es obligatorio';
+    END IF;
+
+    -- 🔸 Campos requeridos
+    v_nombre := LEFT(COALESCE(NULLIF(btrim(j->>'nombre_referencia_familiar'),''), ''), 100);
+    v_dir    := LEFT(COALESCE(NULLIF(btrim(j->>'direccion_referencia_familiar'),''), ''), 100);
+
+    IF v_nombre = '' THEN
+        RAISE EXCEPTION 'nombre_referencia_familiar es obligatorio';
+    END IF;
+    IF v_dir = '' THEN
+        RAISE EXCEPTION 'direccion_referencia_familiar es obligatoria';
+    END IF;
+
+    -- 🔸 Catálogos (IDs)
+    v_id_departamento := NULLIF(j->>'id_departamento','')::int;
+    v_id_ciudad       := NULLIF(j->>'id_ciudad','')::int;
+
+    -- 🔸 Teléfonos: sólo dígitos válidos
+    v_tel := NULLIF(regexp_replace(COALESCE(j->>'telefono_referencia_familiar',''), '\D', '', 'g'), '');
+    IF v_tel IS NOT NULL AND length(v_tel) <> 7 THEN v_tel := NULL; END IF;
+
+    v_cel := NULLIF(regexp_replace(COALESCE(j->>'celular_referencia_familiar',''), '\D', '', 'g'), '');
+    IF v_cel IS NOT NULL AND length(v_cel) <> 10 THEN v_cel := NULL; END IF;
+
+    -- 🔸 Parentesco: validar contra catálogo
+    v_cod_parentesco := upper(left(NULLIF(btrim(j->>'codigo_parentesco'), ''), 2));
+    IF v_cod_parentesco IS NOT NULL THEN
+        SELECT 1 INTO v_exists FROM catalogos.parentescos p WHERE p.codigo_parentesco = v_cod_parentesco;
+        IF NOT FOUND THEN v_cod_parentesco := NULL; END IF;
+    END IF;
+
+    -- 🔸 Inserción directa (1:N → varias filas permitidas por persona)
+    INSERT INTO hoja_vida.datos_familiares (
+        id_datos_personal,
+        codigo_parentesco,
+        nombre_datos_familiar,
+        direccion_datos_familiar,
+        id_departamento,
+        id_ciudad,
+        telefono_datos_familiar,
+        celular_datos_familiar,
+        fk_seguridad_creacion,
+        fecha_creacion,
+        fk_seguridad_edicion,
+        fecha_edicion
+    )
+    VALUES (
+        p_id_datos_personal,
+        v_cod_parentesco,
+        v_nombre,
+        v_dir,
+        v_id_departamento,
+        v_id_ciudad,
+        v_tel,
+        v_cel,
+        v_fk_seguridad, now(),
+        v_fk_seguridad, now()
+    );
+END;
+$procedure$
+"
+hoja_vida,pg_guardar_datos_personales_json,"CREATE OR REPLACE FUNCTION hoja_vida.pg_guardar_datos_personales_json(p_data jsonb, p_id integer DEFAULT NULL::integer)
+ RETURNS integer
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+  -- Tabla destino FIJA
+  p_target CONSTANT regclass := 'hoja_vida.datos_personales'::regclass;
+
+  v_sql  text;
+  v_id   integer;
+  pkcol  name;
+
+  ins_cols text;
+  ins_vals text;
+  upd_set  text;
+
+  has_conflict_cols boolean;
+  json_keys  text;
+  tdoc text := p_data->>'tipo_documento';
+  doc  text := p_data->>'documento';
+
+  -- control de timestamps
+  has_fc  boolean;  -- existe columna fecha_creacion
+  has_fe  boolean;  -- existe columna fecha_edicion
+  fc_typ  text;     -- tipo real de fecha_creacion
+  fe_typ  text;     -- tipo real de fecha_edicion
+
+  _sep text;
+BEGIN
+  -- PK de la tabla (busca la PK real; si no la encuentra, intenta nombres típicos)
+  SELECT a.attname INTO pkcol
+  FROM pg_index i
+  JOIN pg_attribute a ON a.attrelid = i.indrelid AND a.attnum = ANY(i.indkey)
+  WHERE i.indrelid = p_target AND i.indisprimary
+  LIMIT 1;
+
+  IF pkcol IS NULL THEN
+    SELECT a.attname INTO pkcol
+    FROM pg_attribute a
+    WHERE a.attrelid = p_target
+      AND a.attnum > 0 AND NOT a.attisdropped
+      AND a.attname IN ('id_datos_personal','id_datos_personales','id_persona','id')
+    LIMIT 1;
+  END IF;
+
+  IF pkcol IS NULL THEN
+    RAISE EXCEPTION 'No se pudo determinar la PK de %', p_target::text;
+  END IF;
+
+  -- columnas de timestamps presentes y sus tipos
+  SELECT EXISTS (
+           SELECT 1 FROM pg_attribute
+           WHERE attrelid = p_target AND attname = 'fecha_creacion'
+                 AND attnum > 0 AND NOT attisdropped
+         ),
+         EXISTS (
+           SELECT 1 FROM pg_attribute
+           WHERE attrelid = p_target AND attname = 'fecha_edicion'
+                 AND attnum > 0 AND NOT attisdropped
+         )
+    INTO has_fc, has_fe;
+
+  IF has_fc THEN
+    SELECT format_type(a.atttypid, a.atttypmod)
+      INTO fc_typ
+    FROM pg_attribute a
+    WHERE a.attrelid = p_target
+      AND a.attname = 'fecha_creacion'
+      AND a.attnum > 0 AND NOT a.attisdropped
+    LIMIT 1;
+  END IF;
+
+  IF has_fe THEN
+    SELECT format_type(a.atttypid, a.atttypmod)
+      INTO fe_typ
+    FROM pg_attribute a
+    WHERE a.attrelid = p_target
+      AND a.attname = 'fecha_edicion'
+      AND a.attnum > 0 AND NOT a.attisdropped
+    LIMIT 1;
+  END IF;
+
+  -- Claves del JSON (diagnóstico)
+  SELECT string_agg(k, ', ' ORDER BY k) INTO json_keys
+  FROM jsonb_object_keys(p_data) AS k;
+
+  -- Si viene PK explícita, UPDATE parcial con solo campos presentes en el JSON
+  IF p_id IS NOT NULL THEN
+    WITH cols AS (
+      SELECT a.attname AS col,
+             format('(NULLIF($1::jsonb->>%L, ''''))::%s',
+                    a.attname, format_type(a.atttypid, a.atttypmod)) AS cast_expr
+      FROM pg_attribute a
+      WHERE a.attrelid = p_target
+        AND a.attnum > 0 AND NOT a.attisdropped
+        AND a.attname <> pkcol
+        AND (p_data ? a.attname)
+    )
+    SELECT string_agg(format('%I = %s', col, cast_expr), ',')
+      INTO upd_set
+    FROM cols;
+
+    -- Garantiza fecha_edicion en UPDATE por PK
+    IF has_fe THEN
+      IF upd_set IS NULL OR upd_set = '' THEN
+        IF (p_data ? 'fecha_edicion') THEN
+          upd_set := format('fecha_edicion = (NULLIF($1::jsonb->>%L, ''''))::%s',
+                            'fecha_edicion', fe_typ);
+        ELSE
+          upd_set := format('fecha_edicion = now()::%s', fe_typ);
+        END IF;
+      ELSE
+        IF (p_data ? 'fecha_edicion') THEN
+          upd_set := upd_set || ', ' ||
+                     format('fecha_edicion = (NULLIF($1::jsonb->>%L, ''''))::%s',
+                            'fecha_edicion', fe_typ);
+        ELSE
+          upd_set := upd_set || ', ' || format('fecha_edicion = now()::%s', fe_typ);
+        END IF;
+      END IF;
+    END IF;
+
+    IF upd_set IS NULL OR upd_set = '' THEN
+      RAISE EXCEPTION 'El JSON no contiene columnas válidas para %', p_target::text
+      USING DETAIL = 'Claves JSON: '||COALESCE(json_keys,'(vacío)');
+    END IF;
+
+    v_sql := 'UPDATE '|| p_target::text ||' SET '|| upd_set ||
+             ' WHERE '|| quote_ident(pkcol) ||' = $2 ' ||
+             ' RETURNING '|| quote_ident(pkcol);
+
+    EXECUTE v_sql USING p_data, p_id INTO v_id;
+
+    IF v_id IS NULL THEN
+      RAISE EXCEPTION 'UPDATE no devolvió ID'
+      USING DETAIL = v_sql, HINT = 'Claves JSON: '||COALESCE(json_keys,'(vacío)');
+    END IF;
+
+    RETURN v_id;
+  END IF;
+
+  -- UPSERT por (tipo_documento, documento)
+  SELECT (SELECT COUNT(*) FROM pg_attribute
+          WHERE attrelid = p_target AND attname IN ('tipo_documento','documento')) = 2
+    INTO has_conflict_cols;
+
+  IF NOT has_conflict_cols THEN
+    RAISE EXCEPTION 'La tabla % no tiene (tipo_documento, documento) para upsert', p_target::text;
+  END IF;
+  IF tdoc IS NULL OR tdoc = '' OR doc IS NULL OR doc = '' THEN
+    RAISE EXCEPTION 'El JSON debe incluir tipo_documento y documento para el upsert'
+    USING DETAIL = 'Claves JSON: '||COALESCE(json_keys,'(vacío)');
+  END IF;
+
+  WITH cols AS (
+    SELECT a.attname AS col,
+           format('(NULLIF($1::jsonb->>%L, ''''))::%s',
+                  a.attname, format_type(a.atttypid, a.atttypmod)) AS cast_expr
+    FROM pg_attribute a
+    WHERE a.attrelid = p_target
+      AND a.attnum > 0 AND NOT a.attisdropped
+      AND a.attname <> pkcol
+      AND (p_data ? a.attname)
+  ),
+  cols_ins AS (
+    SELECT col, cast_expr FROM cols
+  ),
+  cols_upd AS (
+    SELECT col FROM cols
+    WHERE col NOT IN ('tipo_documento','documento', pkcol)
+  )
+  SELECT 
+    (SELECT string_agg(quote_ident(ci.col), ',') FROM cols_ins ci),
+    (SELECT string_agg(ci.cast_expr, ',')        FROM cols_ins ci),
+    (SELECT string_agg(format('%I = EXCLUDED.%I', cu.col, cu.col), ',') FROM cols_upd cu)
+  INTO ins_cols, ins_vals, upd_set;
+
+  -- Agrega fechas si faltan
+  IF ins_cols IS NULL THEN ins_cols := ''; END IF;
+  IF ins_vals IS NULL THEN ins_vals := ''; END IF;
+
+  IF has_fc AND NOT (p_data ? 'fecha_creacion') THEN
+    _sep := CASE WHEN ins_cols = '' THEN '' ELSE ',' END;
+    ins_cols := ins_cols || _sep || 'fecha_creacion';
+    ins_vals := ins_vals || _sep || format('now()::%s', fc_typ);
+  END IF;
+
+  IF has_fe AND NOT (p_data ? 'fecha_edicion') THEN
+    _sep := CASE WHEN ins_cols = '' THEN '' ELSE ',' END;
+    ins_cols := ins_cols || _sep || 'fecha_edicion';
+    ins_vals := ins_vals || _sep || format('now()::%s', fe_typ);
+  END IF;
+
+  IF ins_cols = '' OR ins_vals = '' THEN
+    RAISE EXCEPTION 'El JSON no contiene columnas válidas para %', p_target::text
+    USING DETAIL = 'Claves JSON: '||COALESCE(json_keys,'(vacío)');
+  END IF;
+
+  -- Actualiza fecha_edicion al hacer upsert
+  IF has_fe THEN
+    IF upd_set IS NULL OR upd_set = '' THEN
+      upd_set := format('fecha_edicion = now()::%s', fe_typ);
+    ELSE
+      upd_set := upd_set || ', ' || format('fecha_edicion = now()::%s', fe_typ);
+    END IF;
+  END IF;
+
+  IF upd_set IS NULL OR upd_set = '' THEN
+    upd_set := quote_ident(pkcol)||'='||quote_ident(pkcol);
+  END IF;
+
+  v_sql := 'INSERT INTO '|| p_target::text ||' ('|| ins_cols ||') VALUES ('|| ins_vals ||') ' ||
+           'ON CONFLICT (tipo_documento, documento) DO UPDATE SET ' || upd_set ||
+           ' RETURNING '|| quote_ident(pkcol);
+
+  EXECUTE v_sql USING p_data INTO v_id;
+
+  -- Fallback
+  IF v_id IS NULL THEN
+    EXECUTE format(
+      'SELECT %I FROM %s WHERE tipo_documento = $1 AND documento = $2 LIMIT 1',
+      pkcol, p_target::text
+    ) USING tdoc, doc INTO v_id;
+  END IF;
+
+  IF v_id IS NULL THEN
+    RAISE EXCEPTION 'UPSERT no devolvió ID ni fallback encontró fila'
+    USING DETAIL = v_sql,
+          HINT = 'Verifique PK/DEFAULT e índice único (tipo_documento,documento).';
+  END IF;
+
+  RETURN v_id;
+END;
+$function$
+"
+hoja_vida,pg_guardar_financiero_json,"CREATE OR REPLACE PROCEDURE hoja_vida.pg_guardar_financiero_json(IN p_id_datos_personal integer, IN p_payload jsonb, IN p_fk_seguridad integer)
+ LANGUAGE plpgsql
+AS $procedure$
+DECLARE
+    j jsonb := COALESCE(p_payload, '{}'::jsonb);
+
+    -- numéricos (default 0)
+    v_valor_salario             numeric(18,2) := 0;
+    v_valor_pension             numeric(18,2) := 0;
+    v_ingresos_arriendo         numeric(18,2) := 0;
+    v_ingresos_comisiones       numeric(18,2) := 0;
+    v_otros_ingresos            numeric(18,2) := 0;
+    v_egresos_familiares        numeric(18,2) := 0;
+    v_egresos_arriendo          numeric(18,2) := 0;
+    v_egresos_credito           numeric(18,2) := 0;
+    v_otros_egresos             numeric(18,2) := 0;
+    v_total_activos             numeric(18,2) := 0;
+    v_total_pasivos             numeric(18,2) := 0;
+    v_deuda_relacion_financiera numeric(18,2) := 0;
+
+    -- textos (recortar a 100)
+    v_com_otros_ingresos text;
+    v_com_otros_egresos  text;
+    v_origen_fondos      text;
+    v_relacion_fin       text;
+
+    v_fk_seguridad integer := COALESCE(p_fk_seguridad, 1);
+BEGIN
+    -- Validación de ID
+    IF p_id_datos_personal IS NULL THEN
+        RAISE EXCEPTION 'id_datos_personal es obligatorio';
+    END IF;
+
+    -- ========= numéricos: si vienen vacíos -> 0 =========
+    v_valor_salario             := COALESCE(NULLIF(btrim(j->>'valor_salario'),             '')::numeric, 0);
+    v_valor_pension             := COALESCE(NULLIF(btrim(j->>'valor_pension'),             '')::numeric, 0);
+    v_ingresos_arriendo         := COALESCE(NULLIF(btrim(j->>'ingresos_arriendo'),         '')::numeric, 0);
+    v_ingresos_comisiones       := COALESCE(NULLIF(btrim(j->>'ingresos_comisiones'),       '')::numeric, 0);
+    v_otros_ingresos            := COALESCE(NULLIF(btrim(j->>'otros_ingresos'),            '')::numeric, 0);
+    v_egresos_familiares        := COALESCE(NULLIF(btrim(j->>'egresos_familiares'),        '')::numeric, 0);
+    v_egresos_arriendo          := COALESCE(NULLIF(btrim(j->>'egresos_arriendo'),          '')::numeric, 0);
+    v_egresos_credito           := COALESCE(NULLIF(btrim(j->>'egresos_credito'),           '')::numeric, 0);
+    v_otros_egresos             := COALESCE(NULLIF(btrim(j->>'otros_egresos'),             '')::numeric, 0);
+    v_total_activos             := COALESCE(NULLIF(btrim(j->>'total_activos'),             '')::numeric, 0);
+    v_total_pasivos             := COALESCE(NULLIF(btrim(j->>'total_pasivos'),             '')::numeric, 0);
+    v_deuda_relacion_financiera := COALESCE(NULLIF(btrim(j->>'deuda_relacion_financiera'), '')::numeric, 0);
+
+    -- ========= textos: recortar a 100 =========
+    v_com_otros_ingresos := left(COALESCE((j->>'comentario_otros_ingresos'), ''), 100);
+    v_com_otros_egresos  := left(COALESCE((j->>'comentario_otros_egresos'),  ''), 100);
+    v_origen_fondos      := left(COALESCE((j->>'origen_fondos'),             ''), 100);
+    v_relacion_fin       := left(COALESCE((j->>'relacion_financiera'),       ''), 100);
+
+    -- ========= Inserción =========
+    INSERT INTO hoja_vida.financieros (
+        id_datos_personal,
+        valor_salario, valor_pension, ingresos_arriendo, ingresos_comisiones, otros_ingresos,
+        comentario_otros_ingresos,
+        egresos_familiares, egresos_arriendo, egresos_credito, otros_egresos,
+        comentario_otros_egresos,
+        total_activos, total_pasivos,
+        origen_fondos, relacion_financiera, deuda_relacion_financiera,
+        fk_seguridad_creacion, fecha_creacion,
+        fk_seguridad_edicion, fecha_edicion
+    )
+    VALUES (
+        p_id_datos_personal,
+        v_valor_salario, v_valor_pension, v_ingresos_arriendo, v_ingresos_comisiones, v_otros_ingresos,
+        v_com_otros_ingresos,
+        v_egresos_familiares, v_egresos_arriendo, v_egresos_credito, v_otros_egresos,
+        v_com_otros_egresos,
+        v_total_activos, v_total_pasivos,
+        v_origen_fondos, v_relacion_fin, v_deuda_relacion_financiera,
+        v_fk_seguridad, now(),
+        v_fk_seguridad, now()
+    );
+END;
+$procedure$
+"
+hoja_vida,pg_guardar_laboral_json,"CREATE OR REPLACE PROCEDURE hoja_vida.pg_guardar_laboral_json(IN p_id_datos_personal integer, IN p_payload jsonb, IN p_fk_seguridad integer DEFAULT 1, IN p_usuario text DEFAULT 'system'::text)
+ LANGUAGE plpgsql
+AS $procedure$
+DECLARE
+    j jsonb := COALESCE(p_payload, '{}'::jsonb);
+
+    v_nom_emp   text;
+    v_dir       text;
+
+    v_id_pais         integer;
+    v_id_departamento integer;
+    v_id_ciudad       integer;
+
+    v_tel_emp   text;
+    v_cel_emp   text;
+    v_correo    text;
+
+    v_cod_tipo_emp      text;
+    v_cod_tipo_contrato text;
+    v_cod_jornada       text;
+
+    v_emp_ent   boolean;
+    v_nom_cto   text;
+    v_cel_cto   text;
+
+    v_fecha_txt  text;
+    v_fecha_vinc date;
+
+    v_fk_seguridad integer := COALESCE(p_fk_seguridad, 1);
+    v_exists int;
+BEGIN
+    -- Validar persona
+    IF p_id_datos_personal IS NULL THEN
+        RAISE EXCEPTION 'id_datos_personal es obligatorio';
+    END IF;
+
+    -- Campos requeridos
+    v_nom_emp := left(coalesce(nullif(btrim(j->>'nombre_empresa'),''), ''), 100);
+    v_dir     := left(coalesce(nullif(btrim(j->>'direccion'),''), ''), 100);
+    IF v_nom_emp = '' THEN RAISE EXCEPTION 'nombre_empresa es obligatorio'; END IF;
+    IF v_dir     = '' THEN RAISE EXCEPTION 'direccion es obligatoria'; END IF;
+
+    -- Catálogos geográficos
+    v_id_pais         := NULLIF(j->>'id_pais', '')::int;
+    v_id_departamento := NULLIF(j->>'id_departamento', '')::int;
+    v_id_ciudad       := NULLIF(j->>'id_ciudad', '')::int;
+
+    -- Teléfonos
+    v_tel_emp := NULLIF(regexp_replace(coalesce(j->>'telefono_empresa',''), '\D','','g'), '');
+    IF v_tel_emp IS NOT NULL AND length(v_tel_emp) <> 7 THEN v_tel_emp := NULL; END IF;
+
+    v_cel_emp := NULLIF(regexp_replace(coalesce(j->>'celular_empresa',''), '\D','','g'), '');
+    IF v_cel_emp IS NOT NULL AND length(v_cel_emp) <> 10 THEN v_cel_emp := NULL; END IF;
+
+    -- Correo (formato válido)
+    v_correo := left(NULLIF(btrim(j->>'correo_empresa'), ''), 100);
+    IF v_correo IS NOT NULL AND v_correo !~ '^[^@]+@[^@]+\.[^@]+$' THEN
+        v_correo := NULL;
+    END IF;
+
+    -- Códigos (máx 2 chars, mayúscula, validados)
+    v_cod_tipo_emp := upper(left(NULLIF(btrim(j->>'codigo_tipo_empresa'), ''), 2));
+    IF v_cod_tipo_emp IS NOT NULL THEN
+        SELECT 1 INTO v_exists FROM catalogos.tipos_empresas t WHERE t.codigo_tipo_empresa = v_cod_tipo_emp;
+        IF NOT FOUND THEN v_cod_tipo_emp := NULL; END IF;
+    END IF;
+
+    v_cod_tipo_contrato := upper(left(NULLIF(btrim(j->>'codigo_tipo_contrato'), ''), 2));
+    IF v_cod_tipo_contrato IS NOT NULL THEN
+        SELECT 1 INTO v_exists FROM catalogos.tipos_contratos t WHERE t.codigo_tipo_contrato = v_cod_tipo_contrato;
+        IF NOT FOUND THEN v_cod_tipo_contrato := NULL; END IF;
+    END IF;
+
+    v_cod_jornada := upper(left(NULLIF(btrim(j->>'codigo_jornada'), ''), 2));
+    IF v_cod_jornada IS NOT NULL THEN
+        SELECT 1 INTO v_exists FROM catalogos.jornadas_laborales t WHERE t.codigo_jornada = v_cod_jornada;
+        IF NOT FOUND THEN v_cod_jornada := NULL; END IF;
+    END IF;
+
+    -- Booleano
+    v_emp_ent := COALESCE((j->>'empleado_entidad')::boolean, false);
+
+    -- Contacto
+    v_nom_cto := left(coalesce(nullif(btrim(j->>'nombre_contacto'),''), ''), 100);
+    IF v_nom_cto = '' THEN RAISE EXCEPTION 'nombre_contacto es obligatorio'; END IF;
+
+    v_cel_cto := NULLIF(regexp_replace(coalesce(j->>'celular_contacto',''), '\D', '', 'g'), '');
+    IF v_cel_cto IS NOT NULL AND length(v_cel_cto) <> 10 THEN v_cel_cto := NULL; END IF;
+
+    -- Fecha de vinculación
+    v_fecha_txt := NULLIF(btrim(j->>'fecha_vinculacion'), '');
+    v_fecha_vinc := NULL;
+    IF v_fecha_txt IS NOT NULL THEN
+        BEGIN
+            v_fecha_vinc := v_fecha_txt::date;
+        EXCEPTION WHEN others THEN
+            BEGIN
+                v_fecha_vinc := to_date(v_fecha_txt, 'DD/MM/YYYY');
+            EXCEPTION WHEN others THEN
+                v_fecha_vinc := NULL;
+            END;
+        END;
+    END IF;
+
+    -- UPSERT 1:1
+    INSERT INTO hoja_vida.laborales (
+        id_datos_personal,
+        nombre_empresa, direccion,
+        id_pais, id_departamento, id_ciudad,
+        telefono_empresa, celular_empresa, correo_empresa,
+        codigo_tipo_empresa, empleado_entidad,
+        codigo_tipo_contrato, codigo_jornada,
+        nombre_contacto, celular_contacto, fecha_vinculacion,
+        fk_seguridad_creacion, fecha_creacion,
+        fk_seguridad_edicion, fecha_edicion
+    )
+    VALUES (
+        p_id_datos_personal,
+        v_nom_emp, v_dir,
+        v_id_pais, v_id_departamento, v_id_ciudad,
+        v_tel_emp, v_cel_emp, v_correo,
+        v_cod_tipo_emp, v_emp_ent,
+        v_cod_tipo_contrato, v_cod_jornada,
+        v_nom_cto, v_cel_cto, v_fecha_vinc,
+        v_fk_seguridad, now(),
+        v_fk_seguridad, now()
+    )
+    ON CONFLICT (id_datos_personal)
+    DO UPDATE SET
+        nombre_empresa       = EXCLUDED.nombre_empresa,
+        direccion             = EXCLUDED.direccion,
+        id_pais               = EXCLUDED.id_pais,
+        id_departamento       = EXCLUDED.id_departamento,
+        id_ciudad             = EXCLUDED.id_ciudad,
+        telefono_empresa      = EXCLUDED.telefono_empresa,
+        celular_empresa       = EXCLUDED.celular_empresa,
+        correo_empresa        = EXCLUDED.correo_empresa,
+        codigo_tipo_empresa   = EXCLUDED.codigo_tipo_empresa,
+        empleado_entidad      = EXCLUDED.empleado_entidad,
+        codigo_tipo_contrato  = EXCLUDED.codigo_tipo_contrato,
+        codigo_jornada        = EXCLUDED.codigo_jornada,
+        nombre_contacto       = EXCLUDED.nombre_contacto,
+        celular_contacto      = EXCLUDED.celular_contacto,
+        fecha_vinculacion     = EXCLUDED.fecha_vinculacion,
+        fk_seguridad_edicion  = EXCLUDED.fk_seguridad_edicion,
+        fecha_edicion         = now();
+END;
+$procedure$
+"
+hoja_vida,pg_guardar_permisos_especiales_json,"CREATE OR REPLACE PROCEDURE hoja_vida.pg_guardar_permisos_especiales_json(IN p_id_datos_personal integer, IN p_payload jsonb, IN p_fk_seguridad integer)
+ LANGUAGE plpgsql
+AS $procedure$
+/*---------------------------------------------------------------------
+ 📘 Procedimiento: pg_guardar_permisos_especiales_json
+ Esquema: hoja_vida
+ Autor: Carlos González Pérez — ERP ASSIP SOLIDARIA Y FINANCIERA
+ Fecha: 2025-11-06
+----------------------------------------------------------------------
+ 🔹 Descripción:
+ Inserta o actualiza los permisos de comunicación (llamadas, SMS, email,
+ cartas y redes sociales) asociados a un registro de hoja_vida.datos_personales.
+
+ 🔹 Parámetros:
+   p_id_datos_personal → ID del registro principal
+   p_payload            → JSONB con los valores booleanos (true/false)
+   p_fk_seguridad       → ID de usuario auditoría (por defecto: 1)
+---------------------------------------------------------------------*/
+DECLARE
+    j jsonb := COALESCE(p_payload, '{}'::jsonb);
+
+    v_llamadas boolean := false;
+    v_msm      boolean := false;
+    v_emails   boolean := false;
+    v_cartas   boolean := false;
+    v_sociales boolean := false;
+
+    v_fk_seguridad integer := COALESCE(p_fk_seguridad, 1);
+BEGIN
+    -- 🔸 Validación
+    IF p_id_datos_personal IS NULL THEN
+        RAISE EXCEPTION 'id_datos_personal es obligatorio';
+    END IF;
+
+    -- 🔸 Normalización: acepta 'S', 'TRUE', '1' como verdadero
+    v_llamadas := CASE WHEN upper(COALESCE(btrim(j->>'recibe_llamadas'),      '')) IN ('S','TRUE','1') THEN true ELSE false END;
+    v_msm      := CASE WHEN upper(COALESCE(btrim(j->>'recibe_msm'),           '')) IN ('S','TRUE','1') THEN true ELSE false END;
+    v_emails   := CASE WHEN upper(COALESCE(btrim(j->>'recibe_emails'),        '')) IN ('S','TRUE','1') THEN true ELSE false END;
+    v_cartas   := CASE WHEN upper(COALESCE(btrim(j->>'recibe_cartas'),        '')) IN ('S','TRUE','1') THEN true ELSE false END;
+    v_sociales := CASE WHEN upper(COALESCE(btrim(j->>'recibe_redes_sociales'),'')) IN ('S','TRUE','1') THEN true ELSE false END;
+
+    -- 🔸 Inserción o actualización (1:1 con id_datos_personal)
+    INSERT INTO hoja_vida.permisos_especiales (
+        id_datos_personal,
+        recibe_llamadas, recibe_msm, recibe_emails, recibe_cartas, recibe_redes_sociales,
+        fk_seguridad_creacion, fecha_creacion,
+        fk_seguridad_edicion, fecha_edicion
+    )
+    VALUES (
+        p_id_datos_personal,
+        v_llamadas, v_msm, v_emails, v_cartas, v_sociales,
+        v_fk_seguridad, now(),
+        v_fk_seguridad, now()
+    )
+    ON CONFLICT (id_datos_personal) DO UPDATE SET
+        recibe_llamadas       = EXCLUDED.recibe_llamadas,
+        recibe_msm            = EXCLUDED.recibe_msm,
+        recibe_emails         = EXCLUDED.recibe_emails,
+        recibe_cartas         = EXCLUDED.recibe_cartas,
+        recibe_redes_sociales = EXCLUDED.recibe_redes_sociales,
+        fk_seguridad_edicion  = EXCLUDED.fk_seguridad_edicion,
+        fecha_edicion         = now();
+END;
+$procedure$
+"
+hoja_vida,pg_guardar_referencia_personal_json,"CREATE OR REPLACE PROCEDURE hoja_vida.pg_guardar_referencia_personal_json(IN p_id_datos_personal integer, IN p_payload jsonb, IN p_fk_seguridad integer)
+ LANGUAGE plpgsql
+AS $procedure$
+DECLARE
+    j jsonb := COALESCE(p_payload, '{}'::jsonb);
+
+    v_nombre   text;
+    v_dir      text;
+    v_id_departamento integer;
+    v_id_ciudad       integer;
+    v_tel text;
+    v_cel text;
+    v_fk_seg integer := COALESCE(p_fk_seguridad, 1);
+BEGIN
+    IF p_id_datos_personal IS NULL THEN
+        RAISE EXCEPTION 'id_datos_personal es obligatorio';
+    END IF;
+
+    v_nombre := LEFT(COALESCE(NULLIF(btrim(j->>'nombre_referencia_personal'),''), ''), 100);
+    v_dir    := LEFT(COALESCE(NULLIF(btrim(j->>'direccion_referencia_personal'),''), ''), 100);
+    IF v_nombre = '' THEN RAISE EXCEPTION 'nombre_referencia_personal es obligatorio'; END IF;
+    IF v_dir = '' THEN RAISE EXCEPTION 'direccion_referencia_personal es obligatoria'; END IF;
+
+    v_id_departamento := NULLIF(j->>'id_departamento','')::int;
+    v_id_ciudad       := NULLIF(j->>'id_ciudad','')::int;
+
+    v_tel := NULLIF(regexp_replace(COALESCE(j->>'telefono_referencia_personal',''), '\D', '', 'g'), '');
+    IF v_tel IS NOT NULL AND length(v_tel) <> 7 THEN v_tel := NULL; END IF;
+
+    v_cel := NULLIF(regexp_replace(COALESCE(j->>'celular_referencia_personal',''), '\D', '', 'g'), '');
+    IF v_cel IS NOT NULL AND length(v_cel) <> 10 THEN v_cel := NULL; END IF;
+
+    INSERT INTO hoja_vida.referencias_personales (
+        id_datos_personal,
+        nombre_referencia_personal,
+        direccion_referencia_personal,
+        id_departamento,
+        id_ciudad,
+        telefono_referencia_personal,
+        celular_referencia_personal,
+        fk_seguridad_creacion,
+        fecha_creacion,
+        fk_seguridad_edicion,
+        fecha_edicion
+    )
+    VALUES (
+        p_id_datos_personal,
+        v_nombre,
+        v_dir,
+        v_id_departamento,
+        v_id_ciudad,
+        v_tel,
+        v_cel,
+        v_fk_seg, now(),
+        v_fk_seg, now()
+    )
+    ON CONFLICT (id_datos_personal) DO UPDATE SET
+        nombre_referencia_personal     = EXCLUDED.nombre_referencia_personal,
+        direccion_referencia_personal  = EXCLUDED.direccion_referencia_personal,
+        id_departamento                = EXCLUDED.id_departamento,
+        id_ciudad                      = EXCLUDED.id_ciudad,
+        telefono_referencia_personal   = EXCLUDED.telefono_referencia_personal,
+        celular_referencia_personal    = EXCLUDED.celular_referencia_personal,
+        fk_seguridad_edicion           = EXCLUDED.fk_seguridad_edicion,
+        fecha_edicion                  = now();
+END;
+$procedure$
+"
+hoja_vida,pg_guardar_sarlaft_json,"CREATE OR REPLACE PROCEDURE hoja_vida.pg_guardar_sarlaft_json(IN p_id_datos_personal integer, IN p_payload jsonb, IN p_usuario text DEFAULT NULL::text, IN p_fk_seguridad integer DEFAULT 1)
+ LANGUAGE plpgsql
+AS $procedure$
+/*---------------------------------------------------------------------
+ 📘 Procedimiento: pg_guardar_sarlaft_json
+ Esquema: hoja_vida
+ Autor: Carlos González Pérez — ERP ASSIP SOLIDARIA Y FINANCIERA
+ Fecha: 2025-11-06
+----------------------------------------------------------------------
+ 🔹 Descripción:
+ Inserta o actualiza el bloque SARLAFT (UIAF, PEPs y cuentas en el exterior)
+ correspondiente a un registro de hoja_vida.datos_personales.
+
+ 🔹 Parámetros:
+   p_id_datos_personal → ID de persona (obligatorio)
+   p_payload            → JSONB con datos de SARLAFT
+   p_usuario            → Usuario de migración o sistema
+   p_fk_seguridad       → ID de seguridad/auditoría (por defecto 1)
+
+ 🔹 Ejemplo de uso:
+ CALL hoja_vida.pg_guardar_sarlaft_json(
+     101,
+     '{
+        ""exoneracion_uiaf"": true,
+        ""fecha_exoneracion"": ""2024-06-15"",
+        ""asociado_peps"": true,
+        ""tipo_peps"": ""001"",
+        ""observaciones_peps"": ""Miembro activo de organización política"",
+        ""fecha_inicial_peps"": ""2023-01-01"",
+        ""fecha_final_peps"": ""2025-01-01"",
+        ""familia_peps"": false,
+        ""moneda_extranjera"": true,
+        ""observacion_moneda_extranjera"": ""Opera en USD"",
+        ""cuenta_extranjero"": true,
+        ""tipo_moneda_extranjera"": ""USD"",
+        ""numero_cuenta_extranjero"": ""987654321"",
+        ""nombre_banco_extranjero"": ""Bank of America"",
+        ""ciudad_cuenta_extranjero"": ""Miami"",
+        ""pais_cuenta_extranjero"": ""Estados Unidos""
+      }'::jsonb,
+     'vb6_migracion',
+     1
+ );
+---------------------------------------------------------------------*/
+DECLARE
+    j jsonb := COALESCE(p_payload, '{}'::jsonb);
+
+    -- Booleanos
+    v_exon_uiaf  boolean := false;
+    v_asoc_peps  boolean := false;
+    v_fam_peps   boolean := false;
+    v_mon_ext    boolean := false;
+    v_cta_ext    boolean := false;
+
+    -- Fechas
+    v_fexon      date;
+    v_fi_peps    date;
+    v_ff_peps    date;
+
+    -- Códigos / catálogos
+    v_tipo_peps  text;
+    v_tipo_fpeps text;
+    v_cod_parent text;
+    v_exists int;
+
+    -- Campos texto
+    v_obs_peps   text;
+    v_nom_fam    text;
+    v_obs_mon    text;
+    v_tipo_mon   text;
+    v_num_cta    text;
+    v_banco      text;
+    v_ciudad     text;
+    v_pais       text;
+
+    -- Documento familiar
+    v_doc_fam    text;
+
+    -- Auditoría
+    v_usuario      text    := COALESCE(NULLIF(p_usuario,''), 'system');
+    v_fk_seguridad integer := COALESCE(p_fk_seguridad, 1);
+
+    -- Helper temporal
+    v_txt text;
+BEGIN
+    -- 🔸 Validación inicial
+    IF p_id_datos_personal IS NULL THEN
+        RAISE EXCEPTION 'id_datos_personal es obligatorio';
+    END IF;
+
+    -- 🔸 Booleans normalizados
+    v_exon_uiaf := CASE WHEN upper(COALESCE(btrim(j->>'exoneracion_uiaf'),       '')) IN ('S','TRUE','1') THEN true ELSE false END;
+    v_asoc_peps := CASE WHEN upper(COALESCE(btrim(j->>'asociado_peps'),          '')) IN ('S','TRUE','1') THEN true ELSE false END;
+    v_fam_peps  := CASE WHEN upper(COALESCE(btrim(j->>'familia_peps'),           '')) IN ('S','TRUE','1') THEN true ELSE false END;
+    v_mon_ext   := CASE WHEN upper(COALESCE(btrim(j->>'moneda_extranjera'),      '')) IN ('S','TRUE','1') THEN true ELSE false END;
+    v_cta_ext   := CASE WHEN upper(COALESCE(btrim(j->>'cuenta_extranjero'),      '')) IN ('S','TRUE','1') THEN true ELSE false END;
+
+    -- 🔸 Conversión de fechas (acepta ISO o DD/MM/YYYY)
+    PERFORM 1;
+    FOR v_txt, v_fexon IN
+      SELECT j->>'fecha_exoneracion', NULL
+    LOOP
+      IF v_txt IS NOT NULL AND v_txt <> '' THEN
+        BEGIN v_fexon := v_txt::date;
+        EXCEPTION WHEN others THEN
+          BEGIN v_fexon := to_date(v_txt,'DD/MM/YYYY'); EXCEPTION WHEN others THEN v_fexon := NULL; END;
+        END;
+      END IF;
+    END LOOP;
+
+    v_txt := NULLIF(btrim(j->>'fecha_inicial_peps'), '');
+    IF v_txt IS NOT NULL THEN
+      BEGIN v_fi_peps := v_txt::date;
+      EXCEPTION WHEN others THEN
+        BEGIN v_fi_peps := to_date(v_txt,'DD/MM/YYYY'); EXCEPTION WHEN others THEN v_fi_peps := NULL; END;
+      END;
+    END IF;
+
+    v_txt := NULLIF(btrim(j->>'fecha_final_peps'), '');
+    IF v_txt IS NOT NULL THEN
+      BEGIN v_ff_peps := v_txt::date;
+      EXCEPTION WHEN others THEN
+        BEGIN v_ff_peps := to_date(v_txt,'DD/MM/YYYY'); EXCEPTION WHEN others THEN v_ff_peps := NULL; END;
+      END;
+    END IF;
+
+    -- Intercambio si las fechas están invertidas
+    IF v_fi_peps IS NOT NULL AND v_ff_peps IS NOT NULL AND v_fi_peps > v_ff_peps THEN
+      v_txt := v_fi_peps::text;
+      v_fi_peps := v_ff_peps;
+      v_ff_peps := v_txt::date;
+    END IF;
+
+    -- 🔸 Códigos y validaciones
+    v_tipo_peps  := upper(left(NULLIF(btrim(j->>'tipo_peps'), ''), 5));
+    IF v_tipo_peps IS NOT NULL THEN
+      SELECT 1 INTO v_exists FROM catalogos.tipos_peps t WHERE t.tipo_peps = v_tipo_peps;
+      IF NOT FOUND THEN v_tipo_peps := NULL; END IF;
+    END IF;
+
+    v_tipo_fpeps := upper(left(NULLIF(btrim(j->>'tipo_familia_peps'), ''), 5));
+    IF v_tipo_fpeps IS NOT NULL THEN
+      SELECT 1 INTO v_exists FROM catalogos.tipos_peps t WHERE t.tipo_peps = v_tipo_fpeps;
+      IF NOT FOUND THEN v_tipo_fpeps := NULL; END IF;
+    END IF;
+
+    v_cod_parent := upper(left(NULLIF(btrim(j->>'codigo_parentesco'), ''), 2));
+    IF v_cod_parent IS NOT NULL THEN
+      SELECT 1 INTO v_exists FROM catalogos.parentescos p WHERE p.codigo_parentesco = v_cod_parent;
+      IF NOT FOUND THEN v_cod_parent := NULL; END IF;
+    END IF;
+
+    -- 🔸 Documento familiar
+    v_doc_fam := NULLIF(regexp_replace(COALESCE(j->>'cedula_familia_peps',''), '\D', '', 'g'), '');
+
+    -- 🔸 Textos y recortes
+    v_obs_peps := left(COALESCE(j->>'observaciones_peps',''), 300);
+    v_nom_fam  := left(COALESCE(j->>'nombre_familia_peps',''), 100);
+    v_obs_mon  := left(NULLIF(btrim(j->>'observacion_moneda_extranjera'), ''), 200);
+    v_tipo_mon := left(COALESCE(j->>'tipo_moneda_extranjera',''), 20);
+    v_num_cta  := left(COALESCE(j->>'numero_cuenta_extranjero',''), 30);
+    v_banco    := left(COALESCE(j->>'nombre_banco_extranjero',''), 100);
+    v_ciudad   := left(COALESCE(j->>'ciudad_cuenta_extranjero',''), 50);
+    v_pais     := left(COALESCE(j->>'pais_cuenta_extranjero',''), 50);
+
+    -- 🔸 Inserción o actualización
+    INSERT INTO hoja_vida.sarlaft (
+      id_datos_personal,
+      exoneracion_uiaf, fecha_exoneracion,
+      asociado_peps, tipo_peps, observaciones_peps,
+      fecha_inicial_peps, fecha_final_peps,
+      familia_peps, tipo_familia_peps, cedula_familia_peps, codigo_parentesco, nombre_familia_peps,
+      moneda_extranjera, observacion_moneda_extranjera,
+      cuenta_extranjero, tipo_moneda_extranjera, numero_cuenta_extranjero,
+      nombre_banco_extranjero, ciudad_cuenta_extranjero, pais_cuenta_extranjero,
+      fk_seguridad_creacion, fecha_creacion, usuario_creacion,
+      fk_seguridad_edicion, fecha_edicion, usuario_actualizacion
+    )
+    VALUES (
+      p_id_datos_personal,
+      v_exon_uiaf, v_fexon,
+      v_asoc_peps, v_tipo_peps, v_obs_peps,
+      v_fi_peps, v_ff_peps,
+      v_fam_peps, v_tipo_fpeps, v_doc_fam, v_cod_parent, v_nom_fam,
+      v_mon_ext, v_obs_mon,
+      v_cta_ext, v_tipo_mon, v_num_cta,
+      v_banco, v_ciudad, v_pais,
+      v_fk_seguridad, now(), v_usuario,
+      v_fk_seguridad, now(), v_usuario
+    )
+    ON CONFLICT (id_datos_personal) DO UPDATE SET
+      exoneracion_uiaf              = EXCLUDED.exoneracion_uiaf,
+      fecha_exoneracion             = EXCLUDED.fecha_exoneracion,
+      asociado_peps                 = EXCLUDED.asociado_peps,
+      tipo_peps                     = EXCLUDED.tipo_peps,
+      observaciones_peps            = EXCLUDED.observaciones_peps,
+      fecha_inicial_peps            = EXCLUDED.fecha_inicial_peps,
+      fecha_final_peps              = EXCLUDED.fecha_final_peps,
+      familia_peps                  = EXCLUDED.familia_peps,
+      tipo_familia_peps             = EXCLUDED.tipo_familia_peps,
+      cedula_familia_peps           = EXCLUDED.cedula_familia_peps,
+      codigo_parentesco             = EXCLUDED.codigo_parentesco,
+      nombre_familia_peps           = EXCLUDED.nombre_familia_peps,
+      moneda_extranjera             = EXCLUDED.moneda_extranjera,
+      observacion_moneda_extranjera = EXCLUDED.observacion_moneda_extranjera,
+      cuenta_extranjero             = EXCLUDED.cuenta_extranjero,
+      tipo_moneda_extranjera        = EXCLUDED.tipo_moneda_extranjera,
+      numero_cuenta_extranjero      = EXCLUDED.numero_cuenta_extranjero,
+      nombre_banco_extranjero       = EXCLUDED.nombre_banco_extranjero,
+      ciudad_cuenta_extranjero      = EXCLUDED.ciudad_cuenta_extranjero,
+      pais_cuenta_extranjero        = EXCLUDED.pais_cuenta_extranjero,
+      fk_seguridad_edicion          = EXCLUDED.fk_seguridad_edicion,
+      fecha_edicion                 = now(),
+      usuario_actualizacion         = EXCLUDED.usuario_actualizacion;
+END;
+$procedure$
+"
+hoja_vida,pg_guardar_sarlaft_json,"CREATE OR REPLACE PROCEDURE hoja_vida.pg_guardar_sarlaft_json(IN p_id_datos_personal integer, IN p_payload jsonb, IN p_fk_seguridad integer)
+ LANGUAGE plpgsql
+AS $procedure$
+/*---------------------------------------------------------------------
+ 📘 Procedimiento: pg_guardar_sarlaft_json
+ Esquema: hoja_vida
+ Autor: Carlos González Pérez — ERP ASSIP SOLIDARIA Y FINANCIERA
+ Fecha: 2025-11-06
+----------------------------------------------------------------------
+ 🔹 Descripción:
+ Inserta o actualiza el bloque SARLAFT (UIAF, PEPs y cuentas en el exterior)
+ correspondiente a un registro de hoja_vida.datos_personales.
+
+ 🔹 Parámetros:
+   p_id_datos_personal → ID de persona (obligatorio)
+   p_payload            → JSONB con datos de SARLAFT
+   p_fk_seguridad       → ID de seguridad/auditoría (por defecto 1)
+---------------------------------------------------------------------*/
+DECLARE
+    j jsonb := COALESCE(p_payload, '{}'::jsonb);
+
+    -- Booleanos
+    v_exon_uiaf  boolean := false;
+    v_asoc_peps  boolean := false;
+    v_fam_peps   boolean := false;
+    v_mon_ext    boolean := false;
+    v_cta_ext    boolean := false;
+
+    -- Fechas
+    v_fexon      date;
+    v_fi_peps    date;
+    v_ff_peps    date;
+
+    -- Códigos / catálogos
+    v_tipo_peps  text;
+    v_tipo_fpeps text;
+    v_cod_parent text;
+    v_exists int;
+
+    -- Campos texto
+    v_obs_peps   text;
+    v_nom_fam    text;
+    v_obs_mon    text;
+    v_tipo_mon   text;
+    v_num_cta    text;
+    v_banco      text;
+    v_ciudad     text;
+    v_pais       text;
+
+    -- Documento familiar
+    v_doc_fam    text;
+
+    -- Auditoría
+    v_fk_seguridad integer := COALESCE(p_fk_seguridad, 1);
+
+    -- Helper temporal
+    v_txt text;
+BEGIN
+    -- 🔸 Validación inicial
+    IF p_id_datos_personal IS NULL THEN
+        RAISE EXCEPTION 'id_datos_personal es obligatorio';
+    END IF;
+
+    -- 🔸 Booleans normalizados
+    v_exon_uiaf := CASE WHEN upper(COALESCE(btrim(j->>'exoneracion_uiaf'),       '')) IN ('S','TRUE','1') THEN true ELSE false END;
+    v_asoc_peps := CASE WHEN upper(COALESCE(btrim(j->>'asociado_peps'),          '')) IN ('S','TRUE','1') THEN true ELSE false END;
+    v_fam_peps  := CASE WHEN upper(COALESCE(btrim(j->>'familia_peps'),           '')) IN ('S','TRUE','1') THEN true ELSE false END;
+    v_mon_ext   := CASE WHEN upper(COALESCE(btrim(j->>'moneda_extranjera'),      '')) IN ('S','TRUE','1') THEN true ELSE false END;
+    v_cta_ext   := CASE WHEN upper(COALESCE(btrim(j->>'cuenta_extranjero'),      '')) IN ('S','TRUE','1') THEN true ELSE false END;
+
+    -- 🔸 Conversión de fechas (acepta ISO o DD/MM/YYYY)
+    v_txt := NULLIF(btrim(j->>'fecha_exoneracion'), '');
+    IF v_txt IS NOT NULL THEN
+      BEGIN v_fexon := v_txt::date;
+      EXCEPTION WHEN others THEN
+        BEGIN v_fexon := to_date(v_txt,'DD/MM/YYYY'); EXCEPTION WHEN others THEN v_fexon := NULL; END;
+      END;
+    END IF;
+
+    v_txt := NULLIF(btrim(j->>'fecha_inicial_peps'), '');
+    IF v_txt IS NOT NULL THEN
+      BEGIN v_fi_peps := v_txt::date;
+      EXCEPTION WHEN others THEN
+        BEGIN v_fi_peps := to_date(v_txt,'DD/MM/YYYY'); EXCEPTION WHEN others THEN v_fi_peps := NULL; END;
+      END;
+    END IF;
+
+    v_txt := NULLIF(btrim(j->>'fecha_final_peps'), '');
+    IF v_txt IS NOT NULL THEN
+      BEGIN v_ff_peps := v_txt::date;
+      EXCEPTION WHEN others THEN
+        BEGIN v_ff_peps := to_date(v_txt,'DD/MM/YYYY'); EXCEPTION WHEN others THEN v_ff_peps := NULL; END;
+      END;
+    END IF;
+
+    -- Intercambio si las fechas están invertidas
+    IF v_fi_peps IS NOT NULL AND v_ff_peps IS NOT NULL AND v_fi_peps > v_ff_peps THEN
+      v_txt := v_fi_peps::text;
+      v_fi_peps := v_ff_peps;
+      v_ff_peps := v_txt::date;
+    END IF;
+
+    -- 🔸 Códigos y validaciones
+    v_tipo_peps  := upper(left(NULLIF(btrim(j->>'tipo_peps'), ''), 5));
+    IF v_tipo_peps IS NOT NULL THEN
+      SELECT 1 INTO v_exists FROM catalogos.tipos_peps t WHERE t.tipo_peps = v_tipo_peps;
+      IF NOT FOUND THEN v_tipo_peps := NULL; END IF;
+    END IF;
+
+    v_tipo_fpeps := upper(left(NULLIF(btrim(j->>'tipo_familia_peps'), ''), 5));
+    IF v_tipo_fpeps IS NOT NULL THEN
+      SELECT 1 INTO v_exists FROM catalogos.tipos_peps t WHERE t.tipo_peps = v_tipo_fpeps;
+      IF NOT FOUND THEN v_tipo_fpeps := NULL; END IF;
+    END IF;
+
+    v_cod_parent := upper(left(NULLIF(btrim(j->>'codigo_parentesco'), ''), 2));
+    IF v_cod_parent IS NOT NULL THEN
+      SELECT 1 INTO v_exists FROM catalogos.parentescos p WHERE p.codigo_parentesco = v_cod_parent;
+      IF NOT FOUND THEN v_cod_parent := NULL; END IF;
+    END IF;
+
+    -- 🔸 Documento familiar
+    v_doc_fam := NULLIF(regexp_replace(COALESCE(j->>'cedula_familia_peps',''), '\D', '', 'g'), '');
+
+    -- 🔸 Textos y recortes
+    v_obs_peps := left(COALESCE(j->>'observaciones_peps',''), 300);
+    v_nom_fam  := left(COALESCE(j->>'nombre_familia_peps',''), 100);
+    v_obs_mon  := left(NULLIF(btrim(j->>'observacion_moneda_extranjera'), ''), 200);
+    v_tipo_mon := left(COALESCE(j->>'tipo_moneda_extranjera',''), 20);
+    v_num_cta  := left(COALESCE(j->>'numero_cuenta_extranjero',''), 30);
+    v_banco    := left(COALESCE(j->>'nombre_banco_extranjero',''), 100);
+    v_ciudad   := left(COALESCE(j->>'ciudad_cuenta_extranjero',''), 50);
+    v_pais     := left(COALESCE(j->>'pais_cuenta_extranjero',''), 50);
+
+    -- 🔸 Inserción o actualización
+    INSERT INTO hoja_vida.sarlaft (
+      id_datos_personal,
+      exoneracion_uiaf, fecha_exoneracion,
+      asociado_peps, tipo_peps, observaciones_peps,
+      fecha_inicial_peps, fecha_final_peps,
+      familia_peps, tipo_familia_peps, cedula_familia_peps, codigo_parentesco, nombre_familia_peps,
+      moneda_extranjera, observacion_moneda_extranjera,
+      cuenta_extranjero, tipo_moneda_extranjera, numero_cuenta_extranjero,
+      nombre_banco_extranjero, ciudad_cuenta_extranjero, pais_cuenta_extranjero,
+      fk_seguridad_creacion, fecha_creacion,
+      fk_seguridad_edicion, fecha_edicion
+    )
+    VALUES (
+      p_id_datos_personal,
+      v_exon_uiaf, v_fexon,
+      v_asoc_peps, v_tipo_peps, v_obs_peps,
+      v_fi_peps, v_ff_peps,
+      v_fam_peps, v_tipo_fpeps, v_doc_fam, v_cod_parent, v_nom_fam,
+      v_mon_ext, v_obs_mon,
+      v_cta_ext, v_tipo_mon, v_num_cta,
+      v_banco, v_ciudad, v_pais,
+      v_fk_seguridad, now(),
+      v_fk_seguridad, now()
+    )
+    ON CONFLICT (id_datos_personal) DO UPDATE SET
+      exoneracion_uiaf              = EXCLUDED.exoneracion_uiaf,
+      fecha_exoneracion             = EXCLUDED.fecha_exoneracion,
+      asociado_peps                 = EXCLUDED.asociado_peps,
+      tipo_peps                     = EXCLUDED.tipo_peps,
+      observaciones_peps            = EXCLUDED.observaciones_peps,
+      fecha_inicial_peps            = EXCLUDED.fecha_inicial_peps,
+      fecha_final_peps              = EXCLUDED.fecha_final_peps,
+      familia_peps                  = EXCLUDED.familia_peps,
+      tipo_familia_peps             = EXCLUDED.tipo_familia_peps,
+      cedula_familia_peps           = EXCLUDED.cedula_familia_peps,
+      codigo_parentesco             = EXCLUDED.codigo_parentesco,
+      nombre_familia_peps           = EXCLUDED.nombre_familia_peps,
+      moneda_extranjera             = EXCLUDED.moneda_extranjera,
+      observacion_moneda_extranjera = EXCLUDED.observacion_moneda_extranjera,
+      cuenta_extranjero             = EXCLUDED.cuenta_extranjero,
+      tipo_moneda_extranjera        = EXCLUDED.tipo_moneda_extranjera,
+      numero_cuenta_extranjero      = EXCLUDED.numero_cuenta_extranjero,
+      nombre_banco_extranjero       = EXCLUDED.nombre_banco_extranjero,
+      ciudad_cuenta_extranjero      = EXCLUDED.ciudad_cuenta_extranjero,
+      pais_cuenta_extranjero        = EXCLUDED.pais_cuenta_extranjero,
+      fk_seguridad_edicion          = EXCLUDED.fk_seguridad_edicion,
+      fecha_edicion                 = now();
+END;
+$procedure$
+"
+hoja_vida,pg_guardar_ubicacion_json,"CREATE OR REPLACE PROCEDURE hoja_vida.pg_guardar_ubicacion_json(IN p_id_datos_personal integer, IN p_payload jsonb, IN p_fk_seguridad integer DEFAULT 1, IN p_usuario text DEFAULT 'system'::text)
+ LANGUAGE plpgsql
+AS $procedure$
+DECLARE
+    j jsonb := COALESCE(p_payload, '{}'::jsonb);
+
+    v_direccion text;
+    v_barrio    text;
+    v_telefono  text;
+    v_cel1      text;
+    v_cel2      text;
+    v_correo    text;
+
+    v_id_pais           integer;
+    v_id_departamento   integer;
+    v_id_ciudad         integer;
+    v_id_sub_zona       integer;
+
+    v_id_zona           integer;   -- opcional
+    v_id_zona_from_sub  integer;
+
+    v_fk_seguridad integer := COALESCE(p_fk_seguridad, 1);
+BEGIN
+    IF p_id_datos_personal IS NULL THEN
+        RAISE EXCEPTION 'id_datos_personal es obligatorio';
+    END IF;
+
+    -- 🔹 Requeridos
+    v_direccion := left(coalesce(nullif(btrim(j->>'direccion'),''), ''), 100);
+    v_barrio    := left(coalesce(nullif(btrim(j->>'barrio'),   ''), ''), 100);
+    IF v_direccion = '' THEN RAISE EXCEPTION 'direccion es obligatoria'; END IF;
+    IF v_barrio    = '' THEN RAISE EXCEPTION 'barrio es obligatorio';   END IF;
+
+    -- 🔹 Teléfonos/celulares
+    v_telefono := NULLIF(regexp_replace(coalesce(j->>'telefono',''), '\D', '', 'g'), '');
+    IF v_telefono IS NOT NULL AND length(v_telefono) <> 7 THEN v_telefono := NULL; END IF;
+
+    v_cel1 := NULLIF(regexp_replace(coalesce(j->>'celular_uno',''), '\D', '', 'g'), '');
+    IF v_cel1 IS NOT NULL AND length(v_cel1) <> 10 THEN v_cel1 := NULL; END IF;
+
+    v_cel2 := NULLIF(regexp_replace(coalesce(j->>'celular_dos',''), '\D', '', 'g'), '');
+    IF v_cel2 IS NOT NULL AND length(v_cel2) <> 10 THEN v_cel2 := NULL; END IF;
+
+    -- 🔹 Correo
+    v_correo := left(NULLIF(btrim(j->>'correo'), ''), 100);
+
+    -- 🔹 Catálogos
+    v_id_pais         := NULLIF(j->>'id_pais', '')::int;
+    v_id_departamento := NULLIF(j->>'id_departamento', '')::int;
+    v_id_ciudad       := NULLIF(j->>'id_ciudad', '')::int;
+    v_id_sub_zona     := NULLIF(j->>'id_sub_zona', '')::int;
+    v_id_zona         := NULLIF(j->>'id_zona', '')::int;  -- opcional
+
+    -- 🔹 Coherencia sub-zona ↔ zona
+    IF v_id_sub_zona IS NOT NULL THEN
+        SELECT sz.id_zona
+          INTO v_id_zona_from_sub
+          FROM general.sub_zonas sz
+         WHERE sz.id_sub_zona = v_id_sub_zona;
+
+        IF v_id_zona_from_sub IS NULL THEN
+            RAISE EXCEPTION 'id_sub_zona % no existe en general.sub_zonas', v_id_sub_zona;
+        END IF;
+
+        IF v_id_zona IS NOT NULL AND v_id_zona <> v_id_zona_from_sub THEN
+            RAISE EXCEPTION 'Inconsistencia: sub_zona % pertenece a zona %, pero llegó id_zona %',
+                v_id_sub_zona, v_id_zona_from_sub, v_id_zona;
+        END IF;
+    END IF;
+
+    -- 🔹 UPSERT (1:1 con persona)
+    INSERT INTO hoja_vida.ubicaciones (
+    id_datos_personal,
+    direccion, barrio, telefono, celular_uno, celular_dos, correo,
+    id_pais, id_departamento, id_ciudad,
+    id_sub_zona, id_zona,
+    fk_seguridad_creacion, fecha_creacion,
+    fk_seguridad_edicion, fecha_edicion
+	)
+	VALUES (
+	    p_id_datos_personal,
+	    v_direccion, v_barrio, v_telefono, v_cel1, v_cel2, v_correo,
+	    v_id_pais, v_id_departamento, v_id_ciudad,
+	    v_id_sub_zona, v_id_zona,
+	    v_fk_seguridad, now(),
+	    v_fk_seguridad, now()
+	)
+	ON CONFLICT (id_datos_personal)
+	DO UPDATE
+	    SET direccion = EXCLUDED.direccion,
+	        barrio = EXCLUDED.barrio,
+	        telefono = EXCLUDED.telefono,
+	        celular_uno = EXCLUDED.celular_uno,
+	        celular_dos = EXCLUDED.celular_dos,
+	        correo = EXCLUDED.correo,
+	        id_pais = EXCLUDED.id_pais,
+	        id_departamento = EXCLUDED.id_departamento,
+	        id_ciudad = EXCLUDED.id_ciudad,
+	        id_sub_zona = EXCLUDED.id_sub_zona,
+	        id_zona = EXCLUDED.id_zona,
+	        fk_seguridad_edicion = EXCLUDED.fk_seguridad_edicion,
+	        fecha_edicion = now();
+END $procedure$
+"
+seguridad,fn_auto_fecha_edicion,"CREATE OR REPLACE FUNCTION seguridad.fn_auto_fecha_edicion()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  NEW.fecha_edicion := CURRENT_TIMESTAMP;
+  RETURN NEW;
+END;
+$function$
+"
+seguridad,fn_fix_fechas_nulas,"CREATE OR REPLACE FUNCTION seguridad.fn_fix_fechas_nulas()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  IF NEW.fecha_creacion IS NULL THEN
+    NEW.fecha_creacion := CURRENT_TIMESTAMP;
+  END IF;
+  IF NEW.fecha_edicion IS NULL THEN
+    NEW.fecha_edicion := CURRENT_TIMESTAMP;
+  END IF;
+  IF NEW.fecha_actualizacion IS NULL THEN
+    NEW.fecha_actualizacion := CURRENT_DATE;
+  END IF;
+  IF NEW.fecha_apertura IS NULL THEN
+    NEW.fecha_apertura := CURRENT_DATE;
+  END IF;
+  RETURN NEW;
+END;
+$function$
+"
+seguridad,fn_log_cambio_fechas,"CREATE OR REPLACE FUNCTION seguridad.fn_log_cambio_fechas()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+  v_usuario INTEGER;
+BEGIN
+  v_usuario := COALESCE(current_setting('app.user_id', true)::INTEGER, NULL);
+
+  IF (OLD.fecha_actualizacion IS DISTINCT FROM NEW.fecha_actualizacion)
+     OR (OLD.fecha_edicion IS DISTINCT FROM NEW.fecha_edicion)
+     OR (OLD.fecha_apertura IS DISTINCT FROM NEW.fecha_apertura) THEN
+
+    INSERT INTO seguridad.log_evento (
+      esquema, tabla, id_registro, descripcion_evento, fecha_evento, id_usuario
+    )
+    VALUES (
+      TG_TABLE_SCHEMA,
+      TG_TABLE_NAME,
+      COALESCE(NEW.id_datos_personal, NEW.id_agencia),
+      'Cambio de fechas en ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME,
+      CURRENT_TIMESTAMP,
+      v_usuario
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$function$
+"
+seguridad,fn_propagate_fechas_agencia,"CREATE OR REPLACE FUNCTION seguridad.fn_propagate_fechas_agencia()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  UPDATE contabilidad.comprobantes
+  SET fecha_edicion = CURRENT_TIMESTAMP
+  WHERE id_agencia = NEW.id_agencia;
+
+  UPDATE depositos.cuentas
+  SET fecha_edicion = CURRENT_TIMESTAMP
+  WHERE id_agencia = NEW.id_agencia;
+
+  UPDATE cartera.creditos
+  SET fecha_edicion = CURRENT_TIMESTAMP
+  WHERE id_agencia = NEW.id_agencia;
+
+  RETURN NEW;
+END;
+$function$
+"
+seguridad,fn_set_fechas_auditoria,"CREATE OR REPLACE FUNCTION seguridad.fn_set_fechas_auditoria()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    NEW.fecha_creacion := COALESCE(NEW.fecha_creacion, CURRENT_TIMESTAMP);
+    NEW.fecha_edicion := COALESCE(NEW.fecha_edicion, CURRENT_TIMESTAMP);
+  ELSIF TG_OP = 'UPDATE' THEN
+    NEW.fecha_edicion := CURRENT_TIMESTAMP;
+  END IF;
+  RETURN NEW;
+END;
+$function$
+"
+seguridad,fn_sync_fecha_actualizacion,"CREATE OR REPLACE FUNCTION seguridad.fn_sync_fecha_actualizacion()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  UPDATE hoja_vida.datos_personales
+  SET
+    fecha_actualizacion = CURRENT_DATE,
+    fecha_edicion = CURRENT_TIMESTAMP
+  WHERE id_datos_personal = NEW.id_datos_personal;
+  RETURN NEW;
+END;
+$function$
+"
+seguridad,fn_update_fechas_relacionadas,"CREATE OR REPLACE FUNCTION seguridad.fn_update_fechas_relacionadas()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+  UPDATE general.datos_agencias
+  SET fecha_edicion = CURRENT_TIMESTAMP
+  WHERE id_agencia = NEW.id_agencia;
+  RETURN NEW;
+END;
+$function$
+"

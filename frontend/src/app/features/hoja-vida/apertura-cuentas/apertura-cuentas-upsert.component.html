@@ -1,0 +1,182 @@
+<div class="form-container">
+
+  <h3>{{ editando ? 'Editar Cuenta de Ahorro' : 'Nueva Cuenta de Ahorro' }}</h3>
+
+  <!-- ⚠ Bloqueo -->
+  <div *ngIf="mensajeBloqueo" class="alert alert-warning mb-3">
+    {{ mensajeBloqueo }}
+    <br>
+    <small>Debe revisar saldos o ubicación de cuentas.</small>
+  </div>
+
+  <!-- FORMULARIO SOLO SI PERMITIDO -->
+  <form *ngIf="!mensajeBloqueo"
+        [formGroup]="form"
+        (ngSubmit)="guardar()"
+        autocomplete="off">
+
+    <!-- 🧍 APERTURA APORTES -->
+    <fieldset *ngIf="formaAportes">
+      <legend>Cuenta de Aportes Sociales</legend>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Forma asignada</label>
+          <input type="text"
+                 [value]="formaAportes.codigoForma + ' — ' + formaAportes.nombreForma"
+                 disabled />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Próximo código sugerido</label>
+          <input type="text" [value]="codigoAportes" disabled />
+        </div>
+      </div>
+
+      <small class="text-muted">
+        Esta cuenta no aplica GMF ni Retención según política.
+      </small>
+
+      <!-- 🔹 Apoderado para aportes -->
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Apoderado para aportes (obligatorio)</label>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Documento *</label>
+          <input type="text"
+                 maxlength="20"
+                 formControlName="documentoApoderadoAportes"
+                 placeholder="Documento apoderado aportes" />
+        </div>
+
+        <div class="form-group">
+          <label>Nombre *</label>
+          <input type="text"
+                 maxlength="100"
+                 formControlName="nombreApoderadoAportes"
+                 placeholder="Nombre apoderado aportes" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group sm">
+          <label>Teléfono</label>
+          <input type="text"
+                 maxlength="7"
+                 formControlName="telefonoApoderadoAportes"
+                 placeholder="6543210" />
+        </div>
+
+        <div class="form-group sm">
+          <label>Celular</label>
+          <input type="text"
+                 maxlength="10"
+                 formControlName="celularApoderadoAportes"
+                 placeholder="3123456789" />
+        </div>
+      </div>
+    </fieldset>
+
+
+    <!-- 🧍 FORMAS OPCIONALES -->
+    <fieldset *ngIf="formasOpcionales?.length">
+      <legend>Cuentas de Ahorro Opcionales</legend>
+
+      <div class="form-row">
+        <div class="form-group full">
+          <label>Seleccione forma opcional</label>
+          <select formControlName="idFormaAhorro">
+            <option [ngValue]="null">Seleccione...</option>
+            <option *ngFor="let f of formasOpcionales"
+                    [ngValue]="f.idFormaAhorro">
+              {{ f.codigoForma }} — {{ f.nombreForma }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <!-- GMF / Retención -->
+      <div class="form-row" *ngIf="!esAportesSeleccionado">
+        <div class="form-group">
+          <label>Aplica GMF *</label>
+          <select formControlName="gmf">
+            <option value="S">Sí</option>
+            <option value="N">No</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Aplica Retención *</label>
+          <input type="checkbox" formControlName="retencion" />
+        </div>
+      </div>
+
+      <!-- 🔹 Apoderado ahorro opcional -->
+      <div class="form-row mt-2">
+        <div class="form-group full">
+          <label>Apoderado para cuenta opcional (si aplica)</label>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Documento</label>
+          <input type="text"
+                 maxlength="20"
+                 formControlName="documentoApoderadoAhorro"
+                 placeholder="Documento apoderado ahorro" />
+        </div>
+
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text"
+                 maxlength="100"
+                 formControlName="nombreApoderadoAhorro"
+                 placeholder="Nombre apoderado ahorro" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group sm">
+          <label>Teléfono</label>
+          <input type="text"
+                 maxlength="7"
+                 formControlName="telefonoApoderadoAhorro"
+                 placeholder="6543210" />
+        </div>
+
+        <div class="form-group sm">
+          <label>Celular</label>
+          <input type="text"
+                 maxlength="10"
+                 formControlName="celularApoderadoAhorro"
+                 placeholder="3123456789" />
+        </div>
+      </div>
+    </fieldset>
+
+
+    <!-- BOTONES -->
+    <div class="form-actions full">
+      <button type="submit"
+              class="btn btn--primary"
+              [disabled]="form.invalid">
+        💾 {{ editando ? 'Actualizar' : 'Guardar' }}
+      </button>
+
+      <button type="button"
+              class="btn btn--cancel"
+              (click)="cancelar()">
+        ↩️ Cancelar
+      </button>
+    </div>
+
+  </form>
+
+</div>

@@ -11,19 +11,6 @@ import java.util.*;
 /**
  * 🧩 ReportesRepositoryImpl — Búsquedas detalladas seguras
  * ==============================================================
- * Ejecuta consultas dinámicas sobre vistas de cualquier esquema
- * permitido (por defecto "reporting", pero configurable).
- *
- * 🔒 Seguridad:
- * - Sanitiza nombres de esquema y vista
- * - Construye WHERE dinámico con parámetros seguros
- * - Aplica solo filtros explícitos enviados
- * - Limita los resultados (máx. 2000 filas)
- *
- * 🧮 Filtros admitidos:
- *   id_datos_personal, documento, nombres, primer_apellido,
- *   segundo_apellido, codigo_forma, codigo_cuenta, fecha_inicial, fecha_final
- * ==============================================================
  */
 @Repository
 public class ReportesRepositoryImpl {
@@ -43,13 +30,13 @@ public class ReportesRepositoryImpl {
             throw new IllegalArgumentException("Debe especificar la vista de reporte.");
         }
 
-        // ✅ Sanitizar nombre de esquema
+        // Sanitizar esquema
         String schema = (req.getSchema() != null) ? req.getSchema() : "reporting";
         if (!schema.matches("^[a-zA-Z0-9_]+$")) {
             throw new SecurityException("Nombre de esquema no válido.");
         }
 
-        // ✅ Sanitizar nombre de vista
+        // Sanitizar vista
         String vista = req.getView().replaceAll("[^a-zA-Z0-9_]", "");
 
         StringBuilder sql = new StringBuilder("SELECT * FROM " + schema + "." + vista);
@@ -60,11 +47,14 @@ public class ReportesRepositoryImpl {
         // ======================================================
         Map<String, Object> filters = req.getFilters();
         if (filters != null && !filters.isEmpty()) {
+
             StringBuilder where = new StringBuilder();
             int count = 0;
 
-            // 🔹 Filtros por datos personales
-            // 🔹 Filtros por datos personales
+            // ======================================================
+            // 🔹 Filtros de PERSONA
+            // ======================================================
+
             if (filters.get("id_datos_personal") != null && !filters.get("id_datos_personal").toString().isBlank()) {
                 where.append((count++ > 0 ? " AND " : " WHERE "));
                 where.append("id_datos_personal = ?");
@@ -77,64 +67,91 @@ public class ReportesRepositoryImpl {
                 params.add("%" + filters.get("documento").toString().trim() + "%");
             }
 
-// 🔹 Nuevo filtro por forma de ahorro (texto)
-            if (filters.get("forma_ahorro") != null && !filters.get("forma_ahorro").toString().isBlank()) {
+            if (filters.get("nombres") != null && !filters.get("nombres").toString().isBlank()) {
                 where.append((count++ > 0 ? " AND " : " WHERE "));
-                where.append("LOWER(forma_ahorro) ILIKE LOWER(?)");
-                params.add("%" + filters.get("forma_ahorro").toString().trim() + "%");
+                where.append("LOWER(nombres) ILIKE LOWER(?)");
+                params.add("%" + filters.get("nombres").toString().trim() + "%");
             }
 
-// 🔹 Filtro por código de cuenta
+            if (filters.get("primer_apellido") != null && !filters.get("primer_apellido").toString().isBlank()) {
+                where.append((count++ > 0 ? " AND " : " WHERE "));
+                where.append("LOWER(primer_apellido) ILIKE LOWER(?)");
+                params.add("%" + filters.get("primer_apellido").toString().trim() + "%");
+            }
+
+            if (filters.get("segundo_apellido") != null && !filters.get("segundo_apellido").toString().isBlank()) {
+                where.append((count++ > 0 ? " AND " : " WHERE "));
+                where.append("LOWER(segundo_apellido) ILIKE LOWER(?)");
+                params.add("%" + filters.get("segundo_apellido").toString().trim() + "%");
+            }
+
+            // ======================================================
+            // 🔹 Filtros de CUENTA
+            // ======================================================
+
             if (filters.get("codigo_cuenta") != null && !filters.get("codigo_cuenta").toString().isBlank()) {
                 where.append((count++ > 0 ? " AND " : " WHERE "));
                 where.append("CAST(codigo_cuenta AS TEXT) ILIKE ?");
                 params.add("%" + filters.get("codigo_cuenta").toString().trim() + "%");
             }
 
-
-            // ======================================================
-            // 🔸 BLOQUE ACTUALIZADO — ORDEN CORRECTO
-            // ======================================================
-
-            // 🔹 1️⃣ Filtro por código de forma
             if (filters.get("codigo_forma") != null && !filters.get("codigo_forma").toString().isBlank()) {
                 where.append((count++ > 0 ? " AND " : " WHERE "));
                 where.append("CAST(codigo_forma AS TEXT) ILIKE ?");
                 params.add("%" + filters.get("codigo_forma").toString().trim() + "%");
             }
 
-            // 🔹 2️⃣ Filtro por código de cuenta
-            if (filters.get("codigo_cuenta") != null && !filters.get("codigo_cuenta").toString().isBlank()) {
+            if (filters.get("forma_ahorro") != null && !filters.get("forma_ahorro").toString().isBlank()) {
                 where.append((count++ > 0 ? " AND " : " WHERE "));
-                where.append("CAST(codigo_cuenta AS TEXT) ILIKE ?");
-                params.add("%" + filters.get("codigo_cuenta").toString().trim() + "%");
+                where.append("LOWER(forma_ahorro) ILIKE LOWER(?)");
+                params.add("%" + filters.get("forma_ahorro").toString().trim() + "%");
             }
 
-            // 🔹 3️⃣ Filtro por fecha inicial
+            // ======================================================
+            // 🔹 Filtros de FECHAS
+            // ======================================================
+
             if (filters.get("fecha_inicial") != null && !filters.get("fecha_inicial").toString().isBlank()) {
                 where.append((count++ > 0 ? " AND " : " WHERE "));
                 where.append("fecha_movimiento >= TO_DATE(?, 'YYYY-MM-DD')");
                 params.add(filters.get("fecha_inicial").toString().trim());
             }
 
-            // 🔹 4️⃣ Filtro por fecha final
             if (filters.get("fecha_final") != null && !filters.get("fecha_final").toString().isBlank()) {
                 where.append((count++ > 0 ? " AND " : " WHERE "));
                 where.append("fecha_movimiento <= TO_DATE(?, 'YYYY-MM-DD')");
                 params.add(filters.get("fecha_final").toString().trim());
             }
 
-            // ======================================================
+            // ==========================================================
+            // 🔐 Filtro por agencias del usuario (SEGURIDAD CENTRALIZADA)
+            // ==========================================================
+            try {
+                if (!co.assip.erp.seguridad.utils.SecurityUtils.tieneAccesoTotal()) {
+
+                    List<Integer> agenciasUsuario = co.assip.erp.seguridad.utils.SecurityUtils.getAgencias();
+
+                    if (agenciasUsuario != null && !agenciasUsuario.isEmpty()) {
+
+                        where.append((count++ > 0 ? " AND " : " WHERE "));
+                        where.append(" id_agencia = ANY(?) ");
+
+                        params.add(agenciasUsuario.toArray(new Integer[0]));
+                    }
+                }
+            } catch (Exception ignored) {
+                // Si no está SecurityUtils disponible, simplemente no filtra (caso extremo)
+            }
+
             sql.append(where);
         }
 
         // ======================================================
-        // 🔹 Orden y límite de seguridad — adaptado por esquema
+        // 🔹 Orden y límite de seguridad
         // ======================================================
         String orderClause;
 
         if (vista.toLowerCase().contains("extracto")) {
-            // 🕓 Para vistas de extractos: orden cronológico
             orderClause = " ORDER BY fecha_movimiento ASC, hora_movimiento ASC LIMIT 2000";
         } else if (schema.equalsIgnoreCase("reporting") || schema.equalsIgnoreCase("hoja_vida")) {
             orderClause = " ORDER BY fecha_actualizacion DESC LIMIT 2000";
@@ -150,7 +167,8 @@ public class ReportesRepositoryImpl {
         // ⚡ Ejecución segura
         // ======================================================
         long start = System.currentTimeMillis();
-        List<Map<String, Object>> data = jdbc.queryForList(sql.toString(), params.toArray());
+        List<Map<String, Object>> data =
+                jdbc.queryForList(sql.toString(), params.toArray());
         long duration = System.currentTimeMillis() - start;
 
         // ======================================================
@@ -164,7 +182,7 @@ public class ReportesRepositoryImpl {
     }
 
     /**
-     * 🔹 Lista metadatos de vistas registradas en el esquema reporting.
+     * 🔹 Lista metadatos de vistas registradas en reporting.
      */
     public List<Map<String, Object>> listarMetadata() {
         String sql = """

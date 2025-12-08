@@ -16,8 +16,8 @@ public class Rol {
     @Column(name = "id_rol")
     private Integer idRol;
 
-    @Column(name = "nombre", nullable = false, unique = true, length = 100)
-    private String nombre;
+    @Column(name = "nombre_rol", nullable = false, unique = true, length = 100)
+    private String nombreRol;
 
     @Column(name = "descripcion")
     private String descripcion;

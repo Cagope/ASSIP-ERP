@@ -3,6 +3,7 @@ package co.assip.erp.seguridad.domain;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -31,6 +32,8 @@ public class Usuario {
     @Column(name = "email", length = 150)
     private String email;
 
+    // ✔ DEFAULT CORRECTO PARA @Builder
+    @Builder.Default
     @Column(name = "activo")
     private Boolean activo = true;
 
@@ -46,8 +49,51 @@ public class Usuario {
     @Column(name = "usuario_actualizacion", length = 50)
     private String usuarioActualizacion;
 
-    // 🔗 Relación con Rol (ahora cargada automáticamente y visible en JSON)
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "id_rol", referencedColumnName = "id_rol")
-    private Rol rol;
+    @Column(name = "password_expira")
+    private LocalDateTime passwordExpira;
+
+    @Column(name = "password_intentos")
+    @Builder.Default
+    private Integer passwordIntentos = 0;
+
+    @Column(name = "password_ultimo_cambio")
+    private LocalDateTime passwordUltimoCambio;
+
+    @Column(name = "requiere_cambio_password")
+    @Builder.Default
+    private Boolean requiereCambioPassword = false;
+
+    @Column(name = "bloqueado")
+    @Builder.Default
+    private Boolean bloqueado = false;
+
+    @Column(name = "fecha_bloqueo")
+    private LocalDateTime fechaBloqueo;
+
+    @Column(name = "ultimo_login")
+    private LocalDateTime ultimoLogin;
+
+    @Column(name = "ultimo_intento_login")
+    private LocalDateTime ultimoIntentoLogin;
+
+    @Column(name = "ip_ultimo_login", length = 50)
+    private String ipUltimoLogin;
+
+    @Column(name = "token_recuperacion", length = 255)
+    private String tokenRecuperacion;
+
+    @Column(name = "token_expira")
+    private LocalDateTime tokenExpira;
+
+    @Column(name = "id_agencia_principal")
+    private Integer idAgenciaPrincipal;
+
+    @Column(name = "origen_creacion", length = 20)
+    private String origenCreacion;
+
+    // ------------------------------------------------------------------------------------
+    // ✔ Opción B: solo idRol, sin relación @ManyToOne
+    // ------------------------------------------------------------------------------------
+    @Column(name = "id_rol")
+    private Integer idRol;
 }

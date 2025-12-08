@@ -14,33 +14,55 @@ public class PermisoService {
 
     private final PermisoRepository permisoRepository;
 
+    // ============================================================
+    // LISTAR TODOS
+    // ============================================================
     public List<Permiso> listar() {
         return permisoRepository.findAll();
     }
 
+    // ============================================================
+    // BUSCAR POR ID
+    // ============================================================
     public Optional<Permiso> buscarPorId(Integer id) {
         return permisoRepository.findById(id);
     }
 
+    // ============================================================
+    // LISTAR POR ROL (usando idRol plano)
+    // ============================================================
     public List<Permiso> listarPorRol(Integer idRol) {
-        return permisoRepository.findByRol_IdRol(idRol);
+        return permisoRepository.findByIdRol(idRol);
     }
 
+    // ============================================================
+    // GUARDAR / ACTUALIZAR
+    // ============================================================
     public Permiso guardar(Permiso permiso) {
+
         Optional<Permiso> existente = permisoRepository.findByCodigo(permiso.getCodigo());
 
         if (existente.isPresent()) {
             Permiso actual = existente.get();
             actual.setDescripcion(permiso.getDescripcion());
-            actual.setActivo(permiso.getActivo() != null ? permiso.getActivo() : true);
-            actual.setRol(permiso.getRol());
+            actual.setActivo(
+                    permiso.getActivo() != null ? permiso.getActivo() : Boolean.TRUE
+            );
+            // ⬇️ ahora se usa idRol (campo plano)
+            actual.setIdRol(permiso.getIdRol());
             return permisoRepository.save(actual);
         }
 
-        permiso.setActivo(permiso.getActivo() != null ? permiso.getActivo() : true);
+        // Nuevo permiso
+        if (permiso.getActivo() == null) {
+            permiso.setActivo(Boolean.TRUE);
+        }
         return permisoRepository.save(permiso);
     }
 
+    // ============================================================
+    // ELIMINAR
+    // ============================================================
     public void eliminar(Integer id) {
         permisoRepository.deleteById(id);
     }

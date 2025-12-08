@@ -32,7 +32,30 @@ public class RevalorizacionService {
     @Transactional(readOnly = true)
     public List<RevalorizacionItemDTO> ejecutar(RevalorizacionEntradaDTO input, Integer usuarioId) {
 
-        // 1️⃣ Ejecutar cálculo técnico desde el repository
+        // =====================================================
+        // 1️⃣ VALIDACIÓN — Revisar forma seleccionada
+        // =====================================================
+        Map<String, Object> forma = jdbc.queryForMap("""
+            SELECT 
+                id_forma_ahorro,
+                tiempo_liquidacion
+            FROM depositos.formas_ahorro
+            WHERE id_forma_ahorro = :formaId
+        """, Map.of("formaId", input.getFormaId()));
+
+        Integer tiempo = ((Number) forma.get("tiempo_liquidacion")).intValue();
+
+        // ✔ Revalorización solo aplica a liquidación anual (360)
+        if (tiempo != 360) {
+            throw new IllegalStateException(
+                    "ERROR_VALIDACION|La forma seleccionada NO permite revalorización. "
+                            + "(tiempo_liquidacion = " + tiempo + ")"
+            );
+        }
+
+        // =====================================================
+        // 2️⃣ Ejecutar cálculo técnico desde el repository
+        // =====================================================
         List<Map<String, Object>> rows = repository.calcular(input);
 
         List<RevalorizacionItemDTO> resultado = new ArrayList<>();
@@ -45,7 +68,7 @@ public class RevalorizacionService {
             BigDecimal valorPromedio = num(row.get("valor_promedio"));
             BigDecimal valorReval = num(row.get("valor_revalorizacion"));
 
-            // ❌ 2️⃣ IMPACTO EN BASE DE DATOS DESHABILITADO
+            // ❌  IMPACTO EN BD (NO eliminar)
             // if (valorReval.compareTo(BigDecimal.ZERO) > 0) {
             //     registrarMovimientoReval(documento, saldoActual, valorReval, input.getFechaContabilizacion(), usuarioId);
             //     actualizarSaldoCuenta(documento, valorReval, usuarioId);
@@ -68,7 +91,7 @@ public class RevalorizacionService {
     }
 
     // ---------------------------------------------------------------------
-    // ⚠ Métodos de impacto en BD — Deshabilitados para pruebas
+    // ⚠ Métodos de impacto en BD — Deshabilitados para pruebas (NO BORRAR)
     // ---------------------------------------------------------------------
 
 //    private void registrarMovimientoReval(

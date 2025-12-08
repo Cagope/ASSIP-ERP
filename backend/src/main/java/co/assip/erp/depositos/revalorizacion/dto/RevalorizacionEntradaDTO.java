@@ -20,6 +20,11 @@ public class RevalorizacionEntradaDTO {
     private Integer agenciaId;
 
     /**
+     * Id de la forma de ahorro (depositos.formas_ahorro.id_forma_ahorro)
+     */
+    private Integer formaId;
+
+    /**
      * Fecha inicial del período a evaluar.
      */
     private LocalDate fechaInicio;

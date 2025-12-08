@@ -8,34 +8,38 @@
 export const depositosMenu = {
   title: '🏦 Depósitos',
   items: [
-    // 💰 CUENTAS DE AHORRO
-    { label: 'Cuentas de Ahorro', route: '/depositos/cuentas-ahorro' },
+    //  CRUD DE AHORRO
+    {
+      label: 'Actualización de cuentas',
+      route: '/depositos/cuentas-ahorro',
+      permiso: 'DEPOSITOS_CUENTAS_VIEW'   // ⭐ SOLO ESTE CONTROLADO POR PERMISOS
+    },
 
-    // 🏛 FORMAS DE Ahorro
+    // 💰 CUENTAS DE AHORRO
+    { label: 'Consulta cuentas de Ahorro', route: '/depositos/informes/consulta-cuentas-ahorro' },
+
+    // 🏛 FORMAS de Ahorro
     { label: 'Formas de Ahorro', route: '/depositos/formas-ahorro' },
 
-    // ===============================
-    // 📈 PROCESOS (NUEVA SECCIÓN)
-    // ===============================
-    { label: 'Revalorización de Aportes', route: '/depositos/procesos/revalorizacion' },
 
-    // ⭐ NUEVO — INTERÉS DIARIO SM
+    // ===============================
+    // 📈 PROCESOS
+    // ===============================
+
+    { label: 'Revalorización de Aportes', route: '/depositos/procesos/revalorizacion' },
     { label: 'Interés Diario SM', route: '/depositos/procesos/interes-diario-sm' },
+    { label: 'Interés Mensual SM', route: '/depositos/procesos/interes-mensual-sm' },
+    { label: 'Interés Mensual TAC', route: '/depositos/procesos/interes-mensual-tac' },
+    { label: 'Habilidad del Asociado', route: '/depositos/procesos/habilidad-asociado' },
+
 
     // ===============================
     // 🧾 INFORMES
     // ===============================
 
-    // 📊 SALDOS A CORTE
     { label: 'Saldos a Corte', route: '/depositos/informes/saldos-corte' },
-
-    // 🆕 CUENTAS NUEVAS O RETIRADAS
     { label: 'Cuentas Nuevas o Retiradas', route: '/depositos/informes/cuentas-nr' },
-
-    // 🧩 INFORME — POR RANGOS
     { label: 'Informe por Rangos', route: '/depositos/informes/rangos' },
-
-    // ⚠️ INFORME — INCONSISTENCIAS
     { label: 'Inconsistencias de Saldos', route: '/depositos/informes/inconsistencias' },
   ],
 };

@@ -9,13 +9,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
-/**
- * Inicializa datos base al arrancar el sistema:
- * - Crea el rol ADMIN si no existe.
- * - Asigna ese rol al usuario "admin" si ya está registrado.
- *
- * Diseñado para ejecutarse una sola vez y mantenerse idempotente.
- */
 @Component
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
@@ -28,19 +21,28 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
 
         // 1️⃣ Crear rol ADMIN si no existe
-        Rol rolAdmin = rolRepository.findByNombre("ADMIN")
+        Rol rolAdmin = rolRepository.findByNombreRol("ADMIN")
                 .orElseGet(() -> rolRepository.save(
                         Rol.builder()
-                                .nombre("ADMIN")
+                                .nombreRol("ADMIN")
                                 .descripcion("Administrador general del sistema")
                                 .activo(true)
                                 .build()
                 ));
 
-        // 2️⃣ Asignar el rol ADMIN al usuario "admin" si existe y no lo tiene
+        // 2️⃣ Asignar el rol ADMIN al usuario admin/admin1 si existe
+        usuarioRepository.findByUsername("admin1").ifPresent(usuario -> {
+            if (usuario.getIdRol() == null) {
+                usuario.setIdRol(rolAdmin.getIdRol());
+                usuarioRepository.save(usuario);
+                System.out.println("✅ Rol ADMIN asignado al usuario 'admin1'");
+            }
+        });
+
+        // También verificar "admin" por compatibilidad
         usuarioRepository.findByUsername("admin").ifPresent(usuario -> {
-            if (usuario.getRol() == null) {
-                usuario.setRol(rolAdmin);
+            if (usuario.getIdRol() == null) {
+                usuario.setIdRol(rolAdmin.getIdRol());
                 usuarioRepository.save(usuario);
                 System.out.println("✅ Rol ADMIN asignado al usuario 'admin'");
             }

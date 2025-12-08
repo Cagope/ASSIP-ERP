@@ -11,15 +11,20 @@
 
         <!-- 🔽 SUBMENÚ SOLO SI ESTÁ ABIERTO -->
         <ul class="submenu" *ngIf="isOpen(i)">
-          <li *ngFor="let item of section.items">
-            <a
-              [routerLink]="item.route"
-              routerLinkActive="active"
-              class="menu-item"
-            >
-              • {{ item.label }}
-            </a>
-          </li>
+
+          <!-- ⭐ Contenedor para combinar *ngFor + *ngIf -->
+          <ng-container *ngFor="let item of section.items">
+            <li *ngIf="tienePermiso(item)">
+              <a
+                [routerLink]="item.route"
+                routerLinkActive="active"
+                class="menu-item"
+              >
+                • {{ item.label }}
+              </a>
+            </li>
+          </ng-container>
+
         </ul>
 
       </li>

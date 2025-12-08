@@ -1,0 +1,71 @@
+.benef-box {
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 8px;
+  background: #fafafa;
+  margin-top: 15px;
+}
+
+h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr) 120px;
+  gap: 10px;
+  margin-bottom: 15px;
+
+  input {
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+
+    &:focus {
+      outline: none;
+      border-color: #0a7bbd;
+    }
+  }
+
+  .btn-add {
+    background: #0a7bbd;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover {
+      background: #095e8b;
+    }
+  }
+}
+
+.benef-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead {
+    background: #ececec;
+  }
+
+  th, td {
+    padding: 6px 8px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .btn-del {
+    background: #e03434;
+    border: none;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover {
+      background: #b82828;
+    }
+  }
+}

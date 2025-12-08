@@ -1,0 +1,120 @@
+<div class="form-container">
+
+  <h5>
+    {{ idUsuario() ? 'editar usuario' : 'nuevo usuario' }}
+  </h5>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="form-grid">
+
+    <!-- 🟩 Usuario -->
+    <!-- 🟦 Rol -->
+    <div class="form-group sm">
+      <label for="idRol">rol *</label>
+
+      <select
+        id="idRol"
+        formControlName="idRol"
+        [ngClass]="{ 'invalid': form.get('idRol')?.invalid && form.get('idRol')?.touched }"
+      >
+        <option value="">-- Seleccione --</option>
+        <option *ngFor="let r of rolesDisponibles()" [value]="r.idRol">
+          {{ r.nombreRol }}
+        </option>
+      </select>
+
+      <div
+        *ngIf="form.get('idRol')?.hasError('required') && form.get('idRol')?.touched"
+        class="error"
+      >
+        Seleccione un rol.
+      </div>
+    </div>
+
+    <!-- 🟦 Contraseña -->
+    <div class="form-group sm">
+      <label for="password">clave</label>
+      <input
+        id="password"
+        type="password"
+        class="form-control"
+        formControlName="password"
+        placeholder="••••••••"
+      />
+    </div>
+
+    <!-- 🟩 Nombre Completo -->
+    <div class="form-group full">
+      <label for="nombreCompleto">nombre completo *</label>
+      <input id="nombreCompleto" type="text" formControlName="nombreCompleto" />
+      <div *ngIf="form.get('nombreCompleto')?.hasError('required') && form.get('nombreCompleto')?.touched"
+           class="error">
+        Este campo es obligatorio.
+      </div>
+    </div>
+
+    <!-- 🟦 Email -->
+    <div class="form-group sm">
+      <label for="email">email</label>
+      <input id="email" type="email" formControlName="email" />
+    </div>
+
+    <!-- 🟧 Activo -->
+    <div class="form-group sm">
+      <label for="activo">activo</label>
+      <select id="activo" formControlName="activo">
+        <option [ngValue]="true">Sí</option>
+        <option [ngValue]="false">No</option>
+      </select>
+    </div>
+
+    <!-- 🟩 Agencia Principal -->
+    <div class="form-group sm">
+      <label for="idAgenciaPrincipal">agencia principal</label>
+      <select id="idAgenciaPrincipal" formControlName="idAgenciaPrincipal">
+        <option [ngValue]="null">-- Seleccione --</option>
+
+        <option *ngFor="let a of agenciasDisponibles()" [ngValue]="a.idAgencia">
+          {{ a.nombreAgencia }}
+        </option>
+
+      </select>
+    </div>
+
+    <!-- 🟨 Agencias asignadas -->
+    <div class="form-group full mt-3">
+      <label class="label-title">agencias del usuario</label>
+
+      <div class="agencias-card">
+        <div
+          class="agencia-item"
+          *ngFor="let a of agenciasDisponibles()"
+          (click)="toggleAgencia(a.idAgencia!, { target: { checked: !agenciasUsuario().includes(a.idAgencia!) } })"
+        >
+          <input
+            type="checkbox"
+            class="agencia-check"
+            [checked]="agenciasUsuario().includes(a.idAgencia!)"
+            (change)="toggleAgencia(a.idAgencia!, $event)"
+            (click)="$event.stopPropagation()"
+          />
+
+          <div class="agencia-info">
+            <span class="agencia-nombre">{{ a.nombreAgencia }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🟫 Acciones -->
+    <div class="form-actions full">
+      <button type="submit" class="btn sm primary" [disabled]="form.invalid">
+        💾 {{ idUsuario() ? 'actualizar' : 'guardar' }}
+      </button>
+
+      <button type="button" class="btn sm danger" (click)="volver()">
+        ↩️ cancelar
+      </button>
+    </div>
+
+  </form>
+</div>

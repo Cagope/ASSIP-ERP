@@ -1,0 +1,1 @@
+schema,tabla,trigger,momento,evento,definicion

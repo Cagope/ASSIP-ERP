@@ -9,16 +9,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
-/**
- * Servicio de gestión de usuarios del módulo de seguridad.
- * Encapsula la lógica de negocio para listar, buscar, guardar y eliminar usuarios.
- * - Cifra contraseñas con BCrypt.
- * - Valida duplicados.
- * - Permite obtener el usuario autenticado desde el token JWT.
- */
 @Service
 @RequiredArgsConstructor
 public class UsuarioService {
@@ -26,71 +22,196 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    /**
-     * Listar todos los usuarios (incluye su rol cargado por EAGER).
-     */
-    public List<Usuario> listar() {
-        return usuarioRepository.findAll();
+    // ============================================================
+    // LISTAR DTO
+    // ============================================================
+    public List<Map<String, Object>> listar() {
+        return usuarioRepository.listarConRolYAgencia();
     }
 
-    /**
-     * Buscar usuario por username.
-     */
+    // ============================================================
+    // BUSCAR DTO PARA EDICIÓN
+    // ============================================================
+    public Map<String, Object> buscarDtoPorId(Integer idUsuario) {
+        return usuarioRepository.buscarDtoPorId(idUsuario);
+    }
+
+    // ============================================================
+    // ENTIDAD
+    // ============================================================
     public Optional<Usuario> buscarPorUsername(String username) {
         return usuarioRepository.findByUsername(username);
     }
 
-    /**
-     * Crear o actualizar un usuario.
-     * Si es nuevo, cifra la contraseña antes de guardar.
-     * Si ya existe, actualiza los demás campos.
-     */
+    public Optional<Usuario> buscarPorId(Integer idUsuario) {
+        return usuarioRepository.findById(idUsuario);
+    }
+
+    // ============================================================
+    // GUARDAR / ACTUALIZAR
+    // ============================================================
     public Usuario guardar(Usuario usuario) {
+
+        // ------------------------------
+        // VALIDACIÓN DE ROL
+        // ------------------------------
+        if (usuario.getIdRol() == null || usuario.getIdRol() == 0) {
+            throw new RuntimeException("Debe seleccionar un rol válido");
+        }
+
         Optional<Usuario> existente = usuarioRepository.findByUsername(usuario.getUsername());
 
         if (existente.isPresent()) {
             Usuario actual = existente.get();
 
-            // 🔒 Cifrar nueva contraseña si se envía
+            // Clave
             if (usuario.getPassword() != null && !usuario.getPassword().isBlank()) {
                 actual.setPassword(passwordEncoder.encode(usuario.getPassword()));
+                actual.setPasswordUltimoCambio(LocalDateTime.now());
+                actual.setPasswordExpira(LocalDateTime.now().plusDays(90));
+                actual.setRequiereCambioPassword(false);
+                actual.setPasswordIntentos(0);
             }
 
-            // 🔄 Actualizar datos generales
+            // Campos básicos
             actual.setNombreCompleto(usuario.getNombreCompleto());
             actual.setEmail(usuario.getEmail());
-            actual.setActivo(usuario.getActivo() != null ? usuario.getActivo() : true);
-            actual.setRol(usuario.getRol());
+            actual.setActivo(usuario.getActivo());
+            actual.setIdAgenciaPrincipal(usuario.getIdAgenciaPrincipal());
+
+            // 🔥 GRABA EL ROL DIRECTAMENTE
+            actual.setIdRol(usuario.getIdRol());
+
+            actual.setFechaActualizacion(LocalDateTime.now());
+            actual.setUsuarioActualizacion(usuario.getUsuarioActualizacion());
 
             return usuarioRepository.save(actual);
         }
 
-        // 🆕 Nuevo usuario → cifrar contraseña antes de guardar
+        // ------------------------------
+        // NUEVO USUARIO
+        // ------------------------------
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
-        usuario.setActivo(usuario.getActivo() != null ? usuario.getActivo() : true);
+        usuario.setActivo(true);
+        usuario.setFechaCreacion(LocalDateTime.now());
+        usuario.setPasswordUltimoCambio(LocalDateTime.now());
+        usuario.setPasswordExpira(LocalDateTime.now().plusDays(90));
+        usuario.setPasswordIntentos(0);
+        usuario.setBloqueado(false);
+        usuario.setRequiereCambioPassword(false);
+
         return usuarioRepository.save(usuario);
     }
 
-    /**
-     * Eliminar usuario por ID (eliminación física).
-     */
+    // ============================================================
+    // ELIMINAR
+    // ============================================================
     public void eliminar(Integer id) {
         usuarioRepository.deleteById(id);
     }
 
-    /**
-     * Obtener el usuario autenticado actual a partir del token JWT.
-     * Usa el contexto de seguridad cargado por JwtAuthenticationFilter.
-     */
+    // ============================================================
+    // USUARIO ACTUAL
+    // ============================================================
+    // ============================================================
+// USUARIO ACTUAL (desde TOKEN, no BD)
+// ============================================================
     public Usuario getUsuarioActual(HttpServletRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new RuntimeException("No hay usuario autenticado en el contexto");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new RuntimeException("No hay usuario autenticado");
         }
 
-        String username = authentication.getName();
-        return usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + username));
+        // Claims del token
+        Object credentials = auth.getCredentials();
+        if (!(credentials instanceof io.jsonwebtoken.Claims claims)) {
+            throw new RuntimeException("Token inválido en el contexto");
+        }
+
+        // Crear un usuario liviano SOLO con los datos del token
+        Usuario u = new Usuario();
+        u.setIdUsuario(claims.get("idUsuario", Integer.class));  // ← ID real
+        u.setIdRol(claims.get("rol", Integer.class));            // ← ROL REAL
+        u.setUsername(auth.getName());
+
+        return u;
+    }
+
+    // ============================================================
+    // RESET PASSWORD
+    // ============================================================
+    public String generarTokenRecuperacion(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Correo no registrado"));
+
+        String token = UUID.randomUUID().toString();
+        usuario.setTokenRecuperacion(token);
+        usuario.setTokenExpira(LocalDateTime.now().plusHours(2));
+        usuarioRepository.save(usuario);
+
+        return token;
+    }
+
+    public void restaurarPassword(String token, String nuevaClave) {
+        Usuario usuario = usuarioRepository.findByTokenRecuperacion(token)
+                .orElseThrow(() -> new RuntimeException("Token inválido"));
+
+        if (usuario.getTokenExpira().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("El token ha expirado");
+        }
+
+        usuario.setPassword(passwordEncoder.encode(nuevaClave));
+        usuario.setPasswordUltimoCambio(LocalDateTime.now());
+        usuario.setPasswordExpira(LocalDateTime.now().plusDays(90));
+        usuario.setPasswordIntentos(0);
+        usuario.setRequiereCambioPassword(false);
+
+        usuario.setTokenRecuperacion(null);
+        usuario.setTokenExpira(null);
+
+        usuarioRepository.save(usuario);
+    }
+
+    // ============================================================
+    // BLOQUEO AUTOMÁTICO
+    // ============================================================
+    public void registrarIntentoFallido(String username) {
+
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElse(null);
+
+        if (usuario == null) return;
+
+        usuario.setPasswordIntentos(
+                (usuario.getPasswordIntentos() == null ? 0 : usuario.getPasswordIntentos()) + 1
+        );
+
+        usuario.setUltimoIntentoLogin(LocalDateTime.now());
+
+        if (usuario.getPasswordIntentos() >= 5) {
+            usuario.setBloqueado(true);
+            usuario.setFechaBloqueo(LocalDateTime.now());
+        }
+
+        usuarioRepository.save(usuario);
+    }
+
+    // ============================================================
+    // LOGIN EXITOSO
+    // ============================================================
+    public void registrarLoginExitoso(String username, String ip) {
+
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElse(null);
+
+        if (usuario == null) return;
+
+        usuario.setUltimoLogin(LocalDateTime.now());
+        usuario.setIpUltimoLogin(ip);
+        usuario.setPasswordIntentos(0);
+
+        usuarioRepository.save(usuario);
     }
 }

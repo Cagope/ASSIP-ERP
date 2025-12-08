@@ -60,13 +60,13 @@ public class SaldosCorteRepository {
 
                 COALESCE(m.total_debitos,0) - COALESCE(m.total_creditos,0) AS saldo_corte
             FROM depositos.cuentas_ahorro c
-            JOIN general.datos_agencias a ON a.id_agencia = c.codigo_agencia
-            LEFT JOIN depositos.formas_ahorro f ON f.id_forma_ahorro = c.codigo_forma
+            JOIN general.datos_agencias a ON a.id_agencia = c.id_agencia
+            LEFT JOIN depositos.formas_ahorro f ON f.id_forma_ahorro = c.id_forma_ahorro
             LEFT JOIN depositos.estados_ahorros ea ON ea.codigo_estado_ahorro = c.estado_cuenta_cuenta
             LEFT JOIN reporting.vw_hoja_vida_general_total_reciente hv ON hv.id_datos_personal = c.id_datos_personal
             LEFT JOIN hoja_vida.permisos_especiales pe ON pe.id_datos_personal = c.id_datos_personal
             LEFT JOIN mov m ON m.id_cuenta_ahorro = c.id_cuenta_ahorro
-            WHERE (:agencia = '0' OR c.codigo_agencia = CAST(:agencia AS INTEGER))
+            WHERE (:agencia = '0' OR c.id_agencia = CAST(:agencia AS INTEGER))
         )
         SELECT *
         FROM base
@@ -138,8 +138,8 @@ public class SaldosCorteRepository {
 
                 COALESCE(m.total_debitos,0) - COALESCE(m.total_creditos,0) AS saldo_corte
             FROM depositos.cuentas_ahorro c
-            JOIN general.datos_agencias a ON a.id_agencia = c.codigo_agencia
-            JOIN depositos.formas_ahorro f ON f.id_forma_ahorro = c.codigo_forma
+            JOIN general.datos_agencias a ON a.id_agencia = c.id_agencia
+            JOIN depositos.formas_ahorro f ON f.id_forma_ahorro = c.id_forma_ahorro
             LEFT JOIN mov m ON m.id_cuenta_ahorro = c.id_cuenta_ahorro
         )
         SELECT
@@ -151,7 +151,7 @@ public class SaldosCorteRepository {
             COUNT(*)        AS cantidad
         FROM base
         WHERE saldo_corte <> 0
-        GROUP BY codigo_agencia, nombre_agencia, codigo_forma, nombre_forma
+        GROUP BY id_agencia, nombre_agencia, codigo_forma, nombre_forma
         ORDER BY codigo_agencia, codigo_forma
         """;
 

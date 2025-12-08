@@ -8,6 +8,7 @@ import { DATOS_FAMILIARES_ROUTES } from './datos-familiares/datos-familiares.rou
 import { REFERENCIAS_PERSONALES_ROUTES } from './referencias-personales/referencias-personales.routes';
 import { SARLAFT_ROUTES } from './sarlaft/sarlaft.routes';
 import { PERMISOS_ESPECIALES_ROUTES } from './permisos-especiales/permisos-especiales.routes';
+import { APERTURA_CUENTAS_ROUTES } from './apertura-cuentas/apertura-cuentas.routes';
 
 /** ✅ Flujo integral (wizard) */
 import { FORMULARIO_INTEGRAL_ROUTES } from './formulario-integral/formulario-integral.routes';
@@ -36,6 +37,7 @@ export const HOJA_VIDA_ROUTES: Routes = [
   { path: 'referencias-personales', children: REFERENCIAS_PERSONALES_ROUTES },
   { path: 'sarlaft', children: SARLAFT_ROUTES },
   { path: 'permisos-especiales', children: PERMISOS_ESPECIALES_ROUTES },
+  { path: 'apertura-cuentas', children: APERTURA_CUENTAS_ROUTES },
 
   // 🧾 Nuevo módulo de impresiones
   { path: 'impresiones', children: AFILIACION_ROUTES },

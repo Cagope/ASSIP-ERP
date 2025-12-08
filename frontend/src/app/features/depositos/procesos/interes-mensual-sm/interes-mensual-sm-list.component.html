@@ -1,0 +1,143 @@
+<div class="page">
+
+  <!-- ========================================================= -->
+  <!-- 🟦 ENCABEZADO GLOBAL DEL MÓDULO                           -->
+  <!-- ========================================================= -->
+  <app-header-actions
+    titulo="🏦 Proceso — Interés Mensual SM"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <!-- ========================================================= -->
+  <!-- 🔍 FILTROS                                                -->
+  <!-- ========================================================= -->
+  <form class="filtros" (ngSubmit)="liquidar()">
+
+    <!-- 🏛 Agencia -->
+    <div class="f-row">
+      <label>Agencia</label>
+      <select
+        [(ngModel)]="filtros.agenciaId"
+        name="agenciaId"
+        (ngModelChange)="cargarFormas($event)"
+      >
+        <option value="0">Todas</option>
+        <option *ngFor="let a of agencias" [value]="a.idAgencia">
+          {{ a.nombreAgencia }}
+        </option>
+      </select>
+    </div>
+
+    <!-- 🔢 Forma -->
+    <div class="f-row">
+      <label>Forma</label>
+      <select [(ngModel)]="filtros.formaId" name="formaId">
+        <option value="">Seleccione</option>
+        <option *ngFor="let f of formas" [value]="f.idFormaAhorro">
+          {{ f.codigoForma }} — {{ f.nombreForma }}
+        </option>
+      </select>
+    </div>
+
+    <!-- 📆 Fecha proceso -->
+    <div class="f-row">
+      <label>Fecha proceso</label>
+      <input type="date"
+             [(ngModel)]="filtros.fechaProceso"
+             name="fechaProceso" />
+    </div>
+
+    <!-- 📆 Fecha liquidación -->
+    <div class="f-row">
+      <label>Fecha liquidación</label>
+      <input type="date"
+             [(ngModel)]="filtros.fechaLiquidacion"
+             name="fechaLiquidacion" />
+    </div>
+
+    <!-- 🔘 BOTONES -->
+    <div class="f-buttons">
+      <button type="submit" class="btn btn--primary">
+        ⚙️ Ejecutar proceso
+      </button>
+
+      <button type="button" class="btn btn--cancel" (click)="limpiar()">
+        🧹 Limpiar
+      </button>
+    </div>
+
+  </form>
+
+  <!-- ========================================================= -->
+  <!-- ESTADOS -->
+  <!-- ========================================================= -->
+  <div *ngIf="cargando" class="loading">Procesando...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <!-- ========================================================= -->
+  <!-- 🧮 RESULTADOS                                             -->
+  <!-- ========================================================= -->
+  <div *ngIf="resultados.length > 0" class="resultados">
+
+    <h3 class="mt-3">Resultados del proceso</h3>
+
+    <div class="header-actions" style="margin-top: 10px;">
+      <div class="actions">
+
+        <button class="btn btn--primary"
+                type="button"
+                (click)="exportar()"
+                [disabled]="resultados.length === 0">
+          📥 Exportar Excel
+        </button>
+
+        <button class="btn btn--print"
+                type="button"
+                (click)="imprimir()"
+                [disabled]="resultados.length === 0">
+          🖨️ Imprimir
+        </button>
+
+      </div>
+    </div>
+
+    <table class="tabla-resumen">
+      <thead>
+      <tr>
+        <th>Documento</th>
+        <th>Nombre</th>
+
+        <th class="right">Saldo mínimo mes</th>
+        <th class="right">Interés bruto</th>
+        <th class="right">Retención</th>
+        <th class="right">Interés neto</th>
+
+        <th class="right">Tasa</th>
+        <th class="right">Mínimo forma</th>
+        <th>Aplica retención</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr *ngFor="let r of resultados">
+        <td>{{ r.documento }}</td>
+        <td>{{ r.nombreCompleto }}</td>
+
+        <td class="right">{{ r.saldoMinimoMes | number:'1.0-0' }}</td>
+        <td class="right">{{ r.interesBruto | number:'1.0-0' }}</td>
+        <td class="right">{{ r.retencion | number:'1.0-0' }}</td>
+        <td class="right">{{ r.interesNeto | number:'1.0-0' }}</td>
+
+        <td class="right">{{ r.tasaInteres | number:'1.2-2' }}</td>
+        <td class="right">{{ r.minimoForma | number:'1.0-0' }}</td>
+        <td>{{ r.aplicaRetencion ? 'Sí' : 'No' }}</td>
+      </tr>
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>

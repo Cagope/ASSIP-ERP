@@ -1,0 +1,161 @@
+<div class="page">
+
+  <!-- ========================================================= -->
+  <!-- 🟦 ENCABEZADO GLOBAL DEL MÓDULO                           -->
+  <!-- ========================================================= -->
+  <app-header-actions
+    titulo="🏦 Proceso — Habilidad del Asociado"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <!-- ========================================================= -->
+  <!-- 🔍 FILTROS                                                -->
+  <!-- ========================================================= -->
+  <form class="filtros" (ngSubmit)="ejecutar()">
+
+    <!-- 🏛 Agencia -->
+    <div class="f-row">
+      <label>Agencia</label>
+      <select [(ngModel)]="filtros.agenciaId" name="agenciaId">
+        <option value="0">Todas</option>
+        <option *ngFor="let a of agencias" [value]="a.idAgencia">
+          {{ a.nombreAgencia }}
+        </option>
+      </select>
+    </div>
+
+    <!-- 📆 Fecha inicio -->
+    <div class="f-row">
+      <label>Fecha inicio</label>
+      <input type="date" [(ngModel)]="filtros.fechaInicio" name="fechaInicio" />
+    </div>
+
+    <!-- 📆 Fecha fin -->
+    <div class="f-row">
+      <label>Fecha fin</label>
+      <input type="date" [(ngModel)]="filtros.fechaFin" name="fechaFin" />
+    </div>
+
+    <!-- 💰 Valor menores -->
+    <div class="f-row">
+      <label>Aportes mínimos (Menores)</label>
+      <input type="text"
+             numericFormat
+             [(ngModel)]="filtros.valorMenores"
+             name="valorMenores"
+             placeholder="Ej: 72.000" />
+    </div>
+
+    <!-- 💰 Valor mayores -->
+    <div class="f-row">
+      <label>Aportes mínimos (Mayores)</label>
+      <input type="text"
+             numericFormat
+             [(ngModel)]="filtros.valorMayores"
+             name="valorMayores"
+             placeholder="Ej: 100.000" />
+    </div>
+
+    <!-- 💰 Valor jurídicas -->
+    <div class="f-row">
+      <label>Aportes mínimos (Jurídicas)</label>
+      <input type="text"
+             numericFormat
+             [(ngModel)]="filtros.valorJuridicas"
+             name="valorJuridicas"
+             placeholder="Ej: 150.000" />
+    </div>
+
+    <!-- 🔘 BOTONES -->
+    <div class="f-buttons">
+      <button type="submit" class="btn btn--primary">
+        ⚙️ Ejecutar proceso
+      </button>
+
+      <button type="button" class="btn btn--cancel" (click)="limpiar()">
+        🧹 Limpiar
+      </button>
+    </div>
+
+  </form>
+
+  <!-- ========================================================= -->
+  <!-- ESTADOS -->
+  <!-- ========================================================= -->
+  <div *ngIf="cargando" class="loading">Procesando...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <!-- ========================================================= -->
+  <!-- 📊 ESTADÍSTICAS                                           -->
+  <!-- ========================================================= -->
+  <div *ngIf="resultados.length > 0" class="resultados">
+
+    <h3 class="mt-3">Resultados del proceso</h3>
+
+    <div class="header-actions" style="margin-top: 10px;">
+      <div class="actions">
+        <button class="btn btn--primary"
+                type="button"
+                (click)="exportar()"
+                [disabled]="resultados.length === 0">
+          📥 Exportar Excel
+        </button>
+
+        <button class="btn btn--print"
+                type="button"
+                (click)="imprimir()"
+                [disabled]="resultados.length === 0">
+          🖨️ Imprimir
+        </button>
+      </div>
+    </div>
+
+    <!-- ========================= -->
+    <!-- 🧮 TABLA ESTADÍSTICA      -->
+    <!-- ========================= -->
+    <table class="tabla-resumen">
+      <thead>
+      <tr>
+        <th>Descripción</th>
+        <th class="right">Cantidad</th>
+        <th class="right">Total aportes</th>
+        <th class="right">%</th>
+      </tr>
+      </thead>
+
+      <tbody>
+
+      <tr>
+        <td>HÁBILES</td>
+        <td class="right">{{ resumen.habiles | number:'1.0-0' }}</td>
+        <td class="right">{{ resumen.totalHabilesAportes | number:'1.0-0' }}</td>
+        <td class="right">{{ resumen.porcentajeHabiles | number:'1.2-2' }}%</td>
+      </tr>
+
+      <tr>
+        <td>INHÁBILES</td>
+        <td class="right">{{ resumen.inhabiles | number:'1.0-0' }}</td>
+        <td class="right">{{ resumen.totalInhabilesAportes | number:'1.0-0' }}</td>
+        <td class="right">{{ resumen.porcentajeInhabiles | number:'1.2-2' }}%</td>
+      </tr>
+
+      <tr class="total-row">
+        <td><strong>TOTAL GENERAL</strong></td>
+        <td class="right"><strong>{{ resumen.total | number:'1.0-0' }}</strong></td>
+        <td class="right">
+          <strong>
+            {{ (resumen.totalHabilesAportes + resumen.totalInhabilesAportes) | number:'1.0-0' }}
+          </strong>
+        </td>
+        <td></td>
+      </tr>
+
+      </tbody>
+    </table>
+
+
+  </div>
+
+</div>

@@ -1,14 +1,23 @@
 <div class="layout">
+
   <!-- 🟩 CABECERA SUPERIOR -->
   <header class="header">
     <div class="left">
       <img src="assets/logo-web.png" alt="Logo ASSIP ERP" class="logo" />
       <span class="title">ASSIP ERP</span>
     </div>
+
     <div class="right">
+
+      <!-- 🏢 Agencia activa -->
+      <span *ngIf="agenciaActual" class="agency">
+    🏢 {{ agenciaActual.codigo_agencia }} — {{ agenciaActual.nombre_agencia }}
+  </span>
+
       <span class="user">👤 {{ username }}</span>
       <button class="logout" (click)="logout()">Cerrar sesión</button>
     </div>
+
   </header>
 
   <!-- 📋 CUERPO GENERAL -->
@@ -21,4 +30,5 @@
       <router-outlet></router-outlet>
     </section>
   </div>
+
 </div>

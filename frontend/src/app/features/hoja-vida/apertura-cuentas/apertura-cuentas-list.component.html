@@ -1,0 +1,79 @@
+<div class="apertura-cuentas-list">
+
+  <app-header-actions
+    titulo="Apertura de Cuentas de Ahorro"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <!-- 🔎 Buscar -->
+  <div class="filtro mb-3">
+    <input
+      type="text"
+      placeholder="Buscar por nombre o documento..."
+      [(ngModel)]="filtro"
+      (input)="filtrar()"
+      class="form-control"
+    />
+  </div>
+
+  <!-- 📌 Tabla -->
+  <table *ngIf="!cargando && filtradas.length > 0" class="table table-striped table-hover align-middle">
+    <thead>
+    <tr>
+      <th>Documento</th>
+      <th>Nombre completo</th>
+      <th>Fecha actualización</th>
+      <th class="text-center">Acción</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let p of paginadas">
+
+      <!-- Documento -->
+      <td>{{ p.tipoDocumento }} {{ p.documento }}</td>
+
+      <!-- Nombre -->
+      <td>{{ p.nombres }} {{ p.primerApellido }} {{ p.segundoApellido }}</td>
+
+      <!-- Fecha actualización -->
+      <td>{{ p.fechaActualizacion | date: 'dd/MM/yyyy' }}</td>
+
+      <!-- Acción -->
+      <td class="text-center">
+        <button
+          class="btn btn-sm btn-outline-primary"
+          (click)="gestionar(p)">
+          Gestionar
+        </button>
+      </td>
+
+    </tr>
+    </tbody>
+  </table>
+
+  <!-- 📌 Paginación -->
+  <div class="pagination-controls" *ngIf="!cargando && filtradas.length > tamanoPagina">
+    <button (click)="cambiarPagina(pagina - 1)" [disabled]="pagina === 1">Anterior</button>
+    <span>Página {{ pagina }} / {{ totalPaginas() }}</span>
+    <button (click)="cambiarPagina(pagina + 1)" [disabled]="pagina === totalPaginas()">Siguiente</button>
+  </div>
+
+  <!-- 📌 Mensajes -->
+  <div *ngIf="cargando" class="loading">
+    <i class="bi bi-hourglass-split"></i> Cargando apertura de cuentas...
+  </div>
+
+  <div *ngIf="!cargando && filtradas.length === 0" class="empty">
+    <i class="bi bi-inbox"></i> No hay registros para mostrar.
+  </div>
+
+  <div *ngIf="error" class="alert alert-warning d-flex align-items-start gap-2" role="alert">
+    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+    <div>{{ error }}</div>
+  </div>
+
+
+</div>
