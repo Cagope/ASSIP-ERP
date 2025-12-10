@@ -79,7 +79,9 @@ export class LoginComponent {
         // === ✔ AHORA consultar /auth/me para obtener agencias y permisos ===
         this.authApi.me().subscribe({
           next: (info: any) => {
-
+            console.log("🔥 Resultado /auth/me =", info);
+            console.log("🔥 Agencias =", info.agencias);
+            console.log("🔥 Primera agencia =", info.agencias?.[0]);
             // ⭐⭐⭐ ¡ESTO FALTABA! — GUARDAR PERMISOS DEL USUARIO ⭐⭐⭐
             if (info.permisos) {
               this.session.setPermisos(info.permisos);

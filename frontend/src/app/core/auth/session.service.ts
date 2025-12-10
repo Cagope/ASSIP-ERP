@@ -24,9 +24,31 @@ export class SessionService {
     if (storedToken) this.tokenSig.set(storedToken);
     if (storedUser) this.userSig.set(storedUser);
 
-    if (storedAgencias) this.agenciasSig.set(JSON.parse(storedAgencias));
-    if (storedAgenciaActiva) this.agenciaActivaSig.set(JSON.parse(storedAgenciaActiva));
+    if (storedAgencias) {
+      // Normalizamos al cargar
+      const arr = JSON.parse(storedAgencias).map((a: any) => this.normalizarAgencia(a));
+      this.agenciasSig.set(arr);
+    }
+
+    if (storedAgenciaActiva) {
+      const ag = this.normalizarAgencia(JSON.parse(storedAgenciaActiva));
+      this.agenciaActivaSig.set(ag);
+    }
+
     if (storedPermisos) this.permisosSig.set(JSON.parse(storedPermisos));
+  }
+
+  // ============================================================
+  // 🔧 NORMALIZADOR: Convertir snake_case → camelCase
+  // ============================================================
+  private normalizarAgencia(a: any) {
+    if (!a) return null;
+
+    return {
+      idAgencia: a.idAgencia ?? a.id_agencia ?? null,
+      codigoAgencia: a.codigoAgencia ?? a.codigo_agencia ?? null,
+      nombreAgencia: a.nombreAgencia ?? a.nombre_agencia ?? null
+    };
   }
 
   // === TOKEN ===
@@ -49,9 +71,9 @@ export class SessionService {
     return this.userSig() || localStorage.getItem(this.userKey);
   }
 
-  // ⭐⭐⭐ AÑADIR ESTE MÉTODO ⭐⭐⭐
+  // === ADMIN (superusuario hardcoded) ===
   esAdmin(): boolean {
-    return this.getUser() === 'admin1';   // SUPERUSUARIO
+    return this.getUser() === 'admin1';
   }
 
   // === PERMISOS ===
@@ -68,13 +90,17 @@ export class SessionService {
     return this.getPermisos().includes(codigo);
   }
 
-  // === AGENCIAS ===
+  // ============================================================
+  // 🔹 AGENCIAS — SIEMPRE NORMALIZADAS
+  // ============================================================
   setAgencias(agencias: any[]) {
-    localStorage.setItem(this.agenciasKey, JSON.stringify(agencias));
-    this.agenciasSig.set(agencias);
+    const normalizadas = agencias.map(a => this.normalizarAgencia(a));
+
+    localStorage.setItem(this.agenciasKey, JSON.stringify(normalizadas));
+    this.agenciasSig.set(normalizadas);
 
     if (!this.agenciaActivaSig()) {
-      this.setAgenciaActiva(agencias[0] ?? null);
+      this.setAgenciaActiva(normalizadas[0] ?? null);
     }
   }
 
@@ -82,18 +108,24 @@ export class SessionService {
     return this.agenciasSig() || [];
   }
 
-  // === AGENCIA ACTIVA ===
+  // ============================================================
+  // 🔹 AGENCIA ACTIVA — SIEMPRE NORMALIZADA
+  // ============================================================
   setAgenciaActiva(agencia: any | null) {
-    if (agencia) {
-      localStorage.setItem(this.agenciaActivaKey, JSON.stringify(agencia));
+    const normal = this.normalizarAgencia(agencia);
+
+    if (normal) {
+      localStorage.setItem(this.agenciaActivaKey, JSON.stringify(normal));
     } else {
       localStorage.removeItem(this.agenciaActivaKey);
     }
-    this.agenciaActivaSig.set(agencia);
+
+    this.agenciaActivaSig.set(normal);
   }
 
   getAgenciaActiva() {
-    return this.agenciaActivaSig();
+    const raw = this.agenciaActivaSig();
+    return this.normalizarAgencia(raw);
   }
 
   // === SESIÓN ===
@@ -119,5 +151,18 @@ export class SessionService {
 
   clear(): void {
     this.logout();
+  }
+
+  // === USER ID desde JWT ===
+  getUsuarioId(): number | null {
+    const token = this.getToken();
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.idUsuario ?? null;
+    } catch {
+      return null;
+    }
   }
 }

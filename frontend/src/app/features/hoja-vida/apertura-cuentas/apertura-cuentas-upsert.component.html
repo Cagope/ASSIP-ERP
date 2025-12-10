@@ -85,46 +85,68 @@
 
 
     <!-- 🧍 FORMAS OPCIONALES -->
-    <fieldset *ngIf="formasOpcionales?.length">
+    <fieldset>
       <legend>Cuentas de Ahorro Opcionales</legend>
 
-      <div class="form-row">
+      <!-- Seleccionador de forma -->
+      <div class="form-row" *ngIf="formasOpcionales && formasOpcionales.length > 0">
         <div class="form-group full">
-          <label>Seleccione forma opcional</label>
+          <label>Seleccione forma opcional *</label>
           <select formControlName="idFormaAhorro">
             <option [ngValue]="null">Seleccione...</option>
-            <option *ngFor="let f of formasOpcionales"
-                    [ngValue]="f.idFormaAhorro">
+            <option *ngFor="let f of formasOpcionales" [ngValue]="f.idFormaAhorro">
               {{ f.codigoForma }} — {{ f.nombreForma }}
             </option>
           </select>
         </div>
       </div>
 
+      <!-- Subtítulo con descripción forma -->
+      <div class="form-row" *ngIf="idFormaSeleccionada">
+        <div class="form-group full text-info">
+          Está abriendo:|
+          {{ nombreFormaSeleccionada }}
+        </div>
+      </div>
+
+      <!-- Consecutivo sugerido -->
+      <div class="form-row" *ngIf="codigoFormaConsecutivo && idFormaSeleccionada && !esAportesSeleccionado">
+        <div class="form-group full">
+          <label>Próximo código sugerido</label>
+          <input type="text" [value]="codigoFormaConsecutivo" disabled />
+        </div>
+      </div>
+
       <!-- GMF / Retención -->
-      <div class="form-row" *ngIf="!esAportesSeleccionado">
+      <div class="form-row" *ngIf="idFormaSeleccionada">
         <div class="form-group">
           <label>Aplica GMF *</label>
-          <select formControlName="gmf">
-            <option value="S">Sí</option>
-            <option value="N">No</option>
+          <select formControlName="gmf" [disabled]="esAportesSeleccionado">
+            <option [ngValue]="null">Seleccione...</option>
+
+            <option *ngFor="let g of tiposGmf" [ngValue]="g.codigoTipoGmf">
+              {{ g.descripcionTiposGmf }}
+            </option>
           </select>
         </div>
 
         <div class="form-group">
           <label>Aplica Retención *</label>
-          <input type="checkbox" formControlName="retencion" />
+          <select formControlName="retencion">
+            <option [value]="true">Sí</option>
+            <option [value]="false">No</option>
+          </select>
         </div>
       </div>
 
       <!-- 🔹 Apoderado ahorro opcional -->
-      <div class="form-row mt-2">
+      <div class="form-row mt-2" *ngIf="idFormaSeleccionada">
         <div class="form-group full">
           <label>Apoderado para cuenta opcional (si aplica)</label>
         </div>
       </div>
 
-      <div class="form-row">
+      <div class="form-row" *ngIf="idFormaSeleccionada">
         <div class="form-group">
           <label>Documento</label>
           <input type="text"
@@ -142,7 +164,7 @@
         </div>
       </div>
 
-      <div class="form-row">
+      <div class="form-row" *ngIf="idFormaSeleccionada">
         <div class="form-group sm">
           <label>Teléfono</label>
           <input type="text"
@@ -160,7 +182,6 @@
         </div>
       </div>
     </fieldset>
-
 
     <!-- BOTONES -->
     <div class="form-actions full">

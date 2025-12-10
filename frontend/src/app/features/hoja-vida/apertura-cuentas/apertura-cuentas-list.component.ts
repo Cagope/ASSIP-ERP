@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
 import { DatosPersonalesApi, DatosPersonales } from '../datos-personales/datos-personales.api';
 import { AperturaCuentasApi } from './apertura-cuentas.api';
+import { SessionService } from '../../../core/auth/session.service';
 
 @Component({
   selector: 'app-apertura-cuentas-list',
@@ -19,6 +20,7 @@ export class AperturaCuentasListComponent implements OnInit {
   private readonly dpApi = inject(DatosPersonalesApi);
   private readonly api = inject(AperturaCuentasApi);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);   // ⭐ AGREGADO
 
   personas: DatosPersonales[] = [];
   filtradas: DatosPersonales[] = [];
@@ -31,8 +33,22 @@ export class AperturaCuentasListComponent implements OnInit {
   tamanoPagina = 10;
 
   ngOnInit(): void {
-    this.cargar();
+
+    // Espera a que Angular termine de actualizar SessionService
+    setTimeout(() => {
+
+      const ag = this.session.getAgenciaActiva();
+      console.log("🟦 ngOnInit → Agencia activa disponible:", ag);
+
+      if (!ag) {
+        console.warn("⚠️ Aún no hay agencia activa, la pantalla esperará...");
+        return; // evita cargar sin agencia
+      }
+
+      this.cargar();  // ← ahora sí, cuando ya existe agencia
+    }, 0);
   }
+
 
   cargar(): void {
     this.cargando = true;
@@ -40,7 +56,6 @@ export class AperturaCuentasListComponent implements OnInit {
 
     this.dpApi.listar().subscribe({
       next: lista => {
-        // ✅ Asignar la lista y ordenar por fechaActualizacion (más reciente primero)
         this.personas = (lista ?? []).sort((a, b) => {
           const fa = a.fechaActualizacion ? Date.parse(a.fechaActualizacion) : 0;
           const fb = b.fechaActualizacion ? Date.parse(b.fechaActualizacion) : 0;
@@ -94,21 +109,36 @@ export class AperturaCuentasListComponent implements OnInit {
       return;
     }
 
-    this.api.listarFormas(persona.idDatosPersonal).subscribe({
+    // ⛔ MALO (devuelve null según el timing)
+    // const agenciaActiva = this.session.getAgenciaActiva()?.idAgencia ?? null;
+
+    // ✅ BUENO: usar directamente los SIGNALS como hace Cuentas de Ahorro
+    const agencia = this.session.agenciaActivaSig();
+    const agenciaActiva =
+        agencia?.idAgencia ??
+        agencia?.id_agencia ??
+        null;
+
+    console.log("🔥 Agencia ACTIVA usada:", agenciaActiva);
+
+    this.api.listarFormas(persona.idDatosPersonal, agenciaActiva).subscribe({
       next: formas => {
         if (!formas || formas.length === 0) {
-          // ✅ Mensaje más claro y explicativo
           this.error =
             'No es posible abrir cuentas para este asociado. ' +
             'Posibles causas: ya tiene saldos activos en cuentas de otra agencia, ' +
-            'no pertenece a ninguna de las agencias asignadas a su usuario, ' +
             'o su usuario no tiene agencias configuradas correctamente.';
           return;
         }
 
         this.router.navigate(
           ['/hoja-vida/apertura-cuentas/nuevo'],
-          { queryParams: { idDatosPersonal: persona.idDatosPersonal } }
+          {
+            queryParams: {
+              idDatosPersonal: persona.idDatosPersonal,
+              idAgencia: agenciaActiva   // <-- ⭐ AGREGADO
+            }
+          }
         );
       },
       error: err => {
@@ -117,4 +147,5 @@ export class AperturaCuentasListComponent implements OnInit {
       }
     });
   }
+
 }

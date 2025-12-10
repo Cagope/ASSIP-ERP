@@ -5,8 +5,11 @@ import co.assip.erp.depositos.apertura_cuentas.dto.AperturaCuentasEntradaDTO;
 import co.assip.erp.depositos.apertura_cuentas.dto.AperturaCuentasRespuestaDTO;
 import co.assip.erp.depositos.apertura_cuentas.repository.AperturaCuentasRepository;
 
+import co.assip.erp.seguridad.utils.SecurityUtils;   // ⭐ IMPORTANTE
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -18,32 +21,40 @@ public class AperturaCuentasService {
     private final AperturaCuentasRepository repo;
 
     // ============================================================
-    // 🔹 1. Listar formas aplicando reglas REALES
+    // 🔹 1. LISTAR FORMAS — AGENCIA SE TOMA DEL JWT
     // ============================================================
-    public List<AperturaCuentaItemDTO> listarFormas(Integer idDatosPersonal, List<Integer> agenciasUsuario) {
+    public List<AperturaCuentaItemDTO> listarFormas(Integer idPersona) {
 
-        System.out.println("🚨 ID persona: " + idDatosPersonal);
-
-        // ✔ Validación única válida:
-        int cuentasConSaldo = repo.contarCuentasConSaldo(idDatosPersonal);
-
-        System.out.println("🔎 Total cuentas con saldo: " + cuentasConSaldo);
-
+        // 🔥 1) Validación global — NO cambia
+        int cuentasConSaldo = repo.contarCuentasConSaldo(idPersona);
         if (cuentasConSaldo > 0) {
-            System.out.println("🚫 Bloqueado: tiene cuentas activas con saldo");
             return Collections.emptyList();
         }
 
-        Integer agenciaUsuario = null;
-        if (agenciasUsuario != null && !agenciasUsuario.isEmpty()) {
-            agenciaUsuario = agenciasUsuario.get(0);
-            System.out.println("✔ Agencia operativa: " + agenciaUsuario);
+        boolean tieneAportesActivos = repo.tieneAportesActivos(idPersona);
+
+        // 🔥 2) AGENCIAS DEL USUARIO DESDE EL TOKEN
+        var agenciasUsuario = SecurityUtils.getAgencias();
+        Integer agenciaFiltrar = null;
+
+        if (agenciasUsuario != null && agenciasUsuario.size() == 1) {
+            agenciaFiltrar = agenciasUsuario.get(0);
         }
 
-        boolean tieneAportesActivos = repo.tieneAportesActivos(idDatosPersonal);
+        System.out.println("🔥 AGENCIA DEL USUARIO (JWT) = " + agenciaFiltrar);
 
-        var lista = repo.listarFormasDisponibles(idDatosPersonal, agenciaUsuario);
+        // 🔥 3) Traemos TODAS las formas internas (así funcionan las validaciones)
+        var lista = repo.listarFormasDisponibles(idPersona, agenciaFiltrar);
 
+        if (agenciaFiltrar != null) {
+
+            // ⭐ Necesario para que funcione en el lambda
+            final Integer agenciaFinal = agenciaFiltrar;
+
+            lista.removeIf(x -> !x.getIdAgencia().equals(agenciaFinal));
+        }
+
+        // 🔥 5) Reglas de aportes iguales
         if (tieneAportesActivos) {
             lista.stream()
                     .filter(x -> "01".equals(x.getCodigoForma()))
@@ -54,21 +65,41 @@ public class AperturaCuentasService {
     }
 
     // ============================================================
-    // 🔹 2. Crear cuenta
+    // 🔹 2. CREAR CUENTA — AGENCIA TAMBIÉN SE OBTIENE DEL JWT
     // ============================================================
+    @Transactional
     public AperturaCuentasRespuestaDTO crear(AperturaCuentasEntradaDTO dto) {
+
+        System.out.println("➡️ ENTRÓ A CREAR CUENTA");
+        System.out.println("DTO RECIBIDO = " + dto);
 
         AperturaCuentasRespuestaDTO res = new AperturaCuentasRespuestaDTO();
 
+        // -------- VALIDACIONES DURAS --------
         if (dto.getIdDatosPersonal() == null || dto.getIdDatosPersonal() <= 0) {
             res.setOk(false);
             res.setMensaje("Asociado no válido.");
             return res;
         }
 
-        if (dto.getIdAgenciaUsuario() == null) {
+        // ⭐ AGENCIA TOMADA DEL TOKEN
+        var agencias = SecurityUtils.getAgencias();
+        Integer idAgencia = (agencias != null && agencias.size() == 1) ? agencias.get(0) : null;
+
+        System.out.println("🔥 AGENCIA DEL JWT PARA CREAR = " + idAgencia);
+
+        if (idAgencia == null) {
             res.setOk(false);
-            res.setMensaje("Agencia no válida en la sesión.");
+            res.setMensaje("No se pudo determinar la agencia del usuario.");
+            return res;
+        }
+
+        // Se guarda en el DTO (evita errores en repo)
+        dto.setIdAgenciaUsuario(idAgencia);
+
+        if (dto.getUsuarioId() == null || dto.getUsuarioId() <= 0) {
+            res.setOk(false);
+            res.setMensaje("Usuario no detectado en sesión.");
             return res;
         }
 
@@ -89,25 +120,27 @@ public class AperturaCuentasService {
             retencion = false;
         }
 
-        // Código con 10 dígitos
-        Integer consecutivo = repo.obtenerConsecutivo(dto.getIdFormaAhorro());
-        String codigoForma = repo.obtenerCodigoForma(dto.getIdFormaAhorro());
-        String codigo = codigoForma + "-" + String.format("%010d", consecutivo);
+        // ⭐ Consecutivo por AGENCIA + FORMA
+        Integer consecutivo =
+                repo.incrementarYObtenerConsecutivo(dto.getIdFormaAhorro(), idAgencia);
 
-        // 🔹 Crear cuenta
+        String codigo = String.format("%010d", consecutivo);
+        System.out.println("✔ Código generado = " + codigo);
+
+        // Crear
         Integer idCuenta = repo.crearCuenta(
                 dto.getIdFormaAhorro(),
                 dto.getIdDatosPersonal(),
-                dto.getIdAgenciaUsuario(),
+                idAgencia,
                 codigo,
                 gmf,
                 retencion,
                 dto.getUsuarioId()
         );
 
-        // =============================
-        // 🔹 Guardar apoderado aportes
-        // =============================
+        System.out.println("✔ Cuenta creada con ID = " + idCuenta);
+
+        // Apoderados
         repo.guardarApoderadoBasico(
                 idCuenta,
                 dto.getDocumentoApoderadoAportes(),
@@ -117,9 +150,6 @@ public class AperturaCuentasService {
                 dto.getUsuarioId()
         );
 
-        // =============================
-        // 🔹 Guardar apoderado ahorro opcional
-        // =============================
         repo.guardarApoderadoBasico(
                 idCuenta,
                 dto.getDocumentoApoderadoAhorro(),
@@ -129,14 +159,12 @@ public class AperturaCuentasService {
                 dto.getUsuarioId()
         );
 
-        // 🔹 Actualizar consecutivo
-        repo.actualizarConsecutivo(dto.getIdFormaAhorro());
-
         res.setOk(true);
         res.setIdCuentaAhorro(idCuenta);
         res.setCodigoCuenta(codigo);
-        res.setMensaje("Cuenta creada exitosamente.");
+        res.setMensaje("✔ Cuenta creada correctamente.");
 
+        System.out.println("🏁 FIN CREACIÓN → COMMIT");
         return res;
     }
 }

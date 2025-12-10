@@ -17,16 +17,17 @@ public class AperturaCuentasController {
 
     // ============================================================
     // 🔹 LISTAR FORMAS DISPONIBLES
-    //    Recibe:
-    //      - idPersona por path
-    //      - agencias del usuario (opcional) por header X-Agencias
+    //    Solo recibe idPersona. La agencia se toma del JWT en el service.
     // ============================================================
     @GetMapping("/formas/{idPersona}")
     public List<AperturaCuentaItemDTO> listarFormas(
-            @PathVariable Integer idPersona,
-            @RequestHeader(value = "X-Agencias", required = false) List<Integer> agenciasUsuario
+            @PathVariable Integer idPersona
     ) {
-        return service.listarFormas(idPersona, agenciasUsuario);
+        System.out.println("🔥 *** AperturaCuentasController.listarFormas ejecutándose ***");
+        System.out.println("🔥 idPersona = " + idPersona);
+        System.out.println("==============================================");
+
+        return service.listarFormas(idPersona);
     }
 
     // ============================================================

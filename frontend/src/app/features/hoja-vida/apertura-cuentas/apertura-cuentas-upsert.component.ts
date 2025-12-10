@@ -31,6 +31,16 @@ export class AperturaCuentasUpsertComponent implements OnInit {
   formaAportes: any | null = null;
   formasOpcionales: any[] = [];
   codigoAportes: string | null = null;
+  codigoFormaConsecutivo: string | null = null;
+  idFormaSeleccionada: number | null = null;
+  nombreFormaSeleccionada: string | null = null;
+
+  // ✔ Catálogo GMF — mismo formato del módulo guía
+  tiposGmf = [
+    { codigoTipoGmf: 'S', descripcionTiposGmf: 'Sí' },
+    { codigoTipoGmf: 'N', descripcionTiposGmf: 'No' },
+    { codigoTipoGmf: 'U', descripcionTiposGmf: 'Carta Única' }
+  ];
 
   get esAportesSeleccionado(): boolean {
     const id = this.form.get('idFormaAhorro')?.value;
@@ -56,17 +66,61 @@ export class AperturaCuentasUpsertComponent implements OnInit {
 
   ngOnInit(): void {
 
+    // 1️⃣ Escuchar SIEMPRE cambios del combo
+    this.form.get('idFormaAhorro')?.valueChanges.subscribe(id => {
+
+        id = Number(id); // ⭐ CORRECCIÓN: asegurar número
+
+        this.idFormaSeleccionada = id;
+
+        const forma = this.formas.find(f => Number(f.idFormaAhorro) === id);
+
+        this.nombreFormaSeleccionada = forma?.nombreForma ?? null;
+
+        if (forma && forma.codigoForma !== '01') {
+          const consecutivo =
+            forma.consecutivo ??
+            forma.consecutivoForma ??
+            forma.siguienteConsecutivo ??
+            null;
+
+          this.codigoFormaConsecutivo = consecutivo
+            ? consecutivo.toString().padStart(10, '0')
+            : null;
+        } else {
+          this.codigoFormaConsecutivo = null;
+        }
+
+        this.aplicarReglasForma(id);
+    });
+
+    // 2️⃣ Luego procesamos agencias y cargamos formas
+    let agencia = this.session.getAgenciaActiva();
+
     this.route.queryParams.subscribe(params => {
-      this.idDatosPersonal = +params['idDatosPersonal'];
+
+      if (!agencia || !agencia.idAgencia) {
+        const idAg = Number(params['idAgencia'] ?? 0);
+        if (idAg > 0 && agencia) {
+          agencia = {
+            idAgencia: idAg,
+            codigoAgencia: agencia.codigoAgencia,
+            nombreAgencia: agencia.nombreAgencia
+          };
+        }
+      }
+
+      if (!agencia || !agencia.idAgencia) {
+        this.mensajeBloqueo = "No se pudo determinar la agencia activa.";
+        return;
+      }
+
+      this.idDatosPersonal = Number(params['idDatosPersonal']);
       this.idFormaAhorroInicial = params['idFormaAhorro']
-        ? +params['idFormaAhorro']
+        ? Number(params['idFormaAhorro'])
         : null;
 
       this.cargarFormas();
-    });
-
-    this.form.get('idFormaAhorro')?.valueChanges.subscribe(v => {
-      this.aplicarReglasForma(v);
     });
   }
 
@@ -81,6 +135,7 @@ export class AperturaCuentasUpsertComponent implements OnInit {
     if (esAportes) {
 
       this.form.patchValue({ gmf: 'N', retencion: false });
+
       this.form.get('gmf')?.disable({ emitEvent: false });
       this.form.get('retencion')?.disable({ emitEvent: false });
 
@@ -88,6 +143,7 @@ export class AperturaCuentasUpsertComponent implements OnInit {
       this.form.get('nombreApoderadoAportes')?.setValidators([Validators.required]);
 
     } else {
+
       this.form.get('gmf')?.enable({ emitEvent: false });
       this.form.get('retencion')?.enable({ emitEvent: false });
 
@@ -97,54 +153,77 @@ export class AperturaCuentasUpsertComponent implements OnInit {
 
     this.form.get('documentoApoderadoAportes')?.updateValueAndValidity({ emitEvent:false });
     this.form.get('nombreApoderadoAportes')?.updateValueAndValidity({ emitEvent:false });
+
+    // 🔹 Mostrar consecutivo cuando NO es aportes
+    if (!esAportes) {
+
+      const consecutivo =
+        forma.consecutivo ??
+        forma.consecutivoForma ??      // muchos DTO lo traen así
+        forma.siguienteConsecutivo ??   // otros así
+        null;
+
+      this.codigoFormaConsecutivo = consecutivo
+        ? consecutivo.toString().padStart(10, '0')
+        : null;
+
+    } else {
+      this.codigoFormaConsecutivo = null;
+    }
+
   }
 
   cargarFormas(): void {
 
-    const agenciaActiva = this.session.getAgenciaActiva()?.idAgencia;
+    const agenciaActiva = Number(this.session.getAgenciaActiva()?.idAgencia ?? 0);
 
-    this.api.listarFormas(this.idDatosPersonal).subscribe({
+    this.api.listarFormas(this.idDatosPersonal, agenciaActiva).subscribe({
       next: lista => {
 
-        // ⚠ NO bloquear si hay lista
-        if (!lista) {
-          this.mensajeBloqueo =
-            '⚠ Error cargando formas de apertura.';
+        if (!lista || !lista.length) {
+          this.mensajeBloqueo = '⚠ No hay formas de ahorro configuradas.';
           return;
         }
 
-        this.formas = lista ?? [];
+        // TODAS las formas del backend
+        this.formas = lista;
 
-        // Aportes SIEMPRE existe visualmente
+        // Forma aportes
         this.formaAportes = lista.find(f => f.codigoForma === '01') || null;
 
-        // Opcionales SÍ se filtran por agencia
+        // Filtrar opcionales por agencia
         this.formasOpcionales = lista.filter(f =>
-          ['02','03','05','06'].includes(f.codigoForma)
-          && Number(f.idAgencia) === Number(agenciaActiva)
+          f.codigoForma !== '01' &&
+          Number(f.idAgencia) === agenciaActiva
         );
 
-        // Mostrar consecutivo de aportes aunque no pertenezca a la agencia
+        // Código aportes
         if (this.formaAportes) {
-          this.codigoAportes = String(this.formaAportes.consecutivo).padStart(10, '0');
+          this.codigoAportes = String(this.formaAportes.consecutivo)
+            .padStart(10, '0');
         }
 
-        // AUTOCARGA solo si pertenece a agencia
+        // Autoselección aportes
         if (this.formaAportes &&
-            Number(this.formaAportes.idAgencia) === Number(agenciaActiva) &&
+            Number(this.formaAportes.idAgencia) === agenciaActiva &&
             this.idFormaAhorroInicial == null) {
+
           this.form.patchValue({ idFormaAhorro: this.formaAportes.idFormaAhorro });
           this.aplicarReglasForma(this.formaAportes.idFormaAhorro);
         }
 
-        // Caso edición
+        // Modo edición
         if (this.idFormaAhorroInicial !== null) {
           this.form.patchValue({ idFormaAhorro: this.idFormaAhorroInicial });
           this.aplicarReglasForma(this.idFormaAhorroInicial);
           this.editando = true;
         }
       },
-      error: () => console.error('❌ Error cargando formas')
+
+      error: () => {
+        console.error('❌ Error cargando formas');
+        this.mensajeBloqueo = '⚠ Error cargando formas de apertura.';
+      }
     });
   }
 
@@ -157,16 +236,23 @@ export class AperturaCuentasUpsertComponent implements OnInit {
     if (this.form.invalid) return;
 
     const agenciaActiva = this.session.getAgenciaActiva();
+    const usuarioId = this.session.getUsuarioId();
+
+    if (!usuarioId) {
+      alert('No se pudo obtener el usuario. Cierre sesión e ingrese de nuevo.');
+      return;
+    }
 
     const dto = {
       idDatosPersonal: this.idDatosPersonal,
       idAgenciaUsuario: agenciaActiva?.idAgencia ?? null,
+      usuarioId,
       ...this.form.getRawValue()
     };
 
     this.api.crear(dto).subscribe({
-      next: () => {
-        alert('✔ Cuenta procesada correctamente');
+      next: res => {
+        alert(res?.mensaje ?? '✔ Cuenta procesada correctamente');
         this.router.navigate(['/hoja-vida/apertura-cuentas']);
       },
       error: err => {
@@ -175,7 +261,6 @@ export class AperturaCuentasUpsertComponent implements OnInit {
       }
     });
   }
-
   cancelar(): void {
     this.router.navigate(['/hoja-vida/apertura-cuentas']);
   }

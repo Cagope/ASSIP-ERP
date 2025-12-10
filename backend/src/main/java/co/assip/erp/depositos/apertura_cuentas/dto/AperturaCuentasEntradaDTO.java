@@ -8,13 +8,8 @@ public class AperturaCuentasEntradaDTO {
     private Integer idDatosPersonal;
     private Integer idFormaAhorro;
 
-    // Alias viejo que usabas en el Service
-    public String getCodigoForma() {
-        return idFormaAhorro != null ? String.valueOf(idFormaAhorro) : null;
-    }
-
     // Valores seleccionados en el formulario (solo para la forma que se está creando)
-    private String gmf;              // “S” o “N”
+    private String gmf;              // “S”, “N”, “U”
     private Boolean retencion;       // true/false
 
     // 🔹 Apoderado para la cuenta de APORTES

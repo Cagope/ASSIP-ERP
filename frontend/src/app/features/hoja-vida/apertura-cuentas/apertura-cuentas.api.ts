@@ -25,15 +25,32 @@ export class AperturaCuentasApi {
     });
   }
 
-  /** 🔹 Listar formas habilitadas (reglas ya aplicadas en backend) */
-  listarFormas(idDatosPersonal: number): Observable<any[]> {
+  // ============================================================
+  // 🔹 LISTAR FORMAS HABILITADAS
+  //    * No acepta null ni undefined
+  //    * No hay overloads duplicados
+  // ============================================================
+  listarFormas(idDatosPersonal: number, idAgencia: number): Observable<any[]> {
+
+    console.log("🔥 API → Enviando persona/agencia =", idDatosPersonal, idAgencia);
+
+    if (!idAgencia || isNaN(idAgencia)) {
+      console.warn("⚠️ API: idAgencia inválida, devolviendo arreglo vacío.");
+      return new Observable<any[]>(observer => {
+        observer.next([]);
+        observer.complete();
+      });
+    }
+
     return this.http.get<any[]>(
-      `${this.base}/formas/${idDatosPersonal}`,
+      `${this.base}/formas/${idDatosPersonal}/${idAgencia}`,
       { headers: this.buildHeaders() }
     );
   }
 
-  /** 🔹 Obtener próximo código sugerido para aportes */
+  // ============================================================
+  // 🔹 OBTENER SIGUIENTE CÓDIGO
+  // ============================================================
   obtenerSiguienteCodigo(idForma: number): Observable<string> {
     return this.http.get(
       `${this.base}/consecutivo/${idForma}`,
@@ -41,7 +58,9 @@ export class AperturaCuentasApi {
     );
   }
 
-  /** 🔹 Listar formas de ahorro opcionales (02,03,05,06) */
+  // ============================================================
+  // 🔹 FORMAS OPCIONALES (SI SE USAN)
+  // ============================================================
   listarFormasOpcionales(): Observable<any[]> {
 
     const agenciaActiva = this.session.getAgenciaActiva();
@@ -53,7 +72,9 @@ export class AperturaCuentasApi {
     );
   }
 
-  /** 🔹 Crear cuenta (envía agencia del usuario y aplica reglas) */
+  // ============================================================
+  // 🔹 CREAR CUENTA
+  // ============================================================
   crear(data: any): Observable<any> {
     return this.http.post<any>(
       `${this.base}`,
