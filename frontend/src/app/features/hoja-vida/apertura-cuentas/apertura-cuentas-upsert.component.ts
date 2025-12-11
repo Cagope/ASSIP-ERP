@@ -35,7 +35,6 @@ export class AperturaCuentasUpsertComponent implements OnInit {
   idFormaSeleccionada: number | null = null;
   nombreFormaSeleccionada: string | null = null;
 
-  // ✔ Catálogo GMF — mismo formato del módulo guía
   tiposGmf = [
     { codigoTipoGmf: 'S', descripcionTiposGmf: 'Sí' },
     { codigoTipoGmf: 'N', descripcionTiposGmf: 'No' },
@@ -66,35 +65,33 @@ export class AperturaCuentasUpsertComponent implements OnInit {
 
   ngOnInit(): void {
 
-    // 1️⃣ Escuchar SIEMPRE cambios del combo
     this.form.get('idFormaAhorro')?.valueChanges.subscribe(id => {
 
-        id = Number(id); // ⭐ CORRECCIÓN: asegurar número
+      id = Number(id);
 
-        this.idFormaSeleccionada = id;
+      this.idFormaSeleccionada = id;
 
-        const forma = this.formas.find(f => Number(f.idFormaAhorro) === id);
+      const forma = this.formas.find(f => Number(f.idFormaAhorro) === id);
 
-        this.nombreFormaSeleccionada = forma?.nombreForma ?? null;
+      this.nombreFormaSeleccionada = forma?.nombreForma ?? null;
 
-        if (forma && forma.codigoForma !== '01') {
-          const consecutivo =
-            forma.consecutivo ??
-            forma.consecutivoForma ??
-            forma.siguienteConsecutivo ??
-            null;
+      if (forma && forma.codigoForma !== '01') {
+        const consecutivo =
+          forma.consecutivo ??
+          forma.consecutivoForma ??
+          forma.siguienteConsecutivo ??
+          null;
 
-          this.codigoFormaConsecutivo = consecutivo
-            ? consecutivo.toString().padStart(10, '0')
-            : null;
-        } else {
-          this.codigoFormaConsecutivo = null;
-        }
+        this.codigoFormaConsecutivo = consecutivo
+          ? consecutivo.toString().padStart(10, '0')
+          : null;
+      } else {
+        this.codigoFormaConsecutivo = null;
+      }
 
-        this.aplicarReglasForma(id);
+      this.aplicarReglasForma(id);
     });
 
-    // 2️⃣ Luego procesamos agencias y cargamos formas
     let agencia = this.session.getAgenciaActiva();
 
     this.route.queryParams.subscribe(params => {
@@ -154,13 +151,12 @@ export class AperturaCuentasUpsertComponent implements OnInit {
     this.form.get('documentoApoderadoAportes')?.updateValueAndValidity({ emitEvent:false });
     this.form.get('nombreApoderadoAportes')?.updateValueAndValidity({ emitEvent:false });
 
-    // 🔹 Mostrar consecutivo cuando NO es aportes
     if (!esAportes) {
 
       const consecutivo =
         forma.consecutivo ??
-        forma.consecutivoForma ??      // muchos DTO lo traen así
-        forma.siguienteConsecutivo ??   // otros así
+        forma.consecutivoForma ??
+        forma.siguienteConsecutivo ??
         null;
 
       this.codigoFormaConsecutivo = consecutivo
@@ -185,25 +181,20 @@ export class AperturaCuentasUpsertComponent implements OnInit {
           return;
         }
 
-        // TODAS las formas del backend
         this.formas = lista;
 
-        // Forma aportes
         this.formaAportes = lista.find(f => f.codigoForma === '01') || null;
 
-        // Filtrar opcionales por agencia
         this.formasOpcionales = lista.filter(f =>
           f.codigoForma !== '01' &&
           Number(f.idAgencia) === agenciaActiva
         );
 
-        // Código aportes
         if (this.formaAportes) {
           this.codigoAportes = String(this.formaAportes.consecutivo)
             .padStart(10, '0');
         }
 
-        // Autoselección aportes
         if (this.formaAportes &&
             Number(this.formaAportes.idAgencia) === agenciaActiva &&
             this.idFormaAhorroInicial == null) {
@@ -212,7 +203,6 @@ export class AperturaCuentasUpsertComponent implements OnInit {
           this.aplicarReglasForma(this.formaAportes.idFormaAhorro);
         }
 
-        // Modo edición
         if (this.idFormaAhorroInicial !== null) {
           this.form.patchValue({ idFormaAhorro: this.idFormaAhorroInicial });
           this.aplicarReglasForma(this.idFormaAhorroInicial);
@@ -261,6 +251,7 @@ export class AperturaCuentasUpsertComponent implements OnInit {
       }
     });
   }
+
   cancelar(): void {
     this.router.navigate(['/hoja-vida/apertura-cuentas']);
   }

@@ -27,8 +27,8 @@ export class AperturaCuentasApi {
 
   // ============================================================
   // 🔹 LISTAR FORMAS HABILITADAS
-  //    * No acepta null ni undefined
-  //    * No hay overloads duplicados
+  //    * El backend NO acepta idAgencia en la URL
+  //    * La agencia se toma del JWT en el backend
   // ============================================================
   listarFormas(idDatosPersonal: number, idAgencia: number): Observable<any[]> {
 
@@ -42,8 +42,13 @@ export class AperturaCuentasApi {
       });
     }
 
+    // ⛔ ANTES: /formas/{idDatosPersonal}/{idAgencia}
+    // ⛔ Ese endpoint NO existe → 404
+    //
+    // ✅ AHORA: /formas/{idDatosPersonal}
+    //    Coincide con tu @GetMapping("/formas/{idPersona}")
     return this.http.get<any[]>(
-      `${this.base}/formas/${idDatosPersonal}/${idAgencia}`,
+      `${this.base}/formas/${idDatosPersonal}`,
       { headers: this.buildHeaders() }
     );
   }

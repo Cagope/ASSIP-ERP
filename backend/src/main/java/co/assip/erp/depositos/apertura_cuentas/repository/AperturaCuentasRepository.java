@@ -20,13 +20,14 @@ public class AperturaCuentasRepository {
     public boolean tieneAportesActivos(Integer idDatosPersonal) {
 
         String sql = """
-            SELECT COUNT(*)
-            FROM depositos.cuentas_ahorro ca
-            JOIN depositos.formas_ahorro fa ON fa.id_forma_ahorro = ca.id_forma_ahorro
-            WHERE ca.id_datos_personal = :id
-              AND fa.codigo_forma = '01'
-              AND ca.saldo_actual_cuenta > 0
-        """;
+        SELECT COUNT(*)
+        FROM depositos.cuentas_ahorro ca
+        JOIN depositos.formas_ahorro fa 
+              ON fa.id_forma_ahorro = ca.id_forma_ahorro
+        WHERE ca.id_datos_personal = :id
+          AND fa.codigo_forma = '01'
+          AND ca.estado_cuenta_cuenta = 'A'
+    """;
 
         Integer count = jdbc.queryForObject(
                 sql,
@@ -38,7 +39,33 @@ public class AperturaCuentasRepository {
     }
 
     // ============================================================
-    // 🔹 2. Cuentas internas con saldo (agencias usuario) – POR SI LUEGO LO USAS
+    // 🔹 1.1 NUEVO — validar si existe cuenta activa en cualquier forma
+    // ============================================================
+    public boolean existeCuentaActivaEnForma(Integer idPersona, Integer idForma, Integer idAgencia) {
+
+        String sql = """
+            SELECT COUNT(*)
+            FROM depositos.cuentas_ahorro
+            WHERE id_datos_personal = :id
+              AND id_forma_ahorro = :forma
+              AND id_agencia = :agencia
+              AND estado_cuenta_cuenta = 'A'
+        """;
+
+        Integer count = jdbc.queryForObject(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("id", idPersona)
+                        .addValue("forma", idForma)
+                        .addValue("agencia", idAgencia),
+                Integer.class
+        );
+
+        return count != null && count > 0;
+    }
+
+    // ============================================================
+    // 🔹 2. Cuentas internas con saldo (agencias usuario)
     // ============================================================
     public int contarCuentasInternas(Integer idDatosPersonal, List<Integer> agenciasUsuario) {
 
@@ -62,7 +89,7 @@ public class AperturaCuentasRepository {
     }
 
     // ============================================================
-    // 🔹 3. Cuentas externas con saldo (fuera agencias usuario) – POR SI LUEGO LO USAS
+    // 🔹 3. Cuentas externas con saldo
     // ============================================================
     public int contarCuentasExternas(Integer idDatosPersonal, List<Integer> agenciasUsuario) {
 
@@ -87,8 +114,6 @@ public class AperturaCuentasRepository {
 
     // ============================================================
     // 🔹 4. Listar formas habilitadas
-    //    - Si idAgenciaUsuario != null → filtra por agencia (para consecutivos).
-    //    - Si idAgenciaUsuario == null → trae TODAS (para no dañar validación).
     // ============================================================
     public List<AperturaCuentaItemDTO> listarFormasDisponibles(Integer idDatosPersonal, Integer idAgenciaUsuario) {
 
@@ -133,9 +158,8 @@ public class AperturaCuentasRepository {
         });
     }
 
-
     // ============================================================
-    // 🔹 5. Incrementar consecutivo por agencia (para guardar)
+    // 🔹 5. Incrementar consecutivo por agencia
     // ============================================================
     public Integer incrementarYObtenerConsecutivo(Integer idForma, Integer idAgencia) {
 
@@ -167,7 +191,7 @@ public class AperturaCuentasRepository {
     }
 
     // ============================================================
-    // 🔹 7. Crear cuenta
+    // 🔹 7. Crear cuenta (INSERT FINAL)
     // ============================================================
     public Integer crearCuenta(
             Integer idForma,
@@ -181,20 +205,54 @@ public class AperturaCuentasRepository {
 
         String sql = """
             INSERT INTO depositos.cuentas_ahorro (
-                id_agencia, id_forma_ahorro, codigo_cuenta,
-                id_datos_personal, estado_cuenta_cuenta,
-                gmf_cuenta_cuenta, retencion_fuente_cuenta,
-                plazo_cuenta, cuota_mensual_cuenta,
-                cuenta_conjunta, accion_conjunta, tasa,
-                fk_seguridad_creacion, fk_seguridad_edicion
+                id_agencia,
+                id_forma_ahorro,
+                codigo_cuenta,
+                id_datos_personal,
+                fecha_apertura_cuenta,
+                saldo_inicial_cuenta,
+                saldo_actual_cuenta,
+                estado_cuenta_cuenta,
+                fecha_estado_cuenta,
+                gmf_cuenta_cuenta,
+                fecha_gmf_cuenta,
+                libranza_cuenta,
+                libranzatiempo_pago,
+                cuota_mensual_cuenta,
+                retencion_fuente_cuenta,
+                plazo_cuenta,
+                fecha_final_cuenta,
+                cuenta_activa,
+                cuenta_conjunta,
+                accion_conjunta,
+                tasa,
+                fk_seguridad_creacion,
+                fk_seguridad_edicion
             )
             VALUES (
-                :agencia, :forma, :codigo,
-                :idPer, 'A',
-                :gmf, :retencion,
-                0, 0,
-                'N', 'N', 0,
-                :user, :user
+                :agencia,
+                :forma,
+                :codigo,
+                :idPer,
+                CURRENT_DATE,
+                0,
+                0,
+                'A',
+                CURRENT_DATE,
+                :gmf,
+                CURRENT_DATE,
+                false,
+                'M',
+                0,
+                :retencion,
+                0,
+                NULL,
+                'A',
+                'N',
+                'N',
+                0,
+                :user,
+                :user
             )
             RETURNING id_cuenta_ahorro
         """;
@@ -246,7 +304,7 @@ public class AperturaCuentasRepository {
     }
 
     // ============================================================
-    // 🔹 9. Cuentas con saldo (para validaciones)
+    // 🔹 9. Cuentas con saldo
     // ============================================================
     public int contarCuentasConSaldo(Integer idDatosPersonal) {
 

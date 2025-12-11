@@ -20,7 +20,7 @@ export class AperturaCuentasListComponent implements OnInit {
   private readonly dpApi = inject(DatosPersonalesApi);
   private readonly api = inject(AperturaCuentasApi);
   private readonly router = inject(Router);
-  private readonly session = inject(SessionService);   // ⭐ AGREGADO
+  private readonly session = inject(SessionService);
 
   personas: DatosPersonales[] = [];
   filtradas: DatosPersonales[] = [];
@@ -34,7 +34,6 @@ export class AperturaCuentasListComponent implements OnInit {
 
   ngOnInit(): void {
 
-    // Espera a que Angular termine de actualizar SessionService
     setTimeout(() => {
 
       const ag = this.session.getAgenciaActiva();
@@ -42,10 +41,10 @@ export class AperturaCuentasListComponent implements OnInit {
 
       if (!ag) {
         console.warn("⚠️ Aún no hay agencia activa, la pantalla esperará...");
-        return; // evita cargar sin agencia
+        return;
       }
 
-      this.cargar();  // ← ahora sí, cuando ya existe agencia
+      this.cargar();
     }, 0);
   }
 
@@ -109,10 +108,6 @@ export class AperturaCuentasListComponent implements OnInit {
       return;
     }
 
-    // ⛔ MALO (devuelve null según el timing)
-    // const agenciaActiva = this.session.getAgenciaActiva()?.idAgencia ?? null;
-
-    // ✅ BUENO: usar directamente los SIGNALS como hace Cuentas de Ahorro
     const agencia = this.session.agenciaActivaSig();
     const agenciaActiva =
         agencia?.idAgencia ??
@@ -136,7 +131,7 @@ export class AperturaCuentasListComponent implements OnInit {
           {
             queryParams: {
               idDatosPersonal: persona.idDatosPersonal,
-              idAgencia: agenciaActiva   // <-- ⭐ AGREGADO
+              idAgencia: agenciaActiva
             }
           }
         );
