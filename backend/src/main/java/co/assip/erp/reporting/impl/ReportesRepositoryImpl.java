@@ -124,10 +124,13 @@ public class ReportesRepositoryImpl {
             }
 
             // ==========================================================
-            // 🔐 Filtro por agencias del usuario (SEGURIDAD CENTRALIZADA)
-            // ==========================================================
+// 🔐 Filtro por agencias del usuario (solo DEPÓSITOS)
+// ==========================================================
             try {
-                if (!co.assip.erp.seguridad.utils.SecurityUtils.tieneAccesoTotal()) {
+
+                boolean esDepositos = schema.equalsIgnoreCase("depositos");
+
+                if (esDepositos && !co.assip.erp.seguridad.utils.SecurityUtils.tieneAccesoTotal()) {
 
                     List<Integer> agenciasUsuario = co.assip.erp.seguridad.utils.SecurityUtils.getAgencias();
 
@@ -139,8 +142,9 @@ public class ReportesRepositoryImpl {
                         params.add(agenciasUsuario.toArray(new Integer[0]));
                     }
                 }
+
             } catch (Exception ignored) {
-                // Si no está SecurityUtils disponible, simplemente no filtra (caso extremo)
+                // Si ocurre un error, el reporte sigue sin filtro.
             }
 
             sql.append(where);

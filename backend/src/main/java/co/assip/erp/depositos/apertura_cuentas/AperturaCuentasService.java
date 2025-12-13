@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -20,14 +19,52 @@ public class AperturaCuentasService {
     private final AperturaCuentasRepository repo;
 
     // ============================================================
-    // 🔹 1. LISTAR FORMAS
+    // 🔹 0. VALIDAR (para el botón Gestionar)
     // ============================================================
-    public List<AperturaCuentaItemDTO> listarFormas(Integer idPersona) {
+    public AperturaCuentasRespuestaDTO validarApertura(Integer idPersona, Integer idAgencia) {
 
+        AperturaCuentasRespuestaDTO res = new AperturaCuentasRespuestaDTO();
+
+        if (idPersona == null || idPersona <= 0) {
+            res.setOk(false);
+            res.setMensaje("Asociado no válido.");
+            return res;
+        }
+
+        // 1) Tiene cuentas con saldo
         int cuentasConSaldo = repo.contarCuentasConSaldo(idPersona);
         if (cuentasConSaldo > 0) {
-            return Collections.emptyList();
+            res.setOk(false);
+            res.setMensaje("El asociado tiene cuentas con saldo. No es posible abrir nuevas cuentas.");
+            return res;
         }
+
+        // 2) Ya tiene aportes activos
+        boolean tieneAportesActivos = repo.tieneAportesActivos(idPersona);
+        if (tieneAportesActivos) {
+            res.setOk(false);
+            res.setMensaje("El asociado ya tiene una cuenta de APORTES activa.");
+            return res;
+        }
+
+        // 3) NUEVO: validar cuentas ACTIVAS en la misma agencia, aunque saldo = 0
+        boolean tieneCuentaActivaAgencia = repo.existeCuentaActivaEnAgencia(idPersona, idAgencia);
+        if (tieneCuentaActivaAgencia) {
+            res.setOk(false);
+            res.setMensaje("El asociado ya tiene una cuenta activa en esta agencia.");
+            return res;
+        }
+
+        // ✔ Pasa todas las validaciones
+        res.setOk(true);
+        res.setMensaje("OK");
+        return res;
+    }
+
+    // ============================================================
+    // 🔹 1. LISTAR FORMAS (solo para llenar combo, no valida)
+    // ============================================================
+    public List<AperturaCuentaItemDTO> listarFormas(Integer idPersona) {
 
         boolean tieneAportesActivos = repo.tieneAportesActivos(idPersona);
 
@@ -48,14 +85,14 @@ public class AperturaCuentasService {
         if (tieneAportesActivos) {
             lista.stream()
                     .filter(x -> "01".equals(x.getCodigoForma()))
-                    .forEach(x -> x.setObservacion("⚠️ Ya posee cuenta de aportes con saldo"));
+                    .forEach(x -> x.setObservacion("⚠️ Ya posee cuenta de aportes con saldo/activa"));
         }
 
         return lista;
     }
 
     // ============================================================
-    // 🔹 2. CREAR DOS CUENTAS EN UNA TRANSACCIÓN
+    // 🔹 2. CREAR DOS CUENTAS EN TRANSACCIÓN
     // ============================================================
     @Transactional
     public AperturaCuentasRespuestaDTO crear(AperturaCuentasEntradaDTO dto) {
@@ -90,24 +127,7 @@ public class AperturaCuentasService {
         Integer idPersona = dto.getIdDatosPersonal();
         Integer idFormaAhorroSeleccionada = dto.getIdFormaAhorro();
 
-        // ============================================================
-        // 🚫 VALIDACIÓN NUEVA — evitar duplicados aunque saldo = 0
-        // ============================================================
-        if (repo.existeCuentaActivaEnForma(idPersona, 1, idAgencia)) {
-            res.setOk(false);
-            res.setMensaje("El asociado ya tiene cuenta de APORTES activa en esta agencia.");
-            return res;
-        }
-
-        if (repo.existeCuentaActivaEnForma(idPersona, idFormaAhorroSeleccionada, idAgencia)) {
-            res.setOk(false);
-            res.setMensaje("El asociado ya tiene una cuenta activa en esta forma de ahorro dentro de la misma agencia.");
-            return res;
-        }
-
-        // ============================================================
         // 🔥 CUENTA 1 — APORTES
-        // ============================================================
         System.out.println("🔵 creando cuenta de APORTES (01)");
 
         Integer consecutivoAportes =
@@ -136,10 +156,7 @@ public class AperturaCuentasService {
 
         System.out.println("✔ Cuenta de aportes creada: " + idCuentaAportes);
 
-
-        // ============================================================
         // 🔥 CUENTA 2 — FORMA SELECCIONADA
-        // ============================================================
         System.out.println("🟢 creando segunda cuenta (forma seleccionada): " + idFormaAhorroSeleccionada);
 
         boolean esAportes = idFormaAhorroSeleccionada != null && idFormaAhorroSeleccionada == 1;
@@ -178,9 +195,6 @@ public class AperturaCuentasService {
 
         System.out.println("✔ Cuenta seleccionada creada: " + idCuentaAhorro);
 
-        // ============================================================
-        // 🔹 RESPUESTA FINAL
-        // ============================================================
         res.setOk(true);
         res.setIdCuentaAhorro(idCuentaAhorro);
         res.setCodigoCuenta(codigoAhorro);

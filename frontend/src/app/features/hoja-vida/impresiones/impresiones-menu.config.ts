@@ -28,12 +28,13 @@ export const FORMATOS_IMPRESION: FormatoImpresion[] = [
     id: 'carta-gmf',
     label: 'Carta Exoneración GMF',
     icon: '📄',
-    ruta: '/hoja-vida/impresiones/carta-gmf'
+    ruta: '/hoja-vida/impresiones/exoneracion-gmf'   // ← CORRECTO
   },
   {
-    id: 'actualizacion-datos', // ✅ Nuevo formato agregado
+    id: 'actualizacion-datos',
     label: 'Actualización Datos Persona Naturales',
     icon: '📋',
     ruta: '/hoja-vida/impresiones/actualizacion-datos'
   }
 ];
+

@@ -5,12 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f7dc21a8-45a4-4140-a7e2-a5ded858c06e" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/exoneracion-gmf/exoneracion-gmf.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/exoneracion-gmf/exoneracion-gmf.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/exoneracion-gmf/exoneracion-gmf.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/apertura_cuentas/AperturaCuentasController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/apertura_cuentas/AperturaCuentasController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/apertura_cuentas/AperturaCuentasService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/apertura_cuentas/AperturaCuentasService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/apertura_cuentas/repository/AperturaCuentasRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/apertura_cuentas/repository/AperturaCuentasRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/reporting/impl/ReportesRepositoryImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/reporting/impl/ReportesRepositoryImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/apertura-cuentas/apertura-cuentas-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/apertura-cuentas/apertura-cuentas-list.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/apertura-cuentas/apertura-cuentas-upsert.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/apertura-cuentas/apertura-cuentas-upsert.component.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/apertura-cuentas/apertura-cuentas.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/apertura-cuentas/apertura-cuentas.api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/afiliacion-list/afiliacion-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/afiliacion-list/afiliacion-list.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/afiliacion.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/afiliacion.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/impresiones-menu.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/impresiones-menu.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/tratamiento-datos/tratamiento-datos.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/tratamiento-datos/tratamiento-datos.component.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/shared/reporting/reporting.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/shared/reporting/reporting.api.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

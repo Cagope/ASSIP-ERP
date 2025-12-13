@@ -78,6 +78,19 @@ export class AperturaCuentasApi {
   }
 
   // ============================================================
+  // 🔹 VALIDAR REGLAS DE NEGOCIO ANTES DE ABRIR CUENTAS
+  //    /hoja-vida/apertura-cuentas/validar/{idPersona}/{idAgencia}
+  // ============================================================
+  validar(idPersona: number, idAgencia: number): Observable<any> {
+
+    return this.http.get<any>(
+      `${this.base}/validar/${idPersona}/${idAgencia}`,
+      { headers: this.buildHeaders() }
+    );
+  }
+
+
+  // ============================================================
   // 🔹 CREAR CUENTA
   // ============================================================
   crear(data: any): Observable<any> {

@@ -15,19 +15,19 @@ public class AperturaCuentasRepository {
     private final NamedParameterJdbcTemplate jdbc;
 
     // ============================================================
-    // 🔹 1. Validar existencia de aportes activos
+    // 🔹 1. Validar existencia de aportes activos (forma 01)
     // ============================================================
     public boolean tieneAportesActivos(Integer idDatosPersonal) {
 
         String sql = """
-        SELECT COUNT(*)
-        FROM depositos.cuentas_ahorro ca
-        JOIN depositos.formas_ahorro fa 
-              ON fa.id_forma_ahorro = ca.id_forma_ahorro
-        WHERE ca.id_datos_personal = :id
-          AND fa.codigo_forma = '01'
-          AND ca.estado_cuenta_cuenta = 'A'
-    """;
+            SELECT COUNT(*)
+            FROM depositos.cuentas_ahorro ca
+            JOIN depositos.formas_ahorro fa 
+                    ON fa.id_forma_ahorro = ca.id_forma_ahorro
+            WHERE ca.id_datos_personal = :id
+              AND fa.codigo_forma = '01'
+              AND ca.estado_cuenta_cuenta = 'A'
+        """;
 
         Integer count = jdbc.queryForObject(
                 sql,
@@ -39,15 +39,14 @@ public class AperturaCuentasRepository {
     }
 
     // ============================================================
-    // 🔹 1.1 NUEVO — validar si existe cuenta activa en cualquier forma
+    // 🔹 1.1 NUEVO — validar si existe cualquier cuenta activa en la agencia
     // ============================================================
-    public boolean existeCuentaActivaEnForma(Integer idPersona, Integer idForma, Integer idAgencia) {
+    public boolean existeCuentaActivaEnAgencia(Integer idPersona, Integer idAgencia) {
 
         String sql = """
             SELECT COUNT(*)
             FROM depositos.cuentas_ahorro
             WHERE id_datos_personal = :id
-              AND id_forma_ahorro = :forma
               AND id_agencia = :agencia
               AND estado_cuenta_cuenta = 'A'
         """;
@@ -56,7 +55,6 @@ public class AperturaCuentasRepository {
                 sql,
                 new MapSqlParameterSource()
                         .addValue("id", idPersona)
-                        .addValue("forma", idForma)
                         .addValue("agencia", idAgencia),
                 Integer.class
         );
@@ -65,79 +63,31 @@ public class AperturaCuentasRepository {
     }
 
     // ============================================================
-    // 🔹 2. Cuentas internas con saldo (agencias usuario)
-    // ============================================================
-    public int contarCuentasInternas(Integer idDatosPersonal, List<Integer> agenciasUsuario) {
-
-        if (agenciasUsuario == null || agenciasUsuario.isEmpty()) return 0;
-
-        String sql = """
-            SELECT COUNT(*)
-            FROM depositos.cuentas_ahorro
-            WHERE id_datos_personal = :id
-              AND saldo_actual_cuenta > 0
-              AND id_agencia IN (:agencias)
-        """;
-
-        return jdbc.queryForObject(
-                sql,
-                new MapSqlParameterSource()
-                        .addValue("id", idDatosPersonal)
-                        .addValue("agencias", agenciasUsuario),
-                Integer.class
-        );
-    }
-
-    // ============================================================
-    // 🔹 3. Cuentas externas con saldo
-    // ============================================================
-    public int contarCuentasExternas(Integer idDatosPersonal, List<Integer> agenciasUsuario) {
-
-        if (agenciasUsuario == null || agenciasUsuario.isEmpty()) return 0;
-
-        String sql = """
-            SELECT COUNT(*)
-            FROM depositos.cuentas_ahorro
-            WHERE id_datos_personal = :id
-              AND saldo_actual_cuenta > 0
-              AND id_agencia NOT IN (:agencias)
-        """;
-
-        return jdbc.queryForObject(
-                sql,
-                new MapSqlParameterSource()
-                        .addValue("id", idDatosPersonal)
-                        .addValue("agencias", agenciasUsuario),
-                Integer.class
-        );
-    }
-
-    // ============================================================
-    // 🔹 4. Listar formas habilitadas
+    // 🔹 2. Listar formas habilitadas
     // ============================================================
     public List<AperturaCuentaItemDTO> listarFormasDisponibles(Integer idDatosPersonal, Integer idAgenciaUsuario) {
 
         String sql = """
-        SELECT
-            fa.id_forma_ahorro,
-            fa.codigo_forma,
-            fa.nombre_forma,
-            fa.id_agencia,
-            (fa.codigo_forma = '01')::boolean AS obligatoria,
-            true AS permite_apoderado,
-            (fa.codigo_forma <> '01')::boolean AS permite_gmf,
-            (fa.codigo_forma <> '01')::boolean AS permite_retencion,
-            '' AS observacion,
-            (
-                SELECT COALESCE(f2.consecutivo_forma,0) + 1
-                FROM depositos.formas_ahorro f2
-                WHERE f2.id_forma_ahorro = fa.id_forma_ahorro
-                  AND f2.id_agencia = :idAgencia
-                LIMIT 1
-            ) AS consecutivo
-        FROM depositos.formas_ahorro fa
-        ORDER BY fa.codigo_forma
-    """;
+            SELECT
+                fa.id_forma_ahorro,
+                fa.codigo_forma,
+                fa.nombre_forma,
+                fa.id_agencia,
+                (fa.codigo_forma = '01')::boolean AS obligatoria,
+                true AS permite_apoderado,
+                (fa.codigo_forma <> '01')::boolean AS permite_gmf,
+                (fa.codigo_forma <> '01')::boolean AS permite_retencion,
+                '' AS observacion,
+                (
+                    SELECT COALESCE(f2.consecutivo_forma,0) + 1
+                    FROM depositos.formas_ahorro f2
+                    WHERE f2.id_forma_ahorro = fa.id_forma_ahorro
+                      AND f2.id_agencia = :idAgencia
+                    LIMIT 1
+                ) AS consecutivo
+            FROM depositos.formas_ahorro fa
+            ORDER BY fa.codigo_forma
+        """;
 
         var params = new MapSqlParameterSource()
                 .addValue("idAgencia", idAgenciaUsuario);
@@ -159,15 +109,15 @@ public class AperturaCuentasRepository {
     }
 
     // ============================================================
-    // 🔹 5. Incrementar consecutivo por agencia
+    // 🔹 3. Incrementar consecutivo por agencia
     // ============================================================
     public Integer incrementarYObtenerConsecutivo(Integer idForma, Integer idAgencia) {
 
         return jdbc.queryForObject("""
             UPDATE depositos.formas_ahorro
-            SET consecutivo_forma = COALESCE(consecutivo_forma,0) + 1
-            WHERE id_forma_ahorro = :forma
-              AND id_agencia      = :agencia
+               SET consecutivo_forma = COALESCE(consecutivo_forma,0) + 1
+             WHERE id_forma_ahorro = :forma
+               AND id_agencia      = :agencia
             RETURNING consecutivo_forma
         """,
                 new MapSqlParameterSource()
@@ -177,21 +127,7 @@ public class AperturaCuentasRepository {
     }
 
     // ============================================================
-    // 🔹 6. Obtener código forma
-    // ============================================================
-    public String obtenerCodigoForma(Integer idForma) {
-
-        return jdbc.queryForObject("""
-            SELECT codigo_forma
-            FROM depositos.formas_ahorro
-            WHERE id_forma_ahorro = :id
-        """,
-                new MapSqlParameterSource().addValue("id", idForma),
-                String.class);
-    }
-
-    // ============================================================
-    // 🔹 7. Crear cuenta (INSERT FINAL)
+    // 🔹 4. Crear cuenta (INSERT final)
     // ============================================================
     public Integer crearCuenta(
             Integer idForma,
@@ -246,7 +182,7 @@ public class AperturaCuentasRepository {
                 0,
                 :retencion,
                 0,
-                NULL,
+                CURRENT_DATE,   -- ✔ YA NO ES NULL
                 'A',
                 'N',
                 'N',
@@ -270,7 +206,7 @@ public class AperturaCuentasRepository {
     }
 
     // ============================================================
-    // 🔹 8. Guardar apoderado
+    // 🔹 5. Guardar apoderado
     // ============================================================
     public void guardarApoderadoBasico(
             Integer idCuenta,
@@ -304,7 +240,7 @@ public class AperturaCuentasRepository {
     }
 
     // ============================================================
-    // 🔹 9. Cuentas con saldo
+    // 🔹 6. Cuentas con saldo
     // ============================================================
     public int contarCuentasConSaldo(Integer idDatosPersonal) {
 

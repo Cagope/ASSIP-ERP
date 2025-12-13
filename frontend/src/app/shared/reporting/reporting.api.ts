@@ -1,23 +1,17 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { map } from 'rxjs/operators'; // 👈 Import necesario
+import { map } from 'rxjs/operators';
 
 /** 🌐 API base para el módulo Reporting */
 const API_URL = `${environment.apiUrl}/reporting`;
 
 /** Tipos principales usados por el motor de reportes */
 export interface ReportMetadata {
-  /** 🔹 Nombre del esquema (reporting, etc.) */
   table_schema: string;
-
-  /** 🔹 Nombre de la vista en base de datos */
   table_name: string;
-
-  /** 🪶 Alias usados en frontend */
-  schema?: string;   // alias de table_schema
-  view?: string;     // alias de table_name
-
+  schema?: string;
+  view?: string;
   description?: string;
 }
 
@@ -39,9 +33,10 @@ export interface ReportResult {
 /** ✅ API pública de Reporting */
 @Injectable({ providedIn: 'root' })
 export class ReportingApi {
+
   private readonly http = inject(HttpClient);
 
-  /** 🔹 Listar metadatos disponibles en el esquema reporting */
+  /** 🔹 Listar metadatos disponibles */
   listarMetadata() {
     return this.http.get<ReportMetadata[]>(`${API_URL}/metadata`).pipe(
       map(vistas =>
@@ -54,8 +49,22 @@ export class ReportingApi {
     );
   }
 
-  /** 🔹 Ejecutar consulta dinámica sobre una vista */
+  /**
+   * 🔹 Ejecutar consulta dinámica sobre una vista
+   * 🚫 IMPORTANTE: evitar envío automático de X-Agencias
+   */
   ejecutarConsulta(req: ReportQueryRequest) {
-    return this.http.post<ReportResult>(`${API_URL}/query`, req);
+
+    // 🛑 Evita que el interceptor agregue X-Agencias
+    const cleanHeaders = new HttpHeaders({
+      // No enviamos absolutamente nada especial
+      'Content-Type': 'application/json'
+    });
+
+    return this.http.post<ReportResult>(
+      `${API_URL}/query`,
+      req,
+      { headers: cleanHeaders }
+    );
   }
 }

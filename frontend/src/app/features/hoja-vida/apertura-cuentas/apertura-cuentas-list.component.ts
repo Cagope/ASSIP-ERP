@@ -114,18 +114,23 @@ export class AperturaCuentasListComponent implements OnInit {
         agencia?.id_agencia ??
         null;
 
-    console.log("🔥 Agencia ACTIVA usada:", agenciaActiva);
+    if (!agenciaActiva) {
+      this.error = 'No se detectó la agencia activa del usuario.';
+      return;
+    }
 
-    this.api.listarFormas(persona.idDatosPersonal, agenciaActiva).subscribe({
-      next: formas => {
-        if (!formas || formas.length === 0) {
-          this.error =
-            'No es posible abrir cuentas para este asociado. ' +
-            'Posibles causas: ya tiene saldos activos en cuentas de otra agencia, ' +
-            'o su usuario no tiene agencias configuradas correctamente.';
+    console.log("🔥 VALIDANDO apertura → persona:", persona.idDatosPersonal, "agencia:", agenciaActiva);
+
+    // 🔥 AHORA SE LLAMA AL NUEVO ENDPOINT /validar
+    this.api.validar(persona.idDatosPersonal, agenciaActiva).subscribe({
+      next: res => {
+
+        if (!res || res.ok === false) {
+          this.error = res?.mensaje ?? 'El asociado no cumple las reglas para abrir cuentas.';
           return;
         }
 
+        // ✔️ Validación pasada → ahora sí navegar
         this.router.navigate(
           ['/hoja-vida/apertura-cuentas/nuevo'],
           {
@@ -137,8 +142,8 @@ export class AperturaCuentasListComponent implements OnInit {
         );
       },
       error: err => {
-        console.error('❌ Error validando reglas:', err);
-        this.error = 'No se pudo validar la información del asociado para apertura de cuentas.';
+        console.error('❌ Error llamando validación de apertura:', err);
+        this.error = 'No fue posible validar la apertura de cuentas.';
       }
     });
   }

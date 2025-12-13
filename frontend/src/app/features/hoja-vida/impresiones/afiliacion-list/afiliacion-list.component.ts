@@ -153,7 +153,7 @@ export class AfiliacionListComponent implements OnInit {
         this.router.navigate(['/hoja-vida/impresiones/origen-fondos', id], { state: { persona } });
         break;
       case 'carta-gmf':
-        this.router.navigate(['/hoja-vida/impresiones/carta-gmf', id], { state: { persona } });
+        this.router.navigate(['/hoja-vida/impresiones/exoneracion-gmf', id], { state: { persona } });
         break;
       case 'actualizacion-datos':
         this.router.navigate(['/hoja-vida/impresiones/actualizacion-datos', id], { state: { persona } });

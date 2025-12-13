@@ -1,0 +1,115 @@
+<div class="sheet" *ngIf="cuenta() as c">
+
+  <!-- 🟩 Botones superiores -->
+  <div class="actions-top no-print">
+    <button class="btn btn-back" (click)="onBack()">Regresar</button>
+    <button class="btn btn-print" (click)="onPrint()">Imprimir</button>
+  </div>
+
+  <!-- 🏢 Encabezado institucional estandarizado -->
+  <header class="header">
+    <!-- IZQUIERDA -->
+    <div class="logo">
+      <img src="assets/LOGO_EMPRESA.png" alt="Logo empresa" />
+    </div>
+
+    <!-- CENTRO -->
+    <div class="center">
+      <div class="rs">ERP ASSIP SOLIDARIA Y FINANCIERA</div>
+      <div class="nit">NIT: 999999999</div>
+      <div class="form-title-main">CARTA DE EXONERACIÓN DE GMF</div>
+    </div>
+
+    <!-- DERECHA -->
+    <div class="right">
+      <div class="ver-txt">Versión 1.0</div>
+      <div class="ver-fecha">{{ today | date:'yyyy-MM-dd' }}</div>
+    </div>
+  </header>
+
+  <hr class="header-line" />
+
+  <!-- 📝 CUERPO PRINCIPAL -->
+  <section class="block">
+    <div class="card txt">
+
+      <p>
+        {{ persona()?.ciudad_residencia || '________' }},
+        {{ today | date:'yyyy-MM-dd' }}
+      </p>
+
+      <p>
+        <b>Señores:</b><br />
+        COOPVALLE<br />
+        {{ persona()?.ciudad_residencia || '________' }}
+      </p>
+
+      <p><b>Ref: SOLICITUD DE EXENCIÓN DEL GRAVAMEN A LOS MOVIMIENTOS FINANCIEROS – GMF</b></p>
+
+      <p style="text-align: justify;">
+        Yo, <b>{{ c.nombre_completo }}</b>, identificado(a) con el documento de identificación
+        número <b>{{ persona()?.documento }}</b>, domiciliado en
+        <b>{{ persona()?.direccion_residencia || '________________' }}</b>,
+        <b>{{ persona()?.ciudad_residencia || '________________' }}</b>.
+      </p>
+
+      <p style="text-align: justify;">
+        Solicito que la cuenta de ahorros número <b>{{ c.codigo_cuenta }}</b>, abierta el
+        <b>{{ c.fecha_apertura_cuenta | date:'yyyy-MM-dd' }}</b>,
+        sea exenta del Gravamen a los Movimientos Financieros – GMF.
+      </p>
+
+      <p style="text-align: justify;">
+        Para el efecto, manifiesto que no he solicitado y me comprometo a no solicitar ante otro
+        establecimiento de crédito, mientras exista la exención sobre la cuenta de ahorros respecto
+        de la cual solicito la aplicación del beneficio tributario.
+      </p>
+
+      <p>Agradezco la atención a la presente.</p>
+
+      <br /><br />
+
+      <p><b>Atentamente,</b></p>
+
+      <div class="signatures">
+
+        <!-- Firma -->
+        <div class="sig">
+          <div class="sig-area"></div>
+
+          <div class="sig-meta">
+            <div class="meta-row">
+              <span class="sig-label">Firma:</span>
+              <span class="sig-id">{{ c.nombre_completo }}</span>
+            </div>
+
+            <div class="meta-row">
+              <span class="sig-label">Documento:</span>
+              <span class="sig-id">{{ persona()?.documento }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Huella -->
+        <div class="finger">
+          <div class="finger-box"></div>
+          <div class="finger-label">HUELLA</div>
+        </div>
+
+      </div>
+
+
+    </div>
+  </section>
+
+  <div class="print-footer" aria-hidden="true"></div>
+
+  <!-- 🟦 Botones inferiores -->
+  <div class="actions no-print">
+    <button class="btn secondary" (click)="onBack()">Regresar</button>
+    <button class="btn" (click)="onPrint()">Imprimir</button>
+  </div>
+
+</div>
+
+<div class="empty" *ngIf="!cuenta()">Cargando…</div>

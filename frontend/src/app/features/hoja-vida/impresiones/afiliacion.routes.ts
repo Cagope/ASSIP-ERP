@@ -30,5 +30,14 @@ export const AFILIACION_ROUTES: Routes = [
     path: 'actualizacion-datos/:id', // ✅ Nuevo formato
     component: ActualizacionDatosComponent,
     title: 'Actualización de Datos Persona Naturales'
+  },
+
+  {
+    path: 'exoneracion-gmf/:idPersona',
+    loadComponent: () =>
+      import('./exoneracion-gmf/exoneracion-gmf.component')
+        .then(c => c.ExoneracionGmfComponent),
+    title: 'Carta de Exoneración GMF'
   }
+
 ];

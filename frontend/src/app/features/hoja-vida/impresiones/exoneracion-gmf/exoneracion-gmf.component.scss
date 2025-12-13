@@ -1,0 +1,195 @@
+/* ============================================================
+   🏢 ENCABEZADO FORMATO AFILIACIÓN – ESTILO ASSIP ERP
+   ============================================================ */
+
+.header {
+  display: grid;
+  grid-template-columns: 140px 1fr 140px;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #dcdcdc;
+  border-radius: 14px;
+  padding: .8rem 1rem;
+  margin-bottom: .8rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* --- Columna izquierda (logo) --- */
+.header .logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-right: 1rem;
+  border-right: 1px solid #e5e5e5;
+}
+
+.header .logo img {
+  max-width: 110px;
+  max-height: 70px;
+  object-fit: contain;
+}
+
+/* --- Columna central (texto institucional) --- */
+.header .center {
+  text-align: center;
+  padding: 0 1rem;
+}
+
+.header .center .rs {
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.header .center .nit {
+  font-size: .85rem;
+  color: #444;
+}
+
+.header .center .form-title-main {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-top: .25rem;
+  letter-spacing: .3px;
+}
+
+/* --- Columna derecha (versión y fecha) --- */
+.header .right {
+  text-align: center;
+  padding-left: 1rem;
+  border-left: 1px solid #e5e5e5;
+}
+
+.header .right .ver-txt {
+  font-size: .75rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.header .right .ver-fecha {
+  font-size: .82rem;
+  margin-top: 2px;
+  color: #111;
+}
+
+/* Línea decorativa bajo encabezado */
+.header-line {
+  margin: .6rem 0;
+  border: none;
+  border-top: 1px solid #ccc;
+}
+
+/* ============================================================
+   ✍️ SECCIÓN FIRMAS Y HUELLA – IGUAL A FORMULARIO CORRECTO
+   ============================================================ */
+
+.signatures {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-top: 1rem;
+}
+
+/* --- Firma izquierda --- */
+.sig {
+  flex: 1;
+  min-width: 220px;
+}
+
+.sig-area {
+  width: 50%;
+  border-bottom: 2px solid #222;
+  margin: 2rem 0 .35rem 0;
+}
+
+.sig-meta {
+  display: grid;
+  row-gap: .15rem;
+}
+
+.meta-row {
+  display: flex;
+  align-items: baseline;
+  gap: .35rem;
+  font-size: .78rem;
+}
+
+.sig-label {
+  font-weight: 600;
+}
+
+.sig-id {
+  color: #444;
+}
+
+/* --- Caja de huella derecha --- */
+.finger {
+  width: 260px;
+  text-align: center;
+}
+
+.finger-box {
+  width: 260px;
+  height: 240px;
+  border: 1.8px solid #222;
+  border-radius: .25rem;
+  margin: 0 auto .35rem;
+  background: #fff;
+}
+
+.finger-label {
+  font-size: .78rem;
+  font-weight: 600;
+}
+
+@media print {
+
+  /* 🔴 Oculta TODO visualmente (sin romper layout) */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* 🟢 Muestra SOLO el informe */
+  .sheet,
+  .sheet * {
+    visibility: visible !important;
+  }
+
+  /* 🟢 Posición limpia del informe */
+  .sheet {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: 210mm;      /* Carta */
+    margin: 0 auto;
+    padding: 12mm 15mm;
+    box-sizing: border-box;
+    background: #fff;
+  }
+
+  /* ❌ Botones y UI */
+  .actions,
+  .actions-top,
+  .no-print,
+  .print-footer {
+    display: none !important;
+  }
+
+  /* 🔧 Ajustes globales de impresión */
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* 🧷 Evitar cortes feos */
+  .block,
+  .card,
+  .signatures {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}

@@ -305,3 +305,43 @@
     background: #fff;
   }
 }
+/* ============================================================
+   🖨️ IMPRESIÓN – SOLO EL INFORME
+   ============================================================ */
+@media print {
+
+  /* 1️⃣ Ocultar TODO */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* 2️⃣ Mostrar SOLO el informe */
+  .sheet,
+  .sheet * {
+    visibility: visible !important;
+  }
+
+  /* 3️⃣ Posicionar el informe como página completa */
+  .sheet {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    max-width: 210mm;
+    margin: 0 auto;
+    padding: 12mm 15mm;
+    box-sizing: border-box;
+    background: #fff;
+  }
+
+  /* 4️⃣ Asegurar colores y bordes */
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* 5️⃣ Forzar salto limpio */
+  .sheet {
+    page-break-inside: avoid;
+  }
+}
