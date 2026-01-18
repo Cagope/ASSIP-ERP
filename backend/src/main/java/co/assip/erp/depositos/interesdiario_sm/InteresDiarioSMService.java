@@ -21,8 +21,7 @@ public class InteresDiarioSMService {
 
     @Transactional(readOnly = true)
     public List<InteresDiarioSMItemDTO> ejecutar(
-            InteresDiarioSMEntradaDTO input,
-            Integer usuarioId
+            InteresDiarioSMEntradaDTO input
     ) {
 
         boolean confirmado = input.getConfirmado() != null && input.getConfirmado();

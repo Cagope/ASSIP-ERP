@@ -8,10 +8,19 @@ import java.util.Optional;
 
 public interface PlanCuentaRepository extends JpaRepository<PlanCuenta, Integer> {
 
+    // ==========================================================
+    // LISTAR POR AGENCIA (catálogo completo)
+    // ==========================================================
     List<PlanCuenta> findByIdAgenciaOrderByCodigoCuentaAsc(Integer idAgencia);
 
+    // ==========================================================
+    // BUSCAR EXACTA POR AGENCIA + CÓDIGO (validaciones jerarquía)
+    // ==========================================================
     Optional<PlanCuenta> findByIdAgenciaAndCodigoCuenta(Integer idAgencia, String codigoCuenta);
 
+    // ==========================================================
+    // HIJAS POR PREFIJO (para validar jerarquía / eliminar)
+    // ==========================================================
     @Query("""
            SELECT c FROM PlanCuenta c
            WHERE c.idAgencia = :idAgencia
@@ -20,4 +29,23 @@ public interface PlanCuentaRepository extends JpaRepository<PlanCuenta, Integer>
            ORDER BY c.codigoCuenta
            """)
     List<PlanCuenta> buscarHijas(Integer idAgencia, String codigo);
+
+    // ==========================================================
+    // AUTOCOMPLETE (por agencia) — desde 2 caracteres (eso se valida en front/service)
+    // • Busca por prefijo de código: "17" -> "17%"
+    // • Busca por nombre: "iva" -> "%iva%"
+    // ==========================================================
+    @Query("""
+       SELECT c
+       FROM PlanCuenta c
+       WHERE c.idAgencia = :idAgencia
+         AND c.operable = true
+         AND (
+              LOWER(c.codigoCuenta) LIKE LOWER(CONCAT(:texto, '%'))
+           OR LOWER(c.nombre)       LIKE LOWER(CONCAT('%', :texto, '%'))
+         )
+       ORDER BY c.codigoCuenta
+       """)
+    List<PlanCuenta> buscarPorAgenciaYTexto(Integer idAgencia, String texto);
+
 }

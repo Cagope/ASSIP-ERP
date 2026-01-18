@@ -1,7 +1,9 @@
 package co.assip.erp.hojavida.financieros;
 
+import co.assip.erp.seguridad.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -22,17 +24,14 @@ public class FinancieroService {
     // 🔹 OPERACIONES BÁSICAS
     // ================================================================
 
-    /** Listar todos los registros ordenados por fecha de edición */
     public List<Financiero> listar() {
         return repository.findAllByOrderByFechaEdicionDesc();
     }
 
-    /** Buscar por ID */
     public Optional<Financiero> buscarPorId(Integer id) {
         return repository.findById(id);
     }
 
-    /** Buscar por persona */
     public Optional<Financiero> buscarPorPersona(Integer idDatosPersonal) {
         return repository.findByIdDatosPersonal(idDatosPersonal);
     }
@@ -40,8 +39,16 @@ public class FinancieroService {
     /** Crear nuevo registro */
     public Financiero crear(Financiero nuevo) {
         validar(nuevo);
+
+        Integer idUsuario = SecurityUtils.getIdUsuario();
+
         nuevo.setFechaCreacion(Timestamp.valueOf(LocalDateTime.now()));
         nuevo.setFechaEdicion(Timestamp.valueOf(LocalDateTime.now()));
+
+        // 🔐 Auditoría
+        nuevo.setFkSeguridadCreacion(idUsuario);
+        nuevo.setFkSeguridadEdicion(idUsuario);
+
         return repository.save(nuevo);
     }
 
@@ -49,9 +56,17 @@ public class FinancieroService {
     public Optional<Financiero> actualizar(Integer id, Financiero actualizado) {
         return repository.findById(id).map(existente -> {
             validar(actualizado);
+
+            Integer idUsuario = SecurityUtils.getIdUsuario();
+
             actualizado.setIdFinanciero(id);
             actualizado.setFechaCreacion(existente.getFechaCreacion());
             actualizado.setFechaEdicion(Timestamp.valueOf(LocalDateTime.now()));
+
+            // 🔐 Auditoría
+            actualizado.setFkSeguridadCreacion(existente.getFkSeguridadCreacion());
+            actualizado.setFkSeguridadEdicion(idUsuario);
+
             return repository.save(actualizado);
         });
     }
@@ -68,34 +83,29 @@ public class FinancieroService {
     // ================================================================
 
     private void validar(Financiero f) {
-        // Comentario de ingresos solo si hay valor
-        if (isPositive(f.getOtrosIngresos()) && (f.getComentarioOtrosIngresos() == null || f.getComentarioOtrosIngresos().isBlank())) {
+
+        if (isPositive(f.getOtrosIngresos()) &&
+                (f.getComentarioOtrosIngresos() == null || f.getComentarioOtrosIngresos().isBlank())) {
             throw new IllegalArgumentException("Debe indicar un comentario para 'otros ingresos'.");
         }
 
-        // Comentario de egresos solo si hay valor
-        if (isPositive(f.getOtrosEgresos()) && (f.getComentarioOtrosEgresos() == null || f.getComentarioOtrosEgresos().isBlank())) {
+        if (isPositive(f.getOtrosEgresos()) &&
+                (f.getComentarioOtrosEgresos() == null || f.getComentarioOtrosEgresos().isBlank())) {
             throw new IllegalArgumentException("Debe indicar un comentario para 'otros egresos'.");
         }
 
-        // Relación financiera solo si hay deuda
-        if (isPositive(f.getDeudaRelacionFinanciera()) && (f.getRelacionFinanciera() == null || f.getRelacionFinanciera().isBlank())) {
+        if (isPositive(f.getDeudaRelacionFinanciera()) &&
+                (f.getRelacionFinanciera() == null || f.getRelacionFinanciera().isBlank())) {
             throw new IllegalArgumentException("Debe indicar una descripción para 'relación financiera'.");
         }
 
-        // Origen de fondos opcional pero recomendable
         if (f.getOrigenFondos() != null && f.getOrigenFondos().length() > 100) {
             throw new IllegalArgumentException("El campo 'origen de fondos' no puede superar los 100 caracteres.");
         }
 
-        // Totales nunca negativos
         if (isNegative(f.getTotalActivos()) || isNegative(f.getTotalPasivos())) {
             throw new IllegalArgumentException("Los totales de activos y pasivos no pueden ser negativos.");
         }
-
-        // Campos de auditoría mínimos
-        if (f.getFkSeguridadCreacion() == null) f.setFkSeguridadCreacion(1);
-        if (f.getFkSeguridadEdicion() == null) f.setFkSeguridadEdicion(1);
     }
 
     private boolean isPositive(BigDecimal value) {

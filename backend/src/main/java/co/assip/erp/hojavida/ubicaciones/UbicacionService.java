@@ -1,7 +1,9 @@
 package co.assip.erp.hojavida.ubicaciones;
 
+import co.assip.erp.seguridad.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -40,8 +42,15 @@ public class UbicacionService {
     public Ubicacion crear(Ubicacion nueva) {
         validarContactos(nueva);
 
+        Integer idUsuario = SecurityUtils.getIdUsuario();
+
         nueva.setFechaCreacion(LocalDateTime.now());
         nueva.setFechaEdicion(LocalDateTime.now());
+
+        // 🔐 Auditoría
+        nueva.setFkSeguridadCreacion(idUsuario);
+        nueva.setFkSeguridadEdicion(idUsuario);
+
         return repository.save(nueva);
     }
 
@@ -50,9 +59,16 @@ public class UbicacionService {
         return repository.findById(id).map(existente -> {
             validarContactos(actualizada);
 
+            Integer idUsuario = SecurityUtils.getIdUsuario();
+
             actualizada.setIdUbicacion(id);
             actualizada.setFechaCreacion(existente.getFechaCreacion());
             actualizada.setFechaEdicion(LocalDateTime.now());
+
+            // 🔐 Auditoría
+            actualizada.setFkSeguridadCreacion(existente.getFkSeguridadCreacion());
+            actualizada.setFkSeguridadEdicion(idUsuario);
+
             return repository.save(actualizada);
         });
     }

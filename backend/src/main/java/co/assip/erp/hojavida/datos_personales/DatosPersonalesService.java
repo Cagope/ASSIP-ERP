@@ -1,17 +1,14 @@
 package co.assip.erp.hojavida.datos_personales;
 
+import co.assip.erp.seguridad.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Servicio de negocio para la gestión de los Datos Personales.
- *
- * Controla validaciones, reglas de negocio y manejo de fechas.
- */
 @Service
 @Transactional
 public class DatosPersonalesService {
@@ -42,11 +39,17 @@ public class DatosPersonalesService {
         normalizarCampos(nuevo);
         aplicarReglasGenero(nuevo);
 
+        Integer idUsuario = SecurityUtils.getIdUsuario();
+
         LocalDate hoy = LocalDate.now();
         nuevo.setFechaCreacion(LocalDateTime.now());
         nuevo.setFechaEdicion(LocalDateTime.now());
         if (nuevo.getFechaApertura() == null) nuevo.setFechaApertura(hoy);
         if (nuevo.getFechaActualizacion() == null) nuevo.setFechaActualizacion(hoy);
+
+        // 🔐 Auditoría
+        nuevo.setFkSeguridadCreacion(idUsuario);
+        nuevo.setFkSeguridadEdicion(idUsuario);
 
         return repository.save(nuevo);
     }
@@ -60,6 +63,8 @@ public class DatosPersonalesService {
             normalizarCampos(actualizado);
             aplicarReglasGenero(actualizado);
 
+            Integer idUsuario = SecurityUtils.getIdUsuario();
+
             actualizado.setIdDatosPersonal(id);
             actualizado.setFechaCreacion(existente.getFechaCreacion());
             actualizado.setFechaApertura(
@@ -69,6 +74,10 @@ public class DatosPersonalesService {
             );
             actualizado.setFechaActualizacion(LocalDate.now());
             actualizado.setFechaEdicion(LocalDateTime.now());
+
+            // 🔐 Auditoría
+            actualizado.setFkSeguridadCreacion(existente.getFkSeguridadCreacion());
+            actualizado.setFkSeguridadEdicion(idUsuario);
 
             return repository.save(actualizado);
         });
@@ -88,10 +97,6 @@ public class DatosPersonalesService {
     // 🧩 REGLAS DE NEGOCIO INTERNAS
     // ==========================================================
 
-    /**
-     * Convierte los nombres y apellidos a mayúsculas,
-     * eliminando espacios redundantes.
-     */
     private void normalizarCampos(DatosPersonales p) {
         if (p.getNombres() != null)
             p.setNombres(p.getNombres().trim().toUpperCase());
@@ -104,15 +109,11 @@ public class DatosPersonalesService {
         if (p.getComentario() != null)
             p.setComentario(p.getComentario().trim());
 
-        // ✅ Nueva regla: si no tiene RUT, limpiar el dígito
         if (Boolean.FALSE.equals(p.getTieneRut())) {
             p.setDigitoVerificacion(null);
         }
     }
 
-    /**
-     * Si el género es masculino (1), fuerza cabeza de familia a "0" (No).
-     */
     private void aplicarReglasGenero(DatosPersonales p) {
         if ("1".equals(p.getCodigoGenero())) {
             p.setCabezaFamilia("0");

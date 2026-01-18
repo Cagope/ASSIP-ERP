@@ -130,9 +130,10 @@ public class ReportesRepositoryImpl {
 
                 boolean esDepositos = schema.equalsIgnoreCase("depositos");
 
-                if (esDepositos && !co.assip.erp.seguridad.utils.SecurityUtils.tieneAccesoTotal()) {
+                if (esDepositos) {
 
-                    List<Integer> agenciasUsuario = co.assip.erp.seguridad.utils.SecurityUtils.getAgencias();
+                    List<Integer> agenciasUsuario =
+                            co.assip.erp.seguridad.utils.SecurityUtils.getAgencias();
 
                     if (agenciasUsuario != null && !agenciasUsuario.isEmpty()) {
 
@@ -142,6 +143,7 @@ public class ReportesRepositoryImpl {
                         params.add(agenciasUsuario.toArray(new Integer[0]));
                     }
                 }
+
 
             } catch (Exception ignored) {
                 // Si ocurre un error, el reporte sigue sin filtro.

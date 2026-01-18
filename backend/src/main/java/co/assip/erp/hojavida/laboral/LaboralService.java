@@ -1,7 +1,9 @@
 package co.assip.erp.hojavida.laboral;
 
+import co.assip.erp.seguridad.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -35,8 +37,15 @@ public class LaboralService {
     public Laboral crear(Laboral nuevo) {
         validarDatos(nuevo);
 
+        Integer idUsuario = SecurityUtils.getIdUsuario();
+
         nuevo.setFechaCreacion(java.sql.Timestamp.valueOf(LocalDateTime.now()));
         nuevo.setFechaEdicion(java.sql.Timestamp.valueOf(LocalDateTime.now()));
+
+        // 🔐 Auditoría
+        nuevo.setFkSeguridadCreacion(idUsuario);
+        nuevo.setFkSeguridadEdicion(idUsuario);
+
         return repository.save(nuevo);
     }
 
@@ -45,9 +54,16 @@ public class LaboralService {
         return repository.findById(id).map(existente -> {
             validarDatos(actualizado);
 
+            Integer idUsuario = SecurityUtils.getIdUsuario();
+
             actualizado.setIdLaboral(id);
             actualizado.setFechaCreacion(existente.getFechaCreacion());
             actualizado.setFechaEdicion(java.sql.Timestamp.valueOf(LocalDateTime.now()));
+
+            // 🔐 Auditoría
+            actualizado.setFkSeguridadCreacion(existente.getFkSeguridadCreacion());
+            actualizado.setFkSeguridadEdicion(idUsuario);
+
             return repository.save(actualizado);
         });
     }
@@ -64,6 +80,7 @@ public class LaboralService {
     // ================================================================
 
     private void validarDatos(Laboral l) {
+
         if (l.getNombreEmpresa() == null || l.getNombreEmpresa().isBlank()) {
             throw new IllegalArgumentException("El nombre de la empresa es obligatorio.");
         }
@@ -107,8 +124,5 @@ public class LaboralService {
         if (l.getFechaVinculacion() == null) {
             l.setFechaVinculacion(LocalDateTime.now().toLocalDate());
         }
-
-        if (l.getFkSeguridadCreacion() == null) l.setFkSeguridadCreacion(1);
-        if (l.getFkSeguridadEdicion() == null) l.setFkSeguridadEdicion(1);
     }
 }

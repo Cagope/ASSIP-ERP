@@ -1,5 +1,6 @@
 package co.assip.erp.contabilidad.plan_cuentas;
 
+import co.assip.erp.seguridad.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +42,11 @@ public class PlanCuentaService {
         // 2) VALIDAR OPERABLE
         validarOperable(dto);
 
+        // 🔐 AUDITORÍA (patrón mínimo y seguro)
+        Integer idUsuario = SecurityUtils.getIdUsuario();
+        dto.setFkSeguridadCreacion(idUsuario);
+        dto.setFkSeguridadEdicion(idUsuario);
+
         // 3) Guardar
         return repository.save(dto);
     }
@@ -49,24 +55,20 @@ public class PlanCuentaService {
     // VALIDAR JERARQUÍA DE BLOQUES
     // ==========================================================
     private void validarJerarquia(PlanCuenta dto) {
-
         String codigo = dto.getCodigoCuenta().trim();
         int len = codigo.length();
 
-        // Nivel raíz
         if (len == 1) {
             dto.setNivel(1);
             return;
         }
 
-        // Validar longitudes permitidas
         if (!(len == 1 || len == 2 || len == 4 || len == 6 || len == 8 || len == 11)) {
             throw new IllegalArgumentException(
                     "Longitud del código inválida. Debe ser 1, 2, 4, 6, 8 o 11 dígitos."
             );
         }
 
-        // Calcular nivel
         int nivel = switch (len) {
             case 2 -> 2;
             case 4 -> 3;
@@ -77,7 +79,6 @@ public class PlanCuentaService {
         };
         dto.setNivel(nivel);
 
-        // Obtener código padre
         String padre = switch (len) {
             case 2 -> codigo.substring(0, 1);
             case 4 -> codigo.substring(0, 2);
@@ -89,7 +90,6 @@ public class PlanCuentaService {
 
         if (padre == null) return;
 
-        // Buscar cuenta padre
         PlanCuenta cuentaPadre =
                 repository.findByIdAgenciaAndCodigoCuenta(dto.getIdAgencia(), padre)
                         .orElseThrow(() ->
@@ -98,8 +98,6 @@ public class PlanCuentaService {
                                 )
                         );
 
-
-        // Padre no puede ser operable
         if (Boolean.TRUE.equals(cuentaPadre.getOperable())) {
             throw new IllegalArgumentException(
                     "El padre (" + padre + ") NO puede ser operable."
@@ -115,14 +113,12 @@ public class PlanCuentaService {
         boolean esOperable = Boolean.TRUE.equals(dto.getOperable());
         int nivel = dto.getNivel();
 
-        // Solo niveles 5 y 6 pueden ser operables
         if (esOperable && !(nivel == 5 || nivel == 6)) {
             throw new IllegalArgumentException(
                     "Solo las cuentas de nivel 5 o 6 pueden ser operables."
             );
         }
 
-        // Si es operable, no puede tener hijas
         if (esOperable) {
             List<PlanCuenta> hijas = repository.buscarHijas(
                     dto.getIdAgencia(),
@@ -145,7 +141,6 @@ public class PlanCuentaService {
         PlanCuenta cuenta = repository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Cuenta no encontrada."));
 
-        // Validar: NO eliminar si tiene hijas
         List<PlanCuenta> hijas =
                 repository.buscarHijas(cuenta.getIdAgencia(), cuenta.getCodigoCuenta().trim());
 
@@ -156,5 +151,21 @@ public class PlanCuentaService {
         }
 
         repository.delete(cuenta);
+    }
+
+    // ==========================================================
+    // AUTOCOMPLETE POR AGENCIA + TEXTO (código o nombre)
+    // ==========================================================
+    @Transactional(readOnly = true)
+    public List<PlanCuenta> buscarPorAgenciaYTexto(Integer idAgencia, String texto) {
+
+        if (texto == null || texto.trim().length() < 2) {
+            return List.of(); // seguridad: no buscar con menos de 2 caracteres
+        }
+
+        return repository.buscarPorAgenciaYTexto(
+                idAgencia,
+                texto.trim()
+        );
     }
 }

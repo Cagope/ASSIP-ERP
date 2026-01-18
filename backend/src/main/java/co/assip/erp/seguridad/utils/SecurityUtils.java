@@ -1,74 +1,98 @@
 package co.assip.erp.seguridad.utils;
 
 import io.jsonwebtoken.Claims;
-import lombok.experimental.UtilityClass;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Collections;
 import java.util.List;
 
-@UtilityClass
-public class SecurityUtils {
+public final class SecurityUtils {
 
-    /**
-     * Obtiene los Claims almacenados como Credentials
-     * dentro del Authentication del usuario autenticado.
-     *
-     * Esto requiere que el filtro JWT del proyecto
-     * coloque Claims como credentials del Authentication.
-     */
-    private Claims getClaims() {
-        var auth = SecurityContextHolder.getContext().getAuthentication();
+    private SecurityUtils() {}
 
-        if (auth instanceof UsernamePasswordAuthenticationToken token &&
-                token.getCredentials() instanceof Claims claims) {
-            return claims;
-        }
+    // ============================================================
+    // 🔐 Obtener Claims del JWT que el filtro guardó en SecurityContext
+    // ============================================================
+    private static Claims getClaims() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) return null;
 
-        return null;  // No hay claims → sin datos
+        Object credentials = auth.getCredentials();
+        if (credentials instanceof Claims c) return c;
+
+        return null;
     }
 
     // ============================================================
-    //    DATOS DEL TOKEN
+    // ✅ ID del usuario autenticado
     // ============================================================
-
-    /** 🔹 ID del usuario autenticado (idUsuario en el JWT) */
-    public Integer getIdUsuario() {
+    public static Integer getIdUsuario() {
         Claims c = getClaims();
-        return c != null ? c.get("idUsuario", Integer.class) : null;
+        if (c == null) return null;
+        return c.get("idUsuario", Integer.class);
     }
 
-    /** 🔹 Username del token (sub) */
-    public String getUsername() {
-        Claims c = getClaims();
-        return c != null ? c.getSubject() : null;
-    }
-
-    /** 🔹 Lista de agencias a las que pertenece el usuario */
+    // ============================================================
+    // ✅ Lista de agencias permitidas en el token
+    // ============================================================
     @SuppressWarnings("unchecked")
-    public List<Integer> getAgencias() {
+    public static List<Integer> getAgencias() {
         Claims c = getClaims();
         if (c == null) return Collections.emptyList();
 
-        Object valor = c.get("agencias");
-
-        if (valor instanceof List<?> lista) {
-            return (List<Integer>) lista;
+        Object raw = c.get("agencias");
+        if (raw instanceof List<?> list) {
+            try {
+                return (List<Integer>) list;
+            } catch (Exception e) {
+                return Collections.emptyList();
+            }
         }
-
         return Collections.emptyList();
     }
 
-    /** 🔹 ¿Acceso total? (si no hay agencias definidas) */
-    public boolean tieneAccesoTotal() {
-        List<Integer> ag = getAgencias();
-        return ag == null || ag.isEmpty();
+    // ============================================================
+    // ✅ ID del rol autenticado
+    // ============================================================
+    public static Integer getIdRol() {
+        Claims c = getClaims();
+        if (c == null) return null;
+        Integer rol = c.get("rol", Integer.class);
+        return (rol != null) ? rol : 0;
     }
 
-    /** 🔹 ¿El usuario pertenece a una agencia dada? */
-    public boolean perteneceA(Integer idAgencia) {
-        if (tieneAccesoTotal()) return true;
-        return getAgencias().contains(idAgencia);
+    // ============================================================
+    // ✅ Validar agencia (si llega null, NO valida)
+    // ============================================================
+    public static void validarAgencia(Integer idAgencia) {
+        if (idAgencia == null) return;
+
+        List<Integer> agencias = getAgencias();
+        if (agencias == null || agencias.isEmpty() || !agencias.contains(idAgencia)) {
+            throw new RuntimeException("AGENCIA_NO_PERMITIDA");
+        }
     }
+
+    // ============================================================
+    // ✅ Acceso total (por ahora: rol ADMIN = 1)
+    // ============================================================
+    public static boolean tieneAccesoTotal() {
+        Integer rol = getIdRol();
+        return rol != null && rol == 1; // ADMIN
+    }
+
+    // ============================================================
+    // ✅ Verifica si el usuario pertenece a una agencia específica
+    // ============================================================
+    public static boolean perteneceA(Integer idAgencia) {
+        if (idAgencia == null) return false;
+
+        List<Integer> agencias = getAgencias();
+        if (agencias == null || agencias.isEmpty()) return false;
+
+        return agencias.contains(idAgencia);
+    }
+
+
 }

@@ -97,9 +97,16 @@ public class AperturaCuentasService {
     @Transactional
     public AperturaCuentasRespuestaDTO crear(AperturaCuentasEntradaDTO dto) {
 
-        System.out.println("➡️ INICIANDO PROCESO DE CREACIÓN DE 2 CUENTAS");
+        AperturaCuentasRespuestaDTO res = new AperturaCuentasRespuestaDTO(); // ✅ PRIMERO
 
-        AperturaCuentasRespuestaDTO res = new AperturaCuentasRespuestaDTO();
+        Integer idUsuario = SecurityUtils.getIdUsuario();
+        if (idUsuario == null) {
+            res.setOk(false);
+            res.setMensaje("Usuario no autenticado.");
+            return res;
+        }
+
+        System.out.println("➡️ INICIANDO PROCESO DE CREACIÓN DE 2 CUENTAS");
 
         if (dto.getIdDatosPersonal() == null || dto.getIdDatosPersonal() <= 0) {
             res.setOk(false);
@@ -108,7 +115,9 @@ public class AperturaCuentasService {
         }
 
         var agencias = SecurityUtils.getAgencias();
-        Integer idAgencia = (agencias != null && agencias.size() == 1) ? agencias.get(0) : null;
+        Integer idAgencia = (agencias != null && agencias.size() == 1)
+                ? agencias.get(0)
+                : null;
 
         if (idAgencia == null) {
             res.setOk(false);
@@ -118,18 +127,10 @@ public class AperturaCuentasService {
 
         dto.setIdAgenciaUsuario(idAgencia);
 
-        if (dto.getUsuarioId() == null || dto.getUsuarioId() <= 0) {
-            res.setOk(false);
-            res.setMensaje("Usuario no detectado en sesión.");
-            return res;
-        }
-
         Integer idPersona = dto.getIdDatosPersonal();
         Integer idFormaAhorroSeleccionada = dto.getIdFormaAhorro();
 
         // 🔥 CUENTA 1 — APORTES
-        System.out.println("🔵 creando cuenta de APORTES (01)");
-
         Integer consecutivoAportes =
                 repo.incrementarYObtenerConsecutivo(1, idAgencia);
 
@@ -142,7 +143,7 @@ public class AperturaCuentasService {
                 codigoAportes,
                 "N",
                 false,
-                dto.getUsuarioId()
+                idUsuario
         );
 
         repo.guardarApoderadoBasico(
@@ -151,14 +152,10 @@ public class AperturaCuentasService {
                 dto.getNombreApoderadoAportes(),
                 dto.getTelefonoApoderadoAportes(),
                 dto.getCelularApoderadoAportes(),
-                dto.getUsuarioId()
+                idUsuario
         );
 
-        System.out.println("✔ Cuenta de aportes creada: " + idCuentaAportes);
-
         // 🔥 CUENTA 2 — FORMA SELECCIONADA
-        System.out.println("🟢 creando segunda cuenta (forma seleccionada): " + idFormaAhorroSeleccionada);
-
         boolean esAportes = idFormaAhorroSeleccionada != null && idFormaAhorroSeleccionada == 1;
 
         String gmf = dto.getGmf();
@@ -181,7 +178,7 @@ public class AperturaCuentasService {
                 codigoAhorro,
                 gmf,
                 retencion,
-                dto.getUsuarioId()
+                idUsuario
         );
 
         repo.guardarApoderadoBasico(
@@ -190,17 +187,15 @@ public class AperturaCuentasService {
                 dto.getNombreApoderadoAhorro(),
                 dto.getTelefonoApoderadoAhorro(),
                 dto.getCelularApoderadoAhorro(),
-                dto.getUsuarioId()
+                idUsuario
         );
-
-        System.out.println("✔ Cuenta seleccionada creada: " + idCuentaAhorro);
 
         res.setOk(true);
         res.setIdCuentaAhorro(idCuentaAhorro);
         res.setCodigoCuenta(codigoAhorro);
         res.setMensaje("✔ Se crearon las dos cuentas correctamente.");
 
-        System.out.println("🏁 FIN — TRANSACCIÓN OK");
         return res;
     }
+
 }

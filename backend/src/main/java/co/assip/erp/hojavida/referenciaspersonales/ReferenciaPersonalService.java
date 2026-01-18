@@ -1,17 +1,13 @@
 package co.assip.erp.hojavida.referenciaspersonales;
 
+import co.assip.erp.seguridad.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * 💼 Servicio — Gestión de Referencias Personales
- * ------------------------------------------------------------
- * Encapsula la lógica de negocio y validaciones para la tabla:
- * hoja_vida.referencias_personales
- */
 @Service
 @Transactional
 public class ReferenciaPersonalService {
@@ -51,8 +47,15 @@ public class ReferenciaPersonalService {
     public ReferenciaPersonal crear(ReferenciaPersonal nueva) {
         validarContactos(nueva);
 
+        Integer idUsuario = SecurityUtils.getIdUsuario();
+
         nueva.setFechaCreacion(LocalDateTime.now());
         nueva.setFechaEdicion(LocalDateTime.now());
+
+        // 🔐 Auditoría
+        nueva.setFkSeguridadCreacion(idUsuario);
+        nueva.setFkSeguridadEdicion(idUsuario);
+
         return repository.save(nueva);
     }
 
@@ -61,9 +64,16 @@ public class ReferenciaPersonalService {
         return repository.findById(id).map(existente -> {
             validarContactos(actualizada);
 
+            Integer idUsuario = SecurityUtils.getIdUsuario();
+
             actualizada.setIdReferenciaPersonal(id);
             actualizada.setFechaCreacion(existente.getFechaCreacion());
             actualizada.setFechaEdicion(LocalDateTime.now());
+
+            // 🔐 Auditoría
+            actualizada.setFkSeguridadCreacion(existente.getFkSeguridadCreacion());
+            actualizada.setFkSeguridadEdicion(idUsuario);
+
             return repository.save(actualizada);
         });
     }

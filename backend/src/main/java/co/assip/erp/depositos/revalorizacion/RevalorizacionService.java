@@ -30,7 +30,7 @@ public class RevalorizacionService {
      * NO modifica tablas.
      */
     @Transactional(readOnly = true)
-    public List<RevalorizacionItemDTO> ejecutar(RevalorizacionEntradaDTO input, Integer usuarioId) {
+    public List<RevalorizacionItemDTO> ejecutar(RevalorizacionEntradaDTO input) {
 
         // =====================================================
         // 1️⃣ VALIDACIÓN — Revisar forma seleccionada

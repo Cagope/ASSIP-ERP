@@ -1,7 +1,9 @@
 package co.assip.erp.hojavida.sarlaft;
 
+import co.assip.erp.seguridad.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,8 +38,15 @@ public class SarlaftService {
     public Sarlaft crear(Sarlaft nuevo) {
         validarDatos(nuevo);
 
+        Integer idUsuario = SecurityUtils.getIdUsuario();
+
         nuevo.setFechaCreacion(java.sql.Timestamp.valueOf(LocalDateTime.now()));
         nuevo.setFechaEdicion(java.sql.Timestamp.valueOf(LocalDateTime.now()));
+
+        // 🔐 Auditoría
+        nuevo.setFkSeguridadCreacion(idUsuario);
+        nuevo.setFkSeguridadEdicion(idUsuario);
+
         return repository.save(nuevo);
     }
 
@@ -46,9 +55,16 @@ public class SarlaftService {
         return repository.findById(id).map(existente -> {
             validarDatos(actualizado);
 
+            Integer idUsuario = SecurityUtils.getIdUsuario();
+
             actualizado.setIdSarlaft(id);
             actualizado.setFechaCreacion(existente.getFechaCreacion());
             actualizado.setFechaEdicion(java.sql.Timestamp.valueOf(LocalDateTime.now()));
+
+            // 🔐 Auditoría
+            actualizado.setFkSeguridadCreacion(existente.getFkSeguridadCreacion());
+            actualizado.setFkSeguridadEdicion(idUsuario);
+
             return repository.save(actualizado);
         });
     }
@@ -66,12 +82,10 @@ public class SarlaftService {
     private void validarDatos(Sarlaft s) {
         LocalDate hoy = LocalDate.now();
 
-        // 🟩 Exoneración
         if (Boolean.TRUE.equals(s.getExoneracionUiaf()) && s.getFechaExoneracion() == null) {
             s.setFechaExoneracion(hoy);
         }
 
-        // 🟦 Asociado PEPS
         if (Boolean.TRUE.equals(s.getAsociadoPeps())) {
             if (s.getTipoPeps() == null || s.getTipoPeps().isBlank()) {
                 throw new IllegalArgumentException("Debe seleccionar el tipo de PEPS del asociado.");
@@ -85,7 +99,6 @@ public class SarlaftService {
             s.setFechaFinalPeps(null);
         }
 
-        // 🟨 Familiares PEPS
         if (Boolean.TRUE.equals(s.getFamiliaPeps())) {
             if (s.getTipoFamiliaPeps() == null || s.getTipoFamiliaPeps().isBlank()) {
                 throw new IllegalArgumentException("Debe seleccionar el tipo de PEPS del familiar.");
@@ -100,12 +113,10 @@ public class SarlaftService {
             s.setNombreFamiliaPeps(null);
         }
 
-        // 💱 Moneda extranjera
         if (Boolean.FALSE.equals(s.getMonedaExtranjera())) {
             s.setObservacionMonedaExtranjera(null);
         }
 
-        // 🌎 Cuentas en el extranjero
         if (Boolean.FALSE.equals(s.getCuentaExtranjero())) {
             s.setTipoMonedaExtranjera(null);
             s.setNumeroCuentaExtranjero(null);
@@ -113,9 +124,5 @@ public class SarlaftService {
             s.setCiudadCuentaExtranjero(null);
             s.setPaisCuentaExtranjero(null);
         }
-
-        // 🧾 Seguridad y auditoría
-        if (s.getFkSeguridadCreacion() == null) s.setFkSeguridadCreacion(1);
-        if (s.getFkSeguridadEdicion() == null) s.setFkSeguridadEdicion(1);
     }
 }

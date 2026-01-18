@@ -41,6 +41,6 @@ public class RevalorizacionController {
             usuarioId = 1; // Este valor lo cambias según tu seguridad
         }
 
-        return service.ejecutar(input, usuarioId);
+        return service.ejecutar(input);
     }
 }

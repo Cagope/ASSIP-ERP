@@ -1,14 +1,11 @@
 package co.assip.erp.general.parametro;
 
+import co.assip.erp.seguridad.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
-/**
- * 💼 Servicio — Parametros
- * ------------------------------------------------------------
- * Gestiona la lógica de negocio para la tabla general.parametros.
- */
 @Service
 public class ParametroService {
 
@@ -32,12 +29,28 @@ public class ParametroService {
 
     /** 🔹 Crear nuevo parámetro */
     public Parametro guardar(Parametro parametro) {
+
+        Integer idUsuario = SecurityUtils.getIdUsuario();
+        if (idUsuario == null) {
+            throw new RuntimeException("USUARIO_NO_AUTENTICADO");
+        }
+
+        // 🔐 Auditoría
+        parametro.setFkSeguridadCreacion(idUsuario);
+        parametro.setFkSeguridadEdicion(idUsuario);
+
         return repository.save(parametro);
     }
 
     /** 🔹 Actualizar un parámetro existente */
     public Parametro actualizar(Integer id, Parametro entrada) {
+
         Parametro actual = obtenerPorId(id);
+
+        Integer idUsuario = SecurityUtils.getIdUsuario();
+        if (idUsuario == null) {
+            throw new RuntimeException("USUARIO_NO_AUTENTICADO");
+        }
 
         actual.setIdAgencia(entrada.getIdAgencia());
         actual.setCodigoParametro(entrada.getCodigoParametro());
@@ -45,7 +58,9 @@ public class ParametroService {
         actual.setValorParametro(entrada.getValorParametro());
         actual.setTipoValor(entrada.getTipoValor());
 
-        // Auditoría manejada por BaseAudit
+        // 🔐 Auditoría explícita
+        actual.setFkSeguridadEdicion(idUsuario);
+
         return repository.save(actual);
     }
 
@@ -54,13 +69,7 @@ public class ParametroService {
         repository.deleteById(id);
     }
 
-    // =========================================================
-    // 🔸 NUEVO MÉTODO: Buscar por agencia y código
-    // =========================================================
-    /**
-     * 🔍 Buscar un parámetro por idAgencia y código.
-     * Devuelve Optional.empty() si no existe.
-     */
+    /** 🔍 Buscar un parámetro por idAgencia y código */
     public Optional<Parametro> obtenerPorAgenciaYCodigo(Integer idAgencia, Integer codigoParametro) {
         return repository.findByIdAgenciaAndCodigoParametro(idAgencia, codigoParametro);
     }

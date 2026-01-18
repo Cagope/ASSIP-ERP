@@ -1,5 +1,6 @@
 package co.assip.erp.general.agencia;
 
+import co.assip.erp.seguridad.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,11 +25,27 @@ public class AgenciaService {
     }
 
     public Agencia guardar(Agencia agencia) {
+
+        Integer idUsuario = SecurityUtils.getIdUsuario();
+        if (idUsuario == null) {
+            throw new RuntimeException("USUARIO_NO_AUTENTICADO");
+        }
+
+        // 🔐 Auditoría
+        agencia.setFkSeguridadCreacion(idUsuario);
+        agencia.setFkSeguridadEdicion(idUsuario);
+
         return repository.save(agencia);
     }
 
     public Agencia actualizar(Integer id, Agencia entrada) {
+
         Agencia actual = obtenerPorId(id);
+
+        Integer idUsuario = SecurityUtils.getIdUsuario();
+        if (idUsuario == null) {
+            throw new RuntimeException("USUARIO_NO_AUTENTICADO");
+        }
 
         actual.setCodigoAgencia(entrada.getCodigoAgencia());
         actual.setNombreAgencia(entrada.getNombreAgencia());
@@ -40,7 +57,9 @@ public class AgenciaService {
         actual.setCelularAgencia(entrada.getCelularAgencia());
         actual.setTelefonoAgencia(entrada.getTelefonoAgencia());
 
-        // Auditoría automática por @PreUpdate en BaseAudit
+        // 🔐 Auditoría explícita
+        actual.setFkSeguridadEdicion(idUsuario);
+
         return repository.save(actual);
     }
 

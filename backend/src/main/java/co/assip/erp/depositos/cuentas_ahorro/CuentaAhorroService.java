@@ -117,6 +117,15 @@ public class CuentaAhorroService {
     // ============================================================
     public CuentaAhorroGuardarRespuesta guardar(CuentaAhorroGuardarDTO dto) {
 
+        Integer idUsuario = SecurityUtils.getIdUsuario();
+        if (idUsuario == null) {
+            return new CuentaAhorroGuardarRespuesta(
+                    false,
+                    "Usuario no autenticado.",
+                    null
+            );
+        }
+
         var valid = validarAntesDeGuardar(dto);
         if (!valid.isOk()) return valid;
 
@@ -133,8 +142,8 @@ public class CuentaAhorroService {
         Integer idCuenta = repository.guardarCuenta(dto, codigoCuenta, fechaFinal);
 
         repository.actualizarConsecutivo(dto.getIdFormaAhorro());
-        repository.guardarBeneficiarios(idCuenta, dto.getBeneficiarios(), dto.getUsuarioId());
-        repository.guardarPoderes(idCuenta, dto.getPoderes(), dto.getUsuarioId());
+        repository.guardarBeneficiarios(idCuenta, dto.getBeneficiarios(), idUsuario);
+        repository.guardarPoderes(idCuenta, dto.getPoderes(), idUsuario);
 
         return new CuentaAhorroGuardarRespuesta(
                 true,

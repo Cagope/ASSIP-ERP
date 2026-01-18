@@ -36,14 +36,8 @@ public class HabilidadAsociadoController {
     // ===============================================================
     @PostMapping("/ejecutar")
     public List<HabilidadAsociadoItemDTO> ejecutar(
-            @RequestBody HabilidadAsociadoEntradaDTO input,
-            @RequestHeader(name = "usuarioId", required = false) Integer usuarioId
+            @RequestBody HabilidadAsociadoEntradaDTO input
     ) {
-
-        if (usuarioId == null) {
-            usuarioId = 1;
-        }
-
         return service.ejecutar(input);
     }
 
@@ -53,15 +47,10 @@ public class HabilidadAsociadoController {
     @PostMapping("/actualizar-estado")
     public String actualizarEstado(
             @RequestParam Integer idCuentaAhorro,
-            @RequestParam String nuevoEstado,
-            @RequestHeader(name = "usuarioId", required = false) Integer usuarioId
+            @RequestParam String nuevoEstado
     ) {
 
-        if (usuarioId == null) {
-            usuarioId = 1;
-        }
-
-        service.actualizarEstado(idCuentaAhorro, nuevoEstado, usuarioId);
+        service.actualizarEstado(idCuentaAhorro, nuevoEstado);
 
         return "OK";
     }

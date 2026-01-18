@@ -40,6 +40,6 @@ public class InteresDiarioSMController {
             usuarioId = 1; // Ajustar según tu seguridad real
         }
 
-        return service.ejecutar(input, usuarioId);
+        return service.ejecutar(input);
     }
 }

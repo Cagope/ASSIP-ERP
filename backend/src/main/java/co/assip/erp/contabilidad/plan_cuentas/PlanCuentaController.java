@@ -59,4 +59,20 @@ public class PlanCuentaController {
     public void eliminar(@PathVariable Integer id) {
         service.eliminar(id);
     }
+
+    // ==========================================================
+// BUSCAR CUENTAS (AUTOCOMPLETE)
+// GET /contabilidad/plan-cuentas/buscar
+// ==========================================================
+    @GetMapping("/buscar")
+    public List<PlanCuenta> buscar(
+            @RequestParam Integer idAgencia,
+            @RequestParam String q
+    ) {
+        if (q == null || q.trim().length() < 2) {
+            return List.of();
+        }
+
+        return service.buscarPorAgenciaYTexto(idAgencia, q.trim());
+    }
 }

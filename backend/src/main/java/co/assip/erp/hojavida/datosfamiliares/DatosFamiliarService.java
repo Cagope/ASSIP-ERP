@@ -1,7 +1,9 @@
 package co.assip.erp.hojavida.datosfamiliares;
 
+import co.assip.erp.seguridad.utils.SecurityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -45,8 +47,15 @@ public class DatosFamiliarService {
     public DatosFamiliar crear(DatosFamiliar nuevo) {
         validarTelefonos(nuevo);
 
+        Integer idUsuario = SecurityUtils.getIdUsuario();
+
         nuevo.setFechaCreacion(LocalDateTime.now());
         nuevo.setFechaEdicion(LocalDateTime.now());
+
+        // 🔐 Auditoría
+        nuevo.setFkSeguridadCreacion(idUsuario);
+        nuevo.setFkSeguridadEdicion(idUsuario);
+
         return repository.save(nuevo);
     }
 
@@ -55,9 +64,16 @@ public class DatosFamiliarService {
         return repository.findById(id).map(existente -> {
             validarTelefonos(actualizado);
 
+            Integer idUsuario = SecurityUtils.getIdUsuario();
+
             actualizado.setIdDatosFamiliares(id);
             actualizado.setFechaCreacion(existente.getFechaCreacion());
             actualizado.setFechaEdicion(LocalDateTime.now());
+
+            // 🔐 Auditoría
+            actualizado.setFkSeguridadCreacion(existente.getFkSeguridadCreacion());
+            actualizado.setFkSeguridadEdicion(idUsuario);
+
             return repository.save(actualizado);
         });
     }

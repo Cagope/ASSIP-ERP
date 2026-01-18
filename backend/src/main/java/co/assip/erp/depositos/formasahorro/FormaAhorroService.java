@@ -1,7 +1,9 @@
 package co.assip.erp.depositos.formasahorro;
 
+import co.assip.erp.seguridad.utils.SecurityUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 @Service
@@ -38,6 +40,15 @@ public class FormaAhorroService {
             throw new RuntimeException("El código ya existe.");
         }
 
+        Integer idUsuario = SecurityUtils.getIdUsuario();
+        if (idUsuario == null) {
+            throw new RuntimeException("USUARIO_NO_AUTENTICADO");
+        }
+
+        // 🔐 Auditoría
+        f.setFkSeguridadCreacion(idUsuario);
+        f.setFkSeguridadEdicion(idUsuario);
+
         return repo.save(f);
     }
 
@@ -48,6 +59,11 @@ public class FormaAhorroService {
 
         FormaAhorro db = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("No existe la forma de ahorro."));
+
+        Integer idUsuario = SecurityUtils.getIdUsuario();
+        if (idUsuario == null) {
+            throw new RuntimeException("USUARIO_NO_AUTENTICADO");
+        }
 
         // Código no se edita
         db.setNombreForma(f.getNombreForma());
@@ -66,6 +82,9 @@ public class FormaAhorroService {
         db.setPeriodoGracia(f.getPeriodoGracia());
         db.setValorMinimo(f.getValorMinimo());
         db.setTasaInteresForma(f.getTasaInteresForma());
+
+        // 🔐 Auditoría
+        db.setFkSeguridadEdicion(idUsuario);
 
         return repo.save(db);
     }
