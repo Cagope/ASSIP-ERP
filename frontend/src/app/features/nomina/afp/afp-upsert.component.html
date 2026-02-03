@@ -1,0 +1,68 @@
+<div class="page">
+
+  <app-header-actions
+    title="AFP"
+    subtitle="Crear / Editar"
+  ></app-header-actions>
+
+  <div class="card" *ngIf="!loading; else cargandoTpl">
+
+    <div class="form-grid">
+
+      <div class="form-group full">
+        <label>Nombre AFP *</label>
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="form.nombreAfp"
+          placeholder="Ej: Protección"
+        />
+      </div>
+
+      <!-- ✅ TERCERO (id_datos_personal) -->
+      <div class="form-group full">
+        <label>Tercero asociado (opcional)</label>
+
+        <app-personas-selector
+          (seleccionar)="onPersonaSeleccionada($event)">
+        </app-personas-selector>
+
+        <small *ngIf="form.idDatosPersonal">
+          ID Datos Personal: <b>{{ form.idDatosPersonal }}</b>
+          <button
+            type="button"
+            class="btn btn-light"
+            style="margin-left: 8px;"
+            (click)="limpiarPersona()"
+            [disabled]="guardando">
+            Quitar
+          </button>
+        </small>
+      </div>
+
+      <div class="form-group">
+        <label>Activo</label>
+        <select class="form-control" [(ngModel)]="form.activo">
+          <option [ngValue]="true">Sí</option>
+          <option [ngValue]="false">No</option>
+        </select>
+      </div>
+
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" (click)="guardar()" [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : 'Guardar' }}
+      </button>
+
+      <button class="btn btn-light" (click)="volver()" [disabled]="guardando">
+        Cancelar
+      </button>
+    </div>
+  </div>
+
+  <ng-template #cargandoTpl>
+    <div class="loading">Cargando...</div>
+  </ng-template>
+
+</div>

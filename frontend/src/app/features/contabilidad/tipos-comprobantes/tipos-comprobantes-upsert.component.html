@@ -1,0 +1,114 @@
+<div class="form-container">
+
+  <h5>
+    {{ route.snapshot.paramMap.get('tipo')
+    ? 'editar tipo de comprobante'
+    : 'nuevo tipo de comprobante' }}
+  </h5>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="form-grid">
+
+    <!-- 🟩 Agencia -->
+    <div class="form-group full">
+      <label for="idAgencia">agencia *</label>
+      <select id="idAgencia" formControlName="idAgencia">
+        <option [ngValue]="null">Seleccione una agencia</option>
+        <option *ngFor="let a of agencias" [ngValue]="a.idAgencia">
+          {{ a.nombreAgencia }}
+        </option>
+      </select>
+
+      <div
+        *ngIf="form.get('idAgencia')?.invalid && form.get('idAgencia')?.touched"
+        class="error">
+        Seleccione una agencia válida.
+      </div>
+    </div>
+
+    <!-- 🟦 Tipo comprobante -->
+    <div class="form-group sm">
+      <label for="tipoComprobante">tipo comprobante *</label>
+      <input
+        id="tipoComprobante"
+        type="text"
+        maxlength="5"
+        formControlName="tipoComprobante"
+      />
+
+      <div
+        *ngIf="form.get('tipoComprobante')?.hasError('required')
+               && form.get('tipoComprobante')?.touched"
+        class="error">
+        ⚠️ Este campo es obligatorio.
+      </div>
+
+      <div
+        *ngIf="form.get('tipoComprobante')?.hasError('maxlength')"
+        class="error">
+        ⚠️ Máximo 5 caracteres.
+      </div>
+    </div>
+
+    <!-- 🟩 Nombre -->
+    <div class="form-group full">
+      <label for="nombreTipoComprobante">nombre *</label>
+      <input
+        id="nombreTipoComprobante"
+        type="text"
+        maxlength="100"
+        formControlName="nombreTipoComprobante"
+      />
+
+      <div
+        *ngIf="form.get('nombreTipoComprobante')?.hasError('required')
+               && form.get('nombreTipoComprobante')?.touched"
+        class="error">
+        Este campo es obligatorio.
+      </div>
+    </div>
+
+    <!-- 🟧 Consecutivo -->
+    <div class="form-group sm">
+      <label for="cscComprobante">consecutivo actual *</label>
+      <input
+        id="cscComprobante"
+        type="number"
+        formControlName="cscComprobante"
+      />
+
+      <div
+        *ngIf="form.get('cscComprobante')?.invalid
+               && form.get('cscComprobante')?.touched"
+        class="error">
+        El consecutivo debe ser mayor o igual a cero.
+      </div>
+    </div>
+
+    <!-- 🟪 Activo -->
+    <div class="form-group sm">
+      <label for="comprobanteActivo">activo *</label>
+      <select id="comprobanteActivo" formControlName="comprobanteActivo">
+        <option [ngValue]="true">Sí</option>
+        <option [ngValue]="false">No</option>
+      </select>
+    </div>
+
+    <!-- 🟫 Acciones -->
+    <div class="form-actions full">
+      <button
+        type="submit"
+        class="btn sm primary"
+        [disabled]="form.invalid">
+        💾 {{ route.snapshot.paramMap.get('tipo') ? 'actualizar' : 'guardar' }}
+      </button>
+
+      <button
+        type="button"
+        class="btn sm danger"
+        (click)="router.navigate(['/contabilidad/tipos-comprobantes'])">
+        ↩️ cancelar
+      </button>
+    </div>
+
+  </form>
+</div>

@@ -1,0 +1,71 @@
+<div class="caja-compensacion-list">
+
+  <app-header-actions
+    titulo="Caja de Compensación"
+    (nuevo)="nuevo()"
+    (refrescar)="cargar()"
+    (imprimir)="imprimir()"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <div class="toolbar">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Buscar por nombre o documento..."
+      [(ngModel)]="q"
+    />
+  </div>
+
+  <table class="table" *ngIf="!loading && cajasFiltradas.length > 0; else vacio">
+    <thead>
+    <tr>
+      <th style="width: 90px;">ID</th>
+      <th>Nombre Caja</th>
+      <th style="width: 150px;">Documento</th>
+      <th style="width: 120px;">Activo</th>
+      <th style="width: 120px;">Acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let c of cajasFiltradas">
+      <td>{{ c.idCaja }}</td>
+
+      <td class="nombre">
+        {{ c.nombreCaja }}
+      </td>
+
+      <td>
+        {{ c.documento || '—' }}
+      </td>
+
+      <td>
+        <span
+          class="badge"
+          [class.badge--ok]="c.activo"
+          [class.badge--off]="!c.activo"
+        >
+          {{ c.activo ? 'SI' : 'NO' }}
+        </span>
+      </td>
+
+      <td>
+        <div class="acciones">
+          <button class="btn sm" (click)="editar(c.idCaja)" title="Editar">✏️</button>
+          <button class="btn sm danger" (click)="eliminar(c.idCaja)" title="Eliminar">🗑️</button>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="loading" class="loading">
+    Cargando...
+  </div>
+
+  <ng-template #vacio>
+    <p class="empty">No hay registros para mostrar.</p>
+  </ng-template>
+
+</div>

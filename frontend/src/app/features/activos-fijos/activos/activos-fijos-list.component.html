@@ -1,0 +1,49 @@
+<div class="activos-fijos-list">
+
+  <app-header-actions
+    titulo="Activos Fijos"
+    (nuevo)="nuevo()"
+    (refrescar)="cargar()">
+  </app-header-actions>
+
+  <table class="table" *ngIf="!cargando && activos.length > 0; else vacio">
+    <thead>
+    <tr>
+      <th>Placa</th>
+      <th>Nombre</th>
+      <th>Agencia</th>
+      <th>Estado</th>
+      <th>Ingreso</th>
+      <th>Valor</th>
+      <th>Acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let a of activos">
+      <td>{{ a.placaActivo }}</td>
+      <td>{{ a.nombreActivo }}</td>
+      <td>{{ a.nombreAgencia }}</td>
+      <td>{{ a.nombreEstadoActivo }}</td>
+      <td>{{ a.fechaIngreso | date:'yyyy-MM-dd' }}</td>
+      <td>{{ a.valorAdquisicion | number:'1.0-0' }}</td>
+
+      <td>
+        <div class="acciones">
+          <button class="btn sm" (click)="editar(a.idActivoFijo)">✏️</button>
+          <button class="btn sm danger" (click)="eliminar(a)">🗑️</button>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="cargando" class="loading">
+    Cargando...
+  </div>
+
+  <ng-template #vacio>
+    <p class="empty">No hay activos fijos registrados.</p>
+  </ng-template>
+
+</div>

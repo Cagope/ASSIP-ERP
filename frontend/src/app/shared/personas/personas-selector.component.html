@@ -1,0 +1,34 @@
+<div class="form-group sm personas-selector">
+
+  <label>{{ label }}</label>
+
+  <input
+    type="text"
+    class="form-control"
+    [(ngModel)]="q"
+    (input)="buscar()"
+    placeholder="Documento, nombre o apellido"
+    autocomplete="off"
+  />
+
+  <!-- ✅ Dropdown resultados -->
+  <div class="list-group resultados" *ngIf="resultados.length">
+
+    <button
+      type="button"
+      class="list-group-item list-group-item-action item"
+      *ngFor="let p of resultados"
+      (click)="elegir(p)"
+    >
+      <div class="row1">
+        <span class="doc">{{ p.documento }}</span>
+      </div>
+
+      <div class="row2">
+        {{ p.nombreCompleto }}
+      </div>
+    </button>
+
+  </div>
+
+</div>

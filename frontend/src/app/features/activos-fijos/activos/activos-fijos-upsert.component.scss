@@ -1,0 +1,90 @@
+.activos-fijos-upsert {
+
+  h5 {
+    margin-bottom: 1rem;
+    font-weight: 600;
+    text-transform: lowercase;
+    color: #1f2937;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  input[type='text'],
+  input[type='number'],
+  input[type='date'],
+  select {
+    width: 100%;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.25rem;
+    font-size: 0.9rem;
+    transition: border-color 0.2s ease-in-out;
+
+    &:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px #2563eb33;
+    }
+
+    &:disabled {
+      background-color: #f9fafb;
+      color: #6b7280;
+    }
+  }
+
+  /* 🔹 Alineación derecha en campos numéricos */
+  input[formcontrolname='mesesDepreciacion'],
+  input[formcontrolname='valorAdquisicion'],
+  input[formcontrolname='valorMensual'],
+  input[formcontrolname='idFormaDepreciacion'],
+  input[formcontrolname='idEstadoActivo'],
+  input[formcontrolname='idTipoAdquisicion'],
+  input[formcontrolname='idAgencia'],
+  input[formcontrolname='idUbicacion'],
+  input[formcontrolname='idBloque'],
+  input[formcontrolname='idDatosPersonalResponsable'],
+  input[formcontrolname='idDatosPersonalProveedor'],
+  input[formcontrolname='idCatalogoCuentaActivo'],
+  input[formcontrolname='idCatalogoCuentaDepreciacion'],
+  input[formcontrolname='idCatalogoCuentaGasto'],
+  input[formcontrolname='idCatalogoCuentaControl'],
+  input[formcontrolname='idCatalogoCuentaIva'] {
+    text-align: right;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.8rem;
+    margin-top: 1rem;
+  }
+
+  .error {
+    color: #dc2626;
+    font-size: 0.75rem;
+    margin-top: 0.2rem;
+  }
+
+  button.btn.sm.primary {
+    background-color: #2563eb;
+    color: #fff;
+    border: 1px solid #1d4ed8;
+  }
+
+  button.btn.sm.primary:hover {
+    background-color: #1d4ed8;
+  }
+
+  button.btn.sm.danger {
+    border-color: #fca5a5;
+    color: #dc2626;
+  }
+
+  button.btn.sm.danger:hover {
+    background-color: #fee2e2;
+  }
+}

@@ -1,33 +1,38 @@
-<aside class="menu">
-  <nav class="menu-content">
-    <ul>
-      <li *ngFor="let section of menu; let i = index" [class.open]="isOpen(i)">
+<nav class="menu-bar">
+  <ul class="menu-root">
 
-        <!-- 🔽 TÍTULO CLICABLE -->
-        <button type="button" class="menu-section" (click)="toggleSection(i)">
-          <span>{{ section.title }}</span>
-          <span class="chevron" [class.open]="isOpen(i)">▾</span>
-        </button>
+    <li
+      class="menu-root-item"
+      *ngFor="let section of menu; let i = index"
+      [class.open]="isOpen(i)"
+    >
 
-        <!-- 🔽 SUBMENÚ SOLO SI ESTÁ ABIERTO -->
-        <ul class="submenu" *ngIf="isOpen(i)">
+      <!-- NIVEL 1 -->
+      <button
+        type="button"
+        class="menu-title"
+        (click)="toggleSection(i)"
+      >
+        {{ section.title }}
+      </button>
 
-          <!-- ⭐ Contenedor para combinar *ngFor + *ngIf -->
-          <ng-container *ngFor="let item of section.items">
-            <li *ngIf="tienePermiso(item)">
-              <a
-                [routerLink]="item.route"
-                routerLinkActive="active"
-                class="menu-item"
-              >
-                • {{ item.label }}
-              </a>
-            </li>
-          </ng-container>
+      <!-- NIVEL 2 -->
+      <ul class="menu-dropdown" *ngIf="isOpen(i)">
+        <ng-container *ngFor="let item of section.items">
+          <li *ngIf="tienePermiso(item)">
+            <a
+              [routerLink]="item.route"
+              routerLinkActive="active"
+              class="menu-item"
+              (click)="closeMenu()"
+            >
+              {{ item.label }}
+            </a>
+          </li>
+        </ng-container>
+      </ul>
 
-        </ul>
+    </li>
 
-      </li>
-    </ul>
-  </nav>
-</aside>
+  </ul>
+</nav>

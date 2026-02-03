@@ -1,0 +1,78 @@
+<div class="variables-vigencia-list">
+
+  <app-header-actions
+    titulo="Variables Vigencia"
+    (nuevo)="nuevo()"
+    (refrescar)="cargar()"
+    (imprimir)="imprimir()"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <!-- ✅ FILTRO SIMPLE -->
+  <div class="toolbar">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Buscar por fechas o valores..."
+      [(ngModel)]="q"
+    />
+  </div>
+
+  <table class="table" *ngIf="!loading && filtrados.length > 0; else vacio">
+    <thead>
+    <tr>
+      <th style="width: 90px;">ID</th>
+      <th style="width: 130px;">Fecha inicial</th>
+      <th style="width: 130px;">Fecha final</th>
+      <th style="width: 140px;">SMMLV</th>
+      <th style="width: 160px;">Aux transporte</th>
+      <th style="width: 120px;">Activo</th>
+      <th style="width: 120px;">Acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let v of filtrados">
+      <td>{{ v.idVariable }}</td>
+
+      <td>{{ v.fechaInicial }}</td>
+      <td>{{ v.fechaFinal }}</td>
+
+      <td class="num">{{ v.smmlv }}</td>
+      <td class="num">{{ v.auxTransporte }}</td>
+
+      <td>
+        <span
+          class="badge"
+          [class.badge--ok]="v.activo"
+          [class.badge--off]="!v.activo"
+        >
+          {{ v.activo ? 'SI' : 'NO' }}
+        </span>
+      </td>
+
+      <td>
+        <div class="acciones">
+          <button class="btn sm" (click)="editar(v.idVariable)" title="Editar">
+            ✏️
+          </button>
+
+          <button class="btn sm danger" (click)="eliminar(v.idVariable)" title="Eliminar">
+            🗑️
+          </button>
+        </div>
+      </td>
+
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="loading" class="loading">
+    Cargando...
+  </div>
+
+  <ng-template #vacio>
+    <p class="empty">No hay vigencias para mostrar.</p>
+  </ng-template>
+
+</div>

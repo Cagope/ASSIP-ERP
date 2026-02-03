@@ -1,0 +1,58 @@
+<div class="tipos-comprobantes-list">
+
+  <app-header-actions
+    titulo="Tipos de Comprobantes"
+    (nuevo)="nuevo()">
+  </app-header-actions>
+
+  <table
+    id="tabla-tipos-comprobantes"
+    *ngIf="!cargando && tipos.length > 0"
+    class="table table-striped">
+
+    <thead>
+    <tr>
+      <th>Agencia</th>
+      <th>Tipo</th>
+      <th>Nombre</th>
+      <th class="text-right">Consecutivo</th>
+      <th>Activo</th>
+      <th>Acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let t of tipos">
+      <td>{{ t.idAgencia }}</td>
+      <td>{{ t.tipoComprobante }}</td>
+      <td>{{ t.nombreTipoComprobante }}</td>
+      <td class="text-right">{{ t.cscComprobante }}</td>
+      <td>{{ t.comprobanteActivo ? 'Sí' : 'No' }}</td>
+
+      <td>
+        <div class="acciones">
+          <button
+            class="btn sm"
+            (click)="editar(t)">
+            ✏️
+          </button>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+
+  </table>
+
+  <div *ngIf="cargando" class="loading">
+    Cargando...
+  </div>
+
+  <div *ngIf="!cargando && tipos.length === 0" class="empty">
+    No hay tipos de comprobantes registrados.
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+</div>

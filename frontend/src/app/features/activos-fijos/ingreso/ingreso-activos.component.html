@@ -1,0 +1,616 @@
+<form [formGroup]="form" class="ingreso-activos-form">
+
+  <!-- =====================================================
+       CONTEXTO DE TRABAJO (AGENCIA)
+       ===================================================== -->
+  <div class="card">
+    <h3>Agencia de trabajo</h3>
+
+    <div class="grid grid-2">
+      <div class="form-group">
+        <label>Agencia *</label>
+
+        <select
+          class="form-control"
+          [value]="session.getAgenciaActiva()?.idAgencia"
+          (change)="onChangeAgencia($any($event.target).value)"
+        >
+          <option value="">-- Seleccione agencia --</option>
+
+          <option
+            *ngFor="let ag of session.getAgencias()"
+            [value]="ag.idAgencia"
+          >
+            {{ ag.codigoAgencia }} — {{ ag.nombreAgencia }}
+          </option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================================================
+       HEADER DEL COMPROBANTE
+       ===================================================== -->
+  <fieldset formGroupName="header" class="card">
+    <legend>Comprobante contable</legend>
+
+    <div class="grid grid-3">
+
+      <div class="form-group">
+        <label>Fecha inclusión *</label>
+        <input type="date" formControlName="fechaInclusion" />
+      </div>
+
+      <div class="form-group">
+        <label>Tipo comprobante *</label>
+
+        <select class="form-control" formControlName="tipoComprobante">
+          <option value="">-- Seleccione --</option>
+
+          <option
+            *ngFor="let t of tiposComprobantes"
+            [value]="t.tipoComprobante"
+          >
+            {{ t.tipoComprobante }} — {{ t.nombreTipoComprobante }}
+            <span *ngIf="!t.comprobanteActivo"> (Inactivo)</span>
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Número comprobante sugerido</label>
+        <input
+          type="text"
+          formControlName="numeroComprobante"
+          placeholder="Automático si se deja vacío"
+        />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Tipo de adquisición *</label>
+      <select class="form-control" formControlName="idTipoAdquisicion">
+        <option value="">-- Seleccione --</option>
+        <option
+          *ngFor="let t of tiposAdquisicion"
+          [value]="t.idTipoAdquisicion">
+          {{ t.nombreTipoAdquisicion }}
+        </option>
+      </select>
+    </div>
+
+
+    <!-- ===== PROVEEDOR / CUENTA FACTURA ===== -->
+    <div class="grid grid-2">
+
+      <div class="form-group full autocomplete">
+        <label>Proveedor *</label>
+
+        <input
+          type="text"
+          [formControl]="proveedorCtrl"
+          placeholder="Buscar proveedor por nombre o documento…"
+        />
+
+        <ul class="autocomplete-list" *ngIf="proveedores.length">
+          <li
+            *ngFor="let p of proveedores"
+            (click)="seleccionarProveedor(p)"
+          >
+            <strong>{{ p.nombreCompleto }}</strong>
+            <small> — {{ p.documento }}</small>
+          </li>
+        </ul>
+      </div>
+
+      <div class="form-group full autocomplete">
+        <label>Cuenta contable factura *</label>
+
+        <input
+          type="text"
+          [formControl]="ctaFacturaCtrl"
+          placeholder="Buscar cuenta por código o nombre…"
+        />
+
+        <ul class="autocomplete-list" *ngIf="cuentasFactura.length">
+          <li
+            *ngFor="let c of cuentasFactura"
+            (click)="seleccionarCuentaFactura(c)"
+          >
+            <strong>{{ c.codigoCuenta }}</strong>
+            <small> — {{ c.nombreCuenta }}</small>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="form-group">
+      <label>Detalle *</label>
+      <textarea
+        formControlName="detalle"
+        maxlength="100"
+        rows="2"
+      ></textarea>
+      <small>Máximo 100 caracteres</small>
+    </div>
+  </fieldset>
+
+  <!-- =====================================================
+       ITEMS (ACTIVOS)
+       ===================================================== -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Activos a ingresar</h3>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="agregarItem()"
+        [disabled]="!headerValido"
+      >
+        + Agregar activo
+      </button>
+
+    </div>
+
+    <div formArrayName="items">
+
+      <div
+        *ngFor="let item of items.controls; let i = index"
+        class="item"
+        [formGroupName]="i"
+      >
+
+        <div class="item-header">
+          <h4>Activo #{{ i + 1 }}</h4>
+          <button
+            type="button"
+            class="btn btn-danger"
+            (click)="eliminarItem(i)"
+          >
+            Eliminar
+          </button>
+        </div>
+
+        <!-- ================= DATOS BÁSICOS ================= -->
+        <div class="grid grid-3">
+          <div class="form-group">
+            <label>Placa *</label>
+            <input type="text" formControlName="placaActivo" />
+          </div>
+
+          <div class="form-group">
+            <label>Nombre *</label>
+            <input type="text" formControlName="nombreActivo" />
+          </div>
+
+          <div class="form-group">
+            <label>Garantía</label>
+            <input type="date" formControlName="fechaGarantia" />
+          </div>
+        </div>
+
+        <!-- ================= RESPONSABLE ================= -->
+        <div class="form-group full autocomplete">
+          <label>Responsable</label>
+
+          <input
+            type="text"
+            [formControl]="responsableCtrl[i]"
+            placeholder="Buscar responsable por nombre o documento…"
+          />
+
+          <ul class="autocomplete-list" *ngIf="responsables[i]?.length">
+            <li
+              *ngFor="let r of responsables[i]"
+              (click)="seleccionarResponsable(i, r)"
+            >
+              <strong>{{ r.nombreCompleto }}</strong>
+              <small> — {{ r.documento }}</small>
+            </li>
+          </ul>
+        </div>
+
+        <!-- ================= DEPRECIACIÓN / ESTADO ================= -->
+        <div class="grid grid-3">
+
+          <div class="form-group">
+            <label>Forma depreciación *</label>
+            <select class="form-control" formControlName="idFormaDepreciacion">
+              <option value="">-- Seleccione --</option>
+              <option
+                *ngFor="let f of formasDepreciacion"
+                [value]="f.idFormaDepreciacion">
+                {{ f.nombreForma }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Estado activo *</label>
+            <select class="form-control" formControlName="idEstadoActivo">
+              <option value="">-- Seleccione --</option>
+              <option
+                *ngFor="let e of estadosActivo"
+                [value]="e.idEstadoActivo">
+                {{ e.nombreEstadoActivo }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Localización *</label>
+            <select class="form-control" formControlName="idUbicacion">
+              <option value="">-- Seleccione --</option>
+              <option
+                *ngFor="let u of localizaciones"
+                [value]="u.idLocalizacion">
+                {{ u.nombre }}
+              </option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- ================= BLOQUE / MESES ================= -->
+        <div class="grid grid-3">
+
+          <div class="form-group">
+            <label>Bloque</label>
+            <select class="form-control" formControlName="idBloque">
+              <option value="">-- Seleccione --</option>
+              <option
+                *ngFor="let b of bloques"
+                [value]="b.idBloque">
+                {{ b.codigoBloque }} — {{ b.nombreBloque }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Meses *</label>
+            <input
+              type="number"
+              class="form-control input-number"
+              formControlName="mesesDepreciacion"
+            />
+          </div>
+
+          <!-- 👇 ESPACIADOR VISUAL (NO SE VE, PERO ALINEA) -->
+          <div class="form-group" style="visibility: hidden;">
+            <label>_</label>
+            <input type="text" />
+          </div>
+
+        </div>
+
+        <!-- ================= VALORES ================= -->
+        <div class="grid grid-3">
+          <div class="form-group">
+            <label>Valor histórico *</label>
+
+            <input
+              type="text"
+              class="form-control input-number"
+              formControlName="valorHistorico"
+              numericFormat
+            />
+
+          </div>
+
+          <div class="form-group">
+            <label>IVA</label>
+
+            <input
+              type="text"
+              class="form-control input-number"
+              formControlName="valorIva"
+              numericFormat
+            />
+
+          </div>
+
+          <div class="form-group">
+            <label>Retención</label>
+
+            <input
+              type="text"
+              class="form-control input-number"
+              formControlName="valorRetencion"
+              numericFormat
+            />
+
+
+          </div>
+        </div>
+
+        <!-- ================= CUENTAS ================= -->
+        <div class="grid grid-3">
+
+          <!-- ===== CUENTA ACTIVO ===== -->
+          <div class="form-group full autocomplete">
+            <label>Cuenta activo *</label>
+
+            <input
+              type="text"
+              [formControl]="ctaActivoCtrl[i]"
+              placeholder="Buscar cuenta por código o nombre…" />
+
+            <ul class="autocomplete-list" *ngIf="cuentasActivo[i]?.length">
+              <li
+                *ngFor="let c of cuentasActivo[i]"
+                (click)="seleccionarCuentaItem(
+          i,
+          'idCuentaActivo',
+          'cuentaActivoLabel',
+          ctaActivoCtrl,
+          cuentasActivo,
+          c
+        )">
+                <strong>{{ c.codigoCuenta }}</strong>
+                <small> — {{ c.nombreCuenta }}</small>
+              </li>
+            </ul>
+          </div>
+
+          <!-- ===== CUENTA DEPRECIACIÓN ===== -->
+          <div class="form-group full autocomplete">
+            <label>Cuenta depreciación *</label>
+
+            <input
+              type="text"
+              [formControl]="ctaDepreciacionCtrl[i]"
+              placeholder="Buscar cuenta…" />
+
+            <ul class="autocomplete-list" *ngIf="cuentasDepreciacion[i]?.length">
+              <li
+                *ngFor="let c of cuentasDepreciacion[i]"
+                (click)="seleccionarCuentaItem(
+          i,
+          'idCuentaDepreciacion',
+          'cuentaDepreciacionLabel',
+          ctaDepreciacionCtrl,
+          cuentasDepreciacion,
+          c
+        )">
+                <strong>{{ c.codigoCuenta }}</strong>
+                <small> — {{ c.nombreCuenta }}</small>
+              </li>
+            </ul>
+          </div>
+
+          <!-- ===== CUENTA GASTO ===== -->
+          <div class="form-group full autocomplete">
+            <label>Cuenta gasto *</label>
+
+            <input
+              type="text"
+              [formControl]="ctaGastoCtrl[i]"
+              placeholder="Buscar cuenta…" />
+
+            <ul class="autocomplete-list" *ngIf="cuentasGasto[i]?.length">
+              <li
+                *ngFor="let c of cuentasGasto[i]"
+                (click)="seleccionarCuentaItem(
+          i,
+          'idCuentaGasto',
+          'cuentaGastoLabel',
+          ctaGastoCtrl,
+          cuentasGasto,
+          c
+        )">
+                <strong>{{ c.codigoCuenta }}</strong>
+                <small> — {{ c.nombreCuenta }}</small>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div class="grid grid-3">
+
+          <!-- ===== CUENTA CONTROL ===== -->
+          <div class="form-group full autocomplete">
+            <label>Cuenta control *</label>
+
+            <input
+              type="text"
+              [formControl]="ctaControlCtrl[i]"
+              placeholder="Buscar cuenta…" />
+
+            <ul class="autocomplete-list" *ngIf="cuentasControl[i]?.length">
+              <li
+                *ngFor="let c of cuentasControl[i]"
+                (click)="seleccionarCuentaItem(
+          i,
+          'idCuentaControl',
+          'cuentaControlLabel',
+          ctaControlCtrl,
+          cuentasControl,
+          c
+        )">
+                <strong>{{ c.codigoCuenta }}</strong>
+                <small> — {{ c.nombreCuenta }}</small>
+              </li>
+            </ul>
+          </div>
+
+          <!-- ===== CUENTA IVA ===== -->
+          <div class="form-group full autocomplete">
+            <label>Cuenta IVA</label>
+
+            <input
+              type="text"
+              [formControl]="ctaIvaCtrl[i]"
+              placeholder="Buscar cuenta…" />
+
+            <ul class="autocomplete-list" *ngIf="cuentasIva[i]?.length">
+              <li
+                *ngFor="let c of cuentasIva[i]"
+                (click)="seleccionarCuentaItem(
+          i,
+          'idCuentaIvaActivo',
+          'cuentaIvaLabel',
+          ctaIvaCtrl,
+          cuentasIva,
+          c
+        )">
+                <strong>{{ c.codigoCuenta }}</strong>
+                <small> — {{ c.nombreCuenta }}</small>
+              </li>
+            </ul>
+          </div>
+
+          <!-- ===== CUENTA RETENCIÓN ===== -->
+          <div class="form-group full autocomplete">
+            <label>Cuenta retención</label>
+
+            <input
+              type="text"
+              [formControl]="ctaRetencionCtrl[i]"
+              placeholder="Buscar cuenta…" />
+
+            <ul class="autocomplete-list" *ngIf="cuentasRetencion[i]?.length">
+              <li
+                *ngFor="let c of cuentasRetencion[i]"
+                (click)="seleccionarCuentaItem(
+          i,
+          'idCuentaRetencion',
+          'cuentaRetencionLabel',
+          ctaRetencionCtrl,
+          cuentasRetencion,
+          c
+        )">
+                <strong>{{ c.codigoCuenta }}</strong>
+                <small> — {{ c.nombreCuenta }}</small>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =====================================================
+     RESUMEN DE TOTALES (UNA SOLA LÍNEA)
+     ===================================================== -->
+  <div class="card resumen-totales">
+    <div class="grid grid-4 resumen-row">
+
+      <div class="resumen-item">
+        <span class="label">Ítems</span>
+        <span class="value">{{ totalItems }}</span>
+      </div>
+
+      <div class="resumen-item">
+        <span class="label">Total histórico</span>
+        <span class="value">
+        {{ totalValorHistorico | number:'1.0-2' }}
+      </span>
+      </div>
+
+      <div class="resumen-item">
+        <span class="label">IVA</span>
+        <span class="value">
+        {{ totalIva | number:'1.0-2' }}
+      </span>
+      </div>
+
+      <div class="resumen-item">
+        <span class="label">Retención</span>
+        <span class="value">
+        {{ totalRetencion | number:'1.0-2' }}
+      </span>
+      </div>
+
+    </div>
+  </div>
+
+  <pre style="background:#f5f5f5; padding:8px; font-size:12px;">
+  form.valid: {{ form.valid }}
+  totalValorHistorico: {{ totalValorHistorico }}
+  puedeGuardar: {{ puedeGuardar }}
+  </pre>
+
+  <!-- =====================================================
+     VISTA PREVIA CONTABLE
+     ===================================================== -->
+  <div class="card" *ngIf="lineasContables.length">
+
+    <h3>Vista previa contable</h3>
+
+    <table class="tabla-contable tabla-fija">
+      <thead>
+      <tr>
+        <th style="width:140px">Código</th>
+        <th>Cuenta</th>
+        <th class="num">Débito</th>
+        <th class="num">Crédito</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr *ngFor="let l of lineasContables">
+        <!-- Código -->
+        <td>
+          {{ l.cuenta.split('—')[0].trim() }}
+        </td>
+
+        <!-- Nombre -->
+        <td>
+          {{ l.cuenta.split('—')[1]?.trim() }}
+        </td>
+
+        <!-- Débito -->
+        <td class="num">
+          {{ l.debito ? (l.debito | number:'1.0-2') : '' }}
+        </td>
+
+        <!-- Crédito -->
+        <td class="num">
+          {{ l.credito ? (l.credito | number:'1.0-2') : '' }}
+        </td>
+      </tr>
+      </tbody>
+
+      <!-- ===== TOTALES CONTABLES ===== -->
+      <tfoot>
+      <tr class="totales">
+        <td colspan="2"><strong>Totales</strong></td>
+
+        <td class="num">
+          <strong>{{ totalDebitoContable | number:'1.0-2' }}</strong>
+        </td>
+
+        <td class="num">
+          <strong>{{ totalCreditoContable | number:'1.0-2' }}</strong>
+        </td>
+      </tr>
+      </tfoot>
+    </table>
+
+  </div>
+
+  <!-- =====================================================
+       ACCIONES
+       ===================================================== -->
+  <div class="actions">
+    <button type="button" class="btn btn-secondary" (click)="cancelar()">
+      Cancelar
+    </button>
+    <button
+      type="button"
+      class="btn btn-success"
+      (click)="guardar()"
+      [disabled]="!puedeGuardar"
+    >
+      Guardar
+    </button>
+
+  </div>
+
+</form>

@@ -1,0 +1,87 @@
+<div class="cesantias-list">
+
+  <app-header-actions
+    titulo="Cesantías"
+    (nuevo)="nuevo()"
+    (refrescar)="cargar()"
+    (imprimir)="imprimir()"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <!-- ✅ FILTRO SIMPLE -->
+  <div class="toolbar">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Buscar cesantías por nombre o documento..."
+      [(ngModel)]="q"
+    />
+  </div>
+
+  <table
+    class="table"
+    *ngIf="!loading && cesantiasFiltradas.length > 0; else vacio">
+
+    <thead>
+    <tr>
+      <th style="width: 90px;">ID</th>
+      <th>Nombre Cesantías</th>
+      <th style="width: 150px;">Documento</th>
+      <th style="width: 120px;">Activo</th>
+      <th style="width: 120px;">Acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let c of cesantiasFiltradas">
+
+      <td>{{ c.idCesantias }}</td>
+
+      <td class="nombre">
+        {{ c.nombreCesantias }}
+      </td>
+
+      <td>
+        {{ c.documento || '—' }}
+      </td>
+
+      <td>
+          <span
+            class="badge"
+            [class.badge--ok]="c.activo"
+            [class.badge--off]="!c.activo">
+            {{ c.activo ? 'SI' : 'NO' }}
+          </span>
+      </td>
+
+      <td>
+        <div class="acciones">
+          <button
+            class="btn sm"
+            (click)="editar(c.idCesantias!)"
+            title="Editar">
+            ✏️
+          </button>
+
+          <button
+            class="btn sm danger"
+            (click)="eliminar(c.idCesantias!)"
+            title="Eliminar">
+            🗑️
+          </button>
+        </div>
+      </td>
+
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="loading" class="loading">
+    Cargando Cesantías...
+  </div>
+
+  <ng-template #vacio>
+    <p class="empty">No hay Cesantías para mostrar.</p>
+  </ng-template>
+
+</div>

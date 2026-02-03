@@ -1,0 +1,78 @@
+<div class="afp-list">
+
+  <app-header-actions
+    titulo="AFP"
+    (nuevo)="nuevo()"
+    (refrescar)="cargar()"
+    (imprimir)="imprimir()"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <!-- ✅ FILTRO SIMPLE -->
+  <div class="toolbar">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Buscar AFP por nombre o documento..."
+      [(ngModel)]="q"
+    />
+  </div>
+
+  <table class="table" *ngIf="!loading && afpFiltradas.length > 0; else vacio">
+    <thead>
+    <tr>
+      <th style="width: 90px;">ID</th>
+      <th>Nombre AFP</th>
+      <th style="width: 150px;">Documento</th>
+      <th style="width: 120px;">Activo</th>
+      <th style="width: 120px;">Acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let a of afpFiltradas">
+      <td>{{ a.idAfp }}</td>
+
+      <td class="nombre">
+        {{ a.nombreAfp }}
+      </td>
+
+      <td>
+        {{ a.documento || '—' }}
+      </td>
+
+      <td>
+          <span
+            class="badge"
+            [class.badge--ok]="a.activo"
+            [class.badge--off]="!a.activo"
+          >
+            {{ a.activo ? 'SI' : 'NO' }}
+          </span>
+      </td>
+
+      <td>
+        <div class="acciones">
+          <button class="btn sm" (click)="editar(a.idAfp)" title="Editar">
+            ✏️
+          </button>
+
+          <button class="btn sm danger" (click)="eliminar(a.idAfp)" title="Eliminar">
+            🗑️
+          </button>
+        </div>
+      </td>
+
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="loading" class="loading">
+    Cargando AFP...
+  </div>
+
+  <ng-template #vacio>
+    <p class="empty">No hay AFP para mostrar.</p>
+  </ng-template>
+
+</div>

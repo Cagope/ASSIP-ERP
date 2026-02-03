@@ -1,0 +1,257 @@
+<div class="page">
+
+  <app-header-actions
+    title="Contratos de Empleado"
+    subtitle="Crear / Editar">
+  </app-header-actions>
+
+  <div class="card" *ngIf="!loading; else cargandoTpl">
+
+    <div class="form-grid">
+
+      <!-- =========================
+           EMPLEADO
+           ========================= -->
+      <div class="form-group full">
+        <label>Empleado *</label>
+        <select class="form-control" [(ngModel)]="form.idEmpleado">
+          <option [ngValue]="null">-- Seleccione empleado --</option>
+          <option
+            *ngFor="let e of empleadosDisplay"
+            [ngValue]="e.idEmpleado">
+            {{ e.documento ? (e.documento + ' — ') : '' }}
+            {{ e.nombre }}
+            (ID {{ e.idEmpleado }})
+          </option>
+        </select>
+      </div>
+
+      <!-- =========================
+           SECCIÓN
+           ========================= -->
+      <div class="form-group">
+        <label>Sección</label>
+        <select class="form-control" [(ngModel)]="form.idSeccion">
+          <option [ngValue]="null">-- Seleccione --</option>
+          <option
+            *ngFor="let s of secciones"
+            [ngValue]="s.idSeccion">
+            {{ s.nombreSeccion }}
+          </option>
+        </select>
+      </div>
+
+      <!-- =========================
+           TIPO CONTRATO
+           ========================= -->
+      <div class="form-group">
+        <label>Tipo contrato *</label>
+        <select class="form-control" [(ngModel)]="form.idTipoContrato">
+          <option [ngValue]="null">-- Seleccione --</option>
+          <option
+            *ngFor="let t of tiposContrato"
+            [ngValue]="t.id">
+            {{ t.nombre }}
+          </option>
+        </select>
+      </div>
+
+      <!-- =========================
+           FECHAS
+           ========================= -->
+      <div class="form-group">
+        <label>Fecha inicio *</label>
+        <input
+          type="date"
+          class="form-control"
+          [(ngModel)]="form.fechaInicio">
+      </div>
+
+      <div class="form-group">
+        <label>Fecha fin</label>
+        <input
+          type="date"
+          class="form-control"
+          [(ngModel)]="form.fechaFin">
+      </div>
+
+      <!-- =========================
+           CARGO
+           ========================= -->
+      <div class="form-group full">
+        <label>Cargo</label>
+        <select class="form-control" [(ngModel)]="form.idCargo">
+          <option [ngValue]="null">-- Seleccione --</option>
+          <option
+            *ngFor="let c of cargos"
+            [ngValue]="c.idCargo">
+            {{ c.nombreCargo }}
+          </option>
+        </select>
+      </div>
+
+      <!-- =========================
+           SALARIO
+           ========================= -->
+      <div class="form-group">
+        <label>Salario base *</label>
+        <input
+          type="number"
+          class="form-control"
+          [(ngModel)]="form.salarioBase">
+      </div>
+
+      <div class="form-group">
+        <label>Periodo pago *</label>
+        <select class="form-control" [(ngModel)]="form.periodoPago">
+          <option [ngValue]="'MENSUAL'">MENSUAL</option>
+          <option [ngValue]="'QUINCENAL'">QUINCENAL</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Salario integral</label>
+        <select class="form-control" [(ngModel)]="form.salarioIntegral">
+          <option [ngValue]="false">NO</option>
+          <option [ngValue]="true">SI</option>
+        </select>
+      </div>
+
+      <!-- =========================
+           AFILIACIONES
+           ========================= -->
+      <div class="form-group">
+        <label>EPS</label>
+        <select class="form-control" [(ngModel)]="form.idEps">
+          <option [ngValue]="null">-- Seleccione --</option>
+          <option *ngFor="let x of eps" [ngValue]="x.idEps">
+            {{ x.nombreEps }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>AFP</label>
+        <select class="form-control" [(ngModel)]="form.idAfp">
+          <option [ngValue]="null">-- Seleccione --</option>
+          <option *ngFor="let x of afp" [ngValue]="x.idAfp">
+            {{ x.nombreAfp }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Cesantías</label>
+        <select class="form-control" [(ngModel)]="form.idCesantias">
+          <option [ngValue]="null">-- Seleccione --</option>
+          <option *ngFor="let x of cesantias" [ngValue]="x.idCesantias">
+            {{ x.nombreCesantias }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>ARL</label>
+        <select class="form-control" [(ngModel)]="form.idArl">
+          <option [ngValue]="null">-- Seleccione --</option>
+          <option *ngFor="let x of arl" [ngValue]="x.idArl">
+            {{ x.nombreArl }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Caja Compensación</label>
+        <select class="form-control" [(ngModel)]="form.idCajaCompensacion">
+          <option [ngValue]="null">-- Seleccione --</option>
+          <option *ngFor="let x of cajas" [ngValue]="x.idCaja">
+            {{ x.nombreCaja }}
+          </option>
+        </select>
+      </div>
+
+      <!-- =========================
+           ARL RIESGO
+           ========================= -->
+      <div class="form-group">
+        <label>Clase riesgo ARL</label>
+        <input
+          type="number"
+          class="form-control"
+          [(ngModel)]="form.claseRiesgoArl">
+      </div>
+
+      <div class="form-group">
+        <label>% ARL</label>
+        <input
+          type="number"
+          class="form-control"
+          [(ngModel)]="form.porcentajeArl">
+      </div>
+
+      <!-- =========================
+           CUENTAS
+           ========================= -->
+      <div class="form-group full">
+        <label>Cuenta nómina (display)</label>
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="form.cuentaNominaDisplay">
+      </div>
+
+      <div class="form-group full">
+        <label>ID Cuenta ahorro nómina</label>
+        <input
+          type="number"
+          class="form-control"
+          [(ngModel)]="form.idCuentaAhorroNomina">
+      </div>
+
+      <!-- =========================
+           RENOVACIÓN
+           ========================= -->
+      <div class="form-group">
+        <label>Fecha envío nota renovación</label>
+        <input
+          type="date"
+          class="form-control"
+          [(ngModel)]="form.fechaEnvioNotaRenovacion">
+      </div>
+
+      <!-- =========================
+           ACTIVO
+           ========================= -->
+      <div class="form-group">
+        <label>Activo</label>
+        <select class="form-control" [(ngModel)]="form.activo">
+          <option [ngValue]="true">SI</option>
+          <option [ngValue]="false">NO</option>
+        </select>
+      </div>
+
+    </div>
+
+    <div class="actions">
+      <button
+        class="btn btn-primary"
+        (click)="guardar()"
+        [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : 'Guardar' }}
+      </button>
+
+      <button
+        class="btn btn-light"
+        (click)="volver()"
+        [disabled]="guardando">
+        Cancelar
+      </button>
+    </div>
+
+  </div>
+
+  <ng-template #cargandoTpl>
+    <div class="loading">Cargando...</div>
+  </ng-template>
+
+</div>

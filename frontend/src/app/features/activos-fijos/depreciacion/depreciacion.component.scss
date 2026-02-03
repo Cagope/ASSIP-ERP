@@ -1,0 +1,154 @@
+.depreciacion-container {
+  padding: 1rem 1.25rem;
+}
+
+h2 {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.depreciacion-form {
+  background: #fff;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+
+  .full {
+    grid-column: span 4;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+
+  label {
+    font-size: .75rem;
+    font-weight: 600;
+    margin-bottom: .25rem;
+  }
+
+  input,
+  select {
+    height: 32px;
+    padding: 0 .5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: .8rem;
+    background: #fff;
+
+    &:focus {
+      outline: none;
+      border-color: #1976d2;
+    }
+  }
+}
+
+/* ✅ Hint informativo */
+.hint {
+  margin-top: .25rem;
+  font-size: .7rem;
+  color: #455a64;
+  font-weight: 500;
+}
+
+.form-actions {
+  display: flex;
+  gap: .75rem;
+  margin-top: 1rem;
+}
+
+.loading {
+  margin-top: .75rem;
+  color: #1976d2;
+  font-weight: 600;
+}
+
+.error {
+  margin-top: .75rem;
+  color: #c62828;
+  font-weight: 600;
+}
+
+.preview-result {
+  margin-top: 1.25rem;
+}
+
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .75rem;
+
+  th,
+  td {
+    border: 1px solid #e0e0e0;
+    padding: .35rem .5rem;
+  }
+
+  thead {
+    background: #f5f5f5;
+  }
+
+  tfoot {
+    background: #fafafa;
+    font-weight: 700;
+  }
+
+  .num {
+    text-align: right;
+  }
+
+  .text-right {
+    text-align: right;
+  }
+}
+
+/* ✅ Nuevo bloque: comprobante contable */
+.preview-comprobante {
+  margin-top: 1.25rem;
+
+  h3 {
+    margin-top: 1rem;
+  }
+
+  /* hacer el renglón crédito un subdetalle */
+  tbody tr:nth-child(even) td {
+    background: #fcfcfc;
+  }
+}
+
+.muted {
+  color: #78909c;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+
+    .full {
+      grid-column: span 2;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+
+    .full {
+      grid-column: span 1;
+    }
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+}

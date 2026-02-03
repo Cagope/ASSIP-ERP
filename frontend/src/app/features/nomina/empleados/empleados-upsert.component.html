@@ -1,0 +1,92 @@
+<div class="page">
+
+  <app-header-actions
+    title="Empleados Nómina"
+    subtitle="Crear / Editar"
+  ></app-header-actions>
+
+  <div class="card" *ngIf="!loading; else cargandoTpl">
+
+    <div class="form-grid">
+
+      <!-- =========================
+           AGENCIA (OBLIGATORIO)
+           ========================= -->
+      <div class="form-group">
+        <label>Agencia *</label>
+        <select class="form-control" [(ngModel)]="form.idAgencia">
+          <option [ngValue]="null">-- Seleccione --</option>
+          <option
+            *ngFor="let a of agencias"
+            [ngValue]="a.idAgencia"
+          >
+            {{ a.nombreAgencia }}
+          </option>
+        </select>
+      </div>
+
+      <!-- =========================
+           ACTIVO
+           ========================= -->
+      <div class="form-group">
+        <label>Activo</label>
+        <select class="form-control" [(ngModel)]="form.activo">
+          <option [ngValue]="true">Sí</option>
+          <option [ngValue]="false">No</option>
+        </select>
+      </div>
+
+      <!-- =========================
+           TERCERO / PERSONA (OBLIGATORIO)
+           ========================= -->
+      <div class="form-group full">
+        <label>Tercero / Persona *</label>
+
+        <app-personas-selector
+          label="Buscar por nombre o documento..."
+          (seleccionar)="onPersonaSeleccionada($event)"
+        ></app-personas-selector>
+
+        <!-- ✅ tarjeta mini -->
+        <div class="persona-mini" *ngIf="personaSeleccionada">
+          <strong>{{ personaSeleccionada.nombreCompleto }}</strong>
+          <small>Documento: {{ personaSeleccionada.documento }}</small>
+
+          <div class="mini-actions">
+            <span class="tag">ID Persona: {{ personaSeleccionada.idDatosPersonal }}</span>
+
+            <button type="button" class="btn sm danger" (click)="limpiarPersona()">
+              Quitar
+            </button>
+          </div>
+        </div>
+
+        <!-- ✅ mostrar el id aunque no haya tarjeta -->
+        <div class="hint" *ngIf="!personaSeleccionada && form.idDatosPersonal">
+          ID Persona: {{ form.idDatosPersonal }}
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- =========================
+         ACCIONES
+         ========================= -->
+    <div class="actions">
+      <button class="btn btn-primary" (click)="guardar()" [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : 'Guardar' }}
+      </button>
+
+      <button class="btn btn-light" (click)="volver()" [disabled]="guardando">
+        Cancelar
+      </button>
+    </div>
+
+  </div>
+
+  <ng-template #cargandoTpl>
+    <div class="loading">Cargando...</div>
+  </ng-template>
+
+</div>

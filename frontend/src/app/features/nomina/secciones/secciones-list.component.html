@@ -1,0 +1,85 @@
+<div class="secciones-list">
+
+  <app-header-actions
+    titulo="Secciones Nómina"
+    (nuevo)="nuevo()"
+    (refrescar)="cargar()"
+    (imprimir)="imprimir()"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <div class="toolbar">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Buscar por código o nombre..."
+      [(ngModel)]="q"
+    />
+  </div>
+
+  <div class="loading" *ngIf="loading">
+    Cargando secciones...
+  </div>
+
+  <div class="card" *ngIf="!loading">
+
+    <table class="table">
+      <thead>
+      <tr>
+        <th style="width: 90px;">ID</th>
+        <th style="width: 140px;">Código</th>
+        <th>Nombre sección</th>
+        <th style="width: 120px;">Activo</th>
+        <th style="width: 160px;" class="text-right">Acciones</th>
+      </tr>
+      </thead>
+
+      <tbody>
+
+      <tr *ngIf="!seccionesFiltradas.length">
+        <td colspan="5" class="empty">
+          No hay secciones para mostrar.
+        </td>
+      </tr>
+
+      <tr *ngFor="let s of seccionesFiltradas">
+        <td>{{ s.idSeccion }}</td>
+
+        <td class="codigo">
+          {{ s.codigo }}
+        </td>
+
+        <td class="nombre">
+          {{ s.nombreSeccion }}
+        </td>
+
+        <td>
+          <span
+            class="badge"
+            [class.badge--ok]="s.activo"
+            [class.badge--off]="!s.activo"
+          >
+            {{ s.activo ? 'SI' : 'NO' }}
+          </span>
+        </td>
+
+        <td class="text-right">
+          <div class="acciones">
+            <button class="btn sm" (click)="editar(s.idSeccion!)" title="Editar">
+              ✏️
+            </button>
+
+            <button class="btn sm danger" (click)="eliminar(s.idSeccion!)" title="Eliminar">
+              🗑️
+            </button>
+          </div>
+        </td>
+
+      </tr>
+
+      </tbody>
+    </table>
+
+  </div>
+
+</div>

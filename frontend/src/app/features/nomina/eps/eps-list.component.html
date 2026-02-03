@@ -1,0 +1,78 @@
+<div class="eps-list">
+
+  <app-header-actions
+    titulo="EPS"
+    (nuevo)="nuevo()"
+    (refrescar)="cargar()"
+    (imprimir)="imprimir()"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <!-- ✅ FILTRO SIMPLE -->
+  <div class="toolbar">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Buscar EPS por nombre o documento..."
+      [(ngModel)]="q"
+    />
+  </div>
+
+  <table class="table" *ngIf="!loading && epsFiltradas.length > 0; else vacio">
+    <thead>
+    <tr>
+      <th style="width: 90px;">ID</th>
+      <th>Nombre EPS</th>
+      <th style="width: 150px;">Documento</th>
+      <th style="width: 120px;">Activo</th>
+      <th style="width: 120px;">Acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let e of epsFiltradas">
+      <td>{{ e.idEps }}</td>
+
+      <td class="nombre">
+        {{ e.nombreEps }}
+      </td>
+
+      <td>
+        {{ e.documento || '—' }}
+      </td>
+
+      <td>
+          <span
+            class="badge"
+            [class.badge--ok]="e.activo"
+            [class.badge--off]="!e.activo"
+          >
+            {{ e.activo ? 'SI' : 'NO' }}
+          </span>
+      </td>
+
+      <td>
+        <div class="acciones">
+          <button class="btn sm" (click)="editar(e.idEps)" title="Editar">
+            ✏️
+          </button>
+
+          <button class="btn sm danger" (click)="eliminar(e.idEps)" title="Eliminar">
+            🗑️
+          </button>
+        </div>
+      </td>
+
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="loading" class="loading">
+    Cargando EPS...
+  </div>
+
+  <ng-template #vacio>
+    <p class="empty">No hay EPS para mostrar.</p>
+  </ng-template>
+
+</div>

@@ -61,6 +61,22 @@ export const routes: Routes = [
             .then(m => m.CONTABILIDAD_ROUTES),
       },
 
+      // === ACTIVOS FIJOS ===
+      {
+        path: 'activos-fijos',
+        loadChildren: () =>
+          import('./features/activos-fijos/activos-fijos.routes')
+            .then(m => m.ACTIVOS_FIJOS_ROUTES),
+      },
+
+      // === NÓMINA ===
+      {
+        path: 'nomina',
+        loadChildren: () =>
+          import('./features/nomina/nomina.routes')
+            .then(m => m.NOMINA_ROUTES),
+      },
+
       // === SUPERINTENDENCIA SES ===
       {
         path: 'ses',

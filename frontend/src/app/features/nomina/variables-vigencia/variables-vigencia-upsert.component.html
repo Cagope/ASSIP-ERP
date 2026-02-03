@@ -1,0 +1,195 @@
+<div class="page">
+
+  <app-header-actions
+    [titulo]="id ? 'Editar Variables Vigencia' : 'Nueva Variables Vigencia'"
+    subtitulo="Crear / Editar"
+  ></app-header-actions>
+
+  <div class="card" *ngIf="!loading; else cargandoTpl">
+
+    <!-- =========================
+         VIGENCIA
+         ========================= -->
+    <h4 class="section-title">Vigencia</h4>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Fecha inicial *</label>
+        <input
+          type="date"
+          class="form-control"
+          [(ngModel)]="form.fechaInicial"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Fecha final *</label>
+        <input
+          type="date"
+          class="form-control"
+          [(ngModel)]="form.fechaFinal"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Activo</label>
+        <select class="form-control" [(ngModel)]="form.activo">
+          <option [ngValue]="true">Sí</option>
+          <option [ngValue]="false">No</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- =========================
+         VALORES GENERALES
+         ========================= -->
+    <h4 class="section-title">Valores generales</h4>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>SMMLV *</label>
+        <input type="number" class="form-control" [(ngModel)]="form.smmlv" />
+      </div>
+
+      <div class="form-group">
+        <label>Aux. transporte *</label>
+        <input type="number" class="form-control" [(ngModel)]="form.auxTransporte" />
+      </div>
+    </div>
+
+    <!-- =========================
+         SEGURIDAD SOCIAL
+         ========================= -->
+    <h4 class="section-title">Seguridad social</h4>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>% Salud empleado *</label>
+        <input type="number" class="form-control" [(ngModel)]="form.porcSaludEmpleado" />
+      </div>
+
+      <div class="form-group">
+        <label>% Salud empleador *</label>
+        <input type="number" class="form-control" [(ngModel)]="form.porcSaludEmpleador" />
+      </div>
+
+      <div class="form-group">
+        <label>% Pensión empleado *</label>
+        <input type="number" class="form-control" [(ngModel)]="form.porcPensionEmpleado" />
+      </div>
+
+      <div class="form-group">
+        <label>% Pensión empleador *</label>
+        <input type="number" class="form-control" [(ngModel)]="form.porcPensionEmpleador" />
+      </div>
+    </div>
+
+    <!-- =========================
+         PARAFISCALES
+         ========================= -->
+    <h4 class="section-title">Parafiscales</h4>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>% Caja compensación *</label>
+        <input type="number" class="form-control" [(ngModel)]="form.porcCajaCompensacion" />
+      </div>
+
+      <div class="form-group">
+        <label>% SENA *</label>
+        <input type="number" class="form-control" [(ngModel)]="form.porcSena" />
+      </div>
+
+      <div class="form-group">
+        <label>% ICBF *</label>
+        <input type="number" class="form-control" [(ngModel)]="form.porcIcbf" />
+      </div>
+    </div>
+
+    <!-- =========================
+         PROVISIONES
+         ========================= -->
+    <h4 class="section-title">Provisiones</h4>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>% Prima *</label>
+        <input type="number" class="form-control" [(ngModel)]="form.porProvisionPrima" />
+      </div>
+
+      <div class="form-group">
+        <label>% Vacaciones *</label>
+        <input type="number" class="form-control" [(ngModel)]="form.porProvisionVacaciones" />
+      </div>
+
+      <div class="form-group">
+        <label>% Cesantías *</label>
+        <input type="number" class="form-control" [(ngModel)]="form.porProvisionCesantias" />
+      </div>
+
+      <div class="form-group">
+        <label>% Interés cesantías *</label>
+        <input type="number" class="form-control" [(ngModel)]="form.porProvisionInteresCesantias" />
+      </div>
+    </div>
+
+    <!-- =========================
+         TOPES IBC
+         ========================= -->
+    <h4 class="section-title">Topes IBC</h4>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Tope mínimo SMMLV *</label>
+        <input type="number" class="form-control" [(ngModel)]="form.topeIbcMinSmmlv" />
+      </div>
+
+      <div class="form-group">
+        <label>Tope máximo SMMLV *</label>
+        <input type="number" class="form-control" [(ngModel)]="form.topeIbcMaxSmmlv" />
+      </div>
+    </div>
+
+    <!-- =========================
+         EXONERACIONES
+         ========================= -->
+    <h4 class="section-title">Exoneraciones</h4>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Exonerado Salud</label>
+        <select class="form-control" [(ngModel)]="form.exoneradoSalud">
+          <option [ngValue]="true">Sí</option>
+          <option [ngValue]="false">No</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Exonerado Parafiscales</label>
+        <select class="form-control" [(ngModel)]="form.exoneradoParafiscales">
+          <option [ngValue]="true">Sí</option>
+          <option [ngValue]="false">No</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- =========================
+         ACCIONES
+         ========================= -->
+    <div class="actions">
+      <button class="btn btn-primary" (click)="guardar()" [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : 'Guardar' }}
+      </button>
+
+      <button class="btn btn-light" (click)="volver()" [disabled]="guardando">
+        Cancelar
+      </button>
+    </div>
+
+  </div>
+
+  <ng-template #cargandoTpl>
+    <div class="loading">Cargando...</div>
+  </ng-template>
+
+</div>

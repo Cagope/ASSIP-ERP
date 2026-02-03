@@ -1,0 +1,45 @@
+<div class="localizaciones-list">
+
+  <app-header-actions
+    titulo="Localizaciones"
+    (nuevo)="nuevo()"
+    (refrescar)="cargar()"
+    (imprimir)="imprimir()"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <table class="table" *ngIf="!cargando && localizaciones.length > 0; else vacio">
+    <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Teléfono</th>
+      <th>Agencia</th>
+      <th>Acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let l of localizaciones">
+      <td>{{ l.nombre }}</td>
+      <td>{{ l.telefono || '-' }}</td>
+      <td>{{ nombreAgencia(l.idAgencia) }}</td>
+
+      <td>
+        <div class="acciones">
+          <button class="btn sm" (click)="editar(l.idLocalizacion)">✏️</button>
+          <button class="btn sm danger" (click)="eliminar(l)">🗑️</button>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="cargando" class="loading">
+    Cargando...
+  </div>
+
+  <ng-template #vacio>
+    <p class="empty">No hay localizaciones registradas.</p>
+  </ng-template>
+
+</div>

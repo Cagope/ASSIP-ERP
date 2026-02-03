@@ -1,0 +1,73 @@
+<div class="cargos-list">
+
+  <app-header-actions
+    titulo="Cargos de Nómina"
+    (nuevo)="nuevo()"
+    (refrescar)="cargar()"
+    (imprimir)="imprimir()"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <!-- ✅ FILTRO SIMPLE -->
+  <div class="toolbar">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Buscar cargo por nombre..."
+      [(ngModel)]="q"
+    />
+  </div>
+
+  <table class="table" *ngIf="!loading && cargosFiltrados.length > 0; else vacio">
+    <thead>
+    <tr>
+      <th style="width: 90px;">ID</th>
+      <th>Nombre cargo</th>
+      <th style="width: 120px;">Activo</th>
+      <th style="width: 120px;">Acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let c of cargosFiltrados">
+      <td>{{ c.idCargo }}</td>
+
+      <td class="nombre">
+        {{ c.nombreCargo }}
+      </td>
+
+      <td>
+          <span
+            class="badge"
+            [class.badge--ok]="c.activo"
+            [class.badge--off]="!c.activo"
+          >
+            {{ c.activo ? 'SI' : 'NO' }}
+          </span>
+      </td>
+
+      <td>
+        <div class="acciones">
+          <button class="btn sm" (click)="editar(c.idCargo)" title="Editar">
+            ✏️
+          </button>
+
+          <button class="btn sm danger" (click)="eliminar(c.idCargo)" title="Eliminar">
+            🗑️
+          </button>
+        </div>
+      </td>
+
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="loading" class="loading">
+    Cargando cargos...
+  </div>
+
+  <ng-template #vacio>
+    <p class="empty">No hay cargos para mostrar.</p>
+  </ng-template>
+
+</div>

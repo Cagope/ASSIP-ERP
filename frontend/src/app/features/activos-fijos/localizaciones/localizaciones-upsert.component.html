@@ -1,0 +1,49 @@
+<div class="form-container">
+
+  <h5>
+    {{ route.snapshot.paramMap.get('id')
+    ? 'editar localización'
+    : 'nueva localización' }}
+  </h5>
+
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="form-grid">
+
+    <div class="form-group full">
+      <label>nombre *</label>
+      <input type="text" formControlName="nombre" />
+    </div>
+
+    <div class="form-group sm">
+      <label>teléfono</label>
+      <input type="text" formControlName="telefono" />
+    </div>
+
+    <!-- 🔽 COMBO DE AGENCIAS -->
+    <div class="form-group sm">
+      <label>agencia *</label>
+      <select formControlName="idAgencia">
+        <option [ngValue]="null">-- seleccione --</option>
+        <option *ngFor="let a of agencias" [ngValue]="a.idAgencia">
+          {{ a.nombreAgencia }}
+        </option>
+      </select>
+    </div>
+
+    <div class="form-actions full">
+      <button
+        class="btn sm primary"
+        type="submit"
+        [disabled]="form.invalid">
+        💾 guardar
+      </button>
+
+      <button
+        class="btn sm danger"
+        type="button"
+        (click)="cancelar()">
+        ↩️ cancelar
+      </button>
+    </div>
+
+  </form>
+</div>

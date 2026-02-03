@@ -1,0 +1,64 @@
+<div class="secciones-upsert">
+
+  <app-header-actions
+    [title]="id ? 'Editar sección' : 'Nueva sección'"
+    subtitle="Secciones Nómina"
+  ></app-header-actions>
+
+  <div class="card">
+
+    <form [formGroup]="form">
+
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Código *</label>
+          <input
+            type="text"
+            class="form-control"
+            formControlName="codigo"
+            placeholder="Ej: ADM"
+          />
+          <small class="error" *ngIf="form.get('codigo')?.touched && form.get('codigo')?.invalid">
+            Código requerido
+          </small>
+        </div>
+
+        <div class="form-group full">
+          <label>Nombre sección *</label>
+          <input
+            type="text"
+            class="form-control"
+            formControlName="nombreSeccion"
+            placeholder="Ej: Administrativo"
+          />
+          <small class="error" *ngIf="form.get('nombreSeccion')?.touched && form.get('nombreSeccion')?.invalid">
+            Nombre requerido
+          </small>
+        </div>
+
+        <div class="form-group">
+          <label>Activo</label>
+          <select class="form-control" formControlName="activo">
+            <option [ngValue]="true">SI</option>
+            <option [ngValue]="false">NO</option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="acciones">
+        <button class="btn btn-primary" type="button" (click)="guardar()" [disabled]="loading">
+          {{ loading ? 'Guardando...' : 'Guardar' }}
+        </button>
+
+        <button class="btn btn-outline" type="button" (click)="cancelar()" [disabled]="loading">
+          Cancelar
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+
+</div>

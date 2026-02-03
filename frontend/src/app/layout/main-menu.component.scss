@@ -1,97 +1,105 @@
-.menu {
-  width: 270px;
-  height: 100vh;
-  background: #ffffff;
-  color: #222;
-  display: flex;
-  flex-direction: column;
-  font-family: 'Poppins', sans-serif;
-  overflow-y: auto;
-  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.05);
-}
-
 /* ============================================================
-   🔹 Nuevo: Sección clicable (colapsable)
+   🟩 MENÚ SUPERIOR TIPO INTELLIJ / APLICACIÓN PROFESIONAL
    ============================================================ */
 
-.menu-section {
-  width: 100%;
+.menu-bar {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* ================= NIVEL 1 ================= */
+
+.menu-root {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  list-style: none;
+  margin: 0;
+  padding: 0.4rem 1.2rem;
+}
+
+.menu-root-item {
+  position: relative;
+}
+
+/* Botón principal */
+.menu-title {
   background: none;
   border: none;
   cursor: pointer;
-  text-align: left;
 
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  padding: 0.45rem 0.9rem;
+  border-radius: 6px;
 
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 600;
-  color: #166534;
-  margin-top: 1.2rem;
-  padding: 0;
   text-transform: uppercase;
   letter-spacing: 0.3px;
 
-  transition: color 0.2s ease;
+  color: #14532d;
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
 
-  &:hover {
-    color: #0f3f21;
-  }
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-.chevron {
-  transition: transform 0.25s ease;
-  display: inline-block;
-  font-size: 14px;
+.menu-title:hover {
+  background: #dcfce7;
 }
 
-.chevron.open {
-  transform: rotate(180deg);
+/* ================= NIVEL 2 ================= */
+
+/* 🔒 CERRADO POR DEFECTO */
+.menu-dropdown {
+  display: none;
+
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+
+  min-width: 220px;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
+
+  list-style: none;
+  margin: 0;
+  padding: 0.4rem;
+
+  z-index: 1000;
 }
 
-/* ============================================================
-   🔹 Submenú
-   ============================================================ */
-.menu-content {
-  flex: 1;
-  padding: 1rem 0.75rem;
-
-  .submenu {
-    list-style: none;
-    margin: 0;
-    padding-left: 1rem;
-
-    .menu-item {
-      display: block;
-      padding: 0.5rem 0.7rem;
-      border-radius: 6px;
-      color: #374151;
-      font-size: 14px;
-      text-decoration: none;
-      transition: all 0.2s ease;
-
-      &:hover {
-        background: #f0fdf4;
-      }
-
-      &.active {
-        background: #dcfce7;
-        border-left: 3px solid #16a34a;
-        font-weight: 600;
-        color: #14532d;
-      }
-    }
-  }
+/* 🔓 SOLO ABRE SI ESTÁ ACTIVO */
+.menu-root-item.open .menu-dropdown {
+  display: block;
 }
 
-/* ============================================================
-   🔹 Scroll
-   ============================================================ */
-.menu::-webkit-scrollbar {
-  width: 6px;
+.menu-dropdown li {
+  margin: 0;
 }
-.menu::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 3px;
+
+/* Items */
+.menu-item {
+  display: block;
+  padding: 0.45rem 0.75rem;
+  border-radius: 6px;
+
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  text-decoration: none;
+
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.menu-item:hover {
+  background: #f0fdf4;
+}
+
+.menu-item.active {
+  background: #dcfce7;
+  font-weight: 600;
+  color: #14532d;
 }

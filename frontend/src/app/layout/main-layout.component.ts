@@ -12,12 +12,23 @@ import { SessionService } from '../core/auth/session.service';
   styleUrls: ['./main-layout.component.scss']
 })
 export class MainLayoutComponent {
-  username = '';
-  agenciaActual: any = null;   // ← 🆕 NUEVA LÍNEA
 
-  constructor(private session: SessionService, private router: Router) {
+  /** Usuario autenticado */
+  username: string = '';
+
+  /** Agencia activa del usuario */
+  agenciaActual: {
+    idAgencia: number | null;
+    codigoAgencia: string | null;
+    nombreAgencia: string | null;
+  } | null = null;
+
+  constructor(
+    private session: SessionService,
+    private router: Router
+  ) {
     this.username = this.session.getUser() ?? '';
-    this.agenciaActual = this.session.getAgenciaActiva();  // ← 🆕 NUEVA LÍNEA
+    this.agenciaActual = this.session.getAgenciaActiva();
   }
 
   logout(): void {

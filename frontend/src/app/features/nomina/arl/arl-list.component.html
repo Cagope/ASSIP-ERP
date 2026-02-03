@@ -1,0 +1,78 @@
+<div class="arl-list">
+
+  <app-header-actions
+    titulo="ARL"
+    (nuevo)="nuevo()"
+    (refrescar)="cargar()"
+    (imprimir)="imprimir()"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <!-- ✅ FILTRO SIMPLE -->
+  <div class="toolbar">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Buscar ARL por nombre o documento..."
+      [(ngModel)]="q"
+    />
+  </div>
+
+  <table class="table" *ngIf="!loading && arlFiltradas.length > 0; else vacio">
+    <thead>
+    <tr>
+      <th style="width: 90px;">ID</th>
+      <th>Nombre ARL</th>
+      <th style="width: 150px;">Documento</th>
+      <th style="width: 120px;">Activo</th>
+      <th style="width: 120px;">Acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let a of arlFiltradas">
+      <td>{{ a.idArl }}</td>
+
+      <td class="nombre">
+        {{ a.nombreArl }}
+      </td>
+
+      <td>
+        {{ a.documento || '—' }}
+      </td>
+
+      <td>
+          <span
+            class="badge"
+            [class.badge--ok]="a.activo"
+            [class.badge--off]="!a.activo"
+          >
+            {{ a.activo ? 'SI' : 'NO' }}
+          </span>
+      </td>
+
+      <td>
+        <div class="acciones">
+          <button class="btn sm" (click)="editar(a.idArl)" title="Editar">
+            ✏️
+          </button>
+
+          <button class="btn sm danger" (click)="eliminar(a.idArl)" title="Eliminar">
+            🗑️
+          </button>
+        </div>
+      </td>
+
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="loading" class="loading">
+    Cargando ARL...
+  </div>
+
+  <ng-template #vacio>
+    <p class="empty">No hay ARL para mostrar.</p>
+  </ng-template>
+
+</div>

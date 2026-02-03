@@ -153,16 +153,4 @@ export class SessionService {
     this.logout();
   }
 
-  // === USER ID desde JWT ===
-  getUsuarioId(): number | null {
-    const token = this.getToken();
-    if (!token) return null;
-
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.idUsuario ?? null;
-    } catch {
-      return null;
-    }
-  }
 }

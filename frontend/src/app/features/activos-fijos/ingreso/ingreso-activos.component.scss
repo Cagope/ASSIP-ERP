@@ -1,0 +1,255 @@
+.ingreso-activos-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+legend {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.item {
+  border-top: 1px solid #ddd;
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.grid {
+  display: grid;
+  gap: 1rem;
+
+  &.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  &.grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  position: relative; // 👈 CLAVE para autocomplete
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  input,
+  textarea {
+    padding: 0.45rem 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+
+    &:focus {
+      outline: none;
+      border-color: #1976d2;
+      box-shadow: 0 0 0 1px rgba(25, 118, 210, 0.25);
+    }
+  }
+
+  small {
+    font-size: 0.75rem;
+    color: #777;
+  }
+}
+
+/* =====================================================
+   AUTOCOMPLETE
+   ===================================================== */
+
+.autocomplete {
+  input {
+    background-color: #fff;
+  }
+
+  .autocomplete-list {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    right: 0;
+    z-index: 20;
+
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    max-height: 220px;
+    overflow-y: auto;
+
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .autocomplete-list li {
+    padding: 0.45rem 0.6rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    line-height: 1.2;
+
+    display: flex;
+    flex-direction: column;
+
+    strong {
+      font-weight: 600;
+      color: #1f2937;
+    }
+
+    small {
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    &:hover {
+      background-color: #e3f2fd;
+    }
+  }
+}
+
+/* =====================================================
+   ACCIONES
+   ===================================================== */
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.btn {
+  padding: 0.45rem 0.9rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border: none;
+
+  &.btn-primary {
+    background: #1976d2;
+    color: #fff;
+  }
+
+  &.btn-success {
+    background: #2e7d32;
+    color: #fff;
+  }
+
+  &.btn-danger {
+    background: #c62828;
+    color: #fff;
+  }
+
+  &.btn-secondary {
+    background: #9e9e9e;
+    color: #fff;
+  }
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
+}
+/* =====================================================
+   RESUMEN TOTALES – UNA SOLA FILA
+   ===================================================== */
+
+.resumen-totales {
+  background: #f8f9fa;
+  border-top: 3px solid #198754;
+  padding: 12px 16px;
+}
+
+/* ⚠️ AQUÍ está la clave */
+.resumen-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  align-items: center;
+}
+
+.resumen-item {
+  display: flex;
+  flex-direction: column;
+  text-align: right; /* ← números a la derecha */
+}
+
+.resumen-item .label {
+  font-size: 11px;
+  color: #6c757d;
+  text-transform: uppercase;
+}
+
+.resumen-item .value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #212529;
+}
+.tabla-contable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+.tabla-contable th,
+.tabla-contable td {
+  border: 1px solid #ddd;
+  padding: 6px 8px;
+}
+
+.tabla-contable th {
+  background: #f4f6f8;
+  text-align: left;
+}
+
+.tabla-contable .num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.tabla-fija {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.tabla-fija th:first-child,
+.tabla-fija td:first-child {
+  width: 60%;
+}
+
+.tabla-fija th.num,
+.tabla-fija td.num {
+  width: 20%;
+  text-align: right;
+}

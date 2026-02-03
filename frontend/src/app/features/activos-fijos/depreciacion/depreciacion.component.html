@@ -1,0 +1,283 @@
+<div class="depreciacion-container">
+
+  <h2>Depreciación de Activos Fijos</h2>
+
+  <!-- =========================
+       FORMULARIO
+       ========================= -->
+  <form [formGroup]="form" class="depreciacion-form">
+
+    <div class="form-grid">
+
+      <!-- =========================
+           AGENCIA DE TRABAJO
+           ========================= -->
+      <div class="form-group full">
+        <label>Agencia *</label>
+
+        <select
+          class="form-control"
+          formControlName="idAgencia"
+        >
+          <option [ngValue]="null">-- Seleccione agencia --</option>
+
+          <option
+            *ngFor="let ag of session.getAgencias()"
+            [ngValue]="ag.idAgencia"
+          >
+            {{ ag.codigoAgencia }} — {{ ag.nombreAgencia }}
+          </option>
+        </select>
+
+        <small
+          *ngIf="form.get('idAgencia')?.touched && form.get('idAgencia')?.invalid"
+          class="error"
+        >
+          La agencia es obligatoria
+        </small>
+      </div>
+
+      <!-- =========================
+           PERÍODO
+           ========================= -->
+      <div class="form-group">
+        <label>Período a depreciar *</label>
+        <input
+          type="date"
+          class="form-control"
+          formControlName="fechaPeriodo"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Fecha de contabilización *</label>
+        <input
+          type="date"
+          class="form-control"
+          formControlName="fechaContabilizacion"
+        />
+      </div>
+
+      <!-- =========================
+           COMPROBANTE
+           ========================= -->
+      <div class="form-group">
+        <label>Tipo comprobante *</label>
+        <select
+          class="form-control"
+          formControlName="tipoComprobante"
+        >
+          <option value="">Seleccione…</option>
+          <option
+            *ngFor="let t of tiposComprobantes"
+            [value]="t.tipoComprobante"
+          >
+            {{ t.tipoComprobante }} — {{ t.nombreTipoComprobante }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Número comprobante</label>
+        <input
+          type="text"
+          class="form-control"
+          formControlName="numeroComprobante"
+          readonly
+        />
+
+        <small *ngIf="consecutivoSugerido" class="hint">
+          Consecutivo sugerido: {{ consecutivoSugerido }}
+        </small>
+      </div>
+
+      <!-- =========================
+           CONCEPTO
+           ========================= -->
+      <div class="form-group full">
+        <label>Concepto *</label>
+        <input
+          type="text"
+          class="form-control"
+          maxlength="200"
+          formControlName="concepto"
+        />
+      </div>
+
+    </div>
+
+    <!-- =========================
+         ACCIONES
+         ========================= -->
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="preview()"
+        [disabled]="loading || form.invalid"
+      >
+        Preview
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-success"
+        (click)="ejecutar()"
+        [disabled]="!previewResult || loading"
+      >
+        Ejecutar
+      </button>
+    </div>
+
+  </form>
+
+  <!-- =========================
+       MENSAJES
+       ========================= -->
+  <div *ngIf="loading" class="loading">
+    Procesando…
+  </div>
+
+  <div *ngIf="errorMsg" class="error">
+    {{ errorMsg }}
+  </div>
+
+  <!-- =========================
+       RESULTADO PREVIEW
+       ========================= -->
+  <div *ngIf="previewResult" class="preview-result">
+
+    <h3>Detalle de depreciación</h3>
+
+    <table class="preview-table">
+      <thead>
+      <tr>
+        <th>Placa</th>
+        <th>Activo</th>
+        <th>Valor mensual</th>
+        <th>Depreciado</th>
+        <th>Saldo</th>
+        <th>Valor período</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr *ngFor="let d of previewResult.detalle">
+        <td>{{ d.placaActivo }}</td>
+        <td>{{ d.nombreActivo }}</td>
+        <td class="num">
+          {{ d.valorMensual | number:'1.0-2' }}
+        </td>
+        <td class="num">
+          {{ d.depreciacionAcumulada | number:'1.0-2' }}
+        </td>
+        <td class="num">
+          {{ d.saldoPendiente | number:'1.0-2' }}
+        </td>
+        <td class="num">
+          {{ d.valorPeriodo | number:'1.0-2' }}
+        </td>
+      </tr>
+      </tbody>
+
+      <tfoot>
+      <tr>
+        <th colspan="5" class="text-right">Totales</th>
+        <th class="num">
+          {{ previewResult.totalDebito | number:'1.0-2' }}
+        </th>
+      </tr>
+      </tfoot>
+    </table>
+
+    <!-- =========================
+         ✅ BOTONES EXPORTAR (AQUÍ QUEDAN JUNTOS)
+         ========================= -->
+    <div class="form-actions" style="margin-top: .75rem;">
+      <button
+        type="button"
+        class="btn btn-outline-primary"
+        (click)="exportarListadoExcel()"
+        [disabled]="!previewResult || loading"
+      >
+        Exportar listado (Excel)
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-outline-warning"
+        (click)="exportarAuxiliaresContablesExcel()"
+        [disabled]="!previewResult || loading"
+      >
+        Exportar Auxiliares (Importable)
+      </button>
+    </div>
+
+    <!-- =========================
+         ✅ COMPROBANTE CONTABLE (PREVIEW)
+         ========================= -->
+    <div class="preview-comprobante">
+
+      <h3>Comprobante contable (Preview)</h3>
+
+      <table class="preview-table">
+        <thead>
+        <tr>
+          <th>#</th>
+          <th>Activo</th>
+          <th>Tercero</th>
+
+          <th>Cuenta</th>
+          <th>Nombre cuenta</th>
+
+          <th>Débito</th>
+          <th>Crédito</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <ng-container *ngFor="let d of previewResult.detalle; let i = index">
+
+          <!-- ✅ DÉBITO (Gasto) -->
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ d.placaActivo }} — {{ d.nombreActivo }}</td>
+            <td>{{ terceroDocumento(d.idDatosPersonalProveedor) }}</td>
+
+            <td>{{ cuentaCodigo(d.idCuentaGasto) }}</td>
+            <td>{{ cuentaNombre(d.idCuentaGasto) }}</td>
+
+            <td class="num">{{ d.valorPeriodo | number:'1.0-2' }}</td>
+            <td class="num">0.00</td>
+          </tr>
+
+          <!-- ✅ CRÉDITO (Depreciación acumulada) -->
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>{{ d.placaActivo }} — {{ d.nombreActivo }}</td>
+            <td>{{ terceroDocumento(d.idDatosPersonalProveedor) }}</td>
+
+            <td>{{ cuentaCodigo(d.idCuentaDepreciacion) }}</td>
+            <td>{{ cuentaNombre(d.idCuentaDepreciacion) }}</td>
+
+            <td class="num">0.00</td>
+            <td class="num">{{ d.valorPeriodo | number:'1.0-2' }}</td>
+          </tr>
+
+        </ng-container>
+        </tbody>
+
+        <tfoot>
+        <tr>
+          <th colspan="5" class="text-right">Totales</th>
+          <th class="num">{{ previewResult.totalDebito | number:'1.0-2' }}</th>
+          <th class="num">{{ previewResult.totalCredito | number:'1.0-2' }}</th>
+        </tr>
+        </tfoot>
+      </table>
+
+    </div>
+
+  </div>
+
+</div>

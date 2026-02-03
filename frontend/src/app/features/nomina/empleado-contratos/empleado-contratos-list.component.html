@@ -1,0 +1,76 @@
+<div class="contratos-list">
+
+  <app-header-actions
+    titulo="Contratos de Empleado"
+    (nuevo)="nuevo()"
+    (refrescar)="refrescar()"
+    (imprimir)="imprimir()"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <div class="toolbar">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Buscar por documento, nombre o periodo..."
+      [(ngModel)]="q"
+    />
+  </div>
+
+  <table class="table" *ngIf="!loading && filtrados.length > 0; else vacio">
+    <thead>
+    <tr>
+      <th style="width:90px;">ID</th>
+      <th style="width:140px;">Documento</th>
+      <th>Empleado</th>
+      <th style="width:120px;">Inicio</th>
+      <th style="width:120px;">Fin</th>
+      <th style="width:120px;">Periodo</th>
+      <th style="width:140px;">Salario</th>
+      <th style="width:110px;">Activo</th>
+      <th style="width:120px;">Acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let c of filtrados">
+      <td>{{ c.idContrato }}</td>
+
+      <td>{{ documentoEmpleado(c.idEmpleado) || '—' }}</td>
+
+      <td class="nombre">
+        {{ nombreEmpleado(c.idEmpleado) || ('Empleado #' + c.idEmpleado) }}
+      </td>
+
+      <td>{{ c.fechaInicio }}</td>
+      <td>{{ c.fechaFin || '—' }}</td>
+
+      <td>{{ c.periodoPago }}</td>
+
+      <td class="right">{{ c.salarioBase | number:'1.0-2' }}</td>
+
+      <td>
+          <span class="badge" [class.badge--ok]="c.activo" [class.badge--off]="!c.activo">
+            {{ c.activo ? 'SI' : 'NO' }}
+          </span>
+      </td>
+
+      <td>
+        <div class="acciones">
+          <button class="btn sm" (click)="editar(c.idContrato)" title="Editar">✏️</button>
+          <button class="btn sm danger" (click)="eliminar(c.idContrato)" title="Eliminar">🗑️</button>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="loading" class="loading">
+    Cargando contratos...
+  </div>
+
+  <ng-template #vacio>
+    <p class="empty">No hay contratos para mostrar.</p>
+  </ng-template>
+
+</div>

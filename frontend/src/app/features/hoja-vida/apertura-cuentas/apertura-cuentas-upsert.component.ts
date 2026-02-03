@@ -226,17 +226,9 @@ export class AperturaCuentasUpsertComponent implements OnInit {
     if (this.form.invalid) return;
 
     const agenciaActiva = this.session.getAgenciaActiva();
-    const usuarioId = this.session.getUsuarioId();
-
-    if (!usuarioId) {
-      alert('No se pudo obtener el usuario. Cierre sesión e ingrese de nuevo.');
-      return;
-    }
 
     const dto = {
       idDatosPersonal: this.idDatosPersonal,
-      idAgenciaUsuario: agenciaActiva?.idAgencia ?? null,
-      usuarioId,
       ...this.form.getRawValue()
     };
 

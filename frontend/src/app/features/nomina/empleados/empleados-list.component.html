@@ -1,0 +1,75 @@
+<div class="empleados-list">
+
+  <app-header-actions
+    titulo="Empleados Nómina"
+    (nuevo)="nuevo()"
+    (refrescar)="cargar()"
+    (imprimir)="imprimir()"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <div class="toolbar">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Buscar por ID, agencia, documento o nombre..."
+      [(ngModel)]="q"
+    />
+  </div>
+
+  <table class="table" *ngIf="!loading && empleadosFiltrados.length > 0; else vacio">
+    <thead>
+    <tr>
+      <th style="width: 90px;">ID</th>
+      <th style="width: 110px;">ID Persona</th>
+      <th style="width: 150px;">Documento</th>
+      <th>Nombre completo</th>
+      <th style="width: 110px;">Agencia</th>
+      <th style="width: 110px;">Activo</th>
+      <th style="width: 120px;">Acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let e of empleadosFiltrados">
+      <td>{{ e.idEmpleado }}</td>
+
+      <td>{{ e.idDatosPersonal }}</td>
+
+      <td>{{ personaDocumento(e.idDatosPersonal) || '—' }}</td>
+
+      <td class="nombre">
+        {{ personaNombre(e.idDatosPersonal) || '—' }}
+      </td>
+
+      <td>{{ e.idAgencia }}</td>
+
+      <td>
+        <span
+          class="badge"
+          [class.badge--ok]="e.activo"
+          [class.badge--off]="!e.activo"
+        >
+          {{ e.activo ? 'SI' : 'NO' }}
+        </span>
+      </td>
+
+      <td>
+        <div class="acciones">
+          <button class="btn sm" (click)="editar(e.idEmpleado)" title="Editar">✏️</button>
+          <button class="btn sm danger" (click)="eliminar(e.idEmpleado)" title="Eliminar">🗑️</button>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="loading" class="loading">
+    Cargando empleados...
+  </div>
+
+  <ng-template #vacio>
+    <p class="empty">No hay empleados para mostrar.</p>
+  </ng-template>
+
+</div>

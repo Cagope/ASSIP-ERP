@@ -1,0 +1,45 @@
+<div class="bloques-list">
+
+  <app-header-actions
+    titulo="Bloques"
+    (nuevo)="nuevo()"
+    (refrescar)="cargar()"
+    (imprimir)="imprimir()"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <table class="table" *ngIf="!cargando && bloques.length > 0; else vacio">
+    <thead>
+    <tr>
+      <th>Código</th>
+      <th>Nombre</th>
+      <th>Meses Depreciación</th>
+      <th>Acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let b of bloques">
+      <td>{{ b.codigoBloque }}</td>
+      <td>{{ b.nombreBloque }}</td>
+      <td>{{ b.mesesDepreciacionDefecto }}</td>
+
+      <td>
+        <div class="acciones">
+          <button class="btn sm" (click)="editar(b.idBloque)">✏️</button>
+          <button class="btn sm danger" (click)="eliminar(b)">🗑️</button>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div *ngIf="cargando" class="loading">
+    Cargando...
+  </div>
+
+  <ng-template #vacio>
+    <p class="empty">No hay bloques registrados.</p>
+  </ng-template>
+
+</div>

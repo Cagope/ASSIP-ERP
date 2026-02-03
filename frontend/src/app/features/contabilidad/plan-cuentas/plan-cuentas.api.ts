@@ -27,28 +27,33 @@ export class PlanCuentasApi {
 
   constructor(private http: HttpClient) {}
 
-  /** 🔹 Listar todas las cuentas de una agencia */
   listar(idAgencia: number): Observable<PlanCuenta[]> {
     return this.http.get<PlanCuenta[]>(`${this.base}/agencia/${idAgencia}`);
   }
 
-  /** 🔹 Obtener una cuenta por ID */
   obtener(id: number): Observable<PlanCuenta> {
     return this.http.get<PlanCuenta>(`${this.base}/${id}`);
   }
 
-  /** 🔹 Crear una nueva cuenta */
   crear(data: PlanCuenta): Observable<PlanCuenta> {
     return this.http.post<PlanCuenta>(this.base, data);
   }
 
-  /** 🔹 Actualizar cuenta existente */
   actualizar(id: number, data: PlanCuenta): Observable<PlanCuenta> {
     return this.http.put<PlanCuenta>(`${this.base}/${id}`, data);
   }
 
-  /** 🔹 Eliminar una cuenta (requiere idAgencia para validar) */
   eliminar(id: number, idAgencia: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}?idAgencia=${idAgencia}`);
+  }
+
+  // 🔥 NUEVO
+  buscar(idAgencia: number, texto: string): Observable<PlanCuenta[]> {
+    return this.http.get<PlanCuenta[]>(`${this.base}/buscar`, {
+      params: {
+        idAgencia,
+        q: texto
+      }
+    });
   }
 }
