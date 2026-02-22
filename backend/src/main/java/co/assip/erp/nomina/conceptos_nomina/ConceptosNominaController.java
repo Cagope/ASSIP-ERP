@@ -14,16 +14,27 @@ public class ConceptosNominaController {
 
     private final ConceptosNominaService service;
 
+    // ============================================================
+    // LISTAR
+    // ============================================================
     @GetMapping
     public ResponseEntity<List<ConceptoNominaDTO>> listar() {
         return ResponseEntity.ok(service.listar());
     }
 
-    @GetMapping("/{codigo}")
-    public ResponseEntity<ConceptoNominaDTO> obtener(@PathVariable String codigo) {
-        return ResponseEntity.ok(service.obtener(codigo));
+    // ============================================================
+    // OBTENER
+    // ============================================================
+    @GetMapping("/{codigoConcepto}")
+    public ResponseEntity<ConceptoNominaDTO> obtener(
+            @PathVariable String codigoConcepto
+    ) {
+        return ResponseEntity.ok(service.obtener(codigoConcepto));
     }
 
+    // ============================================================
+    // CREAR
+    // ============================================================
     @PostMapping
     public ResponseEntity<Void> crear(
             @RequestBody ConceptoNominaDTO dto,
@@ -34,20 +45,28 @@ public class ConceptosNominaController {
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{codigo}")
+    // ============================================================
+    // ACTUALIZAR
+    // ============================================================
+    @PutMapping("/{codigoConcepto}")
     public ResponseEntity<Void> actualizar(
-            @PathVariable String codigo,
+            @PathVariable String codigoConcepto,
             @RequestBody ConceptoNominaDTO dto,
             @RequestHeader(value = "X-User-Id", required = false) Integer idUsuario
     ) {
         Integer usr = (idUsuario != null ? idUsuario : 1);
-        service.actualizar(codigo, dto, usr);
+        service.actualizar(codigoConcepto, dto, usr);
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/{codigo}")
-    public ResponseEntity<Void> eliminar(@PathVariable String codigo) {
-        service.eliminar(codigo);
+    // ============================================================
+    // ELIMINAR
+    // ============================================================
+    @DeleteMapping("/{codigoConcepto}")
+    public ResponseEntity<Void> eliminar(
+            @PathVariable String codigoConcepto
+    ) {
+        service.eliminar(codigoConcepto);
         return ResponseEntity.ok().build();
     }
 }

@@ -1,6 +1,7 @@
 package co.assip.erp.nomina.conceptos_nomina.dto;
 
 import lombok.*;
+import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -9,10 +10,15 @@ import lombok.*;
 @Builder
 public class ConceptoNominaDTO {
 
-    private String codigo;
-    private String nombre;
-    private String tipo;
+    private String codigoConcepto;
+    private String nombreConcepto;
+    private String tipoConcepto;
 
     private Boolean esFijo;
     private Boolean activo;
+
+    // 🔥 NUEVOS CAMPOS
+    private String tipoCalculo;
+    private String baseCalculo;
+    private BigDecimal multiplicador;
 }

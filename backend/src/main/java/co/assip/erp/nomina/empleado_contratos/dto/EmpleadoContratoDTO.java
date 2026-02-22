@@ -15,6 +15,12 @@ public class EmpleadoContratoDTO {
     private Integer idContrato;
 
     private Integer idEmpleado;
+
+    // =========================================================
+    // 🔑 RELACIÓN PERSONA (CLAVE PARA EXCEL / REPORTES)
+    // =========================================================
+    private Long idDatosPersonal;
+
     private Integer idSeccion;
 
     private LocalDate fechaInicio;
@@ -34,7 +40,7 @@ public class EmpleadoContratoDTO {
     private Integer idArl;
     private Integer idCajaCompensacion;
 
-    private String cuentaNominaDisplay;
+    // ✅ Solo se guarda el ID de la cuenta
     private Long idCuentaAhorroNomina;
 
     private LocalDate fechaEnvioNotaRenovacion;
@@ -43,4 +49,10 @@ public class EmpleadoContratoDTO {
     private BigDecimal porcentajeArl;
 
     private Boolean activo;
+
+    // =========================================================
+    // ✅ PARA UI / REPORTES (NO cambia lógica de negocio)
+    // =========================================================
+    private String documentoEmpleado;
+    private String nombreEmpleado;
 }

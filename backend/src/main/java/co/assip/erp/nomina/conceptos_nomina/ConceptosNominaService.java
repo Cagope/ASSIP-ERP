@@ -12,24 +12,45 @@ public class ConceptosNominaService {
 
     private final ConceptosNominaRepository repository;
 
+    // ============================================================
+    // LISTAR
+    // ============================================================
     public List<ConceptoNominaDTO> listar() {
         return repository.listar();
     }
 
-    public ConceptoNominaDTO obtener(String codigo) {
-        return repository.obtener(codigo)
-                .orElseThrow(() -> new RuntimeException("No existe concepto nómina con código: " + codigo));
+    // ============================================================
+    // OBTENER
+    // ============================================================
+    public ConceptoNominaDTO obtener(String codigoConcepto) {
+        return repository.obtener(codigoConcepto)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "No existe concepto nómina con código: " + codigoConcepto
+                        ));
     }
 
+    // ============================================================
+    // CREAR
+    // ============================================================
     public void crear(ConceptoNominaDTO dto, Integer idUsuario) {
         repository.crear(dto, idUsuario);
     }
 
-    public void actualizar(String codigo, ConceptoNominaDTO dto, Integer idUsuario) {
-        repository.actualizar(codigo, dto, idUsuario);
+    // ============================================================
+    // ACTUALIZAR
+    // ============================================================
+    public void actualizar(String codigoConcepto,
+                           ConceptoNominaDTO dto,
+                           Integer idUsuario) {
+
+        repository.actualizar(codigoConcepto, dto, idUsuario);
     }
 
-    public void eliminar(String codigo) {
-        repository.eliminar(codigo);
+    // ============================================================
+    // ELIMINAR
+    // ============================================================
+    public void eliminar(String codigoConcepto) {
+        repository.eliminar(codigoConcepto);
     }
 }

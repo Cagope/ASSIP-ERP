@@ -22,50 +22,63 @@ public class ConceptosNominaRepository {
 
         String sql = """
             SELECT
-              c.codigo       AS codigo,
-              c.nombre       AS nombre,
-              c.tipo         AS tipo,
-              c.es_fijo      AS esFijo,
-              c.activo       AS activo
+              c.codigo_concepto   AS codigoConcepto,
+              c.nombre_concepto   AS nombreConcepto,
+              c.tipo_concepto     AS tipoConcepto,
+              c.es_fijo           AS esFijo,
+              c.activo            AS activo,
+              c.tipo_calculo      AS tipoCalculo,
+              c.base_calculo      AS baseCalculo,
+              c.multiplicador     AS multiplicador
             FROM nomina.conceptos_nomina c
-            ORDER BY c.codigo
+            ORDER BY c.codigo_concepto
         """;
 
         return jdbc.query(sql, (rs, rowNum) -> ConceptoNominaDTO.builder()
-                .codigo(rs.getString("codigo"))
-                .nombre(rs.getString("nombre"))
-                .tipo(rs.getString("tipo"))
+                .codigoConcepto(rs.getString("codigoConcepto"))
+                .nombreConcepto(rs.getString("nombreConcepto"))
+                .tipoConcepto(rs.getString("tipoConcepto"))
                 .esFijo((Boolean) rs.getObject("esFijo"))
                 .activo((Boolean) rs.getObject("activo"))
+                .tipoCalculo(rs.getString("tipoCalculo"))
+                .baseCalculo(rs.getString("baseCalculo"))
+                .multiplicador(rs.getBigDecimal("multiplicador"))
                 .build());
     }
 
     // ============================================================
     // ✅ OBTENER
     // ============================================================
-    public Optional<ConceptoNominaDTO> obtener(String codigo) {
+    public Optional<ConceptoNominaDTO> obtener(String codigoConcepto) {
 
         String sql = """
             SELECT
-              c.codigo       AS codigo,
-              c.nombre       AS nombre,
-              c.tipo         AS tipo,
-              c.es_fijo      AS esFijo,
-              c.activo       AS activo
+              c.codigo_concepto   AS codigoConcepto,
+              c.nombre_concepto   AS nombreConcepto,
+              c.tipo_concepto     AS tipoConcepto,
+              c.es_fijo           AS esFijo,
+              c.activo            AS activo,
+              c.tipo_calculo      AS tipoCalculo,
+              c.base_calculo      AS baseCalculo,
+              c.multiplicador     AS multiplicador
             FROM nomina.conceptos_nomina c
-            WHERE c.codigo = :codigo
+            WHERE c.codigo_concepto = :codigoConcepto
         """;
 
         var params = new MapSqlParameterSource()
-                .addValue("codigo", codigo);
+                .addValue("codigoConcepto", codigoConcepto);
 
-        List<ConceptoNominaDTO> rows = jdbc.query(sql, params, (rs, rowNum) -> ConceptoNominaDTO.builder()
-                .codigo(rs.getString("codigo"))
-                .nombre(rs.getString("nombre"))
-                .tipo(rs.getString("tipo"))
-                .esFijo((Boolean) rs.getObject("esFijo"))
-                .activo((Boolean) rs.getObject("activo"))
-                .build());
+        List<ConceptoNominaDTO> rows = jdbc.query(sql, params,
+                (rs, rowNum) -> ConceptoNominaDTO.builder()
+                        .codigoConcepto(rs.getString("codigoConcepto"))
+                        .nombreConcepto(rs.getString("nombreConcepto"))
+                        .tipoConcepto(rs.getString("tipoConcepto"))
+                        .esFijo((Boolean) rs.getObject("esFijo"))
+                        .activo((Boolean) rs.getObject("activo"))
+                        .tipoCalculo(rs.getString("tipoCalculo"))
+                        .baseCalculo(rs.getString("baseCalculo"))
+                        .multiplicador(rs.getBigDecimal("multiplicador"))
+                        .build());
 
         return rows.stream().findFirst();
     }
@@ -77,31 +90,40 @@ public class ConceptosNominaRepository {
 
         String sql = """
             INSERT INTO nomina.conceptos_nomina (
-              codigo,
-              nombre,
-              tipo,
+              codigo_concepto,
+              nombre_concepto,
+              tipo_concepto,
               es_fijo,
               activo,
+              tipo_calculo,
+              base_calculo,
+              multiplicador,
               fk_seguridad_creacion,
               fk_seguridad_edicion
             )
             VALUES (
-              :codigo,
-              :nombre,
-              :tipo,
+              :codigoConcepto,
+              :nombreConcepto,
+              :tipoConcepto,
               :esFijo,
               :activo,
+              :tipoCalculo,
+              :baseCalculo,
+              :multiplicador,
               :usr,
               :usr
             )
         """;
 
         var params = new MapSqlParameterSource()
-                .addValue("codigo", dto.getCodigo())
-                .addValue("nombre", dto.getNombre())
-                .addValue("tipo", dto.getTipo())
+                .addValue("codigoConcepto", dto.getCodigoConcepto())
+                .addValue("nombreConcepto", dto.getNombreConcepto())
+                .addValue("tipoConcepto", dto.getTipoConcepto())
                 .addValue("esFijo", dto.getEsFijo() != null ? dto.getEsFijo() : Boolean.FALSE)
                 .addValue("activo", dto.getActivo() != null ? dto.getActivo() : Boolean.TRUE)
+                .addValue("tipoCalculo", dto.getTipoCalculo())
+                .addValue("baseCalculo", dto.getBaseCalculo())
+                .addValue("multiplicador", dto.getMultiplicador())
                 .addValue("usr", idUsuario != null ? idUsuario : 1);
 
         jdbc.update(sql, params);
@@ -110,26 +132,32 @@ public class ConceptosNominaRepository {
     // ============================================================
     // ✅ ACTUALIZAR
     // ============================================================
-    public void actualizar(String codigo, ConceptoNominaDTO dto, Integer idUsuario) {
+    public void actualizar(String codigoConcepto, ConceptoNominaDTO dto, Integer idUsuario) {
 
         String sql = """
             UPDATE nomina.conceptos_nomina
             SET
-              nombre = :nombre,
-              tipo = :tipo,
-              es_fijo = :esFijo,
-              activo = :activo,
+              nombre_concepto = :nombreConcepto,
+              tipo_concepto   = :tipoConcepto,
+              es_fijo         = :esFijo,
+              activo          = :activo,
+              tipo_calculo    = :tipoCalculo,
+              base_calculo    = :baseCalculo,
+              multiplicador   = :multiplicador,
               fk_seguridad_edicion = :usr,
-              fecha_edicion = CURRENT_TIMESTAMP
-            WHERE codigo = :codigo
+              fecha_edicion   = CURRENT_TIMESTAMP
+            WHERE codigo_concepto = :codigoConcepto
         """;
 
         var params = new MapSqlParameterSource()
-                .addValue("codigo", codigo)
-                .addValue("nombre", dto.getNombre())
-                .addValue("tipo", dto.getTipo())
+                .addValue("codigoConcepto", codigoConcepto)
+                .addValue("nombreConcepto", dto.getNombreConcepto())
+                .addValue("tipoConcepto", dto.getTipoConcepto())
                 .addValue("esFijo", dto.getEsFijo() != null ? dto.getEsFijo() : Boolean.FALSE)
                 .addValue("activo", dto.getActivo() != null ? dto.getActivo() : Boolean.TRUE)
+                .addValue("tipoCalculo", dto.getTipoCalculo())
+                .addValue("baseCalculo", dto.getBaseCalculo())
+                .addValue("multiplicador", dto.getMultiplicador())
                 .addValue("usr", idUsuario != null ? idUsuario : 1);
 
         jdbc.update(sql, params);
@@ -138,16 +166,44 @@ public class ConceptosNominaRepository {
     // ============================================================
     // ✅ ELIMINAR
     // ============================================================
-    public void eliminar(String codigo) {
+    public void eliminar(String codigoConcepto) {
 
         String sql = """
             DELETE FROM nomina.conceptos_nomina
-            WHERE codigo = :codigo
+            WHERE codigo_concepto = :codigoConcepto
         """;
 
         var params = new MapSqlParameterSource()
-                .addValue("codigo", codigo);
+                .addValue("codigoConcepto", codigoConcepto);
 
         jdbc.update(sql, params);
     }
+
+    // ============================================================
+    // ✅ MAPA: codigo_concepto -> nombre_concepto (para Excel)
+    // ============================================================
+    public java.util.Map<String, String> mapCodigoNombre(Boolean soloActivos) {
+
+        String sql = """
+        SELECT
+          c.codigo_concepto AS codigo,
+          c.nombre_concepto AS nombre
+        FROM nomina.conceptos_nomina c
+        WHERE (:soloActivos = FALSE OR c.activo = TRUE)
+    """;
+
+        var params = new MapSqlParameterSource()
+                .addValue("soloActivos", soloActivos != null ? soloActivos : Boolean.TRUE);
+
+        return jdbc.query(sql, params, rs -> {
+            java.util.Map<String, String> map = new java.util.HashMap<>();
+            while (rs.next()) {
+                String codigo = rs.getString("codigo");
+                String nombre = rs.getString("nombre");
+                if (codigo != null) map.put(codigo, nombre);
+            }
+            return map;
+        });
+    }
+
 }

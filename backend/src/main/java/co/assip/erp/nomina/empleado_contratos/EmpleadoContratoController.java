@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import co.assip.erp.nomina.empleado_contratos.dto.EmpleadoContratoListViewDTO;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -15,15 +17,25 @@ public class EmpleadoContratoController {
     private final EmpleadoContratoService service;
 
     // ============================================================
-    // ✅ LISTAR
+    // LISTAR
     // ============================================================
     @GetMapping
-    public List<EmpleadoContratoDTO> listar() {
+    public List<EmpleadoContratoListViewDTO> listar() {
         return service.listar();
     }
 
     // ============================================================
-    // ✅ OBTENER
+    // LISTAR POR EMPLEADO
+    // ============================================================
+    @GetMapping("/por-empleado/{idEmpleado}")
+    public List<EmpleadoContratoListViewDTO> listarPorEmpleado(
+            @PathVariable Integer idEmpleado) {
+
+        return service.listarPorEmpleado(idEmpleado);
+    }
+
+    // ============================================================
+    // OBTENER
     // ============================================================
     @GetMapping("/{id}")
     public EmpleadoContratoDTO obtener(@PathVariable Integer id) {
@@ -31,7 +43,7 @@ public class EmpleadoContratoController {
     }
 
     // ============================================================
-    // ✅ CREAR
+    // CREAR
     // ============================================================
     @PostMapping
     public Integer crear(@RequestBody EmpleadoContratoDTO dto) {
@@ -43,7 +55,7 @@ public class EmpleadoContratoController {
     }
 
     // ============================================================
-    // ✅ ACTUALIZAR
+    // ACTUALIZAR
     // ============================================================
     @PutMapping("/{id}")
     public void actualizar(@PathVariable Integer id,
@@ -56,7 +68,7 @@ public class EmpleadoContratoController {
     }
 
     // ============================================================
-    // ✅ ELIMINAR
+    // ELIMINAR
     // ============================================================
     @DeleteMapping("/{id}")
     public void eliminar(@PathVariable Integer id) {

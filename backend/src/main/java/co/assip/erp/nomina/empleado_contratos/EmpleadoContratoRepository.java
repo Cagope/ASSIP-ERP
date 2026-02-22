@@ -10,6 +10,8 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
+import co.assip.erp.nomina.empleado_contratos.dto.EmpleadoContratoListViewDTO;
+
 
 @Repository
 @RequiredArgsConstructor
@@ -17,67 +19,296 @@ public class EmpleadoContratoRepository {
 
     private final NamedParameterJdbcTemplate jdbc;
 
+    /// ============================================================
+// LISTAR (VIEW ENRIQUECIDO)
+// ============================================================
     // ============================================================
-    // ✅ LISTAR
-    // ============================================================
-    public List<EmpleadoContratoDTO> listar() {
+// LISTAR (vista decodificada)
+// ============================================================
+    public List<EmpleadoContratoListViewDTO> listar() {
 
         String sql = """
-            SELECT
-              c.id_contrato                  AS idContrato,
-              c.id_empleado                  AS idEmpleado,
-              c.id_seccion                   AS idSeccion,
-              c.fecha_inicio                 AS fechaInicio,
-              c.fecha_fin                    AS fechaFin,
-              c.id_tipo_contrato             AS idTipoContrato,
-              c.id_cargo                     AS idCargo,
-              c.salario_base                 AS salarioBase,
-              c.salario_integral             AS salarioIntegral,
-              c.periodo_pago                 AS periodoPago,
-              c.id_eps                       AS idEps,
-              c.id_afp                       AS idAfp,
-              c.id_cesantias                 AS idCesantias,
-              c.id_arl                       AS idArl,
-              c.id_caja_compensacion         AS idCajaCompensacion,
-              c.cuenta_nomina_display        AS cuentaNominaDisplay,
-              c.id_cuenta_ahorro_nomina      AS idCuentaAhorroNomina,
-              c.fecha_envio_nota_renovacion  AS fechaEnvioNotaRenovacion,
-              c.clase_riesgo_arl             AS claseRiesgoArl,
-              c.porcentaje_arl               AS porcentajeArl,
-              c.activo                       AS activo
-            FROM nomina.empleado_contratos c
-            ORDER BY c.id_contrato DESC
-        """;
+        SELECT
+          c.id_contrato                 AS idContrato,
+          c.id_empleado                 AS idEmpleado,
 
-        return jdbc.query(sql, (rs, rowNum) -> EmpleadoContratoDTO.builder()
-                .idContrato(rs.getInt("idContrato"))
-                .idEmpleado((Integer) rs.getObject("idEmpleado"))
-                .idSeccion((Integer) rs.getObject("idSeccion"))
-                .fechaInicio(rs.getDate("fechaInicio").toLocalDate())
-                .fechaFin(rs.getDate("fechaFin") != null ? rs.getDate("fechaFin").toLocalDate() : null)
-                .idTipoContrato((Integer) rs.getObject("idTipoContrato"))
-                .idCargo((Integer) rs.getObject("idCargo"))
-                .salarioBase(rs.getBigDecimal("salarioBase"))
-                .salarioIntegral((Boolean) rs.getObject("salarioIntegral"))
-                .periodoPago(rs.getString("periodoPago"))
-                .idEps((Integer) rs.getObject("idEps"))
-                .idAfp((Integer) rs.getObject("idAfp"))
-                .idCesantias((Integer) rs.getObject("idCesantias"))
-                .idArl((Integer) rs.getObject("idArl"))
-                .idCajaCompensacion((Integer) rs.getObject("idCajaCompensacion"))
-                .cuentaNominaDisplay(rs.getString("cuentaNominaDisplay"))
-                .idCuentaAhorroNomina((Long) rs.getObject("idCuentaAhorroNomina"))
-                .fechaEnvioNotaRenovacion(rs.getDate("fechaEnvioNotaRenovacion") != null
-                        ? rs.getDate("fechaEnvioNotaRenovacion").toLocalDate()
-                        : null)
-                .claseRiesgoArl((Short) rs.getObject("claseRiesgoArl"))
-                .porcentajeArl(rs.getBigDecimal("porcentajeArl"))
-                .activo((Boolean) rs.getObject("activo"))
-                .build());
+          c.fecha_inicio                AS fechaInicio,
+          c.fecha_fin                   AS fechaFin,
+
+          c.id_tipo_contrato            AS idTipoContrato,
+          tc.nombre                     AS tipoContratoNombre,
+
+          c.periodo_pago                AS periodoPago,
+
+          c.id_seccion                  AS idSeccion,
+          s.nombre_seccion              AS nombreSeccion,
+
+          c.id_cargo                    AS idCargo,
+          cg.nombre_cargo               AS nombreCargo,
+
+          c.salario_base                AS salarioBase,
+          c.salario_integral            AS salarioIntegral,
+
+          c.id_eps                      AS idEps,
+          eps.nombre_eps                AS nombreEps,
+
+          c.id_afp                      AS idAfp,
+          afp.nombre_afp                AS nombreAfp,
+
+          c.id_cesantias                AS idCesantias,
+          ces.nombre_cesantias          AS nombreCesantias,
+
+          c.id_arl                      AS idArl,
+          arl.nombre_arl                AS nombreArl,
+
+          c.id_caja_compensacion        AS idCajaCompensacion,
+          caja.nombre_caja              AS nombreCajaCompensacion,
+
+          c.id_cuenta_ahorro_nomina     AS idCuentaAhorroNomina,
+
+          c.fecha_envio_nota_renovacion AS fechaEnvioNotaRenovacion,
+          c.clase_riesgo_arl            AS claseRiesgoArl,
+          c.porcentaje_arl              AS porcentajeArl,
+
+          c.activo                      AS activo
+
+        FROM nomina.empleado_contratos c
+
+        LEFT JOIN nomina.secciones_nomina s
+          ON s.id_seccion = c.id_seccion
+
+        LEFT JOIN nomina.cargos cg
+          ON cg.id_cargo = c.id_cargo
+
+        LEFT JOIN nomina.tipos_contrato tc
+          ON tc.id_tipo_contrato = c.id_tipo_contrato
+
+        LEFT JOIN nomina.entidades_eps eps
+          ON eps.id_eps = c.id_eps
+
+        LEFT JOIN nomina.entidades_afp afp
+          ON afp.id_afp = c.id_afp
+
+        LEFT JOIN nomina.entidades_cesantias ces
+          ON ces.id_cesantias = c.id_cesantias
+
+        LEFT JOIN nomina.entidades_arl arl
+          ON arl.id_arl = c.id_arl
+
+        LEFT JOIN nomina.entidades_caja_compensacion caja
+          ON caja.id_caja = c.id_caja_compensacion
+
+        ORDER BY c.id_contrato DESC
+    """;
+
+        return jdbc.query(sql, (rs, rowNum) ->
+                EmpleadoContratoListViewDTO.builder()
+                        .idContrato(rs.getInt("idContrato"))
+                        .idEmpleado(rs.getInt("idEmpleado"))
+
+                        .fechaInicio(rs.getDate("fechaInicio").toLocalDate())
+                        .fechaFin(rs.getDate("fechaFin") != null
+                                ? rs.getDate("fechaFin").toLocalDate()
+                                : null)
+
+                        .idTipoContrato(rs.getObject("idTipoContrato", Integer.class))
+                        .tipoContratoNombre(rs.getString("tipoContratoNombre"))
+
+                        .periodoPago(rs.getString("periodoPago"))
+
+                        .idSeccion(rs.getObject("idSeccion", Integer.class))
+                        .nombreSeccion(rs.getString("nombreSeccion"))
+
+                        .idCargo(rs.getObject("idCargo", Integer.class))
+                        .nombreCargo(rs.getString("nombreCargo"))
+
+                        .salarioBase(rs.getBigDecimal("salarioBase"))
+                        .salarioIntegral(rs.getBoolean("salarioIntegral"))
+
+                        .idEps(rs.getObject("idEps", Integer.class))
+                        .nombreEps(rs.getString("nombreEps"))
+
+                        .idAfp(rs.getObject("idAfp", Integer.class))
+                        .nombreAfp(rs.getString("nombreAfp"))
+
+                        .idCesantias(rs.getObject("idCesantias", Integer.class))
+                        .nombreCesantias(rs.getString("nombreCesantias"))
+
+                        .idArl(rs.getObject("idArl", Integer.class))
+                        .nombreArl(rs.getString("nombreArl"))
+
+                        .idCajaCompensacion(rs.getObject("idCajaCompensacion", Integer.class))
+                        .nombreCajaCompensacion(rs.getString("nombreCajaCompensacion"))
+
+                        .idCuentaAhorroNomina(rs.getObject("idCuentaAhorroNomina", Long.class))
+
+                        .fechaEnvioNotaRenovacion(
+                                rs.getDate("fechaEnvioNotaRenovacion") != null
+                                        ? rs.getDate("fechaEnvioNotaRenovacion").toLocalDate()
+                                        : null
+                        )
+
+                        .claseRiesgoArl(
+                                rs.getObject("claseRiesgoArl") == null
+                                        ? null
+                                        : ((Integer) rs.getObject("claseRiesgoArl")).shortValue()
+                        )
+
+                        .porcentajeArl(rs.getBigDecimal("porcentajeArl"))
+                        .activo(rs.getBoolean("activo"))
+
+                        .build()
+        );
     }
 
     // ============================================================
-    // ✅ OBTENER
+    // LISTAR POR EMPLEADO
+    // ============================================================
+    public List<EmpleadoContratoListViewDTO> listarPorEmpleado(Integer idEmpleado) {
+
+        String sql = """
+        SELECT
+          c.id_contrato                 AS idContrato,
+          c.id_empleado                 AS idEmpleado,
+
+          c.fecha_inicio                AS fechaInicio,
+          c.fecha_fin                   AS fechaFin,
+
+          c.id_tipo_contrato            AS idTipoContrato,
+          tc.nombre                     AS tipoContratoNombre,
+
+          c.periodo_pago                AS periodoPago,
+
+          c.id_seccion                  AS idSeccion,
+          s.nombre_seccion              AS nombreSeccion,
+
+          c.id_cargo                    AS idCargo,
+          cg.nombre_cargo               AS nombreCargo,
+
+          c.salario_base                AS salarioBase,
+          c.salario_integral            AS salarioIntegral,
+
+          c.id_eps                      AS idEps,
+          eps.nombre_eps                AS nombreEps,
+
+          c.id_afp                      AS idAfp,
+          afp.nombre_afp                AS nombreAfp,
+
+          c.id_cesantias                AS idCesantias,
+          ces.nombre_cesantias          AS nombreCesantias,
+
+          c.id_arl                      AS idArl,
+          arl.nombre_arl                AS nombreArl,
+
+          c.id_caja_compensacion        AS idCajaCompensacion,
+          caja.nombre_caja              AS nombreCajaCompensacion,
+
+          c.id_cuenta_ahorro_nomina     AS idCuentaAhorroNomina,
+
+          c.fecha_envio_nota_renovacion AS fechaEnvioNotaRenovacion,
+          c.clase_riesgo_arl            AS claseRiesgoArl,
+          c.porcentaje_arl              AS porcentajeArl,
+
+          c.activo                      AS activo
+
+        FROM nomina.empleado_contratos c
+
+        LEFT JOIN nomina.secciones_nomina s
+          ON s.id_seccion = c.id_seccion
+
+        LEFT JOIN nomina.cargos cg
+          ON cg.id_cargo = c.id_cargo
+
+        LEFT JOIN nomina.tipos_contrato tc
+          ON tc.id_tipo_contrato = c.id_tipo_contrato
+
+        LEFT JOIN nomina.entidades_eps eps
+          ON eps.id_eps = c.id_eps
+
+        LEFT JOIN nomina.entidades_afp afp
+          ON afp.id_afp = c.id_afp
+
+        LEFT JOIN nomina.entidades_cesantias ces
+          ON ces.id_cesantias = c.id_cesantias
+
+        LEFT JOIN nomina.entidades_arl arl
+          ON arl.id_arl = c.id_arl
+
+        LEFT JOIN nomina.entidades_caja_compensacion caja
+          ON caja.id_caja = c.id_caja_compensacion
+
+        WHERE c.id_empleado = :idEmpleado
+
+        ORDER BY c.fecha_inicio DESC
+    """;
+
+        var params = new MapSqlParameterSource()
+                .addValue("idEmpleado", idEmpleado);
+
+        return jdbc.query(sql, params, (rs, rowNum) ->
+                EmpleadoContratoListViewDTO.builder()
+                        .idContrato(rs.getInt("idContrato"))
+                        .idEmpleado(rs.getInt("idEmpleado"))
+
+                        .fechaInicio(rs.getDate("fechaInicio").toLocalDate())
+                        .fechaFin(rs.getDate("fechaFin") != null
+                                ? rs.getDate("fechaFin").toLocalDate()
+                                : null)
+
+                        .idTipoContrato(rs.getObject("idTipoContrato", Integer.class))
+                        .tipoContratoNombre(rs.getString("tipoContratoNombre"))
+
+                        .periodoPago(rs.getString("periodoPago"))
+
+                        .idSeccion(rs.getObject("idSeccion", Integer.class))
+                        .nombreSeccion(rs.getString("nombreSeccion"))
+
+                        .idCargo(rs.getObject("idCargo", Integer.class))
+                        .nombreCargo(rs.getString("nombreCargo"))
+
+                        .salarioBase(rs.getBigDecimal("salarioBase"))
+                        .salarioIntegral(rs.getBoolean("salarioIntegral"))
+
+                        .idEps(rs.getObject("idEps", Integer.class))
+                        .nombreEps(rs.getString("nombreEps"))
+
+                        .idAfp(rs.getObject("idAfp", Integer.class))
+                        .nombreAfp(rs.getString("nombreAfp"))
+
+                        .idCesantias(rs.getObject("idCesantias", Integer.class))
+                        .nombreCesantias(rs.getString("nombreCesantias"))
+
+                        .idArl(rs.getObject("idArl", Integer.class))
+                        .nombreArl(rs.getString("nombreArl"))
+
+                        .idCajaCompensacion(rs.getObject("idCajaCompensacion", Integer.class))
+                        .nombreCajaCompensacion(rs.getString("nombreCajaCompensacion"))
+
+                        .idCuentaAhorroNomina(rs.getObject("idCuentaAhorroNomina", Long.class))
+
+                        .fechaEnvioNotaRenovacion(
+                                rs.getDate("fechaEnvioNotaRenovacion") != null
+                                        ? rs.getDate("fechaEnvioNotaRenovacion").toLocalDate()
+                                        : null
+                        )
+
+                        .claseRiesgoArl(
+                                rs.getObject("claseRiesgoArl") == null
+                                        ? null
+                                        : ((Integer) rs.getObject("claseRiesgoArl")).shortValue()
+                        )
+
+                        .porcentajeArl(rs.getBigDecimal("porcentajeArl"))
+                        .activo(rs.getBoolean("activo"))
+
+                        .build()
+        );
+    }
+
+
+
+    // ============================================================
+    // OBTENER
     // ============================================================
     public Optional<EmpleadoContratoDTO> obtener(Integer idContrato) {
 
@@ -98,7 +329,6 @@ public class EmpleadoContratoRepository {
               c.id_cesantias                 AS idCesantias,
               c.id_arl                       AS idArl,
               c.id_caja_compensacion         AS idCajaCompensacion,
-              c.cuenta_nomina_display        AS cuentaNominaDisplay,
               c.id_cuenta_ahorro_nomina      AS idCuentaAhorroNomina,
               c.fecha_envio_nota_renovacion  AS fechaEnvioNotaRenovacion,
               c.clase_riesgo_arl             AS claseRiesgoArl,
@@ -108,40 +338,45 @@ public class EmpleadoContratoRepository {
             WHERE c.id_contrato = :id
         """;
 
-        var params = new MapSqlParameterSource()
-                .addValue("id", idContrato);
+        var params = new MapSqlParameterSource().addValue("id", idContrato);
 
-        List<EmpleadoContratoDTO> rows = jdbc.query(sql, params, (rs, rowNum) -> EmpleadoContratoDTO.builder()
-                .idContrato(rs.getInt("idContrato"))
-                .idEmpleado((Integer) rs.getObject("idEmpleado"))
-                .idSeccion((Integer) rs.getObject("idSeccion"))
-                .fechaInicio(rs.getDate("fechaInicio").toLocalDate())
-                .fechaFin(rs.getDate("fechaFin") != null ? rs.getDate("fechaFin").toLocalDate() : null)
-                .idTipoContrato((Integer) rs.getObject("idTipoContrato"))
-                .idCargo((Integer) rs.getObject("idCargo"))
-                .salarioBase(rs.getBigDecimal("salarioBase"))
-                .salarioIntegral((Boolean) rs.getObject("salarioIntegral"))
-                .periodoPago(rs.getString("periodoPago"))
-                .idEps((Integer) rs.getObject("idEps"))
-                .idAfp((Integer) rs.getObject("idAfp"))
-                .idCesantias((Integer) rs.getObject("idCesantias"))
-                .idArl((Integer) rs.getObject("idArl"))
-                .idCajaCompensacion((Integer) rs.getObject("idCajaCompensacion"))
-                .cuentaNominaDisplay(rs.getString("cuentaNominaDisplay"))
-                .idCuentaAhorroNomina((Long) rs.getObject("idCuentaAhorroNomina"))
-                .fechaEnvioNotaRenovacion(rs.getDate("fechaEnvioNotaRenovacion") != null
-                        ? rs.getDate("fechaEnvioNotaRenovacion").toLocalDate()
-                        : null)
-                .claseRiesgoArl((Short) rs.getObject("claseRiesgoArl"))
-                .porcentajeArl(rs.getBigDecimal("porcentajeArl"))
-                .activo((Boolean) rs.getObject("activo"))
-                .build());
+        List<EmpleadoContratoDTO> rows = jdbc.query(sql, params, (rs, rowNum) ->
+                EmpleadoContratoDTO.builder()
+                        .idContrato(rs.getInt("idContrato"))
+                        .idEmpleado((Integer) rs.getObject("idEmpleado"))
+                        .idSeccion((Integer) rs.getObject("idSeccion"))
+                        .fechaInicio(rs.getDate("fechaInicio").toLocalDate())
+                        .fechaFin(rs.getDate("fechaFin") != null ? rs.getDate("fechaFin").toLocalDate() : null)
+                        .idTipoContrato((Integer) rs.getObject("idTipoContrato"))
+                        .idCargo((Integer) rs.getObject("idCargo"))
+                        .salarioBase(rs.getBigDecimal("salarioBase"))
+                        .salarioIntegral((Boolean) rs.getObject("salarioIntegral"))
+                        .periodoPago(rs.getString("periodoPago"))
+                        .idEps((Integer) rs.getObject("idEps"))
+                        .idAfp((Integer) rs.getObject("idAfp"))
+                        .idCesantias((Integer) rs.getObject("idCesantias"))
+                        .idArl((Integer) rs.getObject("idArl"))
+                        .idCajaCompensacion((Integer) rs.getObject("idCajaCompensacion"))
+                        .idCuentaAhorroNomina((Long) rs.getObject("idCuentaAhorroNomina"))
+                        .fechaEnvioNotaRenovacion(
+                                rs.getDate("fechaEnvioNotaRenovacion") != null
+                                        ? rs.getDate("fechaEnvioNotaRenovacion").toLocalDate()
+                                        : null
+                        )
+                        .claseRiesgoArl(
+                                rs.getObject("claseRiesgoArl") == null
+                                        ? null
+                                        : (short) rs.getInt("claseRiesgoArl")
+                        )
+                        .porcentajeArl(rs.getBigDecimal("porcentajeArl"))
+                        .activo((Boolean) rs.getObject("activo"))
+                        .build());
 
         return rows.stream().findFirst();
     }
 
     // ============================================================
-    // ✅ CREAR
+    // CREAR
     // ============================================================
     public Integer crear(EmpleadoContratoDTO dto, Integer idUsuario) {
 
@@ -161,7 +396,6 @@ public class EmpleadoContratoRepository {
               id_cesantias,
               id_arl,
               id_caja_compensacion,
-              cuenta_nomina_display,
               id_cuenta_ahorro_nomina,
               fecha_envio_nota_renovacion,
               clase_riesgo_arl,
@@ -185,7 +419,6 @@ public class EmpleadoContratoRepository {
               :idCesantias,
               :idArl,
               :idCaja,
-              :cuentaNominaDisplay,
               :idCuentaAhorroNomina,
               :fechaEnvioNotaRenovacion,
               :claseRiesgoArl,
@@ -212,11 +445,11 @@ public class EmpleadoContratoRepository {
                 .addValue("idCesantias", dto.getIdCesantias())
                 .addValue("idArl", dto.getIdArl())
                 .addValue("idCaja", dto.getIdCajaCompensacion())
-                .addValue("cuentaNominaDisplay", dto.getCuentaNominaDisplay())
                 .addValue("idCuentaAhorroNomina", dto.getIdCuentaAhorroNomina())
-                .addValue("fechaEnvioNotaRenovacion", dto.getFechaEnvioNotaRenovacion() != null
-                        ? Date.valueOf(dto.getFechaEnvioNotaRenovacion())
-                        : null)
+                .addValue("fechaEnvioNotaRenovacion",
+                        dto.getFechaEnvioNotaRenovacion() != null
+                                ? Date.valueOf(dto.getFechaEnvioNotaRenovacion())
+                                : null)
                 .addValue("claseRiesgoArl", dto.getClaseRiesgoArl() != null ? dto.getClaseRiesgoArl() : (short) 1)
                 .addValue("porcentajeArl", dto.getPorcentajeArl() != null ? dto.getPorcentajeArl() : BigDecimal.ZERO)
                 .addValue("activo", dto.getActivo() != null ? dto.getActivo() : Boolean.TRUE)
@@ -226,7 +459,7 @@ public class EmpleadoContratoRepository {
     }
 
     // ============================================================
-    // ✅ ACTUALIZAR
+    // ACTUALIZAR
     // ============================================================
     public void actualizar(Integer idContrato, EmpleadoContratoDTO dto, Integer idUsuario) {
 
@@ -247,7 +480,6 @@ public class EmpleadoContratoRepository {
               id_cesantias = :idCesantias,
               id_arl = :idArl,
               id_caja_compensacion = :idCaja,
-              cuenta_nomina_display = :cuentaNominaDisplay,
               id_cuenta_ahorro_nomina = :idCuentaAhorroNomina,
               fecha_envio_nota_renovacion = :fechaEnvioNotaRenovacion,
               clase_riesgo_arl = :claseRiesgoArl,
@@ -274,11 +506,11 @@ public class EmpleadoContratoRepository {
                 .addValue("idCesantias", dto.getIdCesantias())
                 .addValue("idArl", dto.getIdArl())
                 .addValue("idCaja", dto.getIdCajaCompensacion())
-                .addValue("cuentaNominaDisplay", dto.getCuentaNominaDisplay())
                 .addValue("idCuentaAhorroNomina", dto.getIdCuentaAhorroNomina())
-                .addValue("fechaEnvioNotaRenovacion", dto.getFechaEnvioNotaRenovacion() != null
-                        ? Date.valueOf(dto.getFechaEnvioNotaRenovacion())
-                        : null)
+                .addValue("fechaEnvioNotaRenovacion",
+                        dto.getFechaEnvioNotaRenovacion() != null
+                                ? Date.valueOf(dto.getFechaEnvioNotaRenovacion())
+                                : null)
                 .addValue("claseRiesgoArl", dto.getClaseRiesgoArl() != null ? dto.getClaseRiesgoArl() : (short) 1)
                 .addValue("porcentajeArl", dto.getPorcentajeArl() != null ? dto.getPorcentajeArl() : BigDecimal.ZERO)
                 .addValue("activo", dto.getActivo() != null ? dto.getActivo() : Boolean.TRUE)
@@ -288,7 +520,7 @@ public class EmpleadoContratoRepository {
     }
 
     // ============================================================
-    // ✅ ELIMINAR
+    // ELIMINAR
     // ============================================================
     public void eliminar(Integer idContrato) {
 
@@ -297,9 +529,6 @@ public class EmpleadoContratoRepository {
             WHERE id_contrato = :id
         """;
 
-        var params = new MapSqlParameterSource()
-                .addValue("id", idContrato);
-
-        jdbc.update(sql, params);
+        jdbc.update(sql, new MapSqlParameterSource().addValue("id", idContrato));
     }
 }

@@ -80,4 +80,46 @@ public class PersonasBusquedaRepository {
             return dto;
         });
     }
+
+    // =========================================================
+// ✅ MAPA: id_datos_personal -> (documento, nombre_completo)
+// =========================================================
+    public java.util.Map<Long, PersonaBasica> mapPersonasBasicasByIds(java.util.Set<Long> ids) {
+
+        if (ids == null || ids.isEmpty()) {
+            return java.util.Collections.emptyMap();
+        }
+
+        String sql = """
+        SELECT
+            dp.id_datos_personal,
+            dp.documento,
+            TRIM(
+                COALESCE(dp.primer_apellido,'') || ' ' ||
+                COALESCE(dp.segundo_apellido,'') || ' ' ||
+                COALESCE(dp.nombres,'')
+            ) AS nombre_completo
+        FROM hoja_vida.datos_personales dp
+        WHERE dp.id_datos_personal IN (:ids)
+    """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("ids", ids);
+
+        return jdbc.query(sql, params, rs -> {
+            java.util.Map<Long, PersonaBasica> map = new java.util.HashMap<>();
+            while (rs.next()) {
+                Long id = rs.getLong("id_datos_personal");
+                map.put(id, new PersonaBasica(
+                        rs.getString("documento"),
+                        rs.getString("nombre_completo")
+                ));
+            }
+            return map;
+        });
+    }
+
+    // DTO interno simple para Excel / enriquecimientos
+    public record PersonaBasica(String documento, String nombreCompleto) {}
+
 }
