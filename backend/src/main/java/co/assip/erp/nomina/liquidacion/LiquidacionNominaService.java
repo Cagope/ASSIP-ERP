@@ -8,7 +8,9 @@ import co.assip.erp.nomina.liquidacion.calculo.ProvisionesCalculator;
 import co.assip.erp.nomina.liquidacion.dto.LiquidacionDetalleDTO;
 import co.assip.erp.nomina.liquidacion.dto.LiquidacionRequestDTO;
 import co.assip.erp.nomina.liquidacion.dto.TotalesLiquidacionDTO;
+import co.assip.erp.nomina.novedades_nomina.NovedadesNominaRepository;
 import co.assip.erp.nomina.periodos_nomina.PeriodosNominaRepository;
+import co.assip.erp.nomina.periodos_nomina.PeriodosNominaRepository.PeriodoFechas;
 import co.assip.erp.seguridad.repository.UsuarioAgenciaRepository;
 import co.assip.erp.seguridad.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class LiquidacionNominaService {
 
     private final LiquidacionNominaRepository liquidacionRepo;
     private final LiquidacionDetalleRepository detalleRepo;
+    private final NovedadesNominaRepository novedadesRepo;
 
     private final IbcCalculator ibcCalculator;
     private final DevengadosCalculator devengadosCalculator;
@@ -39,16 +42,33 @@ public class LiquidacionNominaService {
     @Transactional
     public void liquidarPeriodo(LiquidacionRequestDTO request) {
 
-        if (request.getIdPeriodoNomina() == null) {
-            throw new IllegalStateException("El período de nómina es obligatorio");
+        Integer idPeriodo = request.getIdPeriodoNomina();
+
+        if (idPeriodo == null) {
+            idPeriodo = liquidacionRepo.obtenerPeriodoOperativo(request.getFkAgencia());
         }
 
+        if (idPeriodo == null) {
+            throw new IllegalStateException(
+                    "No existe un período de nómina ABIERTO para la agencia"
+            );
+        }
+
+        // 🔒 Validación fuerte
+        periodosRepo.validarPeriodoAbierto(idPeriodo, request.getFkAgencia());
         validarAgencia(request.getFkAgencia());
 
-        // 1️⃣ Contratos activos definidos por el query de liquidación
+        // 📅 Fechas reales del período
+        PeriodoFechas fechasPeriodo = periodosRepo.obtenerFechas(idPeriodo);
+        if (fechasPeriodo == null) {
+            throw new IllegalStateException("No se pudieron obtener fechas del período");
+        }
+
+        // 1️⃣ Contratos activos
         List<EmpleadoContratoDTO> contratos =
                 liquidacionRepo.obtenerContratosParaLiquidacion(
-                        request.getIdPeriodoNomina()
+                        idPeriodo,
+                        request.getFkAgencia()
                 );
 
         if (contratos.isEmpty()) {
@@ -57,25 +77,27 @@ public class LiquidacionNominaService {
             );
         }
 
-        // 2️⃣ Liquidar contrato a contrato (idempotente)
+        // 2️⃣ Liquidación contrato a contrato (IDEMPOTENTE)
         for (EmpleadoContratoDTO contrato : contratos) {
 
             if (liquidacionRepo.existeLiquidacion(
-                    request.getIdPeriodoNomina(),
+                    idPeriodo,
                     contrato.getIdContrato()
             )) {
                 continue;
             }
 
             liquidarContrato(
-                    request.getIdPeriodoNomina(),
+                    idPeriodo,
+                    fechasPeriodo,
                     contrato
             );
         }
 
-        // 3️⃣ Marcar período como liquidado
-        periodosRepo.marcarLiquidado(
-                request.getIdPeriodoNomina(),
+        // ✅ 3️⃣ Marcar período como LIQUIDADO (estándar)
+        periodosRepo.cambiarEstado(
+                idPeriodo,
+                "CERRADO",
                 SecurityUtils.getIdUsuario()
         );
     }
@@ -85,25 +107,23 @@ public class LiquidacionNominaService {
     // =========================================================
     private void liquidarContrato(
             Integer idPeriodoNomina,
+            PeriodoFechas fechasPeriodo,
             EmpleadoContratoDTO contrato
     ) {
 
         Integer idUsuario = SecurityUtils.getIdUsuario();
 
-        // 1️⃣ Cabecera
         Integer idLiquidacion = liquidacionRepo.insertarCabecera(
                 idPeriodoNomina,
                 contrato,
                 idUsuario
         );
 
-        // 2️⃣ IBC
         BigDecimal ibc = ibcCalculator.calcular(
                 idPeriodoNomina,
                 contrato
         );
 
-        // 3️⃣ Devengados
         List<LiquidacionDetalleDTO> devengados =
                 devengadosCalculator.calcular(
                         idPeriodoNomina,
@@ -112,7 +132,6 @@ public class LiquidacionNominaService {
                 );
         detalleRepo.insertar(idLiquidacion, devengados, idUsuario);
 
-        // 4️⃣ Deducciones
         List<LiquidacionDetalleDTO> deducciones =
                 deduccionesCalculator.calcular(
                         idPeriodoNomina,
@@ -121,7 +140,25 @@ public class LiquidacionNominaService {
                 );
         detalleRepo.insertar(idLiquidacion, deducciones, idUsuario);
 
-        // 5️⃣ Provisiones
+        // ✅ Si el cálculo genera deducciones automáticas (SALUD/PENSIÓN), se registran como NOVEDAD CALCULO en CERRADO
+        for (LiquidacionDetalleDTO d : deducciones) {
+
+            if (!"DEDUCCION".equals(d.getTipo())) continue;
+            if (!List.of("SALUD_EMP", "PENSION_EMP").contains(d.getCodigoConcepto())) continue;
+
+            novedadesRepo.insertarNovedadAplicada(
+                    idPeriodoNomina,
+                    contrato.getIdEmpleado(),
+                    contrato.getIdContrato(),
+                    d.getCodigoConcepto(),
+                    fechasPeriodo.fechaInicio(),
+                    fechasPeriodo.fechaFin(),
+                    d.getCantidad(),
+                    d.getValorTotal(),
+                    idUsuario
+            );
+        }
+
         List<LiquidacionDetalleDTO> provisiones =
                 provisionesCalculator.calcular(
                         idPeriodoNomina,
@@ -130,7 +167,13 @@ public class LiquidacionNominaService {
                 );
         detalleRepo.insertar(idLiquidacion, provisiones, idUsuario);
 
-        // 6️⃣ Totales
+        // ✅ Marcar novedades ABIERTO como CERRADO (aplicadas)
+        novedadesRepo.marcarNovedadesAplicadas(
+                idPeriodoNomina,
+                contrato.getIdContrato(),
+                idUsuario
+        );
+
         liquidacionRepo.actualizarTotales(
                 idLiquidacion,
                 ibc,
@@ -138,6 +181,37 @@ public class LiquidacionNominaService {
         );
 
         validarTotales(idLiquidacion);
+    }
+
+    // =========================================================
+    // 🧹 ELIMINAR LIQUIDACIONES DE UN PERÍODO (para ABRIR)
+    // =========================================================
+    @Transactional
+    public void eliminarPorPeriodo(Integer idPeriodoNomina) {
+
+        if (idPeriodoNomina == null) {
+            throw new IllegalArgumentException("El id del período es obligatorio");
+        }
+
+        liquidacionRepo.eliminarPorPeriodo(idPeriodoNomina);
+    }
+
+    // =========================================================
+    // 🔓 ABRIR PERÍODO (compatibilidad con tu método anterior)
+    //     - Solo borra ejecución (cabecera + detalle)
+    //     - Los estados (periodo/novedades) los maneja PeriodosNominaService
+    // =========================================================
+    @Transactional
+    public int abrirPeriodoNomina(Integer idPeriodoNomina) {
+
+        if (idPeriodoNomina == null) {
+            throw new IllegalArgumentException("El id del período es obligatorio");
+        }
+
+        return liquidacionRepo.abrirPeriodoEliminarEjecucion(
+                idPeriodoNomina,
+                SecurityUtils.getIdUsuario()
+        );
     }
 
     // =========================================================

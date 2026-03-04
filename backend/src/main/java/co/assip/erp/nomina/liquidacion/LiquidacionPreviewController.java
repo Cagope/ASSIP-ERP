@@ -19,7 +19,6 @@ public class LiquidacionPreviewController {
     public ResponseEntity<?> preview(
             @RequestBody LiquidacionRequestDTO request
     ) {
-
         return ResponseEntity.ok(
                 previewService.previewPeriodo(request)
         );

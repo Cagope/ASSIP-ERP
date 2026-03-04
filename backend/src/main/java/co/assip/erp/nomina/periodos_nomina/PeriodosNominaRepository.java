@@ -132,6 +132,26 @@ public class PeriodosNominaRepository {
         );
     }
 
+    public void marcarCerrado(Integer idPeriodo, Integer idUsuario) {
+
+        String sql = """
+        UPDATE nomina.periodos_nomina
+        SET
+            estado = 'CERRADO',
+            fk_seguridad_edicion = :idUsuario,
+            fecha_edicion = NOW()
+        WHERE id_periodo = :idPeriodo
+          AND estado = 'ABIERTO'
+    """;
+
+        jdbc.update(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idPeriodo", idPeriodo)
+                        .addValue("idUsuario", idUsuario)
+        );
+    }
+
     public void marcarContabilizado(Integer idPeriodo, Integer idUsuario) {
 
         String sql = """
@@ -159,7 +179,7 @@ public class PeriodosNominaRepository {
         String sql = """
         SELECT p.id_periodo
         FROM nomina.periodos_nomina p
-        WHERE UPPER(TRIM(p.estado)) IN ('ABIERTO', 'BORRADOR')
+        WHERE UPPER(TRIM(p.estado)) = 'ABIERTO'
         ORDER BY
           p.fecha_inicio ASC,
           p.id_periodo ASC
@@ -202,4 +222,93 @@ public class PeriodosNominaRepository {
             LocalDate fechaFin
     ) {}
 
+    // =========================================================
+    // 🔒 VALIDACIÓN FUERTE: PERÍODO ABIERTO POR AGENCIA
+    // =========================================================
+    public void validarPeriodoAbierto(Integer idPeriodo, Integer idAgencia) {
+
+        String sql = """
+        SELECT COUNT(1)
+        FROM nomina.periodos_nomina p
+        WHERE p.id_periodo = :idPeriodo
+          AND p.id_agencia = :idAgencia
+          AND UPPER(TRIM(p.estado)) = 'ABIERTO'
+    """;
+
+        Integer count = jdbc.queryForObject(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idPeriodo", idPeriodo)
+                        .addValue("idAgencia", idAgencia),
+                Integer.class
+        );
+
+        if (count == null || count == 0) {
+            throw new IllegalStateException(
+                    "El período no existe, no pertenece a la agencia o no está en estado ABIERTO"
+            );
+        }
+    }
+
+    // =========================================================
+    // 🏷️ LABEL DEL PERÍODO (PARA LIQUIDACIÓN PREVIEW)
+    // =========================================================
+    public PeriodoLabel obtenerPeriodoLabel(Integer idPeriodo) {
+
+        String sql = """
+        SELECT
+          p.id_periodo,
+          p.anio,
+          p.mes,
+          p.numero_periodo,
+          p.tipo_periodo
+        FROM nomina.periodos_nomina p
+        WHERE p.id_periodo = :id
+    """;
+
+        return jdbc.query(
+                sql,
+                new MapSqlParameterSource("id", idPeriodo),
+                rs -> {
+                    if (!rs.next()) return null;
+
+                    return new PeriodoLabel(
+                            rs.getInt("id_periodo"),
+                            rs.getInt("anio"),
+                            rs.getInt("mes"),
+                            (Integer) rs.getObject("numero_periodo"),
+                            rs.getString("tipo_periodo")
+                    );
+                }
+        );
+    }
+
+    // =========================================================
+    // DTO INTERNO: LABEL DEL PERÍODO
+    // =========================================================
+    public record PeriodoLabel(
+            Integer idPeriodo,
+            Integer anio,
+            Integer mes,
+            Integer numeroPeriodo,
+            String tipoPeriodo
+    ) {}
+
+    // =========================================================
+    // 🔎 OBTENER AGENCIA DEL PERÍODO
+    // =========================================================
+    public Integer obtenerAgenciaDelPeriodo(Integer idPeriodo) {
+
+        String sql = """
+        SELECT id_agencia
+        FROM nomina.periodos_nomina
+        WHERE id_periodo = :idPeriodo
+    """;
+
+        return jdbc.queryForObject(
+                sql,
+                new MapSqlParameterSource("idPeriodo", idPeriodo),
+                Integer.class
+        );
+    }
 }

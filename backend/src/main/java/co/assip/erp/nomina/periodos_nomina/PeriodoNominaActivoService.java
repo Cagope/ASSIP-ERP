@@ -13,7 +13,7 @@ public class PeriodoNominaActivoService {
     }
 
     // =========================================================
-    // ID DEL PERÍODO ACTIVO (ABIERTO / BORRADOR)
+    // ID DEL PERÍODO ACTIVO (ABIERTO)
     // =========================================================
     public Integer obtenerPeriodoActivo() {
 
@@ -21,7 +21,7 @@ public class PeriodoNominaActivoService {
 
         if (idPeriodo == null) {
             throw new IllegalStateException(
-                    "No existe un período de nómina ABIERTO o BORRADOR"
+                    "No existe un período de nómina ABIERTO"
             );
         }
 

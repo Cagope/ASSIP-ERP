@@ -142,38 +142,42 @@ public class NovedadesNominaRepository {
     public Integer crear(NovedadNominaFormDTO dto, Integer idUsuario) {
 
         String sql = """
-        INSERT INTO nomina.novedades_nomina (
-          id_periodo,
-          id_empleado,
-          id_contrato,
-          codigo_concepto,
-          fecha_inicial,
-          fecha_final,
-          cantidad,
-          valor,
-          observacion,
-          estado,
-          fk_agencia,
-          fk_seguridad_creacion,
-          fk_seguridad_edicion
-        )
-        VALUES (
-          :periodo,
-          :empleado,
-          :contrato,
-          :concepto,
-          :inicio,
-          :fin,
-          :cantidad,
-          :valor,
-          :obs,
-          'BORRADOR',
-          :agencia,
-          :usr,
-          :usr
-        )
-        RETURNING id_novedad
-        """;
+    INSERT INTO nomina.novedades_nomina (
+      id_periodo,
+      id_empleado,
+      id_contrato,
+      codigo_concepto,
+      fecha_inicial,
+      fecha_final,
+      cantidad,
+      valor,
+      observacion,
+      estado,
+      fk_agencia,
+      origen,
+      fk_seguridad_creacion,
+      fk_seguridad_edicion
+    )
+    SELECT
+      :periodo,
+      e.id_empleado,
+      :contrato,
+      :concepto,
+      :inicio,
+      :fin,
+      :cantidad,
+      :valor,
+      
+      :obs,
+      'ABIERTO',
+      e.id_agencia,
+      'INDIVIDUAL'
+      :usr,
+      :usr
+    FROM nomina.empleados e
+    WHERE e.id_empleado = :empleado
+    RETURNING id_novedad
+    """;
 
         var params = new MapSqlParameterSource()
                 .addValue("periodo", dto.getIdPeriodo())
@@ -185,14 +189,14 @@ public class NovedadesNominaRepository {
                 .addValue("cantidad", dto.getCantidad())
                 .addValue("valor", dto.getValor())
                 .addValue("obs", dto.getObservacion())
-                .addValue("agencia", dto.getFkAgencia())
+                // ⛔ NO fk_agencia desde el DTO
                 .addValue("usr", idUsuario != null ? idUsuario : 1);
 
         return jdbc.queryForObject(sql, params, Integer.class);
     }
 
     // =========================================================
-    // ACTUALIZAR (solo BORRADOR)
+    // ACTUALIZAR (solo ABIERTO)
     // =========================================================
     public void actualizar(Integer id, NovedadNominaFormDTO dto, Integer idUsuario) {
 
@@ -212,7 +216,7 @@ public class NovedadesNominaRepository {
               fk_seguridad_edicion = :usr,
               fecha_edicion = CURRENT_TIMESTAMP
             WHERE id_novedad = :id
-              AND estado = 'BORRADOR'
+              AND estado = 'ABIERTO'
         """;
 
         var params = new MapSqlParameterSource()
@@ -233,14 +237,14 @@ public class NovedadesNominaRepository {
     }
 
     // =========================================================
-    // ELIMINAR (solo BORRADOR)
+    // ELIMINAR (solo ABIERTO)
     // =========================================================
     public void eliminar(Integer id) {
 
         String sql = """
             DELETE FROM nomina.novedades_nomina
             WHERE id_novedad = :id
-              AND estado = 'BORRADOR'
+              AND estado = 'ABIERTO'
         """;
 
         jdbc.update(sql, new MapSqlParameterSource("id", id));
@@ -389,5 +393,166 @@ public class NovedadesNominaRepository {
 
         return count != null && count > 0;
     }
+
+    // =========================================================
+// 🔁 MARCAR NOVEDADES ABIERTO COMO APLICADAS
+// =========================================================
+    public void marcarNovedadesAplicadas(
+            Integer idPeriodo,
+            Integer idContrato,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+        UPDATE nomina.novedades_nomina
+        SET
+          estado = 'CERRADO',
+          fk_seguridad_edicion = :usr,
+          fecha_edicion = CURRENT_TIMESTAMP
+        WHERE id_periodo = :periodo
+          AND id_contrato = :contrato
+          AND estado = 'ABIERTO'
+    """;
+
+        jdbc.update(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("periodo", idPeriodo)
+                        .addValue("contrato", idContrato)
+                        .addValue("usr", idUsuario != null ? idUsuario : 1)
+        );
+    }
+
+    // =========================================================
+    // ➕ INSERTAR NOVEDAD AUTOMÁTICA (APLICADA)
+    // =========================================================
+    public void insertarNovedadAplicada(
+            Integer idPeriodo,
+            Integer idEmpleado,
+            Integer idContrato,
+            String codigoConcepto,
+            java.time.LocalDate fechaInicial,
+            java.time.LocalDate fechaFinal,
+            java.math.BigDecimal cantidad,
+            java.math.BigDecimal valor,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+        INSERT INTO nomina.novedades_nomina (
+          id_periodo,
+          id_empleado,
+          id_contrato,
+          codigo_concepto,
+          fecha_inicial,
+          fecha_final,
+          cantidad,
+          valor,
+          observacion,
+          estado,
+          fk_agencia,
+          fk_seguridad_creacion,
+          fk_seguridad_edicion,
+          fecha_creacion,
+          fecha_edicion,
+          origen
+        )
+        SELECT
+          :periodo,
+          e.id_empleado,
+          :contrato,
+          :concepto,
+          :inicio,
+          :fin,
+          :cantidad,
+          :valor,
+          'Generado automáticamente por proceso de liquidación',
+          'CERRADO',
+          e.id_agencia,
+          :usr,
+          :usr,
+          CURRENT_TIMESTAMP,
+          CURRENT_TIMESTAMP,
+          'CALCULO'
+        FROM nomina.empleados e
+        WHERE e.id_empleado = :empleado
+    """;
+
+        jdbc.update(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("periodo", idPeriodo)
+                        .addValue("empleado", idEmpleado)
+                        .addValue("contrato", idContrato)
+                        .addValue("concepto", codigoConcepto)
+                        .addValue("inicio", fechaInicial)
+                        .addValue("fin", fechaFinal)
+                        .addValue("cantidad", cantidad)
+                        .addValue("valor", valor)
+                        .addValue("usr", idUsuario != null ? idUsuario : 1)
+        );
+    }
+
+    public int eliminarNovedadesCalculoPorPeriodo(Integer idPeriodo) {
+
+        String sql = """
+        DELETE FROM nomina.novedades_nomina
+        WHERE id_periodo = :periodo
+          AND origen = 'CALCULO'
+    """;
+
+        return jdbc.update(
+                sql,
+                new MapSqlParameterSource("periodo", idPeriodo)
+        );
+    }
+
+    // =========================================================
+// 🧹 ELIMINAR NOVEDADES DE CÁLCULO AL ABRIR PERÍODO
+// =========================================================
+    public int eliminarNovedadesCalculoPorPeriodo(
+            Integer idPeriodo,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+        DELETE FROM nomina.novedades_nomina
+        WHERE id_periodo = :periodo
+          AND origen = 'CALCULO'
+    """;
+
+        return jdbc.update(
+                sql,
+                new MapSqlParameterSource("periodo", idPeriodo)
+        );
+    }
+
+    // =========================================================
+    // CAMBIAR ESTADO DE TODAS LAS NOVEDADES POR PERÍODO
+    // =========================================================
+    public void actualizarEstadoPorPeriodo(
+            Integer idPeriodo,
+            String estado,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+        UPDATE nomina.novedades_nomina
+        SET
+          estado = :estado,
+          fk_seguridad_edicion = :usr,
+          fecha_edicion = CURRENT_TIMESTAMP
+        WHERE id_periodo = :periodo
+    """;
+
+        jdbc.update(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("periodo", idPeriodo)
+                        .addValue("estado", estado)
+                        .addValue("usr", idUsuario != null ? idUsuario : 1)
+        );
+    }
+
 
 }

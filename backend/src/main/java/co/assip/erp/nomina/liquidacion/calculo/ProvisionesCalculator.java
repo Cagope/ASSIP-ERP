@@ -137,7 +137,7 @@ public class ProvisionesCalculator {
               ON c.codigo_concepto = n.codigo_concepto
             WHERE n.id_periodo = :idPeriodo
               AND n.id_contrato = :idContrato
-              AND n.estado = 'BORRADOR'
+              AND n.estado = 'ABIERTO'
               AND c.tipo_concepto = 'PROVISION'
         """;
 

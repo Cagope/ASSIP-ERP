@@ -122,7 +122,7 @@ public class CargoRepository {
     }
 
     // ============================================================
-    // ✅ DESACTIVAR (NO BORRA FÍSICO)
+    // ✅ DESACTIVAR (NO ELIMINA FÍSICO)
     // ============================================================
     public void desactivar(Integer idCargo, Integer idUsuario) {
 

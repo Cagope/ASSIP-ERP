@@ -27,10 +27,13 @@ public class DevengadosCalculator {
         List<LiquidacionDetalleDTO> detalles = new ArrayList<>();
 
         // =========================
-        // 1️⃣ NOVEDADES DEVENGADO (PRIORIDAD)
+        // 1️⃣ DEVENGADOS POR NOVEDAD (PRIORIDAD ABSOLUTA)
         // =========================
         Map<String, LiquidacionDetalleDTO> devengadosPorNovedad =
-                obtenerDevengadosPorNovedadesMap(idPeriodoNomina, contrato.getIdContrato());
+                obtenerDevengadosPorNovedadesMap(
+                        idPeriodoNomina,
+                        contrato.getIdContrato()
+                );
 
         detalles.addAll(devengadosPorNovedad.values());
 
@@ -42,10 +45,14 @@ public class DevengadosCalculator {
         ctx.put(BaseCalculo.SALARIO_BASE, contrato.getSalarioBase());
 
         // =========================
-        // 2️⃣ DEVENGADOS AUTOMÁTICOS (SOLO SI NO HAY NOVEDAD)
+        // 2️⃣ DEVENGADOS AUTOMÁTICOS
+        //    (EXCLUYE AUX TRANSPORTE)
         // =========================
         detalles.addAll(
-                obtenerDevengadosAutomaticos(ctx, devengadosPorNovedad.keySet())
+                obtenerDevengadosAutomaticos(
+                        ctx,
+                        devengadosPorNovedad.keySet()
+                )
         );
 
         return detalles;
@@ -75,8 +82,14 @@ public class DevengadosCalculator {
 
             String codigo = rs.getString("codigo_concepto");
 
-            // 🚫 Si hay novedad, NO se calcula automático
+            // 🚫 BLOQUEO POR NOVEDAD
             if (codigosBloqueados.contains(codigo)) {
+                return null;
+            }
+
+            // 🚫 BLOQUEO TÉCNICO: AUXILIO DE TRANSPORTE
+            // ❗ ESTE CONCEPTO SOLO DEBE ENTRAR POR NOVEDAD
+            if ("AUX_TRANSP".equals(codigo) || "AUX_TRANSPORTE".equals(codigo)) {
                 return null;
             }
 
@@ -109,7 +122,7 @@ public class DevengadosCalculator {
     }
 
     // =========================================================
-    // 🔹 DEVENGADOS POR NOVEDADES (VALOR TOTAL REAL)
+    // 🔹 DEVENGADOS POR NOVEDADES
     // =========================================================
     private Map<String, LiquidacionDetalleDTO> obtenerDevengadosPorNovedadesMap(
             Integer idPeriodoNomina,
@@ -127,7 +140,7 @@ public class DevengadosCalculator {
               ON c.codigo_concepto = n.codigo_concepto
             WHERE n.id_periodo = :idPeriodo
               AND n.id_contrato = :idContrato
-              AND n.estado = 'BORRADOR'
+              AND n.estado = 'ABIERTO'
               AND c.tipo_concepto = 'DEVENGADO'
         """;
 

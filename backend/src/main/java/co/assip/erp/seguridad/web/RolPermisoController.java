@@ -40,7 +40,7 @@ public class RolPermisoController {
         Usuario usuarioActual = usuarioService.getUsuarioActual(req);
         accessValidator.validarAcceso(usuarioActual, "ROLES_EDIT");
 
-        // 1. Borrar permisos existentes de ese rol
+        // 1. Elimina permisos existentes de ese rol
         List<Permiso> actuales = permisoRepository.findByIdRol(idRol);
         permisoRepository.deleteAll(actuales);
 

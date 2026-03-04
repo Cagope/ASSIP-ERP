@@ -6,9 +6,9 @@ import co.assip.erp.nomina.liquidacion.calculo.DevengadosCalculator;
 import co.assip.erp.nomina.liquidacion.calculo.IbcCalculator;
 import co.assip.erp.nomina.liquidacion.calculo.ProvisionesCalculator;
 import co.assip.erp.nomina.liquidacion.dto.LiquidacionDetalleDTO;
+import co.assip.erp.nomina.liquidacion.dto.LiquidacionPreviewExcelDTO;
 import co.assip.erp.nomina.liquidacion.dto.LiquidacionRequestDTO;
 import co.assip.erp.nomina.liquidacion.dto.TotalesLiquidacionDTO;
-import co.assip.erp.nomina.liquidacion.dto.LiquidacionPreviewExcelDTO;
 import co.assip.erp.seguridad.repository.UsuarioAgenciaRepository;
 import co.assip.erp.seguridad.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+
+import co.assip.erp.nomina.periodos_nomina.PeriodosNominaRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -29,22 +31,43 @@ public class LiquidacionPreviewService {
     private final DevengadosCalculator devengadosCalculator;
     private final DeduccionesCalculator deduccionesCalculator;
     private final ProvisionesCalculator provisionesCalculator;
+    private final PeriodosNominaRepository periodosNominaRepo;
 
     // =========================================================
     // 👁️ PREVISUALIZAR LIQUIDACIÓN DE PERÍODO (SIN PERSISTIR)
     // =========================================================
     public List<PreviewContratoResult> previewPeriodo(LiquidacionRequestDTO request) {
 
-        if (request.getIdPeriodoNomina() == null) {
-            throw new IllegalStateException("El período de nómina es obligatorio");
+        // 🔑 Resolver período operativo
+        Integer idPeriodo = request.getIdPeriodoNomina();
+
+        if (idPeriodo == null) {
+            idPeriodo = liquidacionRepo.obtenerPeriodoOperativo(request.getFkAgencia());
+        }
+
+        if (idPeriodo == null) {
+            throw new IllegalStateException(
+                    "No existe un período de nómina ABIERTO para la agencia"
+            );
         }
 
         validarAgencia(request.getFkAgencia());
 
-        // 1️⃣ Contratos a liquidar (MISMO QUERY oficial)
+        // 🔑 Obtener label del período (UNA sola vez)
+        PeriodosNominaRepository.PeriodoLabel periodo =
+                periodosNominaRepo.obtenerPeriodoLabel(idPeriodo);
+
+        if (periodo == null) {
+            throw new IllegalStateException(
+                    "No se pudo resolver información del período operativo"
+            );
+        }
+
+        // 1️⃣ Contratos a liquidar
         List<EmpleadoContratoDTO> contratos =
                 liquidacionRepo.obtenerContratosParaLiquidacion(
-                        request.getIdPeriodoNomina()
+                        idPeriodo,
+                        request.getFkAgencia()
                 );
 
         if (contratos.isEmpty()) {
@@ -59,7 +82,7 @@ public class LiquidacionPreviewService {
         for (EmpleadoContratoDTO contrato : contratos) {
 
             BigDecimal ibc = ibcCalculator.calcular(
-                    request.getIdPeriodoNomina(),
+                    idPeriodo,
                     contrato
             );
 
@@ -67,7 +90,7 @@ public class LiquidacionPreviewService {
 
             detalles.addAll(
                     devengadosCalculator.calcular(
-                            request.getIdPeriodoNomina(),
+                            idPeriodo,
                             contrato,
                             ibc
                     )
@@ -75,7 +98,7 @@ public class LiquidacionPreviewService {
 
             detalles.addAll(
                     deduccionesCalculator.calcular(
-                            request.getIdPeriodoNomina(),
+                            idPeriodo,
                             contrato,
                             ibc
                     )
@@ -85,6 +108,7 @@ public class LiquidacionPreviewService {
 
             resultado.add(
                     new PreviewContratoResult(
+                            periodo,
                             contrato,
                             ibc,
                             totales,
@@ -118,7 +142,7 @@ public class LiquidacionPreviewService {
         t.setTotalDevengados(devengados);
         t.setTotalDeducciones(deducciones);
 
-        // 🔹 NO se usa en preview, pero se deja en cero para compatibilidad
+        // 🔹 No se usa en preview
         t.setTotalProvisiones(BigDecimal.ZERO);
 
         t.setNetoPagar(devengados.subtract(deducciones));
@@ -144,6 +168,7 @@ public class LiquidacionPreviewService {
     // 📦 RESULTADO INTERNO DE PREVIEW POR CONTRATO
     // =========================================================
     public record PreviewContratoResult(
+            PeriodosNominaRepository.PeriodoLabel periodo,
             EmpleadoContratoDTO contrato,
             BigDecimal ibc,
             TotalesLiquidacionDTO totales,
@@ -151,14 +176,18 @@ public class LiquidacionPreviewService {
     ) {}
 
     // =========================================================
-// 📤 PREVIEW PLANO PARA EXPORTACIÓN EXCEL
-// =========================================================
+    // 📤 PREVIEW PLANO PARA EXPORTACIÓN EXCEL
+    // =========================================================
     public List<LiquidacionPreviewExcelDTO> previewPeriodoExcel(
             LiquidacionRequestDTO request
     ) {
 
         List<PreviewContratoResult> preview = previewPeriodo(request);
         List<LiquidacionPreviewExcelDTO> filas = new ArrayList<>();
+
+        Integer idPeriodo = request.getIdPeriodoNomina() != null
+                ? request.getIdPeriodoNomina()
+                : liquidacionRepo.obtenerPeriodoOperativo(request.getFkAgencia());
 
         for (PreviewContratoResult r : preview) {
 
@@ -169,24 +198,15 @@ public class LiquidacionPreviewService {
 
                 LiquidacionPreviewExcelDTO x = new LiquidacionPreviewExcelDTO();
 
-                // =========================
-                // EMPLEADO
-                // =========================
                 x.setIdEmpleado(contrato.getIdEmpleado());
-                x.setNombreEmpleado(null);      // se llena luego con vista
+                x.setNombreEmpleado(null);
                 x.setDocumentoEmpleado(null);
 
-                // =========================
-                // CONTRATO
-                // =========================
                 x.setIdContrato(contrato.getIdContrato());
                 x.setFechaInicioContrato(contrato.getFechaInicio());
                 x.setFechaFinContrato(contrato.getFechaFin());
                 x.setContratoActivo(contrato.getActivo());
 
-                // =========================
-                // ORGANIZACIÓN
-                // =========================
                 x.setIdAgencia(request.getFkAgencia());
                 x.setNombreAgencia(null);
 
@@ -196,42 +216,23 @@ public class LiquidacionPreviewService {
                 x.setIdCargo(contrato.getIdCargo());
                 x.setNombreCargo(null);
 
-                // =========================
-                // PERÍODO
-                // =========================
-                x.setIdPeriodoNomina(request.getIdPeriodoNomina());
+                x.setIdPeriodoNomina(idPeriodo);
 
-                // =========================
-                // CONCEPTO
-                // =========================
                 x.setCodigoConcepto(d.getCodigoConcepto());
                 x.setNombreConcepto(null);
                 x.setTipoConcepto(d.getTipo());
                 x.setOrigen(d.getOrigen());
 
-
-                // =========================
-                // MOTOR
-                // =========================
                 x.setTipoCalculo(d.getTipoCalculo());
                 x.setMultiplicador(d.getMultiplicador());
 
-                // =========================
-                // CÁLCULO
-                // =========================
                 x.setCantidad(d.getCantidad());
                 x.setValorUnitario(d.getValorUnitario());
                 x.setBaseCalculoValor(d.getBaseCalculo());
                 x.setValorTotal(d.getValorTotal());
 
-                // =========================
-                // NOVEDAD
-                // =========================
                 x.setIdNovedadNomina(d.getIdNovedadNomina());
 
-                // =========================
-                // TOTALES
-                // =========================
                 x.setSalarioBase(contrato.getSalarioBase());
                 x.setIbc(r.ibc());
                 x.setTotalDevengados(totales.getTotalDevengados());
@@ -239,9 +240,6 @@ public class LiquidacionPreviewService {
                 x.setTotalProvisiones(totales.getTotalProvisiones());
                 x.setNetoPagar(totales.getNetoPagar());
 
-                // =========================
-                // CONTROL
-                // =========================
                 x.setEstadoLiquidacion("PREVIEW");
 
                 filas.add(x);
@@ -250,5 +248,4 @@ public class LiquidacionPreviewService {
 
         return filas;
     }
-
 }

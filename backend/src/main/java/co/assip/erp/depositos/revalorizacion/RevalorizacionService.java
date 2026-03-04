@@ -91,7 +91,7 @@ public class RevalorizacionService {
     }
 
     // ---------------------------------------------------------------------
-    // ⚠ Métodos de impacto en BD — Deshabilitados para pruebas (NO BORRAR)
+    // ⚠ Métodos de impacto en BD — Deshabilitados para pruebas (NO ELIMINAR)
     // ---------------------------------------------------------------------
 
 //    private void registrarMovimientoReval(

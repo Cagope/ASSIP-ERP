@@ -98,7 +98,8 @@ public class NovedadesNominaMasivoRepository {
           fecha_edicion,
           id_contrato,
           estado,
-          fk_agencia
+          fk_agencia,
+          origen
         )
         SELECT
           :idPeriodo,
@@ -137,7 +138,8 @@ public class NovedadesNominaMasivoRepository {
           CURRENT_TIMESTAMP,
           c.id_contrato,
           :estado,
-          e.id_agencia
+          e.id_agencia,
+          'MASIVO'
 
         FROM nomina.empleado_contratos c
         JOIN nomina.empleados e

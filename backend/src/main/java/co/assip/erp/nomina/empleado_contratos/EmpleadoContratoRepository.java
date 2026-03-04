@@ -19,18 +19,22 @@ public class EmpleadoContratoRepository {
 
     private final NamedParameterJdbcTemplate jdbc;
 
-    /// ============================================================
-// LISTAR (VIEW ENRIQUECIDO)
 // ============================================================
-    // ============================================================
 // LISTAR (vista decodificada)
 // ============================================================
-    public List<EmpleadoContratoListViewDTO> listar() {
+public List<EmpleadoContratoListViewDTO> listar() {
 
-        String sql = """
+    String sql = """
         SELECT
           c.id_contrato                 AS idContrato,
           c.id_empleado                 AS idEmpleado,
+
+          -- ✅ EMPLEADO (para Documento / Nombre)
+          e.id_datos_personal           AS idDatosPersonal,
+          dp.documento                  AS documentoEmpleado,
+          (dp.primer_apellido || ' ' ||
+           COALESCE(dp.segundo_apellido || ' ', '') ||
+           dp.nombres)                  AS nombreEmpleado,
 
           c.fecha_inicio                AS fechaInicio,
           c.fecha_fin                   AS fechaFin,
@@ -66,6 +70,11 @@ public class EmpleadoContratoRepository {
 
           c.id_cuenta_ahorro_nomina     AS idCuentaAhorroNomina,
 
+          -- ✅ CUENTA NÓMINA + FORMA (vista existente)
+          dep.codigo_cuenta             AS cuentaNominaDisplay,
+          dep.codigo_forma              AS idFormaAhorroNomina,
+          dep.nombre_forma_ahorro       AS nombreFormaAhorroNomina,
+
           c.fecha_envio_nota_renovacion AS fechaEnvioNotaRenovacion,
           c.clase_riesgo_arl            AS claseRiesgoArl,
           c.porcentaje_arl              AS porcentajeArl,
@@ -73,6 +82,12 @@ public class EmpleadoContratoRepository {
           c.activo                      AS activo
 
         FROM nomina.empleado_contratos c
+
+        JOIN nomina.empleados e
+          ON e.id_empleado = c.id_empleado
+
+        JOIN hoja_vida.datos_personales dp
+          ON dp.id_datos_personal = e.id_datos_personal
 
         LEFT JOIN nomina.secciones_nomina s
           ON s.id_seccion = c.id_seccion
@@ -98,67 +113,78 @@ public class EmpleadoContratoRepository {
         LEFT JOIN nomina.entidades_caja_compensacion caja
           ON caja.id_caja = c.id_caja_compensacion
 
+        LEFT JOIN depositos.vw_depositos_cuentas_ahorro_detalle dep
+          ON dep.id_cuenta_ahorro = c.id_cuenta_ahorro_nomina
+
         ORDER BY c.id_contrato DESC
     """;
 
-        return jdbc.query(sql, (rs, rowNum) ->
-                EmpleadoContratoListViewDTO.builder()
-                        .idContrato(rs.getInt("idContrato"))
-                        .idEmpleado(rs.getInt("idEmpleado"))
+    return jdbc.query(sql, (rs, rowNum) -> {
 
-                        .fechaInicio(rs.getDate("fechaInicio").toLocalDate())
-                        .fechaFin(rs.getDate("fechaFin") != null
-                                ? rs.getDate("fechaFin").toLocalDate()
-                                : null)
+        Object idDpObj = rs.getObject("idDatosPersonal");
+        Integer idDatosPersonal = (idDpObj == null) ? null : ((Number) idDpObj).intValue();
 
-                        .idTipoContrato(rs.getObject("idTipoContrato", Integer.class))
-                        .tipoContratoNombre(rs.getString("tipoContratoNombre"))
+        return EmpleadoContratoListViewDTO.builder()
+                .idContrato(rs.getInt("idContrato"))
+                .idEmpleado(rs.getInt("idEmpleado"))
 
-                        .periodoPago(rs.getString("periodoPago"))
+                // ✅ EMPLEADO
+                .idDatosPersonal(idDatosPersonal)
+                .documentoEmpleado(rs.getString("documentoEmpleado"))
+                .nombreEmpleado(rs.getString("nombreEmpleado"))
 
-                        .idSeccion(rs.getObject("idSeccion", Integer.class))
-                        .nombreSeccion(rs.getString("nombreSeccion"))
+                .fechaInicio(rs.getDate("fechaInicio").toLocalDate())
+                .fechaFin(rs.getDate("fechaFin") != null ? rs.getDate("fechaFin").toLocalDate() : null)
 
-                        .idCargo(rs.getObject("idCargo", Integer.class))
-                        .nombreCargo(rs.getString("nombreCargo"))
+                .idTipoContrato(rs.getObject("idTipoContrato", Integer.class))
+                .tipoContratoNombre(rs.getString("tipoContratoNombre"))
 
-                        .salarioBase(rs.getBigDecimal("salarioBase"))
-                        .salarioIntegral(rs.getBoolean("salarioIntegral"))
+                .periodoPago(rs.getString("periodoPago"))
 
-                        .idEps(rs.getObject("idEps", Integer.class))
-                        .nombreEps(rs.getString("nombreEps"))
+                .idSeccion(rs.getObject("idSeccion", Integer.class))
+                .nombreSeccion(rs.getString("nombreSeccion"))
 
-                        .idAfp(rs.getObject("idAfp", Integer.class))
-                        .nombreAfp(rs.getString("nombreAfp"))
+                .idCargo(rs.getObject("idCargo", Integer.class))
+                .nombreCargo(rs.getString("nombreCargo"))
 
-                        .idCesantias(rs.getObject("idCesantias", Integer.class))
-                        .nombreCesantias(rs.getString("nombreCesantias"))
+                .salarioBase(rs.getBigDecimal("salarioBase"))
+                .salarioIntegral(rs.getBoolean("salarioIntegral"))
 
-                        .idArl(rs.getObject("idArl", Integer.class))
-                        .nombreArl(rs.getString("nombreArl"))
+                .idEps(rs.getObject("idEps", Integer.class))
+                .nombreEps(rs.getString("nombreEps"))
 
-                        .idCajaCompensacion(rs.getObject("idCajaCompensacion", Integer.class))
-                        .nombreCajaCompensacion(rs.getString("nombreCajaCompensacion"))
+                .idAfp(rs.getObject("idAfp", Integer.class))
+                .nombreAfp(rs.getString("nombreAfp"))
 
-                        .idCuentaAhorroNomina(rs.getObject("idCuentaAhorroNomina", Long.class))
+                .idCesantias(rs.getObject("idCesantias", Integer.class))
+                .nombreCesantias(rs.getString("nombreCesantias"))
 
-                        .fechaEnvioNotaRenovacion(
-                                rs.getDate("fechaEnvioNotaRenovacion") != null
-                                        ? rs.getDate("fechaEnvioNotaRenovacion").toLocalDate()
-                                        : null
-                        )
+                .idArl(rs.getObject("idArl", Integer.class))
+                .nombreArl(rs.getString("nombreArl"))
 
-                        .claseRiesgoArl(
-                                rs.getObject("claseRiesgoArl") == null
-                                        ? null
-                                        : ((Integer) rs.getObject("claseRiesgoArl")).shortValue()
-                        )
+                .idCajaCompensacion(rs.getObject("idCajaCompensacion", Integer.class))
+                .nombreCajaCompensacion(rs.getString("nombreCajaCompensacion"))
 
-                        .porcentajeArl(rs.getBigDecimal("porcentajeArl"))
-                        .activo(rs.getBoolean("activo"))
+                .idCuentaAhorroNomina(rs.getObject("idCuentaAhorroNomina", Long.class))
+                .cuentaNominaDisplay(rs.getString("cuentaNominaDisplay"))
+                .idFormaAhorroNomina(rs.getObject("idFormaAhorroNomina", Integer.class))
+                .nombreFormaAhorroNomina(rs.getString("nombreFormaAhorroNomina"))
 
-                        .build()
-        );
+                .fechaEnvioNotaRenovacion(
+                        rs.getDate("fechaEnvioNotaRenovacion") != null
+                                ? rs.getDate("fechaEnvioNotaRenovacion").toLocalDate()
+                                : null
+                )
+
+                .claseRiesgoArl(
+                        rs.getObject("claseRiesgoArl") == null
+                                ? null
+                                : ((Number) rs.getObject("claseRiesgoArl")).shortValue()
+                )
+                .porcentajeArl(rs.getBigDecimal("porcentajeArl"))
+                .activo(rs.getBoolean("activo"))
+                .build();
+        });
     }
 
     // ============================================================
@@ -171,6 +197,13 @@ public class EmpleadoContratoRepository {
           c.id_contrato                 AS idContrato,
           c.id_empleado                 AS idEmpleado,
 
+          -- ✅ EMPLEADO
+          e.id_datos_personal           AS idDatosPersonal,
+          dp.documento                  AS documentoEmpleado,
+          (dp.primer_apellido || ' ' ||
+           COALESCE(dp.segundo_apellido || ' ', '') ||
+           dp.nombres)                  AS nombreEmpleado,
+
           c.fecha_inicio                AS fechaInicio,
           c.fecha_fin                   AS fechaFin,
 
@@ -205,6 +238,10 @@ public class EmpleadoContratoRepository {
 
           c.id_cuenta_ahorro_nomina     AS idCuentaAhorroNomina,
 
+          dep.codigo_cuenta             AS cuentaNominaDisplay,
+          dep.codigo_forma              AS idFormaAhorroNomina,
+          dep.nombre_forma_ahorro       AS nombreFormaAhorroNomina,
+
           c.fecha_envio_nota_renovacion AS fechaEnvioNotaRenovacion,
           c.clase_riesgo_arl            AS claseRiesgoArl,
           c.porcentaje_arl              AS porcentajeArl,
@@ -212,6 +249,12 @@ public class EmpleadoContratoRepository {
           c.activo                      AS activo
 
         FROM nomina.empleado_contratos c
+
+        JOIN nomina.empleados e
+          ON e.id_empleado = c.id_empleado
+
+        JOIN hoja_vida.datos_personales dp
+          ON dp.id_datos_personal = e.id_datos_personal
 
         LEFT JOIN nomina.secciones_nomina s
           ON s.id_seccion = c.id_seccion
@@ -237,75 +280,81 @@ public class EmpleadoContratoRepository {
         LEFT JOIN nomina.entidades_caja_compensacion caja
           ON caja.id_caja = c.id_caja_compensacion
 
-        WHERE c.id_empleado = :idEmpleado
+        LEFT JOIN depositos.vw_depositos_cuentas_ahorro_detalle dep
+          ON dep.id_cuenta_ahorro = c.id_cuenta_ahorro_nomina
 
+        WHERE c.id_empleado = :idEmpleado
         ORDER BY c.fecha_inicio DESC
     """;
 
-        var params = new MapSqlParameterSource()
-                .addValue("idEmpleado", idEmpleado);
+        var params = new MapSqlParameterSource().addValue("idEmpleado", idEmpleado);
 
-        return jdbc.query(sql, params, (rs, rowNum) ->
-                EmpleadoContratoListViewDTO.builder()
-                        .idContrato(rs.getInt("idContrato"))
-                        .idEmpleado(rs.getInt("idEmpleado"))
+        return jdbc.query(sql, params, (rs, rowNum) -> {
 
-                        .fechaInicio(rs.getDate("fechaInicio").toLocalDate())
-                        .fechaFin(rs.getDate("fechaFin") != null
-                                ? rs.getDate("fechaFin").toLocalDate()
-                                : null)
+            Object idDpObj = rs.getObject("idDatosPersonal");
+            Integer idDatosPersonal = (idDpObj == null) ? null : ((Number) idDpObj).intValue();
 
-                        .idTipoContrato(rs.getObject("idTipoContrato", Integer.class))
-                        .tipoContratoNombre(rs.getString("tipoContratoNombre"))
+            return EmpleadoContratoListViewDTO.builder()
+                    .idContrato(rs.getInt("idContrato"))
+                    .idEmpleado(rs.getInt("idEmpleado"))
 
-                        .periodoPago(rs.getString("periodoPago"))
+                    .idDatosPersonal(idDatosPersonal)
+                    .documentoEmpleado(rs.getString("documentoEmpleado"))
+                    .nombreEmpleado(rs.getString("nombreEmpleado"))
 
-                        .idSeccion(rs.getObject("idSeccion", Integer.class))
-                        .nombreSeccion(rs.getString("nombreSeccion"))
+                    .fechaInicio(rs.getDate("fechaInicio").toLocalDate())
+                    .fechaFin(rs.getDate("fechaFin") != null ? rs.getDate("fechaFin").toLocalDate() : null)
 
-                        .idCargo(rs.getObject("idCargo", Integer.class))
-                        .nombreCargo(rs.getString("nombreCargo"))
+                    .idTipoContrato(rs.getObject("idTipoContrato", Integer.class))
+                    .tipoContratoNombre(rs.getString("tipoContratoNombre"))
 
-                        .salarioBase(rs.getBigDecimal("salarioBase"))
-                        .salarioIntegral(rs.getBoolean("salarioIntegral"))
+                    .periodoPago(rs.getString("periodoPago"))
 
-                        .idEps(rs.getObject("idEps", Integer.class))
-                        .nombreEps(rs.getString("nombreEps"))
+                    .idSeccion(rs.getObject("idSeccion", Integer.class))
+                    .nombreSeccion(rs.getString("nombreSeccion"))
 
-                        .idAfp(rs.getObject("idAfp", Integer.class))
-                        .nombreAfp(rs.getString("nombreAfp"))
+                    .idCargo(rs.getObject("idCargo", Integer.class))
+                    .nombreCargo(rs.getString("nombreCargo"))
 
-                        .idCesantias(rs.getObject("idCesantias", Integer.class))
-                        .nombreCesantias(rs.getString("nombreCesantias"))
+                    .salarioBase(rs.getBigDecimal("salarioBase"))
+                    .salarioIntegral(rs.getBoolean("salarioIntegral"))
 
-                        .idArl(rs.getObject("idArl", Integer.class))
-                        .nombreArl(rs.getString("nombreArl"))
+                    .idEps(rs.getObject("idEps", Integer.class))
+                    .nombreEps(rs.getString("nombreEps"))
 
-                        .idCajaCompensacion(rs.getObject("idCajaCompensacion", Integer.class))
-                        .nombreCajaCompensacion(rs.getString("nombreCajaCompensacion"))
+                    .idAfp(rs.getObject("idAfp", Integer.class))
+                    .nombreAfp(rs.getString("nombreAfp"))
 
-                        .idCuentaAhorroNomina(rs.getObject("idCuentaAhorroNomina", Long.class))
+                    .idCesantias(rs.getObject("idCesantias", Integer.class))
+                    .nombreCesantias(rs.getString("nombreCesantias"))
 
-                        .fechaEnvioNotaRenovacion(
-                                rs.getDate("fechaEnvioNotaRenovacion") != null
-                                        ? rs.getDate("fechaEnvioNotaRenovacion").toLocalDate()
-                                        : null
-                        )
+                    .idArl(rs.getObject("idArl", Integer.class))
+                    .nombreArl(rs.getString("nombreArl"))
 
-                        .claseRiesgoArl(
-                                rs.getObject("claseRiesgoArl") == null
-                                        ? null
-                                        : ((Integer) rs.getObject("claseRiesgoArl")).shortValue()
-                        )
+                    .idCajaCompensacion(rs.getObject("idCajaCompensacion", Integer.class))
+                    .nombreCajaCompensacion(rs.getString("nombreCajaCompensacion"))
 
-                        .porcentajeArl(rs.getBigDecimal("porcentajeArl"))
-                        .activo(rs.getBoolean("activo"))
+                    .idCuentaAhorroNomina(rs.getObject("idCuentaAhorroNomina", Long.class))
+                    .cuentaNominaDisplay(rs.getString("cuentaNominaDisplay"))
+                    .idFormaAhorroNomina(rs.getObject("idFormaAhorroNomina", Integer.class))
+                    .nombreFormaAhorroNomina(rs.getString("nombreFormaAhorroNomina"))
 
-                        .build()
-        );
+                    .fechaEnvioNotaRenovacion(
+                            rs.getDate("fechaEnvioNotaRenovacion") != null
+                                    ? rs.getDate("fechaEnvioNotaRenovacion").toLocalDate()
+                                    : null
+                    )
+
+                    .claseRiesgoArl(
+                            rs.getObject("claseRiesgoArl") == null
+                                    ? null
+                                    : ((Number) rs.getObject("claseRiesgoArl")).shortValue()
+                    )
+                    .porcentajeArl(rs.getBigDecimal("porcentajeArl"))
+                    .activo(rs.getBoolean("activo"))
+                    .build();
+        });
     }
-
-
 
     // ============================================================
     // OBTENER

@@ -77,7 +77,7 @@ public class LiquidacionNominaRepository {
                 0,
                 0,
                 0,
-                'LIQUIDADA',
+                'ABIERTO',
                 :idUsuario,
                 NOW()
             )
@@ -87,7 +87,9 @@ public class LiquidacionNominaRepository {
                 .addValue("idPeriodo", idPeriodoNomina)
                 .addValue("idContrato", contrato.getIdContrato())
                 .addValue("idEmpleado", contrato.getIdEmpleado())
-                .addValue("salarioBase", contrato.getSalarioBase() != null ? contrato.getSalarioBase() : BigDecimal.ZERO)
+                .addValue("salarioBase", contrato.getSalarioBase() != null
+                        ? contrato.getSalarioBase()
+                        : BigDecimal.ZERO)
                 .addValue("idUsuario", idUsuario);
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -139,6 +141,7 @@ public class LiquidacionNominaRepository {
                     FROM nomina.liquidacion_detalle d
                     WHERE d.id_liquidacion = l.id_liquidacion
                 ), 0),
+                estado = 'CERRADO',
                 fk_seguridad_edicion = :idUsuario,
                 fecha_edicion = NOW()
             WHERE l.id_liquidacion = :idLiquidacion
@@ -180,43 +183,21 @@ public class LiquidacionNominaRepository {
         });
 
         if (dto == null) {
-            throw new IllegalStateException("No existe liquidación con id_liquidacion=" + idLiquidacion);
+            throw new IllegalStateException(
+                    "No existe liquidación con id_liquidacion=" + idLiquidacion
+            );
         }
 
         return dto;
     }
 
     // =========================================================
-    // 🔄 CAMBIAR ESTADO (OPCIONAL)
-    // =========================================================
-    public void cambiarEstado(
-            Integer idLiquidacion,
-            String estado,
-            Integer idUsuario
-    ) {
-
-        String sql = """
-            UPDATE nomina.liquidaciones
-            SET
-                estado = :estado,
-                fk_seguridad_edicion = :idUsuario,
-                fecha_edicion = NOW()
-            WHERE id_liquidacion = :idLiquidacion
-        """;
-
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("estado", estado)
-                .addValue("idUsuario", idUsuario)
-                .addValue("idLiquidacion", idLiquidacion);
-
-        jdbc.update(sql, params);
-    }
-
-    // =========================================================
     // 📌 CONTRATOS A LIQUIDAR EN EL PERÍODO
-    // ✅ CAMBIO: traer documento + nombre empleado (sin pr.nombre_completo)
     // =========================================================
-    public List<EmpleadoContratoDTO> obtenerContratosParaLiquidacion(Integer idPeriodo) {
+    public List<EmpleadoContratoDTO> obtenerContratosParaLiquidacion(
+            Integer idPeriodo,
+            Integer idAgencia
+    ) {
 
         String sql = """
             SELECT
@@ -240,64 +221,249 @@ public class LiquidacionNominaRepository {
               c.clase_riesgo_arl             AS claseRiesgoArl,
               c.porcentaje_arl               AS porcentajeArl,
               c.activo                       AS activo,
-
-              -- ✅ NUEVO: documento + nombre (armado con columnas reales)
               pr.documento AS documentoEmpleado,
               TRIM(BOTH FROM CONCAT_WS(' ', pr.primer_apellido, pr.segundo_apellido, pr.nombres)) AS nombreEmpleado
-
             FROM nomina.empleado_contratos c
             JOIN nomina.periodos_nomina p
               ON c.fecha_inicio <= p.fecha_fin
              AND (c.fecha_fin IS NULL OR c.fecha_fin >= p.fecha_inicio)
-
             LEFT JOIN nomina.empleados e
               ON e.id_empleado = c.id_empleado
              AND e.activo = TRUE
-
             LEFT JOIN shared.vw_personas_resumen pr
               ON pr.id_datos_personal = e.id_datos_personal
              AND pr.activo = TRUE
-
             WHERE p.id_periodo = :idPeriodo
-              AND c.activo = TRUE
+               AND e.id_agencia = :idAgencia
+               AND c.activo = TRUE
         """;
 
-        var params = new MapSqlParameterSource()
-                .addValue("idPeriodo", idPeriodo);
+        return jdbc.query(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idPeriodo", idPeriodo)
+                        .addValue("idAgencia", idAgencia),
+                (rs, rowNum) -> {
 
-        return jdbc.query(sql, params, (rs, rowNum) -> {
+                    Date fi = rs.getDate("fechaInicio");
+                    Date ff = rs.getDate("fechaFin");
+                    Date fe = rs.getDate("fechaEnvioNotaRenovacion");
 
-            Date fi = rs.getDate("fechaInicio");
-            Date ff = rs.getDate("fechaFin");
-            Date fe = rs.getDate("fechaEnvioNotaRenovacion");
+                    return EmpleadoContratoDTO.builder()
+                            .idContrato(rs.getInt("idContrato"))
+                            .idEmpleado(rs.getInt("idEmpleado"))
+                            .idSeccion((Integer) rs.getObject("idSeccion"))
+                            .fechaInicio(fi != null ? fi.toLocalDate() : null)
+                            .fechaFin(ff != null ? ff.toLocalDate() : null)
+                            .idTipoContrato((Integer) rs.getObject("idTipoContrato"))
+                            .idCargo((Integer) rs.getObject("idCargo"))
+                            .salarioBase(rs.getBigDecimal("salarioBase"))
+                            .salarioIntegral((Boolean) rs.getObject("salarioIntegral"))
+                            .periodoPago(rs.getString("periodoPago"))
+                            .idEps((Integer) rs.getObject("idEps"))
+                            .idAfp((Integer) rs.getObject("idAfp"))
+                            .idCesantias((Integer) rs.getObject("idCesantias"))
+                            .idArl((Integer) rs.getObject("idArl"))
+                            .idCajaCompensacion((Integer) rs.getObject("idCajaCompensacion"))
+                            .idCuentaAhorroNomina((Long) rs.getObject("idCuentaAhorroNomina"))
+                            .fechaEnvioNotaRenovacion(fe != null ? fe.toLocalDate() : null)
+                            .claseRiesgoArl(
+                                    rs.getObject("claseRiesgoArl") != null
+                                            ? rs.getShort("claseRiesgoArl")
+                                            : null
+                            )
+                            .porcentajeArl(rs.getBigDecimal("porcentajeArl"))
+                            .activo(rs.getBoolean("activo"))
+                            .documentoEmpleado(rs.getString("documentoEmpleado"))
+                            .nombreEmpleado(rs.getString("nombreEmpleado"))
+                            .build();
+                }
+        );
+    }
 
-            return EmpleadoContratoDTO.builder()
-                    .idContrato(rs.getInt("idContrato"))
-                    .idEmpleado(rs.getInt("idEmpleado"))
-                    .idSeccion((Integer) rs.getObject("idSeccion"))
-                    .fechaInicio(fi != null ? fi.toLocalDate() : null)
-                    .fechaFin(ff != null ? ff.toLocalDate() : null)
-                    .idTipoContrato((Integer) rs.getObject("idTipoContrato"))
-                    .idCargo((Integer) rs.getObject("idCargo"))
-                    .salarioBase(rs.getBigDecimal("salarioBase"))
-                    .salarioIntegral((Boolean) rs.getObject("salarioIntegral"))
-                    .periodoPago(rs.getString("periodoPago"))
-                    .idEps((Integer) rs.getObject("idEps"))
-                    .idAfp((Integer) rs.getObject("idAfp"))
-                    .idCesantias((Integer) rs.getObject("idCesantias"))
-                    .idArl((Integer) rs.getObject("idArl"))
-                    .idCajaCompensacion((Integer) rs.getObject("idCajaCompensacion"))
-                    .idCuentaAhorroNomina((Long) rs.getObject("idCuentaAhorroNomina"))
-                    .fechaEnvioNotaRenovacion(fe != null ? fe.toLocalDate() : null)
-                    .claseRiesgoArl(rs.getObject("claseRiesgoArl") != null ? rs.getShort("claseRiesgoArl") : null)
-                    .porcentajeArl(rs.getBigDecimal("porcentajeArl"))
-                    .activo(rs.getBoolean("activo"))
+    // =========================================================
+    // 📆 PERÍODO OPERATIVO (primer ABIERTO por agencia)
+    // =========================================================
+    public Integer obtenerPeriodoOperativo(Integer idAgencia) {
 
-                    // ✅ NUEVO
-                    .documentoEmpleado(rs.getString("documentoEmpleado"))
-                    .nombreEmpleado(rs.getString("nombreEmpleado"))
+        String sql = """
+            SELECT p.id_periodo
+            FROM nomina.periodos_nomina p
+            WHERE p.estado = 'ABIERTO'
+              AND p.id_agencia = :idAgencia
+            ORDER BY p.fecha_inicio ASC
+            LIMIT 1
+        """;
 
-                    .build();
-        });
+        return jdbc.query(
+                sql,
+                new MapSqlParameterSource("idAgencia", idAgencia),
+                rs -> rs.next() ? rs.getInt("id_periodo") : null
+        );
+    }
+
+    // =========================================================
+// 🔓 ABRIR PERÍODO / ELIMINAR EJECUCIÓN
+// Reglas:
+// - SI elimina liquidacion_detalle + liquidaciones del período
+// - SI elimina novedades origen CALCULO
+// - SI devuelve novedades CERRADO -> ABIERTO (manuales)
+// =========================================================
+    public int abrirPeriodoEliminarEjecucion(Integer idPeriodoNomina, Integer idUsuario) {
+
+        if (idPeriodoNomina == null) {
+            throw new IllegalArgumentException("El id del período es obligatorio");
+        }
+
+        // 0) Validar que sea el último período "cerrado/ejecutado" por cronología
+        if (!esUltimoPeriodoEjecutado(idPeriodoNomina)) {
+            throw new IllegalStateException(
+                    "Solo se puede abrir el último período cerrado/ejecutado por cronología."
+            );
+        }
+
+        // 1) Eliminar primero DETALLE (para evitar violación FK)
+        String sqlDeleteDetalle = """
+        DELETE FROM nomina.liquidacion_detalle d
+        USING nomina.liquidaciones l
+        WHERE d.id_liquidacion = l.id_liquidacion
+          AND l.id_periodo_nomina = :idPeriodo
+    """;
+
+        jdbc.update(
+                sqlDeleteDetalle,
+                new MapSqlParameterSource("idPeriodo", idPeriodoNomina)
+        );
+
+        // 2) Eliminar cabeceras de liquidación
+        String sqlDeleteLiquidaciones = """
+        DELETE FROM nomina.liquidaciones
+        WHERE id_periodo_nomina = :idPeriodo
+    """;
+
+        int eliminadas = jdbc.update(
+                sqlDeleteLiquidaciones,
+                new MapSqlParameterSource("idPeriodo", idPeriodoNomina)
+        );
+
+        // 3) Eliminar novedades generadas por CÁLCULO
+        String sqlDeleteNovedadesCalculo = """
+        DELETE FROM nomina.novedades_nomina
+        WHERE id_periodo = :idPeriodo
+          AND origen = 'CALCULO'
+    """;
+
+        jdbc.update(
+                sqlDeleteNovedadesCalculo,
+                new MapSqlParameterSource("idPeriodo", idPeriodoNomina)
+        );
+
+        // 4) Devolver novedades MANUALES (MASIVO/INDIVIDUAL) de CERRADO -> ABIERTO
+        String sqlReabrirNovedadesManuales = """
+        UPDATE nomina.novedades_nomina
+        SET
+          estado = 'ABIERTO',
+          fk_seguridad_edicion = :usr,
+          fecha_edicion = NOW()
+        WHERE id_periodo = :idPeriodo
+          AND estado = 'CERRADO'
+          AND (origen IS NULL OR origen <> 'CALCULO')
+    """;
+
+        jdbc.update(
+                sqlReabrirNovedadesManuales,
+                new MapSqlParameterSource()
+                        .addValue("idPeriodo", idPeriodoNomina)
+                        .addValue("usr", idUsuario)
+        );
+
+        // 5) Reabrir período
+        String sqlAbrir = """
+        UPDATE nomina.periodos_nomina
+        SET estado = 'ABIERTO',
+            fk_seguridad_edicion = :usr,
+            fecha_edicion = NOW()
+        WHERE id_periodo = :idPeriodo
+    """;
+
+        jdbc.update(
+                sqlAbrir,
+                new MapSqlParameterSource()
+                        .addValue("idPeriodo", idPeriodoNomina)
+                        .addValue("usr", idUsuario)
+        );
+
+        return eliminadas;
+    }
+
+    // =========================================================
+    // 🔎 VALIDAR: ÚLTIMO PERÍODO EJECUTADO POR CRONOLOGÍA
+    // =========================================================
+    public boolean esUltimoPeriodoEjecutado(Integer idPeriodoNomina) {
+
+        String sql = """
+        SELECT COUNT(1)
+        FROM nomina.periodos_nomina p_actual
+        JOIN nomina.periodos_nomina p_otro
+          ON p_otro.id_agencia = p_actual.id_agencia
+         AND p_otro.estado = 'CERRADO'
+         AND p_otro.fecha_fin > p_actual.fecha_fin
+        WHERE p_actual.id_periodo = :idPeriodo
+          AND p_actual.estado = 'CERRADO'
+    """;
+
+        Integer count = jdbc.queryForObject(
+                sql,
+                new MapSqlParameterSource("idPeriodo", idPeriodoNomina),
+                Integer.class
+        );
+
+        return count != null && count == 0;
+    }
+
+    // =========================================================
+    // 🔎 OBTENER AGENCIA DEL PERÍODO
+    // =========================================================
+    public Integer obtenerAgenciaDelPeriodo(Integer idPeriodo) {
+
+        String sql = """
+            SELECT id_agencia
+            FROM nomina.periodos_nomina
+            WHERE id_periodo = :idPeriodo
+        """;
+
+        return jdbc.queryForObject(
+                sql,
+                new MapSqlParameterSource("idPeriodo", idPeriodo),
+                Integer.class
+        );
+    }
+
+    // =========================================================
+    // 🧹 ELIMINAR LIQUIDACIÓN POR PERÍODO (detalle + cabecera)
+    // =========================================================
+    public int eliminarPorPeriodo(Integer idPeriodoNomina) {
+
+        if (idPeriodoNomina == null) {
+            throw new IllegalArgumentException("El id del período es obligatorio");
+        }
+
+        // 1) Eliminar detalle primero (por FK)
+        String sqlDetalle = """
+        DELETE FROM nomina.liquidacion_detalle d
+        USING nomina.liquidaciones l
+        WHERE d.id_liquidacion = l.id_liquidacion
+          AND l.id_periodo_nomina = :idPeriodo
+    """;
+
+        jdbc.update(sqlDetalle, new MapSqlParameterSource("idPeriodo", idPeriodoNomina));
+
+        // 2) Eliminar cabeceras
+        String sqlCab = """
+        DELETE FROM nomina.liquidaciones
+        WHERE id_periodo_nomina = :idPeriodo
+    """;
+
+        return jdbc.update(sqlCab, new MapSqlParameterSource("idPeriodo", idPeriodoNomina));
     }
 }

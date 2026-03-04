@@ -54,8 +54,25 @@ public class LiquidacionPreviewExcelService {
                 conceptosNominaRepository.mapCodigoNombre(true);
 
         // 3️⃣ Fechas del período (1 query)
+
+        Integer idPeriodo = request.getIdPeriodoNomina();
+
+        if (idPeriodo == null) {
+            idPeriodo = preview.isEmpty()
+                    ? null
+                    : preview.get(0).periodo().idPeriodo();
+        }
+
         PeriodoFechas fechasPeriodo =
-                periodosNominaRepository.obtenerFechas(request.getIdPeriodoNomina());
+                idPeriodo != null
+                        ? periodosNominaRepository.obtenerFechas(idPeriodo)
+                        : null;
+
+        if (fechasPeriodo == null) {
+            throw new IllegalStateException(
+                    "No se encontraron fechas para el período de nómina id=" + idPeriodo
+            );
+        }
 
         // =========================================================
         // 🔎 LOOKUPS POR LOTE (EXPORTACIÓN)
@@ -204,7 +221,7 @@ public class LiquidacionPreviewExcelService {
                 // =========================
                 // 🗓 PERÍODO
                 // =========================
-                x.setIdPeriodoNomina(request.getIdPeriodoNomina());
+                x.setIdPeriodoNomina(idPeriodo);
                 x.setFechaInicioPeriodo(fechasPeriodo.fechaInicio());
                 x.setFechaFinPeriodo(fechasPeriodo.fechaFin());
 

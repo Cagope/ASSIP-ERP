@@ -137,7 +137,7 @@ public class NovedadesNominaMasivoService {
                 : BigDecimal.ZERO;
 
         String observacion = req.getObservacion();
-        String estado = "BORRADOR";
+        String estado = "ABIERTO";
 
         // -------------------------------------------------
         // CONTAR CONTRATOS

@@ -193,7 +193,7 @@ public class NovedadesNominaService {
 
         String st = estado.trim().toUpperCase();
 
-        if ("ABIERTO".equals(st) || "BORRADOR".equals(st)) return;
+        if ("ABIERTO".equals(st) || "ABIERTO".equals(st)) return;
 
         throw new IllegalStateException(
                 "El período no permite modificaciones. Estado: " + st
@@ -208,7 +208,7 @@ public class NovedadesNominaService {
         String estado = repo.obtenerEstadoNovedad(idNovedad);
         if (estado == null) estado = "";
 
-        if ("BORRADOR".equalsIgnoreCase(estado.trim())) return;
+        if ("ABIERTO".equalsIgnoreCase(estado.trim())) return;
 
         throw new IllegalStateException(
                 "La novedad no es editable. Estado: " + estado
@@ -239,5 +239,30 @@ public class NovedadesNominaService {
         }
 
         return valorEnviado;
+    }
+
+    // =========================================================
+// CAMBIO DE ESTADO MASIVO POR PERÍODO
+// =========================================================
+    public void actualizarEstadoPorPeriodo(
+            Integer idPeriodo,
+            String estado,
+            Integer idUsuario
+    ) {
+
+        if (idPeriodo == null) {
+            throw new IllegalArgumentException("ID período es obligatorio");
+        }
+
+        if (!"ABIERTO".equalsIgnoreCase(estado)
+                && !"CERRADO".equalsIgnoreCase(estado)) {
+            throw new IllegalArgumentException("Estado inválido: " + estado);
+        }
+
+        repo.actualizarEstadoPorPeriodo(
+                idPeriodo,
+                estado.toUpperCase(),
+                idUsuario
+        );
     }
 }
