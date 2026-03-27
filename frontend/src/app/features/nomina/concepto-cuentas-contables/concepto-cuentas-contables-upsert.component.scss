@@ -1,0 +1,76 @@
+.page {
+  padding: 16px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+}
+
+/* =========================
+   GRID FORM
+   ========================= */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.form-group.full {
+  grid-column: 1 / -1;
+}
+
+/* =========================
+   ACTIONS
+   ========================= */
+.actions {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.loading {
+  padding: 20px;
+}
+
+/* =========================
+   AUTOCOMPLETE CUENTAS
+   ========================= */
+.form-group {
+  position: relative; /* 🔑 clave para el dropdown */
+}
+
+.autocomplete {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+
+  background: #fff;
+  border: 1px solid #dcdcdc;
+  border-radius: 6px;
+
+  max-height: 220px;
+  overflow-y: auto;
+
+  z-index: 1000; /* 🔥 evita que se esconda */
+  box-shadow: 0 4px 10px rgba(0,0,0,.08);
+}
+
+.autocomplete li {
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.autocomplete li:hover {
+  background: #f2f2f2;
+}

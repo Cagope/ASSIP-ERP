@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 
+import co.assip.erp.shared.math.MathUtils;
+
 @Service
 public class NovedadesNominaService {
 
@@ -86,9 +88,14 @@ public class NovedadesNominaService {
                 dto.getCantidad()
         );
 
-        dto.setValor(
-                determinarValorFinal(dto.getValor(), valorCalculado)
-        );
+        valorCalculado = MathUtils.pesos(valorCalculado);
+
+        BigDecimal valorFinal =
+                determinarValorFinal(dto.getValor(), valorCalculado);
+
+        valorFinal = MathUtils.pesos(valorFinal);
+
+        dto.setValor(valorFinal);
 
         return repo.crear(dto, idUsuario);
     }
@@ -128,9 +135,14 @@ public class NovedadesNominaService {
                 dto.getCantidad()
         );
 
-        dto.setValor(
-                determinarValorFinal(dto.getValor(), valorCalculado)
-        );
+        valorCalculado = MathUtils.pesos(valorCalculado);
+
+        BigDecimal valorFinal =
+                determinarValorFinal(dto.getValor(), valorCalculado);
+
+        valorFinal = MathUtils.pesos(valorFinal);
+
+        dto.setValor(valorFinal);
 
         repo.actualizar(id, dto, idUsuario);
     }
@@ -193,7 +205,7 @@ public class NovedadesNominaService {
 
         String st = estado.trim().toUpperCase();
 
-        if ("ABIERTO".equals(st) || "ABIERTO".equals(st)) return;
+        if ("ABIERTO".equals(st)) return;
 
         throw new IllegalStateException(
                 "El período no permite modificaciones. Estado: " + st

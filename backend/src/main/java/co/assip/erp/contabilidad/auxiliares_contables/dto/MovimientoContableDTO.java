@@ -1,4 +1,4 @@
-package co.assip.erp.contabilidad.registro.dto;
+package co.assip.erp.contabilidad.auxiliares_contables.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -37,6 +37,12 @@ public class MovimientoContableDTO {
     // SOPORTE (OPCIONAL)
     // =========================
     private String documentoSoporte;   // ej: "CHEQUE 12345", "TRANSFERENCIA 8899"
+
+    // =========================
+    // TRAZABILIDAD ERP
+    // =========================
+    private String origenModulo;      // NOMINA, CARTERA, DEPOSITOS, CDAT, ACTIVOS
+    private String documentoOrigen;   // NOM-2026-02, PAG-000245, CTA-000541
 
     // =========================
     // GETTERS / SETTERS
@@ -127,5 +133,21 @@ public class MovimientoContableDTO {
 
     public void setDocumentoSoporte(String documentoSoporte) {
         this.documentoSoporte = documentoSoporte;
+    }
+
+    public String getOrigenModulo() {
+        return origenModulo;
+    }
+
+    public void setOrigenModulo(String origenModulo) {
+        this.origenModulo = origenModulo;
+    }
+
+    public String getDocumentoOrigen() {
+        return documentoOrigen;
+    }
+
+    public void setDocumentoOrigen(String documentoOrigen) {
+        this.documentoOrigen = documentoOrigen;
     }
 }

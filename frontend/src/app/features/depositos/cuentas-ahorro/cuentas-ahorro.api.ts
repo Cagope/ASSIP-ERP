@@ -6,47 +6,61 @@ import { environment } from '../../../../environments/environment';
 export class CuentasAhorroApi {
 
   private readonly http = inject(HttpClient);
-  private readonly base = `${environment.apiUrl}/depositos/cuentas-ahorro`;
+
+  // 👉 endpoint shared nuevo
+  private readonly baseShared =
+    `${environment.apiUrl}/shared/cuentas_ahorro`;
+
+  // 👉 endpoint depósitos (lo dejamos intacto)
+  private readonly baseDepositos =
+    `${environment.apiUrl}/depositos/cuentas-ahorro`;
 
   // ============================================================
-  // 🟦 LISTAR CUENTAS SEGÚN LAS AGENCIAS DEL USUARIO  ⭐ NUEVO
+  // 🟩 NUEVO → CUENTAS OPERATIVAS POR PERSONA
+  // ============================================================
+  listarPorPersona(idDatosPersonal: number) {
+    return this.http.get(
+      `${this.baseShared}/${idDatosPersonal}`
+    );
+  }
+
+  // ============================================================
+  // 🟦 LISTAR CUENTAS (depósitos)
   // ============================================================
   listarTodas() {
-    return this.http.get(`${this.base}`);
+    return this.http.get(`${this.baseDepositos}`);
   }
 
-  // ============================================================
-  // 🟦 LISTAR POR AGENCIA ESPECÍFICA  ⭐ NUEVO
-  // ============================================================
   listarPorAgencia(idAgencia: number) {
-    return this.http.get(`${this.base}/agencia/${idAgencia}`);
+    return this.http.get(
+      `${this.baseDepositos}/agencia/${idAgencia}`
+    );
   }
 
   // ============================================================
-  // 🔹 Buscar cuentas usando reporting (vista oficial)
+  // 🔹 REPORTING
   // ============================================================
   buscarCuentas(req: any) {
-    return this.http.post(`${environment.apiUrl}/reporting/query`, req);
+    return this.http.post(
+      `${environment.apiUrl}/reporting/query`,
+      req
+    );
   }
 
   // ============================================================
-  // 🔹 Validar reglas antes de crear
+  // 🔹 CRUD depósitos
   // ============================================================
   validar(data: any) {
-    return this.http.post(`${this.base}/validar`, data);
+    return this.http.post(`${this.baseDepositos}/validar`, data);
   }
 
-  // ============================================================
-  // 🔹 Crear cuenta
-  // ============================================================
   crear(data: any) {
-    return this.http.post(`${this.base}`, data);
+    return this.http.post(`${this.baseDepositos}`, data);
   }
 
-  // ============================================================
-  // 🔹 Traer detalle después de crear
-  // ============================================================
   detalle(idCuenta: number) {
-    return this.http.get(`${this.base}/${idCuenta}`);
+    return this.http.get(
+      `${this.baseDepositos}/${idCuenta}`
+    );
   }
 }

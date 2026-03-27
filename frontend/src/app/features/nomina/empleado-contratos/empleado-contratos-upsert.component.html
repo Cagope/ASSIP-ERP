@@ -14,14 +14,21 @@
            ========================= -->
       <div class="form-group full">
         <label>Empleado *</label>
-        <select class="form-control" [(ngModel)]="form.idEmpleado">
+        <select
+          class="form-control"
+          [(ngModel)]="form.idEmpleado"
+          (ngModelChange)="cargarCuentasEmpleado($event)">
+
           <option [ngValue]="null">-- Seleccione empleado --</option>
+
           <option
             *ngFor="let e of empleadosDisplay"
             [ngValue]="e.idEmpleado">
+
             {{ e.documento ? (e.documento + ' — ') : '' }}
             {{ e.nombre }}
             (ID {{ e.idEmpleado }})
+
           </option>
         </select>
       </div>
@@ -33,9 +40,7 @@
         <label>Sección</label>
         <select class="form-control" [(ngModel)]="form.idSeccion">
           <option [ngValue]="null">-- Seleccione --</option>
-          <option
-            *ngFor="let s of secciones"
-            [ngValue]="s.idSeccion">
+          <option *ngFor="let s of secciones" [ngValue]="s.idSeccion">
             {{ s.nombreSeccion }}
           </option>
         </select>
@@ -48,9 +53,7 @@
         <label>Tipo contrato *</label>
         <select class="form-control" [(ngModel)]="form.idTipoContrato">
           <option [ngValue]="null">-- Seleccione --</option>
-          <option
-            *ngFor="let t of tiposContrato"
-            [ngValue]="t.id">
+          <option *ngFor="let t of tiposContrato" [ngValue]="t.id">
             {{ t.nombre }}
           </option>
         </select>
@@ -61,18 +64,12 @@
            ========================= -->
       <div class="form-group">
         <label>Fecha inicio *</label>
-        <input
-          type="date"
-          class="form-control"
-          [(ngModel)]="form.fechaInicio">
+        <input type="date" class="form-control" [(ngModel)]="form.fechaInicio">
       </div>
 
       <div class="form-group">
         <label>Fecha fin</label>
-        <input
-          type="date"
-          class="form-control"
-          [(ngModel)]="form.fechaFin">
+        <input type="date" class="form-control" [(ngModel)]="form.fechaFin">
       </div>
 
       <!-- =========================
@@ -82,9 +79,7 @@
         <label>Cargo</label>
         <select class="form-control" [(ngModel)]="form.idCargo">
           <option [ngValue]="null">-- Seleccione --</option>
-          <option
-            *ngFor="let c of cargos"
-            [ngValue]="c.idCargo">
+          <option *ngFor="let c of cargos" [ngValue]="c.idCargo">
             {{ c.nombreCargo }}
           </option>
         </select>
@@ -95,10 +90,7 @@
            ========================= -->
       <div class="form-group">
         <label>Salario base *</label>
-        <input
-          type="number"
-          class="form-control"
-          [(ngModel)]="form.salarioBase">
+        <input type="number" class="form-control" [(ngModel)]="form.salarioBase">
       </div>
 
       <div class="form-group">
@@ -175,37 +167,35 @@
            ========================= -->
       <div class="form-group">
         <label>Clase riesgo ARL</label>
-        <input
-          type="number"
-          class="form-control"
-          [(ngModel)]="form.claseRiesgoArl">
+        <input type="number" class="form-control" [(ngModel)]="form.claseRiesgoArl">
       </div>
 
       <div class="form-group">
         <label>% ARL</label>
-        <input
-          type="number"
-          class="form-control"
-          [(ngModel)]="form.porcentajeArl">
+        <input type="number" class="form-control" [(ngModel)]="form.porcentajeArl">
       </div>
 
       <!-- =========================
-           CUENTAS
-           ========================= -->
+     CUENTA NÓMINA
+     ========================= -->
       <div class="form-group full">
-        <label>Cuenta nómina (display)</label>
-        <input
-          type="text"
-          class="form-control"
-          [(ngModel)]="form.cuentaNominaDisplay">
-      </div>
+        <label>Cuenta nómina</label>
 
-      <div class="form-group full">
-        <label>ID Cuenta ahorro nómina</label>
-        <input
-          type="number"
+        <select
           class="form-control"
           [(ngModel)]="form.idCuentaAhorroNomina">
+
+          <option [ngValue]="null">-- Seleccione cuenta --</option>
+
+          <option
+            *ngFor="let c of cuentasNomina"
+            [ngValue]="c.idCuentaAhorro">
+
+            {{ c.cuentaDisplay }}
+
+          </option>
+
+        </select>
       </div>
 
       <!-- =========================
@@ -213,10 +203,7 @@
            ========================= -->
       <div class="form-group">
         <label>Fecha envío nota renovación</label>
-        <input
-          type="date"
-          class="form-control"
-          [(ngModel)]="form.fechaEnvioNotaRenovacion">
+        <input type="date" class="form-control" [(ngModel)]="form.fechaEnvioNotaRenovacion">
       </div>
 
       <!-- =========================
@@ -237,14 +224,18 @@
         class="btn btn-primary"
         (click)="guardar()"
         [disabled]="guardando">
+
         {{ guardando ? 'Guardando...' : 'Guardar' }}
+
       </button>
 
       <button
         class="btn btn-light"
         (click)="volver()"
         [disabled]="guardando">
+
         Cancelar
+
       </button>
     </div>
 

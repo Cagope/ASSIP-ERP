@@ -1,0 +1,105 @@
+<div class="novedades-list">
+
+  <app-header-actions
+    titulo="Novedades de Nómina"
+    (nuevo)="nuevo()"
+    (refrescar)="cargar()">
+  </app-header-actions>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Buscar concepto, estado u observación..."
+      [(ngModel)]="q" />
+
+  </div>
+
+  <!-- Tabla -->
+  <table
+    class="table"
+    *ngIf="!loading && filtrados.length > 0; else vacio">
+
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Empleado</th>
+      <th>Concepto</th>
+      <th>Fecha Inicial</th>
+      <th>Fecha Final</th>
+      <th>Cantidad</th>
+      <th>Valor</th>
+      <th>Estado</th>
+      <th style="width:120px;">Acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+
+    <tr *ngFor="let x of filtrados">
+
+      <td>{{ x.idNovedad }}</td>
+
+      <!-- EMPLEADO -->
+      <td class="empleado">
+        {{ x.documentoEmpleado }} — {{ x.nombreEmpleado }}
+      </td>
+
+      <td class="nombre">
+        {{ x.codigoConcepto }}
+      </td>
+
+      <td>{{ x.fechaInicial | date:'yyyy-MM-dd' }}</td>
+      <td>{{ x.fechaFinal | date:'yyyy-MM-dd' }}</td>
+
+      <td class="center">
+        {{ x.cantidad }}
+      </td>
+
+      <td class="right valor">
+        {{ x.valor | number:'1.0-0' }}
+      </td>
+
+      <td>
+        <span class="badge">
+          {{ x.estado }}
+        </span>
+      </td>
+
+      <td>
+        <div class="acciones">
+
+          <button
+            class="btn sm"
+            (click)="editar(x.idNovedad)">
+            ✏️
+          </button>
+
+          <button
+            class="btn sm danger"
+            (click)="eliminar(x.idNovedad)">
+            🗑️
+          </button>
+
+        </div>
+      </td>
+
+    </tr>
+
+    </tbody>
+
+  </table>
+
+  <div *ngIf="loading" class="loading">
+    Cargando novedades...
+  </div>
+
+  <ng-template #vacio>
+    <p class="empty">
+      No hay novedades para mostrar.
+    </p>
+  </ng-template>
+
+</div>

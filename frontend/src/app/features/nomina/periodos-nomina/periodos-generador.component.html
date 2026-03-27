@@ -1,0 +1,86 @@
+<div class="page">
+
+  <h2>Generar períodos de nómina</h2>
+
+  <div class="card">
+
+    <div class="form-grid">
+
+      <!-- Agencia -->
+      <div class="form-group full">
+
+        <label>Agencia *</label>
+
+        <select class="form-control" [(ngModel)]="form.idAgencia">
+
+          <option [ngValue]="null">
+            -- Seleccione agencia --
+          </option>
+
+          <option *ngFor="let a of agencias" [ngValue]="a.idAgencia">
+            {{ a.nombreAgencia }}
+          </option>
+
+        </select>
+
+      </div>
+
+      <!-- Año -->
+      <div class="form-group">
+
+        <label>Año *</label>
+
+        <input
+          type="number"
+          class="form-control"
+          [(ngModel)]="form.anio" />
+
+      </div>
+
+      <!-- Tipo de período -->
+      <div class="form-group">
+
+        <label>Tipo de período *</label>
+
+        <select
+          class="form-control"
+          [(ngModel)]="form.tipoPeriodo">
+
+          <option value="QUINCENAL">
+            Quincenal
+          </option>
+
+          <option value="MENSUAL">
+            Mensual
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+    <div class="actions">
+
+      <button
+        class="btn btn-primary"
+        (click)="generar()"
+        [disabled]="loading">
+
+        {{ loading ? 'Generando...' : 'Generar períodos' }}
+
+      </button>
+
+      <button
+        class="btn"
+        (click)="volver()">
+
+        Volver
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

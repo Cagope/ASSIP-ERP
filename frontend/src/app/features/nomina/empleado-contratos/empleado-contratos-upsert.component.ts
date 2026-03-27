@@ -12,12 +12,16 @@ import { PersonasApi, PersonaBusquedaDTO } from '../../../shared/personas/person
 import { CargoApi, CargoListDTO } from '../cargos/cargos.api';
 import { SeccionesNominaApi, SeccionNominaDTO } from '../secciones/secciones.api';
 
-
 import { EpsApi, EpsListDTO } from '../eps/eps.api';
 import { AfpApi, AfpListDTO } from '../afp/afp.api';
 import { ArlApi, ArlListDTO } from '../arl/arl.api';
 import { CajaCompensacionApi, CajaCompensacionListDTO } from '../caja-compensacion/caja-compensacion.api';
 import { CesantiasApi, CesantiasDTO } from '../cesantias/cesantias.api';
+
+import {
+  CuentasAhorroApi,
+  CuentaAhorroSelectDTO
+} from '../../../shared/cuentas-ahorro/cuentas-ahorro.api';
 
 @Component({
   standalone: true,
@@ -44,11 +48,12 @@ export class EmpleadoContratosUpsertComponent implements OnInit {
   private readonly cajaApi = inject(CajaCompensacionApi);
   private readonly cesantiasApi = inject(CesantiasApi);
 
+  private readonly cuentasApi = inject(CuentasAhorroApi);
+
   id: number | null = null;
   loading = false;
   guardando = false;
 
-  // catálogos
   empleados: EmpleadoListDTO[] = [];
   empleadosDisplay: { idEmpleado: number; documento: string; nombre: string }[] = [];
 
@@ -59,10 +64,10 @@ export class EmpleadoContratosUpsertComponent implements OnInit {
   afp: AfpListDTO[] = [];
   arl: ArlListDTO[] = [];
   cajas: CajaCompensacionListDTO[] = [];
-cesantias: CesantiasDTO[] = [];
+  cesantias: CesantiasDTO[] = [];
 
+  cuentasNomina: CuentaAhorroSelectDTO[] = [];
 
-  // ⚠️ tipos de contrato (local)
   tiposContrato = [
     { id: 1, nombre: 'INDEFINIDO' },
     { id: 2, nombre: 'FIJO' },
@@ -73,32 +78,22 @@ cesantias: CesantiasDTO[] = [];
   form: EmpleadoContratoFormDTO = {
     idEmpleado: null,
     idSeccion: null,
-
     fechaInicio: '',
     fechaFin: null,
-
     idTipoContrato: null,
     idCargo: null,
-
     salarioBase: 0,
     salarioIntegral: false,
-
     periodoPago: 'MENSUAL',
-
     idEps: null,
     idAfp: null,
     idCesantias: null,
     idArl: null,
     idCajaCompensacion: null,
-
-    cuentaNominaDisplay: null,
     idCuentaAhorroNomina: null,
-
     fechaEnvioNotaRenovacion: null,
-
     claseRiesgoArl: 1,
     porcentajeArl: 0,
-
     activo: true
   };
 
@@ -111,8 +106,44 @@ cesantias: CesantiasDTO[] = [];
     if (this.id) this.cargar(this.id);
   }
 
+  // =========================
+  // CUENTAS EMPLEADO
+  // =========================
+
+  cargarCuentasEmpleado(idEmpleado: number | null): void {
+
+    this.cuentasNomina = [];
+
+    if (!idEmpleado) return;
+
+    const emp = this.empleados.find(
+      e => e.idEmpleado === idEmpleado
+    );
+
+    if (!emp || !emp.idDatosPersonal) return;
+
+    console.log('🔵 Cargando cuentas para:', emp.idDatosPersonal);
+
+    this.cuentasApi
+      .listarPorPersona(emp.idDatosPersonal)
+      .subscribe({
+        next: data => {
+          console.log('🟢 Cuentas recibidas:', data);
+          this.cuentasNomina = data ?? [];
+        },
+        error: err => {
+          console.error('🔴 Error cuentas:', err);
+          this.cuentasNomina = [];
+        }
+      });
+  }
+
+  // =========================
+  // CATÁLOGOS
+  // =========================
+
   cargarCatalogos(): void {
-    // empleados
+
     this.empleadosApi.listar().subscribe({
       next: (data) => {
         this.empleados = data ?? [];
@@ -124,13 +155,9 @@ cesantias: CesantiasDTO[] = [];
       }
     });
 
-    // secciones
     this.seccionesApi.listar().subscribe({ next: d => this.secciones = d ?? [], error: () => this.secciones = [] });
-
-    // cargos
     this.cargosApi.listar().subscribe({ next: d => this.cargos = d ?? [], error: () => this.cargos = [] });
 
-    // eps/afp/arl/caja/cesantias
     this.epsApi.listar().subscribe({ next: d => this.eps = d ?? [], error: () => this.eps = [] });
     this.afpApi.listar().subscribe({ next: d => this.afp = d ?? [], error: () => this.afp = [] });
     this.arlApi.listar().subscribe({ next: d => this.arl = d ?? [], error: () => this.arl = [] });
@@ -138,9 +165,15 @@ cesantias: CesantiasDTO[] = [];
     this.cesantiasApi.listar().subscribe({ next: d => this.cesantias = d ?? [], error: () => this.cesantias = [] });
   }
 
+  // =========================
+  // EMPLEADOS DISPLAY
+  // =========================
+
   private pintarEmpleadosDisplay(): void {
-    // construir display (idEmpleado -> documento/nombre) consultando persona
-    const idsPersona = Array.from(new Set(this.empleados.map(x => x.idDatosPersonal).filter(Boolean)));
+
+    const idsPersona = Array.from(new Set(
+      this.empleados.map(x => x.idDatosPersonal).filter(Boolean)
+    ));
 
     if (idsPersona.length === 0) {
       this.empleadosDisplay = this.empleados.map(e => ({
@@ -151,10 +184,10 @@ cesantias: CesantiasDTO[] = [];
       return;
     }
 
-    // trae uno por uno (simple, estable)
     const mapPersonas = new Map<number, PersonaBusquedaDTO>();
 
     let pending = idsPersona.length;
+
     for (const idDatosPersonal of idsPersona) {
       this.personasApi.obtenerPorId(idDatosPersonal).subscribe({
         next: (p) => {
@@ -171,47 +204,54 @@ cesantias: CesantiasDTO[] = [];
   }
 
   private buildEmpleadoDisplay(mapPersonas: Map<number, PersonaBusquedaDTO>): void {
+
     this.empleadosDisplay = this.empleados.map(e => {
-      const p = e.idDatosPersonal ? mapPersonas.get(e.idDatosPersonal) : null;
+
+      const p = e.idDatosPersonal
+        ? mapPersonas.get(e.idDatosPersonal)
+        : null;
+
       return {
         idEmpleado: e.idEmpleado,
         documento: p?.documento ?? '',
         nombre: p?.nombreCompleto ?? `EMPLEADO #${e.idEmpleado}`
       };
-    }).sort((a, b) => (a.nombre ?? '').localeCompare(b.nombre ?? ''));
+
+    }).sort((a, b) =>
+      (a.nombre ?? '').localeCompare(b.nombre ?? '')
+    );
   }
 
+  // =========================
+  // CARGAR CONTRATO
+  // =========================
+
   cargar(id: number): void {
+
     this.loading = true;
 
     this.api.obtener(id).subscribe({
       next: (data) => {
-        this.form = {
-          ...this.form,
-          ...data,
-          idContrato: data.idContrato,
-          idEmpleado: (data as any).idEmpleado ?? null,
-          idTipoContrato: (data as any).idTipoContrato ?? null,
-          salarioBase: (data as any).salarioBase ?? 0,
-          salarioIntegral: (data as any).salarioIntegral ?? false,
-          periodoPago: (data as any).periodoPago ?? 'MENSUAL',
-          claseRiesgoArl: (data as any).claseRiesgoArl ?? 1,
-          porcentajeArl: (data as any).porcentajeArl ?? 0,
-          activo: (data as any).activo ?? true,
-        };
+
+        this.form = { ...this.form, ...data };
+
+        this.cargarCuentasEmpleado(this.form.idEmpleado);
 
         this.loading = false;
       },
-      error: (err) => {
-        console.error('Error cargando contrato', err);
+      error: () => {
         this.loading = false;
-        alert('No se pudo cargar el contrato.');
         this.volver();
       }
     });
   }
 
+  // =========================
+  // GUARDAR
+  // =========================
+
   guardar(): void {
+
     if (!this.form.idEmpleado) {
       alert('Debe seleccionar un empleado.');
       return;
@@ -227,38 +267,39 @@ cesantias: CesantiasDTO[] = [];
       return;
     }
 
-    if (!this.form.periodoPago) {
-      this.form.periodoPago = 'MENSUAL';
-    }
-
     this.guardando = true;
 
     if (this.id) {
-      this.api.actualizar(this.id, this.form).subscribe({
-        next: () => {
-          this.guardando = false;
-          this.volver();
-        },
-        error: (err) => {
-          console.error('Error actualizando contrato', err);
-          this.guardando = false;
-          alert('No se pudo actualizar el contrato.');
-        }
-      });
+
+      this.api.actualizar(this.id, this.form)
+        .subscribe({
+          next: () => {
+            this.guardando = false;
+            this.volver();
+          },
+          error: () => {
+            this.guardando = false;
+            alert('No se pudo actualizar el contrato.');
+          }
+        });
+
     } else {
-      this.api.crear(this.form).subscribe({
-        next: () => {
-          this.guardando = false;
-          this.volver();
-        },
-        error: (err) => {
-          console.error('Error creando contrato', err);
-          this.guardando = false;
-          alert('No se pudo crear el contrato.');
-        }
-      });
+
+      this.api.crear(this.form)
+        .subscribe({
+          next: () => {
+            this.guardando = false;
+            this.volver();
+          },
+          error: () => {
+            this.guardando = false;
+            alert('No se pudo crear el contrato.');
+          }
+        });
+
     }
   }
+
 
   volver(): void {
     this.router.navigate(['/nomina/empleado-contratos']);

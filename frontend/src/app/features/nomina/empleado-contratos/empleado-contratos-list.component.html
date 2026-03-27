@@ -36,10 +36,10 @@
     <tr *ngFor="let c of filtrados">
       <td>{{ c.idContrato }}</td>
 
-      <td>{{ documentoEmpleado(c.idEmpleado) || '—' }}</td>
+      <td>{{ c.documentoEmpleado || '—' }}</td>
 
       <td class="nombre">
-        {{ nombreEmpleado(c.idEmpleado) || ('Empleado #' + c.idEmpleado) }}
+        {{ c.nombreEmpleado || ('Empleado #' + c.idEmpleado) }}
       </td>
 
       <td>{{ c.fechaInicio }}</td>

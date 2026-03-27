@@ -5,275 +5,105 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f7dc21a8-45a4-4140-a7e2-a5ded858c06e" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/activosfijos/informes/ActivosFijosInformesController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/activosfijos/informes/ActivosFijosInformesService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/afp/AfpController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/afp/AfpRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/afp/AfpService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/afp/dto/AfpDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/arl/ArlController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/arl/ArlRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/arl/ArlService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/arl/dto/ArlDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/caja_compensacion/CajaCompensacionController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/caja_compensacion/CajaCompensacionRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/caja_compensacion/CajaCompensacionService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/caja_compensacion/dto/CajaCompensacionDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/cargos/CargoController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/cargos/CargoRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/cargos/CargoService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/cargos/dto/CargoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/cesantias/CesantiasController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/cesantias/CesantiasRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/cesantias/CesantiasService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/cesantias/dto/CesantiasDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/conceptos_nomina/ConceptosNominaController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/conceptos_nomina/ConceptosNominaRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/conceptos_nomina/ConceptosNominaService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/conceptos_nomina/dto/ConceptoNominaDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/empleado_contratos/EmpleadoContratoController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/empleado_contratos/EmpleadoContratoRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/empleado_contratos/EmpleadoContratoService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/empleado_contratos/dto/EmpleadoContratoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/empleados/EmpleadoController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/empleados/EmpleadoRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/empleados/EmpleadoService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/empleados/dto/EmpleadoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/eps/EpsController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/eps/EpsRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/eps/EpsService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/eps/dto/EpsDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/secciones/SeccionesController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/secciones/SeccionesRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/secciones/SeccionesService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/secciones/dto/SeccionNominaDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/variables_vigencia/VariablesVigenciaController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/variables_vigencia/VariablesVigenciaRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/variables_vigencia/VariablesVigenciaService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/variables_vigencia/dto/VariablesVigenciaDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/resources/db/migration/V040__nomina_core.sql" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/activos-fijos-informes.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/depreciacion/depreciacion-informe-exporter.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/depreciacion/depreciacion-informe-list.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/depreciacion/depreciacion-informe-list.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/depreciacion/depreciacion-informe-list.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/depreciacion/depreciacion-informe-print.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/depreciacion/depreciacion-informe.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/kardex-activo/kardex-activo-exporter.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/kardex-activo/kardex-activo-list.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/kardex-activo/kardex-activo-list.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/kardex-activo/kardex-activo-list.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/kardex-activo/kardex-activo-print.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/kardex-activo/kardex-activo.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/maestro-activos/maestro-activos-exporter.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/maestro-activos/maestro-activos-list.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/maestro-activos/maestro-activos-list.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/maestro-activos/maestro-activos-list.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/maestro-activos/maestro-activos-print.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/maestro-activos/maestro-activos.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/movimientos-activos/movimientos-activos-exporter.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/movimientos-activos/movimientos-activos-list.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/movimientos-activos/movimientos-activos-list.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/movimientos-activos/movimientos-activos-list.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/movimientos-activos/movimientos-activos-print.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/movimientos-activos/movimientos-activos.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/resumen-movimientos/resumen-movimientos-exporter.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/resumen-movimientos/resumen-movimientos-list.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/resumen-movimientos/resumen-movimientos-list.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/resumen-movimientos/resumen-movimientos-list.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/resumen-movimientos/resumen-movimientos-print.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/informes/resumen-movimientos/resumen-movimientos.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/afp/afp-exporter.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/afp/afp-list.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/afp/afp-list.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/afp/afp-list.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/afp/afp-print.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/afp/afp-upsert.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/afp/afp-upsert.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/afp/afp-upsert.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/afp/afp.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/afp/afp.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/arl/arl-exporter.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/arl/arl-list.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/arl/arl-list.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/arl/arl-list.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/arl/arl-print.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/arl/arl-upsert.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/arl/arl-upsert.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/arl/arl-upsert.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/arl/arl.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/arl/arl.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/caja-compensacion/caja-compensacion-exporter.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/caja-compensacion/caja-compensacion-list.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/caja-compensacion/caja-compensacion-list.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/caja-compensacion/caja-compensacion-list.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/caja-compensacion/caja-compensacion-print.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/caja-compensacion/caja-compensacion-upsert.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/caja-compensacion/caja-compensacion-upsert.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/caja-compensacion/caja-compensacion-upsert.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/caja-compensacion/caja-compensacion.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/caja-compensacion/caja-compensacion.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/cargos/cargos-exporter.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/cargos/cargos-list.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/cargos/cargos-list.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/cargos/cargos-list.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/cargos/cargos-print.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/cargos/cargos-upsert.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/cargos/cargos-upsert.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/cargos/cargos-upsert.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/cargos/cargos.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/cargos/cargos.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/cesantias/cesantias-exporter.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/cesantias/cesantias-list.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/cesantias/cesantias-list.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/cesantias/cesantias-list.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/cesantias/cesantias-print.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/cesantias/cesantias-upsert.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/cesantias/cesantias-upsert.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/cesantias/cesantias-upsert.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/cesantias/cesantias.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/cesantias/cesantias.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina-exporter.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina-list.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina-list.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina-list.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina-print.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina-upsert.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina-upsert.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina-upsert.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos-exporter.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos-list.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos-list.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos-list.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos-print.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos-upsert.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos-upsert.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos-upsert.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/empleados/empleados-exporter.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/empleados/empleados-list.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/empleados/empleados-list.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/empleados/empleados-list.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/empleados/empleados-print.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/empleados/empleados-upsert.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/empleados/empleados-upsert.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/empleados/empleados-upsert.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/empleados/empleados.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/empleados/empleados.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/eps/eps-exporter.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/eps/eps-list.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/eps/eps-list.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/eps/eps-list.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/eps/eps-print.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/eps/eps-routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/eps/eps-upsert.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/eps/eps-upsert.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/eps/eps-upsert.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/eps/eps.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/nomina-menu.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/nomina.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/secciones/secciones-exporter.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/secciones/secciones-list.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/secciones/secciones-list.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/secciones/secciones-list.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/secciones/secciones-print.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/secciones/secciones-upsert.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/secciones/secciones-upsert.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/secciones/secciones-upsert.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/secciones/secciones.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/secciones/secciones.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/variables-vigencia/variables-vigencia-exporter.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/variables-vigencia/variables-vigencia-list.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/variables-vigencia/variables-vigencia-list.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/variables-vigencia/variables-vigencia-list.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/variables-vigencia/variables-vigencia-print.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/variables-vigencia/variables-vigencia-upsert.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/variables-vigencia/variables-vigencia-upsert.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/variables-vigencia/variables-vigencia-upsert.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/variables-vigencia/variables-vigencia.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/variables-vigencia/variables-vigencia.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/shared/personas/personas-selector.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/contabilizacion/liquidacion/LiquidacionContabilizacionController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/contabilizacion/liquidacion/LiquidacionContabilizacionRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/contabilizacion/liquidacion/LiquidacionContabilizacionService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/contabilizacion/liquidacion/dto/LiquidacionComprobanteGeneradoDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/contabilizacion/liquidacion/dto/LiquidacionContabilizacionResultadoDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/contabilizacion/liquidacion/dto/LiquidacionMovimientoContableDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/math/MathUtils.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/contabilizacion/liquidacion/liquidacion-contabilizacion.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/contabilizacion/liquidacion/liquidacion-contabilizacion.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/contabilizacion/liquidacion/liquidacion-contabilizacion.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/contabilizacion/liquidacion/liquidacion-contabilizacion.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/contabilizacion/liquidacion/liquidacion-contabilizacion.exporter.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/contabilizacion/liquidacion/liquidacion-contabilizacion.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/AssipErpApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/AssipErpApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/activosfijos/depreciacion/DepreciacionEjecucionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/activosfijos/depreciacion/DepreciacionEjecucionService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/contabilidad/plan_cuentas/PlanCuentaRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/contabilidad/plan_cuentas/PlanCuentaRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/contabilidad/registro/dto/MovimientoContableDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/contabilidad/auxiliares_contables/dto/MovimientoContableDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/contabilidad/registro/dto/OrigenComprobanteDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/contabilidad/origen_comprobantes/dto/OrigenComprobanteDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/contabilidad/registro/repository/AuxiliaresContablesRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/contabilidad/auxiliares_contables/AuxiliaresContablesRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/contabilidad/registro/repository/CatalogoCuentasRepository.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/contabilidad/registro/repository/ConceptosContablesRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/contabilidad/conceptos_contables/ConceptosContablesRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/contabilidad/registro/repository/ControlesAuxiliaresRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/contabilidad/auxiliares_contables/ControlesAuxiliaresRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/contabilidad/registro/repository/OrigenComprobantesRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/contabilidad/origen_comprobantes/OrigenComprobantesRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/contabilidad/registro/service/ContabilidadRegistroService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/contabilidad/auxiliares_contables/ContabilidadRegistroService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/interesdiario_sm/InteresDiarioSMService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/interesdiario_sm/InteresDiarioSMService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion/calculo/DeduccionesCalculator.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion/calculo/DeduccionesCalculator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion/calculo/DevengadosCalculator.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion/calculo/DevengadosCalculator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion/calculo/IbcCalculator.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion/calculo/IbcCalculator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion/calculo/ProvisionesCalculator.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion/calculo/ProvisionesCalculator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/novedades_nomina/NovedadCalculoService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/novedades_nomina/NovedadCalculoService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/novedades_nomina/NovedadesNominaMasivoService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/novedades_nomina/NovedadesNominaMasivoService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/novedades_nomina/NovedadesNominaService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/novedades_nomina/NovedadesNominaService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/periodos_nomina/PeriodosNominaController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/periodos_nomina/PeriodosNominaController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/periodos_nomina/PeriodosNominaRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/periodos_nomina/PeriodosNominaRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/periodos_nomina/PeriodosNominaService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/periodos_nomina/PeriodosNominaService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/app.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/app.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/core/auth/session.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/core/auth/session.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/activos-fijos-menu.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/activos-fijos-menu.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/activos-fijos.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/activos-fijos.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/activos/activos-fijos-exporter.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/activos/activos-fijos-exporter.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/activos/activos-fijos-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/activos/activos-fijos-list.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/activos/activos-fijos-list.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/activos/activos-fijos-list.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/activos/activos-fijos-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/activos/activos-fijos-list.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/activos/activos-fijos-print.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/activos/activos-fijos-print.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/activos/activos-fijos-upsert.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/activos/activos-fijos-upsert.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/activos/activos-fijos-upsert.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/activos/activos-fijos-upsert.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/activos/activos-fijos-upsert.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/activos/activos-fijos-upsert.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/activos/activos-fijos.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/activos/activos-fijos.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/bloques/bloques-exporter.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/bloques/bloques-exporter.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/bloques/bloques-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/bloques/bloques-list.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/bloques/bloques-list.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/bloques/bloques-list.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/bloques/bloques-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/bloques/bloques-list.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/bloques/bloques-print.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/bloques/bloques-print.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/bloques/bloques-upsert.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/bloques/bloques-upsert.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/bloques/bloques-upsert.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/bloques/bloques-upsert.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/bloques/bloques-upsert.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/bloques/bloques-upsert.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/bloques/bloques.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/bloques/bloques.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/bloques/bloques.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/bloques/bloques.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/catalogos/estados-activo.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/catalogos/estados-activo.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/catalogos/formas-depreciacion.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/catalogos/formas-depreciacion.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/catalogos/tipos-adquisicion.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/catalogos/tipos-adquisicion.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/depreciacion/depreciacion.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/depreciacion/depreciacion.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/depreciacion/depreciacion.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/depreciacion/depreciacion.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/depreciacion/depreciacion.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/depreciacion/depreciacion.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/depreciacion/depreciacion.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/depreciacion/depreciacion.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/depreciacion/depreciacion.exporter.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/depreciacion/depreciacion.exporter.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/depreciacion/depreciacion.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/depreciacion/depreciacion.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/ingreso/ingreso-activos.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/ingreso/ingreso-activos.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/ingreso/ingreso-activos.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/ingreso/ingreso-activos.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/ingreso/ingreso-activos.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/ingreso/ingreso-activos.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/ingreso/ingreso-activos.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/ingreso/ingreso-activos.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/ingreso/ingreso-activos.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/ingreso/ingreso-activos.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/localizaciones/localizaciones-exporter.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/localizaciones/localizaciones-exporter.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/localizaciones/localizaciones-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/localizaciones/localizaciones-list.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/localizaciones/localizaciones-list.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/localizaciones/localizaciones-list.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/localizaciones/localizaciones-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/localizaciones/localizaciones-list.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/localizaciones/localizaciones-print.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/localizaciones/localizaciones-print.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/localizaciones/localizaciones-upsert.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/localizaciones/localizaciones-upsert.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/localizaciones/localizaciones-upsert.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/localizaciones/localizaciones-upsert.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/localizaciones/localizaciones-upsert.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/localizaciones/localizaciones-upsert.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/localizaciones/localizaciones.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/localizaciones/localizaciones.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/activos-fijos/localizaciones/localizaciones.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/activos-fijos/localizaciones/localizaciones.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/contabilidad/contabilidad-menu.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/contabilidad/contabilidad-menu.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/contabilidad/contabilidad.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/contabilidad/contabilidad.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/contabilidad/plan-cuentas/plan-cuentas.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/contabilidad/plan-cuentas/plan-cuentas.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes-exporter.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes-exporter.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes-list.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes-list.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes-list.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes-list.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes-print.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes-print.service.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes-upsert.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes-upsert.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes-upsert.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes-upsert.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes-upsert.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes-upsert.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes.dto.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes.dto.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/contabilidad/tipos-comprobantes/tipos-comprobantes.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/apertura-cuentas/apertura-cuentas-upsert.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/apertura-cuentas/apertura-cuentas-upsert.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/layout/main-layout.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout/main-layout.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/layout/main-layout.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout/main-layout.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/layout/main-layout.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout/main-layout.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/layout/main-menu.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout/main-menu.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/layout/main-menu.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout/main-menu.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/layout/main-menu.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout/main-menu.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/layout/menu-registry.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout/menu-registry.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/shared/cuentas/cuentas.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/shared/cuentas/cuentas.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/shared/personas/personas-busqueda.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/shared/personas/personas-busqueda.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/shared/personas/personas-busqueda.dto.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/shared/personas/personas-busqueda.dto.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/shared/personas/personas-selector.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/shared/personas/personas-selector.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/shared/personas/personas-selector.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/shared/personas/personas-selector.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/shared/personas/personas.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/shared/personas/personas.api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro.api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/busqueda/empleado-autocomplete.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/busqueda/empleado-autocomplete.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/busqueda/empleado-autocomplete.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/busqueda/empleado-autocomplete.component.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/busqueda/empleado-autocomplete.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/busqueda/empleado-autocomplete.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/busqueda/nomina-busqueda.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/busqueda/nomina-busqueda.api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/concepto-cuentas-contables/concepto-cuentas-contables-exporter.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/concepto-cuentas-contables/concepto-cuentas-contables-exporter.service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/concepto-cuentas-contables/concepto-cuentas-contables-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/concepto-cuentas-contables/concepto-cuentas-contables-list.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/concepto-cuentas-contables/concepto-cuentas-contables-list.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/concepto-cuentas-contables/concepto-cuentas-contables-list.component.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/concepto-cuentas-contables/concepto-cuentas-contables-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/concepto-cuentas-contables/concepto-cuentas-contables-list.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/concepto-cuentas-contables/concepto-cuentas-contables-print.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/concepto-cuentas-contables/concepto-cuentas-contables-print.service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/concepto-cuentas-contables/concepto-cuentas-contables-upsert.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/concepto-cuentas-contables/concepto-cuentas-contables-upsert.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/concepto-cuentas-contables/concepto-cuentas-contables-upsert.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/concepto-cuentas-contables/concepto-cuentas-contables-upsert.component.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/concepto-cuentas-contables/concepto-cuentas-contables-upsert.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/concepto-cuentas-contables/concepto-cuentas-contables-upsert.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/concepto-cuentas-contables/concepto-cuentas-contables.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/concepto-cuentas-contables/concepto-cuentas-contables.api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/concepto-cuentas-contables/concepto-cuentas-contables.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/concepto-cuentas-contables/concepto-cuentas-contables.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina-exporter.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina-exporter.service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina-list.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina-list.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina-print.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina-print.service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina-upsert.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina-upsert.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina-upsert.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina-upsert.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/conceptos-nomina/conceptos-nomina.api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/desprendible/desprendible.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/desprendible/desprendible.api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/desprendible/desprendible.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/desprendible/desprendible.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/desprendible/desprendible.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/desprendible/desprendible.component.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/desprendible/desprendible.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/desprendible/desprendible.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/desprendible/desprendible.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/desprendible/desprendible.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos-exporter.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos-exporter.service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos-list.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos-list.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos-upsert.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos-upsert.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos-upsert.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos-upsert.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/empleado-contratos/empleado-contratos.api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/liquidacion/liquidacion.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/liquidacion/liquidacion.api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/liquidacion/liquidacion.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/liquidacion/liquidacion.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/liquidacion/preview/liquidacion-preview.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/liquidacion/preview/liquidacion-preview.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/liquidacion/preview/liquidacion-preview.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/liquidacion/preview/liquidacion-preview.component.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/liquidacion/preview/liquidacion-preview.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/liquidacion/preview/liquidacion-preview.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/nomina-menu.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/nomina-menu.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/nomina.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/nomina.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-exporter.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-exporter.service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-list.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-list.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-list.component.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-list.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-masivo.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-masivo.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-masivo.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-masivo.component.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-masivo.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-masivo.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-print.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-print.service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-upsert.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-upsert.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-upsert.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-upsert.component.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-upsert.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-upsert.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina.api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/periodos-nomina/periodos-generador.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/periodos-nomina/periodos-generador.api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/periodos-nomina/periodos-generador.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/periodos-nomina/periodos-generador.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/periodos-nomina/periodos-generador.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/periodos-nomina/periodos-generador.component.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/periodos-nomina/periodos-generador.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/periodos-nomina/periodos-generador.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/periodos-nomina/periodos-nomina-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/periodos-nomina/periodos-nomina-list.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/periodos-nomina/periodos-nomina-list.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/periodos-nomina/periodos-nomina-list.component.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/periodos-nomina/periodos-nomina-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/periodos-nomina/periodos-nomina-list.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/periodos-nomina/periodos-nomina.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/periodos-nomina/periodos-nomina.api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/periodos-nomina/periodos-nomina.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/periodos-nomina/periodos-nomina.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/shared/cuentas-ahorro/cuentas-ahorro.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/shared/cuentas-ahorro/cuentas-ahorro.api.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

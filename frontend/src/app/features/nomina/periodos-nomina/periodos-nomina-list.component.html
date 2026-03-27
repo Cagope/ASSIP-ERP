@@ -1,0 +1,125 @@
+<div class="page periodos-list">
+
+  <app-header-actions
+    titulo="Períodos Nómina"
+    (refrescar)="cargar()"
+    (nuevo)="generar()">
+  </app-header-actions>
+
+  <div class="filters-card">
+    <div class="filters-grid">
+
+      <div class="field">
+        <label>Año</label>
+        <input
+          type="number"
+          [(ngModel)]="anio"
+          (change)="cargar()">
+      </div>
+
+      <div class="field">
+        <label>Estado</label>
+        <select [(ngModel)]="estado">
+          <option value="">Todos</option>
+          <option value="ABIERTO">Abierto</option>
+          <option value="CERRADO">Cerrado</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Buscar</label>
+        <input
+          type="text"
+          [(ngModel)]="q"
+          placeholder="Ej: 2026-01, cerrado, mensual">
+      </div>
+
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    Cargando períodos...
+  </div>
+
+  <table
+    class="table"
+    *ngIf="!loading && filtrados.length > 0; else vacio">
+
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Agencia</th>
+      <th>Periodo</th>
+      <th>Tipo</th>
+      <th>Inicio</th>
+      <th>Fin</th>
+      <th>Estado</th>
+      <th style="width:120px;">Acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let x of filtrados">
+
+      <td><strong>{{ x.idPeriodo }}</strong></td>
+      <td>{{ x.nombreAgencia }}</td>
+
+      <td>
+        {{ x.anio }}-{{ ('' + x.mes).padStart(2,'0') }}
+        #{{ x.numeroPeriodo }}
+      </td>
+
+      <td>{{ x.tipoPeriodo }}</td>
+      <td>{{ x.fechaInicio }}</td>
+      <td>{{ x.fechaFin }}</td>
+
+      <td>
+        <span
+          class="badge"
+          [class.badge--ok]="x.estado === 'ABIERTO'"
+          [class.badge--warn]="x.estado === 'CERRADO'"
+          [class.badge--off]="x.estado !== 'ABIERTO' && x.estado !== 'CERRADO'">
+          {{ x.estado }}
+        </span>
+      </td>
+
+      <td>
+        <div class="acciones">
+
+          <!-- 🔁 REABRIR PERÍODO -->
+          <button
+            class="btn btn-reverse"
+            (click)="reversar(x.idPeriodo)"
+            [disabled]="!puedeReversar(x)"
+            title="Reabrir el período y eliminar liquidaciones y novedades calculadas">
+
+            <span class="icon">↺</span>
+            Reabrir período
+          </button>
+
+          <!-- 🧾 DESPRENDIBLES (SOLO CERRADO) -->
+          <button
+            *ngIf="x.estado === 'CERRADO'"
+            class="btn btn-outline-primary"
+            [routerLink]="['/nomina/desprendible', x.idPeriodo]"
+            [state]="{ periodo: x }"
+            title="Ver desprendibles de nómina">
+
+            <span class="icon">🧾</span>
+            Desprendibles
+          </button>
+
+        </div>
+      </td>
+
+    </tr>
+    </tbody>
+  </table>
+
+  <ng-template #vacio>
+    <p class="empty">
+      No hay períodos para mostrar.
+    </p>
+  </ng-template>
+
+</div>

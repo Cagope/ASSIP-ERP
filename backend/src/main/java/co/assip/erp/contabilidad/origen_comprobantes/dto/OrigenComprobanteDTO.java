@@ -1,4 +1,4 @@
-package co.assip.erp.contabilidad.registro.dto;
+package co.assip.erp.contabilidad.origen_comprobantes.dto;
 
 /**
  * Trazabilidad del ORIGEN del comprobante contable.

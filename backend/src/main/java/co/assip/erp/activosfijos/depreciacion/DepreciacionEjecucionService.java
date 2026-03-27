@@ -1,8 +1,8 @@
 package co.assip.erp.activosfijos.depreciacion;
 
-import co.assip.erp.contabilidad.registro.dto.MovimientoContableDTO;
-import co.assip.erp.contabilidad.registro.dto.OrigenComprobanteDTO;
-import co.assip.erp.contabilidad.registro.service.ContabilidadRegistroService;
+import co.assip.erp.contabilidad.auxiliares_contables.dto.MovimientoContableDTO;
+import co.assip.erp.contabilidad.origen_comprobantes.dto.OrigenComprobanteDTO;
+import co.assip.erp.contabilidad.auxiliares_contables.ContabilidadRegistroService;
 import co.assip.erp.seguridad.utils.SecurityUtils;
 import co.assip.erp.shared.config.EmpresaConfigService;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;

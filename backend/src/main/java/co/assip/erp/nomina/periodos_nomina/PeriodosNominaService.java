@@ -34,6 +34,13 @@ public class PeriodosNominaService {
     }
 
     // =========================================================
+    // 🔎 PERÍODOS DISPONIBLES PARA CONTABILIZACIÓN
+    // =========================================================
+    public List<PeriodoNominaListDTO> listarParaContabilizacion() {
+        return repo.listarParaContabilizacion();
+    }
+
+    // =========================================================
     // ACCIONES DE PERIODO
     // =========================================================
     @Transactional

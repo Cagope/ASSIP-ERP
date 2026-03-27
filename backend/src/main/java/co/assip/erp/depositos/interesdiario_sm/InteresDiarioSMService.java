@@ -97,8 +97,11 @@ public class InteresDiarioSMService {
         // 6️⃣ FILTRAR Saldos/intereses en 0 (BigDecimal)
         // ================================
         return lista.stream()
-                .filter(x -> x.getSaldoMinimoDia() != null && x.getSaldoMinimoDia().doubleValue() > 0)
-                .filter(x -> x.getInteresBruto() != null && x.getInteresBruto().doubleValue() > 0)
+                .filter(x -> x.getSaldoMinimoDia() != null &&
+                        x.getSaldoMinimoDia().compareTo(java.math.BigDecimal.ZERO) > 0)
+
+                .filter(x -> x.getInteresBruto() != null &&
+                        x.getInteresBruto().compareTo(java.math.BigDecimal.ZERO) > 0)
                 .toList();
     }
 }

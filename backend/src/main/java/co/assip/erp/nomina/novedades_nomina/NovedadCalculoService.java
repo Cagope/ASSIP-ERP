@@ -6,9 +6,11 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import co.assip.erp.shared.math.MathUtils;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Map;
+
 
 @Service
 @RequiredArgsConstructor
@@ -150,26 +152,30 @@ public class NovedadCalculoService {
         switch (tipo.toUpperCase()) {
 
             case "POR_DIAS" ->
-                    resultado = base
-                            .divide(diasMes, 8, RoundingMode.HALF_UP)
-                            .multiply(cantidad)
-                            .multiply(multiplicador);
+                    resultado = MathUtils.pesos(
+                            base
+                                    .divide(diasMes, 8, RoundingMode.HALF_UP)
+                                    .multiply(cantidad)
+                                    .multiply(multiplicador)
+                    );
 
             case "POR_HORAS" ->
-                    resultado = base
-                            .divide(horasMes, 8, RoundingMode.HALF_UP)
-                            .multiply(cantidad)
-                            .multiply(multiplicador);
+                    resultado = MathUtils.pesos(
+                            base
+                                    .divide(horasMes, 8, RoundingMode.HALF_UP)
+                                    .multiply(cantidad)
+                                    .multiply(multiplicador)
+                    );
 
             case "POR_PORCENTAJE" ->
-                    resultado = base.multiply(multiplicador);
+                    resultado = MathUtils.pesos(
+                            base.multiply(multiplicador)
+                    );
 
             default ->
                     resultado = null;
         }
 
-        return resultado != null
-                ? resultado.setScale(0, RoundingMode.HALF_UP)
-                : null;
+        return MathUtils.pesos(resultado);
     }
 }

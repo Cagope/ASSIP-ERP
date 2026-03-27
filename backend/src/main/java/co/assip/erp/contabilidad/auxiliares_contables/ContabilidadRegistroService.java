@@ -1,8 +1,10 @@
-package co.assip.erp.contabilidad.registro.service;
+package co.assip.erp.contabilidad.auxiliares_contables;
 
-import co.assip.erp.contabilidad.registro.dto.MovimientoContableDTO;
-import co.assip.erp.contabilidad.registro.dto.OrigenComprobanteDTO;
-import co.assip.erp.contabilidad.registro.repository.*;
+import co.assip.erp.contabilidad.conceptos_contables.ConceptosContablesRepository;
+import co.assip.erp.contabilidad.origen_comprobantes.OrigenComprobantesRepository;
+import co.assip.erp.contabilidad.plan_cuentas.PlanCuentaRepository;
+import co.assip.erp.contabilidad.auxiliares_contables.dto.MovimientoContableDTO;
+import co.assip.erp.contabilidad.origen_comprobantes.dto.OrigenComprobanteDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,20 +26,20 @@ public class ContabilidadRegistroService {
     private final ConceptosContablesRepository conceptosRepo;
     private final OrigenComprobantesRepository origenRepo;
     private final AuxiliaresContablesRepository auxiliaresRepo;
-    private final CatalogoCuentasRepository catalogoCuentasRepo;
+    private final PlanCuentaRepository planCuentaRepository;
     private final ControlesAuxiliaresRepository controlesRepo;
 
     public ContabilidadRegistroService(
             ConceptosContablesRepository conceptosRepo,
             OrigenComprobantesRepository origenRepo,
             AuxiliaresContablesRepository auxiliaresRepo,
-            CatalogoCuentasRepository catalogoCuentasRepo,
+            PlanCuentaRepository planCuentaRepository,
             ControlesAuxiliaresRepository controlesRepo
     ) {
         this.conceptosRepo = conceptosRepo;
         this.origenRepo = origenRepo;
         this.auxiliaresRepo = auxiliaresRepo;
-        this.catalogoCuentasRepo = catalogoCuentasRepo;
+        this.planCuentaRepository = planCuentaRepository;
         this.controlesRepo = controlesRepo;
     }
 
@@ -58,10 +60,21 @@ public class ContabilidadRegistroService {
         // =========================
         // 1) Validaciones mínimas
         // =========================
-        if (idAgencia == null) throw new IllegalArgumentException("idAgencia es obligatorio");
-        if (tipoComprobante == null || tipoComprobante.isBlank()) throw new IllegalArgumentException("tipoComprobante es obligatorio");
-        if (numeroComprobante == null || numeroComprobante.isBlank()) throw new IllegalArgumentException("numeroComprobante es obligatorio");
-        if (conceptoComprobante == null || conceptoComprobante.isBlank()) throw new IllegalArgumentException("conceptoComprobante es obligatorio");
+        if (idAgencia == null) {
+            throw new IllegalArgumentException("idAgencia es obligatorio");
+        }
+
+        if (tipoComprobante == null || tipoComprobante.isBlank()) {
+            throw new IllegalArgumentException("tipoComprobante es obligatorio");
+        }
+
+        if (numeroComprobante == null || numeroComprobante.isBlank()) {
+            throw new IllegalArgumentException("numeroComprobante es obligatorio");
+        }
+
+        if (conceptoComprobante == null || conceptoComprobante.isBlank()) {
+            throw new IllegalArgumentException("conceptoComprobante es obligatorio");
+        }
 
         if (movimientos == null || movimientos.isEmpty()) {
             throw new IllegalArgumentException("Debe existir al menos 1 movimiento contable");
@@ -99,7 +112,7 @@ public class ContabilidadRegistroService {
         // 4) Insertar origen del comprobante
         // =========================
         if (origen != null) {
-            // asegurar llaves
+
             origen.setIdAgencia(idAgencia);
             origen.setTipoComprobante(tipoComprobante);
             origen.setNumeroComprobante(numeroComprobante);
@@ -117,26 +130,49 @@ public class ContabilidadRegistroService {
             mov.setTipoComprobante(tipoComprobante);
             mov.setNumeroComprobante(numeroComprobante);
 
-            // validaciones mínimas por movimiento
+            // =========================
+            // NUEVO: Trazabilidad ERP
+            // =========================
+            if (origen != null) {
+
+                mov.setOrigenModulo(origen.getModuloOrigen());
+                mov.setDocumentoOrigen(origen.getProcesoOrigen());
+
+            } else {
+
+                // fallback seguro
+                mov.setOrigenModulo("CONTABILIDAD");
+                mov.setDocumentoOrigen(tipoComprobante + "-" + numeroComprobante);
+            }
+
+            // =========================
+            // Validaciones mínimas
+            // =========================
             if (mov.getIdCatalogoCuenta() == null) {
                 throw new IllegalArgumentException("Movimiento sin idCatalogoCuenta");
             }
+
             if (mov.getFechaAuxiliar() == null) {
                 throw new IllegalArgumentException("Movimiento sin fechaAuxiliar");
             }
+
             if (mov.getDetalleMovimiento() == null || mov.getDetalleMovimiento().isBlank()) {
                 throw new IllegalArgumentException("Movimiento sin detalleMovimiento");
             }
+
             if (mov.getIdDatosPersonal() == null) {
                 throw new IllegalArgumentException("Movimiento sin idDatosPersonal (tercero contable)");
             }
 
             Integer idAuxiliar = auxiliaresRepo.insertarAuxiliar(mov, idUsuario);
 
-            // ✅ Si la cuenta exige control → insertar documento soporte
-            boolean requiereControl = catalogoCuentasRepo.requiereControlEntradaSalida(mov.getIdCatalogoCuenta());
+            // =========================
+            // Control de documento soporte
+            // =========================
+            Boolean requiereControl =
+                    planCuentaRepository.requiereControlEntradaSalida(mov.getIdCatalogoCuenta());
 
-            if (requiereControl) {
+            if (Boolean.TRUE.equals(requiereControl)) {
 
                 String doc = mov.getDocumentoSoporte();
 
@@ -147,10 +183,10 @@ public class ContabilidadRegistroService {
                     );
                 }
 
-                // ✅ numero_documento = VARCHAR(20)
                 if (doc.length() > 20) {
                     throw new IllegalStateException(
-                            "El documento soporte supera 20 caracteres. Cuenta=" + mov.getIdCatalogoCuenta()
+                            "El documento soporte supera 20 caracteres. Cuenta=" +
+                                    mov.getIdCatalogoCuenta()
                     );
                 }
 

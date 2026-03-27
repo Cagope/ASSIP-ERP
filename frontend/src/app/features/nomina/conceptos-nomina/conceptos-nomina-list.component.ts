@@ -28,9 +28,17 @@ export class ConceptosNominaListComponent implements OnInit {
 
   q = '';
 
+  // =========================================================
+  // INIT
+  // =========================================================
+
   ngOnInit(): void {
     this.cargar();
   }
+
+  // =========================================================
+  // CARGAR
+  // =========================================================
 
   cargar(): void {
     this.loading = true;
@@ -48,19 +56,24 @@ export class ConceptosNominaListComponent implements OnInit {
     });
   }
 
+  // =========================================================
+  // FILTRO ✅ ALINEADO CON DTO
+  // =========================================================
+
   get filtrados(): ConceptoNominaListDTO[] {
-    const q = (this.q ?? '').trim().toLowerCase();
+
+    const q = this.q.trim().toLowerCase();
     if (!q) return this.items;
 
     return this.items.filter(x =>
-      (x.codigo ?? '').toLowerCase().includes(q) ||
-      (x.nombre ?? '').toLowerCase().includes(q) ||
-      (x.tipo ?? '').toLowerCase().includes(q)
+      x.codigoConcepto.toLowerCase().includes(q) ||
+      x.nombreConcepto.toLowerCase().includes(q) ||
+      x.tipoConcepto.toLowerCase().includes(q)
     );
   }
 
   // =========================================================
-  // ✅ HEADER
+  // HEADER
   // =========================================================
 
   nuevo(): void {
@@ -80,7 +93,7 @@ export class ConceptosNominaListComponent implements OnInit {
   }
 
   // =========================================================
-  // ✅ FILA
+  // FILA
   // =========================================================
 
   editar(codigo: string): void {
@@ -88,6 +101,7 @@ export class ConceptosNominaListComponent implements OnInit {
   }
 
   eliminar(codigo: string): void {
+
     const ok = confirm('¿Desea eliminar este concepto?');
     if (!ok) return;
 

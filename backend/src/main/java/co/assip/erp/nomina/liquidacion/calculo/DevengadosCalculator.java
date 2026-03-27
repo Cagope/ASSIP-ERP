@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
+import co.assip.erp.shared.math.MathUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -114,9 +115,9 @@ public class DevengadosCalculator {
             return LiquidacionDetalleDTO.devengadoAutomatico(
                     codigo,
                     r.cantidad(),
-                    r.valorUnitario(),
-                    r.valorTotal(),
-                    r.baseCalculo()
+                    MathUtils.pesos(r.valorUnitario()),
+                    MathUtils.pesos(r.valorTotal()),
+                    MathUtils.pesos(r.baseCalculo())
             );
         }).stream().filter(Objects::nonNull).toList();
     }
@@ -162,8 +163,12 @@ public class DevengadosCalculator {
                 total = BigDecimal.ZERO;
             }
 
+            total = MathUtils.pesos(total);
+
             BigDecimal valorUnitario =
-                    total.divide(cantidad, 6, RoundingMode.HALF_UP);
+                    MathUtils.pesos(
+                            total.divide(cantidad, 8, RoundingMode.HALF_UP)
+                    );
 
             LiquidacionDetalleDTO dto =
                     LiquidacionDetalleDTO.devengadoNovedad(

@@ -17,7 +17,6 @@ public class PeriodosNominaController {
         this.service = service;
     }
 
-    // ✅ /nomina/periodos-nomina?agencia=2&anio=2026
     @GetMapping
     public ResponseEntity<List<PeriodoNominaListDTO>> listar(
             @RequestParam(value = "agencia", required = false) Integer idAgencia,
@@ -26,7 +25,12 @@ public class PeriodosNominaController {
         return ResponseEntity.ok(service.listar(idAgencia, anio));
     }
 
-    // ✅ acción única para mantener simple el front
+    // 🔎 NUEVO
+    @GetMapping("/para-contabilizacion")
+    public ResponseEntity<List<PeriodoNominaListDTO>> listarParaContabilizacion() {
+        return ResponseEntity.ok(service.listarParaContabilizacion());
+    }
+
     @PostMapping("/accion")
     public ResponseEntity<Void> accion(
             @RequestBody PeriodoAccionDTO dto,

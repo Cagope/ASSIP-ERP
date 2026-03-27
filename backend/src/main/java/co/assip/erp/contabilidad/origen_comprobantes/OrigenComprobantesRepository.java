@@ -1,6 +1,6 @@
-package co.assip.erp.contabilidad.registro.repository;
+package co.assip.erp.contabilidad.origen_comprobantes;
 
-import co.assip.erp.contabilidad.registro.dto.OrigenComprobanteDTO;
+import co.assip.erp.contabilidad.origen_comprobantes.dto.OrigenComprobanteDTO;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -74,5 +74,38 @@ public class OrigenComprobantesRepository {
                 .addValue("idOrigen", dto.getIdOrigen())
                 .addValue("usuario", idUsuario)
         );
+    }
+
+    // =========================================================
+    // VALIDAR SI UN PROCESO YA GENERÓ COMPROBANTE
+    // (IDEMPOTENCIA ERP)
+    // =========================================================
+    public boolean existeProcesoOrigen(
+            String modulo,
+            String proceso,
+            String tabla,
+            Long idOrigen
+    ) {
+
+        String sql = """
+        SELECT COUNT(1)
+        FROM contabilidad.origen_comprobantes
+        WHERE modulo_origen = :modulo
+          AND proceso_origen = :proceso
+          AND tabla_origen = :tabla
+          AND id_origen = :idOrigen
+        """;
+
+        Integer count = jdbc.queryForObject(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("modulo", modulo)
+                        .addValue("proceso", proceso)
+                        .addValue("tabla", tabla)
+                        .addValue("idOrigen", idOrigen),
+                Integer.class
+        );
+
+        return count != null && count > 0;
     }
 }

@@ -13,9 +13,9 @@ export class ConceptosNominaExporterService {
     }
 
     const data = items.map(x => ({
-      'Código': x.codigo,
-      'Nombre': x.nombre,
-      'Tipo': x.tipo,
+      'Código': x.codigoConcepto,
+      'Nombre': x.nombreConcepto,
+      'Tipo': x.tipoConcepto,
       'Es fijo': x.esFijo ? 'SI' : 'NO',
       'Activo': x.activo ? 'SI' : 'NO',
     }));

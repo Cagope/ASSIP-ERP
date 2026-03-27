@@ -1,4 +1,4 @@
-package co.assip.erp.contabilidad.registro.repository;
+package co.assip.erp.contabilidad.auxiliares_contables;
 
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;

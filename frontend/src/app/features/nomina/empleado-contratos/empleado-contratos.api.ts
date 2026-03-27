@@ -3,20 +3,98 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
-export interface EmpleadoContratoListDTO {
-  idContrato: number;
-  idEmpleado: number;
+/* ============================================================
+   DTO LISTA (backend enriquecido / vista)
+   ============================================================ */
 
-  fechaInicio: string; // yyyy-MM-dd
+export interface EmpleadoContratoListDTO {
+
+  idContrato: number;
+
+  // =========================
+  // Empleado
+  // =========================
+  idEmpleado: number;
+  idDatosPersonal?: number | null;
+  documentoEmpleado?: string | null;
+  nombreEmpleado?: string | null;
+
+  // =========================
+  // Fechas
+  // =========================
+  fechaInicio: string;
   fechaFin?: string | null;
 
-  salarioBase: number;
+  // =========================
+  // Contrato
+  // =========================
+  idTipoContrato: number;
+  tipoContratoNombre?: string | null;
+
   periodoPago: string;
 
+  // =========================
+  // Sección / Cargo
+  // =========================
+  idSeccion?: number | null;
+  nombreSeccion?: string | null;
+
+  idCargo?: number | null;
+  nombreCargo?: string | null;
+
+  // =========================
+  // Valores
+  // =========================
+  salarioBase: number;
+  salarioIntegral: boolean;
+
+  // =========================
+  // Afiliaciones
+  // =========================
+  idEps?: number | null;
+  nombreEps?: string | null;
+
+  idAfp?: number | null;
+  nombreAfp?: string | null;
+
+  idCesantias?: number | null;
+  nombreCesantias?: string | null;
+
+  idArl?: number | null;
+  nombreArl?: string | null;
+
+  idCajaCompensacion?: number | null;
+  nombreCajaCompensacion?: string | null;
+
+  // =========================
+  // Cuenta nómina
+  // =========================
+  idCuentaAhorroNomina?: number | null;
+  cuentaNominaDisplay?: string | null;
+
+  idFormaAhorroNomina?: number | null;
+  nombreFormaAhorroNomina?: string | null;
+
+  // =========================
+  // ARL / Renovación
+  // =========================
+  fechaEnvioNotaRenovacion?: string | null;
+
+  claseRiesgoArl: number;
+  porcentajeArl: number;
+
+  // =========================
+  // Estado
+  // =========================
   activo: boolean;
 }
 
+/* ============================================================
+   DTO FORMULARIO (crear / editar)
+   ============================================================ */
+
 export interface EmpleadoContratoFormDTO {
+
   idContrato?: number;
 
   idEmpleado: number | null;
@@ -31,7 +109,7 @@ export interface EmpleadoContratoFormDTO {
   salarioBase: number;
   salarioIntegral: boolean;
 
-  periodoPago: string; // MENSUAL | QUINCENAL
+  periodoPago: string;
 
   idEps?: number | null;
   idAfp?: number | null;
@@ -39,7 +117,6 @@ export interface EmpleadoContratoFormDTO {
   idArl?: number | null;
   idCajaCompensacion?: number | null;
 
-  cuentaNominaDisplay?: string | null;
   idCuentaAhorroNomina?: number | null;
 
   fechaEnvioNotaRenovacion?: string | null;
@@ -51,6 +128,10 @@ export interface EmpleadoContratoFormDTO {
 }
 
 export interface EmpleadoContratoSaveDTO extends EmpleadoContratoFormDTO {}
+
+/* ============================================================
+   API SERVICE
+   ============================================================ */
 
 @Injectable({ providedIn: 'root' })
 export class EmpleadoContratosApi {
@@ -78,4 +159,11 @@ export class EmpleadoContratosApi {
   eliminar(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
   }
+
+  listarPorEmpleado(idEmpleado: number) {
+    return this.http.get<EmpleadoContratoListDTO[]>(
+      `${this.base}/por-empleado/${idEmpleado}`
+    );
+  }
+
 }

@@ -12,6 +12,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import co.assip.erp.shared.math.MathUtils;
+
 @Service
 @RequiredArgsConstructor
 public class NovedadesNominaMasivoService {
@@ -62,13 +64,9 @@ public class NovedadesNominaMasivoService {
         // -------------------------------------------------
         // VALORES
         // -------------------------------------------------
-        BigDecimal cantidad = req.getCantidad() != null
-                ? req.getCantidad()
-                : BigDecimal.ZERO;
+        BigDecimal cantidad = MathUtils.pesos(req.getCantidad());
 
-        BigDecimal valorManual = req.getValor() != null
-                ? req.getValor()
-                : BigDecimal.ZERO;
+        BigDecimal valorManual = MathUtils.pesos(req.getValor());
 
         // -------------------------------------------------
         // PREVIEW
@@ -128,13 +126,9 @@ public class NovedadesNominaMasivoService {
         // -------------------------------------------------
         // VALORES
         // -------------------------------------------------
-        BigDecimal cantidad = req.getCantidad() != null
-                ? req.getCantidad()
-                : BigDecimal.ZERO;
+        BigDecimal cantidad = MathUtils.pesos(req.getCantidad());
 
-        BigDecimal valorManual = req.getValor() != null
-                ? req.getValor()
-                : BigDecimal.ZERO;
+        BigDecimal valorManual = MathUtils.pesos(req.getValor());
 
         String observacion = req.getObservacion();
         String estado = "ABIERTO";

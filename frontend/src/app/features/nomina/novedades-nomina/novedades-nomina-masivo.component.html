@@ -1,0 +1,225 @@
+<div class="page">
+
+  <!-- =========================================================
+       ENCABEZADO (SIN NUEVO / IMPRIMIR / EXPORTAR)
+       ========================================================= -->
+  <app-header-actions
+    titulo="Novedades Masivas"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <!-- =========================================================
+       FORMULARIO
+       ========================================================= -->
+  <div class="card">
+
+    <div class="form-grid">
+
+      <!-- =========================
+           CONCEPTO
+           ========================= -->
+      <div class="form-group">
+        <label>Concepto *</label>
+
+        <select
+          class="form-control"
+          [(ngModel)]="form.codigoConcepto"
+          (ngModelChange)="onConceptoChange()">
+
+          <option value="">-- Seleccione --</option>
+
+          <option
+            *ngFor="let c of conceptos"
+            [value]="c.codigoConcepto">
+
+            {{ c.codigoConcepto }} - {{ c.nombreConcepto }}
+
+          </option>
+
+        </select>
+      </div>
+
+      <!-- =========================
+           CANTIDAD (HORAS / DÍAS)
+           ========================= -->
+      <div
+        class="form-group"
+        *ngIf="requiereCantidad">
+
+        <label>
+          {{ esAuxTransporte ? 'Días *' : 'Cantidad *' }}
+        </label>
+
+        <input
+          type="number"
+          class="form-control"
+          [(ngModel)]="form.cantidad"
+          min="0"
+          step="1">
+      </div>
+
+
+      <!-- =========================
+           VALOR (SOLO MANUAL)
+           ========================= -->
+      <div
+        class="form-group"
+        *ngIf="valorEditable">
+
+        <label>Valor</label>
+
+        <input
+          type="number"
+          class="form-control valor"
+          [(ngModel)]="form.valor"
+          min="0">
+      </div>
+
+      <!-- =========================
+           OBSERVACIÓN
+           ========================= -->
+      <div class="form-group full">
+        <label>Observación</label>
+
+        <textarea
+          class="form-control"
+          rows="3"
+          [(ngModel)]="form.observacion">
+        </textarea>
+      </div>
+
+    </div>
+
+    <!-- =========================
+         ACCIONES
+         ========================= -->
+    <div class="actions">
+
+      <!-- 🔍 PREVIEW -->
+      <button
+        class="btn secondary"
+        (click)="previewMasivo()"
+        [disabled]="procesando">
+
+        {{ procesando ? 'Procesando...' : 'Preview' }}
+
+      </button>
+
+      <!-- 📤 EXPORTAR EXCEL (SOLO SI HAY PREVIEW) -->
+      <button
+        class="btn secondary"
+        *ngIf="preview && preview.length"
+        (click)="exportarPreview()">
+
+        Exportar Excel
+
+      </button>
+
+      <!-- ✅ APLICAR DEFINITIVO -->
+      <button
+        class="btn primary"
+        (click)="generar()"
+        [disabled]="procesando || !preview || preview.length === 0">
+
+        Aplicar
+
+      </button>
+
+      <!-- ↩ VOLVER -->
+      <button
+        class="btn"
+        (click)="volver()">
+        Volver
+      </button>
+
+    </div>
+
+  </div>
+
+  <div
+    *ngIf="viendoPreview && preview.length"
+    class="preview">
+
+    <h3>Vista previa de novedades</h3>
+
+    <table class="table preview-table">
+      <thead>
+      <tr>
+        <th>Documento</th>
+        <th>Empleado</th>
+        <th class="center">Cantidad</th>
+        <th class="right">Salario Base</th>
+        <th class="right">Valor</th>
+        <th class="center">Estado</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr *ngFor="let x of preview">
+
+        <td>{{ x.documento }}</td>
+        <td>{{ x.nombre_empleado }}</td>
+
+        <td class="center">
+          {{ x.cantidad }}
+        </td>
+
+        <td class="right">
+          {{ x.salario_base | number:'1.0-0' }}
+        </td>
+
+        <td class="right valor">
+          {{ x.valor_calculado | number:'1.0-0' }}
+        </td>
+
+        <td class="center">
+          <span class="badge warn" *ngIf="x.ya_existe">Ya existe</span>
+          <span class="badge ok" *ngIf="!x.ya_existe">Nuevo</span>
+        </td>
+
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- =========================
+     RESUMEN PREVIEW
+     ========================= -->
+  <div class="preview-resumen">
+
+    <div class="res-card">
+      <span>Total contratos</span>
+      <strong>{{ totalContratos }}</strong>
+    </div>
+
+    <div class="res-card ok">
+      <span>Nuevos</span>
+      <strong>{{ totalNuevos }}</strong>
+    </div>
+
+    <div class="res-card warn">
+      <span>Ya existentes</span>
+      <strong>{{ totalExistentes }}</strong>
+    </div>
+
+    <div class="res-card money">
+      <span>Total nuevos</span>
+      <strong>
+        {{ totalValorNuevos | number:'1.0-0' }}
+      </strong>
+    </div>
+
+    <div class="res-card money light">
+      <span>Total general</span>
+      <strong>
+        {{ totalValorGeneral | number:'1.0-0' }}
+      </strong>
+    </div>
+
+  </div>
+
+
+</div>

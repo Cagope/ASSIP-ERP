@@ -1,0 +1,101 @@
+.page { padding: 16px; }
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.form-group.full { grid-column: 1 / -1; }
+
+.actions {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.loading { padding: 20px; }
+
+.subtitle {
+  margin-top: -8px;
+  margin-bottom: 16px;
+  color: #666;
+  font-size: 14px;
+}
+
+app-empleado-autocomplete {
+  display: block;
+  width: 100%;
+}
+
+app-empleado-autocomplete input {
+  width: 100%;
+  min-height: 44px;
+  font-size: 14px;
+}
+
+.contrato-info {
+  background: #f8f9fa;
+  border: 1px solid #e2e6ea;
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 8px;
+  font-size: 13px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 6px;
+}
+
+.valor-destacado {
+  margin-top: 10px;
+}
+
+.valor-input {
+  font-size: 1.4rem;
+  font-weight: 600;
+  text-align: right;
+  background-color: #f5f7fa;
+  color: #1e3a8a;
+  border: 2px solid #d1d5db;
+}
+
+.valor-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.periodo-activo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin: 12px 0 18px;
+  padding: 12px 16px;
+
+  background: linear-gradient(90deg, #eef2ff, #f8faff);
+  border-left: 5px solid #3f51b5;
+  border-radius: 4px;
+
+  font-size: 15px;
+  color: #1f2937;
+
+  strong {
+    font-weight: 600;
+    color: #1e3a8a;
+    white-space: nowrap;
+  }
+
+  span {
+    font-weight: 500;
+    font-size: 15px;
+    color: #111827;
+  }
+}

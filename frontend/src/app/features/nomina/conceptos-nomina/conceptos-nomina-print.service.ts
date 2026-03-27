@@ -25,9 +25,9 @@ export class ConceptosNominaPrintService {
 
     const filasHTML = items.map(x => `
       <tr>
-        <td><strong>${(x.codigo ?? '').toUpperCase()}</strong></td>
-        <td>${(x.nombre ?? '').toUpperCase()}</td>
-        <td>${(x.tipo ?? '').toUpperCase()}</td>
+        <td><strong>${(x.codigoConcepto ?? '').toUpperCase()}</strong></td>
+        <td>${(x.nombreConcepto ?? '').toUpperCase()}</td>
+        <td>${(x.tipoConcepto ?? '').toUpperCase()}</td>
         <td class="center">${x.esFijo ? 'SI' : 'NO'}</td>
         <td class="center">${x.activo ? 'SI' : 'NO'}</td>
       </tr>

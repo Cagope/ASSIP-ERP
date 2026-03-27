@@ -1,0 +1,166 @@
+<div class="page">
+
+  <h2>
+    {{ id ? 'Editar novedad de nómina' : 'Nueva novedad de nómina' }}
+  </h2>
+
+  <!-- =========================
+       PERÍODO ACTIVO (INFORMATIVO)
+       ========================= -->
+  <div class="periodo-activo" *ngIf="periodoActivoTexto">
+    <strong>Período activo:</strong>
+    <span>{{ periodoActivoTexto }}</span>
+  </div>
+
+  <div class="card">
+
+    <div class="form-grid">
+
+      <!-- =========================
+           EMPLEADO
+           ========================= -->
+      <div class="form-group full">
+        <label>Empleado *</label>
+        <app-empleado-autocomplete
+          [(ngModel)]="form.idEmpleado"
+          name="idEmpleado"
+          (ngModelChange)="onEmpleadoChange()">
+        </app-empleado-autocomplete>
+      </div>
+
+      <div *ngIf="contratoActivo" class="contrato-info">
+        <div><strong>Salario base:</strong> {{ contratoActivo.salarioBase | number:'1.0-0' }}</div>
+        <div><strong>Tipo contrato:</strong> {{ contratoActivo.tipoContratoNombre }}</div>
+        <div><strong>Cargo:</strong> {{ contratoActivo.nombreCargo }}</div>
+        <div><strong>Sección:</strong> {{ contratoActivo.nombreSeccion }}</div>
+        <div><strong>Periodo pago:</strong> {{ contratoActivo.periodoPago }}</div>
+      </div>
+
+      <!-- =========================
+           CONCEPTO
+           ========================= -->
+      <div class="form-group">
+        <label>Concepto *</label>
+
+        <select
+          class="form-control"
+          [(ngModel)]="form.codigoConcepto"
+          name="codigoConcepto"
+          (change)="onConceptoChange()">
+
+          <option [ngValue]="null">
+            -- Seleccione --
+          </option>
+
+          <option
+            *ngFor="let c of conceptos"
+            [ngValue]="c.codigoConcepto">
+
+            {{ c.codigoConcepto }} — {{ c.nombreConcepto }}
+
+          </option>
+
+        </select>
+      </div>
+
+      <!-- =========================
+           FECHA INICIAL
+           ========================= -->
+      <div class="form-group" *ngIf="requiereFechas">
+        <label>Fecha inicial *</label>
+
+        <input
+          type="date"
+          class="form-control"
+          [(ngModel)]="form.fechaInicial"
+          name="fechaInicial"
+          (change)="calcularDias()">
+      </div>
+
+      <!-- =========================
+           FECHA FINAL
+           ========================= -->
+      <div class="form-group" *ngIf="requiereFechas">
+        <label>Fecha final *</label>
+
+        <input
+          type="date"
+          class="form-control"
+          [(ngModel)]="form.fechaFinal"
+          name="fechaFinal"
+          (change)="calcularDias()">
+      </div>
+
+      <!-- =========================
+           CANTIDAD
+           ========================= -->
+      <div class="form-group" *ngIf="requiereCantidad">
+        <label>Cantidad *</label>
+
+        <input
+          type="number"
+          step="0.01"
+          class="form-control"
+          [(ngModel)]="form.cantidad"
+          name="cantidad"
+          (ngModelChange)="recalcular()">
+      </div>
+
+      <!-- =========================
+           VALOR
+           ========================= -->
+      <div class="form-group valor-destacado">
+        <label>Valor</label>
+
+        <input
+          type="text"
+          class="form-control valor-input"
+          [(ngModel)]="form.valor"
+          [readonly]="!valorEditable"
+        />
+      </div>
+
+
+      <!-- =========================
+           OBSERVACIÓN
+           ========================= -->
+      <div class="form-group full">
+        <label>Observación</label>
+
+        <textarea
+          rows="3"
+          class="form-control"
+          [(ngModel)]="form.observacion"
+          name="observacion">
+        </textarea>
+      </div>
+
+    </div>
+
+    <!-- =========================
+         ACCIONES
+         ========================= -->
+    <div class="actions">
+
+      <button
+        class="btn btn-primary"
+        (click)="guardar()"
+        [disabled]="guardando">
+
+        {{ guardando ? 'Guardando...' : 'Guardar' }}
+
+      </button>
+
+      <button
+        class="btn"
+        (click)="volver()">
+
+        Cancelar
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

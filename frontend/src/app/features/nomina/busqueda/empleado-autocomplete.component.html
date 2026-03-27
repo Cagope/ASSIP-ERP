@@ -1,0 +1,26 @@
+<div class="autocomplete">
+
+  <input
+    type="text"
+    class="form-control"
+    placeholder="Buscar por documento o nombre..."
+    [(ngModel)]="q"
+    (input)="buscar()"
+  />
+
+  <ul
+    class="autocomplete-list"
+    *ngIf="resultados.length">
+
+    <li
+      *ngFor="let x of resultados"
+      (click)="seleccionar(x)">
+
+      <strong>{{ x.documento }}</strong>
+      — {{ x.nombreCompleto }}
+
+    </li>
+
+  </ul>
+
+</div>

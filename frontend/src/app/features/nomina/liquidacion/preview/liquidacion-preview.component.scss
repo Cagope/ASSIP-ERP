@@ -1,0 +1,207 @@
+.liquidacion-preview {
+
+  padding: 16px;
+
+  // =========================================================
+  // FORMULARIO
+  // =========================================================
+  .formulario {
+
+    margin-bottom: 20px;
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      align-items: end;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+
+      label {
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+  }
+
+  // =========================================================
+  // ESTADOS
+  // =========================================================
+  .loading {
+    padding: 12px;
+    color: #555;
+    font-style: italic;
+  }
+
+  .error {
+    padding: 12px;
+    background: #fdecea;
+    color: #b71c1c;
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+
+  // =========================================================
+  // RESUMEN GLOBAL
+  // =========================================================
+  .resumen-global {
+
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+
+    .resumen-item {
+      background: #f5f5f5;
+      padding: 12px;
+      border-radius: 6px;
+      text-align: center;
+
+      strong {
+        display: block;
+        font-size: 12px;
+        color: #666;
+      }
+
+      span {
+        font-size: 18px;
+        font-weight: bold;
+      }
+
+      &.neto {
+        background: #e3f2fd;
+
+        span {
+          color: #0d47a1;
+        }
+      }
+    }
+  }
+
+  // =========================================================
+  // CONTRATO CARD
+  // =========================================================
+  .contrato-card {
+
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 24px;
+    overflow: hidden;
+
+    // -------------------------
+    // CABECERA
+    // -------------------------
+    .contrato-header {
+
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 8px;
+
+      background: #fafafa;
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+
+      div {
+        font-size: 13px;
+
+        strong {
+          font-weight: 600;
+        }
+      }
+
+      .neto {
+        font-weight: bold;
+        color: #1b5e20;
+      }
+    }
+
+    // -------------------------
+    // TABLA DETALLE
+    // -------------------------
+    table.detalle {
+
+      width: 100%;
+      border-collapse: collapse;
+
+      thead {
+        background: #f0f0f0;
+
+        th {
+          padding: 8px;
+          font-size: 12px;
+          text-transform: uppercase;
+          border-bottom: 1px solid #ccc;
+        }
+      }
+
+      tbody {
+
+        tr {
+          border-bottom: 1px solid #eee;
+        }
+
+        td {
+          padding: 6px 8px;
+          font-size: 13px;
+        }
+
+        .center {
+          text-align: center;
+        }
+
+        .right {
+          text-align: right;
+        }
+
+        .total {
+          font-weight: 600;
+        }
+      }
+    }
+
+    // -------------------------
+    // TOTALES CONTRATO
+    // -------------------------
+    .totales-contrato {
+
+      display: flex;
+      justify-content: flex-end;
+      gap: 24px;
+
+      padding: 10px 12px;
+      background: #fafafa;
+      border-top: 1px solid #ddd;
+
+      span {
+        font-size: 13px;
+
+        strong {
+          margin-left: 4px;
+        }
+      }
+    }
+  }
+
+  // =========================================================
+  // ACCIONES FINALES
+  // =========================================================
+  .acciones-finales {
+
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+
+    .btn {
+      min-width: 160px;
+    }
+  }
+}

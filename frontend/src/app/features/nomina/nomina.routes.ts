@@ -11,73 +11,122 @@ import { CONCEPTOS_NOMINA_ROUTES } from './conceptos-nomina/conceptos-nomina.rou
 import { EMPLEADOS_ROUTES } from './empleados/empleados.routes';
 import { EMPLEADO_CONTRATOS_ROUTES } from './empleado-contratos/empleado-contratos.routes';
 import { CESANTIAS_ROUTES } from './cesantias/cesantias.routes';
+import { DESPRENDIBLE_ROUTES } from './desprendible/desprendible.routes';
+
+// ✅ NUEVO: Novedades Nómina
+import { NOVEDADES_NOMINA_ROUTES } from './novedades-nomina/novedades-nomina.routes';
+
+// ✅ NUEVO: Períodos Nómina
+import { PERIODOS_NOMINA_ROUTES } from './periodos-nomina/periodos-nomina.routes';
+import { LIQUIDACION_ROUTES } from './liquidacion/liquidacion.routes';
+import { CONCEPTO_CUENTAS_CONTABLES_ROUTES } from './concepto-cuentas-contables/concepto-cuentas-contables.routes';
 
 export const NOMINA_ROUTES: Routes = [
 
-  // ✅ CRUD: Cargos
-  {
-    path: 'cargos',
-    children: CARGOS_ROUTES
-  },
+  // =========================
+  // 🏗 ESTRUCTURA HUMANA
+  // =========================
 
-  // ✅ CRUD: Secciones Nómina
-  {
-    path: 'secciones',
-    children: SECCIONES_ROUTES
-  },
-
-  // ✅ CRUD: EPS
-  {
-    path: 'eps',
-    children: EPS_ROUTES
-  },
-
-  // ✅ CRUD: AFP
-  {
-    path: 'afp',
-    children: AFP_ROUTES
-  },
-
-  // ✅ CRUD: ARL
-  {
-    path: 'arl',
-    children: ARL_ROUTES
-  },
-
-  // ✅ CRUD: Caja de Compensación
-  {
-    path: 'caja-compensacion',
-    children: CAJA_COMPENSACION_ROUTES
-  },
-
-  // ✅ CRUD: Variables de Vigencia
-  {
-    path: 'variables-vigencia',
-    children: VARIABLES_VIGENCIA_ROUTES
-  },
-
-  // ✅ CRUD: Conceptos de Nómina
-  {
-    path: 'conceptos-nomina',
-    children: CONCEPTOS_NOMINA_ROUTES
-  },
-
-  // ✅ CRUD: Empleados
   {
     path: 'empleados',
     children: EMPLEADOS_ROUTES
   },
 
-  // ✅ CRUD: Cesantías
+  {
+    path: 'empleado-contratos',
+    children: EMPLEADO_CONTRATOS_ROUTES
+  },
+
+  // =========================
+  // 📅 CALENDARIO DE NÓMINA
+  // =========================
+
+  {
+    path: 'periodos',
+    children: PERIODOS_NOMINA_ROUTES
+  },
+
+  // =========================
+  // 📄 DESPRENDIBLES DE NÓMINA
+  // =========================
+  {
+    path: 'desprendible',
+    children: DESPRENDIBLE_ROUTES
+  },
+
+  // =========================
+  // ⚙ OPERACIÓN
+  // =========================
+
+  {
+    path: 'novedades',
+    children: NOVEDADES_NOMINA_ROUTES
+  },
+
+  {
+    path: 'liquidacion',
+    children: LIQUIDACION_ROUTES
+  },
+
   {
     path: 'cesantias',
     children: CESANTIAS_ROUTES
   },
 
-  // ✅ CRUD: Contratos de Empleados
+  // =========================
+  // 📚 CONFIGURACIÓN
+  // =========================
+
   {
-    path: 'empleado-contratos',
-    children: EMPLEADO_CONTRATOS_ROUTES
+    path: 'conceptos-nomina',
+    children: CONCEPTOS_NOMINA_ROUTES
+  },
+
+  {
+    path: 'concepto-cuentas-contables',
+    children: CONCEPTO_CUENTAS_CONTABLES_ROUTES
+  },
+
+  {
+    path: 'variables-vigencia',
+    children: VARIABLES_VIGENCIA_ROUTES
+  },
+
+  {
+    path: 'cargos',
+    children: CARGOS_ROUTES
+  },
+
+  {
+    path: 'secciones',
+    children: SECCIONES_ROUTES
+  },
+
+  {
+    path: 'eps',
+    children: EPS_ROUTES
+  },
+
+  {
+    path: 'afp',
+    children: AFP_ROUTES
+  },
+
+  {
+    path: 'arl',
+    children: ARL_ROUTES
+  },
+
+  {
+    path: 'caja-compensacion',
+    children: CAJA_COMPENSACION_ROUTES
+  },
+
+  {
+    path: 'contabilizacion/liquidacion',
+    loadChildren: () =>
+      import('./contabilizacion/liquidacion/liquidacion-contabilizacion.routes')
+        .then(m => m.LIQUIDACION_CONTABILIZACION_ROUTES)
   }
 
 ];

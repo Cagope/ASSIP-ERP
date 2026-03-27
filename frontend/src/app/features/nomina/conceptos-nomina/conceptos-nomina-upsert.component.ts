@@ -26,6 +26,10 @@ export class ConceptosNominaUpsertComponent implements OnInit {
 
   form: ConceptoNominaFormDTO = this.nuevo();
 
+  // =========================================================
+  // INIT
+  // =========================================================
+
   ngOnInit(): void {
     const codigoParam = this.route.snapshot.paramMap.get('codigo');
     this.codigo = codigoParam ? codigoParam : null;
@@ -35,18 +39,29 @@ export class ConceptosNominaUpsertComponent implements OnInit {
     }
   }
 
+  // =========================================================
+  // CARGAR
+  // =========================================================
+
   cargar(codigo: string): void {
     this.loading = true;
 
     this.api.obtener(codigo).subscribe({
       next: (data) => {
+
         this.form = {
-          codigo: data.codigo ?? '',
-          nombre: data.nombre ?? '',
-          tipo: data.tipo ?? '',
+          codigoConcepto: data.codigoConcepto ?? '',
+          nombreConcepto: data.nombreConcepto ?? '',
+          tipoConcepto: data.tipoConcepto ?? '',
           esFijo: data.esFijo ?? false,
-          activo: data.activo ?? true
+          activo: data.activo ?? true,
+
+          // 🔥 NUEVOS CAMPOS
+          tipoCalculo: data.tipoCalculo ?? 'MANUAL',
+          baseCalculo: data.baseCalculo ?? undefined,
+          multiplicador: data.multiplicador ?? 1
         };
+
         this.loading = false;
       },
       error: (err) => {
@@ -58,19 +73,26 @@ export class ConceptosNominaUpsertComponent implements OnInit {
     });
   }
 
+  // =========================================================
+  // GUARDAR
+  // =========================================================
+
   guardar(): void {
-    const codigo = (this.form.codigo ?? '').trim();
-    const nombre = (this.form.nombre ?? '').trim();
-    const tipo = (this.form.tipo ?? '').trim();
+
+    const codigo = (this.form.codigoConcepto ?? '').trim();
+    const nombre = (this.form.nombreConcepto ?? '').trim();
+    const tipo = (this.form.tipoConcepto ?? '').trim();
 
     if (!codigo) {
       alert('El código es obligatorio.');
       return;
     }
+
     if (!nombre) {
       alert('El nombre es obligatorio.');
       return;
     }
+
     if (!tipo) {
       alert('El tipo es obligatorio.');
       return;
@@ -79,10 +101,10 @@ export class ConceptosNominaUpsertComponent implements OnInit {
     this.guardando = true;
 
     if (this.codigo) {
-      // ✅ editar: no dejamos cambiar codigo
+
       const payload: ConceptoNominaFormDTO = {
         ...this.form,
-        codigo: this.codigo
+        codigoConcepto: this.codigo!
       };
 
       this.api.actualizar(this.codigo, payload).subscribe({
@@ -98,6 +120,7 @@ export class ConceptosNominaUpsertComponent implements OnInit {
       });
 
     } else {
+
       this.api.crear(this.form).subscribe({
         next: () => {
           this.guardando = false;
@@ -109,20 +132,34 @@ export class ConceptosNominaUpsertComponent implements OnInit {
           alert('No se pudo crear.');
         }
       });
+
     }
   }
+
+  // =========================================================
+  // VOLVER
+  // =========================================================
 
   volver(): void {
     this.router.navigate(['/nomina/conceptos-nomina']);
   }
 
+  // =========================================================
+  // NUEVO
+  // =========================================================
+
   private nuevo(): ConceptoNominaFormDTO {
     return {
-      codigo: '',
-      nombre: '',
-      tipo: '',
+      codigoConcepto: '',
+      nombreConcepto: '',
+      tipoConcepto: '',
       esFijo: false,
-      activo: true
+      activo: true,
+
+      // 🔥 NUEVOS CAMPOS
+      tipoCalculo: 'MANUAL',
+      baseCalculo: undefined,
+      multiplicador: 1
     };
   }
 }

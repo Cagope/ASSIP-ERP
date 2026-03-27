@@ -1,6 +1,6 @@
-package co.assip.erp.contabilidad.registro.repository;
+package co.assip.erp.contabilidad.auxiliares_contables;
 
-import co.assip.erp.contabilidad.registro.dto.MovimientoContableDTO;
+import co.assip.erp.contabilidad.auxiliares_contables.dto.MovimientoContableDTO;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -30,37 +30,41 @@ public class AuxiliaresContablesRepository {
     ) {
 
         String sql = """
-            INSERT INTO contabilidad.auxiliares_contables (
-                id_catalogo_cuenta,
-                id_agencia,
-                id_datos_personal,
-                fecha_auxiliar,
-                tipo_comprobante,
-                numero_comprobante,
-                detalle_movimiento,
-                estado_movimiento,
-                valor_debito,
-                valor_credito,
-                valor_base,
-                fk_seguridad_creacion,
-                fk_seguridad_edicion
-            ) VALUES (
-                :idCatalogoCuenta,
-                :idAgencia,
-                :idDatosPersonal,
-                :fechaAuxiliar,
-                :tipoComprobante,
-                :numeroComprobante,
-                :detalleMovimiento,
-                'A',
-                :valorDebito,
-                :valorCredito,
-                :valorBase,
-                :usuario,
-                :usuario
-            )
-            RETURNING id_auxiliar_contable
-        """;
+        INSERT INTO contabilidad.auxiliares_contables (
+            id_catalogo_cuenta,
+            id_agencia,
+            id_datos_personal,
+            fecha_auxiliar,
+            tipo_comprobante,
+            numero_comprobante,
+            detalle_movimiento,
+            estado_movimiento,
+            valor_debito,
+            valor_credito,
+            valor_base,
+            origen_modulo,
+            documento_origen,
+            fk_seguridad_creacion,
+            fk_seguridad_edicion
+        ) VALUES (
+            :idCatalogoCuenta,
+            :idAgencia,
+            :idDatosPersonal,
+            :fechaAuxiliar,
+            :tipoComprobante,
+            :numeroComprobante,
+            :detalleMovimiento,
+            'A',
+            :valorDebito,
+            :valorCredito,
+            :valorBase,
+            :origenModulo,
+            :documentoOrigen,
+            :usuario,
+            :usuario
+        )
+        RETURNING id_auxiliar_contable
+    """;
 
         Integer idAux = jdbc.queryForObject(sql,
                 new MapSqlParameterSource()
@@ -74,6 +78,8 @@ public class AuxiliaresContablesRepository {
                         .addValue("valorDebito", mov.getValorDebito())
                         .addValue("valorCredito", mov.getValorCredito())
                         .addValue("valorBase", mov.getValorBase() == null ? BigDecimal.ZERO : mov.getValorBase())
+                        .addValue("origenModulo", mov.getOrigenModulo() == null ? "CONTABILIDAD" : mov.getOrigenModulo())
+                        .addValue("documentoOrigen", mov.getDocumentoOrigen())
                         .addValue("usuario", idUsuario),
                 Integer.class
         );

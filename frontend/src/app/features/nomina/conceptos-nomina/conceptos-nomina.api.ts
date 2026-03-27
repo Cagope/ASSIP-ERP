@@ -4,23 +4,35 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 /* =========================================================
-   DTOs
+   DTOs (ALINEADOS 100% CON EL BACKEND ACTUALIZADO)
    ========================================================= */
 
 export interface ConceptoNominaListDTO {
-  codigo: string;
-  nombre: string;
-  tipo: string;
+  codigoConcepto: string;
+  nombreConcepto: string;
+  tipoConcepto: string;
+
   esFijo: boolean;
   activo: boolean;
+
+  // 🔥 NUEVOS CAMPOS
+  tipoCalculo: string;      // MANUAL | POR_DIAS | POR_HORAS | POR_PORCENTAJE
+  baseCalculo?: string;     // SALARIO_BASE, etc
+  multiplicador?: number;   // 1.25, 0.04, etc
 }
 
 export interface ConceptoNominaFormDTO {
-  codigo: string;
-  nombre: string;
-  tipo: string;
+  codigoConcepto: string;
+  nombreConcepto: string;
+  tipoConcepto: string;
+
   esFijo: boolean;
   activo: boolean;
+
+  // 🔥 NUEVOS CAMPOS
+  tipoCalculo: string;
+  baseCalculo?: string;
+  multiplicador?: number;
 }
 
 export interface ConceptoNominaSaveDTO extends ConceptoNominaFormDTO {}
@@ -44,10 +56,12 @@ export class ConceptosNominaApi {
   }
 
   // =========================================================
-  // OBTENER (FORM)
+  // OBTENER
   // =========================================================
-  obtener(codigo: string): Observable<ConceptoNominaFormDTO> {
-    return this.http.get<ConceptoNominaFormDTO>(`${this.base}/${codigo}`);
+  obtener(codigoConcepto: string): Observable<ConceptoNominaFormDTO> {
+    return this.http.get<ConceptoNominaFormDTO>(
+      `${this.base}/${codigoConcepto}`
+    );
   }
 
   // =========================================================
@@ -60,14 +74,22 @@ export class ConceptosNominaApi {
   // =========================================================
   // ACTUALIZAR
   // =========================================================
-  actualizar(codigo: string, data: ConceptoNominaSaveDTO): Observable<void> {
-    return this.http.put<void>(`${this.base}/${codigo}`, data);
+  actualizar(
+    codigoConcepto: string,
+    data: ConceptoNominaSaveDTO
+  ): Observable<void> {
+    return this.http.put<void>(
+      `${this.base}/${codigoConcepto}`,
+      data
+    );
   }
 
   // =========================================================
   // ELIMINAR
   // =========================================================
-  eliminar(codigo: string): Observable<void> {
-    return this.http.delete<void>(`${this.base}/${codigo}`);
+  eliminar(codigoConcepto: string): Observable<void> {
+    return this.http.delete<void>(
+      `${this.base}/${codigoConcepto}`
+    );
   }
 }

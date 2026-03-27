@@ -6,6 +6,8 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import co.assip.erp.shared.math.MathUtils;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -38,7 +40,7 @@ public class IbcCalculator {
         );
 
         if (diasLaborados == null || diasLaborados <= 0) {
-            return BigDecimal.ZERO;
+            return MathUtils.pesos(BigDecimal.ZERO);
         }
 
         // =========================================
@@ -46,9 +48,11 @@ public class IbcCalculator {
         // =========================================
         BigDecimal salarioBase = contrato.getSalarioBase();
 
-        BigDecimal salarioProporcional = salarioBase
-                .divide(BigDecimal.valueOf(30), 10, RoundingMode.HALF_UP)
-                .multiply(BigDecimal.valueOf(diasLaborados));
+        BigDecimal salarioProporcional = MathUtils.pesos(
+                salarioBase
+                        .divide(BigDecimal.valueOf(30), 10, RoundingMode.HALF_UP)
+                        .multiply(BigDecimal.valueOf(diasLaborados))
+        );
 
         // =========================================
         // 3️⃣ NOVEDADES QUE AFECTAN IBC (VALOR TOTAL)
@@ -67,7 +71,7 @@ public class IbcCalculator {
             ibc = BigDecimal.ZERO;
         }
 
-        return ibc.setScale(2, RoundingMode.HALF_UP);
+        return MathUtils.pesos(ibc);
     }
 
     // =========================================================
@@ -129,6 +133,6 @@ public class IbcCalculator {
                 .addValue("idContrato", idContrato);
 
         BigDecimal v = jdbc.queryForObject(sql, params, BigDecimal.class);
-        return v != null ? v : BigDecimal.ZERO;
+        return MathUtils.pesos(v);
     }
 }

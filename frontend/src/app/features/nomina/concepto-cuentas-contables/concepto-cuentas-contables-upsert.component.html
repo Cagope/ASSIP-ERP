@@ -1,0 +1,139 @@
+<div class="page">
+
+  <app-header-actions
+    [titulo]="idMapeo ? 'Editar Mapeo Contable de Concepto' : 'Nuevo Mapeo Contable de Concepto'"
+    subtitulo="Crear / Editar"
+  ></app-header-actions>
+
+  <div class="card" *ngIf="!loading; else cargandoTpl">
+
+    <div class="form-grid">
+
+      <!-- =========================
+           AGENCIA (1°)
+           ========================= -->
+      <div class="form-group">
+        <label>Agencia *</label>
+        <select
+          class="form-control"
+          [(ngModel)]="form.idAgencia"
+          (change)="onChangeAgencia(form.idAgencia)"
+          [disabled]="!!idMapeo"
+        >
+          <option [ngValue]="null">-- Seleccione agencia --</option>
+          <option
+            *ngFor="let ag of agencias"
+            [ngValue]="ag.idAgencia"
+          >
+            {{ ag.nombreAgencia }}
+          </option>
+        </select>
+      </div>
+
+      <!-- =========================
+           CONCEPTO NÓMINA (2°)
+           ========================= -->
+      <div class="form-group">
+        <label>Concepto Nómina *</label>
+        <select
+          class="form-control"
+          [(ngModel)]="form.codigoConcepto"
+          [disabled]="!!idMapeo"
+        >
+          <option [ngValue]="null">-- Seleccione concepto --</option>
+          <option
+            *ngFor="let c of conceptos"
+            [ngValue]="c.codigoConcepto"
+          >
+            {{ c.codigoConcepto }} - {{ c.nombreConcepto }}
+          </option>
+        </select>
+      </div>
+
+      <!-- =========================
+           CUENTA DÉBITO (BUSCADOR)
+           ========================= -->
+      <div class="form-group full">
+        <label>Cuenta Débito *</label>
+
+        <input
+          type="text"
+          class="form-control"
+          [formControl]="ctaDebitoCtrl"
+          placeholder="Buscar cuenta contable..."
+        />
+
+        <ul class="autocomplete" *ngIf="cuentasDebito.length > 0">
+          <li
+            *ngFor="let c of cuentasDebito"
+            (click)="seleccionarCuentaDebito(c)"
+          >
+            {{ c.codigoCuenta }} — {{ c.nombreCuenta }}
+          </li>
+        </ul>
+      </div>
+
+      <!-- =========================
+           CUENTA CRÉDITO (BUSCADOR)
+           ========================= -->
+      <div class="form-group full">
+        <label>Cuenta Crédito *</label>
+
+        <input
+          type="text"
+          class="form-control"
+          [formControl]="ctaCreditoCtrl"
+          placeholder="Buscar cuenta contable..."
+        />
+
+        <ul class="autocomplete" *ngIf="cuentasCredito.length > 0">
+          <li
+            *ngFor="let c of cuentasCredito"
+            (click)="seleccionarCuentaCredito(c)"
+          >
+            {{ c.codigoCuenta }} — {{ c.nombreCuenta }}
+          </li>
+        </ul>
+      </div>
+
+      <!-- =========================
+           ACTIVO
+           ========================= -->
+      <div class="form-group">
+        <label>Activo</label>
+        <select class="form-control" [(ngModel)]="form.activo">
+          <option [ngValue]="true">Sí</option>
+          <option [ngValue]="false">No</option>
+        </select>
+      </div>
+
+    </div>
+
+    <!-- =========================
+         ACCIONES
+         ========================= -->
+    <div class="actions">
+      <button
+        class="btn btn-primary"
+        (click)="guardar()"
+        [disabled]="guardando"
+      >
+        {{ guardando ? 'Guardando...' : 'Guardar' }}
+      </button>
+
+      <button
+        class="btn btn-light"
+        (click)="volver()"
+        [disabled]="guardando"
+      >
+        Cancelar
+      </button>
+    </div>
+
+  </div>
+
+  <ng-template #cargandoTpl>
+    <div class="loading">Cargando...</div>
+  </ng-template>
+
+</div>

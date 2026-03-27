@@ -17,50 +17,80 @@
     />
   </div>
 
-  <table class="table" *ngIf="!loading && filtrados.length > 0; else vacio">
+  <!-- =========================
+       TABLA
+       ========================= -->
+  <table
+    class="table"
+    *ngIf="!loading && filtrados.length > 0; else vacio">
+
     <thead>
     <tr>
-      <th style="width: 140px;">Código</th>
+      <th style="width:140px;">Código</th>
       <th>Nombre</th>
-      <th style="width: 120px;">Tipo</th>
-      <th style="width: 90px;">Fijo</th>
-      <th style="width: 110px;">Activo</th>
-      <th style="width: 120px;">Acciones</th>
+      <th style="width:120px;">Tipo</th>
+      <th style="width:90px;">Fijo</th>
+      <th style="width:110px;">Activo</th>
+      <th style="width:120px;">Acciones</th>
     </tr>
     </thead>
 
     <tbody>
     <tr *ngFor="let x of filtrados">
-      <td><strong>{{ x.codigo }}</strong></td>
-      <td class="nombre">{{ x.nombre }}</td>
-      <td>{{ x.tipo }}</td>
+      <td><strong>{{ x.codigoConcepto }}</strong></td>
+      <td class="nombre">{{ x.nombreConcepto }}</td>
+      <td>{{ x.tipoConcepto }}</td>
 
       <td class="center">
-        <span class="badge" [class.badge--ok]="x.esFijo" [class.badge--off]="!x.esFijo">
+        <span
+          class="badge"
+          [class.badge--ok]="x.esFijo"
+          [class.badge--off]="!x.esFijo">
           {{ x.esFijo ? 'SI' : 'NO' }}
         </span>
       </td>
 
-      <td>
-        <span class="badge" [class.badge--ok]="x.activo" [class.badge--off]="!x.activo">
+      <td class="center">
+        <span
+          class="badge"
+          [class.badge--ok]="x.activo"
+          [class.badge--off]="!x.activo">
           {{ x.activo ? 'SI' : 'NO' }}
         </span>
       </td>
 
       <td>
         <div class="acciones">
-          <button class="btn sm" (click)="editar(x.codigo)" title="Editar">✏️</button>
-          <button class="btn sm danger" (click)="eliminar(x.codigo)" title="Eliminar">🗑️</button>
+          <button
+            class="btn sm"
+            (click)="editar(x.codigoConcepto)"
+            title="Editar">
+            ✏️
+          </button>
+
+          <button
+            class="btn sm danger"
+            (click)="eliminar(x.codigoConcepto)"
+            title="Eliminar">
+            🗑️
+          </button>
         </div>
       </td>
     </tr>
     </tbody>
+
   </table>
 
+  <!-- =========================
+       LOADING
+       ========================= -->
   <div *ngIf="loading" class="loading">
     Cargando...
   </div>
 
+  <!-- =========================
+       VACÍO
+       ========================= -->
   <ng-template #vacio>
     <p class="empty">No hay conceptos para mostrar.</p>
   </ng-template>

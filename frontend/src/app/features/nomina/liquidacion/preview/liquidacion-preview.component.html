@@ -1,0 +1,189 @@
+<div class="liquidacion-preview">
+
+  <!-- ===================================================== -->
+  <!-- 🧭 HEADER -->
+  <!-- ===================================================== -->
+  <app-header-actions
+    titulo="Liquidación de Nómina"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <!-- ===================================================== -->
+  <!-- 🧾 FORMULARIO -->
+  <!-- ===================================================== -->
+  <form
+    class="formulario"
+    [formGroup]="form"
+    (ngSubmit)="ejecutarPreview()">
+
+    <div class="form-grid">
+
+      <!-- =========================
+           AGENCIA
+           ========================= -->
+      <div class="form-group">
+        <label>Agencia *</label>
+
+        <select
+          class="form-control"
+          formControlName="fkAgencia">
+
+          <option [ngValue]="null">
+            -- Seleccione --
+          </option>
+
+          <option
+            *ngFor="let a of session.getAgencias()"
+            [ngValue]="a.idAgencia">
+
+            {{ a.codigoAgencia }} — {{ a.nombreAgencia }}
+
+          </option>
+
+        </select>
+      </div>
+
+      <!-- =========================
+     PERÍODO (AUTOMÁTICO)
+     ========================= -->
+      <div class="form-group">
+        <label>Período de nómina</label>
+
+        <input
+          type="text"
+          class="form-control"
+          [value]="periodoLabel"
+          readonly
+        />
+      </div>
+
+      <!-- =========================
+           ACCIÓN
+           ========================= -->
+      <div class="form-group actions">
+        <button
+          type="submit"
+          class="btn primary"
+          [disabled]="cargando">
+          👁️ Generar preview
+        </button>
+      </div>
+
+    </div>
+  </form>
+
+  <!-- ===================================================== -->
+  <!-- ⏳ CARGA / ERROR -->
+  <!-- ===================================================== -->
+  <div *ngIf="cargando" class="loading">
+    Generando simulación de liquidación...
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- 📊 RESUMEN GENERAL -->
+  <!-- ===================================================== -->
+  <div *ngIf="preview.length > 0" class="resumen-global">
+
+    <div class="resumen-item">
+      <strong>Contratos</strong>
+      <span>{{ totalContratos }}</span>
+    </div>
+
+    <div class="resumen-item">
+      <strong>Total devengados</strong>
+      <span>{{ totalDevengados | number:'1.0-0' }}</span>
+    </div>
+
+    <div class="resumen-item">
+      <strong>Total deducciones</strong>
+      <span>{{ totalDeducciones | number:'1.0-0' }}</span>
+    </div>
+
+    <div class="resumen-item neto">
+      <strong>Neto a pagar</strong>
+      <span>{{ totalNeto | number:'1.0-0' }}</span>
+    </div>
+
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- 📄 PREVIEW POR CONTRATO -->
+  <!-- ===================================================== -->
+  <div
+    *ngFor="let c of preview"
+    class="contrato-card">
+
+    <div class="contrato-header">
+      <!-- ✅ AQUÍ: mostrar nombre (y documento si existe) -->
+      <div><strong>Empleado:</strong>
+        {{ c.contrato.documentoEmpleado || c.contrato.idEmpleado }} — {{ c.contrato.nombreEmpleado || '' }}
+      </div>
+      <div><strong>Contrato:</strong> {{ c.contrato.idContrato }}</div>
+      <div><strong>IBC:</strong> {{ c.ibc | number:'1.0-0' }}</div>
+      <div class="neto">
+        <strong>Neto:</strong> {{ c.totales.netoPagar | number:'1.0-0' }}
+      </div>
+    </div>
+
+    <table class="table detalle">
+      <thead>
+      <tr>
+        <th>Concepto</th>
+        <th>Tipo</th>
+        <th>Origen</th>
+        <th class="center">Cantidad</th>
+        <th class="right">Valor unitario</th>
+        <th class="right">Base</th>
+        <th class="right">Total</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr *ngFor="let d of c.detalles">
+        <!-- ✅ AQUÍ: mostrar el código real del concepto -->
+        <td>{{ d.codigoConcepto }}</td>
+
+        <td>{{ d.tipo }}</td>
+        <td>{{ d.origen }}</td>
+        <td class="center">{{ d.cantidad }}</td>
+        <td class="right">{{ d.valorUnitario | number:'1.0-0' }}</td>
+        <td class="right">{{ d.baseCalculo | number:'1.0-0' }}</td>
+        <td class="right total">{{ d.valorTotal | number:'1.0-0' }}</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="totales-contrato">
+      <span>Devengados: <strong>{{ c.totales.totalDevengados | number:'1.0-0' }}</strong></span>
+      <span>Deducciones: <strong>{{ c.totales.totalDeducciones | number:'1.0-0' }}</strong></span>
+      <span>Provisiones: <strong>{{ c.totales.totalProvisiones | number:'1.0-0' }}</strong></span>
+    </div>
+
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- 🔘 ACCIONES FINALES -->
+  <!-- ===================================================== -->
+  <div *ngIf="preview.length > 0" class="acciones-finales">
+
+    <button
+      class="btn secondary"
+      (click)="exportarExcel()">
+      📤 Exportar Excel
+    </button>
+
+    <button
+      class="btn primary"
+      (click)="ejecutarLiquidacion()">
+      ▶️ Ejecutar liquidación
+    </button>
+
+  </div>
+
+</div>

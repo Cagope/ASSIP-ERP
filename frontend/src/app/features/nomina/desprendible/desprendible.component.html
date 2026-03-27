@@ -1,0 +1,106 @@
+<app-header-actions
+  title="Desprendibles de nómina"
+></app-header-actions>
+
+<!-- =========================
+     ENCABEZADO DEL PERÍODO
+     ========================= -->
+<div class="periodo-bar">
+  <div class="periodo-text">
+    <ng-container *ngIf="periodo; else sinPeriodo">
+      <strong>Período:</strong>
+      {{ periodo.anio }}-{{ periodo.mes }}
+      <span *ngIf="periodo.tipoPeriodo">
+        — {{ periodo.tipoPeriodo }}
+      </span>
+      ({{ periodo.fechaInicio | date:'dd/MM/yyyy' }}
+      –
+      {{ periodo.fechaFin | date:'dd/MM/yyyy' }})
+      <span class="estado">
+        — {{ periodo.estado }}
+      </span>
+    </ng-container>
+
+    <ng-template #sinPeriodo>
+      <strong>Período:</strong> seleccionado desde el listado
+    </ng-template>
+  </div>
+</div>
+
+<div class="container-fluid mt-3">
+
+  <!-- =========================
+       LOADING
+       ========================= -->
+  <div *ngIf="loading" class="text-center py-4">
+    <span class="spinner-border"></span>
+  </div>
+
+  <!-- =========================
+       SIN REGISTROS
+       ========================= -->
+  <div *ngIf="!loading && empleados.length === 0" class="alert alert-info">
+    No hay empleados liquidados para este período.
+  </div>
+
+  <!-- =========================
+       TABLA EMPLEADOS
+       ========================= -->
+  <div *ngIf="!loading && empleados.length > 0" class="table-responsive">
+
+    <table class="table table-sm table-hover align-middle">
+      <thead class="table-light">
+      <tr>
+        <th>Documento</th>
+        <th>Empleado</th>
+        <th>Cargo</th>
+        <th class="text-end">Salario base</th>
+        <th class="text-center">Acción</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr *ngFor="let e of empleados">
+        <td>{{ e.documento }}</td>
+        <td>{{ e.nombreCompleto }}</td>
+        <td>{{ e.cargo }}</td>
+        <td class="text-end">
+          {{ e.salarioBase | number:'1.0-2' }}
+        </td>
+        <td class="text-center">
+          <button
+            class="btn btn-sm btn-outline-primary"
+            title="Imprimir desprendible"
+            type="button"
+            (click)="imprimir(e)"
+          >
+            🖨️
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+  </div>
+
+  <!-- =========================
+     ACCIONES FINALES
+     ========================= -->
+  <div class="acciones-footer">
+
+    <button
+      class="btn btn-outline-primary"
+      (click)="generarTodos()"
+      [disabled]="loading || empleados.length === 0">
+      🗂 Generar todos los desprendibles
+    </button>
+
+    <button
+      class="btn btn-secondary"
+      (click)="volver()">
+      ← Volver a períodos
+    </button>
+
+  </div>
+
+</div>

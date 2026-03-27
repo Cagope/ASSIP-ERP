@@ -311,4 +311,68 @@ public class PeriodosNominaRepository {
                 Integer.class
         );
     }
+
+    // =========================================================
+// 🔎 PERÍODOS DISPONIBLES PARA CONTABILIZACIÓN
+// =========================================================
+    public List<PeriodoNominaListDTO> listarParaContabilizacion() {
+
+        String sql = """
+        SELECT
+          p.id_periodo,
+          p.id_agencia,
+          a.nombre_agencia,
+          p.anio,
+          p.mes,
+          p.numero_periodo,
+          p.tipo_periodo,
+          p.descripcion,
+          p.fecha_inicio,
+          p.fecha_fin,
+          p.estado,
+          p.fecha_liquidacion,
+          p.fk_seguridad_liquidacion,
+          p.fecha_contabiliza,
+          p.fk_seguridad_contabiliza
+        FROM nomina.periodos_nomina p
+        JOIN general.datos_agencias a
+          ON a.id_agencia = p.id_agencia
+        WHERE
+            UPPER(TRIM(p.estado)) IN ('CERRADO','CONTABILIZADO')
+        ORDER BY
+          a.nombre_agencia,
+          p.anio ASC,
+          p.mes ASC,
+          p.numero_periodo ASC
+    """;
+
+        return jdbc.query(sql, new MapSqlParameterSource(), (rs, rowNum) ->
+                PeriodoNominaListDTO.builder()
+                        .idPeriodo(rs.getInt("id_periodo"))
+                        .idAgencia(rs.getInt("id_agencia"))
+                        .nombreAgencia(rs.getString("nombre_agencia"))
+                        .anio(rs.getInt("anio"))
+                        .mes(rs.getInt("mes"))
+                        .numeroPeriodo((Integer) rs.getObject("numero_periodo"))
+                        .tipoPeriodo(rs.getString("tipo_periodo"))
+                        .descripcion(rs.getString("descripcion"))
+                        .fechaInicio(rs.getDate("fecha_inicio").toLocalDate())
+                        .fechaFin(rs.getDate("fecha_fin").toLocalDate())
+                        .estado(rs.getString("estado"))
+                        .fechaLiquidacion(
+                                rs.getTimestamp("fecha_liquidacion") != null
+                                        ? rs.getTimestamp("fecha_liquidacion").toLocalDateTime()
+                                        : null)
+                        .fkSeguridadLiquidacion(
+                                (Integer) rs.getObject("fk_seguridad_liquidacion"))
+                        .fechaContabiliza(
+                                rs.getTimestamp("fecha_contabiliza") != null
+                                        ? rs.getTimestamp("fecha_contabiliza").toLocalDateTime()
+                                        : null)
+                        .fkSeguridadContabiliza(
+                                (Integer) rs.getObject("fk_seguridad_contabiliza"))
+                        .build()
+        );
+    }
+
 }

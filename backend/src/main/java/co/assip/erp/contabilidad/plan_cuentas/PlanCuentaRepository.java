@@ -48,4 +48,14 @@ public interface PlanCuentaRepository extends JpaRepository<PlanCuenta, Integer>
        """)
     List<PlanCuenta> buscarPorAgenciaYTexto(Integer idAgencia, String texto);
 
+    // ==========================================================
+    // VALIDAR SI LA CUENTA EXIGE CONTROL DE DOCUMENTO
+    // ==========================================================
+    @Query("""
+       SELECT COALESCE(p.controlEntradaSalida, false)
+       FROM PlanCuenta p
+       WHERE p.id = :idCatalogoCuenta
+       """)
+    Boolean requiereControlEntradaSalida(Integer idCatalogoCuenta);
+
 }
