@@ -221,9 +221,19 @@ public class LiquidacionNominaRepository {
               c.clase_riesgo_arl             AS claseRiesgoArl,
               c.porcentaje_arl               AS porcentajeArl,
               c.activo                       AS activo,
+              tc.aplica_salud                AS aplicaSalud,
+              tc.aplica_pension              AS aplicaPension,
+              tc.aplica_arl                  AS aplicaArl,
+              tc.aplica_caja_compensacion    AS aplicaCajaCompensacion,
+              tc.aplica_cesantias            AS aplicaCesantias,
+              tc.aplica_prima                AS aplicaPrima,
+              tc.aplica_vacaciones           AS aplicaVacaciones,
+              tc.aplica_parafiscales         AS aplicaParafiscales,
               pr.documento AS documentoEmpleado,
               TRIM(BOTH FROM CONCAT_WS(' ', pr.primer_apellido, pr.segundo_apellido, pr.nombres)) AS nombreEmpleado
             FROM nomina.empleado_contratos c
+            LEFT JOIN nomina.tipos_contrato tc
+                      ON tc.id_tipo_contrato = c.id_tipo_contrato
             JOIN nomina.periodos_nomina p
               ON c.fecha_inicio <= p.fecha_fin
              AND (c.fecha_fin IS NULL OR c.fecha_fin >= p.fecha_inicio)
@@ -274,6 +284,14 @@ public class LiquidacionNominaRepository {
                             )
                             .porcentajeArl(rs.getBigDecimal("porcentajeArl"))
                             .activo(rs.getBoolean("activo"))
+                            .aplicaSalud((Boolean) rs.getObject("aplicaSalud"))
+                            .aplicaPension((Boolean) rs.getObject("aplicaPension"))
+                            .aplicaArl((Boolean) rs.getObject("aplicaArl"))
+                            .aplicaCajaCompensacion((Boolean) rs.getObject("aplicaCajaCompensacion"))
+                            .aplicaCesantias((Boolean) rs.getObject("aplicaCesantias"))
+                            .aplicaPrima((Boolean) rs.getObject("aplicaPrima"))
+                            .aplicaVacaciones((Boolean) rs.getObject("aplicaVacaciones"))
+                            .aplicaParafiscales((Boolean) rs.getObject("aplicaParafiscales"))
                             .documentoEmpleado(rs.getString("documentoEmpleado"))
                             .nombreEmpleado(rs.getString("nombreEmpleado"))
                             .build();

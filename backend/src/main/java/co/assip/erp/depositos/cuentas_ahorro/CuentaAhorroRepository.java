@@ -144,7 +144,7 @@ public class CuentaAhorroRepository {
         String sql = """
             SELECT *
             FROM depositos.poderes_cuentas_ahorro
-            WHERE id_cuenta = :id
+            WHERE id_cuenta_ahorro = :id
         """;
 
         return jdbc.query(sql,
@@ -318,7 +318,7 @@ public class CuentaAhorroRepository {
 
         jdbc.update("""
             DELETE FROM depositos.poderes_cuentas_ahorro
-            WHERE id_cuenta = :id
+            WHERE id_cuenta_ahorro = :id
         """, new MapSqlParameterSource().addValue("id", idCuenta));
 
         if (lista == null || lista.isEmpty()) return;

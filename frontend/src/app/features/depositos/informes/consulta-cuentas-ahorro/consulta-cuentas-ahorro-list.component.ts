@@ -108,7 +108,7 @@ export class CuentasAhorroListComponent {
     // ⭐ Construir request SARLAFT (versión completa)
     const req: EvaluacionSarlaftRequest = {
       idDatosPersonal: cuenta.id_datos_personal,
-      idAgencia: cuenta.codigo_agencia,
+      idAgencia: cuenta.id_agencia,
       codigoModulo: "02",
       accion: "CONSULTA",
       monto: 0,
@@ -116,7 +116,7 @@ export class CuentasAhorroListComponent {
       fechaUltimaActualizacion: cuenta.fecha_actualizacion,
       fechaNacimiento: cuenta.fecha_nacimiento,
       tipoDocumento: cuenta.tipo_documento,
-      codigoFormaAhorro: cuenta.codigo_forma,
+      codigoFormaAhorro: cuenta.id_forma_ahorro,
 
       // 🔹 INGRESOS MENSUALES (suma real)
       ingresosMensuales:

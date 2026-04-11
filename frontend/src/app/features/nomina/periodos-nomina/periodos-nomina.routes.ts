@@ -8,7 +8,7 @@ export const PERIODOS_NOMINA_ROUTES: Routes = [
 
   { path: '', component: PeriodosNominaListComponent },
 
-  { path: 'generar', component: PeriodosGeneradorComponent },
+  { path: 'generador', component: PeriodosGeneradorComponent },
 
   { path: 'masivo', component: NovedadesNominaMasivoComponent },
 

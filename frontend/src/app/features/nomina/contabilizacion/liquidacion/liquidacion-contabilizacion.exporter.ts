@@ -10,6 +10,10 @@ export class LiquidacionContabilizacionExporter {
     movimientos: LiquidacionMovimientoContableDTO[],
     params: {
       periodo: number;
+      anio: number;
+      mes: number;
+      numeroPeriodo: number;
+      codigoAgencia: string | number;
       fechaContabilizacion: string | null;
       tipoComprobante: string;
       numeroComprobante: string;
@@ -18,9 +22,13 @@ export class LiquidacionContabilizacionExporter {
 
     if (!movimientos || movimientos.length === 0) return;
 
+    const mes2 = String(params.mes).padStart(2, '0');
+    const agencia2 = String(params.codigoAgencia).padStart(2, '0');
+    const periodoTexto = `${params.anio}-${mes2}-${params.numeroPeriodo}`;
+
     const header = [
       ['COMPROBANTE CONTABLE NÓMINA'],
-      [`Período nómina: ${params.periodo}`],
+      [`Período nómina: ${periodoTexto}`],
       [`Fecha contabilización: ${params.fechaContabilizacion ?? ''}`],
       [`Documento: ${params.tipoComprobante} ${params.numeroComprobante}`],
       []
@@ -44,10 +52,8 @@ export class LiquidacionContabilizacionExporter {
 
       'Crédito': Number(m.credito ?? 0),
 
-      // 🔵 base real del movimiento
       'Base movimiento': Number(m.valorBase ?? 0),
 
-      // 🔵 documento del tercero
       'Documento tercero': m.documentoTercero ?? ''
 
     }));
@@ -66,10 +72,10 @@ export class LiquidacionContabilizacionExporter {
       'Comprobante'
     );
 
-    XLSX.writeFile(
-      wb,
-      `comprobante_nomina_periodo_${params.periodo}.xlsx`
-    );
+    const fileName =
+      `comprobante_nomina_periodo_${params.anio}_${mes2}_${params.numeroPeriodo}_${agencia2}.xlsx`;
+
+    XLSX.writeFile(wb, fileName);
   }
 
 }

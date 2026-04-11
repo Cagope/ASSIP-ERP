@@ -27,7 +27,11 @@ public class EmpleadoController {
     // ============================================================
     @GetMapping("/{id}")
     public ResponseEntity<EmpleadoDTO> obtener(@PathVariable Integer id) {
-        return ResponseEntity.ok(service.obtener(id));
+
+
+            return ResponseEntity.ok(service.obtener(id));
+
+
     }
 
     // ============================================================

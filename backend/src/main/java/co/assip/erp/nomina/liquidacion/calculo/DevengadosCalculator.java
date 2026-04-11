@@ -25,38 +25,13 @@ public class DevengadosCalculator {
             BigDecimal ibc
     ) {
 
-        List<LiquidacionDetalleDTO> detalles = new ArrayList<>();
-
-        // =========================
-        // 1️⃣ DEVENGADOS POR NOVEDAD (PRIORIDAD ABSOLUTA)
-        // =========================
         Map<String, LiquidacionDetalleDTO> devengadosPorNovedad =
                 obtenerDevengadosPorNovedadesMap(
                         idPeriodoNomina,
                         contrato.getIdContrato()
                 );
 
-        detalles.addAll(devengadosPorNovedad.values());
-
-        // =========================
-        // CONTEXTO DE CÁLCULO
-        // =========================
-        ContextoCalculo ctx = new ContextoCalculo();
-        ctx.put(BaseCalculo.IBC, ibc);
-        ctx.put(BaseCalculo.SALARIO_BASE, contrato.getSalarioBase());
-
-        // =========================
-        // 2️⃣ DEVENGADOS AUTOMÁTICOS
-        //    (EXCLUYE AUX TRANSPORTE)
-        // =========================
-        detalles.addAll(
-                obtenerDevengadosAutomaticos(
-                        ctx,
-                        devengadosPorNovedad.keySet()
-                )
-        );
-
-        return detalles;
+        return new ArrayList<>(devengadosPorNovedad.values());
     }
 
     // =========================================================

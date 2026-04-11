@@ -6,6 +6,7 @@ import co.assip.erp.seguridad.utils.SecurityUtils;
 import co.assip.erp.contabilidad.auxiliares_contables.ContabilidadRegistroService;
 import co.assip.erp.contabilidad.auxiliares_contables.dto.MovimientoContableDTO;
 import co.assip.erp.contabilidad.origen_comprobantes.dto.OrigenComprobanteDTO;
+import co.assip.erp.nomina.periodos_nomina.PeriodosNominaRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class LiquidacionContabilizacionService {
 
     private final LiquidacionContabilizacionRepository repository;
     private final ContabilidadRegistroService contabilidadRegistroService;
+    private final PeriodosNominaRepository periodosNominaRepository;
 
     // =========================================================
     // PREVIEW CONTABLE
@@ -74,6 +76,21 @@ public class LiquidacionContabilizacionService {
         List<LiquidacionComprobanteGeneradoDTO> comprobantes = new ArrayList<>();
 
         LocalDate fechaComprobante = repository.obtenerFechaComprobante(idPeriodoNomina);
+
+        var periodoLabel = periodosNominaRepository.obtenerPeriodoLabel(idPeriodoNomina);
+
+        if (periodoLabel == null) {
+            throw new IllegalStateException(
+                    "No se pudo obtener el label del período de nómina " + idPeriodoNomina
+            );
+        }
+
+        String periodoTexto = String.format(
+                "%d-%02d-%d",
+                periodoLabel.anio(),
+                periodoLabel.mes(),
+                periodoLabel.numeroPeriodo()
+        );
 
         // =====================================================
         // RECORRER AGENCIAS
@@ -147,7 +164,7 @@ public class LiquidacionContabilizacionService {
             String numeroComprobante = String.format("%010d", nuevoConsecutivo);
 
             String concepto =
-                    "Contabilización liquidación nómina período " + idPeriodoNomina;
+                    "Contabilización liquidación nómina  " + periodoTexto;
 
             // -------------------------------------------------
             // VALIDAR QUE EL COMPROBANTE NO EXISTA
@@ -177,7 +194,10 @@ public class LiquidacionContabilizacionService {
                 m.setFechaAuxiliar(fechaComprobante);
 
                 m.setDetalleMovimiento(
-                        "Liquidación nómina período " + idPeriodoNomina
+                        "Liquidación nómina " + periodoTexto +
+                                " - " + (mov.getNombreEmpleadoReferencia() != null
+                                ? mov.getNombreEmpleadoReferencia()
+                                : "")
                 );
 
                 m.setValorDebito(mov.getDebito());
@@ -271,6 +291,22 @@ public class LiquidacionContabilizacionService {
 
         LocalDate fechaComprobante = repository.obtenerFechaComprobante(idPeriodoNomina);
 
+        var periodoLabel = periodosNominaRepository.obtenerPeriodoLabel(idPeriodoNomina);
+
+        if (periodoLabel == null) {
+            throw new IllegalStateException(
+                    "No se pudo obtener el label del período de nómina " + idPeriodoNomina
+            );
+        }
+
+        String periodoTexto = String.format(
+                "%d-%02d-%d",
+                periodoLabel.anio(),
+                periodoLabel.mes(),
+                periodoLabel.numeroPeriodo()
+        );
+
+
         for (Integer idAgencia : agencias) {
 
             String tipoComprobante = "NM";
@@ -297,7 +333,7 @@ public class LiquidacionContabilizacionService {
                 m.setFechaAuxiliar(fechaComprobante);
 
                 m.setDetalleMovimiento(
-                        "REVERSIÓN liquidación nómina período " + idPeriodoNomina
+                        "REVERSIÓN liquidación nómina período " + periodoTexto
                 );
 
                 // 🔥 invertir débitos y créditos
@@ -316,7 +352,7 @@ public class LiquidacionContabilizacionService {
             String numeroComprobante = String.format("%010d", nuevoConsecutivo);
 
             String concepto =
-                    "REVERSIÓN contabilización nómina período " + idPeriodoNomina;
+                    "REVERSIÓN contabilización nómina período " + periodoTexto;
 
             OrigenComprobanteDTO origen = new OrigenComprobanteDTO();
 

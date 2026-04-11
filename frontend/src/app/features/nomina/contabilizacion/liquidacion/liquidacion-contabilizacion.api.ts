@@ -115,7 +115,7 @@ export class LiquidacionContabilizacionApi {
 
   obtenerComprobante(idPeriodo: number) {
     return this.http.get(
-      `/nomina/contabilizacion/liquidacion/comprobante/${idPeriodo}`,
+      `${this.baseUrl}/comprobante/${idPeriodo}`,
       { responseType: 'text' }
     );
   }

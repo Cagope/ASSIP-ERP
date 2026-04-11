@@ -10,6 +10,9 @@ import {
   NovedadNominaListDTO
 } from './novedades-nomina.api';
 
+import { NovedadesNominaExporterService } from './novedades-nomina-exporter.service';
+import { NovedadesNominaPrintService } from './novedades-nomina-print.service';
+
 @Component({
   standalone: true,
   selector: 'app-novedades-nomina-list',
@@ -26,6 +29,9 @@ export class NovedadesNominaListComponent implements OnInit {
 
   private readonly api = inject(NovedadesNominaApi);
   private readonly router = inject(Router);
+  private readonly exporterService = inject(NovedadesNominaExporterService);
+  private readonly printService: NovedadesNominaPrintService =
+    inject(NovedadesNominaPrintService);
 
   items: NovedadNominaListDTO[] = [];
   loading = false;
@@ -84,13 +90,29 @@ export class NovedadesNominaListComponent implements OnInit {
     this.router.navigate(['/nomina/novedades', id]);
   }
 
-  eliminar(id: number): void {
+  eliminar(item: NovedadNominaListDTO): void {
 
-    if (!confirm('¿Eliminar novedad?')) return;
+    const mensaje =
+      `¿Eliminar novedad?\n\n` +
+      `${item.nombreEmpleado}\n` +
+      `Concepto: ${item.codigoConcepto}`;
 
-    this.api.eliminar(id).subscribe({
+    const ok = confirm(mensaje);
+    if (!ok) return;
+
+    this.api.eliminar(item.idNovedad).subscribe({
       next: () => this.cargar(),
       error: () => alert('No se pudo eliminar.')
     });
   }
+
+  exportar(): void {
+    console.log('exportar novedades', this.filtrados);
+    this.exporterService.exportar(this.filtrados);
+  }
+
+  imprimir(): void {
+    this.printService.imprimir(this.filtrados);
+  }
+
 }

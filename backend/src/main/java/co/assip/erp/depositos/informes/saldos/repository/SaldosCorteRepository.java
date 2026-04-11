@@ -151,7 +151,7 @@ public class SaldosCorteRepository {
             COUNT(*)        AS cantidad
         FROM base
         WHERE saldo_corte <> 0
-        GROUP BY id_agencia, nombre_agencia, codigo_forma, nombre_forma
+        GROUP BY codigo_agencia, nombre_agencia, codigo_forma, nombre_forma
         ORDER BY codigo_agencia, codigo_forma
         """;
 

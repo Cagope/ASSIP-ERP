@@ -88,7 +88,7 @@
         <button
           class="btn btn-primary"
           (click)="preview()"
-          [disabled]="cargando || ejecutando || comprobanteExistente"
+          [disabled]="!esPeriodoCerrado || cargando || ejecutando"
         >
           {{ cargando ? 'Consultando...' : 'Preview' }}
         </button>
@@ -96,7 +96,7 @@
         <button
           class="btn btn-success"
           (click)="ejecutar()"
-          [disabled]="movimientos.length === 0 || cargando || ejecutando || comprobanteExistente"
+          [disabled]="!esPeriodoCerrado || movimientos.length === 0 || cargando || ejecutando"
         >
           {{ ejecutando ? 'Contabilizando...' : 'Contabilizar' }}
         </button>
@@ -104,7 +104,7 @@
         <button
           class="btn btn-warning"
           (click)="reversar()"
-          [disabled]="!comprobanteExistente || reversando || cargando"
+          [disabled]="!esPeriodoContabilizado || reversando || cargando"
         >
           {{ reversando ? 'Reversando...' : 'Reversar contabilización' }}
         </button>
@@ -124,6 +124,11 @@
     <div *ngIf="error" class="alert alert-danger">
       {{ error }}
     </div>
+
+    <div *ngIf="periodoSeleccionado" class="alert alert-info">
+      <strong>Estado período:</strong> {{ periodoSeleccionado.estado }}
+    </div>
+
   </div>
 
   <div class="card documento-preview" *ngIf="movimientos.length > 0">
@@ -147,7 +152,11 @@
 
       <div>
         <label>Período nómina</label>
-        <strong>{{ idPeriodoNomina }}</strong>
+        <strong>
+          {{ periodoSeleccionado?.nombreAgencia }} |
+          {{ periodoSeleccionado?.descripcion }} |
+          {{ periodoSeleccionado?.tipoPeriodo }}
+        </strong>
       </div>
 
       <div>

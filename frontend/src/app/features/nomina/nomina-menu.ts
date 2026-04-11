@@ -77,14 +77,14 @@ export const nominaMenu = {
     },
 
     {
-      label: 'Contabilización Parafiscales',
-      route: '/nomina/contabilizacion/parafiscales',
+      label: 'Contabilización SGSSI y Parafiscales',
+      route: '/nomina/contabilizacion/aportes-parafiscales',
       permiso: 'NOMINA_VIEW'
     },
 
     {
-      label: 'Contabilización Provisiones',
-      route: '/nomina/contabilizacion/provisiones',
+      label: 'Contabilización Prestaciones Sociales',
+      route: '/nomina/contabilizacion/prestaciones-sociales',
       permiso: 'NOMINA_VIEW'
     },
 

@@ -32,7 +32,7 @@ public class InconsistenciasRepository {
             )
             SELECT
                 c.codigo_cuenta,
-                LPAD(c.codigo_agencia::text, 2, '0') AS codigo_agencia,
+                LPAD(a.codigo_agencia::text, 2, '0') AS codigo_agencia,
                 a.nombre_agencia,
 
                 LPAD(f.codigo_forma, 2, '0') AS codigo_forma,

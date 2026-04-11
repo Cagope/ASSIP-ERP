@@ -23,6 +23,8 @@ import {
   CuentaAhorroSelectDTO
 } from '../../../shared/cuentas-ahorro/cuentas-ahorro.api';
 
+import { TiposContratosApi, TipoContratoDTO } from '../tipos-contratos/tipos-contratos.api';
+
 @Component({
   standalone: true,
   selector: 'app-empleado-contratos-upsert',
@@ -50,6 +52,8 @@ export class EmpleadoContratosUpsertComponent implements OnInit {
 
   private readonly cuentasApi = inject(CuentasAhorroApi);
 
+  private readonly tiposContratoApi = inject(TiposContratosApi);
+
   id: number | null = null;
   loading = false;
   guardando = false;
@@ -68,12 +72,7 @@ export class EmpleadoContratosUpsertComponent implements OnInit {
 
   cuentasNomina: CuentaAhorroSelectDTO[] = [];
 
-  tiposContrato = [
-    { id: 1, nombre: 'INDEFINIDO' },
-    { id: 2, nombre: 'FIJO' },
-    { id: 3, nombre: 'OBRA / LABOR' },
-    { id: 4, nombre: 'APRENDIZAJE' },
-  ];
+  tiposContrato: TipoContratoDTO[] = [];
 
   form: EmpleadoContratoFormDTO = {
     idEmpleado: null,
@@ -153,6 +152,11 @@ export class EmpleadoContratosUpsertComponent implements OnInit {
         this.empleados = [];
         this.empleadosDisplay = [];
       }
+    });
+
+    this.tiposContratoApi.listar().subscribe({
+      next: d => this.tiposContrato = d ?? [],
+      error: () => this.tiposContrato = []
     });
 
     this.seccionesApi.listar().subscribe({ next: d => this.secciones = d ?? [], error: () => this.secciones = [] });
@@ -264,6 +268,11 @@ export class EmpleadoContratosUpsertComponent implements OnInit {
 
     if (!this.form.idTipoContrato) {
       alert('Debe seleccionar el tipo de contrato.');
+      return;
+    }
+
+    if (!this.form.idCuentaAhorroNomina) {
+      alert('Debe seleccionar la cuenta de nómina.');
       return;
     }
 

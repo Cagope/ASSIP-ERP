@@ -10,6 +10,20 @@
     [mostrarExportar]="false">
   </app-header-actions>
 
+  <div class="alert alert-info periodo-activo" *ngIf="periodoActivo">
+    <strong>Agencia:</strong> {{ periodoActivo.nombreAgencia }}
+    &nbsp; | &nbsp;
+    <strong>Período:</strong> {{ periodoActivo.descripcion }}
+    &nbsp; | &nbsp;
+    <strong>Año:</strong> {{ periodoActivo.anio }}
+    &nbsp; | &nbsp;
+    <strong>Mes:</strong> {{ periodoActivo.mes }}
+    &nbsp; | &nbsp;
+    <strong>#:</strong> {{ periodoActivo.numeroPeriodo }}
+    &nbsp; | &nbsp;
+    <strong>Estado:</strong> {{ periodoActivo.estado }}
+  </div>
+
   <!-- =========================================================
        FORMULARIO
        ========================================================= -->
@@ -54,7 +68,7 @@
 
         <input
           type="number"
-          class="form-control"
+          class="form-control no-spinner input-right"
           [(ngModel)]="form.cantidad"
           min="0"
           step="1">
@@ -81,7 +95,7 @@
            OBSERVACIÓN
            ========================= -->
       <div class="form-group full">
-        <label>Observación</label>
+        <label>Observación *</label>
 
         <textarea
           class="form-control"
@@ -101,7 +115,7 @@
       <button
         class="btn secondary"
         (click)="previewMasivo()"
-        [disabled]="procesando">
+        [disabled]="procesando || !formularioValido">
 
         {{ procesando ? 'Procesando...' : 'Preview' }}
 
@@ -121,7 +135,7 @@
       <button
         class="btn primary"
         (click)="generar()"
-        [disabled]="procesando || !preview || preview.length === 0">
+        [disabled]="procesando || !formularioValido || !preview || preview.length === 0">
 
         Aplicar
 

@@ -20,6 +20,7 @@ import { NOVEDADES_NOMINA_ROUTES } from './novedades-nomina/novedades-nomina.rou
 import { PERIODOS_NOMINA_ROUTES } from './periodos-nomina/periodos-nomina.routes';
 import { LIQUIDACION_ROUTES } from './liquidacion/liquidacion.routes';
 import { CONCEPTO_CUENTAS_CONTABLES_ROUTES } from './concepto-cuentas-contables/concepto-cuentas-contables.routes';
+import { TIPOS_CONTRATOS_ROUTES } from './tipos-contratos/tipos-contratos.routes';
 
 export const NOMINA_ROUTES: Routes = [
 
@@ -127,6 +128,25 @@ export const NOMINA_ROUTES: Routes = [
     loadChildren: () =>
       import('./contabilizacion/liquidacion/liquidacion-contabilizacion.routes')
         .then(m => m.LIQUIDACION_CONTABILIZACION_ROUTES)
+  },
+
+  {
+    path: 'contabilizacion/aportes-parafiscales',
+    loadChildren: () =>
+      import('./contabilizacion/aportes-parafiscales/aportes-parafiscales-contabilizacion.routes')
+        .then(m => m.APORTES_PARAFISCALES_CONTABILIZACION_ROUTES)
+  },
+
+  {
+    path: 'contabilizacion/prestaciones-sociales',
+    loadChildren: () =>
+      import('./contabilizacion/prestaciones-sociales/prestaciones-sociales-contabilizacion.routes')
+        .then(m => m.PRESTACIONES_SOCIALES_CONTABILIZACION_ROUTES)
+  },
+
+  {
+    path: 'tipos-contratos',
+    children: TIPOS_CONTRATOS_ROUTES
   }
 
 ];

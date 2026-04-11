@@ -171,7 +171,7 @@ public class NovedadesNominaRepository {
       :obs,
       'ABIERTO',
       e.id_agencia,
-      'INDIVIDUAL'
+      'INDIVIDUAL',
       :usr,
       :usr
     FROM nomina.empleados e

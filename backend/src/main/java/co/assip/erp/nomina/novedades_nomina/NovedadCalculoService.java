@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Map;
 
-
 @Service
 @RequiredArgsConstructor
 public class NovedadCalculoService {
@@ -107,7 +106,7 @@ public class NovedadCalculoService {
         // 🔹 VARIABLES VIGENCIA
         // =====================================================
         String sqlVariables = """
-            SELECT v.horas_mes, v.dias_mes
+            SELECT v.horas_mes, v.dias_mes, v.aux_transporte
             FROM nomina.periodos_nomina p
             JOIN nomina.variables_vigencia v
               ON p.fecha_fin BETWEEN v.fecha_inicial AND v.fecha_final
@@ -123,6 +122,7 @@ public class NovedadCalculoService {
                     Map<String, Object> m = new java.util.HashMap<>();
                     m.put("horas", rs.getInt("horas_mes"));
                     m.put("dias", rs.getInt("dias_mes"));
+                    m.put("auxTransporte", rs.getBigDecimal("aux_transporte"));
                     return m;
                 }
         );
@@ -133,6 +133,11 @@ public class NovedadCalculoService {
 
         BigDecimal horasMes = BigDecimal.valueOf((Integer) vars.get("horas"));
         BigDecimal diasMes  = BigDecimal.valueOf((Integer) vars.get("dias"));
+
+        BigDecimal auxTransporte = (BigDecimal) vars.get("auxTransporte");
+        if (auxTransporte == null) {
+            auxTransporte = BigDecimal.ZERO;
+        }
 
         // =====================================================
         // 🔹 BASE
@@ -172,10 +177,18 @@ public class NovedadCalculoService {
                             base.multiply(multiplicador)
                     );
 
+            case "AUX_TRANSPORTE" ->
+                    resultado = MathUtils.pesos(
+                            auxTransporte
+                                    .divide(diasMes, 8, RoundingMode.HALF_UP)
+                                    .multiply(cantidad)
+                                    .multiply(multiplicador)
+                    );
+
             default ->
                     resultado = null;
         }
 
-        return MathUtils.pesos(resultado);
+        return resultado != null ? MathUtils.pesos(resultado) : null;
     }
 }

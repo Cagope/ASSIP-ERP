@@ -3,7 +3,9 @@
   <app-header-actions
     titulo="Novedades de Nómina"
     (nuevo)="nuevo()"
-    (refrescar)="cargar()">
+    (refrescar)="cargar()"
+    (imprimir)="imprimir()"
+    (exportar)="exportar()">
   </app-header-actions>
 
   <!-- Toolbar -->
@@ -79,7 +81,7 @@
 
           <button
             class="btn sm danger"
-            (click)="eliminar(x.idNovedad)">
+            (click)="eliminar(x)">
             🗑️
           </button>
 

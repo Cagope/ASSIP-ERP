@@ -27,9 +27,9 @@ public class DeduccionesCalculator {
 
         List<LiquidacionDetalleDTO> detalles = new ArrayList<>();
 
-        // =========================
-        // 1️⃣ DEDUCCIONES POR NOVEDADES (PRIORIDAD)
-        // =========================
+// =========================
+// 1️⃣ DEDUCCIONES POR NOVEDADES (PRIORIDAD)
+// =========================
         Map<String, LiquidacionDetalleDTO> deduccionesPorNovedad =
                 obtenerDeduccionesPorNovedadesMap(
                         idPeriodoNomina,
@@ -38,21 +38,22 @@ public class DeduccionesCalculator {
 
         detalles.addAll(deduccionesPorNovedad.values());
 
-        // =========================
-        // CONTEXTO DE CÁLCULO
-        // =========================
-        ContextoCalculo ctx = new ContextoCalculo();
-        ctx.put(BaseCalculo.IBC, ibc);
+// =========================
+// 2️⃣ SOLO CALCULAR AUTOMÁTICAS SI HAY IBC
+// =========================
+        if (ibc != null && ibc.compareTo(BigDecimal.ZERO) > 0) {
 
-        // =========================
-        // 2️⃣ DEDUCCIONES AUTOMÁTICAS (SI NO HAY NOVEDAD)
-        // =========================
-        detalles.addAll(
-                obtenerDeduccionesAutomaticas(
-                        ctx,
-                        deduccionesPorNovedad.keySet()
-                )
-        );
+            ContextoCalculo ctx = new ContextoCalculo();
+            ctx.put(BaseCalculo.IBC, ibc);
+
+            detalles.addAll(
+                    obtenerDeduccionesAutomaticas(
+                            contrato,
+                            ctx,
+                            deduccionesPorNovedad.keySet()
+                    )
+            );
+        }
 
         return detalles;
     }
@@ -61,6 +62,7 @@ public class DeduccionesCalculator {
     // 🔹 DEDUCCIONES AUTOMÁTICAS
     // =========================================================
     private List<LiquidacionDetalleDTO> obtenerDeduccionesAutomaticas(
+            EmpleadoContratoDTO contrato,
             ContextoCalculo contexto,
             Set<String> codigosBloqueados
     ) {
@@ -83,6 +85,11 @@ public class DeduccionesCalculator {
 
             // 🚫 Si hay novedad, no calcular automático
             if (codigosBloqueados.contains(codigo)) {
+                return null;
+            }
+
+            // 🚫 excluir por tipo de contrato (paramétrico)
+            if (excluirPorTipoContrato(contrato, codigo)) {
                 return null;
             }
 
@@ -175,5 +182,25 @@ public class DeduccionesCalculator {
         });
 
         return map;
+    }
+
+    private boolean excluirPorTipoContrato(
+            EmpleadoContratoDTO contrato,
+            String codigoConcepto
+    ) {
+
+        if (contrato == null || codigoConcepto == null) return false;
+
+        // 🔹 SALUD
+        if (codigoConcepto.equalsIgnoreCase("SALUD_EMP")) {
+            return Boolean.FALSE.equals(contrato.getAplicaSalud());
+        }
+
+        // 🔹 PENSIÓN
+        if (codigoConcepto.equalsIgnoreCase("PENSION_EMP")) {
+            return Boolean.FALSE.equals(contrato.getAplicaPension());
+        }
+
+        return false;
     }
 }

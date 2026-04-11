@@ -55,4 +55,16 @@ public class EmpleadoContratoDTO {
     // =========================================================
     private String documentoEmpleado;
     private String nombreEmpleado;
+
+    // =========================================================
+    // 🔥 REGLAS DESDE TIPO DE CONTRATO
+    // =========================================================
+    private Boolean aplicaSalud;
+    private Boolean aplicaPension;
+    private Boolean aplicaArl;
+    private Boolean aplicaCajaCompensacion;
+    private Boolean aplicaCesantias;
+    private Boolean aplicaPrima;
+    private Boolean aplicaVacaciones;
+    private Boolean aplicaParafiscales;
 }

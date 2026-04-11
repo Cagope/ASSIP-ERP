@@ -53,7 +53,7 @@
         <label>Tipo contrato *</label>
         <select class="form-control" [(ngModel)]="form.idTipoContrato">
           <option [ngValue]="null">-- Seleccione --</option>
-          <option *ngFor="let t of tiposContrato" [ngValue]="t.id">
+          <option *ngFor="let t of tiposContrato" [ngValue]="t.idTipoContrato">
             {{ t.nombre }}
           </option>
         </select>

@@ -99,3 +99,111 @@ app-empleado-autocomplete input {
     color: #111827;
   }
 }
+
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.no-spinner[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* ✅ NUEVO: alinear cantidad a la derecha */
+.input-right {
+  text-align: right !important;
+}
+
+table {
+  font-size: 13px;
+}
+
+table th {
+  background: #f1f5f9;
+  font-weight: 600;
+}
+
+.novedades-card {
+  margin-bottom: 16px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+
+  h5 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f2937;
+  }
+}
+
+.badge-total {
+  background: #eef2ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tabla-wrapper {
+  overflow-x: auto;
+}
+
+.table-novedades {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: #fff;
+}
+
+.table-novedades thead th {
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 600;
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table-novedades tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #eef2f7;
+  vertical-align: top;
+  color: #111827;
+}
+
+.table-novedades tbody tr:hover {
+  background: #f9fbff;
+}
+
+.table-novedades .concepto {
+  font-weight: 600;
+  color: #1e3a8a;
+}
+
+.table-novedades .observacion {
+  color: #4b5563;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.empty-state {
+  padding: 14px 12px;
+  border: 1px dashed #d1d5db;
+  border-radius: 8px;
+  background: #fafafa;
+  color: #6b7280;
+  font-size: 13px;
+}

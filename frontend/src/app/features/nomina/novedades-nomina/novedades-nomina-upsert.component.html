@@ -12,6 +12,67 @@
     <span>{{ periodoActivoTexto }}</span>
   </div>
 
+  <!-- =========================
+       CONTRATO ACTIVO
+       ========================= -->
+  <div class="card" *ngIf="contratoActivo">
+    <h5 style="margin-bottom: 12px;">Datos del contrato</h5>
+
+    <div class="contrato-info">
+      <div><strong>Salario base:</strong> {{ contratoActivo.salarioBase | number:'1.0-0' }}</div>
+      <div><strong>Tipo contrato:</strong> {{ contratoActivo.tipoContratoNombre }}</div>
+      <div><strong>Cargo:</strong> {{ contratoActivo.nombreCargo }}</div>
+      <div><strong>Sección:</strong> {{ contratoActivo.nombreSeccion }}</div>
+      <div><strong>Periodo pago:</strong> {{ contratoActivo.periodoPago }}</div>
+    </div>
+  </div>
+
+  <!-- =========================
+   NOVEDADES DEL PERÍODO
+   ========================= -->
+  <div class="card novedades-card" *ngIf="contratoActivo">
+    <div class="section-header">
+      <h5>Novedades ya incluidas en el período</h5>
+
+      <span class="badge-total" *ngIf="!loadingNovedades">
+      {{ novedadesContrato.length }} registro(s)
+    </span>
+    </div>
+
+    <div *ngIf="loadingNovedades" class="empty-state">
+      Cargando novedades...
+    </div>
+
+    <div *ngIf="!loadingNovedades && novedadesContrato.length === 0" class="empty-state">
+      No hay novedades registradas para este contrato en el período.
+    </div>
+
+    <div class="tabla-wrapper" *ngIf="!loadingNovedades && novedadesContrato.length > 0">
+      <table class="table-novedades">
+        <thead>
+        <tr>
+          <th>Concepto</th>
+          <th class="text-right" style="width: 90px;">Cantidad</th>
+          <th class="text-right" style="width: 130px;">Valor</th>
+          <th>Observación</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let n of novedadesContrato">
+          <td class="concepto">{{ n.codigoConcepto }}</td>
+          <td class="text-right">{{ n.cantidad | number:'1.0-0' }}</td>
+          <td class="text-right">{{ n.valor | number:'1.0-0' }}</td>
+          <td class="observacion">{{ n.observacion || '-' }}</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- =========================
+       FORMULARIO DE CAPTURA
+       ========================= -->
   <div class="card">
 
     <div class="form-grid">
@@ -26,14 +87,6 @@
           name="idEmpleado"
           (ngModelChange)="onEmpleadoChange()">
         </app-empleado-autocomplete>
-      </div>
-
-      <div *ngIf="contratoActivo" class="contrato-info">
-        <div><strong>Salario base:</strong> {{ contratoActivo.salarioBase | number:'1.0-0' }}</div>
-        <div><strong>Tipo contrato:</strong> {{ contratoActivo.tipoContratoNombre }}</div>
-        <div><strong>Cargo:</strong> {{ contratoActivo.nombreCargo }}</div>
-        <div><strong>Sección:</strong> {{ contratoActivo.nombreSeccion }}</div>
-        <div><strong>Periodo pago:</strong> {{ contratoActivo.periodoPago }}</div>
       </div>
 
       <!-- =========================
@@ -95,14 +148,19 @@
            CANTIDAD
            ========================= -->
       <div class="form-group" *ngIf="requiereCantidad">
-        <label>Cantidad *</label>
+        <label>
+          {{ conceptoSeleccionado?.tipoCalculo === 'POR_HORAS' ? 'Horas *' : 'Días *' }}
+        </label>
 
         <input
           type="number"
-          step="0.01"
-          class="form-control"
+          step="1"
+          min="0"
+          class="form-control no-spinner input-right"
           [(ngModel)]="form.cantidad"
           name="cantidad"
+          (focus)="seleccionarCantidad($event)"
+          (click)="seleccionarCantidad($event)"
           (ngModelChange)="recalcular()">
       </div>
 
@@ -120,12 +178,11 @@
         />
       </div>
 
-
       <!-- =========================
            OBSERVACIÓN
            ========================= -->
       <div class="form-group full">
-        <label>Observación</label>
+        <label>Observación *</label>
 
         <textarea
           rows="3"
@@ -145,7 +202,7 @@
       <button
         class="btn btn-primary"
         (click)="guardar()"
-        [disabled]="guardando">
+        [disabled]="guardando || !formularioValido">
 
         {{ guardando ? 'Guardando...' : 'Guardar' }}
 

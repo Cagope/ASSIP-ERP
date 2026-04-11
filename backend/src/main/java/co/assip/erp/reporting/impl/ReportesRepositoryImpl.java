@@ -89,10 +89,22 @@ public class ReportesRepositoryImpl {
             // 🔹 Filtros de CUENTA
             // ======================================================
 
+            if (filters.get("id_agencia") != null && !filters.get("id_agencia").toString().isBlank()) {
+                where.append((count++ > 0 ? " AND " : " WHERE "));
+                where.append("id_agencia = ?");
+                params.add(Integer.parseInt(filters.get("id_agencia").toString().trim()));
+            }
+
+            if (filters.get("id_forma_ahorro") != null && !filters.get("id_forma_ahorro").toString().isBlank()) {
+                where.append((count++ > 0 ? " AND " : " WHERE "));
+                where.append("id_forma_ahorro = ?");
+                params.add(Integer.parseInt(filters.get("id_forma_ahorro").toString().trim()));
+            }
+
             if (filters.get("codigo_cuenta") != null && !filters.get("codigo_cuenta").toString().isBlank()) {
                 where.append((count++ > 0 ? " AND " : " WHERE "));
-                where.append("CAST(codigo_cuenta AS TEXT) ILIKE ?");
-                params.add("%" + filters.get("codigo_cuenta").toString().trim() + "%");
+                where.append("codigo_cuenta = ?");
+                params.add(filters.get("codigo_cuenta").toString().trim());
             }
 
             if (filters.get("codigo_forma") != null && !filters.get("codigo_forma").toString().isBlank()) {
@@ -124,26 +136,21 @@ public class ReportesRepositoryImpl {
             }
 
             // ==========================================================
-// 🔐 Filtro por agencias del usuario (solo DEPÓSITOS)
-// ==========================================================
+            // 🔐 Filtro por agencias del usuario (solo DEPÓSITOS)
+            // ==========================================================
             try {
-
                 boolean esDepositos = schema.equalsIgnoreCase("depositos");
 
-                if (esDepositos) {
-
+                if (esDepositos && (filters.get("id_agencia") == null || filters.get("id_agencia").toString().isBlank())) {
                     List<Integer> agenciasUsuario =
                             co.assip.erp.seguridad.utils.SecurityUtils.getAgencias();
 
                     if (agenciasUsuario != null && !agenciasUsuario.isEmpty()) {
-
                         where.append((count++ > 0 ? " AND " : " WHERE "));
                         where.append(" id_agencia = ANY(?) ");
-
                         params.add(agenciasUsuario.toArray(new Integer[0]));
                     }
                 }
-
 
             } catch (Exception ignored) {
                 // Si ocurre un error, el reporte sigue sin filtro.

@@ -49,4 +49,17 @@ public class PeriodoNominaActivoService {
                 fechas.fechaFin()
         );
     }
+
+    public PeriodosNominaRepository.PeriodoActivoInfo obtenerPeriodoActivoInfo() {
+
+        var info = repo.obtenerPeriodoActivoInfo();
+
+        if (info == null) {
+            throw new IllegalStateException(
+                    "No existe un período de nómina ABIERTO"
+            );
+        }
+
+        return info;
+    }
 }

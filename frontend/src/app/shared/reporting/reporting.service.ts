@@ -87,12 +87,14 @@ export class ReportingService {
   // 🧾 NUEVO: Consulta avanzada por forma + cuenta + fechas
   // ===========================================================
   async obtenerExtractoCuentaAvanzado(
-    formaAhorro: string,
+    idAgencia: number,
+    formaAhorro: number,
     codigoCuenta: string,
     fechaInicial: string,
     fechaFinal: string
   ): Promise<ReportResult> {
-    if (!formaAhorro || !codigoCuenta || !fechaInicial || !fechaFinal) {
+
+    if (!idAgencia || !formaAhorro || !codigoCuenta || !fechaInicial || !fechaFinal) {
       console.warn('⚠️ Faltan parámetros para consultar el extracto.');
       return { data: [], total: 0 };
     }
@@ -101,12 +103,15 @@ export class ReportingService {
       schema: 'depositos',
       view: 'vw_extracto_cuentas_persona_total',
       filters: {
-        forma_ahorro: formaAhorro,
+        id_agencia: idAgencia,
+        id_forma_ahorro: formaAhorro,
         codigo_cuenta: codigoCuenta,
         fecha_inicial: fechaInicial,
         fecha_final: fechaFinal
       }
     };
+
+    console.log('REQ EXTRACTO =>', req);
 
     try {
       const res = await firstValueFrom(this.api.ejecutarConsulta(req));
@@ -115,8 +120,11 @@ export class ReportingService {
         total: res?.total ?? 0,
         durationMs: res?.durationMs ?? 0
       };
+
+    console.log('RES EXTRACTO =>', res);
+
     } catch (err) {
-      console.error('❌ Error al obtener extracto de cuenta avanzado:', err);
+      console.error('❌ Error al obtener extracto:', err);
       return { data: [], total: 0 };
     }
   }

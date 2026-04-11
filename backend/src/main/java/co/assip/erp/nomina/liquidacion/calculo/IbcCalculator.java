@@ -31,31 +31,15 @@ public class IbcCalculator {
     ) {
 
         // =========================================
-        // 1️⃣ DÍAS LABORADOS EN EL PERÍODO
+        // 1️⃣ BASICO DEL PERÍODO
         // =========================================
-        Integer diasLaborados = obtenerDiasLaborados(
+        BigDecimal basico = obtenerBasicoPeriodo(
                 idPeriodoNomina,
-                contrato.getFechaInicio(),
-                contrato.getFechaFin()
-        );
-
-        if (diasLaborados == null || diasLaborados <= 0) {
-            return MathUtils.pesos(BigDecimal.ZERO);
-        }
-
-        // =========================================
-        // 2️⃣ SALARIO BASE PROPORCIONAL
-        // =========================================
-        BigDecimal salarioBase = contrato.getSalarioBase();
-
-        BigDecimal salarioProporcional = MathUtils.pesos(
-                salarioBase
-                        .divide(BigDecimal.valueOf(30), 10, RoundingMode.HALF_UP)
-                        .multiply(BigDecimal.valueOf(diasLaborados))
+                contrato.getIdContrato()
         );
 
         // =========================================
-        // 3️⃣ NOVEDADES QUE AFECTAN IBC (VALOR TOTAL)
+        // 2️⃣ NOVEDADES QUE AFECTAN IBC (SIN BASICO)
         // =========================================
         BigDecimal novedadesIbc = obtenerNovedadesQueAfectanIbc(
                 idPeriodoNomina,
@@ -63,9 +47,9 @@ public class IbcCalculator {
         );
 
         // =========================================
-        // 4️⃣ IBC FINAL
+        // 3️⃣ IBC FINAL
         // =========================================
-        BigDecimal ibc = salarioProporcional.add(novedadesIbc);
+        BigDecimal ibc = basico.add(novedadesIbc);
 
         if (ibc.compareTo(BigDecimal.ZERO) < 0) {
             ibc = BigDecimal.ZERO;
@@ -114,8 +98,7 @@ public class IbcCalculator {
 
         String sql = """
         SELECT COALESCE(
-            SUM(n.valor * COALESCE(n.cantidad, 1)),
-            0
+            SUM(n.valor),0
         )
         FROM nomina.novedades_nomina n
         JOIN nomina.conceptos_nomina c
@@ -126,6 +109,31 @@ public class IbcCalculator {
           AND c.tipo_concepto = 'DEVENGADO'
           AND c.afecta_ibc = TRUE
           AND c.codigo_concepto <> 'BASICO'   -- 🔒 CLAVE
+    """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("idPeriodo", idPeriodoNomina)
+                .addValue("idContrato", idContrato);
+
+        BigDecimal v = jdbc.queryForObject(sql, params, BigDecimal.class);
+        return MathUtils.pesos(v);
+    }
+
+    // =========================================================
+// 🔎 BASICO DEL PERÍODO
+// =========================================================
+    private BigDecimal obtenerBasicoPeriodo(
+            Integer idPeriodoNomina,
+            Integer idContrato
+    ) {
+
+        String sql = """
+    SELECT COALESCE(SUM(n.valor), 0)
+    FROM nomina.novedades_nomina n
+    WHERE n.id_periodo = :idPeriodo
+      AND n.id_contrato = :idContrato
+      AND n.estado = 'ABIERTO'
+      AND n.codigo_concepto = 'BASICO'
     """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()

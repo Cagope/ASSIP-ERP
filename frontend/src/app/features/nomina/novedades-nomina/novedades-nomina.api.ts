@@ -99,6 +99,10 @@ export class NovedadesNominaApi {
     return this.http.get<NovedadNominaListDTO[]>(url);
   }
 
+  obtenerPeriodoActivo(): Observable<any> {
+    return this.http.get<any>(`${this.base}/periodo-activo`);
+  }
+
   // =========================================================
   // OBTENER
   // =========================================================
@@ -172,4 +176,5 @@ export class NovedadesNominaApi {
       data
     );
   }
+
 }

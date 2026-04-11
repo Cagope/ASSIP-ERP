@@ -71,20 +71,7 @@ export class LiquidacionContabilizacionComponent {
           this.idPeriodoNomina = ultimoPeriodo?.idPeriodo ?? null;
 
           this.cargarFechaPeriodo();
-
-          const idAgencia = ultimoPeriodo.idAgencia;
-
-          this.tiposComprobantesApi
-            .listarPorAgencia(idAgencia)
-            .subscribe(tc => {
-
-              this.tiposComprobantes = tc ?? [];
-
-              // sugerir consecutivo inmediatamente
-              this.actualizarConsecutivo();
-
-            });
-
+          this.cargarTiposComprobantesPorPeriodo();
         }
 
       });
@@ -101,10 +88,6 @@ export class LiquidacionContabilizacionComponent {
     this.error = '';
     this.resultado = null;
     this.cargando = true;
-
-    // 👇 documento temporal para pantalla
-    this.numeroComprobantePreview =
-      `PREVIEW-${this.idPeriodoNomina}`;
 
     if (!this.idPeriodoNomina) {
       this.error = 'Debe seleccionar un período de nómina.';
@@ -133,8 +116,6 @@ export class LiquidacionContabilizacionComponent {
         this.cargando = false;
       }
     });
-
-
   }
 
   ejecutar(): void {
@@ -146,8 +127,14 @@ export class LiquidacionContabilizacionComponent {
       return;
     }
 
+    const p = this.periodoSeleccionado;
+
+    const descripcion = p
+      ? `${p.nombreAgencia} | ${p.descripcion} | ${p.tipoPeriodo}`
+      : `ID ${this.idPeriodoNomina}`;
+
     const ok = confirm(
-      `¿Desea contabilizar la liquidación del período ${this.idPeriodoNomina}?`
+      `¿Desea contabilizar la liquidación de nómina del período:\n\n${descripcion}?`
     );
 
     if (!ok) return;
@@ -187,8 +174,14 @@ export class LiquidacionContabilizacionComponent {
       return;
     }
 
+    const p = this.periodoSeleccionado;
+
+    const descripcion = p
+      ? `${p.nombreAgencia} | ${p.descripcion} | ${p.tipoPeriodo}`
+      : `ID ${this.idPeriodoNomina}`;
+
     const ok = confirm(
-      `¿Desea REVERSAR la contabilización del período ${this.idPeriodoNomina}?`
+      `¿Desea REVERSAR la contabilización de nómina del período:\n\n${descripcion}?\n\n⚠ Esta acción eliminará el comprobante contable generado.`
     );
 
     if (!ok) return;
@@ -281,28 +274,29 @@ export class LiquidacionContabilizacionComponent {
 
     if (!periodo) {
       this.fechaContabilizacion = null;
+      this.tiposComprobantes = [];
+      this.numeroComprobantePreview = '';
       return;
     }
 
     this.fechaContabilizacion = periodo.fechaFin ?? null;
+
+    this.movimientos = [];
+    this.resumenCuentas = [];
+    this.resultado = null;
+    this.error = '';
+
+    this.cargarTiposComprobantesPorPeriodo();
 
     if (this.idPeriodoNomina) {
 
       this.api.obtenerComprobante(this.idPeriodoNomina)
         .subscribe(numero => {
 
-          this.comprobanteExistente = numero;
+          this.comprobanteExistente = numero ?? null;
 
           if (numero) {
-
             this.numeroComprobantePreview = numero;
-
-            // limpiar preview
-            this.movimientos = [];
-            this.resumenCuentas = [];
-            this.resultado = null;
-            this.comprobanteExistente = null;
-
           }
 
         });
@@ -318,10 +312,23 @@ export class LiquidacionContabilizacionComponent {
       return;
     }
 
+    const periodo = this.periodos.find(
+      p => String(p.idPeriodo) === String(this.idPeriodoNomina)
+    );
+
+    if (!periodo) {
+      this.error = 'No se pudo obtener la información del período.';
+      return;
+    }
+
     LiquidacionContabilizacionExporter.exportarComprobante(
       this.movimientos,
       {
         periodo: this.idPeriodoNomina as number,
+        anio: periodo.anio,
+        mes: periodo.mes,
+        numeroPeriodo: periodo.numeroPeriodo,
+        codigoAgencia: periodo.codigoAgencia ?? periodo.idAgencia,
         fechaContabilizacion: this.fechaContabilizacion,
         tipoComprobante: this.tipoComprobante,
         numeroComprobante: this.numeroComprobantePreview
@@ -390,5 +397,47 @@ export class LiquidacionContabilizacionComponent {
       });
 
   }
+
+    private cargarTiposComprobantesPorPeriodo(): void {
+
+      const periodo = this.periodos.find(
+        p => String(p.idPeriodo) === String(this.idPeriodoNomina)
+      );
+
+      if (!periodo?.idAgencia) {
+        this.tiposComprobantes = [];
+        this.numeroComprobantePreview = '';
+        return;
+      }
+
+      this.tiposComprobantesApi
+        .listarPorAgencia(periodo.idAgencia)
+        .subscribe(tc => {
+          this.tiposComprobantes = tc ?? [];
+          this.actualizarConsecutivo();
+        });
+    }
+
+    // ======================================================
+    // 🔥 ESTADO DEL PERÍODO
+    // ======================================================
+
+    get periodoSeleccionado(): any | null {
+      return this.periodos.find(
+        p => String(p.idPeriodo) === String(this.idPeriodoNomina)
+      ) ?? null;
+    }
+
+    get estadoPeriodoSeleccionado(): string {
+      return (this.periodoSeleccionado?.estado ?? '').toUpperCase().trim();
+    }
+
+    get esPeriodoCerrado(): boolean {
+      return this.estadoPeriodoSeleccionado === 'CERRADO';
+    }
+
+    get esPeriodoContabilizado(): boolean {
+      return this.estadoPeriodoSeleccionado === 'CONTABILIZADO';
+    }
 
 }

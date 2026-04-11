@@ -72,7 +72,8 @@ public List<EmpleadoContratoListViewDTO> listar() {
 
           -- ✅ CUENTA NÓMINA + FORMA (vista existente)
           dep.codigo_cuenta             AS cuentaNominaDisplay,
-          dep.codigo_forma              AS idFormaAhorroNomina,
+          dep.id_forma_ahorro           AS idFormaAhorroNomina,
+          dep.codigo_forma              AS codigoFormaAhorroNomina,
           dep.nombre_forma_ahorro       AS nombreFormaAhorroNomina,
 
           c.fecha_envio_nota_renovacion AS fechaEnvioNotaRenovacion,
@@ -239,7 +240,8 @@ public List<EmpleadoContratoListViewDTO> listar() {
           c.id_cuenta_ahorro_nomina     AS idCuentaAhorroNomina,
 
           dep.codigo_cuenta             AS cuentaNominaDisplay,
-          dep.codigo_forma              AS idFormaAhorroNomina,
+          dep.id_forma_ahorro           AS idFormaAhorroNomina,
+          dep.codigo_forma              AS codigoFormaAhorroNomina,
           dep.nombre_forma_ahorro       AS nombreFormaAhorroNomina,
 
           c.fecha_envio_nota_renovacion AS fechaEnvioNotaRenovacion,
@@ -382,8 +384,20 @@ public List<EmpleadoContratoListViewDTO> listar() {
               c.fecha_envio_nota_renovacion  AS fechaEnvioNotaRenovacion,
               c.clase_riesgo_arl             AS claseRiesgoArl,
               c.porcentaje_arl               AS porcentajeArl,
-              c.activo                       AS activo
+              c.activo                       AS activo,
+              
+              tc.aplica_salud              AS aplicaSalud,
+              tc.aplica_pension            AS aplicaPension,
+              tc.aplica_arl                AS aplicaArl,
+              tc.aplica_caja_compensacion  AS aplicaCajaCompensacion,
+              tc.aplica_cesantias          AS aplicaCesantias,
+              tc.aplica_prima              AS aplicaPrima,
+              tc.aplica_vacaciones         AS aplicaVacaciones,
+              tc.aplica_parafiscales       AS aplicaParafiscales
+              
             FROM nomina.empleado_contratos c
+            LEFT JOIN nomina.tipos_contrato tc
+              ON tc.id_tipo_contrato = c.id_tipo_contrato
             WHERE c.id_contrato = :id
         """;
 
@@ -419,6 +433,16 @@ public List<EmpleadoContratoListViewDTO> listar() {
                         )
                         .porcentajeArl(rs.getBigDecimal("porcentajeArl"))
                         .activo((Boolean) rs.getObject("activo"))
+
+                        .aplicaSalud((Boolean) rs.getObject("aplicaSalud"))
+                        .aplicaPension((Boolean) rs.getObject("aplicaPension"))
+                        .aplicaArl((Boolean) rs.getObject("aplicaArl"))
+                        .aplicaCajaCompensacion((Boolean) rs.getObject("aplicaCajaCompensacion"))
+                        .aplicaCesantias((Boolean) rs.getObject("aplicaCesantias"))
+                        .aplicaPrima((Boolean) rs.getObject("aplicaPrima"))
+                        .aplicaVacaciones((Boolean) rs.getObject("aplicaVacaciones"))
+                        .aplicaParafiscales((Boolean) rs.getObject("aplicaParafiscales"))
+
                         .build());
 
         return rows.stream().findFirst();

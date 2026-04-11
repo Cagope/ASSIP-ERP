@@ -129,18 +129,9 @@ public class NovedadesNominaService {
             );
         }
 
-        BigDecimal valorCalculado = calculoService.calcularValor(
-                dto.getIdContrato(),
-                dto.getCodigoConcepto(),
-                dto.getCantidad()
-        );
-
-        valorCalculado = MathUtils.pesos(valorCalculado);
-
-        BigDecimal valorFinal =
-                determinarValorFinal(dto.getValor(), valorCalculado);
-
-        valorFinal = MathUtils.pesos(valorFinal);
+        BigDecimal valorFinal = dto.getValor() != null
+                ? MathUtils.pesos(dto.getValor())
+                : BigDecimal.ZERO;
 
         dto.setValor(valorFinal);
 
@@ -180,6 +171,10 @@ public class NovedadesNominaService {
 
         if (dto.getCodigoConcepto() == null || dto.getCodigoConcepto().isBlank()) {
             throw new IllegalArgumentException("Concepto es obligatorio");
+        }
+
+        if (dto.getObservacion() == null || dto.getObservacion().trim().isEmpty()) {
+            throw new IllegalArgumentException("La observación es obligatoria");
         }
 
         if (dto.getFechaFinal().isBefore(dto.getFechaInicial())) {
@@ -277,4 +272,20 @@ public class NovedadesNominaService {
                 idUsuario
         );
     }
+
+    // =========================================================
+    // 🧹 ELIMINAR NOVEDADES DE CÁLCULO POR PERÍODO
+    // =========================================================
+    public int eliminarNovedadesCalculoPorPeriodo(
+            Integer idPeriodo,
+            Integer idUsuario
+    ) {
+
+        if (idPeriodo == null) {
+            throw new IllegalArgumentException("ID período es obligatorio");
+        }
+
+        return repo.eliminarNovedadesCalculoPorPeriodo(idPeriodo, idUsuario);
+    }
+
 }

@@ -108,7 +108,9 @@
 
   <app-extracto-modal
     *ngIf="mostrarModalExtracto"
+    [formaAhorro]="cuenta?.id_forma_ahorro"
     [codigoCuenta]="cuenta?.codigo_cuenta"
+    [asociado]="cuenta"
     [visible]="mostrarModalExtracto"
     (cerrar)="cerrarExtracto()">
   </app-extracto-modal>

@@ -43,6 +43,7 @@ export class NovedadesNominaMasivoComponent implements OnInit {
   // resultado final (después de aplicar)
   resultado: NovedadMasivaResultDTO | null = null;
 
+  periodoActivo: any = null;
 
   // =========================
   // 🔢 TOTALES PREVIEW
@@ -68,6 +69,7 @@ export class NovedadesNominaMasivoComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarCatalogos();
+    this.cargarPeriodoActivo();
   }
 
   private cargarCatalogos(): void {
@@ -75,6 +77,13 @@ export class NovedadesNominaMasivoComponent implements OnInit {
     this.conceptosApi.listar().subscribe({
       next: d => this.conceptos = d ?? [],
       error: () => this.conceptos = []
+    });
+  }
+
+  private cargarPeriodoActivo(): void {
+    this.api.obtenerPeriodoActivo().subscribe({
+      next: (data) => this.periodoActivo = data,
+      error: () => this.periodoActivo = null
     });
   }
 
@@ -97,6 +106,11 @@ export class NovedadesNominaMasivoComponent implements OnInit {
       this.conceptos.find(c => c.codigoConcepto === this.form.codigoConcepto) ?? null;
 
     if (!concepto) return;
+
+    if (!this.form.observacion || !this.form.observacion.trim()) {
+      this.form.observacion =
+        `Novedad ${concepto.nombreConcepto} - Carga masiva`;
+    }
 
     switch (concepto.tipoCalculo) {
 
@@ -161,6 +175,11 @@ export class NovedadesNominaMasivoComponent implements OnInit {
       return;
     }
 
+    if (!this.form.observacion || !this.form.observacion.trim()) {
+      alert('La observación es obligatoria.');
+      return;
+    }
+
     this.procesando = true;
     this.resultado = null;
 
@@ -203,8 +222,6 @@ export class NovedadesNominaMasivoComponent implements OnInit {
       .reduce((acc, x) => acc + Number(x.valor_calculado ?? 0), 0);
   }
 
-
-
   // =========================================================
   // ✅ APLICAR / GRABAR
   // =========================================================
@@ -215,6 +232,21 @@ export class NovedadesNominaMasivoComponent implements OnInit {
       return;
     }
 
+    if (!this.form.observacion || !this.form.observacion.trim()) {
+      alert('La observación es obligatoria.');
+      return;
+    }
+
+    const ok = confirm(
+      `¿Aplicar novedad masiva?\n\n` +
+      `Concepto: ${this.form.codigoConcepto}\n` +
+      `Nuevos: ${this.totalNuevos}\n` +
+      `Existentes: ${this.totalExistentes}\n\n` +
+      `Esta acción generará las novedades para el período activo.`
+    );
+
+    if (!ok) return;
+
     this.procesando = true;
     this.resultado = null;
 
@@ -222,6 +254,7 @@ export class NovedadesNominaMasivoComponent implements OnInit {
       next: (res) => {
         this.resultado = res;
         this.procesando = false;
+        this.limpiarFormulario();
 
         // ✅ después de aplicar, se puede mantener preview o limpiarlo
         // yo lo dejo visible para auditoría visual:
@@ -233,6 +266,25 @@ export class NovedadesNominaMasivoComponent implements OnInit {
         alert('No se pudo aplicar la novedad masiva.');
       }
     });
+  }
+
+  get formularioValido(): boolean {
+
+    if (!this.form.codigoConcepto) return false;
+
+    if (this.requiereCantidad && (!this.form.cantidad || this.form.cantidad <= 0)) {
+      return false;
+    }
+
+    if (this.valorEditable && (!this.form.valor || this.form.valor <= 0)) {
+      return false;
+    }
+
+    if (!this.form.observacion || !this.form.observacion.trim()) {
+      return false;
+    }
+
+    return true;
   }
 
   volver(): void {
@@ -311,6 +363,32 @@ export class NovedadesNominaMasivoComponent implements OnInit {
       `preview_novedades_NUEVOS_${nombreSeguro}_${fecha}.xlsx`;
 
     XLSX.writeFile(workbook, fileName);
+  }
+
+  private limpiarFormulario(): void {
+
+    this.form = {
+      codigoConcepto: '',
+      cantidad: 0,
+      valor: 0,
+      observacion: null
+    };
+
+    // reset flags UI
+    this.valorEditable = true;
+    this.requiereCantidad = false;
+    this.esAuxTransporte = false;
+
+    // limpiar preview
+    this.preview = [];
+    this.viendoPreview = false;
+
+    // limpiar totales
+    this.totalContratos = 0;
+    this.totalNuevos = 0;
+    this.totalExistentes = 0;
+    this.totalValorNuevos = 0;
+    this.totalValorGeneral = 0;
   }
 
 }

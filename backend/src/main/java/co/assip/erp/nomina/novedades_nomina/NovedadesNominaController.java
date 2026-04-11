@@ -1,6 +1,7 @@
 package co.assip.erp.nomina.novedades_nomina;
 
 import co.assip.erp.nomina.novedades_nomina.dto.*;
+import co.assip.erp.nomina.periodos_nomina.PeriodoNominaActivoService;
 import co.assip.erp.seguridad.utils.SecurityUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,15 +16,18 @@ public class NovedadesNominaController {
     private final NovedadesNominaService service;
     private final NovedadesNominaMasivoService masivoService;
     private final NovedadCalculoService calculoService;
+    private final PeriodoNominaActivoService periodoActivoService;
 
     public NovedadesNominaController(
             NovedadesNominaService service,
             NovedadesNominaMasivoService masivoService,
-            NovedadCalculoService calculoService
+            NovedadCalculoService calculoService,
+            PeriodoNominaActivoService periodoActivoService
     ) {
         this.service = service;
         this.masivoService = masivoService;
         this.calculoService = calculoService;
+        this.periodoActivoService = periodoActivoService;
     }
 
     // =========================================================
@@ -51,6 +55,11 @@ public class NovedadesNominaController {
     public void crear(@RequestBody NovedadNominaFormDTO dto) {
         Integer idUsuario = SecurityUtils.getIdUsuario();
         service.crear(dto, idUsuario);
+    }
+
+    @GetMapping("/periodo-activo")
+    public Object obtenerPeriodoActivo() {
+        return periodoActivoService.obtenerPeriodoActivoInfo();
     }
 
     // =========================================================

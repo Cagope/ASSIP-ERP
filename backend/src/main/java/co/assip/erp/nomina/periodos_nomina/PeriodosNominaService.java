@@ -64,14 +64,20 @@ public class PeriodosNominaService {
                 // 1. Eliminar liquidaciones del período (si existen)
                 liquidacionService.eliminarPorPeriodo(dto.getIdPeriodo());
 
-                // 2. Reabrir novedades
+                // 2. Eliminar solo novedades generadas por cálculo
+                novedadesService.eliminarNovedadesCalculoPorPeriodo(
+                        dto.getIdPeriodo(),
+                        idUsuario
+                );
+
+                // 3. Reabrir novedades restantes del período
                 novedadesService.actualizarEstadoPorPeriodo(
                         dto.getIdPeriodo(),
                         "ABIERTO",
                         idUsuario
                 );
 
-                // 3. Reabrir período
+                // 4. Reabrir período
                 repo.cambiarEstado(dto.getIdPeriodo(), "ABIERTO", idUsuario);
             }
 

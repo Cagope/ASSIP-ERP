@@ -84,14 +84,15 @@
 
   <!-- 🧾 Modal de Extracto -->
   <app-extracto-modal
+    [idAgencia]="seleccionada?.id_agencia"
+    [formaAhorro]="seleccionada?.id_forma_ahorro"
     [codigoCuenta]="seleccionada?.codigo_cuenta"
-    [formaAhorro]="seleccionada?.nombre_forma_ahorro"
     [asociado]="{
-      documento: seleccionada?.documento,
-      nombreCompleto: (seleccionada?.nombres || '') + ' ' +
-                      (seleccionada?.primer_apellido || '') + ' ' +
-                      (seleccionada?.segundo_apellido || '')
-    }"
+    documento: seleccionada?.documento,
+    nombreCompleto: (seleccionada?.nombres || '') + ' ' +
+                    (seleccionada?.primer_apellido || '') + ' ' +
+                    (seleccionada?.segundo_apellido || '')
+  }"
     [visible]="modalVisible"
     (cerrar)="modalVisible = false">
   </app-extracto-modal>

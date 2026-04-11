@@ -1,0 +1,264 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h2>Contabilización de Aportes Empleador y Parafiscales</h2>
+      <p class="subtitle">Preview y generación del comprobante contable mensual</p>
+    </div>
+  </div>
+
+  <div class="card filtros">
+    <div class="form-row">
+
+      <div class="field">
+        <label for="idPeriodoNomina">Período de nómina</label>
+        <select
+          id="idPeriodoNomina"
+          [(ngModel)]="idPeriodoNomina"
+          (ngModelChange)="cargarFechaPeriodo()"
+          class="form-control"
+        >
+          <option [ngValue]="null">Seleccione período</option>
+          <option *ngFor="let p of periodos" [ngValue]="p.idPeriodo">
+            {{ p.nombreAgencia }} | {{ p.descripcion }} | {{ p.tipoPeriodo }}
+          </option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Fecha contabilización</label>
+        <input type="date" class="form-control" [(ngModel)]="fechaContabilizacion" />
+      </div>
+
+      <div class="field">
+        <label>Tipo comprobante</label>
+        <select
+          [(ngModel)]="tipoComprobante"
+          (ngModelChange)="actualizarConsecutivo()"
+          class="form-control"
+        >
+          <option [ngValue]="null">Seleccione</option>
+          <option *ngFor="let t of tiposComprobantes" [ngValue]="t.tipoComprobante">
+            {{ t.tipoComprobante }} | {{ t.nombreTipoComprobante }}
+          </option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Número comprobante</label>
+        <input type="text" class="form-control" [value]="numeroComprobantePreview" readonly />
+      </div>
+
+      <div class="actions">
+        <button
+          class="btn btn-primary"
+          (click)="preview()"
+          [disabled]="!esPeriodoContabilizado || cargando || ejecutando"
+        >
+          {{ cargando ? 'Consultando...' : 'Preview' }}
+        </button>
+
+        <button
+          class="btn btn-success"
+          (click)="ejecutar()"
+          [disabled]="!esPeriodoContabilizado || movimientos.length === 0 || cargando || ejecutando || comprobanteExistente"
+        >
+          {{ ejecutando ? 'Contabilizando...' : 'Contabilizar' }}
+        </button>
+
+        <button
+          class="btn btn-warning"
+          (click)="reversar()"
+          [disabled]="!esPeriodoContabilizado || reversando || cargando || !comprobanteExistente"
+        >
+          {{ reversando ? 'Reversando...' : 'Reversar contabilización' }}
+        </button>
+
+        <button
+          class="btn btn-secondary"
+          (click)="exportarExcel()"
+          [disabled]="movimientos.length === 0"
+        >
+          Exportar Excel
+        </button>
+      </div>
+
+    </div>
+
+    <div *ngIf="error" class="alert alert-danger">
+      {{ error }}
+    </div>
+
+    <div *ngIf="periodoSeleccionado" class="alert alert-info">
+      <strong>Estado período (liquidación):</strong> {{ periodoSeleccionado.estado }}
+    </div>
+
+    <div *ngIf="comprobanteExistente" class="alert alert-success">
+      <strong>Mes ya contabilizado:</strong> {{ tipoComprobante }} - {{ comprobanteExistente }}
+    </div>
+  </div>
+
+  <div class="card documento-preview" *ngIf="movimientos.length > 0">
+    <div class="doc-grid">
+      <div *ngIf="fechaContabilizacion">
+        <label>Fecha comprobante</label>
+        <strong>{{ fechaContabilizacion }}</strong>
+      </div>
+
+      <div>
+        <label>Documento contable</label>
+        <strong>{{ tipoComprobante }} - {{ numeroComprobantePreview }}</strong>
+      </div>
+
+      <div *ngIf="comprobanteExistente">
+        <label>Comprobante existente</label>
+        <strong>{{ tipoComprobante }} - {{ comprobanteExistente }}</strong>
+      </div>
+
+      <div>
+        <label>Mes nómina</label>
+        <strong>{{ periodoSeleccionado?.nombreAgencia }}</strong>
+      </div>
+
+      <div>
+        <label>Referencia seleccionada</label>
+        <strong>{{ periodoSeleccionado?.descripcion }} | {{ periodoSeleccionado?.tipoPeriodo }}</strong>
+      </div>
+
+      <div>
+        <label>Movimientos</label>
+        <strong>{{ movimientos.length }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-resumen">
+    <div class="card total-card">
+      <span class="label">Total Débito</span>
+      <strong>{{ totalDebito() | number:'1.2-2' }}</strong>
+    </div>
+
+    <div class="card total-card">
+      <span class="label">Total Crédito</span>
+      <strong>{{ totalCredito() | number:'1.2-2' }}</strong>
+    </div>
+
+    <div
+      class="card total-card estado"
+      [class.ok]="cuadre() === 0 && movimientos.length > 0"
+      [class.error]="cuadre() !== 0 && movimientos.length > 0"
+    >
+      <span class="label">Estado contable</span>
+
+      <strong *ngIf="movimientos.length === 0">Sin datos</strong>
+      <strong *ngIf="movimientos.length > 0 && cuadre() === 0">CUADRADO ✔</strong>
+      <strong *ngIf="movimientos.length > 0 && cuadre() !== 0">
+        DESCUADRADO ❌ ({{ cuadre() | number:'1.2-2' }})
+      </strong>
+    </div>
+  </div>
+
+  <div *ngIf="resultado" class="card resultado-card">
+    <div class="alert alert-success mb-2">
+      Contabilización realizada correctamente.
+    </div>
+
+    <h3>Comprobantes generados</h3>
+
+    <table class="table table-sm table-bordered">
+      <thead>
+      <tr>
+        <th>Agencia</th>
+        <th>Tipo</th>
+        <th>Número</th>
+        <th>Concepto</th>
+        <th>Fecha</th>
+        <th>Movimientos</th>
+        <th>Débito</th>
+        <th>Crédito</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let c of resultado.comprobantes">
+        <td>{{ c.idAgencia }}</td>
+        <td>{{ c.tipoComprobante }}</td>
+        <td>{{ c.numeroComprobante }}</td>
+        <td>{{ c.conceptoComprobante }}</td>
+        <td>{{ c.fechaComprobante }}</td>
+        <td class="text-end">{{ c.cantidadMovimientos }}</td>
+        <td class="text-end">{{ c.totalDebito | number:'1.2-2' }}</td>
+        <td class="text-end">{{ c.totalCredito | number:'1.2-2' }}</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Resumen por cuenta contable</h3>
+
+    <table class="table table-sm table-bordered table-hover">
+      <thead>
+      <tr>
+        <th>Agencia</th>
+        <th>Código cuenta</th>
+        <th>Nombre cuenta</th>
+        <th class="text-end">Débito</th>
+        <th class="text-end">Crédito</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let r of resumenCuentas">
+        <td>{{ r.idAgencia }}</td>
+        <td>{{ r.codigoCuenta }}</td>
+        <td>{{ r.nombreCuenta }}</td>
+        <td class="text-end">{{ r.totalDebito | number:'1.2-2' }}</td>
+        <td class="text-end">{{ r.totalCredito | number:'1.2-2' }}</td>
+      </tr>
+      <tr *ngIf="resumenCuentas.length === 0">
+        <td colspan="5" class="empty">Sin información para mostrar</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Detalle de movimientos</h3>
+
+    <table class="table table-sm table-bordered table-hover">
+      <thead>
+      <tr>
+        <th>Agencia</th>
+        <th>Código cuenta</th>
+        <th>Nombre cuenta</th>
+        <th>Tercero</th>
+        <th>Empleado referencia</th>
+        <th class="text-end">Base movimiento</th>
+        <th class="text-end">Débito</th>
+        <th class="text-end">Crédito</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let m of movimientos">
+        <td>{{ m.idAgencia }}</td>
+        <td>{{ m.codigoCuenta }}</td>
+        <td>{{ m.nombreCuenta }}</td>
+        <td>{{ m.nombreTercero }}</td>
+        <td>{{ m.nombreEmpleadoReferencia }}</td>
+        <td class="text-end">{{ m.valorBase | number:'1.0-0' }}</td>
+        <td class="text-end">{{ m.debito | number:'1.2-2' }}</td>
+        <td class="text-end">{{ m.credito | number:'1.2-2' }}</td>
+      </tr>
+      <tr *ngIf="movimientos.length === 0">
+        <td colspan="8" class="empty">Sin movimientos para mostrar</td>
+      </tr>
+      </tbody>
+      <tfoot *ngIf="movimientos.length > 0">
+      <tr>
+        <th colspan="6">TOTAL</th>
+        <th class="text-end">{{ totalDebito() | number:'1.2-2' }}</th>
+        <th class="text-end">{{ totalCredito() | number:'1.2-2' }}</th>
+      </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>

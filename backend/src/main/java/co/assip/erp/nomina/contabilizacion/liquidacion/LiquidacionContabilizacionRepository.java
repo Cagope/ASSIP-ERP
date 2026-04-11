@@ -303,8 +303,35 @@ public class LiquidacionContabilizacionRepository {
                 c.nombre_cuenta,
                 m.id_tercero,
                 dp.documento AS documento_tercero,
-                dp.nombres AS nombre_tercero,
+                CASE
+                    WHEN dp.tipo_persona = '2' THEN COALESCE(dp.nombres, '')
+                    ELSE TRIM(BOTH FROM CONCAT(
+                        COALESCE(dp.nombres, ''),
+                        CASE
+                            WHEN dp.primer_apellido IS NOT NULL AND dp.primer_apellido <> '' THEN ' ' || dp.primer_apellido
+                            ELSE ''
+                        END,
+                        CASE
+                            WHEN dp.segundo_apellido IS NOT NULL AND dp.segundo_apellido <> '' THEN ' ' || dp.segundo_apellido
+                            ELSE ''
+                        END
+                    ))
+                END AS nombre_tercero,
                 m.id_empleado_referencia,
+                CASE
+                    WHEN dpe.tipo_persona = '2' THEN COALESCE(dpe.nombres, '')
+                    ELSE TRIM(BOTH FROM CONCAT(
+                        COALESCE(dpe.nombres, ''),
+                        CASE
+                            WHEN dpe.primer_apellido IS NOT NULL AND dpe.primer_apellido <> '' THEN ' ' || dpe.primer_apellido
+                            ELSE ''
+                        END,
+                        CASE
+                            WHEN dpe.segundo_apellido IS NOT NULL AND dpe.segundo_apellido <> '' THEN ' ' || dpe.segundo_apellido
+                            ELSE ''
+                        END
+                    ))
+                END AS nombre_empleado_referencia,
                 dpe.nombres AS nombre_empleado_referencia,
                 m.debito,
                 m.credito,

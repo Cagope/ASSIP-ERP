@@ -56,10 +56,10 @@ public class PeriodosNominaRepository {
 
         sql.append("""
             ORDER BY
-              a.nombre_agencia,
               p.anio ASC,
               p.mes ASC,
-              p.numero_periodo ASC
+              p.numero_periodo ASC,
+              p.id_agencia ASC
         """);
 
         return jdbc.query(sql.toString(), params, (rs, rowNum) ->
@@ -222,6 +222,17 @@ public class PeriodosNominaRepository {
             LocalDate fechaFin
     ) {}
 
+    public record PeriodoActivoInfo(
+            Integer idPeriodo,
+            Integer idAgencia,
+            String nombreAgencia,
+            Integer anio,
+            Integer mes,
+            Integer numeroPeriodo,
+            String descripcion,
+            String estado
+    ) {}
+
     // =========================================================
     // 🔒 VALIDACIÓN FUERTE: PERÍODO ABIERTO POR AGENCIA
     // =========================================================
@@ -313,8 +324,8 @@ public class PeriodosNominaRepository {
     }
 
     // =========================================================
-// 🔎 PERÍODOS DISPONIBLES PARA CONTABILIZACIÓN
-// =========================================================
+    // 🔎 PERÍODOS DISPONIBLES PARA CONTABILIZACIÓN
+    // =========================================================
     public List<PeriodoNominaListDTO> listarParaContabilizacion() {
 
         String sql = """
@@ -373,6 +384,47 @@ public class PeriodosNominaRepository {
                                 (Integer) rs.getObject("fk_seguridad_contabiliza"))
                         .build()
         );
+    }
+
+    // =========================================================
+// 🔎 DETALLE COMPLETO DEL PERÍODO ACTIVO
+// =========================================================
+    public PeriodoActivoInfo obtenerPeriodoActivoInfo() {
+
+        String sql = """
+        SELECT
+          p.id_periodo,
+          p.id_agencia,
+          a.nombre_agencia,
+          p.anio,
+          p.mes,
+          p.numero_periodo,
+          p.descripcion,
+          p.estado
+        FROM nomina.periodos_nomina p
+        JOIN general.datos_agencias a
+          ON a.id_agencia = p.id_agencia
+        WHERE UPPER(TRIM(p.estado)) = 'ABIERTO'
+        ORDER BY
+          p.fecha_inicio ASC,
+          p.id_periodo ASC
+        LIMIT 1
+    """;
+
+        return jdbc.query(sql, new MapSqlParameterSource(), rs -> {
+            if (!rs.next()) return null;
+
+            return new PeriodoActivoInfo(
+                    rs.getInt("id_periodo"),
+                    rs.getInt("id_agencia"),
+                    rs.getString("nombre_agencia"),
+                    rs.getInt("anio"),
+                    rs.getInt("mes"),
+                    (Integer) rs.getObject("numero_periodo"),
+                    rs.getString("descripcion"),
+                    rs.getString("estado")
+            );
+        });
     }
 
 }
