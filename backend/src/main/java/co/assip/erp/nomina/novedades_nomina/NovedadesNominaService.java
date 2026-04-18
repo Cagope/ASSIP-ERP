@@ -30,11 +30,20 @@ public class NovedadesNominaService {
     // =========================================================
     // LISTAR (PERÍODO ACTIVO)
     // =========================================================
-    public List<NovedadNominaListDTO> listar(Integer idEmpleado) {
-        Integer idPeriodo = periodoActivoService.obtenerPeriodoActivo();
-        return repo.listar(idPeriodo, idEmpleado);
-    }
+    public List<NovedadNominaListDTO> listar(
+            Integer idAgencia,
+            Integer idEmpleado
+    ) {
 
+        if (idAgencia == null) {
+            throw new IllegalArgumentException("La agencia es obligatoria");
+        }
+
+        Integer idPeriodo = periodoActivoService
+                .obtenerPeriodoActivoPorAgencia(idAgencia);
+
+        return repo.listar(idPeriodo, idAgencia, idEmpleado);
+    }
     // =========================================================
     // OBTENER
     // =========================================================
@@ -48,17 +57,19 @@ public class NovedadesNominaService {
     }
 
     // =========================================================
-    // CREAR (PERÍODO AUTOMÁTICO)
+    // CREAR (PERÍODO AUTOMÁTICO POR AGENCIA DEL EMPLEADO)
     // =========================================================
     public Integer crear(NovedadNominaFormDTO dto, Integer idUsuario) {
 
-        Integer idPeriodo = periodoActivoService.obtenerPeriodoActivo();
+        Integer idAgencia = repo.obtenerAgenciaPorEmpleado(dto.getIdEmpleado());
+
+        Integer idPeriodo = periodoActivoService.obtenerPeriodoActivoPorAgencia(idAgencia);
         dto.setIdPeriodo(idPeriodo);
 
-        // 🔥 COMPLETAR FECHAS DESDE PERÍODO ACTIVO
+        // 🔥 COMPLETAR FECHAS DESDE PERÍODO ACTIVO DE LA AGENCIA
         if (dto.getFechaInicial() == null || dto.getFechaFinal() == null) {
 
-            var periodo = periodoActivoService.obtenerPeriodoActivoDetalle();
+            var periodo = periodoActivoService.obtenerPeriodoActivoDetallePorAgencia(idAgencia);
 
             if (periodo == null) {
                 throw new IllegalStateException(
@@ -69,7 +80,6 @@ public class NovedadesNominaService {
             dto.setFechaInicial(periodo.getFechaInicio());
             dto.setFechaFinal(periodo.getFechaFin());
         }
-
 
         // ✅ AHORA SÍ VALIDAR
         validar(dto);
@@ -249,8 +259,8 @@ public class NovedadesNominaService {
     }
 
     // =========================================================
-// CAMBIO DE ESTADO MASIVO POR PERÍODO
-// =========================================================
+    // CAMBIO DE ESTADO MASIVO POR PERÍODO
+    // =========================================================
     public void actualizarEstadoPorPeriodo(
             Integer idPeriodo,
             String estado,

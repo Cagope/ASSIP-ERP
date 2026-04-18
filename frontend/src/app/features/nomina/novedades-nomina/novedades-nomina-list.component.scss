@@ -91,3 +91,39 @@
   font-weight: 600;
   color: #0f172a;
 }
+
+.toolbar {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #374151;
+}
+
+.search-group {
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+}
+
+.form-control {
+  height: 40px;
+}
+
+@media (max-width: 768px) {
+  .toolbar {
+    grid-template-columns: 1fr;
+  }
+}

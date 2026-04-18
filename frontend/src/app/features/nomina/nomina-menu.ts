@@ -50,6 +50,12 @@ export const nominaMenu = {
       permiso: 'NOMINA_VIEW'
     },
 
+    {
+      label: 'Eventos Liquidación',
+      route: '/nomina/eventos-liquidacion',
+      permiso: 'NOMINA_VIEW'
+    },
+
     // =========================
     // 🧮 LIQUIDACIÓN DE NÓMINA
     // =========================
@@ -143,6 +149,12 @@ export const nominaMenu = {
     {
       label: 'Caja Compensación',
       route: '/nomina/caja-compensacion',
+      permiso: 'NOMINA_VIEW'
+    },
+
+    {
+      label: 'Liquidación V2',
+      route: '/nomina/liquidacion-v2',
       permiso: 'NOMINA_VIEW'
     }
 

@@ -149,11 +149,16 @@ export class LiquidacionContabilizacionComponent {
 
         this.resultado = resp;
         this.ejecutando = false;
+        this.error = '';
 
         alert('Contabilización realizada correctamente.');
 
-        // refrescar preview
-        this.preview();
+        // limpiar pantalla para no regenerar preview sobre período ya contabilizado
+        this.movimientos = [];
+        this.resumenCuentas = [];
+
+        // refrescar estado del período y comprobante existente
+        this.recargarPeriodos(this.idPeriodoNomina);
       },
 
       error: (err) => {
@@ -397,6 +402,29 @@ export class LiquidacionContabilizacionComponent {
       });
 
   }
+
+  private recargarPeriodos(idPeriodoMantener: number | null): void {
+    this.periodosApi.listarParaContabilizacion().subscribe({
+      next: (data) => {
+        this.periodos = data ?? [];
+
+        if (idPeriodoMantener != null) {
+          const existe = this.periodos.find(
+            p => String(p.idPeriodo) === String(idPeriodoMantener)
+          );
+
+          this.idPeriodoNomina = existe ? idPeriodoMantener : null;
+        }
+
+        this.comprobanteExistente = null;
+        this.cargarFechaPeriodo();
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    });
+  }
+
 
     private cargarTiposComprobantesPorPeriodo(): void {
 

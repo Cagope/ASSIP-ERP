@@ -35,9 +35,10 @@ public class NovedadesNominaController {
     // =========================================================
     @GetMapping
     public List<NovedadNominaListDTO> listar(
+            @RequestParam Integer agencia,
             @RequestParam(required = false) Integer empleado
     ) {
-        return service.listar(empleado);
+        return service.listar(agencia, empleado);
     }
 
     // =========================================================

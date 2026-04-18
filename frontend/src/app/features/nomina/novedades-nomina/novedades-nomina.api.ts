@@ -89,12 +89,16 @@ export class NovedadesNominaApi {
   // LISTAR (PERÍODO OPERATIVO IMPLÍCITO)
   // =========================================================
 
-  listar(empleado?: number)
-    : Observable<NovedadNominaListDTO[]> {
+  listar(
+    agencia: number,
+    empleado?: number
+  ): Observable<NovedadNominaListDTO[]> {
 
-    const url = empleado != null
-      ? `${this.base}?empleado=${empleado}`
-      : this.base;
+    let url = `${this.base}?agencia=${agencia}`;
+
+    if (empleado != null) {
+      url += `&empleado=${empleado}`;
+    }
 
     return this.http.get<NovedadNominaListDTO[]>(url);
   }

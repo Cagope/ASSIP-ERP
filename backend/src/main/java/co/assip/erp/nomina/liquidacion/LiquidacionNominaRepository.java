@@ -229,6 +229,7 @@ public class LiquidacionNominaRepository {
               tc.aplica_prima                AS aplicaPrima,
               tc.aplica_vacaciones           AS aplicaVacaciones,
               tc.aplica_parafiscales         AS aplicaParafiscales,
+              tc.aplica_aux_transporte       AS aplicaAuxTransporte,
               pr.documento AS documentoEmpleado,
               TRIM(BOTH FROM CONCAT_WS(' ', pr.primer_apellido, pr.segundo_apellido, pr.nombres)) AS nombreEmpleado
             FROM nomina.empleado_contratos c
@@ -292,6 +293,7 @@ public class LiquidacionNominaRepository {
                             .aplicaPrima((Boolean) rs.getObject("aplicaPrima"))
                             .aplicaVacaciones((Boolean) rs.getObject("aplicaVacaciones"))
                             .aplicaParafiscales((Boolean) rs.getObject("aplicaParafiscales"))
+                            .aplicaAuxTransporte((Boolean) rs.getObject("aplicaAuxTransporte"))
                             .documentoEmpleado(rs.getString("documentoEmpleado"))
                             .nombreEmpleado(rs.getString("nombreEmpleado"))
                             .build();
@@ -483,5 +485,27 @@ public class LiquidacionNominaRepository {
     """;
 
         return jdbc.update(sqlCab, new MapSqlParameterSource("idPeriodo", idPeriodoNomina));
+    }
+
+    public void actualizarDiasLaborados(
+            Integer idLiquidacion,
+            BigDecimal diasLaborados,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+        UPDATE nomina.liquidaciones
+        SET dias_laborados = :dias,
+            fk_seguridad_edicion = :usuario,
+            fecha_edicion = NOW()
+        WHERE id_liquidacion = :id
+    """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("id", idLiquidacion)
+                .addValue("dias", diasLaborados)
+                .addValue("usuario", idUsuario);
+
+        jdbc.update(sql, params);
     }
 }

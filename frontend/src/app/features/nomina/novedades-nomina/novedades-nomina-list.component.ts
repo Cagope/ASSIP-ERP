@@ -12,6 +12,7 @@ import {
 
 import { NovedadesNominaExporterService } from './novedades-nomina-exporter.service';
 import { NovedadesNominaPrintService } from './novedades-nomina-print.service';
+import { SessionService } from '../../../core/auth/session.service';
 
 @Component({
   standalone: true,
@@ -30,24 +31,50 @@ export class NovedadesNominaListComponent implements OnInit {
   private readonly api = inject(NovedadesNominaApi);
   private readonly router = inject(Router);
   private readonly exporterService = inject(NovedadesNominaExporterService);
-  private readonly printService: NovedadesNominaPrintService =
-    inject(NovedadesNominaPrintService);
+  private readonly printService = inject(NovedadesNominaPrintService);
+  public readonly session = inject(SessionService);
 
   items: NovedadNominaListDTO[] = [];
   loading = false;
+
+  agencias: any[] = [];
+  idAgencia: number | null = null;
 
   // filtros
   q = '';
 
   ngOnInit(): void {
-    this.cargar();
+    this.cargarAgencias();
+  }
+
+  private cargarAgencias(): void {
+    this.agencias = this.session.getAgencias?.() ?? [];
+
+    if (this.agencias.length === 1) {
+      this.idAgencia = this.agencias[0].idAgencia;
+      this.cargar();
+      return;
+    }
+
+    if (this.agencias.length > 1) {
+      this.idAgencia = this.agencias[0].idAgencia;
+      this.cargar();
+      return;
+    }
+
+    this.items = [];
   }
 
   cargar(): void {
 
+    if (!this.idAgencia) {
+      this.items = [];
+      return;
+    }
+
     this.loading = true;
 
-    this.api.listar().subscribe({
+    this.api.listar(this.idAgencia).subscribe({
       next: d => {
         this.items = d ?? [];
         this.loading = false;
@@ -58,6 +85,10 @@ export class NovedadesNominaListComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  onAgenciaChange(): void {
+    this.cargar();
   }
 
   get filtrados(): NovedadNominaListDTO[] {
@@ -72,15 +103,13 @@ export class NovedadesNominaListComponent implements OnInit {
         ${x.codigoConcepto}
         ${x.observacion}
         ${x.estado}
+        ${x.documentoEmpleado ?? ''}
+        ${x.nombreEmpleado ?? ''}
       `.toLowerCase();
 
       return texto.includes(q);
     });
   }
-
-  // =========================
-  // Header actions
-  // =========================
 
   nuevo(): void {
     this.router.navigate(['/nomina/novedades/nuevo']);
@@ -94,7 +123,7 @@ export class NovedadesNominaListComponent implements OnInit {
 
     const mensaje =
       `¿Eliminar novedad?\n\n` +
-      `${item.nombreEmpleado}\n` +
+      `${item.nombreEmpleado ?? ''}\n` +
       `Concepto: ${item.codigoConcepto}`;
 
     const ok = confirm(mensaje);
@@ -107,12 +136,10 @@ export class NovedadesNominaListComponent implements OnInit {
   }
 
   exportar(): void {
-    console.log('exportar novedades', this.filtrados);
     this.exporterService.exportar(this.filtrados);
   }
 
   imprimir(): void {
     this.printService.imprimir(this.filtrados);
   }
-
 }

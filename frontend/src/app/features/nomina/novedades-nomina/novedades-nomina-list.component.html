@@ -11,11 +11,29 @@
   <!-- Toolbar -->
   <div class="toolbar">
 
-    <input
-      type="text"
-      class="form-control"
-      placeholder="Buscar concepto, estado u observación..."
-      [(ngModel)]="q" />
+    <div class="form-group agencia-group">
+      <label for="idAgencia">Agencia</label>
+      <select
+        id="idAgencia"
+        class="form-control"
+        [(ngModel)]="idAgencia"
+        (change)="onAgenciaChange()">
+        <option [ngValue]="null">-- Seleccione --</option>
+        <option
+          *ngFor="let a of agencias"
+          [ngValue]="a.idAgencia">
+          {{ a.codigoAgencia }} — {{ a.nombreAgencia }}
+        </option>
+      </select>
+    </div>
+
+    <div class="search-group">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Buscar concepto, estado, observación o empleado..."
+        [(ngModel)]="q" />
+    </div>
 
   </div>
 
@@ -44,7 +62,6 @@
 
       <td>{{ x.idNovedad }}</td>
 
-      <!-- EMPLEADO -->
       <td class="empleado">
         {{ x.documentoEmpleado }} — {{ x.nombreEmpleado }}
       </td>

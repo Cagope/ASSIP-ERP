@@ -190,6 +190,29 @@ public class PeriodosNominaRepository {
     }
 
     // =========================================================
+    // 🔥 PERÍODO ACTIVO POR AGENCIA
+    // =========================================================
+    public Integer obtenerPeriodoActivoIdPorAgencia(Integer idAgencia) {
+
+        String sql = """
+        SELECT p.id_periodo
+        FROM nomina.periodos_nomina p
+        WHERE UPPER(TRIM(p.estado)) = 'ABIERTO'
+          AND p.id_agencia = :idAgencia
+        ORDER BY
+          p.fecha_inicio ASC,
+          p.id_periodo ASC
+        LIMIT 1
+    """;
+
+        return jdbc.queryForObject(
+                sql,
+                new MapSqlParameterSource("idAgencia", idAgencia),
+                Integer.class
+        );
+    }
+
+    // =========================================================
     // 🔥 FECHAS DEL PERÍODO (USADO EN LIQUIDACIÓN / EXCEL)
     // =========================================================
     public PeriodoFechas obtenerFechas(Integer idPeriodo) {
@@ -238,6 +261,10 @@ public class PeriodosNominaRepository {
     // =========================================================
     public void validarPeriodoAbierto(Integer idPeriodo, Integer idAgencia) {
 
+        System.out.println("VALIDANDO PERIODO:");
+        System.out.println("idPeriodo = " + idPeriodo);
+        System.out.println("idAgencia = " + idAgencia);
+
         String sql = """
         SELECT COUNT(1)
         FROM nomina.periodos_nomina p
@@ -253,6 +280,8 @@ public class PeriodosNominaRepository {
                         .addValue("idAgencia", idAgencia),
                 Integer.class
         );
+
+        System.out.println("count = " + count);
 
         if (count == null || count == 0) {
             throw new IllegalStateException(

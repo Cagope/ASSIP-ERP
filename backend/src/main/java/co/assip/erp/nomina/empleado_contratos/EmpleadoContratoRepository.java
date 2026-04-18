@@ -286,6 +286,7 @@ public List<EmpleadoContratoListViewDTO> listar() {
           ON dep.id_cuenta_ahorro = c.id_cuenta_ahorro_nomina
 
         WHERE c.id_empleado = :idEmpleado
+            AND c.activo = TRUE
         ORDER BY c.fecha_inicio DESC
     """;
 

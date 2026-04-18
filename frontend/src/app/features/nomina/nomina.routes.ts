@@ -21,6 +21,10 @@ import { PERIODOS_NOMINA_ROUTES } from './periodos-nomina/periodos-nomina.routes
 import { LIQUIDACION_ROUTES } from './liquidacion/liquidacion.routes';
 import { CONCEPTO_CUENTAS_CONTABLES_ROUTES } from './concepto-cuentas-contables/concepto-cuentas-contables.routes';
 import { TIPOS_CONTRATOS_ROUTES } from './tipos-contratos/tipos-contratos.routes';
+import { LIQUIDACION_V2_ROUTES } from './liquidacion-v2/liquidacion-v2.routes';
+
+// ✅ NUEVO: Eventos de liquidación
+import { EVENTOS_LIQUIDACION_ROUTES } from './eventos-liquidacion/eventos-liquidacion.routes';
 
 export const NOMINA_ROUTES: Routes = [
 
@@ -62,6 +66,11 @@ export const NOMINA_ROUTES: Routes = [
   {
     path: 'novedades',
     children: NOVEDADES_NOMINA_ROUTES
+  },
+
+  {
+    path: 'eventos-liquidacion',
+    children: EVENTOS_LIQUIDACION_ROUTES
   },
 
   {
@@ -147,6 +156,11 @@ export const NOMINA_ROUTES: Routes = [
   {
     path: 'tipos-contratos',
     children: TIPOS_CONTRATOS_ROUTES
-  }
+  },
+
+  {
+    path: 'liquidacion-v2',
+    children: LIQUIDACION_V2_ROUTES
+  },
 
 ];

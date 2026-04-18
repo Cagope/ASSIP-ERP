@@ -121,12 +121,24 @@
 
     </div>
 
-    <div *ngIf="error" class="alert alert-danger">
+    <div *ngIf="error && !esPeriodoContabilizado" class="alert alert-danger">
       {{ error }}
     </div>
 
-    <div *ngIf="periodoSeleccionado" class="alert alert-info">
+    <div *ngIf="periodoSeleccionado"
+         class="alert"
+         [ngClass]="{
+       'alert-info': esPeriodoCerrado,
+       'alert-success': esPeriodoContabilizado,
+       'alert-secondary': !esPeriodoCerrado && !esPeriodoContabilizado
+     }">
+
       <strong>Estado período:</strong> {{ periodoSeleccionado.estado }}
+
+      <span *ngIf="esPeriodoContabilizado">
+    — Ya fue contabilizado
+  </span>
+
     </div>
 
   </div>

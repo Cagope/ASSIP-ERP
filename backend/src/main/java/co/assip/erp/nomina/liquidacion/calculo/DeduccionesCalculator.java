@@ -1,13 +1,16 @@
 package co.assip.erp.nomina.liquidacion.calculo;
 
 import co.assip.erp.nomina.empleado_contratos.dto.EmpleadoContratoDTO;
-import co.assip.erp.nomina.liquidacion.calculo.engine.*;
+import co.assip.erp.nomina.liquidacion.calculo.engine.BaseCalculo;
+import co.assip.erp.nomina.liquidacion.calculo.engine.ContextoCalculo;
+import co.assip.erp.nomina.liquidacion.calculo.engine.MotorCalculoConcepto;
+import co.assip.erp.nomina.liquidacion.calculo.engine.TipoCalculo;
 import co.assip.erp.nomina.liquidacion.dto.LiquidacionDetalleDTO;
+import co.assip.erp.shared.math.MathUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
-import co.assip.erp.shared.math.MathUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -27,9 +30,9 @@ public class DeduccionesCalculator {
 
         List<LiquidacionDetalleDTO> detalles = new ArrayList<>();
 
-// =========================
-// 1️⃣ DEDUCCIONES POR NOVEDADES (PRIORIDAD)
-// =========================
+        // =========================
+        // 1️⃣ DEDUCCIONES POR NOVEDADES (PRIORIDAD)
+        // =========================
         Map<String, LiquidacionDetalleDTO> deduccionesPorNovedad =
                 obtenerDeduccionesPorNovedadesMap(
                         idPeriodoNomina,
@@ -38,9 +41,9 @@ public class DeduccionesCalculator {
 
         detalles.addAll(deduccionesPorNovedad.values());
 
-// =========================
-// 2️⃣ SOLO CALCULAR AUTOMÁTICAS SI HAY IBC
-// =========================
+        // =========================
+        // 2️⃣ SOLO CALCULAR AUTOMÁTICAS SI HAY IBC
+        // =========================
         if (ibc != null && ibc.compareTo(BigDecimal.ZERO) > 0) {
 
             ContextoCalculo ctx = new ContextoCalculo();
@@ -72,12 +75,16 @@ public class DeduccionesCalculator {
               c.codigo_concepto,
               c.tipo_calculo,
               c.base_calculo,
-              c.multiplicador
+              c.multiplicador,
+              c.smmlv_desde,
+              c.smmlv_hasta
             FROM nomina.conceptos_nomina c
             WHERE c.tipo_concepto = 'DEDUCCION'
               AND c.es_fijo = TRUE
               AND c.activo = TRUE
         """;
+
+        BigDecimal smmlvVigente = obtenerSmmlvVigente();
 
         return jdbc.query(sql, new MapSqlParameterSource(), (rs, row) -> {
 
@@ -88,8 +95,11 @@ public class DeduccionesCalculator {
                 return null;
             }
 
-            // 🚫 excluir por tipo de contrato (paramétrico)
-            if (excluirPorTipoContrato(contrato, codigo)) {
+            BigDecimal smmlvDesde = rs.getBigDecimal("smmlv_desde");
+            BigDecimal smmlvHasta = rs.getBigDecimal("smmlv_hasta");
+
+            // 🚫 excluir por rango de salario base en SMMLV (paramétrico)
+            if (!aplicaPorRangoSmmlv(contrato, smmlvVigente, smmlvDesde, smmlvHasta)) {
                 return null;
             }
 
@@ -184,23 +194,63 @@ public class DeduccionesCalculator {
         return map;
     }
 
-    private boolean excluirPorTipoContrato(
+    // =========================================================
+    // 🔹 VALIDAR APLICACIÓN POR RANGO SMMLV
+    // =========================================================
+    private boolean aplicaPorRangoSmmlv(
             EmpleadoContratoDTO contrato,
-            String codigoConcepto
+            BigDecimal smmlvVigente,
+            BigDecimal smmlvDesde,
+            BigDecimal smmlvHasta
     ) {
 
-        if (contrato == null || codigoConcepto == null) return false;
-
-        // 🔹 SALUD
-        if (codigoConcepto.equalsIgnoreCase("SALUD_EMP")) {
-            return Boolean.FALSE.equals(contrato.getAplicaSalud());
+        // Sin regla parametrizada → aplica siempre
+        if (smmlvDesde == null && smmlvHasta == null) {
+            return true;
         }
 
-        // 🔹 PENSIÓN
-        if (codigoConcepto.equalsIgnoreCase("PENSION_EMP")) {
-            return Boolean.FALSE.equals(contrato.getAplicaPension());
+        if (contrato == null || contrato.getSalarioBase() == null) {
+            return false;
         }
 
-        return false;
+        if (smmlvVigente == null || smmlvVigente.compareTo(BigDecimal.ZERO) <= 0) {
+            return false;
+        }
+
+        BigDecimal salarioBase = contrato.getSalarioBase();
+        BigDecimal minimo = smmlvDesde != null ? smmlvVigente.multiply(smmlvDesde) : null;
+        BigDecimal maximo = smmlvHasta != null ? smmlvVigente.multiply(smmlvHasta) : null;
+
+        if (minimo != null && salarioBase.compareTo(minimo) < 0) {
+            return false;
+        }
+
+        if (maximo != null && salarioBase.compareTo(maximo) > 0) {
+            return false;
+        }
+
+        return true;
+    }
+
+    // =========================================================
+    // 🔹 OBTENER SMMLV VIGENTE
+    // =========================================================
+    private BigDecimal obtenerSmmlvVigente() {
+
+        String sql = """
+            SELECT smmlv
+            FROM nomina.variables_vigencia
+            WHERE activo = true
+            ORDER BY fecha_inicial DESC
+            LIMIT 1
+        """;
+
+        List<BigDecimal> lista = jdbc.query(
+                sql,
+                new MapSqlParameterSource(),
+                (rs, rowNum) -> rs.getBigDecimal("smmlv")
+        );
+
+        return lista.isEmpty() ? null : lista.get(0);
     }
 }

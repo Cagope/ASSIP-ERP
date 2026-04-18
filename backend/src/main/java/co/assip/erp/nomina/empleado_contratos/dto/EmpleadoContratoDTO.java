@@ -67,4 +67,5 @@ public class EmpleadoContratoDTO {
     private Boolean aplicaPrima;
     private Boolean aplicaVacaciones;
     private Boolean aplicaParafiscales;
+    private Boolean aplicaAuxTransporte;
 }

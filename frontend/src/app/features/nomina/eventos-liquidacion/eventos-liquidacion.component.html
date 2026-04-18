@@ -1,0 +1,151 @@
+<div class="page">
+
+  <h2>Eventos de liquidación</h2>
+  <p class="subtitle">
+    Incapacidades, licencias y demás eventos que afectan la liquidación
+  </p>
+
+  <!-- =========================
+       FILTROS Y ACCIONES
+       ========================= -->
+  <div class="card">
+
+    <div class="form-grid">
+
+      <div class="form-group full">
+        <label for="q">Buscar</label>
+        <input
+          id="q"
+          type="text"
+          class="form-control"
+          [(ngModel)]="q"
+          (ngModelChange)="filtrar()"
+          placeholder="Empleado, documento, tipo, soporte, estado..."
+        />
+      </div>
+
+    </div>
+
+    <div class="actions">
+      <button
+        class="btn btn-primary"
+        (click)="nuevo()">
+        Nuevo
+      </button>
+
+      <button
+        class="btn"
+        (click)="cargar()">
+        Refrescar
+      </button>
+    </div>
+
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger mt-3">
+    {{ error }}
+  </div>
+
+  <!-- =========================
+       TABLA
+       ========================= -->
+  <div class="card tabla-card">
+
+    <div *ngIf="cargando" class="loading">
+      Cargando...
+    </div>
+
+    <div class="table-responsive" *ngIf="!cargando">
+      <table class="table table-sm table-bordered table-hover align-middle">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Documento</th>
+          <th>Empleado</th>
+          <th>Contrato</th>
+          <th>Fecha doc.</th>
+          <th>Inicio</th>
+          <th>Fin</th>
+          <th>Días</th>
+          <th>Tipo evento</th>
+          <th>Responsable</th>
+          <th>% Resp.</th>
+          <th>% Emp.</th>
+          <th>Días Emp 100</th>
+          <th>CxC</th>
+          <th>ARL</th>
+          <th>Rem.</th>
+          <th>Estado</th>
+          <th style="width: 220px;">Acciones</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngIf="rowsFiltradas.length === 0">
+          <td colspan="18" class="text-center text-muted py-4">
+            No hay registros para mostrar.
+          </td>
+        </tr>
+
+        <tr *ngFor="let row of rowsFiltradas">
+          <td>{{ row.idEventoLiquidacion }}</td>
+          <td>{{ row.documentoEmpleado }}</td>
+          <td>{{ row.nombreEmpleado }}</td>
+          <td>{{ row.idContrato }}</td>
+          <td>{{ row.fechaDocumento | date:'dd/MM/yyyy' }}</td>
+          <td>{{ row.fechaInicio | date:'dd/MM/yyyy' }}</td>
+          <td>{{ row.fechaFin | date:'dd/MM/yyyy' }}</td>
+          <td class="text-end">{{ row.totalDias }}</td>
+          <td>{{ row.tipoEvento }}</td>
+          <td>{{ row.responsablePago }}</td>
+          <td class="text-end">{{ row.porcentajeResponsable | number:'1.0-2' }}</td>
+          <td class="text-end">{{ row.porcentajeEmpresa | number:'1.0-2' }}</td>
+          <td class="text-end">{{ row.diasEmpresa100 }}</td>
+          <td class="text-center">{{ row.generaCxc ? 'Sí' : 'No' }}</td>
+          <td class="text-center">{{ row.liquidaArl ? 'Sí' : 'No' }}</td>
+          <td class="text-center">{{ row.esRemunerado ? 'Sí' : 'No' }}</td>
+          <td>
+              <span [class]="getBadgeClass(row.estado)">
+                {{ row.estado }}
+              </span>
+          </td>
+          <td>
+            <div class="acciones-tabla">
+
+              <button
+                class="btn-action btn-action-primary"
+                (click)="editar(row)">
+                Editar
+              </button>
+
+              <button
+                class="btn-action btn-action-neutral"
+                *ngIf="row.estado === 'ACTIVO'"
+                (click)="cambiarEstado(row, 'INACTIVO')">
+                Inactivar
+              </button>
+
+              <button
+                class="btn-action btn-action-warning"
+                *ngIf="row.estado !== 'ACTIVO'"
+                (click)="cambiarEstado(row, 'ACTIVO')">
+                Activar
+              </button>
+
+              <button
+                class="btn-action btn-action-danger"
+                *ngIf="row.estado !== 'ANULADO'"
+                (click)="cambiarEstado(row, 'ANULADO')">
+                Anular
+              </button>
+
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</div>

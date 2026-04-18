@@ -1,0 +1,281 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h2>{{ id ? 'Editar evento de liquidación' : 'Nuevo evento de liquidación' }}</h2>
+      <p class="subtitle">
+        Registro de incapacidades, licencias y demás eventos que afectan la liquidación
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn btn-outline-secondary" (click)="cancelar()">
+        Volver
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <div class="loading card" *ngIf="cargando">
+    Cargando...
+  </div>
+
+  <form *ngIf="!cargando" [formGroup]="form" class="evento-layout">
+
+    <!-- =========================
+         DATOS PRINCIPALES
+         ========================= -->
+    <div class="card">
+      <h5 class="section-title">Datos principales</h5>
+
+      <div class="form-grid">
+
+        <div class="form-group full">
+          <label>Empleado *</label>
+
+          <app-empleado-autocomplete
+            [(ngModel)]="idEmpleadoSeleccionado"
+            name="idEmpleado"
+            [ngModelOptions]="{ standalone: true }"
+            (ngModelChange)="onEmpleadoChange()">
+          </app-empleado-autocomplete>
+
+          <div class="invalid-feedback d-block" *ngIf="campoInvalido('idEmpleado')">
+            El empleado es obligatorio.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Contrato *</label>
+
+          <select
+            class="form-control"
+            formControlName="idContrato"
+            (change)="onContratoChange()">
+
+            <option [ngValue]="null">
+              -- Seleccione contrato --
+            </option>
+
+            <option
+              *ngFor="let c of contratosEmpleado"
+              [ngValue]="c.idContrato">
+
+              Contrato #{{ c.idContrato }}
+              {{ c.tipoContratoNombre ? ' — ' + c.tipoContratoNombre : '' }}
+              {{ c.nombreCargo ? ' — ' + c.nombreCargo : '' }}
+              {{ c.activo ? ' — ACTIVO' : '' }}
+
+            </option>
+          </select>
+
+          <div class="invalid-feedback d-block" *ngIf="campoInvalido('idContrato')">
+            El contrato es obligatorio.
+          </div>
+        </div>
+
+        <!-- =========================
+         DATOS DEL CONTRATO
+         ========================= -->
+        <div class="form-group full" *ngIf="contratoActivo">
+          <div class="contrato-resumen">
+
+            <span><strong>Salario:</strong> {{ contratoActivo.salarioBase | number:'1.0-0' }}</span>
+
+            <span><strong>Tipo:</strong> {{ contratoActivo.tipoContratoNombre || '-' }}</span>
+
+            <span><strong>Cargo:</strong> {{ contratoActivo.nombreCargo || '-' }}</span>
+
+            <span><strong>Sección:</strong> {{ contratoActivo.nombreSeccion || '-' }}</span>
+
+            <span><strong>Periodo:</strong> {{ contratoActivo.periodoPago || '-' }}</span>
+
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="fechaDocumento">Fecha documento *</label>
+          <input
+            id="fechaDocumento"
+            type="date"
+            class="form-control"
+            formControlName="fechaDocumento"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="tipoEvento">Tipo evento *</label>
+          <select
+            id="tipoEvento"
+            class="form-control"
+            formControlName="tipoEvento"
+          >
+            <option *ngFor="let t of tiposEvento" [value]="t">
+              {{ t }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="numeroSoporte">Número soporte</label>
+          <input
+            id="numeroSoporte"
+            type="text"
+            class="form-control"
+            formControlName="numeroSoporte"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="fechaInicio">Fecha inicio *</label>
+          <input
+            id="fechaInicio"
+            type="date"
+            class="form-control"
+            formControlName="fechaInicio"
+            (change)="recalcularDias()"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="fechaFin">Fecha fin *</label>
+          <input
+            id="fechaFin"
+            type="date"
+            class="form-control"
+            formControlName="fechaFin"
+            (change)="recalcularDias()"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="totalDias">Total días *</label>
+          <input
+            id="totalDias"
+            type="number"
+            class="form-control input-right no-spinner"
+            formControlName="totalDias"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="estado">Estado *</label>
+          <select
+            id="estado"
+            class="form-control"
+            formControlName="estado"
+          >
+            <option *ngFor="let e of estados" [value]="e">
+              {{ e }}
+            </option>
+          </select>
+        </div>
+
+      </div>
+
+      <div class="form-group full contrato-ayuda"
+           *ngIf="form.get('idEmpleado')?.value && !form.get('idContrato')?.value">
+        <small>
+          Seleccione un contrato para continuar.
+        </small>
+      </div>
+    </div>
+
+
+    <!-- =========================
+         REGLAS DE PAGO
+         ========================= -->
+    <div class="card">
+      <h5 class="section-title">Reglas de pago</h5>
+
+      <div class="form-grid form-grid-1">
+        <div class="form-group">
+          <label>Responsable pago *</label>
+          <select class="form-control" formControlName="responsablePago">
+            <option *ngFor="let r of responsablesPago" [value]="r">
+              {{ r }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>% responsable *</label>
+          <input type="number" class="form-control input-right" formControlName="porcentajeResponsable"/>
+        </div>
+
+        <div class="form-group">
+          <label>% empresa *</label>
+          <input type="number" class="form-control input-right" formControlName="porcentajeEmpresa"/>
+        </div>
+
+        <div class="form-group">
+          <label>Días empresa 100 *</label>
+          <input type="number" class="form-control input-right" formControlName="diasEmpresa100"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================
+         OPCIONES
+         ========================= -->
+    <div class="card">
+      <h5 class="section-title">Opciones</h5>
+
+      <div class="checks-switch">
+
+        <label class="switch-item">
+          <span>Genera CxC</span>
+          <input type="checkbox" formControlName="generaCxc">
+          <span class="slider"></span>
+        </label>
+
+        <label class="switch-item">
+          <span>Liquida ARL</span>
+          <input type="checkbox" formControlName="liquidaArl">
+          <span class="slider"></span>
+        </label>
+
+        <label class="switch-item">
+          <span>Es remunerado</span>
+          <input type="checkbox" formControlName="esRemunerado">
+          <span class="slider"></span>
+        </label>
+
+      </div>
+    </div>
+
+    <!-- =========================
+         OBSERVACIÓN
+         ========================= -->
+    <div class="card full-width">
+      <h5 class="section-title">Observación</h5>
+
+      <div class="form-group full">
+    <textarea
+      rows="4"
+      class="form-control observacion-input"
+      formControlName="observacion"
+      placeholder="Ingrese una observación (opcional)...">
+    </textarea>
+
+        <div class="observacion-footer">
+          <small>Máx. 500 caracteres</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- =========================
+         ACCIONES
+         ========================= -->
+    <div class="card full-width footer-card">
+      <div class="actions">
+        <button type="button" class="btn" (click)="cancelar()">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="guardar()">Guardar</button>
+      </div>
+    </div>
+
+  </form>
+</div>

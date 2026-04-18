@@ -13,7 +13,7 @@ public class PeriodoNominaActivoService {
     }
 
     // =========================================================
-    // ID DEL PERÍODO ACTIVO (ABIERTO)
+    // ID DEL PERÍODO ACTIVO (ABIERTO) GLOBAL
     // =========================================================
     public Integer obtenerPeriodoActivo() {
 
@@ -29,17 +29,59 @@ public class PeriodoNominaActivoService {
     }
 
     // =========================================================
-// 🔥 DETALLE DEL PERÍODO ACTIVO (FECHAS)
-// =========================================================
+    // ID DEL PERÍODO ACTIVO (ABIERTO) POR AGENCIA
+    // =========================================================
+    public Integer obtenerPeriodoActivoPorAgencia(Integer idAgencia) {
+
+        if (idAgencia == null) {
+            throw new IllegalArgumentException("La agencia es obligatoria");
+        }
+
+        Integer idPeriodo = repo.obtenerPeriodoActivoIdPorAgencia(idAgencia);
+
+        if (idPeriodo == null) {
+            throw new IllegalStateException(
+                    "No existe un período de nómina ABIERTO para la agencia " + idAgencia
+            );
+        }
+
+        return idPeriodo;
+    }
+
+    // =========================================================
+    // 🔥 DETALLE DEL PERÍODO ACTIVO (FECHAS) GLOBAL
+    // =========================================================
     public PeriodoActivoDetalleDTO obtenerPeriodoActivoDetalle() {
 
         Integer idPeriodo = obtenerPeriodoActivo();
 
-        var fechas = repo.obtenerFechas(idPeriodo); // ✅ NOMBRE CORRECTO
+        var fechas = repo.obtenerFechas(idPeriodo);
 
         if (fechas == null) {
             throw new IllegalStateException(
                     "No se pudieron obtener las fechas del período activo"
+            );
+        }
+
+        return new PeriodoActivoDetalleDTO(
+                idPeriodo,
+                fechas.fechaInicio(),
+                fechas.fechaFin()
+        );
+    }
+
+    // =========================================================
+    // 🔥 DETALLE DEL PERÍODO ACTIVO (FECHAS) POR AGENCIA
+    // =========================================================
+    public PeriodoActivoDetalleDTO obtenerPeriodoActivoDetallePorAgencia(Integer idAgencia) {
+
+        Integer idPeriodo = obtenerPeriodoActivoPorAgencia(idAgencia);
+
+        var fechas = repo.obtenerFechas(idPeriodo);
+
+        if (fechas == null) {
+            throw new IllegalStateException(
+                    "No se pudieron obtener las fechas del período activo para la agencia " + idAgencia
             );
         }
 

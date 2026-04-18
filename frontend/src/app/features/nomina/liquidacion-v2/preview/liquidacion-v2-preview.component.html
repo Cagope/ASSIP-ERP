@@ -1,0 +1,231 @@
+<div class="liquidacion-preview">
+
+  <!-- ===================================================== -->
+  <!-- HEADER -->
+  <!-- ===================================================== -->
+  <app-header-actions
+    titulo="Liquidación de Nómina"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <!-- ===================================================== -->
+  <!-- FORMULARIO -->
+  <!-- ===================================================== -->
+  <div class="formulario">
+    <div class="form-grid">
+
+      <!-- AGENCIA -->
+      <div class="form-group">
+        <label for="fkAgencia">Agencia *</label>
+        <select
+          id="fkAgencia"
+          class="form-control"
+          [(ngModel)]="form.fkAgencia"
+          name="fkAgencia"
+          (ngModelChange)="onCambioAgencia()"
+          [disabled]="cargando || ejecutando || cargandoPeriodo">
+
+          <option [ngValue]="null">-- Seleccione --</option>
+
+          <option
+            *ngFor="let a of session.getAgencias()"
+            [ngValue]="a.idAgencia">
+            {{ a.codigoAgencia }} — {{ a.nombreAgencia }}
+          </option>
+        </select>
+      </div>
+
+      <!-- PERÍODO AUTOMÁTICO -->
+      <div class="form-group">
+        <label for="periodoLabel">Período de nómina</label>
+        <input
+          id="periodoLabel"
+          type="text"
+          class="form-control"
+          [value]="periodoLabel"
+          readonly
+        />
+      </div>
+
+      <!-- ACCIÓN -->
+      <div class="form-group actions">
+        <button
+          type="button"
+          class="btn primary"
+          (click)="preview()"
+          [disabled]="!puedePrevisualizar">
+          {{ cargando ? 'GENERANDO PREVIEW...' : '👁️ GENERAR PREVIEW' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- ESTADOS -->
+  <!-- ===================================================== -->
+  <div *ngIf="cargandoPeriodo" class="loading">
+    Consultando período disponible...
+  </div>
+
+  <div *ngIf="cargando" class="loading">
+    Generando simulación de liquidación...
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="mensaje && !error" class="success">
+    {{ mensaje }}
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- RESUMEN GLOBAL -->
+  <!-- ===================================================== -->
+  <div *ngIf="hayItems" class="resumen-global">
+
+    <div class="resumen-item">
+      <strong>Contratos</strong>
+      <span>{{ totalContratos }}</span>
+    </div>
+
+    <div class="resumen-item">
+      <strong>Total devengados</strong>
+      <span>{{ totalDevengados | number:'1.0-0' }}</span>
+    </div>
+
+    <div class="resumen-item">
+      <strong>Total deducciones</strong>
+      <span>{{ totalDeducciones | number:'1.0-0' }}</span>
+    </div>
+
+    <div class="resumen-item neto">
+      <strong>Neto a pagar</strong>
+      <span>{{ totalNeto | number:'1.0-0' }}</span>
+    </div>
+
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- ESTADO VACÍO -->
+  <!-- ===================================================== -->
+  <div
+    *ngIf="hayResultado && !hayItems && !cargando && !cargandoPeriodo && !error"
+    class="empty-state">
+    No se encontraron contratos para la agencia seleccionada en el período disponible.
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- PREVIEW POR CONTRATO -->
+  <!-- ===================================================== -->
+  <div
+    *ngFor="let item of items; trackBy: trackByContrato"
+    class="contrato-card">
+
+    <div class="contrato-header">
+      <div>
+        <strong>Empleado:</strong>
+        {{ item.documentoEmpleado || item.idEmpleado }} — {{ item.nombreEmpleado || '' }}
+      </div>
+
+      <div>
+        <strong>Contrato:</strong> {{ item.idContrato }}
+      </div>
+
+      <div>
+        <strong>IBC:</strong> {{ item.ibc | number:'1.0-0' }}
+      </div>
+
+      <div class="neto">
+        <strong>Neto:</strong> {{ item.netoPagar | number:'1.0-0' }}
+      </div>
+    </div>
+
+    <table class="table detalle">
+      <thead>
+      <tr>
+        <th>Concepto</th>
+        <th>Tipo</th>
+        <th>Origen</th>
+        <th class="center">Cantidad</th>
+        <th class="right">Valor unitario</th>
+        <th class="right">Base</th>
+        <th class="right">Total</th>
+      </tr>
+      </thead>
+
+      <tbody>
+
+      <tr *ngIf="!(item.detalle?.length)">
+        <td colspan="7" class="empty-row">
+          No hay detalle disponible para este contrato.
+        </td>
+      </tr>
+
+      <tr *ngFor="let d of item.detalle || []; trackBy: trackByDetalle">
+        <td>{{ d.codigoConcepto }}</td>
+        <td>{{ d.tipo }}</td>
+        <td>{{ d.origen || '-' }}</td>
+        <td class="center">{{ d.cantidad | number:'1.0-2' }}</td>
+        <td class="right">{{ d.valorUnitario | number:'1.0-0' }}</td>
+        <td class="right">{{ d.baseCalculo | number:'1.0-0' }}</td>
+        <td class="right total">{{ d.valorTotal | number:'1.0-0' }}</td>
+      </tr>
+
+      </tbody>
+    </table>
+
+    <div class="totales-contrato">
+      <span>
+        Devengados:
+        <strong>{{ item.totalDevengados | number:'1.0-0' }}</strong>
+      </span>
+
+      <span>
+        Deducciones:
+        <strong>{{ item.totalDeducciones | number:'1.0-0' }}</strong>
+      </span>
+
+      <span>
+        Provisiones:
+        <strong>{{ item.totalProvisiones | number:'1.0-0' }}</strong>
+      </span>
+    </div>
+
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- ACCIONES FINALES -->
+  <!-- ===================================================== -->
+  <div *ngIf="hayItems" class="acciones-finales">
+
+    <button
+      type="button"
+      class="btn secondary"
+      (click)="preview()"
+      [disabled]="!puedePrevisualizar">
+      🔄 Refrescar preview
+    </button>
+
+    <button
+      type="button"
+      class="btn primary"
+      (click)="ejecutar()"
+      [disabled]="!puedeEjecutar">
+      ▶️ Ejecutar liquidación
+    </button>
+
+    <button
+      type="button"
+      class="btn secondary"
+      (click)="limpiar()"
+      [disabled]="cargando || ejecutando || cargandoPeriodo">
+      Limpiar
+    </button>
+
+  </div>
+
+</div>

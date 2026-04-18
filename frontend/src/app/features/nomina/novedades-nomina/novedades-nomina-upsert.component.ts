@@ -59,10 +59,9 @@ export class NovedadesNominaUpsertComponent implements OnInit {
 
   empleados: EmpleadoListDTO[] = [];
   conceptos: ConceptoNominaListDTO[] = [];
+  contratosEmpleado: EmpleadoContratoListDTO[] = [];
   contratoActivo: EmpleadoContratoListDTO | null = null;
   periodoActivoTexto = '';
-
-  contratosEmpleado: EmpleadoContratoListDTO[] = [];
 
   novedadesContrato: NovedadNominaListDTO[] = [];
   loadingNovedades = false;
@@ -160,13 +159,13 @@ export class NovedadesNominaUpsertComponent implements OnInit {
 
       case 'POR_DIAS':
         this.valorEditable = false;
-        this.requiereCantidad = true;   // 🔥 activar cantidad
-        this.requiereFechas = false;    // opcional
+        this.requiereCantidad = true;
+        this.requiereFechas = false;
         break;
 
       case 'AUX_TRANSPORTE':
         this.valorEditable = false;
-        this.requiereCantidad = true;   // días
+        this.requiereCantidad = true;
         this.requiereFechas = false;
         this.form.cantidad = this.form.cantidad && this.form.cantidad > 0
           ? this.form.cantidad
@@ -182,7 +181,6 @@ export class NovedadesNominaUpsertComponent implements OnInit {
         break;
     }
 
-    // Si el valor no es editable, lo limpiamos visualmente
     if (!this.valorEditable) {
       this.form.valor = 0;
     }
@@ -193,10 +191,32 @@ export class NovedadesNominaUpsertComponent implements OnInit {
     if (!this.form.idEmpleado) {
       this.form.idContrato = null;
       this.contratoActivo = null;
+      this.contratosEmpleado = [];
+      this.novedadesContrato = [];
       return;
     }
 
     this.cargarContratoActivo(this.form.idEmpleado);
+  }
+
+  onContratoChange(): void {
+
+    if (!this.form.idContrato) {
+      this.contratoActivo = null;
+      this.novedadesContrato = [];
+      return;
+    }
+
+    this.contratoActivo =
+      this.contratosEmpleado.find(c => c.idContrato === this.form.idContrato) ?? null;
+
+    if (this.form.idEmpleado && this.form.idContrato) {
+      this.cargarNovedadesContrato(this.form.idEmpleado, this.form.idContrato);
+    }
+
+    if (this.form.codigoConcepto) {
+      this.recalcular();
+    }
   }
 
   // =========================================================
@@ -211,9 +231,8 @@ export class NovedadesNominaUpsertComponent implements OnInit {
 
         this.form = { ...this.form, ...data };
 
-        // 🔥 IMPORTANTE: cargar contrato en edición
         if (data.idEmpleado) {
-          this.cargarContratoActivo(data.idEmpleado);
+          this.cargarContratoActivo(data.idEmpleado, data.idContrato ?? null);
         }
 
         this.onConceptoChange();
@@ -356,45 +375,69 @@ export class NovedadesNominaUpsertComponent implements OnInit {
   // =========================================================
   // 🔥 CARGAR CONTRATO ACTIVO AUTOMÁTICAMENTE
   // =========================================================
-  private cargarContratoActivo(idEmpleado: number): void {
+  private cargarContratoActivo(
+    idEmpleado: number,
+    idContratoPreferido: number | null = null
+  ): void {
 
-   // 🔥 limpiar antes de consultar (evita cálculos con contrato viejo)
-   this.contratoActivo = null;
-   this.form.idContrato = null;
+    this.contratoActivo = null;
+    this.form.idContrato = null;
+    this.contratosEmpleado = [];
+    this.novedadesContrato = [];
 
-   this.contratosApi.listarPorEmpleado(idEmpleado)
-     .subscribe({
-       next: (contratos: EmpleadoContratoListDTO[]) => {
+    this.contratosApi.listarPorEmpleado(idEmpleado)
+      .subscribe({
+        next: (contratos: EmpleadoContratoListDTO[]) => {
 
-         if (!contratos || contratos.length === 0) {
-           alert('El empleado no tiene contrato.');
-           return;
-         }
+          if (!contratos || contratos.length === 0) {
+            alert('El empleado no tiene contrato.');
+            return;
+          }
 
-         const contratoActivo =
-           contratos.find(c => c.activo === true) ?? contratos[0];
+          this.contratosEmpleado = contratos;
 
-         // ✅ Asignar primero
-         this.form.idContrato = contratoActivo.idContrato;
-         this.contratoActivo = contratoActivo;
+          if (idContratoPreferido != null) {
+            const contratoSeleccionado =
+              contratos.find(c => c.idContrato === idContratoPreferido) ?? null;
 
-         // 🔥 cargar novedades del período para este contrato
-         this.cargarNovedadesContrato(
-           idEmpleado,
-           contratoActivo.idContrato
-         );
+            if (contratoSeleccionado) {
+              this.form.idContrato = contratoSeleccionado.idContrato;
+              this.contratoActivo = contratoSeleccionado;
 
-         // ✅ Recalcular SOLO si ya hay concepto y período
-         if (this.form.codigoConcepto) {
-           this.recalcular();
-         }
-       },
-       error: () => {
-         alert('No se pudo cargar el contrato.');
-         this.form.idContrato = null;
-         this.contratoActivo = null;
-       }
-     });
+              this.cargarNovedadesContrato(
+                idEmpleado,
+                contratoSeleccionado.idContrato
+              );
+
+              if (this.form.codigoConcepto) {
+                this.recalcular();
+              }
+              return;
+            }
+          }
+
+          if (contratos.length === 1) {
+            this.form.idContrato = contratos[0].idContrato;
+            this.contratoActivo = contratos[0];
+
+            this.cargarNovedadesContrato(
+              idEmpleado,
+              contratos[0].idContrato
+            );
+
+            if (this.form.codigoConcepto) {
+              this.recalcular();
+            }
+          }
+        },
+        error: () => {
+          alert('No se pudo cargar el contrato.');
+          this.form.idContrato = null;
+          this.contratoActivo = null;
+          this.contratosEmpleado = [];
+          this.novedadesContrato = [];
+        }
+      });
   }
 
   // =========================================================
@@ -409,7 +452,6 @@ export class NovedadesNominaUpsertComponent implements OnInit {
       return;
     }
 
-    // 🔥 Buscar concepto real
     const concepto = this.conceptos.find(
       c => c.codigoConcepto === this.form.codigoConcepto
     );
@@ -418,12 +460,10 @@ export class NovedadesNominaUpsertComponent implements OnInit {
       return;
     }
 
-    // 🔥 Si es MANUAL no calculamos
     if (concepto.tipoCalculo === 'MANUAL') {
       return;
     }
 
-    // 🔥 Para horas debe haber cantidad
     if (
       concepto.tipoCalculo === 'POR_HORAS' &&
       (!this.form.cantidad || this.form.cantidad <= 0)
@@ -447,12 +487,22 @@ export class NovedadesNominaUpsertComponent implements OnInit {
 
   private cargarNovedadesContrato(idEmpleado: number, idContrato: number): void {
 
+    const empleadoSeleccionado = this.empleados.find(
+      e => e.idEmpleado === idEmpleado
+    );
+
+    const idAgencia = empleadoSeleccionado?.idAgencia;
+
+    if (!idAgencia) {
+      this.novedadesContrato = [];
+      this.loadingNovedades = false;
+      return;
+    }
+
     this.loadingNovedades = true;
 
-    this.api.listar(idEmpleado).subscribe({
+    this.api.listar(idAgencia, idEmpleado).subscribe({
       next: (data) => {
-
-        // 🔥 filtrar por contrato actual
         this.novedadesContrato = (data ?? [])
           .filter(n => n.idContrato === idContrato);
 
@@ -469,9 +519,6 @@ export class NovedadesNominaUpsertComponent implements OnInit {
     const input = event.target as HTMLInputElement | null;
     if (!input) return;
 
-    // pequeño delay para asegurar que Angular ya pintó el valor
     setTimeout(() => input.select(), 0);
   }
-
-
 }

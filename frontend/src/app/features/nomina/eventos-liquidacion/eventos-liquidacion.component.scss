@@ -1,0 +1,225 @@
+.page {
+  padding: 16px;
+}
+
+h2 {
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: #666;
+  font-size: 14px;
+}
+
+/* =========================
+   Card contenedor
+========================= */
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
+}
+
+/* =========================
+   Grid formulario
+========================= */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.form-group.full {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #111827;
+  font-size: 14px;
+}
+
+/* =========================
+   Acciones superiores
+========================= */
+.actions {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* =========================
+   Acciones tabla (UNA LÍNEA)
+========================= */
+.acciones-tabla {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+/* =========================
+   Botones acciones tabla
+========================= */
+.btn-action {
+  min-width: 80px;
+  height: 32px;
+  padding: 0 10px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: #fff;
+
+  font-size: 13px;      // 🔥 cambio aquí
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Azul */
+.btn-action-primary {
+  color: #2563eb;
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.btn-action-primary:hover {
+  background: #dbeafe;
+}
+
+/* Amarillo */
+.btn-action-warning {
+  color: #b45309;
+  border-color: #fcd34d;
+  background: #fffbeb;
+}
+
+.btn-action-warning:hover {
+  background: #fef3c7;
+}
+
+/* Gris */
+.btn-action-neutral {
+  color: #4b5563;
+  border-color: #d1d5db;
+  background: #f9fafb;
+}
+
+.btn-action-neutral:hover {
+  background: #f3f4f6;
+}
+
+/* Rojo suave */
+.btn-action-danger {
+  color: #dc2626;
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+
+.btn-action-danger:hover {
+  background: #fee2e2;
+}
+
+/* =========================
+   Loading
+========================= */
+.loading {
+  padding: 20px;
+  text-align: center;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+/* =========================
+   Tabla
+========================= */
+.tabla-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  margin: 0;
+  font-size: 14px;
+}
+
+.table thead th {
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 600;
+  white-space: nowrap;
+  vertical-align: middle;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.table tbody td {
+  vertical-align: middle;
+  font-size: 14px;
+}
+
+.table tbody tr:hover {
+  background: #f9fbff;
+}
+
+/* =========================
+   Badge estado
+========================= */
+.badge {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+/* =========================
+   Utilidades
+========================= */
+.text-end {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* =========================
+   Responsive
+========================= */
+@media (max-width: 768px) {
+  .actions {
+    justify-content: stretch;
+  }
+
+  .actions .btn {
+    flex: 1 1 auto;
+  }
+
+  .acciones-tabla {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-action {
+    width: 100%;
+  }
+}

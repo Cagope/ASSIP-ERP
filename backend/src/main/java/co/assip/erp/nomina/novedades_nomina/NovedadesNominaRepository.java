@@ -17,7 +17,11 @@ public class NovedadesNominaRepository {
     // =========================================================
     // LISTAR
     // =========================================================
-    public List<NovedadNominaListDTO> listar(Integer idPeriodo, Integer idEmpleado) {
+    public List<NovedadNominaListDTO> listar(
+            Integer idPeriodo,
+            Integer idAgencia,
+            Integer idEmpleado
+    ) {
 
         StringBuilder sql = new StringBuilder("""
         SELECT
@@ -63,6 +67,11 @@ public class NovedadesNominaRepository {
             params.addValue("periodo", idPeriodo);
         }
 
+        if (idAgencia != null) {
+            sql.append(" AND e.id_agencia = :idAgencia");
+            params.addValue("idAgencia", idAgencia);
+        }
+
         if (idEmpleado != null) {
             sql.append(" AND n.id_empleado = :empleado");
             params.addValue("empleado", idEmpleado);
@@ -85,7 +94,6 @@ public class NovedadesNominaRepository {
                         .observacion(rs.getString("observacion"))
                         .fkAgencia((Integer) rs.getObject("fk_agencia"))
 
-                        // 🔥 EMPLEADO
                         .documentoEmpleado(rs.getString("documento"))
                         .nombreEmpleado(
                                 rs.getString("primer_apellido") + " " +
@@ -95,17 +103,13 @@ public class NovedadesNominaRepository {
                                         rs.getString("nombres")
                         )
 
-                        // 🔥 PERÍODO
                         .anio(rs.getInt("anio"))
                         .mes(rs.getInt("mes"))
                         .numeroPeriodo(rs.getInt("numero_periodo"))
                         .tipoPeriodo(rs.getString("tipo_periodo"))
-
                         .build()
         );
     }
-
-
 
     // =========================================================
     // OBTENER POR ID
@@ -554,5 +558,19 @@ public class NovedadesNominaRepository {
         );
     }
 
+    public Integer obtenerAgenciaPorEmpleado(Integer idEmpleado) {
+
+        String sql = """
+        SELECT e.id_agencia
+        FROM nomina.empleados e
+        WHERE e.id_empleado = :idEmpleado
+    """;
+
+        return jdbc.queryForObject(
+                sql,
+                new MapSqlParameterSource("idEmpleado", idEmpleado),
+                Integer.class
+        );
+    }
 
 }

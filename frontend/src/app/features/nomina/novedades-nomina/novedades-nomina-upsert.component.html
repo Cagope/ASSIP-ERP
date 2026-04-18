@@ -12,63 +12,6 @@
     <span>{{ periodoActivoTexto }}</span>
   </div>
 
-  <!-- =========================
-       CONTRATO ACTIVO
-       ========================= -->
-  <div class="card" *ngIf="contratoActivo">
-    <h5 style="margin-bottom: 12px;">Datos del contrato</h5>
-
-    <div class="contrato-info">
-      <div><strong>Salario base:</strong> {{ contratoActivo.salarioBase | number:'1.0-0' }}</div>
-      <div><strong>Tipo contrato:</strong> {{ contratoActivo.tipoContratoNombre }}</div>
-      <div><strong>Cargo:</strong> {{ contratoActivo.nombreCargo }}</div>
-      <div><strong>Sección:</strong> {{ contratoActivo.nombreSeccion }}</div>
-      <div><strong>Periodo pago:</strong> {{ contratoActivo.periodoPago }}</div>
-    </div>
-  </div>
-
-  <!-- =========================
-   NOVEDADES DEL PERÍODO
-   ========================= -->
-  <div class="card novedades-card" *ngIf="contratoActivo">
-    <div class="section-header">
-      <h5>Novedades ya incluidas en el período</h5>
-
-      <span class="badge-total" *ngIf="!loadingNovedades">
-      {{ novedadesContrato.length }} registro(s)
-    </span>
-    </div>
-
-    <div *ngIf="loadingNovedades" class="empty-state">
-      Cargando novedades...
-    </div>
-
-    <div *ngIf="!loadingNovedades && novedadesContrato.length === 0" class="empty-state">
-      No hay novedades registradas para este contrato en el período.
-    </div>
-
-    <div class="tabla-wrapper" *ngIf="!loadingNovedades && novedadesContrato.length > 0">
-      <table class="table-novedades">
-        <thead>
-        <tr>
-          <th>Concepto</th>
-          <th class="text-right" style="width: 90px;">Cantidad</th>
-          <th class="text-right" style="width: 130px;">Valor</th>
-          <th>Observación</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        <tr *ngFor="let n of novedadesContrato">
-          <td class="concepto">{{ n.codigoConcepto }}</td>
-          <td class="text-right">{{ n.cantidad | number:'1.0-0' }}</td>
-          <td class="text-right">{{ n.valor | number:'1.0-0' }}</td>
-          <td class="observacion">{{ n.observacion || '-' }}</td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
 
   <!-- =========================
        FORMULARIO DE CAPTURA
@@ -87,6 +30,43 @@
           name="idEmpleado"
           (ngModelChange)="onEmpleadoChange()">
         </app-empleado-autocomplete>
+      </div>
+
+      <!-- =========================
+           CONTRATO
+           ========================= -->
+      <div class="form-group">
+        <label>Contrato *</label>
+
+        <select
+          class="form-control"
+          [(ngModel)]="form.idContrato"
+          name="idContrato"
+          (ngModelChange)="onContratoChange()"
+          [disabled]="!form.idEmpleado || contratosEmpleado.length === 0">
+
+          <option [ngValue]="null">
+            -- Seleccione contrato --
+          </option>
+
+          <option
+            *ngFor="let c of contratosEmpleado"
+            [ngValue]="c.idContrato">
+
+            Contrato #{{ c.idContrato }}
+            {{ c.tipoContratoNombre ? ' — ' + c.tipoContratoNombre : '' }}
+            {{ c.nombreCargo ? ' — ' + c.nombreCargo : '' }}
+            {{ c.activo ? ' — ACTIVO' : '' }}
+
+          </option>
+
+        </select>
+      </div>
+
+      <div class="form-group full" *ngIf="form.idEmpleado && !form.idContrato">
+        <small style="color: #6c757d;">
+          Seleccione un contrato para ver su información y las novedades del período.
+        </small>
       </div>
 
       <!-- =========================
@@ -192,6 +172,64 @@
         </textarea>
       </div>
 
+    </div>
+
+    <!-- =========================
+       CONTRATO ACTIVO
+       ========================= -->
+    <div class="card" *ngIf="contratoActivo">
+      <h5 style="margin-bottom: 12px;">Datos del contrato</h5>
+
+      <div class="contrato-info">
+        <div><strong>Salario base:</strong> {{ contratoActivo.salarioBase | number:'1.0-0' }}</div>
+        <div><strong>Tipo contrato:</strong> {{ contratoActivo.tipoContratoNombre }}</div>
+        <div><strong>Cargo:</strong> {{ contratoActivo.nombreCargo }}</div>
+        <div><strong>Sección:</strong> {{ contratoActivo.nombreSeccion }}</div>
+        <div><strong>Periodo pago:</strong> {{ contratoActivo.periodoPago }}</div>
+      </div>
+    </div>
+
+    <!-- =========================
+         NOVEDADES DEL PERÍODO
+         ========================= -->
+    <div class="card novedades-card" *ngIf="contratoActivo">
+      <div class="section-header">
+        <h5>Novedades ya incluidas en el período</h5>
+
+        <span class="badge-total" *ngIf="!loadingNovedades">
+        {{ novedadesContrato.length }} registro(s)
+      </span>
+      </div>
+
+      <div *ngIf="loadingNovedades" class="empty-state">
+        Cargando novedades...
+      </div>
+
+      <div *ngIf="!loadingNovedades && novedadesContrato.length === 0" class="empty-state">
+        No hay novedades registradas para este contrato en el período.
+      </div>
+
+      <div class="tabla-wrapper" *ngIf="!loadingNovedades && novedadesContrato.length > 0">
+        <table class="table-novedades">
+          <thead>
+          <tr>
+            <th>Concepto</th>
+            <th class="text-right" style="width: 90px;">Cantidad</th>
+            <th class="text-right" style="width: 130px;">Valor</th>
+            <th>Observación</th>
+          </tr>
+          </thead>
+
+          <tbody>
+          <tr *ngFor="let n of novedadesContrato">
+            <td class="concepto">{{ n.codigoConcepto }}</td>
+            <td class="text-right">{{ n.cantidad | number:'1.0-0' }}</td>
+            <td class="text-right">{{ n.valor | number:'1.0-0' }}</td>
+            <td class="observacion">{{ n.observacion || '-' }}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- =========================
