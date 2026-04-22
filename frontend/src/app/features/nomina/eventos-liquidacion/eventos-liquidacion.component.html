@@ -5,9 +5,6 @@
     Incapacidades, licencias y demás eventos que afectan la liquidación
   </p>
 
-  <!-- =========================
-       FILTROS Y ACCIONES
-       ========================= -->
   <div class="card">
 
     <div class="form-grid">
@@ -46,9 +43,6 @@
     {{ error }}
   </div>
 
-  <!-- =========================
-       TABLA
-       ========================= -->
   <div class="card tabla-card">
 
     <div *ngIf="cargando" class="loading">
@@ -119,24 +113,9 @@
               </button>
 
               <button
-                class="btn-action btn-action-neutral"
-                *ngIf="row.estado === 'ACTIVO'"
-                (click)="cambiarEstado(row, 'INACTIVO')">
-                Inactivar
-              </button>
-
-              <button
-                class="btn-action btn-action-warning"
-                *ngIf="row.estado !== 'ACTIVO'"
-                (click)="cambiarEstado(row, 'ACTIVO')">
-                Activar
-              </button>
-
-              <button
                 class="btn-action btn-action-danger"
-                *ngIf="row.estado !== 'ANULADO'"
-                (click)="cambiarEstado(row, 'ANULADO')">
-                Anular
+                (click)="eliminar(row)">
+                Eliminar
               </button>
 
             </div>

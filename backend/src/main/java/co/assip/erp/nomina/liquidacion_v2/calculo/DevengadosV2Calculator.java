@@ -51,7 +51,9 @@ public class DevengadosV2Calculator {
                 contrato.getIdContrato()
         );
 
-        // 1) BASICO por días laborados
+        // ======================================================
+        // 1) BASICO (solo días realmente laborados)
+        // ======================================================
         if (!codigosManuales.contains("BASICO")
                 && tiempo.getDiasLaboradosSafe().compareTo(BigDecimal.ZERO) > 0) {
 
@@ -75,7 +77,9 @@ public class DevengadosV2Calculator {
             );
         }
 
+        // ======================================================
         // 2) AUXILIO DE TRANSPORTE
+        // ======================================================
         if (!codigosManuales.contains("AUX_TRANSP")
                 && tiempo.getDiasLaboradosSafe().compareTo(BigDecimal.ZERO) > 0
                 && !Boolean.FALSE.equals(contrato.getAplicaAuxTransporte())) {
@@ -91,33 +95,15 @@ public class DevengadosV2Calculator {
             }
         }
 
-        // 3) VACACIONES
-        // No se liquidan aquí.
-        // Solo afectan los días laborados porque se pagan en un proceso aparte.
+        // ======================================================
+        // 🚫 ELIMINADO:
+        // INCAPACIDAD y PERMISOS AUTOMÁTICOS
+        // ======================================================
+        // TODO ahora viene desde novedades (eventos_liquidacion)
 
-        // 4) INCAPACIDAD
-        if (tiempo.getDiasIncapacidadSafe().compareTo(BigDecimal.ZERO) > 0) {
-            detalles.add(
-                    calcularPorDias(
-                            "INCAPACIDAD",
-                            tiempo.getDiasIncapacidadSafe(),
-                            ctx
-                    )
-            );
-        }
-
-        // 5) PERMISO REMUNERADO
-        if (tiempo.getDiasPermisoRemuneradoSafe().compareTo(BigDecimal.ZERO) > 0) {
-            detalles.add(
-                    calcularPorDias(
-                            "PERMISO_REM",
-                            tiempo.getDiasPermisoRemuneradoSafe(),
-                            ctx
-                    )
-            );
-        }
-
-        // 6) NOVEDADES DEVENGADO ADICIONALES
+        // ======================================================
+        // 3) NOVEDADES DEVENGADO
+        // ======================================================
         detalles.addAll(
                 obtenerNovedadesDevengado(
                         idPeriodoNomina,
@@ -126,30 +112,6 @@ public class DevengadosV2Calculator {
         );
 
         return detalles;
-    }
-
-    private LiquidacionDetalleDTO calcularPorDias(
-            String codigo,
-            BigDecimal dias,
-            ContextoCalculo ctx
-    ) {
-
-        MotorCalculoConcepto.ResultadoCalculo r =
-                MotorCalculoConcepto.calcular(
-                        TipoCalculo.POR_DIAS,
-                        BaseCalculo.SALARIO_BASE,
-                        BigDecimal.ONE,
-                        dias,
-                        ctx.asMap()
-                );
-
-        return LiquidacionDetalleDTO.devengadoAutomatico(
-                codigo,
-                r.cantidad(),
-                r.valorUnitario(),
-                r.valorTotal(),
-                r.baseCalculo()
-        );
     }
 
     private LiquidacionDetalleDTO calcularAuxilioTransporte(
@@ -181,7 +143,6 @@ public class DevengadosV2Calculator {
 
         BigDecimal tope = variable.smmlv().multiply(BigDecimal.valueOf(2));
 
-        // Regla actual: solo si salario base < 2 SMMLV
         if (contrato.getSalarioBase().compareTo(tope) >= 0) {
             return null;
         }
@@ -265,25 +226,19 @@ public class DevengadosV2Calculator {
     ) {
 
         String sql = """
-            SELECT
-              n.id_novedad,
-              n.codigo_concepto,
-              n.cantidad,
-              n.valor
-            FROM nomina.novedades_nomina n
-            JOIN nomina.conceptos_nomina c
-              ON c.codigo_concepto = n.codigo_concepto
-            WHERE n.id_periodo = :idPeriodo
-              AND n.id_contrato = :idContrato
-              AND n.estado = 'ABIERTO'
-              AND c.tipo_concepto = 'DEVENGADO'
-              AND n.codigo_concepto NOT IN (
-                  'VACACIONES',
-                  'INCAPACIDAD',
-                  'PERMISO_REM',
-                  'PERMISO_NO_REM'
-              )
-        """;
+        SELECT
+          n.id_novedad,
+          n.codigo_concepto,
+          n.cantidad,
+          n.valor
+        FROM nomina.novedades_nomina n
+        JOIN nomina.conceptos_nomina c
+          ON c.codigo_concepto = n.codigo_concepto
+        WHERE n.id_periodo = :idPeriodo
+          AND n.id_contrato = :idContrato
+          AND n.estado = 'ABIERTO'
+          AND c.tipo_concepto = 'DEVENGADO'
+    """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("idPeriodo", idPeriodoNomina)
@@ -292,6 +247,8 @@ public class DevengadosV2Calculator {
         List<LiquidacionDetalleDTO> list = new ArrayList<>();
 
         jdbc.query(sql, params, rs -> {
+
+            String codigo = rs.getString("codigo_concepto");
 
             BigDecimal cantidad = rs.getBigDecimal("cantidad");
             if (cantidad == null || cantidad.signum() <= 0) {
@@ -303,16 +260,48 @@ public class DevengadosV2Calculator {
                 total = BigDecimal.ZERO;
             }
 
-            total = (total);
+            // ======================================================
+            // 🔴 NUEVO: calcular si viene en cero
+            // ======================================================
+            if (total.compareTo(BigDecimal.ZERO) == 0) {
 
-            BigDecimal valorUnitario =
+                BigDecimal salarioBase = contratoSalarioActual(idContrato);
+                BigDecimal salarioDia = salarioBase
+                        .divide(BigDecimal.valueOf(30), 8, RoundingMode.HALF_UP);
 
-                            total.divide(cantidad, 8, RoundingMode.HALF_UP
+                BigDecimal porcentaje = obtenerPorcentajeConcepto(codigo);
+
+                if (porcentaje.compareTo(BigDecimal.ZERO) > 0) {
+                    BigDecimal valorUnitario = salarioDia
+                            .multiply(porcentaje)
+                            .divide(BigDecimal.valueOf(100), 8, RoundingMode.HALF_UP);
+
+                    total = valorUnitario.multiply(cantidad);
+
+                    list.add(
+                            LiquidacionDetalleDTO.devengadoNovedad(
+                                    codigo,
+                                    cantidad,
+                                    valorUnitario,
+                                    total,
+                                    salarioBase,
+                                    rs.getInt("id_novedad")
+                            )
                     );
+
+                    return;
+                }
+            }
+
+            // ======================================================
+            // ✔ comportamiento actual
+            // ======================================================
+            BigDecimal valorUnitario =
+                    total.divide(cantidad, 8, RoundingMode.HALF_UP);
 
             list.add(
                     LiquidacionDetalleDTO.devengadoNovedad(
-                            rs.getString("codigo_concepto"),
+                            codigo,
                             cantidad,
                             valorUnitario,
                             total,
@@ -331,4 +320,40 @@ public class DevengadosV2Calculator {
             BigDecimal diasMes
     ) {}
 
+    private BigDecimal contratoSalarioActual(Integer idContrato) {
+
+        String sql = """
+        SELECT salario_base
+        FROM nomina.empleado_contratos
+        WHERE id_contrato = :idContrato
+    """;
+
+        return jdbc.query(
+                sql,
+                new MapSqlParameterSource("idContrato", idContrato),
+                rs -> rs.next() ? rs.getBigDecimal("salario_base") : BigDecimal.ZERO
+        );
+    }
+
+    private BigDecimal obtenerPorcentajeConcepto(String codigo) {
+
+        String sql = """
+        SELECT COALESCE(r.porcentaje_pago, 0)
+        FROM nomina.reglas_novedades_tiempo r
+        WHERE r.codigo_concepto = :codigo
+          AND r.activo = true
+        ORDER BY COALESCE(r.orden_aplicacion, 999999), r.id_regla
+        LIMIT 1
+    """;
+
+        List<BigDecimal> lista = jdbc.query(
+                sql,
+                new MapSqlParameterSource("codigo", codigo),
+                (rs, rowNum) -> rs.getBigDecimal(1)
+        );
+
+        return lista.isEmpty() || lista.get(0) == null
+                ? BigDecimal.ZERO
+                : lista.get(0);
+    }
 }

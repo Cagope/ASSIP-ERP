@@ -1,11 +1,11 @@
 Se copia y se pega en power shell
 
- & "C:\Program Files\PostgreSQL\17\bin\pg_dump.exe" `
->>  -h localhost `
->>  -p 5432 `
->>  -U postgres `
->>  -F c `
->>  -b `
->>  -v `
->>  -f "D:\backups_assip\assip_postgres_$(Get-Date -Format 'yyyyMMdd_HHmmss').backup" `
->>  assip_erp
+& "C:\Program Files\PostgreSQL\17\bin\pg_dump.exe" `
+  -h localhost `
+  -p 5432 `
+  -U postgres `
+  -F c `
+  -b `
+  -v `
+  -f "D:\backups_assip\assip_erp_$(Get-Date -Format 'yyyyMMdd_HHmmss').backup" `
+  assip_erp

@@ -84,15 +84,15 @@ export class EventosLiquidacionComponent implements OnInit {
     this.router.navigate(['/nomina/eventos-liquidacion', row.idEventoLiquidacion, 'editar']);
   }
 
-  cambiarEstado(row: EventoLiquidacionListDTO, estado: string): void {
-    const ok = confirm(`¿Desea cambiar el estado del evento ${row.idEventoLiquidacion} a ${estado}?`);
+  eliminar(row: EventoLiquidacionListDTO): void {
+    const ok = confirm(`¿Desea eliminar el evento ${row.idEventoLiquidacion}?`);
     if (!ok) return;
 
-    this.api.cambiarEstado(row.idEventoLiquidacion, estado).subscribe({
+    this.api.eliminar(row.idEventoLiquidacion).subscribe({
       next: () => this.cargar(),
       error: (err) => {
         console.error(err);
-        alert(err?.error?.message || 'No fue posible actualizar el estado.');
+        alert(err?.error?.message || 'No fue posible eliminar el evento.');
       }
     });
   }
@@ -101,10 +101,6 @@ export class EventosLiquidacionComponent implements OnInit {
     switch ((estado || '').toUpperCase()) {
       case 'ACTIVO':
         return 'badge bg-success';
-      case 'INACTIVO':
-        return 'badge bg-secondary';
-      case 'ANULADO':
-        return 'badge bg-danger';
       default:
         return 'badge bg-light text-dark';
     }

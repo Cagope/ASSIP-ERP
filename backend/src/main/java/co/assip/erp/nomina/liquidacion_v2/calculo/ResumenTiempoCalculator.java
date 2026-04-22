@@ -54,7 +54,6 @@ public class ResumenTiempoCalculator {
         BigDecimal diasLaborados = BigDecimal.valueOf(diasPeriodo)
                 .subtract(diasVacaciones)
                 .subtract(diasIncapacidad)
-                .subtract(diasPermisoRemunerado)
                 .subtract(diasPermisoNoRemunerado);
 
         if (diasLaborados.compareTo(BigDecimal.ZERO) < 0) {
@@ -91,11 +90,6 @@ public class ResumenTiempoCalculator {
 
         Integer numeroPeriodo = periodo.numeroPeriodo();
 
-        // =====================================================
-        // REGLA ESPECIAL: APRENDIZ SENA
-        // - Q1: no liquida
-        // - Q2: liquida el mes completo
-        // =====================================================
         if (ID_TIPO_CONTRATO_APRENDIZ_SENA.equals(contrato.getIdTipoContrato())) {
 
             if ("QUINCENAL".equals(tipoPeriodo)) {
@@ -107,14 +101,9 @@ public class ResumenTiempoCalculator {
                 }
             }
 
-            // Si por alguna razón el período no viene quincenal,
-            // mantenemos pago mensual estándar.
             return 30;
         }
 
-        // =====================================================
-        // REGLA NORMAL
-        // =====================================================
         return switch (tipoPeriodo) {
             case "QUINCENAL" -> 15;
             case "MENSUAL" -> 30;

@@ -5,69 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d0577d07-00ee-4562-af4b-c1a4484e8934" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/eventos_liquidacion/EventosLiquidacionController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/eventos_liquidacion/EventosLiquidacionRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/eventos_liquidacion/EventosLiquidacionService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/eventos_liquidacion/dto/EventoLiquidacionFormDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/eventos_liquidacion/dto/EventoLiquidacionListDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/eventos_liquidacion/dto/EventoLiquidacionSaveDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/LiquidacionV2Controller.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/LiquidacionV2PreviewController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/LiquidacionV2PreviewService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/LiquidacionV2Repository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/LiquidacionV2Service.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/calculo/DeduccionesV2Calculator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/calculo/DevengadosV2Calculator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/calculo/IbcV2Calculator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/calculo/ProvisionesV2Calculator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/calculo/ResumenTiempoCalculator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/dto/LiquidacionV2DetalleDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/dto/LiquidacionV2PeriodoDisponibleDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/dto/LiquidacionV2PreviewItemDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/dto/LiquidacionV2PreviewResponseDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/dto/LiquidacionV2RequestDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/dto/LiquidacionV2ResponseDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/dto/ResumenTiempoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/dto/TotalesLiquidacionV2DTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/vacaciones/VacacionesCalculator.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/vacaciones/VacacionesController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/vacaciones/VacacionesRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/vacaciones/VacacionesService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/vacaciones/dto/VacacionPreviewDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/vacaciones/dto/VacacionPreviewRequestDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/eventos-liquidacion/eventos-liquidacion-upsert.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/eventos-liquidacion/eventos-liquidacion-upsert.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/eventos-liquidacion/eventos-liquidacion-upsert.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/eventos-liquidacion/eventos-liquidacion.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/eventos-liquidacion/eventos-liquidacion.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/eventos-liquidacion/eventos-liquidacion.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/eventos-liquidacion/eventos-liquidacion.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/eventos-liquidacion/eventos-liquidacion.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/liquidacion-v2/liquidacion-v2.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/liquidacion-v2/liquidacion-v2.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/liquidacion-v2/preview/liquidacion-v2-preview.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/liquidacion-v2/preview/liquidacion-v2-preview.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/nomina/liquidacion-v2/preview/liquidacion-v2-preview.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/empleado_contratos/EmpleadoContratoRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/empleado_contratos/EmpleadoContratoRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/empleado_contratos/dto/EmpleadoContratoDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/empleado_contratos/dto/EmpleadoContratoDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion/LiquidacionNominaRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion/LiquidacionNominaRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion/calculo/DeduccionesCalculator.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion/calculo/DeduccionesCalculator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/novedades_nomina/NovedadesNominaController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/novedades_nomina/NovedadesNominaController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/novedades_nomina/NovedadesNominaRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/novedades_nomina/NovedadesNominaRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/novedades_nomina/NovedadesNominaService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/novedades_nomina/NovedadesNominaService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/periodos_nomina/PeriodoNominaActivoService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/periodos_nomina/PeriodoNominaActivoService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/periodos_nomina/PeriodosNominaRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/periodos_nomina/PeriodosNominaRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/LiquidacionV2PreviewService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/LiquidacionV2PreviewService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/calculo/DevengadosV2Calculator.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/calculo/DevengadosV2Calculator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/calculo/ResumenTiempoCalculator.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/nomina/liquidacion_v2/calculo/ResumenTiempoCalculator.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../copia_bd_pstgres.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../copia_bd_pstgres.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/contabilizacion/liquidacion/liquidacion-contabilizacion.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/contabilizacion/liquidacion/liquidacion-contabilizacion.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/contabilizacion/liquidacion/liquidacion-contabilizacion.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/contabilizacion/liquidacion/liquidacion-contabilizacion.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/nomina-menu.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/nomina-menu.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/nomina.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/nomina.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-list.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-list.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-list.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-list.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-upsert.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-upsert.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-upsert.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina-upsert.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/nomina/novedades-nomina/novedades-nomina.api.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,35 +19,35 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "Cagope"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Cagope&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Cagope/ASSIP-ERP.git",
-    "accountId": "3d567489-eac5-4435-b238-166d71518dac"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Cagope/ASSIP-ERP.git&quot;,
+    &quot;accountId&quot;: &quot;3d567489-eac5-4435-b238-166d71518dac&quot;
   }
-}]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 8
-}]]></component>
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 8
+}</component>
   <component name="ProjectId" id="3CR5Njz7XmYnCCH9XQDnxGSBxtH" />
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "backup/hoja-vida-exportacion",
-    "last_opened_file_path": "D:/assip-erp/frontend"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;backup/hoja-vida-exportacion&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/assip-erp/frontend&quot;
   }
-}]]></component>
+}</component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="d0577d07-00ee-4562-af4b-c1a4484e8934" name="Changes" comment="" />

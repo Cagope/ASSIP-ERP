@@ -379,11 +379,12 @@ public class NovedadesNominaRepository {
     public boolean existeNovedad(Integer idPeriodo, Integer idContrato, String codigoConcepto) {
 
         String sql = """
-        SELECT COUNT(1)
-        FROM nomina.novedades_nomina
-        WHERE id_periodo = :periodo
-          AND id_contrato = :contrato
-          AND codigo_concepto = :concepto
+    SELECT COUNT(1)
+    FROM nomina.novedades_nomina
+    WHERE id_periodo = :periodo
+      AND id_contrato = :contrato
+      AND codigo_concepto = :concepto
+      AND estado = 'ABIERTO'
     """;
 
         Integer count = jdbc.queryForObject(
@@ -570,6 +571,93 @@ public class NovedadesNominaRepository {
                 sql,
                 new MapSqlParameterSource("idEmpleado", idEmpleado),
                 Integer.class
+        );
+    }
+
+    public void insertarNovedadPreview(
+            Integer idPeriodo,
+            Integer idEmpleado,
+            Integer idContrato,
+            String codigoConcepto,
+            java.time.LocalDate fechaInicial,
+            java.time.LocalDate fechaFinal,
+            java.math.BigDecimal cantidad,
+            java.math.BigDecimal valor,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+    INSERT INTO nomina.novedades_nomina (
+      id_periodo,
+      id_empleado,
+      id_contrato,
+      codigo_concepto,
+      fecha_inicial,
+      fecha_final,
+      cantidad,
+      valor,
+      observacion,
+      estado,
+      fk_agencia,
+      fk_seguridad_creacion,
+      fk_seguridad_edicion,
+      fecha_creacion,
+      fecha_edicion,
+      origen
+    )
+    SELECT
+      :periodo,
+      e.id_empleado,
+      :contrato,
+      :concepto,
+      :inicio,
+      :fin,
+      :cantidad,
+      :valor,
+      'Generado automáticamente por preview de liquidación',
+      'ABIERTO',
+      e.id_agencia,
+      :usr,
+      :usr,
+      CURRENT_TIMESTAMP,
+      CURRENT_TIMESTAMP,
+      'CALCULO'
+    FROM nomina.empleados e
+    WHERE e.id_empleado = :empleado
+    """;
+
+        jdbc.update(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("periodo", idPeriodo)
+                        .addValue("empleado", idEmpleado)
+                        .addValue("contrato", idContrato)
+                        .addValue("concepto", codigoConcepto)
+                        .addValue("inicio", fechaInicial)
+                        .addValue("fin", fechaFinal)
+                        .addValue("cantidad", cantidad)
+                        .addValue("valor", valor)
+                        .addValue("usr", idUsuario != null ? idUsuario : 1)
+        );
+    }
+
+    public int eliminarNovedadesPreviewPorPeriodoYContrato(
+            Integer idPeriodo,
+            Integer idContrato
+    ) {
+
+        String sql = """
+    DELETE FROM nomina.novedades_nomina
+    WHERE id_periodo = :periodo
+      AND id_contrato = :contrato
+      AND origen = 'CALCULO'
+    """;
+
+        return jdbc.update(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("periodo", idPeriodo)
+                        .addValue("contrato", idContrato)
         );
     }
 

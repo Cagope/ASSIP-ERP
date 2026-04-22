@@ -31,12 +31,35 @@ public class EventosLiquidacionService {
             return repository.crear(dto, idUsuario);
         }
 
+        validarPeriodoAbiertoPorEvento(dto.getIdEventoLiquidacion());
         repository.actualizar(dto, idUsuario);
         return dto.getIdEventoLiquidacion();
     }
 
-    public void cambiarEstado(Long idEventoLiquidacion, String estado, Integer idUsuario) {
-        repository.cambiarEstado(idEventoLiquidacion, estado, idUsuario);
+    public void eliminar(Long idEventoLiquidacion, Integer idUsuario) {
+
+        validarPeriodoAbiertoPorEvento(idEventoLiquidacion);
+
+        Integer idPeriodo = repository.obtenerPeriodoQueCruzaEvento(idEventoLiquidacion);
+        Integer idContrato = repository.obtenerContratoPorEvento(idEventoLiquidacion);
+
+        if (idPeriodo != null && idContrato != null) {
+            repository.eliminarNovedadesPreviewPorPeriodoYContrato(idPeriodo, idContrato);
+        }
+
+        repository.eliminar(idEventoLiquidacion);
+    }
+
+    private void validarPeriodoAbiertoPorEvento(Long idEventoLiquidacion) {
+        String estadoPeriodo = repository.obtenerEstadoPeriodoDelEvento(idEventoLiquidacion);
+
+        if (estadoPeriodo == null) {
+            throw new RuntimeException("No se pudo determinar el período del evento.");
+        }
+
+        if (!"ABIERTO".equalsIgnoreCase(estadoPeriodo)) {
+            throw new RuntimeException("El evento pertenece a un período cerrado y no puede modificarse.");
+        }
     }
 
     private void validar(EventoLiquidacionSaveDTO dto) {

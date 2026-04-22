@@ -41,17 +41,20 @@ public class EventosLiquidacionController {
         );
     }
 
-    @PutMapping("/{id}/estado")
-    public Map<String, Object> cambiarEstado(@PathVariable Long id,
-                                             @RequestBody Map<String, String> body) {
+    // =========================
+    // NUEVO: ELIMINAR
+    // =========================
+    @DeleteMapping("/{id}")
+    public Map<String, Object> eliminar(@PathVariable Long id) {
+
         Integer idUsuario = SecurityUtils.getIdUsuario();
         if (idUsuario == null) idUsuario = 1;
 
-        service.cambiarEstado(id, body.get("estado"), idUsuario);
+        service.eliminar(id, idUsuario);
 
         return Map.of(
                 "ok", true,
-                "mensaje", "Estado actualizado correctamente."
+                "mensaje", "Evento eliminado correctamente."
         );
     }
 }

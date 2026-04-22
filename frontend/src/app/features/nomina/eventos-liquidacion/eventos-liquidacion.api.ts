@@ -110,7 +110,7 @@ export class EventosLiquidacionApi {
     return this.http.post<any>(this.baseUrl, dto);
   }
 
-  cambiarEstado(id: number, estado: string): Observable<any> {
-    return this.http.put<any>(`${this.baseUrl}/${id}/estado`, { estado });
+  eliminar(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.baseUrl}/${id}`);
   }
 }
