@@ -184,171 +184,184 @@ public class LiquidacionContabilizacionRepository {
         String filtroAgencia = filtrarAgencia ? " AND e.id_agencia = :idAgencia " : "";
 
         return """
-            WITH movimientos AS (
+        WITH movimientos AS (
 
-            -- ==========================
-            -- DEVENGADOS
-            -- ==========================
-            SELECT
-                e.id_agencia,
-                ccc.id_cuenta_debito AS id_catalogo_cuenta,
-                e.id_datos_personal AS id_tercero,
-                e.id_datos_personal AS id_empleado_referencia,
-                SUM(ld.valor_total) AS debito,
-                0::numeric AS credito,
-                SUM(ld.base_calculo) AS valor_base
-            FROM nomina.liquidacion_detalle ld
-            JOIN nomina.liquidaciones l
-                ON l.id_liquidacion = ld.id_liquidacion
-            JOIN nomina.empleado_contratos ec
-                ON ec.id_contrato = l.id_contrato
-            JOIN nomina.empleados e
-                ON e.id_empleado = ec.id_empleado
-            JOIN nomina.concepto_cuentas_contables ccc
-                ON ccc.codigo_concepto = ld.codigo_concepto
-               AND ccc.id_agencia = e.id_agencia
-            WHERE ld.tipo = 'DEVENGADO'
-              AND l.id_periodo_nomina = :idPeriodoNomina
-              %s
-            GROUP BY
-                e.id_agencia,
-                ccc.id_cuenta_debito,
-                e.id_datos_personal
+        -- ==========================
+        -- DEVENGADOS
+        -- ==========================
+        SELECT
+            e.id_agencia,
+            ccc.id_cuenta_debito AS id_catalogo_cuenta,
+            CASE
+                WHEN ld.codigo_concepto IN ('INCAP_EPS', 'LIC_MATERNIDAD')
+                    THEN eps.id_datos_personal
+                WHEN ld.codigo_concepto = 'LIC_ARL'
+                    THEN arl.id_datos_personal
+                ELSE e.id_datos_personal
+            END AS id_tercero,
+            e.id_datos_personal AS id_empleado_referencia,
+            SUM(ld.valor_total) AS debito,
+            0::numeric AS credito,
+            SUM(ld.base_calculo) AS valor_base
+        FROM nomina.liquidacion_detalle ld
+        JOIN nomina.liquidaciones l
+            ON l.id_liquidacion = ld.id_liquidacion
+        JOIN nomina.empleado_contratos ec
+            ON ec.id_contrato = l.id_contrato
+        JOIN nomina.empleados e
+            ON e.id_empleado = ec.id_empleado
+        LEFT JOIN nomina.entidades_eps eps
+            ON eps.id_eps = ec.id_eps
+        LEFT JOIN nomina.entidades_arl arl
+            ON arl.id_arl = ec.id_arl
+        JOIN nomina.concepto_cuentas_contables ccc
+            ON ccc.codigo_concepto = ld.codigo_concepto
+           AND ccc.id_agencia = e.id_agencia
+        WHERE ld.tipo = 'DEVENGADO'
+          AND l.id_periodo_nomina = :idPeriodoNomina
+          %s
+        GROUP BY
+            e.id_agencia,
+            ccc.id_cuenta_debito,
+            e.id_datos_personal,
+            eps.id_datos_personal,
+            arl.id_datos_personal,
+            ld.codigo_concepto
 
-            UNION ALL
+        UNION ALL
 
-            -- ==========================
-            -- DEDUCCIONES
-            -- tercero = entidad
-            -- valor = por empleado
-            -- ==========================
-            SELECT
-                e.id_agencia,
-                ccc.id_cuenta_credito AS id_catalogo_cuenta,
+        -- ==========================
+        -- DEDUCCIONES
+        -- tercero = entidad
+        -- valor = por empleado
+        -- ==========================
+        SELECT
+            e.id_agencia,
+            ccc.id_cuenta_credito AS id_catalogo_cuenta,
+            CASE
+                WHEN ld.codigo_concepto = 'SALUD_EMP'
+                    THEN eps.id_datos_personal
+                WHEN ld.codigo_concepto = 'PENSION_EMP'
+                    THEN afp.id_datos_personal
+                ELSE e.id_datos_personal
+            END AS id_tercero,
+            e.id_datos_personal AS id_empleado_referencia,
+            0::numeric AS debito,
+            SUM(ld.valor_total) AS credito,
+            SUM(ld.base_calculo) AS valor_base
+        FROM nomina.liquidacion_detalle ld
+        JOIN nomina.liquidaciones l
+            ON l.id_liquidacion = ld.id_liquidacion
+        JOIN nomina.empleado_contratos ec
+            ON ec.id_contrato = l.id_contrato
+        JOIN nomina.empleados e
+            ON e.id_empleado = ec.id_empleado
+        LEFT JOIN nomina.entidades_eps eps
+            ON eps.id_eps = ec.id_eps
+        LEFT JOIN nomina.entidades_afp afp
+            ON afp.id_afp = ec.id_afp
+        JOIN nomina.concepto_cuentas_contables ccc
+            ON ccc.codigo_concepto = ld.codigo_concepto
+           AND ccc.id_agencia = e.id_agencia
+        WHERE ld.tipo = 'DEDUCCION'
+          AND l.id_periodo_nomina = :idPeriodoNomina
+          %s
+        GROUP BY
+            e.id_agencia,
+            ccc.id_cuenta_credito,
+            e.id_datos_personal,
+            eps.id_datos_personal,
+            afp.id_datos_personal,
+            ld.codigo_concepto
+
+        UNION ALL
+
+        -- ==========================
+        -- NETO NOMINA
+        -- ==========================
+        SELECT
+            e.id_agencia,
+            pcn.id_cuenta_neto_nomina AS id_catalogo_cuenta,
+            e.id_datos_personal AS id_tercero,
+            e.id_datos_personal AS id_empleado_referencia,
+            0::numeric AS debito,
+            SUM(
                 CASE
-                    WHEN ld.codigo_concepto = 'SALUD_EMP'
-                        THEN eps.id_datos_personal
-                    WHEN ld.codigo_concepto = 'PENSION_EMP'
-                        THEN afp.id_datos_personal
-                    ELSE e.id_datos_personal
-                END AS id_tercero,
-                e.id_datos_personal AS id_empleado_referencia,
-                0::numeric AS debito,
-                SUM(ld.valor_total) AS credito,
-                SUM(ld.base_calculo) AS valor_base
-            FROM nomina.liquidacion_detalle ld
-            JOIN nomina.liquidaciones l
-                ON l.id_liquidacion = ld.id_liquidacion
-            JOIN nomina.empleado_contratos ec
-                ON ec.id_contrato = l.id_contrato
-            JOIN nomina.empleados e
-                ON e.id_empleado = ec.id_empleado
-            LEFT JOIN nomina.entidades_eps eps
-                ON eps.id_eps = ec.id_eps
-            LEFT JOIN nomina.entidades_afp afp
-                ON afp.id_afp = ec.id_afp
-            JOIN nomina.concepto_cuentas_contables ccc
-                ON ccc.codigo_concepto = ld.codigo_concepto
-               AND ccc.id_agencia = e.id_agencia
-            WHERE ld.tipo = 'DEDUCCION'
-              AND l.id_periodo_nomina = :idPeriodoNomina
-              %s
-            GROUP BY
-                e.id_agencia,
-                ccc.id_cuenta_credito,
-                e.id_datos_personal,
-                eps.id_datos_personal,
-                afp.id_datos_personal,
-                ld.codigo_concepto
+                    WHEN ld.tipo = 'DEVENGADO' THEN ld.valor_total
+                    WHEN ld.tipo = 'DEDUCCION' THEN -ld.valor_total
+                END
+            ) AS credito,
+            0::numeric AS valor_base
+        FROM nomina.liquidacion_detalle ld
+        JOIN nomina.liquidaciones l
+            ON l.id_liquidacion = ld.id_liquidacion
+        JOIN nomina.empleado_contratos ec
+            ON ec.id_contrato = l.id_contrato
+        JOIN nomina.empleados e
+            ON e.id_empleado = ec.id_empleado
+        JOIN nomina.parametros_contables_nomina pcn
+            ON pcn.id_agencia = e.id_agencia
+        WHERE l.id_periodo_nomina = :idPeriodoNomina
+          %s
+        GROUP BY
+            e.id_agencia,
+            pcn.id_cuenta_neto_nomina,
+            e.id_datos_personal
+        )
 
-            UNION ALL
-
-            -- ==========================
-            -- NETO NOMINA
-            -- ==========================
-            SELECT
-                e.id_agencia,
-                pcn.id_cuenta_neto_nomina AS id_catalogo_cuenta,
-                e.id_datos_personal AS id_tercero,
-                e.id_datos_personal AS id_empleado_referencia,
-                0::numeric AS debito,
-                SUM(
+        SELECT
+            m.id_agencia,
+            m.id_catalogo_cuenta,
+            c.codigo_cuenta,
+            c.nombre_cuenta,
+            m.id_tercero,
+            dp.documento AS documento_tercero,
+            CASE
+                WHEN dp.tipo_persona = '2' THEN COALESCE(dp.nombres, '')
+                ELSE TRIM(BOTH FROM CONCAT(
+                    COALESCE(dp.nombres, ''),
                     CASE
-                        WHEN ld.tipo = 'DEVENGADO' THEN ld.valor_total
-                        WHEN ld.tipo = 'DEDUCCION' THEN -ld.valor_total
+                        WHEN dp.primer_apellido IS NOT NULL AND dp.primer_apellido <> '' THEN ' ' || dp.primer_apellido
+                        ELSE ''
+                    END,
+                    CASE
+                        WHEN dp.segundo_apellido IS NOT NULL AND dp.segundo_apellido <> '' THEN ' ' || dp.segundo_apellido
+                        ELSE ''
                     END
-                ) AS credito,
-                0::numeric AS valor_base
-            FROM nomina.liquidacion_detalle ld
-            JOIN nomina.liquidaciones l
-                ON l.id_liquidacion = ld.id_liquidacion
-            JOIN nomina.empleado_contratos ec
-                ON ec.id_contrato = l.id_contrato
-            JOIN nomina.empleados e
-                ON e.id_empleado = ec.id_empleado
-            JOIN nomina.parametros_contables_nomina pcn
-                ON pcn.id_agencia = e.id_agencia
-            WHERE l.id_periodo_nomina = :idPeriodoNomina
-              %s
-            GROUP BY
-                e.id_agencia,
-                pcn.id_cuenta_neto_nomina,
-                e.id_datos_personal
-            )
-
-            SELECT
-                m.id_agencia,
-                m.id_catalogo_cuenta,
-                c.codigo_cuenta,
-                c.nombre_cuenta,
-                m.id_tercero,
-                dp.documento AS documento_tercero,
-                CASE
-                    WHEN dp.tipo_persona = '2' THEN COALESCE(dp.nombres, '')
-                    ELSE TRIM(BOTH FROM CONCAT(
-                        COALESCE(dp.nombres, ''),
-                        CASE
-                            WHEN dp.primer_apellido IS NOT NULL AND dp.primer_apellido <> '' THEN ' ' || dp.primer_apellido
-                            ELSE ''
-                        END,
-                        CASE
-                            WHEN dp.segundo_apellido IS NOT NULL AND dp.segundo_apellido <> '' THEN ' ' || dp.segundo_apellido
-                            ELSE ''
-                        END
-                    ))
-                END AS nombre_tercero,
-                m.id_empleado_referencia,
-                CASE
-                    WHEN dpe.tipo_persona = '2' THEN COALESCE(dpe.nombres, '')
-                    ELSE TRIM(BOTH FROM CONCAT(
-                        COALESCE(dpe.nombres, ''),
-                        CASE
-                            WHEN dpe.primer_apellido IS NOT NULL AND dpe.primer_apellido <> '' THEN ' ' || dpe.primer_apellido
-                            ELSE ''
-                        END,
-                        CASE
-                            WHEN dpe.segundo_apellido IS NOT NULL AND dpe.segundo_apellido <> '' THEN ' ' || dpe.segundo_apellido
-                            ELSE ''
-                        END
-                    ))
-                END AS nombre_empleado_referencia,
-                dpe.nombres AS nombre_empleado_referencia,
-                m.debito,
-                m.credito,
-                m.valor_base
-            FROM movimientos m
-            LEFT JOIN contabilidad.catalogo_cuentas c
-                ON c.id_catalogo_cuenta = m.id_catalogo_cuenta
-            LEFT JOIN hoja_vida.datos_personales dp
-                ON dp.id_datos_personal = m.id_tercero
-            LEFT JOIN hoja_vida.datos_personales dpe
-                ON dpe.id_datos_personal = m.id_empleado_referencia
-            ORDER BY
-                m.id_agencia,
-                c.codigo_cuenta,
-                dpe.nombres,
-                dp.nombres
-            """.formatted(filtroAgencia, filtroAgencia, filtroAgencia);
+                ))
+            END AS nombre_tercero,
+            m.id_empleado_referencia,
+            CASE
+                WHEN dpe.tipo_persona = '2' THEN COALESCE(dpe.nombres, '')
+                ELSE TRIM(BOTH FROM CONCAT(
+                    COALESCE(dpe.nombres, ''),
+                    CASE
+                        WHEN dpe.primer_apellido IS NOT NULL AND dpe.primer_apellido <> '' THEN ' ' || dpe.primer_apellido
+                        ELSE ''
+                    END,
+                    CASE
+                        WHEN dpe.segundo_apellido IS NOT NULL AND dpe.segundo_apellido <> '' THEN ' ' || dpe.segundo_apellido
+                        ELSE ''
+                    END
+                ))
+            END AS nombre_empleado_referencia,
+            dpe.nombres AS nombre_empleado_referencia,
+            m.debito,
+            m.credito,
+            m.valor_base
+        FROM movimientos m
+        LEFT JOIN contabilidad.catalogo_cuentas c
+            ON c.id_catalogo_cuenta = m.id_catalogo_cuenta
+        LEFT JOIN hoja_vida.datos_personales dp
+            ON dp.id_datos_personal = m.id_tercero
+        LEFT JOIN hoja_vida.datos_personales dpe
+            ON dpe.id_datos_personal = m.id_empleado_referencia
+        ORDER BY
+            m.id_agencia,
+            c.codigo_cuenta,
+            dpe.nombres,
+            dp.nombres
+        """.formatted(filtroAgencia, filtroAgencia, filtroAgencia);
     }
 
     public boolean comprobanteExiste(String tipoComprobante,

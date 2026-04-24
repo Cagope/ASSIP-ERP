@@ -158,6 +158,8 @@ public class LiquidacionV2Service {
                 idUsuario
         );
 
+        actualizarNovedadesCalculadas(devengados, deducciones, idUsuario);
+
         // =====================================================
         // 🔒 MARCAR NOVEDADES ABIERTAS COMO APLICADAS
         // =====================================================
@@ -247,4 +249,40 @@ public class LiquidacionV2Service {
             );
         }
     }
+
+    private void actualizarNovedadesCalculadas(
+            List<LiquidacionDetalleDTO> devengados,
+            List<LiquidacionDetalleDTO> deducciones,
+            Integer idUsuario
+    ) {
+
+        // DEVENGADOS
+        for (LiquidacionDetalleDTO d : devengados) {
+
+            if (!"NOVEDAD".equals(d.getOrigen())) continue;
+            if (d.getIdNovedadNomina() == null) continue;
+
+            novedadesRepo.actualizarValorNovedad(
+                    d.getIdNovedadNomina(),
+                    d.getValorTotal(),
+                    d.getCantidad(),
+                    idUsuario
+            );
+        }
+
+        // DEDUCCIONES (por si alguna aplica en futuro)
+        for (LiquidacionDetalleDTO d : deducciones) {
+
+            if (!"NOVEDAD".equals(d.getOrigen())) continue;
+            if (d.getIdNovedadNomina() == null) continue;
+
+            novedadesRepo.actualizarValorNovedad(
+                    d.getIdNovedadNomina(),
+                    d.getValorTotal(),
+                    d.getCantidad(),
+                    idUsuario
+            );
+        }
+    }
+
 }

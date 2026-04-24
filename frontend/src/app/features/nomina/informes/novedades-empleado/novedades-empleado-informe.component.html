@@ -1,0 +1,177 @@
+<div class="page">
+
+  <h2>Informe novedades por empleado</h2>
+  <p class="subtitle">
+    Consulta histórica de novedades por documento, empleado o concepto.
+  </p>
+
+  <div class="card">
+
+    <div class="form-grid">
+
+      <div class="form-group full">
+        <label>Empleado</label>
+
+        <app-empleado-autocomplete
+          [(ngModel)]="idEmpleado">
+        </app-empleado-autocomplete>
+      </div>
+
+      <div class="form-group">
+        <label>Documento</label>
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="documento"
+          placeholder="Filtro adicional por cédula">
+      </div>
+
+      <div class="form-group">
+        <label>Concepto</label>
+
+        <select
+          class="form-control"
+          [(ngModel)]="codigoConcepto">
+
+          <option [ngValue]="null">
+            -- Todos --
+          </option>
+
+          <option
+            *ngFor="let c of conceptos"
+            [ngValue]="c.codigoConcepto">
+            {{ c.codigoConcepto }} — {{ c.nombreConcepto }}
+          </option>
+
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Fecha inicial</label>
+        <input
+          type="date"
+          class="form-control"
+          [(ngModel)]="fechaInicial">
+      </div>
+
+      <div class="form-group">
+        <label>Fecha final</label>
+        <input
+          type="date"
+          class="form-control"
+          [(ngModel)]="fechaFinal">
+      </div>
+
+    </div>
+
+    <div class="actions-process">
+
+      <div class="actions-process-left">
+        <button
+          type="button"
+          class="btn-work-secondary"
+          (click)="limpiar()">
+          🧹 Limpiar
+        </button>
+
+        <button
+          type="button"
+          class="btn-work-secondary"
+          (click)="exportarExcel()"
+          [disabled]="rows.length === 0">
+          📄 Exportar Excel
+        </button>
+
+      </div>
+
+      <div class="actions-process-right">
+        <button
+          type="button"
+          class="btn-work-primary"
+          (click)="consultar()"
+          [disabled]="cargando">
+          {{ cargando ? '⏳ Consultando...' : '🔎 Consultar' }}
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <div class="card resumen" *ngIf="rows.length > 0">
+    <div>
+      <strong>Registros:</strong> {{ rows.length }}
+    </div>
+    <div>
+      <strong>Total valor:</strong> {{ totalValor | number:'1.0-0' }}
+    </div>
+  </div>
+
+  <div class="card tabla-card">
+
+    <div *ngIf="cargando" class="loading">
+      Consultando...
+    </div>
+
+    <div *ngIf="!cargando && rows.length === 0" class="empty">
+      No hay registros para mostrar.
+    </div>
+
+    <div class="table-responsive" *ngIf="!cargando && rows.length > 0">
+
+      <table class="table table-sm table-bordered table-hover align-middle">
+
+        <thead>
+        <tr>
+          <th>Período</th>
+          <th>Agencia</th>
+          <th>Documento</th>
+          <th>Empleado</th>
+          <th>Concepto</th>
+          <th>Nombre concepto</th>
+          <th>Fechas</th>
+          <th>Tipo</th>
+          <th>Inicio</th>
+          <th>Fin</th>
+          <th>Cantidad</th>
+          <th>Valor</th>
+          <th>Origen</th>
+          <th>Estado</th>
+          <th>Observación</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let r of rows">
+          <td>{{ r.anio }}-{{ r.mes | number:'2.0-0' }} P{{ r.numeroPeriodo }}</td>
+          <td>{{ r.codigoAgencia }} - {{ r.nombreAgencia }}</td>
+          <td>{{ r.documento }}</td>
+          <td>{{ r.nombreEmpleado }}</td>
+          <td>{{ r.codigoConcepto }}</td>
+          <td>{{ r.nombreConcepto }}</td>
+          <td>
+            {{ r.fechaInicial | date:'dd/MM/yyyy' }}
+            <span *ngIf="r.fechaFinal"> - {{ r.fechaFinal | date:'dd/MM/yyyy' }}</span>
+          </td>
+          <td>{{ r.tipoConcepto }}</td>
+          <td>{{ r.fechaInicial | date:'dd/MM/yyyy' }}</td>
+          <td>{{ r.fechaFinal | date:'dd/MM/yyyy' }}</td>
+          <td class="text-end">{{ r.cantidad | number:'1.0-2' }}</td>
+          <td class="text-end">{{ r.valor | number:'1.0-0' }}</td>
+          <td>{{ r.origen }}</td>
+          <td>{{ r.estado }}</td>
+          <td>{{ r.observacion }}</td>
+        </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>

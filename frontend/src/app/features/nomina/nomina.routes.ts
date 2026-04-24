@@ -25,6 +25,10 @@ import { LIQUIDACION_V2_ROUTES } from './liquidacion-v2/liquidacion-v2.routes';
 
 // ✅ NUEVO: Eventos de liquidación
 import { EVENTOS_LIQUIDACION_ROUTES } from './eventos-liquidacion/eventos-liquidacion.routes';
+import { NOVEDADES_EMPLEADO_INFORME_ROUTES } from './informes/novedades-empleado/novedades-empleado.routes';
+
+import { NOVEDADES_CONCEPTO_INFORME_ROUTES } from './informes/novedades-concepto/novedades-concepto.routes';
+import { CONSOLIDADO_CONCEPTOS_INFORME_ROUTES } from './informes/consolidado-conceptos/consolidado-conceptos.routes';
 
 export const NOMINA_ROUTES: Routes = [
 
@@ -162,5 +166,33 @@ export const NOMINA_ROUTES: Routes = [
     path: 'liquidacion-v2',
     children: LIQUIDACION_V2_ROUTES
   },
+
+  // =========================
+  // 📊 INFORMES
+  // =========================
+  {
+    path: 'informes/novedades-empleado',
+    children: NOVEDADES_EMPLEADO_INFORME_ROUTES
+  },
+  {
+    path: 'informes/novedades-concepto',
+    children: NOVEDADES_CONCEPTO_INFORME_ROUTES
+  },
+
+  // =========================
+  // 📊 INFORMES
+  // =========================
+  {
+    path: 'informes/novedades-empleado',
+    children: NOVEDADES_EMPLEADO_INFORME_ROUTES
+  },
+  {
+    path: 'informes/novedades-concepto',
+    children: NOVEDADES_CONCEPTO_INFORME_ROUTES
+  },
+  {
+    path: 'informes/consolidado-conceptos',
+    children: CONSOLIDADO_CONCEPTOS_INFORME_ROUTES
+  }
 
 ];

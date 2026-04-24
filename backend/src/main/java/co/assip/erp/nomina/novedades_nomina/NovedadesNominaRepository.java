@@ -661,4 +661,32 @@ public class NovedadesNominaRepository {
         );
     }
 
+    public void actualizarValorNovedad(
+            Integer idNovedad,
+            java.math.BigDecimal valor,
+            java.math.BigDecimal cantidad,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+        UPDATE nomina.novedades_nomina
+        SET
+          valor = :valor,
+          cantidad = :cantidad,
+          fk_seguridad_edicion = :usr,
+          fecha_edicion = CURRENT_TIMESTAMP
+        WHERE id_novedad = :id
+          AND origen = 'CALCULO'
+    """;
+
+        jdbc.update(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("id", idNovedad)
+                        .addValue("valor", valor)
+                        .addValue("cantidad", cantidad)
+                        .addValue("usr", idUsuario != null ? idUsuario : 1)
+        );
+    }
+
 }

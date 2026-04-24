@@ -23,18 +23,20 @@
 
     </div>
 
-    <div class="actions">
+    <div class="table-actions">
+
       <button
-        class="btn btn-primary"
+        class="btn-table-primary"
         (click)="nuevo()">
-        Nuevo
+        ➕ Nuevo
       </button>
 
       <button
-        class="btn"
+        class="btn-table-secondary"
         (click)="cargar()">
-        Refrescar
+        🔄 Refrescar
       </button>
+
     </div>
 
   </div>
@@ -104,18 +106,20 @@
               </span>
           </td>
           <td>
-            <div class="acciones-tabla">
+            <div class="row-actions">
 
               <button
-                class="btn-action btn-action-primary"
-                (click)="editar(row)">
-                Editar
+                class="btn-icon"
+                (click)="editar(row)"
+                title="Editar">
+                ✏️
               </button>
 
               <button
-                class="btn-action btn-action-danger"
-                (click)="eliminar(row)">
-                Eliminar
+                class="btn-icon danger"
+                (click)="eliminar(row)"
+                title="Eliminar">
+                🗑️
               </button>
 
             </div>

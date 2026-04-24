@@ -83,39 +83,47 @@
 
       </div>
 
-      <div class="actions">
+      <div class="actions-process">
 
-        <button
-          class="btn btn-primary"
-          (click)="preview()"
-          [disabled]="!esPeriodoCerrado || cargando || ejecutando"
-        >
-          {{ cargando ? 'Consultando...' : 'Preview' }}
-        </button>
+        <div class="actions-process-left">
 
-        <button
-          class="btn btn-success"
-          (click)="ejecutar()"
-          [disabled]="!esPeriodoCerrado || movimientos.length === 0 || cargando || ejecutando"
-        >
-          {{ ejecutando ? 'Contabilizando...' : 'Contabilizar' }}
-        </button>
+          <button
+            type="button"
+            class="btn-work-secondary"
+            (click)="preview()"
+            [disabled]="!esPeriodoCerrado || cargando || ejecutando">
+            {{ cargando ? '⏳ Consultando...' : '👁️ Preview' }}
+          </button>
 
-        <button
-          class="btn btn-warning"
-          (click)="reversar()"
-          [disabled]="!esPeriodoContabilizado || reversando || cargando"
-        >
-          {{ reversando ? 'Reversando...' : 'Reversar contabilización' }}
-        </button>
+          <button
+            type="button"
+            class="btn-work-secondary"
+            (click)="exportarExcel()"
+            [disabled]="movimientos.length === 0">
+            📄 Exportar Excel
+          </button>
 
-        <button
-          class="btn btn-secondary"
-          (click)="exportarExcel()"
-          [disabled]="movimientos.length === 0"
-        >
-          Exportar Excel
-        </button>
+        </div>
+
+        <div class="actions-process-right">
+
+          <button
+            type="button"
+            class="btn-work-primary"
+            (click)="ejecutar()"
+            [disabled]="!esPeriodoCerrado || movimientos.length === 0 || cargando || ejecutando">
+            {{ ejecutando ? '⏳ Contabilizando...' : '▶ Contabilizar' }}
+          </button>
+
+          <button
+            type="button"
+            class="btn-work-danger"
+            (click)="reversar()"
+            [disabled]="!esPeriodoContabilizado || reversando || cargando">
+            {{ reversando ? '⏳ Reversando...' : '⟲ Reversar contabilización' }}
+          </button>
+
+        </div>
 
       </div>
 

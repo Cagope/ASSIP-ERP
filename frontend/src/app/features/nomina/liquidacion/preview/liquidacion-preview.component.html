@@ -4,7 +4,7 @@
   <!-- 🧭 HEADER -->
   <!-- ===================================================== -->
   <app-header-actions
-    titulo="Liquidación de Nómina"
+    titulo="Liquidación de Nómina Versión 1"
     [mostrarNuevo]="false"
     [mostrarImprimir]="false"
     [mostrarExportar]="false">
@@ -46,8 +46,8 @@
       </div>
 
       <!-- =========================
-     PERÍODO (AUTOMÁTICO)
-     ========================= -->
+           PERÍODO (AUTOMÁTICO)
+           ========================= -->
       <div class="form-group">
         <label>Período de nómina</label>
 
@@ -59,19 +59,20 @@
         />
       </div>
 
-      <!-- =========================
-           ACCIÓN
-           ========================= -->
-      <div class="form-group actions">
-        <button
-          type="submit"
-          class="btn primary"
-          [disabled]="cargando">
-          👁️ Generar preview
-        </button>
-      </div>
-
     </div>
+
+    <!-- =========================
+         ACCIÓN PREVIEW
+         ========================= -->
+    <div class="preview-actions">
+      <button
+        type="submit"
+        class="btn-preview"
+        [disabled]="cargando || form.invalid">
+        {{ cargando ? '⏳ GENERANDO PREVIEW...' : '👁️ GENERAR PREVIEW' }}
+      </button>
+    </div>
+
   </form>
 
   <!-- ===================================================== -->

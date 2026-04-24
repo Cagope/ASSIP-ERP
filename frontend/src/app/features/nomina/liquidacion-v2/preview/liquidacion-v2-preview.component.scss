@@ -320,3 +320,95 @@
     }
   }
 }
+
+.btn-preview {
+  min-width: 200px;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid #d6dbe6;
+  border-radius: 6px;
+  background: #f8f9fb;
+  color: #374151;
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: all .2s ease;
+}
+
+.btn-preview:hover:not(:disabled) {
+  background: #eef3ff;
+  border-color: #9bb3f0;
+  color: #1f3a8a;
+}
+
+.btn-preview:active:not(:disabled) {
+  background: #dde7ff;
+}
+
+.btn-preview:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.acciones-finales {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.acciones-left,
+.acciones-right {
+  display: flex;
+  gap: 8px;
+}
+
+/* =========================
+   Botones proceso
+========================= */
+
+/* acción principal */
+.btn-work-primary {
+  height: 34px;
+  padding: 0 16px;
+  border-radius: 6px;
+  border: none;
+  background: #16a34a;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-work-primary:hover:not(:disabled) {
+  background: #15803d;
+}
+
+/* acciones secundarias */
+.btn-work-secondary {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 6px;
+  border: 1px solid #d6dbe6;
+  background: #f8f9fb;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.btn-work-secondary:hover:not(:disabled) {
+  background: #eef2f7;
+}
+
+/* disabled */
+.btn-work-primary:disabled,
+.btn-work-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

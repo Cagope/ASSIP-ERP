@@ -83,39 +83,49 @@
 
       </div>
 
-      <div class="actions">
+      <div class="actions-process">
 
-        <button
-          class="btn btn-primary"
-          (click)="preview()"
-          [disabled]="!esPeriodoContabilizado || cargando || ejecutando"
-        >
-          {{ cargando ? 'Consultando...' : 'Preview' }}
-        </button>
+        <!-- IZQUIERDA -->
+        <div class="actions-process-left">
 
-        <button
-          class="btn btn-success"
-          (click)="ejecutar()"
-          [disabled]="!esPeriodoContabilizado || movimientos.length === 0 || cargando || ejecutando || comprobanteExistente"
-        >
-          {{ ejecutando ? 'Contabilizando...' : 'Contabilizar' }}
-        </button>
+          <button
+            type="button"
+            class="btn-work-secondary"
+            (click)="preview()"
+            [disabled]="!esPeriodoContabilizado || cargando || ejecutando">
+            {{ cargando ? '⏳ Consultando...' : '👁️ Preview' }}
+          </button>
 
-        <button
-          class="btn btn-warning"
-          (click)="reversar()"
-          [disabled]="!esPeriodoContabilizado || reversando || cargando || !comprobanteExistente"
-        >
-          {{ reversando ? 'Reversando...' : 'Reversar contabilización' }}
-        </button>
+          <button
+            type="button"
+            class="btn-work-secondary"
+            (click)="exportarExcel()"
+            [disabled]="movimientos.length === 0">
+            📄 Exportar Excel
+          </button>
 
-        <button
-          class="btn btn-secondary"
-          (click)="exportarExcel()"
-          [disabled]="movimientos.length === 0"
-        >
-          Exportar Excel
-        </button>
+        </div>
+
+        <!-- DERECHA -->
+        <div class="actions-process-right">
+
+          <button
+            type="button"
+            class="btn-work-primary"
+            (click)="ejecutar()"
+            [disabled]="!esPeriodoContabilizado || movimientos.length === 0 || cargando || ejecutando || comprobanteExistente">
+            {{ ejecutando ? '⏳ Contabilizando...' : '▶ Contabilizar' }}
+          </button>
+
+          <button
+            type="button"
+            class="btn-work-danger"
+            (click)="reversar()"
+            [disabled]="!esPeriodoContabilizado || reversando || cargando || !comprobanteExistente">
+            {{ reversando ? '⏳ Reversando...' : '⟲ Reversar' }}
+          </button>
+
+        </div>
 
       </div>
 
