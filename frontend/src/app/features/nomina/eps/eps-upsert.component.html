@@ -50,14 +50,24 @@
 
     </div>
 
-    <div class="actions">
-      <button class="btn btn-primary" (click)="guardar()" [disabled]="guardando">
-        {{ guardando ? 'Guardando...' : 'Guardar' }}
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="volver()"
+        [disabled]="guardando">
+        ❌ Cancelar
       </button>
 
-      <button class="btn btn-light" (click)="volver()" [disabled]="guardando">
-        Cancelar
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="guardar()"
+        [disabled]="guardando">
+        {{ guardando ? '⏳ Guardando...' : '💾 Guardar' }}
       </button>
+
     </div>
   </div>
 

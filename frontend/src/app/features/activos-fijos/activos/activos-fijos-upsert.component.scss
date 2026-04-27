@@ -1,90 +1,137 @@
-.activos-fijos-upsert {
+.page {
+  padding: 16px;
+}
 
-  h5 {
-    margin-bottom: 1rem;
-    font-weight: 600;
-    text-transform: lowercase;
-    color: #1f2937;
+.form-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.form-title {
+  margin-bottom: 18px;
+
+  h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    text-transform: none;
   }
 
-  .form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
+  p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: #6b7280;
   }
+}
 
-  input[type='text'],
-  input[type='number'],
-  input[type='date'],
-  select {
-    width: 100%;
-    padding: 0.4rem 0.6rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.25rem;
-    font-size: 0.9rem;
-    transition: border-color 0.2s ease-in-out;
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
 
-    &:focus {
-      outline: none;
-      border-color: #2563eb;
-      box-shadow: 0 0 0 1px #2563eb33;
-    }
+.form-group.full {
+  grid-column: 1 / -1;
+}
 
-    &:disabled {
-      background-color: #f9fafb;
-      color: #6b7280;
-    }
-  }
+.form-control,
+input[type='text'],
+input[type='number'],
+input[type='date'],
+select {
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+}
 
-  /* 🔹 Alineación derecha en campos numéricos */
-  input[formcontrolname='mesesDepreciacion'],
-  input[formcontrolname='valorAdquisicion'],
-  input[formcontrolname='valorMensual'],
-  input[formcontrolname='idFormaDepreciacion'],
-  input[formcontrolname='idEstadoActivo'],
-  input[formcontrolname='idTipoAdquisicion'],
-  input[formcontrolname='idAgencia'],
-  input[formcontrolname='idUbicacion'],
-  input[formcontrolname='idBloque'],
-  input[formcontrolname='idDatosPersonalResponsable'],
-  input[formcontrolname='idDatosPersonalProveedor'],
-  input[formcontrolname='idCatalogoCuentaActivo'],
-  input[formcontrolname='idCatalogoCuentaDepreciacion'],
-  input[formcontrolname='idCatalogoCuentaGasto'],
-  input[formcontrolname='idCatalogoCuentaControl'],
-  input[formcontrolname='idCatalogoCuentaIva'] {
-    text-align: right;
-  }
+.form-control:focus,
+input[type='text']:focus,
+input[type='number']:focus,
+input[type='date']:focus,
+select:focus {
+  outline: none;
+  border-color: #198754;
+  box-shadow: 0 0 0 2px rgba(25, 135, 84, 0.15);
+}
 
-  .form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.8rem;
-    margin-top: 1rem;
-  }
+input[type='number'],
+.text-right {
+  text-align: right;
+}
 
-  .error {
-    color: #dc2626;
-    font-size: 0.75rem;
-    margin-top: 0.2rem;
-  }
+.autocomplete {
+  position: relative;
+}
 
-  button.btn.sm.primary {
-    background-color: #2563eb;
-    color: #fff;
-    border: 1px solid #1d4ed8;
-  }
+.autocomplete-list {
+  position: absolute;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  margin-top: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 20;
+}
 
-  button.btn.sm.primary:hover {
-    background-color: #1d4ed8;
-  }
+.autocomplete-list li {
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 13px;
+}
 
-  button.btn.sm.danger {
-    border-color: #fca5a5;
-    color: #dc2626;
-  }
+.autocomplete-list li:hover {
+  background: #f3f4f6;
+}
 
-  button.btn.sm.danger:hover {
-    background-color: #fee2e2;
-  }
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 6px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn--primary {
+  background: #198754;
+  color: #fff;
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: #157347;
+}
+
+.btn--secondary {
+  background: #fff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

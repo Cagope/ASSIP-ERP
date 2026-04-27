@@ -268,13 +268,28 @@
     </div>
 
     <!-- =========================
-         ACCIONES
-         ========================= -->
+     ACCIONES
+     ========================= -->
     <div class="card full-width footer-card">
-      <div class="actions">
-        <button type="button" class="btn" (click)="cancelar()">Cancelar</button>
-        <button type="button" class="btn btn-primary" (click)="guardar()">Guardar</button>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="cancelar()">
+          ❌ Cancelar
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="guardar()">
+          💾 Guardar
+        </button>
+
       </div>
+
     </div>
 
   </form>

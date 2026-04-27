@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 /* =========================================================
-   DTOs (ALINEADOS 100% CON EL BACKEND)
+   DTOs
    ========================================================= */
 
 export interface ConceptoCuentaContableListDTO {
@@ -30,8 +30,8 @@ export interface ConceptoCuentaContableFormDTO {
   codigoConcepto: string;
   idAgencia: number;
 
-  idCuentaDebito: number;
-  idCuentaCredito: number;
+  idCuentaDebito: number | null;
+  idCuentaCredito: number | null;
 
   activo: boolean;
 }
@@ -52,10 +52,20 @@ export class ConceptoCuentasContablesApi {
   constructor(private http: HttpClient) {}
 
   // =========================================================
-  // LISTAR (GLOBAL u opcional por agencia)
+  // LISTAR (con filtro opcional por agencia)
   // =========================================================
-  listar(): Observable<ConceptoCuentaContableListDTO[]> {
-    return this.http.get<ConceptoCuentaContableListDTO[]>(this.base);
+  listar(idAgencia?: number): Observable<ConceptoCuentaContableListDTO[]> {
+
+    let params = new HttpParams();
+
+    if (idAgencia !== undefined && idAgencia !== null) {
+      params = params.set('idAgencia', idAgencia);
+    }
+
+    return this.http.get<ConceptoCuentaContableListDTO[]>(
+      this.base,
+      { params }
+    );
   }
 
   // =========================================================
@@ -89,7 +99,7 @@ export class ConceptoCuentasContablesApi {
   }
 
   // =========================================================
-  // ELIMINAR (SOFT DELETE)
+  // ELIMINAR (SOFT)
   // =========================================================
   eliminar(idMapeo: number): Observable<void> {
     return this.http.delete<void>(

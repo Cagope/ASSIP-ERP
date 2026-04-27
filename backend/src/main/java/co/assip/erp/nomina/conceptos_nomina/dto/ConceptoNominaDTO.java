@@ -1,6 +1,7 @@
 package co.assip.erp.nomina.conceptos_nomina.dto;
 
 import lombok.*;
+
 import java.math.BigDecimal;
 
 @Getter
@@ -17,8 +18,18 @@ public class ConceptoNominaDTO {
     private Boolean esFijo;
     private Boolean activo;
 
-    // 🔥 NUEVOS CAMPOS
     private String tipoCalculo;
     private String baseCalculo;
     private BigDecimal multiplicador;
+
+    private Boolean afectaIbc;
+    private Boolean afectaBaseCesantias;
+    private Boolean afectaBasePrimaLegal;
+    private Boolean afectaBaseVacaciones;
+    private Boolean afectaBasePrimaSemestral;
+    private Boolean afectaBaseArl;
+    private Boolean afectaBaseParafiscales;
+
+    private BigDecimal smmlvDesde;
+    private BigDecimal smmlvHasta;
 }

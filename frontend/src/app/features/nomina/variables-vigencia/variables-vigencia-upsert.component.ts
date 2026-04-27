@@ -28,6 +28,10 @@ export class VariablesVigenciaUpsertComponent implements OnInit {
 
   form: VariablesVigenciaFormDTO = this.nuevo();
 
+  // =========================================================
+  // INIT
+  // =========================================================
+
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     this.id = idParam ? +idParam : null;
@@ -36,6 +40,10 @@ export class VariablesVigenciaUpsertComponent implements OnInit {
       this.cargar(this.id);
     }
   }
+
+  // =========================================================
+  // CARGAR
+  // =========================================================
 
   cargar(id: number): void {
     this.loading = true;
@@ -57,20 +65,50 @@ export class VariablesVigenciaUpsertComponent implements OnInit {
     });
   }
 
+  // =========================================================
+  // GUARDAR
+  // =========================================================
+
   guardar(): void {
-    // ✅ validaciones mínimas
+
+    // =========================
+    // VALIDACIONES
+    // =========================
+
     if (!this.form.fechaInicial || !this.form.fechaFinal) {
       alert('Debe indicar Fecha inicial y Fecha final.');
       return;
     }
+
     if ((this.form.smmlv ?? 0) <= 0) {
       alert('El SMMLV debe ser mayor a cero.');
+      return;
+    }
+
+    if ((this.form.auxTransporte ?? 0) < 0) {
+      alert('El auxilio de transporte no puede ser negativo.');
+      return;
+    }
+
+    if ((this.form.horasMes ?? 0) <= 0) {
+      alert('Las horas del mes deben ser mayores a cero.');
+      return;
+    }
+
+    if ((this.form.diasMes ?? 0) <= 0) {
+      alert('Los días del mes deben ser mayores a cero.');
+      return;
+    }
+
+    if ((this.form.topeIbcMaxSmmlv ?? 0) < (this.form.topeIbcMinSmmlv ?? 0)) {
+      alert('El tope máximo IBC no puede ser menor que el tope mínimo.');
       return;
     }
 
     this.guardando = true;
 
     if (this.id) {
+
       this.api.actualizar(this.id, this.form).subscribe({
         next: () => {
           this.guardando = false;
@@ -82,7 +120,9 @@ export class VariablesVigenciaUpsertComponent implements OnInit {
           alert('No se pudo actualizar.');
         }
       });
+
     } else {
+
       this.api.crear(this.form).subscribe({
         next: () => {
           this.guardando = false;
@@ -94,15 +134,25 @@ export class VariablesVigenciaUpsertComponent implements OnInit {
           alert('No se pudo crear.');
         }
       });
+
     }
   }
+
+  // =========================================================
+  // VOLVER
+  // =========================================================
 
   volver(): void {
     this.router.navigate(['/nomina/variables-vigencia']);
   }
 
+  // =========================================================
+  // NUEVO
+  // =========================================================
+
   private nuevo(): VariablesVigenciaFormDTO {
     return {
+
       fechaInicial: '',
       fechaFinal: '',
 
@@ -120,6 +170,7 @@ export class VariablesVigenciaUpsertComponent implements OnInit {
       porcIcbf: 0,
 
       porProvisionPrima: 0,
+      porProvisionPrimaSemestral: 0,
       porProvisionVacaciones: 0,
       porProvisionCesantias: 0,
       porProvisionInteresCesantias: 0,
@@ -127,8 +178,15 @@ export class VariablesVigenciaUpsertComponent implements OnInit {
       topeIbcMinSmmlv: 1,
       topeIbcMaxSmmlv: 25,
 
+      horasMes: 240,
+      diasMes: 30,
+
       exoneradoSalud: false,
       exoneradoParafiscales: false,
+
+      aplicaCajaCompensacion: true,
+      aplicaSena: true,
+      aplicaIcbf: true,
 
       activo: true
     };

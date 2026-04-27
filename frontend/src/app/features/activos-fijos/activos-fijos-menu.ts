@@ -3,13 +3,8 @@ export const activosFijosMenu = {
   items: [
 
     // ======================================================
-    // ✅ ACTUALIZACIONES
+    // 🔧 MAESTROS
     // ======================================================
-    {
-      label: 'Activos fijos',
-      route: '/activos-fijos/activos',
-      permiso: 'ACTIVOS_FIJOS_VIEW'
-    },
     {
       label: 'Localizaciones',
       route: '/activos-fijos/localizaciones',
@@ -22,8 +17,13 @@ export const activosFijosMenu = {
     },
 
     // ======================================================
-    // ✅ INGRESO
+    // 🧾 OPERACIÓN
     // ======================================================
+    {
+      label: 'Activos fijos',
+      route: '/activos-fijos/activos',
+      permiso: 'ACTIVOS_FIJOS_VIEW'
+    },
     {
       label: 'Ingreso de activos',
       route: '/activos-fijos/ingreso',
@@ -31,7 +31,7 @@ export const activosFijosMenu = {
     },
 
     // ======================================================
-    // ✅ PROCESOS
+    // ⚙️ PROCESOS
     // ======================================================
     {
       label: 'Depreciación mensual',
@@ -40,7 +40,7 @@ export const activosFijosMenu = {
     },
 
     // ======================================================
-    // ✅ INFORMES
+    // 📊 INFORMES
     // ======================================================
     {
       label: 'Maestro de activos',

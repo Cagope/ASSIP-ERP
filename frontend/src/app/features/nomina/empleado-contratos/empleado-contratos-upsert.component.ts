@@ -93,7 +93,8 @@ export class EmpleadoContratosUpsertComponent implements OnInit {
     fechaEnvioNotaRenovacion: null,
     claseRiesgoArl: 1,
     porcentajeArl: 0,
-    activo: true
+    activo: true,
+    liquidaPrimaSemestral: false
   };
 
   ngOnInit(): void {
@@ -271,8 +272,33 @@ export class EmpleadoContratosUpsertComponent implements OnInit {
       return;
     }
 
+    if (!this.form.salarioBase || this.form.salarioBase <= 0) {
+      alert('El salario base debe ser mayor a 0.');
+      return;
+    }
+
+    if (!this.form.periodoPago) {
+      alert('Debe seleccionar el período de pago.');
+      return;
+    }
+
+    if (this.form.fechaFin && this.form.fechaFin < this.form.fechaInicio) {
+      alert('La fecha fin no puede ser menor que la fecha inicio.');
+      return;
+    }
+
     if (!this.form.idCuentaAhorroNomina) {
       alert('Debe seleccionar la cuenta de nómina.');
+      return;
+    }
+
+    if (!this.form.claseRiesgoArl || this.form.claseRiesgoArl < 1 || this.form.claseRiesgoArl > 5) {
+      alert('La clase de riesgo ARL debe estar entre 1 y 5.');
+      return;
+    }
+
+    if (this.form.porcentajeArl == null || this.form.porcentajeArl < 0) {
+      alert('El porcentaje ARL no puede ser negativo.');
       return;
     }
 
@@ -308,7 +334,6 @@ export class EmpleadoContratosUpsertComponent implements OnInit {
 
     }
   }
-
 
   volver(): void {
     this.router.navigate(['/nomina/empleado-contratos']);

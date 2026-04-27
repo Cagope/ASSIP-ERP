@@ -31,6 +31,7 @@ public class VariablesVigenciaDTO {
     private BigDecimal porcIcbf;
 
     private BigDecimal porProvisionPrima;
+    private BigDecimal porProvisionPrimaSemestral;
     private BigDecimal porProvisionVacaciones;
     private BigDecimal porProvisionCesantias;
     private BigDecimal porProvisionInteresCesantias;
@@ -38,8 +39,15 @@ public class VariablesVigenciaDTO {
     private BigDecimal topeIbcMinSmmlv;
     private BigDecimal topeIbcMaxSmmlv;
 
+    private BigDecimal horasMes;
+    private BigDecimal diasMes;
+
     private Boolean exoneradoSalud;
     private Boolean exoneradoParafiscales;
+
+    private Boolean aplicaCajaCompensacion;
+    private Boolean aplicaSena;
+    private Boolean aplicaIcbf;
 
     private Boolean activo;
 }

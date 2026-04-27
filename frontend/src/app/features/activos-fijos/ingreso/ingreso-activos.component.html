@@ -530,13 +530,7 @@
     </div>
   </div>
 
-  <pre style="background:#f5f5f5; padding:8px; font-size:12px;">
-  form.valid: {{ form.valid }}
-  totalValorHistorico: {{ totalValorHistorico }}
-  puedeGuardar: {{ puedeGuardar }}
-  </pre>
-
-  <!-- =====================================================
+    <!-- =====================================================
      VISTA PREVIA CONTABLE
      ===================================================== -->
   <div class="card" *ngIf="lineasContables.length">
@@ -598,17 +592,21 @@
   <!-- =====================================================
        ACCIONES
        ===================================================== -->
-  <div class="actions">
-    <button type="button" class="btn btn-secondary" (click)="cancelar()">
-      Cancelar
-    </button>
+  <div class="form-actions">
+
     <button
       type="button"
-      class="btn btn-success"
+      class="btn btn--secondary"
+      (click)="cancelar()">
+      ❌ Cancelar
+    </button>
+
+    <button
+      type="button"
+      class="btn btn--primary"
       (click)="guardar()"
-      [disabled]="!puedeGuardar"
-    >
-      Guardar
+      [disabled]="!puedeGuardar">
+      💾 Guardar
     </button>
 
   </div>

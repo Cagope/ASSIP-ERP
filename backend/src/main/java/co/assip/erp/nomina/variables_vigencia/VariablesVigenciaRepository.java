@@ -17,7 +17,7 @@ public class VariablesVigenciaRepository {
     private final NamedParameterJdbcTemplate jdbc;
 
     // ============================================================
-    // ✅ LISTAR
+    // LISTAR
     // ============================================================
     public List<VariablesVigenciaDTO> listar() {
 
@@ -28,53 +28,45 @@ public class VariablesVigenciaRepository {
               v.fecha_final                       AS fechaFinal,
               v.smmlv                             AS smmlv,
               v.aux_transporte                    AS auxTransporte,
-              v.porc_salud_empleado               AS porcSaludEmpleado,
-              v.porc_salud_empleador              AS porcSaludEmpleador,
-              v.porc_pension_empleado             AS porcPensionEmpleado,
-              v.porc_pension_empleador            AS porcPensionEmpleador,
-              v.porc_caja_compensacion            AS porcCajaCompensacion,
-              v.porc_sena                         AS porcSena,
-              v.porc_icbf                         AS porcIcbf,
-              v.por_provision_prima               AS porProvisionPrima,
-              v.por_provision_vacaciones          AS porProvisionVacaciones,
-              v.por_provision_cesantias           AS porProvisionCesantias,
-              v.por_provision_interes_cesantias   AS porProvisionInteresCesantias,
-              v.tope_ibc_min_smmlv                AS topeIbcMinSmmlv,
-              v.tope_ibc_max_smmlv                AS topeIbcMaxSmmlv,
-              v.exonerado_salud                   AS exoneradoSalud,
-              v.exonerado_parafiscales            AS exoneradoParafiscales,
-              v.activo                            AS activo
+
+              v.porc_salud_empleado              AS porcSaludEmpleado,
+              v.porc_salud_empleador             AS porcSaludEmpleador,
+              v.porc_pension_empleado            AS porcPensionEmpleado,
+              v.porc_pension_empleador           AS porcPensionEmpleador,
+
+              v.porc_caja_compensacion           AS porcCajaCompensacion,
+              v.porc_sena                        AS porcSena,
+              v.porc_icbf                        AS porcIcbf,
+
+              v.por_provision_prima              AS porProvisionPrima,
+              v.por_provision_prima_semestral    AS porProvisionPrimaSemestral,
+              v.por_provision_vacaciones         AS porProvisionVacaciones,
+              v.por_provision_cesantias          AS porProvisionCesantias,
+              v.por_provision_interes_cesantias  AS porProvisionInteresCesantias,
+
+              v.tope_ibc_min_smmlv               AS topeIbcMinSmmlv,
+              v.tope_ibc_max_smmlv               AS topeIbcMaxSmmlv,
+
+              v.horas_mes                        AS horasMes,
+              v.dias_mes                         AS diasMes,
+
+              v.exonerado_salud                  AS exoneradoSalud,
+              v.exonerado_parafiscales           AS exoneradoParafiscales,
+
+              v.aplica_caja_compensacion         AS aplicaCajaCompensacion,
+              v.aplica_sena                      AS aplicaSena,
+              v.aplica_icbf                      AS aplicaIcbf,
+
+              v.activo                           AS activo
             FROM nomina.variables_vigencia v
             ORDER BY v.fecha_inicial DESC, v.id_variable DESC
         """;
 
-        return jdbc.query(sql, (rs, rowNum) -> VariablesVigenciaDTO.builder()
-                .idVariable(rs.getInt("idVariable"))
-                .fechaInicial(rs.getObject("fechaInicial", java.time.LocalDate.class))
-                .fechaFinal(rs.getObject("fechaFinal", java.time.LocalDate.class))
-                .smmlv(rs.getBigDecimal("smmlv"))
-                .auxTransporte(rs.getBigDecimal("auxTransporte"))
-                .porcSaludEmpleado(rs.getBigDecimal("porcSaludEmpleado"))
-                .porcSaludEmpleador(rs.getBigDecimal("porcSaludEmpleador"))
-                .porcPensionEmpleado(rs.getBigDecimal("porcPensionEmpleado"))
-                .porcPensionEmpleador(rs.getBigDecimal("porcPensionEmpleador"))
-                .porcCajaCompensacion(rs.getBigDecimal("porcCajaCompensacion"))
-                .porcSena(rs.getBigDecimal("porcSena"))
-                .porcIcbf(rs.getBigDecimal("porcIcbf"))
-                .porProvisionPrima(rs.getBigDecimal("porProvisionPrima"))
-                .porProvisionVacaciones(rs.getBigDecimal("porProvisionVacaciones"))
-                .porProvisionCesantias(rs.getBigDecimal("porProvisionCesantias"))
-                .porProvisionInteresCesantias(rs.getBigDecimal("porProvisionInteresCesantias"))
-                .topeIbcMinSmmlv(rs.getBigDecimal("topeIbcMinSmmlv"))
-                .topeIbcMaxSmmlv(rs.getBigDecimal("topeIbcMaxSmmlv"))
-                .exoneradoSalud((Boolean) rs.getObject("exoneradoSalud"))
-                .exoneradoParafiscales((Boolean) rs.getObject("exoneradoParafiscales"))
-                .activo((Boolean) rs.getObject("activo"))
-                .build());
+        return jdbc.query(sql, (rs, rowNum) -> mapRow(rs));
     }
 
     // ============================================================
-    // ✅ OBTENER
+    // OBTENER
     // ============================================================
     public Optional<VariablesVigenciaDTO> obtener(Integer id) {
 
@@ -85,22 +77,36 @@ public class VariablesVigenciaRepository {
               v.fecha_final                       AS fechaFinal,
               v.smmlv                             AS smmlv,
               v.aux_transporte                    AS auxTransporte,
-              v.porc_salud_empleado               AS porcSaludEmpleado,
-              v.porc_salud_empleador              AS porcSaludEmpleador,
-              v.porc_pension_empleado             AS porcPensionEmpleado,
-              v.porc_pension_empleador            AS porcPensionEmpleador,
-              v.porc_caja_compensacion            AS porcCajaCompensacion,
-              v.porc_sena                         AS porcSena,
-              v.porc_icbf                         AS porcIcbf,
-              v.por_provision_prima               AS porProvisionPrima,
-              v.por_provision_vacaciones          AS porProvisionVacaciones,
-              v.por_provision_cesantias           AS porProvisionCesantias,
-              v.por_provision_interes_cesantias   AS porProvisionInteresCesantias,
-              v.tope_ibc_min_smmlv                AS topeIbcMinSmmlv,
-              v.tope_ibc_max_smmlv                AS topeIbcMaxSmmlv,
-              v.exonerado_salud                   AS exoneradoSalud,
-              v.exonerado_parafiscales            AS exoneradoParafiscales,
-              v.activo                            AS activo
+
+              v.porc_salud_empleado              AS porcSaludEmpleado,
+              v.porc_salud_empleador             AS porcSaludEmpleador,
+              v.porc_pension_empleado            AS porcPensionEmpleado,
+              v.porc_pension_empleador           AS porcPensionEmpleador,
+
+              v.porc_caja_compensacion           AS porcCajaCompensacion,
+              v.porc_sena                        AS porcSena,
+              v.porc_icbf                        AS porcIcbf,
+
+              v.por_provision_prima              AS porProvisionPrima,
+              v.por_provision_prima_semestral    AS porProvisionPrimaSemestral,
+              v.por_provision_vacaciones         AS porProvisionVacaciones,
+              v.por_provision_cesantias          AS porProvisionCesantias,
+              v.por_provision_interes_cesantias  AS porProvisionInteresCesantias,
+
+              v.tope_ibc_min_smmlv               AS topeIbcMinSmmlv,
+              v.tope_ibc_max_smmlv               AS topeIbcMaxSmmlv,
+
+              v.horas_mes                        AS horasMes,
+              v.dias_mes                         AS diasMes,
+
+              v.exonerado_salud                  AS exoneradoSalud,
+              v.exonerado_parafiscales           AS exoneradoParafiscales,
+
+              v.aplica_caja_compensacion         AS aplicaCajaCompensacion,
+              v.aplica_sena                      AS aplicaSena,
+              v.aplica_icbf                      AS aplicaIcbf,
+
+              v.activo                           AS activo
             FROM nomina.variables_vigencia v
             WHERE v.id_variable = :id
         """;
@@ -108,37 +114,13 @@ public class VariablesVigenciaRepository {
         var params = new MapSqlParameterSource()
                 .addValue("id", id);
 
-        List<VariablesVigenciaDTO> rows = jdbc.query(sql, params, (rs, rowNum) ->
-                VariablesVigenciaDTO.builder()
-                        .idVariable(rs.getInt("idVariable"))
-                        .fechaInicial(rs.getObject("fechaInicial", java.time.LocalDate.class))
-                        .fechaFinal(rs.getObject("fechaFinal", java.time.LocalDate.class))
-                        .smmlv(rs.getBigDecimal("smmlv"))
-                        .auxTransporte(rs.getBigDecimal("auxTransporte"))
-                        .porcSaludEmpleado(rs.getBigDecimal("porcSaludEmpleado"))
-                        .porcSaludEmpleador(rs.getBigDecimal("porcSaludEmpleador"))
-                        .porcPensionEmpleado(rs.getBigDecimal("porcPensionEmpleado"))
-                        .porcPensionEmpleador(rs.getBigDecimal("porcPensionEmpleador"))
-                        .porcCajaCompensacion(rs.getBigDecimal("porcCajaCompensacion"))
-                        .porcSena(rs.getBigDecimal("porcSena"))
-                        .porcIcbf(rs.getBigDecimal("porcIcbf"))
-                        .porProvisionPrima(rs.getBigDecimal("porProvisionPrima"))
-                        .porProvisionVacaciones(rs.getBigDecimal("porProvisionVacaciones"))
-                        .porProvisionCesantias(rs.getBigDecimal("porProvisionCesantias"))
-                        .porProvisionInteresCesantias(rs.getBigDecimal("porProvisionInteresCesantias"))
-                        .topeIbcMinSmmlv(rs.getBigDecimal("topeIbcMinSmmlv"))
-                        .topeIbcMaxSmmlv(rs.getBigDecimal("topeIbcMaxSmmlv"))
-                        .exoneradoSalud((Boolean) rs.getObject("exoneradoSalud"))
-                        .exoneradoParafiscales((Boolean) rs.getObject("exoneradoParafiscales"))
-                        .activo((Boolean) rs.getObject("activo"))
-                        .build()
-        );
+        List<VariablesVigenciaDTO> rows = jdbc.query(sql, params, (rs, rowNum) -> mapRow(rs));
 
         return rows.stream().findFirst();
     }
 
     // ============================================================
-    // ✅ CREAR
+    // CREAR
     // ============================================================
     public Integer crear(VariablesVigenciaDTO dto, Integer idUsuario) {
 
@@ -148,21 +130,35 @@ public class VariablesVigenciaRepository {
               fecha_final,
               smmlv,
               aux_transporte,
+
               porc_salud_empleado,
               porc_salud_empleador,
               porc_pension_empleado,
               porc_pension_empleador,
+
               porc_caja_compensacion,
               porc_sena,
               porc_icbf,
+
               por_provision_prima,
+              por_provision_prima_semestral,
               por_provision_vacaciones,
               por_provision_cesantias,
               por_provision_interes_cesantias,
+
               tope_ibc_min_smmlv,
               tope_ibc_max_smmlv,
+
+              horas_mes,
+              dias_mes,
+
               exonerado_salud,
               exonerado_parafiscales,
+
+              aplica_caja_compensacion,
+              aplica_sena,
+              aplica_icbf,
+
               activo,
               fk_seguridad_creacion,
               fk_seguridad_edicion
@@ -172,21 +168,35 @@ public class VariablesVigenciaRepository {
               :fechaFinal,
               :smmlv,
               :auxTransporte,
+
               :porcSaludEmpleado,
               :porcSaludEmpleador,
               :porcPensionEmpleado,
               :porcPensionEmpleador,
+
               :porcCajaCompensacion,
               :porcSena,
               :porcIcbf,
+
               :porProvisionPrima,
+              :porProvisionPrimaSemestral,
               :porProvisionVacaciones,
               :porProvisionCesantias,
               :porProvisionInteresCesantias,
+
               :topeIbcMinSmmlv,
               :topeIbcMaxSmmlv,
+
+              :horasMes,
+              :diasMes,
+
               :exoneradoSalud,
               :exoneradoParafiscales,
+
+              :aplicaCajaCompensacion,
+              :aplicaSena,
+              :aplicaIcbf,
+
               :activo,
               :usr,
               :usr
@@ -194,13 +204,11 @@ public class VariablesVigenciaRepository {
             RETURNING id_variable
         """;
 
-        var params = params(dto, idUsuario);
-
-        return jdbc.queryForObject(sql, params, Integer.class);
+        return jdbc.queryForObject(sql, params(dto, idUsuario), Integer.class);
     }
 
     // ============================================================
-    // ✅ ACTUALIZAR
+    // ACTUALIZAR
     // ============================================================
     public void actualizar(Integer id, VariablesVigenciaDTO dto, Integer idUsuario) {
 
@@ -211,34 +219,49 @@ public class VariablesVigenciaRepository {
               fecha_final = :fechaFinal,
               smmlv = :smmlv,
               aux_transporte = :auxTransporte,
+
               porc_salud_empleado = :porcSaludEmpleado,
               porc_salud_empleador = :porcSaludEmpleador,
               porc_pension_empleado = :porcPensionEmpleado,
               porc_pension_empleador = :porcPensionEmpleador,
+
               porc_caja_compensacion = :porcCajaCompensacion,
               porc_sena = :porcSena,
               porc_icbf = :porcIcbf,
+
               por_provision_prima = :porProvisionPrima,
+              por_provision_prima_semestral = :porProvisionPrimaSemestral,
               por_provision_vacaciones = :porProvisionVacaciones,
               por_provision_cesantias = :porProvisionCesantias,
               por_provision_interes_cesantias = :porProvisionInteresCesantias,
+
               tope_ibc_min_smmlv = :topeIbcMinSmmlv,
               tope_ibc_max_smmlv = :topeIbcMaxSmmlv,
+
+              horas_mes = :horasMes,
+              dias_mes = :diasMes,
+
               exonerado_salud = :exoneradoSalud,
               exonerado_parafiscales = :exoneradoParafiscales,
+
+              aplica_caja_compensacion = :aplicaCajaCompensacion,
+              aplica_sena = :aplicaSena,
+              aplica_icbf = :aplicaIcbf,
+
               activo = :activo,
               fk_seguridad_edicion = :usr,
               fecha_edicion = CURRENT_TIMESTAMP
             WHERE id_variable = :id
         """;
 
-        var params = params(dto, idUsuario).addValue("id", id);
+        var params = params(dto, idUsuario)
+                .addValue("id", id);
 
         jdbc.update(sql, params);
     }
 
     // ============================================================
-    // ✅ ELIMINAR
+    // ELIMINAR
     // ============================================================
     public void eliminar(Integer id) {
 
@@ -247,37 +270,101 @@ public class VariablesVigenciaRepository {
             WHERE id_variable = :id
         """;
 
-        var params = new MapSqlParameterSource().addValue("id", id);
-
-        jdbc.update(sql, params);
+        jdbc.update(sql, new MapSqlParameterSource().addValue("id", id));
     }
 
+    // ============================================================
+    // MAPEO
+    // ============================================================
+    private VariablesVigenciaDTO mapRow(java.sql.ResultSet rs) throws java.sql.SQLException {
+        return VariablesVigenciaDTO.builder()
+                .idVariable(rs.getInt("idVariable"))
+                .fechaInicial(rs.getObject("fechaInicial", java.time.LocalDate.class))
+                .fechaFinal(rs.getObject("fechaFinal", java.time.LocalDate.class))
+
+                .smmlv(rs.getBigDecimal("smmlv"))
+                .auxTransporte(rs.getBigDecimal("auxTransporte"))
+
+                .porcSaludEmpleado(rs.getBigDecimal("porcSaludEmpleado"))
+                .porcSaludEmpleador(rs.getBigDecimal("porcSaludEmpleador"))
+                .porcPensionEmpleado(rs.getBigDecimal("porcPensionEmpleado"))
+                .porcPensionEmpleador(rs.getBigDecimal("porcPensionEmpleador"))
+
+                .porcCajaCompensacion(rs.getBigDecimal("porcCajaCompensacion"))
+                .porcSena(rs.getBigDecimal("porcSena"))
+                .porcIcbf(rs.getBigDecimal("porcIcbf"))
+
+                .porProvisionPrima(rs.getBigDecimal("porProvisionPrima"))
+                .porProvisionPrimaSemestral(rs.getBigDecimal("porProvisionPrimaSemestral"))
+                .porProvisionVacaciones(rs.getBigDecimal("porProvisionVacaciones"))
+                .porProvisionCesantias(rs.getBigDecimal("porProvisionCesantias"))
+                .porProvisionInteresCesantias(rs.getBigDecimal("porProvisionInteresCesantias"))
+
+                .topeIbcMinSmmlv(rs.getBigDecimal("topeIbcMinSmmlv"))
+                .topeIbcMaxSmmlv(rs.getBigDecimal("topeIbcMaxSmmlv"))
+
+                .horasMes(rs.getBigDecimal("horasMes"))
+                .diasMes(rs.getBigDecimal("diasMes"))
+
+                .exoneradoSalud((Boolean) rs.getObject("exoneradoSalud"))
+                .exoneradoParafiscales((Boolean) rs.getObject("exoneradoParafiscales"))
+
+                .aplicaCajaCompensacion((Boolean) rs.getObject("aplicaCajaCompensacion"))
+                .aplicaSena((Boolean) rs.getObject("aplicaSena"))
+                .aplicaIcbf((Boolean) rs.getObject("aplicaIcbf"))
+
+                .activo((Boolean) rs.getObject("activo"))
+                .build();
+    }
+
+    // ============================================================
+    // PARAMS
+    // ============================================================
     private MapSqlParameterSource params(VariablesVigenciaDTO dto, Integer idUsuario) {
         return new MapSqlParameterSource()
                 .addValue("fechaInicial", dto.getFechaInicial())
                 .addValue("fechaFinal", dto.getFechaFinal())
+
                 .addValue("smmlv", n(dto.getSmmlv()))
                 .addValue("auxTransporte", n(dto.getAuxTransporte()))
+
                 .addValue("porcSaludEmpleado", n(dto.getPorcSaludEmpleado()))
                 .addValue("porcSaludEmpleador", n(dto.getPorcSaludEmpleador()))
                 .addValue("porcPensionEmpleado", n(dto.getPorcPensionEmpleado()))
                 .addValue("porcPensionEmpleador", n(dto.getPorcPensionEmpleador()))
+
                 .addValue("porcCajaCompensacion", n(dto.getPorcCajaCompensacion()))
                 .addValue("porcSena", n(dto.getPorcSena()))
                 .addValue("porcIcbf", n(dto.getPorcIcbf()))
+
                 .addValue("porProvisionPrima", n(dto.getPorProvisionPrima()))
+                .addValue("porProvisionPrimaSemestral", n(dto.getPorProvisionPrimaSemestral()))
                 .addValue("porProvisionVacaciones", n(dto.getPorProvisionVacaciones()))
                 .addValue("porProvisionCesantias", n(dto.getPorProvisionCesantias()))
                 .addValue("porProvisionInteresCesantias", n(dto.getPorProvisionInteresCesantias()))
+
                 .addValue("topeIbcMinSmmlv", n(dto.getTopeIbcMinSmmlv()))
                 .addValue("topeIbcMaxSmmlv", n(dto.getTopeIbcMaxSmmlv()))
-                .addValue("exoneradoSalud", dto.getExoneradoSalud() != null ? dto.getExoneradoSalud() : Boolean.FALSE)
-                .addValue("exoneradoParafiscales", dto.getExoneradoParafiscales() != null ? dto.getExoneradoParafiscales() : Boolean.FALSE)
+
+                .addValue("horasMes", n(dto.getHorasMes()))
+                .addValue("diasMes", n(dto.getDiasMes()))
+
+                .addValue("exoneradoSalud", b(dto.getExoneradoSalud()))
+                .addValue("exoneradoParafiscales", b(dto.getExoneradoParafiscales()))
+
+                .addValue("aplicaCajaCompensacion", b(dto.getAplicaCajaCompensacion()))
+                .addValue("aplicaSena", b(dto.getAplicaSena()))
+                .addValue("aplicaIcbf", b(dto.getAplicaIcbf()))
+
                 .addValue("activo", dto.getActivo() != null ? dto.getActivo() : Boolean.TRUE)
                 .addValue("usr", idUsuario != null ? idUsuario : 1);
     }
 
     private BigDecimal n(BigDecimal v) {
         return v != null ? v : BigDecimal.ZERO;
+    }
+
+    private Boolean b(Boolean v) {
+        return v != null ? v : Boolean.FALSE;
     }
 }

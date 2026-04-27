@@ -20,13 +20,14 @@ export const nominaMenu = {
     // 📅 PERÍODOS DE NÓMINA
     // =========================
     {
-      label: 'Períodos',
-      route: '/nomina/periodos',
+      label: 'Generar Períodos por año',
+      route: '/nomina/periodos/generador',
       permiso: 'NOMINA_VIEW'
     },
+
     {
-      label: 'Generar Períodos',
-      route: '/nomina/periodos/generador',
+      label: 'Administración de períodos',
+      route: '/nomina/periodos',
       permiso: 'NOMINA_VIEW'
     },
 

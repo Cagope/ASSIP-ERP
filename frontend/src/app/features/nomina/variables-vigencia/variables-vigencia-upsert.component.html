@@ -15,20 +15,12 @@
     <div class="form-grid">
       <div class="form-group">
         <label>Fecha inicial *</label>
-        <input
-          type="date"
-          class="form-control"
-          [(ngModel)]="form.fechaInicial"
-        />
+        <input type="date" class="form-control" [(ngModel)]="form.fechaInicial" />
       </div>
 
       <div class="form-group">
         <label>Fecha final *</label>
-        <input
-          type="date"
-          class="form-control"
-          [(ngModel)]="form.fechaFinal"
-        />
+        <input type="date" class="form-control" [(ngModel)]="form.fechaFinal" />
       </div>
 
       <div class="form-group">
@@ -54,6 +46,16 @@
       <div class="form-group">
         <label>Aux. transporte *</label>
         <input type="number" class="form-control" [(ngModel)]="form.auxTransporte" />
+      </div>
+
+      <div class="form-group">
+        <label>Horas mes *</label>
+        <input type="number" class="form-control" [(ngModel)]="form.horasMes" />
+      </div>
+
+      <div class="form-group">
+        <label>Días mes *</label>
+        <input type="number" class="form-control" [(ngModel)]="form.diasMes" />
       </div>
     </div>
 
@@ -104,6 +106,30 @@
         <label>% ICBF *</label>
         <input type="number" class="form-control" [(ngModel)]="form.porcIcbf" />
       </div>
+
+      <div class="form-group">
+        <label>Aplica caja compensación</label>
+        <select class="form-control" [(ngModel)]="form.aplicaCajaCompensacion">
+          <option [ngValue]="true">Sí</option>
+          <option [ngValue]="false">No</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Aplica SENA</label>
+        <select class="form-control" [(ngModel)]="form.aplicaSena">
+          <option [ngValue]="true">Sí</option>
+          <option [ngValue]="false">No</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Aplica ICBF</label>
+        <select class="form-control" [(ngModel)]="form.aplicaIcbf">
+          <option [ngValue]="true">Sí</option>
+          <option [ngValue]="false">No</option>
+        </select>
+      </div>
     </div>
 
     <!-- =========================
@@ -115,6 +141,11 @@
       <div class="form-group">
         <label>% Prima *</label>
         <input type="number" class="form-control" [(ngModel)]="form.porProvisionPrima" />
+      </div>
+
+      <div class="form-group">
+        <label>% Prima semestral</label>
+        <input type="number" class="form-control" [(ngModel)]="form.porProvisionPrimaSemestral" />
       </div>
 
       <div class="form-group">
@@ -176,14 +207,24 @@
     <!-- =========================
          ACCIONES
          ========================= -->
-    <div class="actions">
-      <button class="btn btn-primary" (click)="guardar()" [disabled]="guardando">
-        {{ guardando ? 'Guardando...' : 'Guardar' }}
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="volver()"
+        [disabled]="guardando">
+        ❌ Cancelar
       </button>
 
-      <button class="btn btn-light" (click)="volver()" [disabled]="guardando">
-        Cancelar
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="guardar()"
+        [disabled]="guardando">
+        {{ guardando ? '⏳ Guardando...' : '💾 Guardar' }}
       </button>
+
     </div>
 
   </div>

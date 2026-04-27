@@ -1,43 +1,60 @@
-<div class="bloques-upsert">
+<div class="page">
 
-  <h5>
-    {{ route.snapshot.paramMap.get('id')
-    ? 'editar bloque'
-    : 'nuevo bloque' }}
-  </h5>
+  <div class="card bloque-form-card">
 
-  <form [formGroup]="form" (ngSubmit)="guardar()" class="form-grid">
-
-    <div class="form-group sm">
-      <label>código *</label>
-      <input type="text" formControlName="codigoBloque" />
+    <div class="form-title">
+      <h3>
+        {{ route.snapshot.paramMap.get('id') ? 'Editar bloque' : 'Nuevo bloque' }}
+      </h3>
+      <p>Configuración de bloques y depreciación</p>
     </div>
 
-    <div class="form-group full">
-      <label>nombre *</label>
-      <input type="text" formControlName="nombreBloque" />
-    </div>
+    <form [formGroup]="form" (ngSubmit)="guardar()" class="form-grid">
 
-    <div class="form-group sm">
-      <label>meses depreciación *</label>
-      <input type="number" formControlName="mesesDepreciacionDefecto" />
-    </div>
+      <div class="form-group sm">
+        <label>Código *</label>
+        <input
+          type="text"
+          class="form-control"
+          formControlName="codigoBloque" />
+      </div>
 
-    <div class="form-actions full">
-      <button
-        class="btn sm primary"
-        type="submit"
-        [disabled]="form.invalid">
-        💾 guardar
-      </button>
+      <div class="form-group full">
+        <label>Nombre *</label>
+        <input
+          type="text"
+          class="form-control"
+          formControlName="nombreBloque" />
+      </div>
 
-      <button
-        class="btn sm danger"
-        type="button"
-        (click)="cancelar()">
-        ↩️ cancelar
-      </button>
-    </div>
+      <div class="form-group sm">
+        <label>Meses depreciación *</label>
+        <input
+          type="number"
+          class="form-control"
+          formControlName="mesesDepreciacionDefecto" />
+      </div>
 
-  </form>
+      <div class="form-actions full">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="cancelar()">
+          ❌ Cancelar
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="form.invalid">
+          💾 Guardar
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
 </div>

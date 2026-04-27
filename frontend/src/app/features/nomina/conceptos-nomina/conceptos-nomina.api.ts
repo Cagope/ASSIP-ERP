@@ -15,10 +15,20 @@ export interface ConceptoNominaListDTO {
   esFijo: boolean;
   activo: boolean;
 
-  // 🔥 NUEVOS CAMPOS
-  tipoCalculo: string;      // MANUAL | POR_DIAS | POR_HORAS | POR_PORCENTAJE
-  baseCalculo?: string;     // SALARIO_BASE, etc
-  multiplicador?: number;   // 1.25, 0.04, etc
+  tipoCalculo: string;
+  baseCalculo?: string | null;
+  multiplicador?: number | null;
+
+  afectaIbc: boolean;
+  afectaBaseCesantias: boolean;
+  afectaBasePrimaLegal: boolean;
+  afectaBaseVacaciones: boolean;
+  afectaBasePrimaSemestral: boolean;
+  afectaBaseArl: boolean;
+  afectaBaseParafiscales: boolean;
+
+  smmlvDesde?: number | null;
+  smmlvHasta?: number | null;
 }
 
 export interface ConceptoNominaFormDTO {
@@ -29,10 +39,20 @@ export interface ConceptoNominaFormDTO {
   esFijo: boolean;
   activo: boolean;
 
-  // 🔥 NUEVOS CAMPOS
   tipoCalculo: string;
-  baseCalculo?: string;
-  multiplicador?: number;
+  baseCalculo?: string | null;
+  multiplicador?: number | null;
+
+  afectaIbc: boolean;
+  afectaBaseCesantias: boolean;
+  afectaBasePrimaLegal: boolean;
+  afectaBaseVacaciones: boolean;
+  afectaBasePrimaSemestral: boolean;
+  afectaBaseArl: boolean;
+  afectaBaseParafiscales: boolean;
+
+  smmlvDesde?: number | null;
+  smmlvHasta?: number | null;
 }
 
 export interface ConceptoNominaSaveDTO extends ConceptoNominaFormDTO {}

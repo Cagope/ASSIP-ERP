@@ -110,23 +110,23 @@
          ACCIONES
          ========================= -->
     <div class="form-actions">
+
       <button
         type="button"
-        class="btn btn-primary"
+        class="btn btn--secondary"
         (click)="preview()"
-        [disabled]="loading || form.invalid"
-      >
-        Preview
+        [disabled]="loading || form.invalid">
+        👁️ Preview
       </button>
 
       <button
         type="button"
-        class="btn btn-success"
+        class="btn btn--primary"
         (click)="ejecutar()"
-        [disabled]="!previewResult || loading"
-      >
-        Ejecutar
+        [disabled]="!previewResult || loading">
+        ⚙️ Ejecutar
       </button>
+
     </div>
 
   </form>

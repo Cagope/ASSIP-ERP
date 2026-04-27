@@ -10,11 +10,14 @@ import { environment } from '../../../../environments/environment';
 export interface VariablesVigenciaListDTO {
   idVariable: number;
 
-  fechaInicial: string; // yyyy-MM-dd
-  fechaFinal: string;   // yyyy-MM-dd
+  fechaInicial: string;
+  fechaFinal: string;
 
   smmlv: number;
   auxTransporte: number;
+
+  horasMes: number;
+  diasMes: number;
 
   activo: boolean;
 }
@@ -39,6 +42,7 @@ export interface VariablesVigenciaFormDTO {
   porcIcbf: number;
 
   porProvisionPrima: number;
+  porProvisionPrimaSemestral: number;
   porProvisionVacaciones: number;
   porProvisionCesantias: number;
   porProvisionInteresCesantias: number;
@@ -46,8 +50,15 @@ export interface VariablesVigenciaFormDTO {
   topeIbcMinSmmlv: number;
   topeIbcMaxSmmlv: number;
 
+  horasMes: number;
+  diasMes: number;
+
   exoneradoSalud: boolean;
   exoneradoParafiscales: boolean;
+
+  aplicaCajaCompensacion: boolean;
+  aplicaSena: boolean;
+  aplicaIcbf: boolean;
 
   activo: boolean;
 }

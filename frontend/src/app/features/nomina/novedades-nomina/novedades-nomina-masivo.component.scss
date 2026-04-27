@@ -342,3 +342,32 @@
 .periodo-activo {
   margin-bottom: 25px;   /* separación real */
 }
+
+/* =========================
+   Acciones de procesos
+========================= */
+.actions-process {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+
+  flex-wrap: wrap;
+}
+
+/* Grupo izquierdo */
+.actions-process-left {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Grupo derecho */
+.actions-process-right {
+  display: flex;
+  gap: 10px;
+}

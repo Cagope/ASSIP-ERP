@@ -1,9 +1,10 @@
 <div class="page periodos-list">
 
   <app-header-actions
-    titulo="Períodos Nómina"
-    (refrescar)="cargar()"
-    (nuevo)="generar()">
+    titulo="Administración Períodos de Nómina"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
   </app-header-actions>
 
   <div class="filters-card">

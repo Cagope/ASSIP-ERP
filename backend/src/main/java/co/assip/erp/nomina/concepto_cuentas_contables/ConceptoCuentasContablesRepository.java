@@ -17,7 +17,7 @@ public class ConceptoCuentasContablesRepository {
     private final NamedParameterJdbcTemplate jdbc;
 
     // ============================================================
-    // ✅ LISTAR (GLOBAL u opcional por agencia)
+    // LISTAR
     // ============================================================
     public List<ConceptoCuentaContableListDTO> listar() {
 
@@ -49,17 +49,17 @@ public class ConceptoCuentasContablesRepository {
          AND cc.id_agencia = c.id_agencia
 
         ORDER BY a.nombre, c.codigo_concepto
-    """;
+        """;
 
         return jdbc.query(sql, new MapSqlParameterSource(), (rs, rowNum) ->
                 ConceptoCuentaContableListDTO.builder()
                         .idMapeo(rs.getInt("idMapeo"))
                         .codigoConcepto(rs.getString("codigoConcepto"))
-                        .idAgencia(rs.getInt("idAgencia"))
+                        .idAgencia((Integer) rs.getObject("idAgencia"))
                         .nombreAgencia(rs.getString("nombreAgencia"))
-                        .idCuentaDebito(rs.getInt("idCuentaDebito"))
+                        .idCuentaDebito((Integer) rs.getObject("idCuentaDebito"))
                         .cuentaDebito(rs.getString("cuentaDebito"))
-                        .idCuentaCredito(rs.getInt("idCuentaCredito"))
+                        .idCuentaCredito((Integer) rs.getObject("idCuentaCredito"))
                         .cuentaCredito(rs.getString("cuentaCredito"))
                         .activo(rs.getBoolean("activo"))
                         .build()
@@ -67,7 +67,7 @@ public class ConceptoCuentasContablesRepository {
     }
 
     // ============================================================
-    // ✅ OBTENER (por id)
+    // OBTENER
     // ============================================================
     public Optional<ConceptoCuentaContableFormDTO> obtener(Integer idMapeo) {
 
@@ -95,7 +95,7 @@ public class ConceptoCuentasContablesRepository {
          AND cc.id_agencia = c.id_agencia
 
         WHERE c.id_mapeo = :idMapeo
-    """;
+        """;
 
         var params = new MapSqlParameterSource()
                 .addValue("idMapeo", idMapeo);
@@ -104,14 +104,11 @@ public class ConceptoCuentasContablesRepository {
                 (rs, rowNum) -> ConceptoCuentaContableFormDTO.builder()
                         .idMapeo(rs.getInt("idMapeo"))
                         .codigoConcepto(rs.getString("codigoConcepto"))
-                        .idAgencia(rs.getInt("idAgencia"))
-
-                        .idCuentaDebito(rs.getInt("idCuentaDebito"))
+                        .idAgencia((Integer) rs.getObject("idAgencia"))
+                        .idCuentaDebito((Integer) rs.getObject("idCuentaDebito"))
                         .cuentaDebito(rs.getString("cuentaDebito"))
-
-                        .idCuentaCredito(rs.getInt("idCuentaCredito"))
+                        .idCuentaCredito((Integer) rs.getObject("idCuentaCredito"))
                         .cuentaCredito(rs.getString("cuentaCredito"))
-
                         .activo(rs.getBoolean("activo"))
                         .build()
         );
@@ -120,9 +117,13 @@ public class ConceptoCuentasContablesRepository {
     }
 
     // ============================================================
-    // ✅ CREAR
+    // CREAR
     // ============================================================
     public void crear(ConceptoCuentaContableFormDTO dto, Integer idUsuario) {
+
+        if (existeActivo(dto.getCodigoConcepto(), dto.getIdAgencia())) {
+            throw new RuntimeException("Ya existe una configuración activa para este concepto y agencia.");
+        }
 
         String sql = """
             INSERT INTO nomina.concepto_cuentas_contables (
@@ -157,7 +158,7 @@ public class ConceptoCuentasContablesRepository {
     }
 
     // ============================================================
-    // ✅ ACTUALIZAR
+    // ACTUALIZAR
     // ============================================================
     public void actualizar(Integer idMapeo, ConceptoCuentaContableFormDTO dto, Integer idUsuario) {
 
@@ -166,7 +167,7 @@ public class ConceptoCuentasContablesRepository {
             SET
               id_cuenta_debito  = :idCuentaDebito,
               id_cuenta_credito = :idCuentaCredito,
-              activo             = :activo,
+              activo            = :activo,
               fk_seguridad_edicion = :usr,
               fecha_edicion     = CURRENT_TIMESTAMP
             WHERE id_mapeo = :idMapeo
@@ -183,7 +184,7 @@ public class ConceptoCuentasContablesRepository {
     }
 
     // ============================================================
-    // ✅ ELIMINAR (SOFT DELETE)
+    // ELIMINAR (SOFT)
     // ============================================================
     public void eliminar(Integer idMapeo, Integer idUsuario) {
 
@@ -204,7 +205,7 @@ public class ConceptoCuentasContablesRepository {
     }
 
     // ============================================================
-    // ✅ VALIDAR EXISTENCIA ACTIVA
+    // VALIDAR DUPLICADO
     // ============================================================
     public boolean existeActivo(String codigoConcepto, Integer idAgencia) {
 

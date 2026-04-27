@@ -2,16 +2,18 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
 
 import {
   EventosLiquidacionApi,
   EventoLiquidacionListDTO
 } from './eventos-liquidacion.api';
 
+
 @Component({
   standalone: true,
   selector: 'app-eventos-liquidacion',
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, HeaderActionsComponent],
   templateUrl: './eventos-liquidacion.component.html',
   styleUrls: ['./eventos-liquidacion.component.scss']
 })

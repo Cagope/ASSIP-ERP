@@ -87,6 +87,7 @@ export interface EmpleadoContratoListDTO {
   // Estado
   // =========================
   activo: boolean;
+  liquidaPrimaSemestral: boolean;
 }
 
 /* ============================================================
@@ -123,8 +124,8 @@ export interface EmpleadoContratoFormDTO {
 
   claseRiesgoArl: number;
   porcentajeArl: number;
-
   activo: boolean;
+  liquidaPrimaSemestral: boolean;
 }
 
 export interface EmpleadoContratoSaveDTO extends EmpleadoContratoFormDTO {}

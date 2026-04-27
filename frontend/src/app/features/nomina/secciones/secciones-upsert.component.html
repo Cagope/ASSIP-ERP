@@ -47,14 +47,24 @@
 
       </div>
 
-      <div class="acciones">
-        <button class="btn btn-primary" type="button" (click)="guardar()" [disabled]="loading">
-          {{ loading ? 'Guardando...' : 'Guardar' }}
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="cancelar()"
+          [disabled]="loading">
+          ❌ Cancelar
         </button>
 
-        <button class="btn btn-outline" type="button" (click)="cancelar()" [disabled]="loading">
-          Cancelar
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="guardar()"
+          [disabled]="loading">
+          {{ loading ? '⏳ Guardando...' : '💾 Guardar' }}
         </button>
+
       </div>
 
     </form>

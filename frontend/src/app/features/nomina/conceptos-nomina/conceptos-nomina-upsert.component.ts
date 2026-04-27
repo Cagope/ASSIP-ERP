@@ -26,10 +26,6 @@ export class ConceptosNominaUpsertComponent implements OnInit {
 
   form: ConceptoNominaFormDTO = this.nuevo();
 
-  // =========================================================
-  // INIT
-  // =========================================================
-
   ngOnInit(): void {
     const codigoParam = this.route.snapshot.paramMap.get('codigo');
     this.codigo = codigoParam ? codigoParam : null;
@@ -38,10 +34,6 @@ export class ConceptosNominaUpsertComponent implements OnInit {
       this.cargar(this.codigo);
     }
   }
-
-  // =========================================================
-  // CARGAR
-  // =========================================================
 
   cargar(codigo: string): void {
     this.loading = true;
@@ -53,13 +45,24 @@ export class ConceptosNominaUpsertComponent implements OnInit {
           codigoConcepto: data.codigoConcepto ?? '',
           nombreConcepto: data.nombreConcepto ?? '',
           tipoConcepto: data.tipoConcepto ?? '',
+
           esFijo: data.esFijo ?? false,
           activo: data.activo ?? true,
 
-          // 🔥 NUEVOS CAMPOS
           tipoCalculo: data.tipoCalculo ?? 'MANUAL',
-          baseCalculo: data.baseCalculo ?? undefined,
-          multiplicador: data.multiplicador ?? 1
+          baseCalculo: data.baseCalculo ?? null,
+          multiplicador: data.multiplicador ?? 1,
+
+          afectaIbc: data.afectaIbc ?? false,
+          afectaBaseCesantias: data.afectaBaseCesantias ?? false,
+          afectaBasePrimaLegal: data.afectaBasePrimaLegal ?? false,
+          afectaBaseVacaciones: data.afectaBaseVacaciones ?? false,
+          afectaBasePrimaSemestral: data.afectaBasePrimaSemestral ?? false,
+          afectaBaseArl: data.afectaBaseArl ?? false,
+          afectaBaseParafiscales: data.afectaBaseParafiscales ?? false,
+
+          smmlvDesde: data.smmlvDesde ?? null,
+          smmlvHasta: data.smmlvHasta ?? null
         };
 
         this.loading = false;
@@ -72,10 +75,6 @@ export class ConceptosNominaUpsertComponent implements OnInit {
       }
     });
   }
-
-  // =========================================================
-  // GUARDAR
-  // =========================================================
 
   guardar(): void {
 
@@ -98,14 +97,44 @@ export class ConceptosNominaUpsertComponent implements OnInit {
       return;
     }
 
+    if (!this.form.tipoCalculo) {
+      alert('El tipo de cálculo es obligatorio.');
+      return;
+    }
+
+    if (this.form.smmlvDesde != null && this.form.smmlvDesde < 0) {
+      alert('SMMLV desde no puede ser negativo.');
+      return;
+    }
+
+    if (this.form.smmlvHasta != null && this.form.smmlvHasta < 0) {
+      alert('SMMLV hasta no puede ser negativo.');
+      return;
+    }
+
+    if (
+      this.form.smmlvDesde != null &&
+      this.form.smmlvHasta != null &&
+      this.form.smmlvHasta < this.form.smmlvDesde
+    ) {
+      alert('SMMLV hasta no puede ser menor que SMMLV desde.');
+      return;
+    }
+
     this.guardando = true;
 
-    if (this.codigo) {
+    const payload: ConceptoNominaFormDTO = {
+      ...this.form,
+      codigoConcepto: this.codigo ? this.codigo : codigo,
+      nombreConcepto: nombre,
+      tipoConcepto: tipo,
+      baseCalculo: this.form.baseCalculo || null,
+      multiplicador: this.form.multiplicador ?? null,
+      smmlvDesde: this.form.smmlvDesde ?? null,
+      smmlvHasta: this.form.smmlvHasta ?? null
+    };
 
-      const payload: ConceptoNominaFormDTO = {
-        ...this.form,
-        codigoConcepto: this.codigo!
-      };
+    if (this.codigo) {
 
       this.api.actualizar(this.codigo, payload).subscribe({
         next: () => {
@@ -121,7 +150,7 @@ export class ConceptosNominaUpsertComponent implements OnInit {
 
     } else {
 
-      this.api.crear(this.form).subscribe({
+      this.api.crear(payload).subscribe({
         next: () => {
           this.guardando = false;
           this.volver();
@@ -136,30 +165,33 @@ export class ConceptosNominaUpsertComponent implements OnInit {
     }
   }
 
-  // =========================================================
-  // VOLVER
-  // =========================================================
-
   volver(): void {
     this.router.navigate(['/nomina/conceptos-nomina']);
   }
-
-  // =========================================================
-  // NUEVO
-  // =========================================================
 
   private nuevo(): ConceptoNominaFormDTO {
     return {
       codigoConcepto: '',
       nombreConcepto: '',
       tipoConcepto: '',
+
       esFijo: false,
       activo: true,
 
-      // 🔥 NUEVOS CAMPOS
       tipoCalculo: 'MANUAL',
-      baseCalculo: undefined,
-      multiplicador: 1
+      baseCalculo: null,
+      multiplicador: 1,
+
+      afectaIbc: false,
+      afectaBaseCesantias: false,
+      afectaBasePrimaLegal: false,
+      afectaBaseVacaciones: false,
+      afectaBasePrimaSemestral: false,
+      afectaBaseArl: false,
+      afectaBaseParafiscales: false,
+
+      smmlvDesde: null,
+      smmlvHasta: null
     };
   }
 }

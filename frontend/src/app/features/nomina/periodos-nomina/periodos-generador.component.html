@@ -60,23 +60,22 @@
 
     </div>
 
-    <div class="actions">
+    <div class="form-actions">
 
       <button
-        class="btn btn-primary"
-        (click)="generar()"
+        type="button"
+        class="btn btn--secondary"
+        (click)="volver()"
         [disabled]="loading">
-
-        {{ loading ? 'Generando...' : 'Generar períodos' }}
-
+        ⬅ Volver
       </button>
 
       <button
-        class="btn"
-        (click)="volver()">
-
-        Volver
-
+        type="button"
+        class="btn btn--primary"
+        (click)="generar()"
+        [disabled]="loading">
+        {{ loading ? '⏳ Generando...' : '⚙ Generar períodos' }}
       </button>
 
     </div>

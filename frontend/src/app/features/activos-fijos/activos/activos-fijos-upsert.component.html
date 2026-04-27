@@ -1,13 +1,15 @@
-<div class="form-container">
+<div class="page">
 
-  <h5>
-    {{ route.snapshot.paramMap.get('id')
-    ? 'editar activo fijo'
-    : 'nuevo activo fijo' }}
-  </h5>
+  <div class="form-card">
 
-  <form [formGroup]="form" (ngSubmit)="guardar()" class="form-grid">
+    <div class="form-title">
+      <h3>
+        {{ route.snapshot.paramMap.get('id') ? 'Editar activo fijo' : 'Nuevo activo fijo' }}
+      </h3>
+      <p>Registro y configuración de activos fijos</p>
+    </div>
 
+    <form [formGroup]="form" (ngSubmit)="guardar()" class="form-grid">
     <!-- =============================
          DATOS GENERALES
          ============================= -->
@@ -194,7 +196,7 @@
 
     <!-- CTA ACTIVO -->
     <div class="form-group full autocomplete">
-      <label>cta activo</label>
+      <label>Cuenta del activo</label>
       <input
         type="text"
         [formControl]="ctaActivoCtrl"
@@ -221,7 +223,7 @@
 
     <!-- CTA DEPRECIACIÓN -->
     <div class="form-group full autocomplete">
-      <label>cta depreciación</label>
+      <label>Cuenta de depreciación</label>
       <input
         type="text"
         [formControl]="ctaDepreciacionCtrl"
@@ -248,7 +250,7 @@
 
     <!-- CTA GASTO -->
     <div class="form-group full autocomplete">
-      <label>cta gasto</label>
+      <label>Cuenta del gasto</label>
       <input
         type="text"
         [formControl]="ctaGastoCtrl"
@@ -275,7 +277,7 @@
 
     <!-- CTA CONTROL -->
     <div class="form-group full autocomplete">
-      <label>cta control</label>
+      <label>Cuenta control</label>
       <input
         type="text"
         [formControl]="ctaControlCtrl"
@@ -305,19 +307,21 @@
      ============================= -->
 
     <div class="form-actions full">
+
       <button
-        class="btn sm primary"
-        type="submit"
-        [disabled]="form.invalid">
-        💾 guardar
+        type="button"
+        class="btn btn--secondary"
+        (click)="cancelar()">
+        ❌ Cancelar
       </button>
 
       <button
-        class="btn sm danger"
-        type="button"
-        (click)="cancelar()">
-        ↩️ cancelar
+        type="submit"
+        class="btn btn--primary"
+        [disabled]="form.invalid">
+        💾 Guardar
       </button>
+
     </div>
 
   </form>

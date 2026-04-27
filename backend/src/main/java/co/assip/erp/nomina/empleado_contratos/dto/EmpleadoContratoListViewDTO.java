@@ -89,4 +89,5 @@ public class EmpleadoContratoListViewDTO {
     // Estado
     // =========================
     private Boolean activo;
+    private Boolean liquidaPrimaSemestral;
 }

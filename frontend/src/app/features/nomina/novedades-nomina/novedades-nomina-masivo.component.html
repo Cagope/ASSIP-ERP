@@ -109,44 +109,52 @@
     <!-- =========================
          ACCIONES
          ========================= -->
-    <div class="actions">
+    <div class="actions-process">
 
-      <!-- 🔍 PREVIEW -->
-      <button
-        class="btn secondary"
-        (click)="previewMasivo()"
-        [disabled]="procesando || !formularioValido">
+      <!-- IZQUIERDA -->
+      <div class="actions-process-left">
 
-        {{ procesando ? 'Procesando...' : 'Preview' }}
+        <!-- 🔍 PREVIEW -->
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="previewMasivo()"
+          [disabled]="procesando || !formularioValido">
+          {{ procesando ? '⏳ Procesando...' : '🔍 Preview' }}
+        </button>
 
-      </button>
+        <!-- 📤 EXPORTAR -->
+        <button
+          type="button"
+          class="btn btn--secondary"
+          *ngIf="preview && preview.length"
+          (click)="exportarPreview()">
+          📤 Exportar Excel
+        </button>
 
-      <!-- 📤 EXPORTAR EXCEL (SOLO SI HAY PREVIEW) -->
-      <button
-        class="btn secondary"
-        *ngIf="preview && preview.length"
-        (click)="exportarPreview()">
+        <!-- ↩ VOLVER -->
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="volver()">
+          ⬅ Volver
+        </button>
 
-        Exportar Excel
+      </div>
 
-      </button>
+      <!-- DERECHA -->
+      <div class="actions-process-right">
 
-      <!-- ✅ APLICAR DEFINITIVO -->
-      <button
-        class="btn primary"
-        (click)="generar()"
-        [disabled]="procesando || !formularioValido || !preview || preview.length === 0">
+        <!-- ✅ APLICAR -->
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="generar()"
+          [disabled]="procesando || !formularioValido || !preview || preview.length === 0">
+          {{ procesando ? '⏳ Aplicando...' : '✅ Aplicar' }}
+        </button>
 
-        Aplicar
-
-      </button>
-
-      <!-- ↩ VOLVER -->
-      <button
-        class="btn"
-        (click)="volver()">
-        Volver
-      </button>
+      </div>
 
     </div>
 

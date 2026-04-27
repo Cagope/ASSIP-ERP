@@ -1,6 +1,13 @@
 <div class="page">
 
-  <h2>Eventos de liquidación</h2>
+  <app-header-actions
+    titulo="Eventos de liquidación"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false"
+    (nuevo)="nuevo()"
+    (refrescar)="cargar()">
+  </app-header-actions>
+
   <p class="subtitle">
     Incapacidades, licencias y demás eventos que afectan la liquidación
   </p>
@@ -20,22 +27,6 @@
           placeholder="Empleado, documento, tipo, soporte, estado..."
         />
       </div>
-
-    </div>
-
-    <div class="table-actions">
-
-      <button
-        class="btn-table-primary"
-        (click)="nuevo()">
-        ➕ Nuevo
-      </button>
-
-      <button
-        class="btn-table-secondary"
-        (click)="cargar()">
-        🔄 Refrescar
-      </button>
 
     </div>
 
@@ -72,7 +63,7 @@
           <th>ARL</th>
           <th>Rem.</th>
           <th>Estado</th>
-          <th style="width: 220px;">Acciones</th>
+          <th style="width: 120px;">Acciones</th>
         </tr>
         </thead>
 
@@ -101,9 +92,9 @@
           <td class="text-center">{{ row.liquidaArl ? 'Sí' : 'No' }}</td>
           <td class="text-center">{{ row.esRemunerado ? 'Sí' : 'No' }}</td>
           <td>
-              <span [class]="getBadgeClass(row.estado)">
-                {{ row.estado }}
-              </span>
+            <span [class]="getBadgeClass(row.estado)">
+              {{ row.estado }}
+            </span>
           </td>
           <td>
             <div class="row-actions">

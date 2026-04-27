@@ -49,6 +49,7 @@ public class EmpleadoContratoDTO {
     private BigDecimal porcentajeArl;
 
     private Boolean activo;
+    private Boolean liquidaPrimaSemestral;
 
     // =========================================================
     // ✅ PARA UI / REPORTES (NO cambia lógica de negocio)

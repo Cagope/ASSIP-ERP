@@ -4,12 +4,13 @@
 
 .filters {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: minmax(260px, 2fr) minmax(280px, 2fr) minmax(180px, 1.2fr) minmax(150px, 160px) minmax(150px, 160px);
   gap: 12px;
-  margin: 12px 0 14px 0;
+  align-items: end;
 
-  /* ✅ Mejora opcional: bloque visual del panel de filtros */
-  padding: 10px;
+  margin: 12px 0 14px;
+  padding: 14px;
+
   background: #fff;
   border-radius: 10px;
   border: 1px solid rgba(0, 0, 0, 0.06);
@@ -18,6 +19,7 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
+    min-width: 0;
 
     label {
       font-size: 13px;
@@ -26,10 +28,11 @@
     }
 
     .form-control {
-      height: 38px;
+      width: 100%;
+      height: 34px;
+      box-sizing: border-box;
     }
 
-    /* ✅ Mejora opcional: cuando esté deshabilitado (ej. activo sin agencia) */
     .form-control:disabled {
       background: #f3f3f3;
       cursor: not-allowed;
@@ -47,6 +50,7 @@
   .toolbar-info {
     margin-left: auto;
     color: #444;
+    font-weight: 700;
   }
 }
 
@@ -86,10 +90,9 @@
   color: #666;
 }
 
-/* Responsive */
-@media (max-width: 1100px) {
+@media (max-width: 1300px) {
   .filters {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

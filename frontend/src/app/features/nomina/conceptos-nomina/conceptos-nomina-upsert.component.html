@@ -1,13 +1,16 @@
 <div class="page">
 
   <app-header-actions
-    [titulo]="codigo ? 'Editar Concepto Nómina' : 'Nuevo Concepto Nómina'"
-    subtitulo="Crear / Editar"
-  ></app-header-actions>
+    [titulo]="codigo ? 'Editar Concepto Nómina' : 'Nuevo Concepto Nómina'">
+  </app-header-actions>
 
   <div class="card" *ngIf="!loading; else cargandoTpl">
 
     <div class="form-grid">
+
+      <!-- =========================
+           DATOS BÁSICOS
+           ========================= -->
 
       <div class="form-group">
         <label>Código *</label>
@@ -16,7 +19,6 @@
           class="form-control"
           [(ngModel)]="form.codigoConcepto"
           [disabled]="!!codigo"
-          placeholder="Ej: BASICO"
         />
       </div>
 
@@ -26,7 +28,6 @@
           type="text"
           class="form-control"
           [(ngModel)]="form.nombreConcepto"
-          placeholder="Ej: Salario básico"
         />
       </div>
 
@@ -36,7 +37,6 @@
           type="text"
           class="form-control"
           [(ngModel)]="form.tipoConcepto"
-          placeholder="Ej: DEVENGADO / DEDUCCION"
         />
       </div>
 
@@ -56,16 +56,150 @@
         </select>
       </div>
 
+      <!-- =========================
+           CÁLCULO
+           ========================= -->
+
+      <div class="form-group">
+        <label>Tipo cálculo *</label>
+        <select class="form-control" [(ngModel)]="form.tipoCalculo">
+          <option value="MANUAL">Manual</option>
+          <option value="POR_DIAS">Por días</option>
+          <option value="POR_HORAS">Por horas</option>
+          <option value="POR_PORCENTAJE">Por porcentaje</option>
+          <option value="AUX_TRANSPORTE">Auxilio de transporte</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Base cálculo</label>
+
+        <select class="form-control" [(ngModel)]="form.baseCalculo">
+
+          <option [ngValue]="null">-- No aplica --</option>
+
+          <option value="SALARIO_BASE">Salario base</option>
+          <option value="IBC">IBC</option>
+
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Multiplicador</label>
+        <input
+          type="number"
+          class="form-control"
+          [(ngModel)]="form.multiplicador"
+          step="0.01"
+        />
+      </div>
+
+      <!-- =========================
+           AFECTA BASES
+           ========================= -->
+
+      <div class="form-group">
+        <label>Afecta IBC</label>
+        <select class="form-control" [(ngModel)]="form.afectaIbc">
+          <option [ngValue]="true">Sí</option>
+          <option [ngValue]="false">No</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Base cesantías</label>
+        <select class="form-control" [(ngModel)]="form.afectaBaseCesantias">
+          <option [ngValue]="true">Sí</option>
+          <option [ngValue]="false">No</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Base prima legal</label>
+        <select class="form-control" [(ngModel)]="form.afectaBasePrimaLegal">
+          <option [ngValue]="true">Sí</option>
+          <option [ngValue]="false">No</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Base vacaciones</label>
+        <select class="form-control" [(ngModel)]="form.afectaBaseVacaciones">
+          <option [ngValue]="true">Sí</option>
+          <option [ngValue]="false">No</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Base prima semestral</label>
+        <select class="form-control" [(ngModel)]="form.afectaBasePrimaSemestral">
+          <option [ngValue]="true">Sí</option>
+          <option [ngValue]="false">No</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Base ARL</label>
+        <select class="form-control" [(ngModel)]="form.afectaBaseArl">
+          <option [ngValue]="true">Sí</option>
+          <option [ngValue]="false">No</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Base parafiscales</label>
+        <select class="form-control" [(ngModel)]="form.afectaBaseParafiscales">
+          <option [ngValue]="true">Sí</option>
+          <option [ngValue]="false">No</option>
+        </select>
+      </div>
+
+      <!-- =========================
+           RANGO SMMLV
+           ========================= -->
+
+      <div class="form-group">
+        <label>SMMLV desde</label>
+        <input
+          type="number"
+          class="form-control"
+          [(ngModel)]="form.smmlvDesde"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>SMMLV hasta</label>
+        <input
+          type="number"
+          class="form-control"
+          [(ngModel)]="form.smmlvHasta"
+        />
+      </div>
+
     </div>
 
-    <div class="actions">
-      <button class="btn btn-primary" (click)="guardar()" [disabled]="guardando">
-        {{ guardando ? 'Guardando...' : 'Guardar' }}
+    <!-- =========================
+         ACCIONES
+         ========================= -->
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="volver()"
+        [disabled]="guardando">
+        ❌ Cancelar
       </button>
 
-      <button class="btn btn-light" (click)="volver()" [disabled]="guardando">
-        Cancelar
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="guardar()"
+        [disabled]="guardando">
+        {{ guardando ? '⏳ Guardando...' : '💾 Guardar' }}
       </button>
+
     </div>
 
   </div>

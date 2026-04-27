@@ -65,19 +65,28 @@
   <!-- =========================
        BOTONES
        ========================= -->
-  <div class="toolbar">
+  <div class="form-actions">
 
-    <button class="btn btn-primary" (click)="consultar()" [disabled]="loading">
-      {{ loading ? 'Consultando...' : 'Consultar' }}
+    <button
+      type="button"
+      class="btn btn--secondary"
+      (click)="limpiar()"
+      [disabled]="loading">
+      🧹 Limpiar
     </button>
 
-    <button class="btn btn-secondary" (click)="limpiar()" [disabled]="loading">
-      Limpiar
+    <button
+      type="button"
+      class="btn btn--primary"
+      (click)="consultar()"
+      [disabled]="loading">
+      {{ loading ? '⏳ Consultando...' : '🔎 Consultar' }}
     </button>
 
     <div class="toolbar-info" *ngIf="!loading && !errorMsg">
       <strong>Total:</strong> {{ total }}
     </div>
+
   </div>
 
   <!-- =========================

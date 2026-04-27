@@ -80,7 +80,8 @@ public List<EmpleadoContratoListViewDTO> listar() {
           c.clase_riesgo_arl            AS claseRiesgoArl,
           c.porcentaje_arl              AS porcentajeArl,
 
-          c.activo                      AS activo
+          c.activo                      AS activo,
+          c.liquida_prima_semestral AS liquidaPrimaSemestral
 
         FROM nomina.empleado_contratos c
 
@@ -184,6 +185,7 @@ public List<EmpleadoContratoListViewDTO> listar() {
                 )
                 .porcentajeArl(rs.getBigDecimal("porcentajeArl"))
                 .activo(rs.getBoolean("activo"))
+                .liquidaPrimaSemestral(rs.getBoolean("liquidaPrimaSemestral"))
                 .build();
         });
     }
@@ -248,7 +250,8 @@ public List<EmpleadoContratoListViewDTO> listar() {
           c.clase_riesgo_arl            AS claseRiesgoArl,
           c.porcentaje_arl              AS porcentajeArl,
 
-          c.activo                      AS activo
+          c.activo                      AS activo,
+          c.liquida_prima_semestral     AS liquidaPrimaSemestral
 
         FROM nomina.empleado_contratos c
 
@@ -355,6 +358,7 @@ public List<EmpleadoContratoListViewDTO> listar() {
                     )
                     .porcentajeArl(rs.getBigDecimal("porcentajeArl"))
                     .activo(rs.getBoolean("activo"))
+                    .liquidaPrimaSemestral(rs.getBoolean("liquidaPrimaSemestral"))
                     .build();
         });
     }
@@ -386,7 +390,7 @@ public List<EmpleadoContratoListViewDTO> listar() {
               c.clase_riesgo_arl             AS claseRiesgoArl,
               c.porcentaje_arl               AS porcentajeArl,
               c.activo                       AS activo,
-              
+              c.liquida_prima_semestral AS liquidaPrimaSemestral,
               tc.aplica_salud              AS aplicaSalud,
               tc.aplica_pension            AS aplicaPension,
               tc.aplica_arl                AS aplicaArl,
@@ -443,7 +447,7 @@ public List<EmpleadoContratoListViewDTO> listar() {
                         .aplicaPrima((Boolean) rs.getObject("aplicaPrima"))
                         .aplicaVacaciones((Boolean) rs.getObject("aplicaVacaciones"))
                         .aplicaParafiscales((Boolean) rs.getObject("aplicaParafiscales"))
-
+                        .liquidaPrimaSemestral((Boolean) rs.getObject("liquidaPrimaSemestral"))
                         .build());
 
         return rows.stream().findFirst();
@@ -475,6 +479,7 @@ public List<EmpleadoContratoListViewDTO> listar() {
               clase_riesgo_arl,
               porcentaje_arl,
               activo,
+              liquidaPrimaSemestral,
               fk_seguridad_creacion,
               fk_seguridad_edicion
             )
@@ -498,6 +503,7 @@ public List<EmpleadoContratoListViewDTO> listar() {
               :claseRiesgoArl,
               :porcentajeArl,
               :activo,
+              :liquida_prima_semestral,
               :usr,
               :usr
             )
@@ -527,6 +533,10 @@ public List<EmpleadoContratoListViewDTO> listar() {
                 .addValue("claseRiesgoArl", dto.getClaseRiesgoArl() != null ? dto.getClaseRiesgoArl() : (short) 1)
                 .addValue("porcentajeArl", dto.getPorcentajeArl() != null ? dto.getPorcentajeArl() : BigDecimal.ZERO)
                 .addValue("activo", dto.getActivo() != null ? dto.getActivo() : Boolean.TRUE)
+                .addValue(
+                        "liquidaPrimaSemestral",
+                        dto.getLiquidaPrimaSemestral() != null ? dto.getLiquidaPrimaSemestral() : Boolean.FALSE
+                )
                 .addValue("usr", idUsuario);
 
         return jdbc.queryForObject(sql, params, Integer.class);
@@ -559,6 +569,7 @@ public List<EmpleadoContratoListViewDTO> listar() {
               clase_riesgo_arl = :claseRiesgoArl,
               porcentaje_arl = :porcentajeArl,
               activo = :activo,
+              liquida_prima_semestral = :liquidaPrimaSemestral,
               fk_seguridad_edicion = :usr,
               fecha_edicion = CURRENT_TIMESTAMP
             WHERE id_contrato = :id
@@ -588,6 +599,10 @@ public List<EmpleadoContratoListViewDTO> listar() {
                 .addValue("claseRiesgoArl", dto.getClaseRiesgoArl() != null ? dto.getClaseRiesgoArl() : (short) 1)
                 .addValue("porcentajeArl", dto.getPorcentajeArl() != null ? dto.getPorcentajeArl() : BigDecimal.ZERO)
                 .addValue("activo", dto.getActivo() != null ? dto.getActivo() : Boolean.TRUE)
+                .addValue(
+                        "liquidaPrimaSemestral",
+                        dto.getLiquidaPrimaSemestral() != null ? dto.getLiquidaPrimaSemestral() : Boolean.FALSE
+                )
                 .addValue("usr", idUsuario);
 
         jdbc.update(sql, params);
