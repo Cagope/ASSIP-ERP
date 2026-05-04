@@ -20,7 +20,7 @@ public class SaldosCorteRepository {
 
         String sql = """
         WITH mov AS (
-            SELECT 
+            SELECT
                 e.id_cuenta_ahorro,
                 SUM(e.valor_debito) AS total_debitos,
                 SUM(e.valor_credito) AS total_creditos

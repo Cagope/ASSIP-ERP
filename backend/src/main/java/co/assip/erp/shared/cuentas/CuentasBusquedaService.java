@@ -44,4 +44,26 @@ public class CuentasBusquedaService {
         return repository.obtenerPorId(id, idAgencia, esCentral);
     }
 
+    public List<CuentaBusquedaDTO> buscarBancos(String texto, List<Integer> agenciasUsuario) {
+
+        boolean esCentral = agenciasUsuario != null && agenciasUsuario.contains(1);
+
+        Integer idAgencia = esCentral || agenciasUsuario == null || agenciasUsuario.isEmpty()
+                ? null
+                : agenciasUsuario.get(0);
+
+        return repository.buscarBancos(texto, idAgencia, esCentral);
+    }
+
+    public List<CuentaBusquedaDTO> buscarTrasladosAgencias(String texto, List<Integer> agenciasUsuario) {
+
+        boolean esCentral = agenciasUsuario != null && agenciasUsuario.contains(1);
+
+        Integer idAgencia = esCentral || agenciasUsuario == null || agenciasUsuario.isEmpty()
+                ? null
+                : agenciasUsuario.get(0);
+
+        return repository.buscarTrasladosAgencias(texto, idAgencia, esCentral);
+    }
+
 }

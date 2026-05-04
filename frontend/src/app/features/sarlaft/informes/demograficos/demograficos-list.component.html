@@ -1,0 +1,171 @@
+<div class="page">
+
+  <app-header-actions
+    titulo="Informe Demográfico de Asociados"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="true"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <!-- ========================= -->
+  <!-- FILTROS -->
+  <!-- ========================= -->
+  <div class="card">
+    <form class="filtros" (ngSubmit)="buscar()">
+
+      <div class="f-row">
+        <label>Fecha Corte</label>
+        <input type="date" [(ngModel)]="fecha" name="fecha" />
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()">
+          Limpiar
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn--primary">
+          Buscar
+        </button>
+
+      </div>
+
+    </form>
+  </div>
+
+  <!-- ========================= -->
+  <!-- ESTADOS -->
+  <!-- ========================= -->
+  <div *ngIf="cargando" class="loading">Cargando datos…</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <!-- ========================= -->
+  <!-- DASHBOARD -->
+  <!-- ========================= -->
+  <section *ngIf="registros.length > 0" class="dashboard card">
+
+    <!-- TARJETAS -->
+    <div class="cards">
+
+      <div class="card">
+        <div class="label">Total Asociados</div>
+        <div class="value big">{{ stats.total | number }}</div>
+      </div>
+
+      <div class="card orange">
+        <div class="label">Total Aportes</div>
+        <div class="value big">
+          {{ stats.resumen.totalAportes | number:'1.0-0' }}
+        </div>
+      </div>
+
+      <div class="card blue">
+        <div class="label">Promedio de Aportes</div>
+        <div class="value big">
+          {{ stats.resumen.promedioAportes | number:'1.0-0' }}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================= -->
+    <!-- BLOQUES DE ESTADÍSTICA -->
+    <!-- ========================= -->
+
+    <h3>Distribución por Género</h3>
+    <div class="bar-list">
+      <div class="bar-item" *ngFor="let g of (stats.genero | keyvalue)">
+        <div class="bar-label">{{ g.key }}</div>
+        <div class="bar">
+          <div class="bar-fill gender" [style.width.%]="(g.value / stats.total) * 100"></div>
+        </div>
+        <div class="bar-value">{{ g.value | number }}</div>
+      </div>
+    </div>
+
+    <h3>Rangos de Edad</h3>
+    <div class="bar-list">
+      <div class="bar-item" *ngFor="let r of (stats.rangosEdad | keyvalue)">
+        <div class="bar-label">{{ r.key }}</div>
+        <div class="bar">
+          <div class="bar-fill age" [style.width.%]="(r.value / stats.total) * 100"></div>
+        </div>
+        <div class="bar-value">{{ r.value }}</div>
+      </div>
+    </div>
+
+    <h3>Tipo de Vivienda</h3>
+    <div class="bar-list">
+      <div class="bar-item" *ngFor="let v of (stats.tipoVivienda | keyvalue)">
+        <div class="bar-label">{{ v.key }}</div>
+        <div class="bar">
+          <div class="bar-fill house" [style.width.%]="(v.value / stats.total) * 100"></div>
+        </div>
+        <div class="bar-value">{{ v.value }}</div>
+      </div>
+    </div>
+
+    <h3>Zonas</h3>
+    <div class="bar-list">
+      <div class="bar-item" *ngFor="let z of (stats.zonas | keyvalue)">
+        <div class="bar-label">{{ z.key }}</div>
+        <div class="bar">
+          <div class="bar-fill zone" [style.width.%]="(z.value / stats.total) * 100"></div>
+        </div>
+        <div class="bar-value">{{ z.value }}</div>
+      </div>
+    </div>
+
+    <h3>Subzonas</h3>
+    <div class="bar-list">
+      <div class="bar-item" *ngFor="let s of (stats.subzonas | keyvalue)">
+        <div class="bar-label">{{ s.key }}</div>
+        <div class="bar">
+          <div class="bar-fill zone" [style.width.%]="(s.value / stats.total) * 100"></div>
+        </div>
+        <div class="bar-value">{{ s.value }}</div>
+      </div>
+    </div>
+
+    <h3>Escolaridad</h3>
+    <div class="bar-list">
+      <div class="bar-item" *ngFor="let e of (stats.escolaridad | keyvalue)">
+        <div class="bar-label">{{ e.key }}</div>
+        <div class="bar">
+          <div class="bar-fill school" [style.width.%]="(e.value / stats.total) * 100"></div>
+        </div>
+        <div class="bar-value">{{ e.value }}</div>
+      </div>
+    </div>
+
+    <h3>Ocupación</h3>
+    <div class="bar-list">
+      <div class="bar-item" *ngFor="let o of (stats.ocupacion | keyvalue)">
+        <div class="bar-label">{{ o.key }}</div>
+        <div class="bar">
+          <div class="bar-fill job" [style.width.%]="(o.value / stats.total) * 100"></div>
+        </div>
+        <div class="bar-value">{{ o.value }}</div>
+      </div>
+    </div>
+
+    <h3>Municipio (Dirección)</h3>
+    <div class="bar-list">
+      <div class="bar-item" *ngFor="let m of (stats.municipio | keyvalue)">
+        <div class="bar-label">{{ m.key }}</div>
+        <div class="bar">
+          <div class="bar-fill town" [style.width.%]="(m.value / stats.total) * 100"></div>
+        </div>
+        <div class="bar-value">{{ m.value }}</div>
+      </div>
+    </div>
+
+  </section>
+
+</div>

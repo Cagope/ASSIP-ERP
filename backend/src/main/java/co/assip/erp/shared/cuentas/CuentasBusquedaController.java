@@ -32,4 +32,20 @@ public class CuentasBusquedaController {
         return service.obtenerPorId(id, agenciasUsuario);
     }
 
+    @GetMapping("/buscar-bancos")
+    public List<CuentaBusquedaDTO> buscarBancos(
+            @RequestParam("q") String texto,
+            @RequestHeader(value = "X-Agencias", required = false) List<Integer> agenciasUsuario
+    ) {
+        return service.buscarBancos(texto, agenciasUsuario);
+    }
+
+    @GetMapping("/buscar-traslados-agencias")
+    public List<CuentaBusquedaDTO> buscarTrasladosAgencias(
+            @RequestParam("q") String texto,
+            @RequestHeader(value = "X-Agencias", required = false) List<Integer> agenciasUsuario
+    ) {
+        return service.buscarTrasladosAgencias(texto, agenciasUsuario);
+    }
+
 }

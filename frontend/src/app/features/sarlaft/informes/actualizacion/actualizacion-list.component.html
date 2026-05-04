@@ -1,0 +1,103 @@
+<div class="page">
+
+  <app-header-actions
+    titulo="Informe de Actualización de Datos"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="true"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <div class="card">
+    <form class="filtros" (ngSubmit)="buscar()">
+
+      <div class="f-row">
+        <label>Estado</label>
+        <select [(ngModel)]="filtros.estado" name="estado">
+          <option value="">-- Todos --</option>
+          <option value="ACTUALIZADO">ACTUALIZADO</option>
+          <option value="DESACTUALIZADO">DESACTUALIZADO</option>
+        </select>
+      </div>
+
+      <div class="f-row">
+        <label>Desde</label>
+        <input type="date" [(ngModel)]="filtros.desde" name="desde" />
+      </div>
+
+      <div class="f-row">
+        <label>Hasta</label>
+        <input type="date" [(ngModel)]="filtros.hasta" name="hasta" />
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn--secondary" (click)="limpiar()">
+          Limpiar
+        </button>
+
+        <button type="submit" class="btn btn--primary">
+          Buscar
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <div *ngIf="cargando" class="loading">Cargando datos…</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+
+  <section *ngIf="registros.length > 0" class="card resumen">
+
+    <h3>Resumen general</h3>
+
+    <div class="cards">
+
+      <div class="card">
+        <div class="label">Total evaluados</div>
+        <div class="value big right">{{ resumen.total | number }}</div>
+      </div>
+
+      <div class="card green">
+        <div class="label">Actualizados</div>
+        <div class="value right">
+          {{ resumen.actualizados | number }} ({{ resumen.pctActualizados }}%)
+        </div>
+      </div>
+
+      <div class="card red">
+        <div class="label">Desactualizados</div>
+        <div class="value right">
+          {{ resumen.desactualizados | number }} ({{ resumen.pctDesactualizados }}%)
+        </div>
+      </div>
+
+      <div class="card saldo-total">
+        <div class="label">Saldo Total</div>
+        <div class="value big right">
+          {{ (resumen.totalSaldoActualizados + resumen.totalSaldoDesactualizados) | number:'1.0-0' }}
+        </div>
+      </div>
+
+      <div class="card green">
+        <div class="label">Saldo Actualizados</div>
+        <div class="value right">
+          {{ resumen.totalSaldoActualizados | number:'1.0-0' }}
+        </div>
+      </div>
+
+      <div class="card red">
+        <div class="label">Saldo Desactualizados</div>
+        <div class="value right">
+          {{ resumen.totalSaldoDesactualizados | number:'1.0-0' }}
+        </div>
+      </div>
+
+    </div>
+
+    <p class="note">
+      El detalle completo de personas se obtiene mediante la exportación a Excel.
+    </p>
+
+  </section>
+
+</div>
