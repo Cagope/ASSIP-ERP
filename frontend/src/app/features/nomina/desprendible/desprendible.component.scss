@@ -92,19 +92,6 @@ table.table {
    Acción PDF
    ========================= */
 
-button.btn-outline-primary {
-  font-size: 12px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
-  background: #ffffff;
-  line-height: 1;
-}
-
-button.btn-outline-primary:hover {
-  background-color: #f3f4f6;
-}
-
 /* =========================
    Loading / mensajes
    ========================= */
@@ -135,21 +122,3 @@ button.btn-outline-primary:hover {
   justify-content: center;
 }
 
-.acciones-final .btn {
-  font-size: 14px;
-  padding: 6px 14px;
-  border-radius: 6px;
-}
-
-.acciones-top {
-  margin: 0.75rem 1rem;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.acciones-footer {
-  margin: 1rem;
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}

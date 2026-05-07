@@ -116,15 +116,15 @@
         class="btn btn--secondary"
         (click)="preview()"
         [disabled]="loading || form.invalid">
-        👁️ Preview
+        Preview
       </button>
 
       <button
         type="button"
         class="btn btn--primary"
         (click)="ejecutar()"
-        [disabled]="!previewResult || loading">
-        ⚙️ Ejecutar
+        [disabled]="!previewResult?.detalle?.length || loading">
+        Ejecutar
       </button>
 
     </div>
@@ -193,24 +193,24 @@
     <!-- =========================
          ✅ BOTONES EXPORTAR (AQUÍ QUEDAN JUNTOS)
          ========================= -->
-    <div class="form-actions" style="margin-top: .75rem;">
+    <div class="form-actions">
+
       <button
         type="button"
-        class="btn btn-outline-primary"
+        class="btn btn--secondary"
         (click)="exportarListadoExcel()"
-        [disabled]="!previewResult || loading"
-      >
-        Exportar listado (Excel)
+        [disabled]="!previewResult || !previewResult.detalle.length || loading">
+        Exportar listado
       </button>
 
       <button
         type="button"
-        class="btn btn-outline-warning"
+        class="btn btn--secondary"
         (click)="exportarAuxiliaresContablesExcel()"
-        [disabled]="!previewResult || loading"
-      >
-        Exportar Auxiliares (Importable)
+        [disabled]="!previewResult || !previewResult.detalle.length || loading">
+        Exportar auxiliares
       </button>
+
     </div>
 
     <!-- =========================

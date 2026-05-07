@@ -93,13 +93,21 @@
 
     <!-- 🟫 Acciones -->
     <div class="form-actions full">
-      <button type="submit" class="btn sm primary" [disabled]="form.invalid">
-        💾 {{ route.snapshot.paramMap.get('id') ? 'actualizar' : 'guardar' }}
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="router.navigate(['/contabilidad/plan-cuentas'])">
+        Cancelar
       </button>
 
-      <button type="button" class="btn sm danger" (click)="router.navigate(['/contabilidad/plan-cuentas'])">
-        ↩️ cancelar
+      <button
+        type="submit"
+        class="btn btn--primary"
+        [disabled]="form.invalid">
+        {{ route.snapshot.paramMap.get('id') ? 'Actualizar' : 'Guardar' }}
       </button>
+
     </div>
 
   </form>

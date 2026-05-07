@@ -1,7 +1,7 @@
 <div class="page">
 
   <app-header-actions
-    titulo="📊 Resumen de Movimientos (Mensual)"
+    titulo="Resumen de Movimientos (Mensual)"
     [mostrarNuevo]="false"
     [mostrarImprimir]="true"
     [mostrarExportar]="true"
@@ -56,24 +56,28 @@
        ========================= -->
   <div class="form-actions">
 
-    <button
-      type="button"
-      class="btn btn--secondary"
-      (click)="limpiar()"
-      [disabled]="loading">
-      🧹 Limpiar
-    </button>
+    <div class="form-actions">
 
-    <button
-      type="button"
-      class="btn btn--primary"
-      (click)="consultar()"
-      [disabled]="loading">
-      {{ loading ? '⏳ Consultando...' : '🔎 Consultar' }}
-    </button>
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="limpiar()"
+        [disabled]="loading">
+        Limpiar
+      </button>
 
-    <div class="toolbar-info" *ngIf="!loading && !errorMsg">
-      <strong>Total:</strong> {{ total }}
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="consultar()"
+        [disabled]="loading">
+        {{ loading ? 'Consultando...' : 'Consultar' }}
+      </button>
+
+      <div class="toolbar-info" *ngIf="!loading && !errorMsg">
+        <strong>Total:</strong> {{ total }}
+      </div>
+
     </div>
 
   </div>

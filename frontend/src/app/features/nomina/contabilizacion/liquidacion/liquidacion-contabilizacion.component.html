@@ -89,18 +89,18 @@
 
           <button
             type="button"
-            class="btn-work-secondary"
+            class="btn btn--secondary"
             (click)="preview()"
             [disabled]="!esPeriodoCerrado || cargando || ejecutando">
-            {{ cargando ? '⏳ Consultando...' : '👁️ Preview' }}
+            {{ cargando ? 'Consultando...' : 'Preview' }}
           </button>
 
           <button
             type="button"
-            class="btn-work-secondary"
+            class="btn btn--excel"
             (click)="exportarExcel()"
             [disabled]="movimientos.length === 0">
-            📄 Exportar Excel
+            Exportar Excel
           </button>
 
         </div>
@@ -109,18 +109,18 @@
 
           <button
             type="button"
-            class="btn-work-primary"
+            class="btn btn--primary"
             (click)="ejecutar()"
             [disabled]="!esPeriodoCerrado || movimientos.length === 0 || cargando || ejecutando">
-            {{ ejecutando ? '⏳ Contabilizando...' : '▶ Contabilizar' }}
+            {{ ejecutando ? 'Contabilizando...' : 'Contabilizar' }}
           </button>
 
           <button
             type="button"
-            class="btn-work-danger"
+            class="btn btn--ghost-danger"
             (click)="reversar()"
             [disabled]="!esPeriodoContabilizado || reversando || cargando">
-            {{ reversando ? '⏳ Reversando...' : '⟲ Reversar contabilización' }}
+            {{ reversando ? 'Reversando...' : 'Reversar contabilización' }}
           </button>
 
         </div>

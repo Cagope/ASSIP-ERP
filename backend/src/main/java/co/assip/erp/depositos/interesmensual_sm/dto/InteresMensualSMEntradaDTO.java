@@ -10,6 +10,10 @@ public class InteresMensualSMEntradaDTO {
     private Integer formaId;
 
     private LocalDate fechaProceso;
-    private LocalDate fechaLiquidacion;  // fin del mes
+    private LocalDate fechaLiquidacion;
+
+    // 🔵 NUEVO — COMPROBANTE
+    private String tipoComprobante;
+    private String numeroComprobante;
 
 }

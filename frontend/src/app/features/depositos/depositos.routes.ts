@@ -1,25 +1,25 @@
 import { Routes } from '@angular/router';
 
-// 🟦 Consulta Cuentas de Ahorro (ANTES cuentas-ahorro)
+// Consulta Cuentas de Ahorro (ANTES cuentas-ahorro)
 import { CONSULTA_CUENTAS_AHORRO_ROUTES }
   from './informes/consulta-cuentas-ahorro/consulta-cuentas-ahorro.routes';
 
-// 🏛 Submódulo: Formas de Ahorro
+//Submódulo: Formas de Ahorro
 import { FORMAS_AHORRO_ROUTES } from './formas-ahorro/formas-ahorro.routes';
 
-// 📊 Informes — Saldos a fecha de corte
+//Informes — Saldos a fecha de corte
 import { SALDOS_CORTE_ROUTES } from './informes/saldos-corte/saldos-corte.routes';
 
-// 📘 Informes — Cuentas Nuevas o Retiradas
+//Informes — Cuentas Nuevas o Retiradas
 import { cuentasNRRoutes } from './informes/cuentas-nr/cuentas-nr.routes';
 
-// 🧩 Informes — Rangos
+//Informes — Rangos
 import { RANGOS_ROUTES } from './informes/rangos/rangos.routes';
 
-// ⚠️ Informes — Inconsistencias
+//Informes — Inconsistencias
 import { INCONSISTENCIAS_ROUTES } from './informes/inconsistencias/inconsistencias.routes';
 
-// ⭐ Proceso — Habilidad del Asociado
+//Proceso — Habilidad del Asociado
 import { habilidadAsociadoRoutes }
   from './procesos/habilidad-asociado/habilidad-asociado.routes';
 
@@ -30,7 +30,7 @@ import { CUENTAS_AHORRO_ROUTES }
 
 export const DEPOSITOS_ROUTES: Routes = [
 
-  // 🟦 CONSULTA CUENTAS DE AHORRO
+  //CONSULTA CUENTAS DE AHORRO
 
   {
     path: 'cuentas-ahorro',
@@ -48,37 +48,37 @@ export const DEPOSITOS_ROUTES: Routes = [
     children: FORMAS_AHORRO_ROUTES
   },
 
-  // 📊 Informes — Saldos Corte
+  //Informes — Saldos Corte
   {
     path: 'informes/saldos-corte',
     children: SALDOS_CORTE_ROUTES
   },
 
-  // 📘 Informes — Cuentas nuevas/retiradas
+  //Informes — Cuentas nuevas/retiradas
   {
     path: 'informes/cuentas-nr',
     children: cuentasNRRoutes
   },
 
-  // ⭐ Habilidad del Asociado
+  //Habilidad del Asociado
   {
     path: 'procesos/habilidad-asociado',
     children: habilidadAsociadoRoutes
   },
 
-  // 🧩 Informes — Rangos
+  //Informes — Rangos
   {
     path: 'informes/rangos',
     children: RANGOS_ROUTES
   },
 
-  // ⚠️ Informes — Inconsistencias
+  //Informes — Inconsistencias
   {
     path: 'informes/inconsistencias',
     children: INCONSISTENCIAS_ROUTES
   },
 
-  // ⚙️ Revalorización
+  //Revalorización
   {
     path: 'procesos/revalorizacion',
     loadChildren: () =>
@@ -86,7 +86,7 @@ export const DEPOSITOS_ROUTES: Routes = [
         .then(m => m.revalorizacionRoutes)
   },
 
-  // ⚙️ Interés Diario SM
+  //Interés Diario SM
   {
     path: 'procesos/interes-diario-sm',
     loadChildren: () =>
@@ -94,7 +94,7 @@ export const DEPOSITOS_ROUTES: Routes = [
         .then(m => m.interesDiarioSmRoutes)
   },
 
-  // ⚙️ Interés Mensual SM
+  //Interés Mensual SM
   {
     path: 'procesos/interes-mensual-sm',
     loadChildren: () =>
@@ -102,7 +102,7 @@ export const DEPOSITOS_ROUTES: Routes = [
         .then(m => m.interesMensualSmRoutes)
   },
 
-  // ⚙️ Interés Mensual TAC
+  //Interés Mensual TAC
   {
     path: 'procesos/interes-mensual-tac',
     loadChildren: () =>

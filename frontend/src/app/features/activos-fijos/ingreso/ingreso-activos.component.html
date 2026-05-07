@@ -144,11 +144,10 @@
       <h3>Activos a ingresar</h3>
       <button
         type="button"
-        class="btn btn-primary"
+        class="btn btn--primary"
         (click)="agregarItem()"
-        [disabled]="!headerValido"
-      >
-        + Agregar activo
+        [disabled]="!headerValido">
+        Agregar activo
       </button>
 
     </div>
@@ -165,10 +164,9 @@
           <h4>Activo #{{ i + 1 }}</h4>
           <button
             type="button"
-            class="btn btn-danger"
-            (click)="eliminarItem(i)"
-          >
-            Eliminar
+            class="btn btn--ghost-danger btn-quitar"
+            (click)="eliminarItem(i)">
+            Quitar
           </button>
         </div>
 
@@ -598,7 +596,7 @@
       type="button"
       class="btn btn--secondary"
       (click)="cancelar()">
-      ❌ Cancelar
+      Cancelar
     </button>
 
     <button
@@ -606,7 +604,7 @@
       class="btn btn--primary"
       (click)="guardar()"
       [disabled]="!puedeGuardar">
-      💾 Guardar
+      Guardar
     </button>
 
   </div>

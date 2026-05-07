@@ -81,27 +81,32 @@
 
   <!-- 🟨 Acciones -->
   <div class="wizard-actions">
+
     <button
-      class="btn btn--cancel"
+      type="button"
+      class="btn btn--secondary"
       [disabled]="pasoActual === 1"
       (click)="anterior()">
-      ⬅️ Anterior
+      Anterior
     </button>
 
     <button
       *ngIf="pasoActual < pasos.length"
+      type="button"
       class="btn btn--primary"
       (click)="siguiente()"
       [disabled]="!formValidoPorPaso[pasoActual - 1]">
-      Siguiente ➡️
+      Siguiente
     </button>
 
     <button
       *ngIf="pasoActual === pasos.length"
+      type="button"
       class="btn btn--primary"
       (click)="finalizar()"
       [disabled]="!todosValidos()">
-      ✅ Finalizar
+      Finalizar
     </button>
+
   </div>
 </div>

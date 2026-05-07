@@ -24,11 +24,7 @@ export class InteresDiarioSmPrintService {
     win.onload = () => win.print();
   }
 
-  // ==========================================================
-  // 🖨️ HTML COMPLETO
-  // ==========================================================
   private buildHTML(resultados: any[], filtros: any): string {
-
     return `
       <html>
       <head>
@@ -36,7 +32,6 @@ export class InteresDiarioSmPrintService {
         <title>Interés Diario SM</title>
 
         <style>
-
           @page { size: letter portrait; margin: 10mm 12mm; }
 
           body {
@@ -46,9 +41,6 @@ export class InteresDiarioSmPrintService {
             color: #222;
           }
 
-          /* ============================ */
-          /* ENCABEZADO REAL (FUNCIONA)   */
-          /* ============================ */
           .enc {
             display: flex;
             align-items: center;
@@ -94,33 +86,34 @@ export class InteresDiarioSmPrintService {
           .right {
             text-align: right;
           }
-
         </style>
-
       </head>
-      <body>
 
+      <body>
         ${this.buildHeader(filtros)}
         ${this.buildTable(resultados)}
-
       </body>
       </html>
     `;
   }
 
-  // ==========================================================
-  // 🟦 Encabezado con datos del proceso
-  // ==========================================================
   private buildHeader(filtros: any): string {
 
     const fechaProceso = filtros.fechaProceso ?? '';
     const fechaLiquidacion = filtros.fechaLiquidacion ?? '';
-    const forma = filtros.formaId ?? '';
+
+    const forma =
+      `${filtros.codigoForma ?? ''} — ${filtros.nombreForma ?? ''}`;
+
+    const agencia = filtros.codigoAgencia
+      ? `${filtros.codigoAgencia} — ${filtros.nombreAgencia ?? ''}`
+      : '';
 
     return `
       <div class="enc">
         <img src="${window.location.origin}/assets/LOGO_EMPRESA.png" />
         <div>
+          ${agencia ? `<div class="tit">${agencia}</div>` : ''}
           <div class="tit">Proceso — Interés Diario SM</div>
           <div class="sub">Fecha proceso: ${fechaProceso}</div>
           <div class="sub">Fecha liquidación: ${fechaLiquidacion}</div>
@@ -130,23 +123,17 @@ export class InteresDiarioSmPrintService {
     `;
   }
 
-  // ==========================================================
-  // 📋 Tabla de resultados
-  // ==========================================================
   private buildTable(rows: any[]): string {
-
     return `
       <table>
         <thead>
           <tr>
             <th>Documento</th>
             <th>Nombre completo</th>
-
             <th class="right">Saldo mínimo día</th>
             <th class="right">Interés bruto</th>
             <th class="right">Retención</th>
             <th class="right">Interés neto</th>
-
             <th class="right">Tasa (%)</th>
             <th class="right">Mínimo forma</th>
             <th>Aplica retención</th>
@@ -158,19 +145,16 @@ export class InteresDiarioSmPrintService {
             <tr>
               <td>${r.documento}</td>
               <td>${r.nombreCompleto}</td>
-
               <td class="right">${Number(r.saldoMinimoDia).toLocaleString('es-CO')}</td>
               <td class="right">${Number(r.interesBruto).toLocaleString('es-CO')}</td>
               <td class="right">${Number(r.retencion).toLocaleString('es-CO')}</td>
               <td class="right">${Number(r.interesNeto).toLocaleString('es-CO')}</td>
-
               <td class="right">${Number(r.tasaInteres).toLocaleString('es-CO')}</td>
               <td class="right">${Number(r.minimoForma).toLocaleString('es-CO')}</td>
               <td>${r.aplicaRetencion ? 'Sí' : 'No'}</td>
             </tr>
           `).join('')}
         </tbody>
-
       </table>
     `;
   }

@@ -26,8 +26,21 @@
       <td>{{ p.tipoValor ? 'Porcentaje' : 'Valor' }}</td>
       <td>
         <div class="acciones">
-          <button class="btn sm" (click)="editarParametro(p.idParametro!)">✏️</button>
-          <button class="btn sm danger" (click)="eliminarParametro(p.idParametro!)">🗑️</button>
+          <button
+            class="btn-action-edit"
+            type="button"
+            (click)="editarParametro(p.idParametro!)"
+            title="Editar">
+            ✏️
+          </button>
+
+          <button
+            class="btn-action-delete"
+            type="button"
+            (click)="eliminarParametro(p.idParametro!)"
+            title="Eliminar">
+            🗑️
+          </button>
         </div>
       </td>
     </tr>

@@ -306,23 +306,23 @@
      ACCIONES
      ============================= -->
 
-    <div class="form-actions full">
+      <div class="form-actions full">
 
-      <button
-        type="button"
-        class="btn btn--secondary"
-        (click)="cancelar()">
-        ❌ Cancelar
-      </button>
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="cancelar()">
+          Cancelar
+        </button>
 
-      <button
-        type="submit"
-        class="btn btn--primary"
-        [disabled]="form.invalid">
-        💾 Guardar
-      </button>
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="form.invalid">
+          Guardar
+        </button>
 
-    </div>
+      </div>
 
   </form>
 </div>

@@ -6,7 +6,7 @@
 // ========================================================
 
 export const seguridadMenu = {
-  title: '🔐 Seguridad',
+  title: 'Seguridad',
   items: [
     // 👤 CRUD Usuarios
     {

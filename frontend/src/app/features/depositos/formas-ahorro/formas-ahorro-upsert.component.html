@@ -58,8 +58,21 @@
     </div>
 
     <div class="form-actions full">
-      <button class="btn sm primary" type="submit" [disabled]="form.invalid">💾 guardar</button>
-      <button class="btn sm danger" type="button" (click)="cancelar()">↩️ cancelar</button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="cancelar()">
+        Cancelar
+      </button>
+
+      <button
+        type="submit"
+        class="btn btn--primary"
+        [disabled]="form.invalid">
+        Guardar
+      </button>
+
     </div>
 
   </form>

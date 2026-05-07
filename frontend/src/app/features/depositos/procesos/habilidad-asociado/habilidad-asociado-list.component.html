@@ -1,120 +1,105 @@
 <div class="page">
 
-  <!-- ========================================================= -->
-  <!-- 🟦 ENCABEZADO GLOBAL DEL MÓDULO                           -->
-  <!-- ========================================================= -->
   <app-header-actions
-    titulo="🏦 Proceso — Habilidad del Asociado"
+    titulo="Proceso — Habilidad del Asociado"
     [mostrarNuevo]="false"
     [mostrarImprimir]="false"
     [mostrarExportar]="false">
   </app-header-actions>
 
-  <!-- ========================================================= -->
-  <!-- 🔍 FILTROS                                                -->
-  <!-- ========================================================= -->
-  <form class="filtros" (ngSubmit)="ejecutar()">
+  <div class="card">
+    <form class="filtros" (ngSubmit)="ejecutar()">
 
-    <!-- 🏛 Agencia -->
-    <div class="f-row">
-      <label>Agencia</label>
-      <select [(ngModel)]="filtros.agenciaId" name="agenciaId">
-        <option value="0">Todas</option>
-        <option *ngFor="let a of agencias" [value]="a.idAgencia">
-          {{ a.nombreAgencia }}
-        </option>
-      </select>
-    </div>
+      <div class="f-row">
+        <label>Agencia</label>
+        <select [(ngModel)]="filtros.agenciaId" name="agenciaId">
+          <option value="0">Todas</option>
+          <option *ngFor="let a of agencias" [value]="a.idAgencia">
+            {{ a.nombreAgencia }}
+          </option>
+        </select>
+      </div>
 
-    <!-- 📆 Fecha inicio -->
-    <div class="f-row">
-      <label>Fecha inicio</label>
-      <input type="date" [(ngModel)]="filtros.fechaInicio" name="fechaInicio" />
-    </div>
+      <div class="f-row">
+        <label>Fecha inicio</label>
+        <input type="date" [(ngModel)]="filtros.fechaInicio" name="fechaInicio" />
+      </div>
 
-    <!-- 📆 Fecha fin -->
-    <div class="f-row">
-      <label>Fecha fin</label>
-      <input type="date" [(ngModel)]="filtros.fechaFin" name="fechaFin" />
-    </div>
+      <div class="f-row">
+        <label>Fecha fin</label>
+        <input type="date" [(ngModel)]="filtros.fechaFin" name="fechaFin" />
+      </div>
 
-    <!-- 💰 Valor menores -->
-    <div class="f-row">
-      <label>Aportes mínimos (Menores)</label>
-      <input type="text"
-             numericFormat
-             [(ngModel)]="filtros.valorMenores"
-             name="valorMenores"
-             placeholder="Ej: 72.000" />
-    </div>
+      <div class="f-row">
+        <label>Aportes mínimos (Menores)</label>
+        <input
+          type="text"
+          numericFormat
+          [(ngModel)]="filtros.valorMenores"
+          name="valorMenores"
+          placeholder="Ej: 72.000" />
+      </div>
 
-    <!-- 💰 Valor mayores -->
-    <div class="f-row">
-      <label>Aportes mínimos (Mayores)</label>
-      <input type="text"
-             numericFormat
-             [(ngModel)]="filtros.valorMayores"
-             name="valorMayores"
-             placeholder="Ej: 100.000" />
-    </div>
+      <div class="f-row">
+        <label>Aportes mínimos (Mayores)</label>
+        <input
+          type="text"
+          numericFormat
+          [(ngModel)]="filtros.valorMayores"
+          name="valorMayores"
+          placeholder="Ej: 100.000" />
+      </div>
 
-    <!-- 💰 Valor jurídicas -->
-    <div class="f-row">
-      <label>Aportes mínimos (Jurídicas)</label>
-      <input type="text"
-             numericFormat
-             [(ngModel)]="filtros.valorJuridicas"
-             name="valorJuridicas"
-             placeholder="Ej: 150.000" />
-    </div>
+      <div class="f-row">
+        <label>Aportes mínimos (Jurídicas)</label>
+        <input
+          type="text"
+          numericFormat
+          [(ngModel)]="filtros.valorJuridicas"
+          name="valorJuridicas"
+          placeholder="Ej: 150.000" />
+      </div>
 
-    <!-- 🔘 BOTONES -->
-    <div class="f-buttons">
-      <button type="submit" class="btn btn--primary">
-        ⚙️ Ejecutar proceso
-      </button>
+      <div class="form-actions">
+        <button type="button" class="btn btn--secondary" (click)="limpiar()">
+          Limpiar
+        </button>
 
-      <button type="button" class="btn btn--cancel" (click)="limpiar()">
-        🧹 Limpiar
-      </button>
-    </div>
+        <button type="submit" class="btn btn--primary">
+          Ejecutar proceso
+        </button>
+      </div>
 
-  </form>
+    </form>
+  </div>
 
-  <!-- ========================================================= -->
-  <!-- ESTADOS -->
-  <!-- ========================================================= -->
   <div *ngIf="cargando" class="loading">Procesando...</div>
   <div *ngIf="error" class="error">{{ error }}</div>
 
-  <!-- ========================================================= -->
-  <!-- 📊 ESTADÍSTICAS                                           -->
-  <!-- ========================================================= -->
-  <div *ngIf="resultados.length > 0" class="resultados">
+  <div *ngIf="resultados.length > 0" class="card resultados">
 
     <h3 class="mt-3">Resultados del proceso</h3>
 
-    <div class="header-actions" style="margin-top: 10px;">
+    <div class="header-actions">
       <div class="actions">
-        <button class="btn btn--primary"
-                type="button"
-                (click)="exportar()"
-                [disabled]="resultados.length === 0">
-          📥 Exportar Excel
+        <button
+          class="btn btn--secondary"
+          type="button"
+          (click)="exportar()"
+          [disabled]="resultados.length === 0">
+          Exportar Excel
         </button>
 
-        <button class="btn btn--print"
-                type="button"
-                (click)="imprimir()"
-                [disabled]="resultados.length === 0">
-          🖨️ Imprimir
+        <button
+          class="btn btn--secondary"
+          type="button"
+          (click)="imprimir()"
+          [disabled]="resultados.length === 0">
+          Imprimir
         </button>
       </div>
     </div>
 
-    <!-- ========================= -->
-    <!-- 🧮 TABLA ESTADÍSTICA      -->
-    <!-- ========================= -->
     <table class="tabla-resumen">
       <thead>
       <tr>
@@ -126,7 +111,6 @@
       </thead>
 
       <tbody>
-
       <tr>
         <td>HÁBILES</td>
         <td class="right">{{ resumen.habiles | number:'1.0-0' }}</td>
@@ -151,10 +135,8 @@
         </td>
         <td></td>
       </tr>
-
       </tbody>
     </table>
-
 
   </div>
 

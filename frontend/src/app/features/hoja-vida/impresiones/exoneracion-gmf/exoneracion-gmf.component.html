@@ -2,10 +2,20 @@
 
   <!-- 🟩 Botones superiores -->
   <div class="actions-top no-print">
-    <button class="btn btn-back" (click)="onBack()">Regresar</button>
-    <button class="btn btn-print" (click)="onPrint()">Imprimir</button>
-  </div>
+    <button
+      class="btn btn--cancel"
+      type="button"
+      (click)="onBack()">
+      Regresar
+    </button>
 
+    <button
+      class="btn btn--print"
+      type="button"
+      (click)="onPrint()">
+      Imprimir
+    </button>
+  </div>
   <!-- 🏢 Encabezado institucional estandarizado -->
   <header class="header">
     <!-- IZQUIERDA -->
@@ -106,8 +116,19 @@
 
   <!-- 🟦 Botones inferiores -->
   <div class="actions no-print">
-    <button class="btn secondary" (click)="onBack()">Regresar</button>
-    <button class="btn" (click)="onPrint()">Imprimir</button>
+    <button
+      class="btn btn--cancel"
+      type="button"
+      (click)="onBack()">
+      Regresar
+    </button>
+
+    <button
+      class="btn btn--print"
+      type="button"
+      (click)="onPrint()">
+      Imprimir
+    </button>
   </div>
 
 </div>

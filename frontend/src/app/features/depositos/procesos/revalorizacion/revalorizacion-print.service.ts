@@ -24,9 +24,6 @@ export class RevalorizacionPrintService {
     win.onload = () => win.print();
   }
 
-  // ==========================================================
-  // 🖨️ HTML COMPLETO
-  // ==========================================================
   private buildHTML(resultados: any[], filtros: any): string {
 
     return `
@@ -36,7 +33,6 @@ export class RevalorizacionPrintService {
         <title>Revalorización de Aportes</title>
 
         <style>
-
           @page { size: letter portrait; margin: 10mm 12mm; }
 
           body {
@@ -46,9 +42,6 @@ export class RevalorizacionPrintService {
             color: #222;
           }
 
-          /* ============================ */
-          /* ENCABEZADO REAL (FUNCIONA)   */
-          /* ============================ */
           .enc {
             display: flex;
             align-items: center;
@@ -94,47 +87,47 @@ export class RevalorizacionPrintService {
           .right {
             text-align: right;
           }
-
         </style>
-
       </head>
+
       <body>
-
         ${this.buildHeader(filtros)}
-
         ${this.buildTable(resultados)}
-
       </body>
       </html>
     `;
   }
 
-  // ==========================================================
-  // 🟦 Encabezado con datos del proceso
-  // ==========================================================
   private buildHeader(filtros: any): string {
 
     const fechaInicio = filtros.fechaInicio ?? '';
     const fechaFin = filtros.fechaFin ?? '';
-    const fechaCont = filtros.fechaContabilizacion ?? '';
+    const fechaProceso = filtros.fechaProceso ?? '';
+    const fechaLiquidacion = filtros.fechaLiquidacion ?? '';
     const tasa = filtros.tasa ?? '';
+
+    const forma = `${filtros.codigoForma ?? ''} — ${filtros.nombreForma ?? ''}`;
+
+    const agencia = filtros.codigoAgencia
+      ? `${filtros.codigoAgencia} — ${filtros.nombreAgencia ?? ''}`
+      : '';
 
     return `
       <div class="enc">
         <img src="${window.location.origin}/assets/LOGO_EMPRESA.png" />
         <div>
+          ${agencia ? `<div class="tit">${agencia}</div>` : ''}
           <div class="tit">Proceso — Revalorización de Aportes</div>
           <div class="sub">Periodo: ${fechaInicio} → ${fechaFin}</div>
-          <div class="sub">Fecha contabilización: ${fechaCont}</div>
+          <div class="sub">Fecha proceso: ${fechaProceso}</div>
+          <div class="sub">Fecha liquidación: ${fechaLiquidacion}</div>
+          <div class="sub">Forma: ${forma}</div>
           <div class="sub">Tasa aplicada: ${tasa}%</div>
         </div>
       </div>
     `;
   }
 
-  // ==========================================================
-  // 📋 Tabla de resultados
-  // ==========================================================
   private buildTable(rows: any[]): string {
 
     return `
@@ -146,6 +139,7 @@ export class RevalorizacionPrintService {
             <th class="right">Saldo actual</th>
             <th class="right">Promedio</th>
             <th class="right">Revalorización</th>
+            <th class="right">Nuevo saldo</th>
             <th>Estado</th>
           </tr>
         </thead>
@@ -158,11 +152,11 @@ export class RevalorizacionPrintService {
               <td class="right">${Number(r.saldoActual).toLocaleString('es-CO')}</td>
               <td class="right">${Number(r.valorPromedio).toLocaleString('es-CO')}</td>
               <td class="right">${Number(r.valorRevalorizacion).toLocaleString('es-CO')}</td>
+              <td class="right">${Number(r.nuevoSaldo).toLocaleString('es-CO')}</td>
               <td>${r.estadoCuenta}</td>
             </tr>
           `).join('')}
         </tbody>
-
       </table>
     `;
   }

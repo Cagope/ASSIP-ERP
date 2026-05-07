@@ -3,7 +3,7 @@
 // ========================================================
 
 export const contabilidadMenu = {
-  title: '💼 Contabilidad',
+  title: 'Contabilidad',
   items: [
     {
       label: 'Plan de Cuentas',

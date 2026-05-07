@@ -1,72 +1,82 @@
 <div class="rangos-container">
 
-  <h2>📊 Informe por Rangos</h2>
+  <h2>Informe por Rangos</h2>
 
-  <form [formGroup]="form" (ngSubmit)="consultar()" class="form-panel">
+  <div class="card">
 
-    <!-- Tipo de informe -->
-    <div class="form-group">
-      <label>Tipo de Informe</label>
-      <select formControlName="tipo">
-        <option value="EDAD">Por Edad</option>
-        <option value="SALDO">Por Saldo</option>
-        <option value="ANTIGUEDAD">Por Antigüedad</option>
-      </select>
-    </div>
+    <form [formGroup]="form" (ngSubmit)="consultar()" class="form-panel">
 
-    <!-- Agencia -->
-    <div class="form-group">
-      <label>Agencia</label>
-      <select formControlName="agencia">
-        <option *ngFor="let a of agencias" [value]="a.id">
-          {{ a.nombre }}
-        </option>
-      </select>
-    </div>
+      <div class="form-group">
+        <label>Tipo de Informe</label>
+        <select formControlName="tipo">
+          <option value="EDAD">Por Edad</option>
+          <option value="SALDO">Por Saldo</option>
+          <option value="ANTIGUEDAD">Por Antigüedad</option>
+        </select>
+      </div>
 
-    <!-- Fecha de Corte -->
-    <div class="form-group">
-      <label>Fecha de Corte</label>
-      <input type="date" formControlName="fechaCorte">
-    </div>
+      <div class="form-group">
+        <label>Agencia</label>
+        <select formControlName="agencia">
+          <option *ngFor="let a of agencias" [value]="a.id">
+            {{ a.nombre }}
+          </option>
+        </select>
+      </div>
 
-    <!-- Tabla de Rangos -->
-    <div class="rangos-table" formArrayName="rangos">
-      <table>
-        <thead>
-        <tr>
-          <th>#</th>
-          <th>Desde</th>
-          <th>Hasta</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let r of rangos.controls; let i = index" [formGroupName]="i">
-          <td>{{ i + 1 }}</td>
-          <td><input type="number" formControlName="desde"></td>
-          <td><input type="number" formControlName="hasta"></td>
-        </tr>
-        </tbody>
-      </table>
-    </div>
+      <div class="form-group">
+        <label>Fecha de Corte</label>
+        <input type="date" formControlName="fechaCorte">
+      </div>
 
-    <div class="actions">
-      <button type="submit" class="btn search" [disabled]="cargando">Buscar</button>
-    </div>
+      <div class="rangos-table" formArrayName="rangos">
+        <table>
+          <thead>
+          <tr>
+            <th>#</th>
+            <th>Desde</th>
+            <th>Hasta</th>
+          </tr>
+          </thead>
 
-  </form>
+          <tbody>
+          <tr *ngFor="let r of rangos.controls; let i = index" [formGroupName]="i">
+            <td>{{ i + 1 }}</td>
+            <td><input type="number" formControlName="desde"></td>
+            <td><input type="number" formControlName="hasta"></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
 
-  <!-- Cargando -->
-  <div *ngIf="cargando" class="loading">Cargando...</div>
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="cargando">
+          Buscar
+        </button>
+      </div>
 
-  <!-- ========================================================= -->
-  <!-- 🔵 RESUMEN BONITO Y PROFESIONAL                            -->
-  <!-- ========================================================= -->
+    </form>
+
+  </div>
+
+  <div *ngIf="cargando" class="loading">
+    Cargando...
+  </div>
+
   <div *ngIf="!cargando && resumen.length > 0" class="resumen-box card">
 
     <div class="header">
       <h3>Resumen del Informe</h3>
-      <button class="btn export" (click)="exportar()">Exportar Excel</button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="exportar()">
+        Exportar Excel
+      </button>
     </div>
 
     <table class="resumen-table">
@@ -89,7 +99,6 @@
 
   </div>
 
-  <!-- NO SE MUESTRA → solo sirve para el exporter -->
   <div style="display:none">
     <table id="tablaCompleta">
       <tr *ngFor="let item of resultados">

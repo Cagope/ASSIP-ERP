@@ -31,8 +31,7 @@
           ID Datos Personal: <b>{{ form.idDatosPersonal }}</b>
           <button
             type="button"
-            class="btn btn-light"
-            style="margin-left: 8px;"
+            class="btn btn--ghost-danger btn-quitar"
             (click)="limpiarPersona()"
             [disabled]="guardando">
             Quitar
@@ -57,7 +56,7 @@
         class="btn btn--secondary"
         (click)="volver()"
         [disabled]="guardando">
-        ❌ Cancelar
+        Cancelar
       </button>
 
       <button
@@ -65,10 +64,11 @@
         class="btn btn--primary"
         (click)="guardar()"
         [disabled]="guardando">
-        {{ guardando ? '⏳ Guardando...' : '💾 Guardar' }}
+        {{ guardando ? 'Guardando...' : 'Guardar' }}
       </button>
 
     </div>
+
   </div>
 
   <ng-template #cargandoTpl>

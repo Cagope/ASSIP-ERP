@@ -1,37 +1,36 @@
 <div class="layout">
 
-  <!-- ================== HEADER PRINCIPAL ================== -->
-  <header class="header">
+  <!-- ================== SIDEBAR ================== -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="title">ASSIP-ERP</span>
+    </div>
 
-    <!-- 🟩 Línea 1 -->
-    <div class="header-top">
+    <app-main-menu></app-main-menu>
+  </aside>
 
-      <div class="left">
-        <img src="assets/logo-web.png" alt="Logo ASSIP ERP" class="logo" />
-        <span class="title">ASSIP-ERP</span>
-      </div>
+  <!-- ================== ÁREA DERECHA ================== -->
+  <div class="content-area">
 
-      <div class="center" *ngIf="agenciaActual">
+    <!-- ================== HEADER SUPERIOR ================== -->
+    <header class="header">
+
+      <div class="header-left" *ngIf="agenciaActual">
         {{ agenciaActual.codigoAgencia }} — {{ agenciaActual.nombreAgencia }}
       </div>
 
-      <div class="right">
+      <div class="header-right">
         <span class="user">👤 {{ username }}</span>
         <button class="logout" (click)="logout()">Cerrar sesión</button>
       </div>
 
-    </div>
+    </header>
 
-    <!-- 🟨 Línea 2: MENÚ -->
-    <div class="header-menu">
-      <app-main-menu></app-main-menu>
-    </div>
+    <!-- ================== CONTENIDO ================== -->
+    <main class="main">
+      <router-outlet></router-outlet>
+    </main>
 
-  </header>
-
-  <!-- ================== CONTENIDO ================== -->
-  <main class="main">
-    <router-outlet></router-outlet>
-  </main>
+  </div>
 
 </div>

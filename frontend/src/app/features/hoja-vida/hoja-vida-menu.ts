@@ -6,7 +6,7 @@
 // ========================================================
 
 export const hojaVidaMenu = {
-  title: '🧾 Hoja de Vida',
+  title: 'Hoja de Vida',
   items: [
     // 🟩 FORMULARIO INTEGRAL
     { label: 'Formulario Integral', route: '/hoja-vida/formulario-integral' },

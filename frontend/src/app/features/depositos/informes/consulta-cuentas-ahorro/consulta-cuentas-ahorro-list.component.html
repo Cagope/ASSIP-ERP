@@ -1,9 +1,8 @@
 <div class="list-container">
   <header class="page-header">
-    <h2>💰 Cuentas de Ahorro</h2>
+    <h2>Cuentas de Ahorro</h2>
   </header>
 
-  <!-- 🟩 Filtros de búsqueda -->
   <div class="filters grid grid-5 gap-sm">
     <div>
       <label>Documento</label>
@@ -30,17 +29,20 @@
       <input type="text" [(ngModel)]="filtros.codigo_cuenta" (keyup.enter)="buscar()" />
     </div>
 
-    <div class="actions full">
-      <button class="btn" (click)="buscar()">🔍 Buscar</button>
-      <button class="btn secondary" (click)="limpiar()">🧹 Limpiar</button>
+    <div class="form-actions full">
+      <button type="button" class="btn btn--secondary" (click)="limpiar()">
+        Limpiar
+      </button>
+
+      <button type="button" class="btn btn--primary" (click)="buscar()">
+        Buscar
+      </button>
     </div>
   </div>
 
-  <!-- ⚙️ Estado -->
   <div *ngIf="cargando" class="loading">Cargando cuentas...</div>
   <div *ngIf="error" class="error">{{ error }}</div>
 
-  <!-- 📋 Resultados -->
   <table class="data-table" *ngIf="!cargando && cuentas.length > 0; else vacio">
     <thead>
     <tr>
@@ -53,6 +55,7 @@
       <th>Acciones</th>
     </tr>
     </thead>
+
     <tbody>
     <tr *ngFor="let c of cuentas; let i = index">
       <td>{{ i + 1 }}</td>
@@ -61,20 +64,32 @@
       <td>{{ c.nombres }} {{ c.primer_apellido }} {{ c.segundo_apellido }}</td>
       <td>{{ c.nombre_forma_ahorro }}</td>
       <td class="right">{{ c.saldo_actual_cuenta | number: '1.0-2' }}</td>
+
       <td class="actions-cell">
-        <button class="btn sm" (click)="verDetalle(c)">🔍 Ver detalle</button>
-        <button class="btn sm secondary" (click)="abrirExtracto(c)">🧾 Ver extracto</button>
+        <div class="acciones">
+          <button
+            type="button"
+            class="btn btn--secondary"
+            (click)="verDetalle(c)">
+            Ver detalle
+          </button>
+
+          <button
+            type="button"
+            class="btn btn--secondary"
+            (click)="abrirExtracto(c)">
+            Ver extracto
+          </button>
+        </div>
       </td>
     </tr>
     </tbody>
   </table>
 
-  <!-- 📭 Sin resultados -->
   <ng-template #vacio>
     <div class="empty">No se encontraron cuentas de ahorro.</div>
   </ng-template>
 
-  <!-- 🟦 Detalle de la cuenta seleccionada -->
   <div *ngIf="seleccionada" class="detalle-wrapper">
     <app-cuentas-ahorro-detalle
       [cuenta]="seleccionada"
@@ -82,19 +97,17 @@
     </app-cuentas-ahorro-detalle>
   </div>
 
-  <!-- 🧾 Modal de Extracto -->
   <app-extracto-modal
     [idAgencia]="seleccionada?.id_agencia"
     [formaAhorro]="seleccionada?.id_forma_ahorro"
     [codigoCuenta]="seleccionada?.codigo_cuenta"
     [asociado]="{
-    documento: seleccionada?.documento,
-    nombreCompleto: (seleccionada?.nombres || '') + ' ' +
-                    (seleccionada?.primer_apellido || '') + ' ' +
-                    (seleccionada?.segundo_apellido || '')
-  }"
+      documento: seleccionada?.documento,
+      nombreCompleto: (seleccionada?.nombres || '') + ' ' +
+                      (seleccionada?.primer_apellido || '') + ' ' +
+                      (seleccionada?.segundo_apellido || '')
+    }"
     [visible]="modalVisible"
     (cerrar)="modalVisible = false">
   </app-extracto-modal>
 </div>
-

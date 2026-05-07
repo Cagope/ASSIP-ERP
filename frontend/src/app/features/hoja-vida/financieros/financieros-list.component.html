@@ -68,7 +68,10 @@
       <td>{{ p.fechaActualizacion | date: 'dd/MM/yyyy' }}</td>
 
       <td class="text-center">
-        <button class="btn btn-sm btn-outline-primary" (click)="gestionar(p, p.financiero)">
+        <button
+          type="button"
+          class="btn-action-edit btn-action-text"
+          (click)="gestionar(p, p.financiero)">
           {{ p.financiero ? 'Gestionar' : 'Crear' }}
         </button>
       </td>
@@ -77,9 +80,25 @@
   </table>
 
   <div class="pagination-controls" *ngIf="!cargando && filtradas.length > tamanoPagina">
-    <button (click)="cambiarPagina(pagina - 1)" [disabled]="pagina === 1">Anterior</button>
+
+    <button
+      type="button"
+      class="btn btn--secondary"
+      (click)="cambiarPagina(pagina - 1)"
+      [disabled]="pagina === 1">
+      Anterior
+    </button>
+
     <span>Página {{ pagina }} / {{ totalPaginas() }}</span>
-    <button (click)="cambiarPagina(pagina + 1)" [disabled]="pagina === totalPaginas()">Siguiente</button>
+
+    <button
+      type="button"
+      class="btn btn--secondary"
+      (click)="cambiarPagina(pagina + 1)"
+      [disabled]="pagina === totalPaginas()">
+      Siguiente
+    </button>
+
   </div>
 
   <div *ngIf="cargando" class="loading">

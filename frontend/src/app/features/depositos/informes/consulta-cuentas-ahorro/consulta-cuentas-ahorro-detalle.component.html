@@ -1,11 +1,16 @@
 <div class="detalle-container" *ngIf="cuenta">
   <div class="acciones">
-    <button class="btn secondary" (click)="onCerrar()">⬅️ Regresar al listado</button>
+    <button
+      type="button"
+      class="btn btn--secondary"
+      (click)="onCerrar()">
+      Regresar al listado
+    </button>
   </div>
 
-  <h2>🔍 Detalle de la Cuenta de Ahorro</h2>
+  <h2>Detalle de la Cuenta de Ahorro</h2>
 
-  <!-- 🔥 ALERTA SARLAFT -->
+  <!-- ALERTA SARLAFT -->
   <div *ngIf="cuenta?.sarlaft"
        class="sarlaft-alert"
        [ngClass]="{
@@ -23,9 +28,9 @@
 
   </div>
 
-  <!-- 🧍 Datos del Titular -->
+  <!-- Datos del Titular -->
   <section class="bloque">
-    <h3>👤 Titular</h3>
+    <h3>Titular</h3>
     <div class="grid">
       <div><strong>Documento:</strong> {{ cuenta.documento }}</div>
       <div><strong>Nombre:</strong> {{ cuenta.nombres }} {{ cuenta.primer_apellido }} {{ cuenta.segundo_apellido }}</div>
@@ -41,9 +46,9 @@
     </div>
   </section>
 
-  <!-- 💰 Información Financiera -->
+  <!-- Información Financiera -->
   <section class="bloque">
-    <h3>💰 Información Financiera</h3>
+    <h3>Información Financiera</h3>
     <div class="grid">
       <div><strong>Código de Cuenta:</strong> {{ cuenta.codigo_cuenta }}</div>
       <div><strong>Forma de Ahorro:</strong> {{ cuenta.nombre_forma_ahorro }}</div>
@@ -56,9 +61,9 @@
     </div>
   </section>
 
-  <!-- 🖼️ Imágenes -->
+  <!-- Imágenes -->
   <section class="bloque">
-    <h3>📸 Imágenes</h3>
+    <h3>Imágenes</h3>
     <div class="imagenes">
       <div>
         <img
@@ -92,14 +97,14 @@
     </div>
   </section>
 
-  <!-- 🌌 Modal de imagen ampliada -->
+  <!-- Modal de imagen ampliada -->
   <div class="modal-foto" *ngIf="imagenAmpliada" (click)="cerrarImagen()">
     <img [src]="imagenAmpliada" alt="Imagen ampliada" />
   </div>
 
-  <!-- 📅 Auditoría -->
+  <!-- Auditoría -->
   <section class="bloque">
-    <h3>🕓 Auditoría</h3>
+    <h3>Auditoría</h3>
     <div class="grid">
       <div><strong>Creado:</strong> {{ cuenta.fecha_creacion | date:'yyyy-MM-dd HH:mm' }}</div>
       <div><strong>Editado:</strong> {{ cuenta.fecha_edicion | date:'yyyy-MM-dd HH:mm' }}</div>

@@ -69,11 +69,10 @@
         </td>
         <td class="text-center">
           <button
-            class="btn btn-sm btn-outline-primary"
+            class="btn-action-print"
             title="Imprimir desprendible"
             type="button"
-            (click)="imprimir(e)"
-          >
+            (click)="imprimir(e)">
             🖨️
           </button>
         </td>
@@ -89,16 +88,18 @@
   <div class="acciones-footer">
 
     <button
-      class="btn btn-outline-primary"
+      type="button"
+      class="btn btn--primary"
       (click)="generarTodos()"
       [disabled]="loading || empleados.length === 0">
-      🗂 Generar todos los desprendibles
+      Generar todos los desprendibles
     </button>
 
     <button
-      class="btn btn-secondary"
+      type="button"
+      class="btn btn--secondary"
       (click)="volver()">
-      ← Volver a períodos
+      Volver a períodos
     </button>
 
   </div>

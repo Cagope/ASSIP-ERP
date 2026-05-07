@@ -12,15 +12,18 @@ public class InteresMensualSMItemDTO {
     private String documento;
     private String nombreCompleto;
 
+    private BigDecimal saldoAnterior;
     private BigDecimal saldoMinimoMes;
 
     private BigDecimal interesBruto;
     private BigDecimal retencion;
     private BigDecimal interesNeto;
 
+    private BigDecimal nuevoSaldo;
+
     private BigDecimal tasaInteres;
     private Integer tiempoLiquidacion;
     private BigDecimal minimoForma;
-
     private Boolean aplicaRetencion;
+    private Integer idDatosPersonal;
 }

@@ -1,7 +1,7 @@
 <div class="page">
 
   <app-header-actions
-    titulo="📒 Kardex por Activo (Entre Fechas)"
+    titulo="Kardex por Activo (Entre Fechas)"
     [mostrarNuevo]="false"
     [mostrarImprimir]="true"
     [mostrarExportar]="true"
@@ -72,7 +72,7 @@
       class="btn btn--secondary"
       (click)="limpiar()"
       [disabled]="loading">
-      🧹 Limpiar
+      Limpiar
     </button>
 
     <button
@@ -80,7 +80,7 @@
       class="btn btn--primary"
       (click)="consultar()"
       [disabled]="loading">
-      {{ loading ? '⏳ Consultando...' : '🔎 Consultar' }}
+      {{ loading ? 'Consultando...' : 'Consultar' }}
     </button>
 
     <div class="toolbar-info" *ngIf="!loading && !errorMsg">

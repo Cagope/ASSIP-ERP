@@ -24,8 +24,21 @@
       <td>{{ s.comentarioSubZona }}</td>
       <td>
         <div class="acciones">
-          <button class="btn sm" (click)="editarSubZona(s.idSubZona!)">✏️</button>
-          <button class="btn sm danger" (click)="eliminarSubZona(s.idSubZona!)">🗑️</button>
+          <button
+            class="btn-action-edit"
+            type="button"
+            (click)="editarSubZona(s.idSubZona!)"
+            title="Editar">
+            ✏️
+          </button>
+
+          <button
+            class="btn-action-delete"
+            type="button"
+            (click)="eliminarSubZona(s.idSubZona!)"
+            title="Eliminar">
+            🗑️
+          </button>
         </div>
       </td>
     </tr>

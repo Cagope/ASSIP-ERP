@@ -67,9 +67,9 @@
     <div class="preview-actions">
       <button
         type="submit"
-        class="btn-preview"
+        class="btn btn--primary"
         [disabled]="cargando || form.invalid">
-        {{ cargando ? '⏳ GENERANDO PREVIEW...' : '👁️ GENERAR PREVIEW' }}
+        {{ cargando ? 'Generando preview...' : 'Generar preview' }}
       </button>
     </div>
 
@@ -174,15 +174,17 @@
   <div *ngIf="preview.length > 0" class="acciones-finales">
 
     <button
-      class="btn secondary"
+      type="button"
+      class="btn btn--secondary"
       (click)="exportarExcel()">
-      📤 Exportar Excel
+      Exportar
     </button>
 
     <button
-      class="btn primary"
+      type="button"
+      class="btn btn--primary"
       (click)="ejecutarLiquidacion()">
-      ▶️ Ejecutar liquidación
+      Ejecutar liquidación
     </button>
 
   </div>

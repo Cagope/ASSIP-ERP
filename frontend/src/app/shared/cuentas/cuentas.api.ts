@@ -47,4 +47,31 @@ export class CuentasApi {
       { headers }
     );
   }
+
+  buscarBancos(idAgencia: number, texto: string): Observable<CuentaAutocompleteDTO[]> {
+
+    const params = new HttpParams().set('q', texto);
+
+    const headers = new HttpHeaders()
+      .set('X-Agencias', String(idAgencia));
+
+    return this.http.get<CuentaAutocompleteDTO[]>(
+      `${this.base}/buscar-bancos`,
+      { params, headers }
+    );
+  }
+
+  buscarTrasladosAgencias(idAgencia: number, texto: string): Observable<CuentaAutocompleteDTO[]> {
+
+    const params = new HttpParams().set('q', texto);
+
+    const headers = new HttpHeaders()
+      .set('X-Agencias', String(idAgencia));
+
+    return this.http.get<CuentaAutocompleteDTO[]>(
+      `${this.base}/buscar-traslados-agencias`,
+      { params, headers }
+    );
+  }
+
 }

@@ -65,11 +65,19 @@
 
         <td class="text-right">
           <div class="acciones">
-            <button class="btn sm" (click)="editar(s.idSeccion!)" title="Editar">
+            <button
+              class="btn-action-edit"
+              type="button"
+              (click)="editar(s.idSeccion!)"
+              title="Editar">
               ✏️
             </button>
 
-            <button class="btn sm danger" (click)="eliminar(s.idSeccion!)" title="Eliminar">
+            <button
+              class="btn-action-delete"
+              type="button"
+              (click)="eliminar(s.idSeccion!)"
+              title="Eliminar">
               🗑️
             </button>
           </div>

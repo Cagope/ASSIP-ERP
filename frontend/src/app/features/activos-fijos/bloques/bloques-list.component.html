@@ -26,8 +26,21 @@
 
       <td>
         <div class="acciones">
-          <button class="btn sm" (click)="editar(b.idBloque)">✏️</button>
-          <button class="btn sm danger" (click)="eliminar(b)">🗑️</button>
+          <button
+            class="btn-action-edit"
+            type="button"
+            (click)="editar(b.idBloque)"
+            title="Editar">
+            ✏️
+          </button>
+
+          <button
+            class="btn-action-delete"
+            type="button"
+            (click)="eliminar(b)"
+            title="Eliminar">
+            🗑️
+          </button>
         </div>
       </td>
     </tr>

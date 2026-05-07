@@ -3,7 +3,7 @@
 
   <form [formGroup]="form" (ngSubmit)="guardar()" autocomplete="off">
 
-    <!-- 🧍‍♂️ SECCIÓN: DATOS DEL FAMILIAR -->
+    <!--SECCIÓN: DATOS DEL FAMILIAR -->
     <fieldset>
       <legend>Datos del Familiar</legend>
 
@@ -19,7 +19,7 @@
         </div>
       </div>
 
-      <!-- 📄 Documento y Parentesco -->
+      <!--Documento y Parentesco -->
       <div class="form-row">
         <div class="form-group">
           <label>Documento</label>
@@ -40,7 +40,7 @@
       </div>
     </fieldset>
 
-    <!-- 🌍 SECCIÓN: UBICACIÓN DEL FAMILIAR -->
+    <!--SECCIÓN: UBICACIÓN DEL FAMILIAR -->
     <fieldset>
       <legend>Ubicación del Familiar</legend>
 
@@ -89,7 +89,7 @@
       </div>
     </fieldset>
 
-    <!-- 💰 SECCIÓN: DATOS ECONÓMICOS -->
+    <!--SECCIÓN: DATOS ECONÓMICOS -->
     <fieldset>
       <legend>Información Económica</legend>
 
@@ -106,7 +106,7 @@
       </div>
     </fieldset>
 
-    <!-- 🌟 SECCIÓN: REFERENCIA -->
+    <!--SECCIÓN: REFERENCIA -->
     <fieldset>
       <legend>Referencia Familiar</legend>
 
@@ -127,12 +127,21 @@
 
     <!-- 🟨 Acciones -->
     <div class="form-actions full">
-      <button type="submit" class="btn btn--primary" [disabled]="form.invalid">
-        💾 {{ editando ? 'Actualizar' : 'Guardar' }}
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="volver()">
+        Cancelar
       </button>
-      <button type="button" class="btn btn--cancel" (click)="volver()">
-        ↩️ Cancelar
+
+      <button
+        type="submit"
+        class="btn btn--primary"
+        [disabled]="form.invalid">
+        {{ editando ? 'Actualizar' : 'Guardar' }}
       </button>
+
     </div>
 
   </form>

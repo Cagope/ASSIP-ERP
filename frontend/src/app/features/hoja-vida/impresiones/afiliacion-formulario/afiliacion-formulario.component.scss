@@ -1,6 +1,5 @@
 /* ============================================================
    🎨 FORMULARIO DE AFILIACIÓN — Estilo Corporativo ASSIP-ERP
-   Compatible con impresión A4 (márgenes 15mm, fuente 12px)
    ============================================================ */
 
 /* ===== Base general ===== */
@@ -25,27 +24,12 @@
   align-items: center;
   justify-content: flex-start;
   margin-bottom: .6rem;
-}
 
-.actions-top .btn {
-  padding: .38rem .65rem;
-  border-radius: .5rem;
-  border: 1px solid #12903e;
-  background: #12903e;
-  color: #fff;
-  cursor: pointer;
-  text-decoration: none;
-  font-size: .85rem;
-  transition: all .15s ease-in-out;
-}
-
-.actions-top .btn:hover {
-  filter: brightness(1.1);
-}
-
-.actions-top .btn.secondary {
-  border-color: #5a5a5a;
-  background: #6b6b6b;
+  .btn {
+    height: 30px;
+    padding: 0 10px;
+    font-size: 0.8rem;
+  }
 }
 
 /* Oculta toolbars viejas */
@@ -71,11 +55,7 @@
   object-fit: contain;
 }
 
-.header > .info {
-  border-left: 1px solid #ddd;
-  padding-left: .75rem;
-}
-
+.header > .info,
 .header > .ver {
   border-left: 1px solid #ddd;
   padding-left: .75rem;
@@ -83,18 +63,17 @@
 
 .info {
   font-size: .82rem;
-  line-height: 1.2;
   text-align: center;
-}
 
-.info .rs {
-  font-weight: 700;
-  font-size: .95rem;
-}
+  .rs {
+    font-weight: 700;
+    font-size: .95rem;
+  }
 
-.info .nit {
-  font-size: .82rem;
-  color: #444;
+  .nit {
+    font-size: .82rem;
+    color: #444;
+  }
 }
 
 .ver {
@@ -102,15 +81,7 @@
   text-align: center;
 }
 
-.ver .ver-txt {
-  font-size: .68rem;
-}
-
-.ver .ver-fecha {
-  font-size: .72rem;
-}
-
-/* ===== Títulos y secciones ===== */
+/* ===== Títulos ===== */
 .title {
   text-align: center;
   margin: .8rem 0 .6rem;
@@ -122,19 +93,18 @@
 
 .block {
   margin-top: .65rem;
+
+  h2 {
+    font-size: 1rem;
+    margin-bottom: .35rem;
+    font-weight: 600;
+    color: #12903e;
+    text-transform: uppercase;
+    border-bottom: 1px solid #ddd;
+  }
 }
 
-.block h2 {
-  font-size: 1rem;
-  margin: 0 0 .35rem;
-  font-weight: 600;
-  color: #12903e;
-  text-transform: uppercase;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: .2rem;
-}
-
-/* ===== Tarjetas internas ===== */
+/* ===== Tarjetas ===== */
 .card {
   border: 1px solid #ddd;
   border-radius: .5rem;
@@ -142,264 +112,76 @@
   display: flex;
   flex-direction: column;
   gap: var(--line-gap);
-  background: #fff;
 }
 
-.line {
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: clip;
-}
-
+/* ===== Datos ===== */
 .kv {
   display: inline-flex;
-  align-items: baseline;
   gap: .22rem;
-  margin-right: 1rem;
-  min-width: 0;
-}
 
-/* 🎯 Ajuste principal: misma fuente, solo valor en negrita */
-.kv .lbl {
-  font-family: "Arial", sans-serif;
-  font-weight: 400; /* normal */
-  white-space: nowrap;
-  font-size: .9rem;
-}
+  .lbl {
+    font-weight: 400;
+  }
 
-.kv .val {
-  font-family: "Arial", sans-serif;
-  font-weight: 700; /* dato destacado */
-}
-
-.kv .val.text {
-  text-align: left;
-}
-
-.kv .val.num {
-  text-align: right;
-  min-width: 24px;
-}
-
-.kv.span2 {
-  flex: 2 1 0;
-  min-width: 0;
-}
-
-.kv.spacer {
-  flex: 1 1 0;
-  margin-right: 0;
-}
-
-.line.one-line {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: .6rem;
-  white-space: nowrap;
-}
-
-.line.one-line .kv {
-  display: inline-flex;
-  align-items: baseline;
-  gap: .22rem;
-  flex: 1 1 0;
-  min-width: 0;
-  margin-right: 0;
-}
-
-.line.one-line .kv .val {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.line.two-col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: .75rem;
-  row-gap: .25rem;
-  align-items: baseline;
-}
-
-.line.two-col.heads {
-  margin-bottom: .2rem;
-}
-
-.col-head {
-  font-weight: 700;
-  font-size: .9rem;
-}
-
-.pair {
-  display: grid;
-  grid-template-columns: 160px 1fr;
-  align-items: baseline;
-  gap: .25rem;
-  min-width: 0;
-}
-
-.pair .lbl {
-  font-weight: 400;
-  white-space: nowrap;
-}
-
-.pair .val {
-  font-weight: 700;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.pair .val.num {
-  text-align: right;
-}
-
-.pair.tight {
-  grid-template-columns: 120px auto;
-  gap: .15rem;
-}
-
-.pair.tighter {
-  grid-template-columns: 100px auto;
-  gap: .10rem;
+  .val {
+    font-weight: 700;
+  }
 }
 
 /* ===== Grillas ===== */
 .grid {
   width: 100%;
   border-collapse: collapse;
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: .28rem .4rem;
+  }
+
+  th {
+    background: #f9fafb;
+    font-weight: 400;
+  }
+
+  td {
+    font-weight: 700;
+  }
 }
 
-.grid th,
-.grid td {
-  border: 1px solid #ddd;
-  padding: .28rem .4rem;
-  vertical-align: top;
-}
-
-.grid th {
-  text-align: left;
-  font-weight: 400;
-  width: 26%;
-  font-size: .9rem;
-  background: #f9fafb;
-}
-
-.grid td {
-  text-align: left;
-  width: 24%;
-  font-weight: 700;
-  font-size: .9rem;
-}
-
-.grid td.num {
-  text-align: right;
-}
-
-.grid.single-row {
-  margin-bottom: .55rem;
-}
-
-/* ===== Botones inferiores ===== */
+/* ===== Acciones inferiores ===== */
 .actions {
   margin-top: .7rem;
   display: flex;
   gap: .5rem;
   justify-content: flex-end;
+
+  .btn {
+    height: 30px;
+    padding: 0 10px;
+    font-size: 0.8rem;
+  }
 }
 
-.btn {
-  padding: .38rem .65rem;
-  border-radius: .5rem;
-  border: 1px solid #12903e;
-  background: #12903e;
-  color: white;
-  text-decoration: none;
-  cursor: pointer;
-  font-size: .85rem;
-}
-
-.btn.secondary {
-  border-color: #5a5a5a;
-  background: #6b6b6b;
-}
-
-/* ===== Mensajes vacíos ===== */
+/* ===== Vacíos ===== */
 .empty {
   padding: .75rem;
   color: #777;
   text-align: center;
 }
 
-.empty.small {
-  border: 1px dashed #ddd;
-  border-radius: .5rem;
-}
-
-/* ===== Firmas y huellas ===== */
+/* ===== Firmas ===== */
 .signatures {
   display: flex;
   gap: 1rem;
-  align-items: flex-end;
   margin-top: 1rem;
 }
 
-.sig {
-  flex: 1;
-  min-width: 220px;
-}
-
 .sig-area {
-  width: 48%;
-  height: 0;
   border-bottom: 2px solid #222;
-  margin: 2rem 0 .35rem 0;
+  margin: 2rem 0 .35rem;
 }
 
-.sig-meta {
-  display: grid;
-  grid-auto-rows: minmax(18px, auto);
-  row-gap: .15rem;
-}
-
-.meta-row {
-  display: flex;
-  align-items: baseline;
-  gap: .35rem;
-  font-size: .78rem;
-}
-
-.sig-label {
-  font-weight: 600;
-}
-
-.sig-id {
-  color: #444;
-}
-
-.finger {
-  width: 260px;
-  text-align: center;
-}
-
-.finger-box {
-  width: 260px;
-  height: 240px;
-  border: 1.8px solid #222;
-  border-radius: .25rem;
-  margin: 0 auto .35rem;
-  background: #fff;
-}
-
-.finger-label {
-  font-size: .78rem;
-  font-weight: 600;
-  text-align: center;
-}
-
-/* ===== Paginación y reglas de impresión ===== */
+/* ===== Impresión ===== */
 @media print {
   .actions,
   .actions-top,
@@ -408,51 +190,19 @@
   }
 
   .print-footer {
-    display: block !important;
     position: fixed;
     right: 12mm;
     bottom: 6mm;
     font-size: 10px;
-    color: #333;
-    z-index: 9999;
-    pointer-events: none;
   }
 
   .print-footer::after {
     content: "Página " counter(page);
   }
-
-  .sheet {
-    padding-bottom: 14mm !important;
-  }
-
-  .block,
-  .card,
-  .grid,
-  .line.one-line,
-  .signatures {
-    break-inside: avoid;
-    page-break-inside: avoid;
-  }
-
-  /* Ajustes visuales */
-  body {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    background: #fff;
-  }
 }
 
-/* ===== Título grande de formulario ===== */
-.form-title-large {
-  font-size: 1.6rem;
-  font-weight: 600;
-  margin-top: 0.3rem;
-  text-align: center;
-  letter-spacing: 0.3px;
-}
+/* ===== Ajuste final ===== */
 .line.one-line {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  align-items: baseline;
 }

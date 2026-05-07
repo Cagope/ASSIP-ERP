@@ -1,107 +1,102 @@
 <div class="page">
 
-  <!-- ========================================================= -->
-  <!-- 🟦 ENCABEZADO GLOBAL DEL MÓDULO                           -->
-  <!-- ========================================================= -->
   <app-header-actions
-    titulo="🏦 Saldos a una fecha de corte"
+    titulo="Saldos a una fecha de corte"
     [mostrarNuevo]="false"
     [mostrarImprimir]="false"
     [mostrarExportar]="false">
   </app-header-actions>
 
-  <!-- ========================================================= -->
-  <!-- 🔍 FILTROS                                                -->
-  <!-- ========================================================= -->
-  <form class="filtros" (ngSubmit)="buscar()">
+  <div class="card">
 
-    <div class="f-row">
-      <label>Agencia</label>
-      <select [(ngModel)]="filtros.agencia" name="agencia">
-        <option value="0">Todas</option>
-        <option *ngFor="let a of agencias" [value]="a.idAgencia">
-          {{ a.nombreAgencia }}
-        </option>
-      </select>
-    </div>
+    <form class="filtros" (ngSubmit)="buscar()">
 
-    <div class="f-row">
-      <label>Fecha de corte</label>
-      <input type="date" [(ngModel)]="filtros.fechaCorte" name="fechaCorte" />
-    </div>
+      <div class="f-row">
+        <label>Agencia</label>
+        <select [(ngModel)]="filtros.agencia" name="agencia">
+          <option value="0">Todas</option>
+          <option *ngFor="let a of agencias" [value]="a.idAgencia">
+            {{ a.nombreAgencia }}
+          </option>
+        </select>
+      </div>
 
-    <!-- 🔘 BOTONES DE FILTROS -->
-    <div class="f-buttons">
-      <button type="submit" class="btn btn--primary">
-        🔍 Buscar
-      </button>
+      <div class="f-row">
+        <label>Fecha de corte</label>
+        <input type="date" [(ngModel)]="filtros.fechaCorte" name="fechaCorte" />
+      </div>
 
-      <button type="button" class="btn btn--cancel" (click)="limpiar()">
-        🧹 Limpiar
-      </button>
-    </div>
+      <div class="form-actions">
 
-  </form>
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()">
+          Limpiar
+        </button>
 
-  <!-- ========================================================= -->
-  <!-- ESTADOS -->
-  <!-- ========================================================= -->
+        <button
+          type="submit"
+          class="btn btn--primary">
+          Buscar
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
   <div *ngIf="cargando" class="loading">Cargando...</div>
   <div *ngIf="error" class="error">{{ error }}</div>
 
-  <!-- ========================================================= -->
-  <!-- RESUMEN GENERAL -->
-  <!-- ========================================================= -->
-  <section *ngIf="resumen" class="resumen">
-    <h3>Resumen del informe</h3>
+  <div class="card" *ngIf="resumen">
 
-    <div class="cards">
-      <div class="card blue">
-        <div class="label">Cuentas con saldo</div>
-        <div class="value big right">{{ resumen.totalCuentas }}</div>
-      </div>
+    <section class="resumen">
+      <h3>Resumen del informe</h3>
 
-      <div class="card green">
-        <div class="label">Saldo total</div>
-        <div class="value big right">
-          {{ resumen.totalSaldos | number:'1.0-0' }}
+      <div class="cards">
+        <div class="card blue">
+          <div class="label">Cuentas con saldo</div>
+          <div class="value big right">{{ resumen.totalCuentas }}</div>
+        </div>
+
+        <div class="card green">
+          <div class="label">Saldo total</div>
+          <div class="value big right">
+            {{ resumen.totalSaldos | number:'1.0-0' }}
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <p *ngIf="items.length > 0" class="note">
-    📌 Los datos completos se exportan solamente en Excel.
-  </p>
+    <p *ngIf="items.length > 0" class="note">
+      Los datos completos se exportan solamente en Excel.
+    </p>
 
-  <!-- ========================================================= -->
-  <!-- 🟦 BOTONES EXPORTAR / IMPRIMIR – NUEVA PRESENTACIÓN       -->
-  <!-- ========================================================= -->
-  <div *ngIf="items.length > 0" class="header-actions" style="margin-top: 10px;">
+    <div *ngIf="items.length > 0" class="form-actions">
 
-    <div class="actions">
-
-      <button class="btn btn--primary"
-              type="button"
-              (click)="exportar()"
-              [disabled]="items.length === 0">
-        📥 Exportar Excel
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="exportar()"
+        [disabled]="items.length === 0">
+        Exportar Excel
       </button>
 
-      <button class="btn btn--print"
-              type="button"
-              (click)="imprimir()"
-              [disabled]="resumenAgencias.length === 0">
-        🖨️ Imprimir
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="imprimir()"
+        [disabled]="resumenAgencias.length === 0">
+        Imprimir
       </button>
 
     </div>
+
   </div>
 
-  <!-- ========================================================= -->
-  <!-- 🟧 RESUMEN POR AGENCIA Y FORMA                            -->
-  <!-- ========================================================= -->
-  <div *ngIf="resumenAgencias.length > 0" class="resumen-agencias">
+  <div *ngIf="resumenAgencias.length > 0" class="card resumen-agencias">
 
     <h3 class="mt-3">Resumen por agencia y forma</h3>
 
@@ -131,7 +126,6 @@
         </tbody>
       </table>
 
-      <br>
     </ng-container>
 
   </div>

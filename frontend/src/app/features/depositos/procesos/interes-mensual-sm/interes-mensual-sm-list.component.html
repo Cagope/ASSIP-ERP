@@ -1,139 +1,476 @@
 <div class="page">
 
-  <!-- ========================================================= -->
-  <!-- 🟦 ENCABEZADO GLOBAL DEL MÓDULO                           -->
-  <!-- ========================================================= -->
   <app-header-actions
-    titulo="🏦 Proceso — Interés Mensual SM"
+    titulo="Proceso — Interés Mensual SM"
     [mostrarNuevo]="false"
     [mostrarImprimir]="false"
     [mostrarExportar]="false">
   </app-header-actions>
 
-  <!-- ========================================================= -->
-  <!-- 🔍 FILTROS                                                -->
-  <!-- ========================================================= -->
-  <form class="filtros" (ngSubmit)="liquidar()">
+  <div class="card">
+    <h3>Parámetros del proceso</h3>
 
-    <!-- 🏛 Agencia -->
-    <div class="f-row">
-      <label>Agencia</label>
-      <select
-        [(ngModel)]="filtros.agenciaId"
-        name="agenciaId"
-        (ngModelChange)="cargarFormas($event)"
-      >
-        <option value="0">Todas</option>
-        <option *ngFor="let a of agencias" [value]="a.idAgencia">
-          {{ a.nombreAgencia }}
-        </option>
-      </select>
-    </div>
+    <form class="filtros" (ngSubmit)="liquidar()">
 
-    <!-- 🔢 Forma -->
-    <div class="f-row">
-      <label>Forma</label>
-      <select [(ngModel)]="filtros.formaId" name="formaId">
-        <option value="">Seleccione</option>
-        <option *ngFor="let f of formas" [value]="f.idFormaAhorro">
-          {{ f.codigoForma }} — {{ f.nombreForma }}
-        </option>
-      </select>
-    </div>
+      <div class="f-row">
+        <label>Agencia</label>
 
-    <!-- 📆 Fecha proceso -->
-    <div class="f-row">
-      <label>Fecha proceso</label>
-      <input type="date"
-             [(ngModel)]="filtros.fechaProceso"
-             name="fechaProceso" />
-    </div>
+        <select
+          [(ngModel)]="filtros.agenciaId"
+          name="agenciaId"
+          (ngModelChange)="cargarFormas($event)"
+        >
+          <option value="0">Seleccione</option>
 
-    <!-- 📆 Fecha liquidación -->
-    <div class="f-row">
-      <label>Fecha liquidación</label>
-      <input type="date"
-             [(ngModel)]="filtros.fechaLiquidacion"
-             name="fechaLiquidacion" />
-    </div>
+          <option
+            *ngFor="let a of agencias"
+            [value]="a.idAgencia"
+          >
+            {{ a.codigoAgencia }} — {{ a.nombreAgencia }}
+          </option>
 
-    <!-- 🔘 BOTONES -->
-    <div class="f-buttons">
-      <button type="submit" class="btn btn--primary">
-        ⚙️ Ejecutar proceso
-      </button>
+        </select>
+      </div>
 
-      <button type="button" class="btn btn--cancel" (click)="limpiar()">
-        🧹 Limpiar
-      </button>
-    </div>
+      <div class="f-row">
+        <label>Forma ahorro</label>
 
-  </form>
+        <select
+          [(ngModel)]="filtros.formaId"
+          name="formaId"
+          (ngModelChange)="seleccionarForma()"
+        >
+          <option value="">Seleccione</option>
 
-  <!-- ========================================================= -->
-  <!-- ESTADOS -->
-  <!-- ========================================================= -->
-  <div *ngIf="cargando" class="loading">Procesando...</div>
-  <div *ngIf="error" class="error">{{ error }}</div>
+          <option
+            *ngFor="let f of formas"
+            [value]="f.idFormaAhorro"
+          >
+            {{ f.codigoForma }} — {{ f.nombreForma }}
+          </option>
 
-  <!-- ========================================================= -->
-  <!-- 🧮 RESULTADOS                                             -->
-  <!-- ========================================================= -->
-  <div *ngIf="resultados.length > 0" class="resultados">
+        </select>
+      </div>
 
-    <h3 class="mt-3">Resultados del proceso</h3>
+      <div class="f-row">
+        <label>Fecha contable</label>
 
-    <div class="header-actions" style="margin-top: 10px;">
-      <div class="actions">
+        <input
+          type="date"
+          [(ngModel)]="filtros.fechaProceso"
+          (ngModelChange)="cambiarFechaContable()"
+          name="fechaProceso"
+        />
+      </div>
 
-        <button class="btn btn--primary"
-                type="button"
-                (click)="exportar()"
-                [disabled]="resultados.length === 0">
-          📥 Exportar Excel
+      <div class="f-row">
+        <label>Fecha liquidación intereses</label>
+
+        <input
+          type="date"
+          [(ngModel)]="filtros.fechaLiquidacion"
+          name="fechaLiquidacion"
+        />
+      </div>
+
+      <div class="f-row">
+        <label>Tipo comprobante</label>
+
+        <select
+          [(ngModel)]="filtros.tipoComprobante"
+          name="tipoComprobante"
+          (ngModelChange)="cargarProximoComprobante()"
+        >
+          <option value="">Seleccione</option>
+
+          <option
+            *ngFor="let t of tiposComprobantes"
+            [value]="t.tipoComprobante"
+          >
+            {{ t.tipoComprobante }}
+            —
+            {{ t.nombreTipoComprobante }}
+          </option>
+
+        </select>
+      </div>
+
+      <div class="f-row">
+        <label>Número comprobante</label>
+
+        <input
+          type="text"
+          maxlength="10"
+          [(ngModel)]="filtros.numeroComprobante"
+          name="numeroComprobante"
+          readonly
+          placeholder="Generado automáticamente"
+        />
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()"
+        >
+          Limpiar
         </button>
 
-        <button class="btn btn--print"
-                type="button"
-                (click)="imprimir()"
-                [disabled]="resultados.length === 0">
-          🖨️ Imprimir
+        <button
+          type="submit"
+          class="btn btn--primary"
+        >
+          Generar preview
         </button>
 
       </div>
+
+    </form>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- VARIABLES FORMA -->
+  <!-- ===================================================== -->
+
+  <div *ngIf="formaSeleccionada" class="card">
+
+    <h3>Variables de la forma seleccionada</h3>
+
+    <div class="stats-grid">
+
+      <div class="stat-card">
+        <div class="stat-label">Última liquidación</div>
+
+        <div class="stat-value">
+          {{ formaSeleccionada.fechaUltimaLiquidacion || '-' }}
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Tasa interés</div>
+
+        <div class="stat-value">
+          {{ formaSeleccionada.tasaInteresForma || 0 }}
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Valor mínimo</div>
+
+        <div class="stat-value">
+          {{ formaSeleccionada.valorMinimo | number:'1.0-0' }}
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Tiempo liquidación</div>
+
+        <div class="stat-value">
+          {{ formaSeleccionada.tiempoLiquidacion }}
+        </div>
+      </div>
+
     </div>
 
-    <table class="tabla-resumen">
+  </div>
+
+  <div *ngIf="cargando" class="loading">
+    Procesando...
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- RESULTADOS -->
+  <!-- ===================================================== -->
+
+  <div *ngIf="resultados.length > 0" class="card resultados">
+
+    <div class="preview-header">
+
+      <div>
+        <h3>Preview de intereses</h3>
+
+        <div class="alerta-preview">
+          ⚠ Revise cuidadosamente la liquidación antes de aplicar el proceso.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- =================================================== -->
+    <!-- ÚLTIMA LIQUIDACIÓN -->
+    <!-- =================================================== -->
+
+    <div *ngIf="ultimaLiquidacion" class="mb-3">
+
+      <h3>
+        Última liquidación aplicada :
+        Fecha liquidación :
+        {{ ultimaLiquidacion.fecha_liquidacion }}
+
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+
+        Comprobante :
+        {{ ultimaLiquidacion.tipo_comprobante }}
+        -
+        {{ ultimaLiquidacion.numero_comprobante }}
+      </h3>
+
+      <div class="stats-grid">
+
+        <div class="stat-card">
+          <div class="stat-label">Cuentas</div>
+
+          <div class="stat-value right">
+            {{ ultimaLiquidacion.cantidad_cuentas | number:'1.0-0' }}
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Interés bruto</div>
+
+          <div class="stat-value right">
+            {{ ultimaLiquidacion.total_interes_bruto | number:'1.0-0' }}
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">Retención</div>
+
+          <div class="stat-value right">
+            {{ ultimaLiquidacion.total_retencion | number:'1.0-0' }}
+          </div>
+        </div>
+
+        <div class="stat-card destacado">
+          <div class="stat-label">Interés neto</div>
+
+          <div class="stat-value right">
+            {{ ultimaLiquidacion.total_interes_neto | number:'1.0-0' }}
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- =================================================== -->
+    <!-- RESUMEN ACTUAL -->
+    <!-- =================================================== -->
+
+    <h3>Resumen de liquidación actual</h3>
+
+    <div class="stats-grid mb-3">
+
+      <div class="stat-card">
+        <div class="stat-label">Cuentas</div>
+
+        <div class="stat-value right">
+          {{ resumen.totalCuentas }}
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Interés bruto</div>
+
+        <div class="stat-value right">
+          {{ resumen.totalInteresBruto | number:'1.0-0' }}
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-label">Retención</div>
+
+        <div class="stat-value right">
+          {{ resumen.totalRetencion | number:'1.0-0' }}
+        </div>
+      </div>
+
+      <div class="stat-card destacado">
+        <div class="stat-label">Interés neto</div>
+
+        <div class="stat-value right">
+          {{ resumen.totalInteresNeto | number:'1.0-0' }}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- =================================================== -->
+    <!-- RESUMEN CONTABLE -->
+    <!-- =================================================== -->
+
+    <h3>Resumen contable</h3>
+
+    <table class="tabla-resumen resumen-contable mb-3">
+
       <thead>
+
       <tr>
+        <th>Código cuenta</th>
+        <th>Nombre cuenta</th>
+        <th class="right">Débito</th>
+        <th class="right">Crédito</th>
+      </tr>
+
+      </thead>
+
+      <tbody>
+
+      <tr *ngFor="let r of resumenContable">
+
+        <td>{{ r.cuenta }}</td>
+        <td>{{ r.nombre }}</td>
+
+        <td class="right">
+          {{ r.debito | number:'1.0-0' }}
+        </td>
+
+        <td class="right">
+          {{ r.credito | number:'1.0-0' }}
+        </td>
+
+      </tr>
+
+      </tbody>
+
+      <tfoot>
+
+      <tr>
+
+        <th colspan="2">
+          Totales
+        </th>
+
+        <td class="right">
+          {{ totalDebitoContable() | number:'1.0-0' }}
+        </td>
+
+        <td class="right">
+          {{ totalCreditoContable() | number:'1.0-0' }}
+        </td>
+
+      </tr>
+
+      <tr>
+
+        <th colspan="4" class="right">
+
+          <span
+            *ngIf="comprobanteCuadrado()"
+            class="ok-text"
+          >
+            ✔ Comprobante cuadrado
+          </span>
+
+          <span
+            *ngIf="!comprobanteCuadrado()"
+            class="error-text"
+          >
+            ✘ Comprobante descuadrado
+          </span>
+
+        </th>
+
+      </tr>
+
+      </tfoot>
+
+    </table>
+
+    <!-- =================================================== -->
+    <!-- ACCIONES -->
+    <!-- =================================================== -->
+
+    <div class="form-actions mb-3">
+
+      <button
+        class="btn btn--primary"
+        type="button"
+        (click)="aplicar()"
+      >
+        Aplicar intereses
+      </button>
+
+      <button
+        class="btn btn--secondary"
+        type="button"
+        (click)="exportar()"
+      >
+        Exportar Excel
+      </button>
+
+      <button
+        class="btn btn--secondary"
+        type="button"
+        (click)="imprimir()"
+      >
+        Imprimir
+      </button>
+
+    </div>
+
+    <!-- =================================================== -->
+    <!-- DETALLE -->
+    <!-- =================================================== -->
+
+    <h3>Detalle individual de cuentas</h3>
+
+    <table class="tabla-resumen">
+
+      <thead>
+
+      <tr>
+
         <th>Documento</th>
         <th>Nombre</th>
 
-        <th class="right">Saldo mínimo mes</th>
+        <th class="right">Saldo mínimo</th>
         <th class="right">Interés bruto</th>
         <th class="right">Retención</th>
         <th class="right">Interés neto</th>
 
-        <th class="right">Tasa</th>
-        <th class="right">Mínimo forma</th>
         <th>Aplica retención</th>
+
       </tr>
+
       </thead>
 
       <tbody>
+
       <tr *ngFor="let r of resultados">
+
         <td>{{ r.documento }}</td>
+
         <td>{{ r.nombreCompleto }}</td>
 
-        <td class="right">{{ r.saldoMinimoMes | number:'1.0-0' }}</td>
-        <td class="right">{{ r.interesBruto | number:'1.0-0' }}</td>
-        <td class="right">{{ r.retencion | number:'1.0-0' }}</td>
-        <td class="right">{{ r.interesNeto | number:'1.0-0' }}</td>
+        <td class="right">
+          {{ r.saldoMinimoMes | number:'1.0-0' }}
+        </td>
 
-        <td class="right">{{ r.tasaInteres | number:'1.2-2' }}</td>
-        <td class="right">{{ r.minimoForma | number:'1.0-0' }}</td>
-        <td>{{ r.aplicaRetencion ? 'Sí' : 'No' }}</td>
+        <td class="right">
+          {{ r.interesBruto | number:'1.0-0' }}
+        </td>
+
+        <td class="right">
+          {{ r.retencion | number:'1.0-0' }}
+        </td>
+
+        <td class="right">
+          {{ r.interesNeto | number:'1.0-0' }}
+        </td>
+
+        <td>
+          {{ r.aplicaRetencion ? 'Sí' : 'No' }}
+        </td>
+
       </tr>
+
       </tbody>
 
     </table>

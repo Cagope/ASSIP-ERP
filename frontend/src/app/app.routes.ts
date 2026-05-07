@@ -37,6 +37,14 @@ export const routes: Routes = [
             .then(m => m.DEPOSITOS_ROUTES),
       },
 
+      // === CDAT ===
+      {
+        path: 'cdat',
+        loadChildren: () =>
+          import('./features/cdat/cdat.routes')
+            .then(m => m.CDAT_ROUTES),
+      },
+
       // === SARLAFT ===
       {
         path: 'sarlaft',

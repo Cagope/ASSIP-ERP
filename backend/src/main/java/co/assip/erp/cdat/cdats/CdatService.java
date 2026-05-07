@@ -1,6 +1,8 @@
 package co.assip.erp.cdat.cdats;
 
 import co.assip.erp.cdat.cdats.contabilizacion.CdatAperturaContabilizacionService;
+import co.assip.erp.depositos.movimientos.DepositosMovimientoService;
+import co.assip.erp.depositos.movimientos.dto.DepositosMovimientoDTO;
 import co.assip.erp.cdat.cdats.dto.CdatFormDTO;
 import co.assip.erp.cdat.cdats.dto.CdatListDTO;
 import co.assip.erp.cdat.cdats.dto.CdatSaveDTO;
@@ -16,12 +18,14 @@ import java.util.List;
 
 import co.assip.erp.cdat.cdats.dto.CdatAsociadoValidacionDTO;
 
+
 @Service
 @RequiredArgsConstructor
 public class CdatService {
 
     private final CdatRepository repository;
     private final CdatAperturaContabilizacionService contabilizacionService;
+    private final DepositosMovimientoService depositosMovimientoService;
 
     public List<CdatListDTO> listar() {
         return repository.listar();
@@ -107,18 +111,24 @@ public class CdatService {
             dto.getMediosPago().getDepositos().forEach(d -> {
 
                 if (mayorCero(d.getValorDebitar())) {
-                    repository.debitarCuentaAhorro(
-                            d.getIdCuentaAhorro(),
-                            d.getValorDebitar(),
-                            idUsuario
-                    );
+                    DepositosMovimientoDTO movDeposito = new DepositosMovimientoDTO();
 
-                    repository.crearExtractoAhorro(
-                            d.getIdCuentaAhorro(),
-                            dto,
-                            d.getValorDebitar(),
-                            idUsuario
-                    );
+                    movDeposito.setIdCuentaAhorro(d.getIdCuentaAhorro());
+                    movDeposito.setFechaMovimiento(dto.getFechaAperturaCdat());
+                    movDeposito.setTipoComprobante(dto.getTipoComprobante());
+                    movDeposito.setNumeroComprobante(dto.getNumeroComprobante());
+                    movDeposito.setTipoMovimiento("773");
+                    movDeposito.setModulo("04");
+                    movDeposito.setTarjeta("N");
+                    movDeposito.setEstablecimiento("APERTURA CDAT");
+                    movDeposito.setValorDebito(d.getValorDebitar());
+                    movDeposito.setValorCredito(BigDecimal.ZERO);
+
+                    movDeposito.setModuloOrigen("CDAT");
+                    movDeposito.setProcesoOrigen("APERTURA_CDAT");
+                    movDeposito.setIdOrigen(idCuentaCdat);
+
+                    depositosMovimientoService.registrarDebito(movDeposito, idUsuario);
                 }
             });
         }

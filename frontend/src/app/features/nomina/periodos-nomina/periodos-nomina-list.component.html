@@ -85,28 +85,24 @@
       </td>
 
       <td>
-        <div class="acciones">
+        <div class="acciones acciones-periodo">
 
-          <!-- 🔁 REABRIR PERÍODO -->
           <button
-            class="btn btn-reverse"
+            type="button"
+            class="btn btn--ghost-danger"
             (click)="reversar(x.idPeriodo)"
             [disabled]="!puedeReversar(x)"
             title="Reabrir el período y eliminar liquidaciones y novedades calculadas">
-
-            <span class="icon">↺</span>
             Reabrir período
           </button>
 
-          <!-- 🧾 DESPRENDIBLES (SOLO CERRADO) -->
           <button
             *ngIf="x.estado === 'CERRADO'"
-            class="btn btn-outline-primary"
+            type="button"
+            class="btn btn--secondary"
             [routerLink]="['/nomina/desprendible', x.idPeriodo]"
             [state]="{ periodo: x }"
             title="Ver desprendibles de nómina">
-
-            <span class="icon">🧾</span>
             Desprendibles
           </button>
 

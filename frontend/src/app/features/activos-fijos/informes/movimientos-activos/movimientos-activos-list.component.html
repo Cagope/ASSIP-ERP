@@ -1,7 +1,7 @@
 <div class="page">
 
   <app-header-actions
-    titulo="📌 Movimientos de Activos"
+    titulo="Movimientos de Activos"
     [mostrarNuevo]="false"
     [mostrarImprimir]="true"
     [mostrarExportar]="true"
@@ -93,18 +93,16 @@
       type="button"
       class="btn btn--secondary"
       (click)="limpiar()"
-      [disabled]="loading"
-    >
-      🧹 Limpiar
+      [disabled]="loading">
+      Limpiar
     </button>
 
     <button
       type="button"
       class="btn btn--primary"
       (click)="consultar()"
-      [disabled]="loading"
-    >
-      {{ loading ? '⏳ Consultando...' : '🔎 Consultar' }}
+      [disabled]="loading">
+      {{ loading ? 'Consultando...' : 'Consultar' }}
     </button>
 
     <div class="toolbar-info" *ngIf="!loading && !errorMsg">

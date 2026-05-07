@@ -1,15 +1,32 @@
-// ========================================================
-// 🏛️ Menú del esquema General
-// Este archivo pertenece exclusivamente al equipo del esquema GENERAL.
-// Aquí se definen las opciones del submenú visible en el panel lateral.
-// ========================================================
-
 export const generalMenu = {
-  title: '🏛️ General',
+  title: 'General',
   items: [
-    { label: 'Agencias', route: '/general/agencias' },
-    { label: 'Zonas', route: '/general/zonas' },
-    { label: 'Subzonas', route: '/general/sub-zonas' },
-    { label: 'Parámetros', route: '/general/parametros' }, // ✅ agregado
-  ],
+
+    {
+      label: 'Estructura Organizacional',
+      children: [
+        { label: 'Agencias', route: '/general/agencias' },
+        { label: 'Zonas', route: '/general/zonas' },
+        { label: 'Subzonas', route: '/general/sub-zonas' }
+      ]
+    },
+
+    {
+      label: 'Parámetros',
+      children: [
+        { label: 'Parámetros generales', route: '/general/parametros' }
+      ]
+    },
+
+    {
+      label: 'Catálogos',
+      children: [
+        {
+          label: 'Formas de ahorro',
+          route: '/depositos/formas-ahorro'
+        }
+      ]
+    }
+
+  ]
 };

@@ -89,19 +89,21 @@
 
       <td>
         <div class="acciones">
-
           <button
-            class="btn sm"
-            (click)="editar(x.idNovedad)">
+            class="btn-action-edit"
+            type="button"
+            (click)="editar(x.idNovedad)"
+            title="Editar">
             ✏️
           </button>
 
           <button
-            class="btn sm danger"
-            (click)="eliminar(x)">
+            class="btn-action-delete"
+            type="button"
+            (click)="eliminar(x)"
+            title="Eliminar">
             🗑️
           </button>
-
         </div>
       </td>
 

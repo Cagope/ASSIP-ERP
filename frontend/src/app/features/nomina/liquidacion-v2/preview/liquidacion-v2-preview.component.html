@@ -53,10 +53,10 @@
       <div class="preview-actions">
         <button
           type="button"
-          class="btn-preview"
+          class="btn btn--primary"
           (click)="preview()"
           [disabled]="!puedePrevisualizar || cargando">
-          {{ cargando ? 'GENERANDO PREVIEW...' : '👁️ GENERAR PREVIEW' }}
+          {{ cargando ? 'Generando preview...' : 'Generar preview' }}
         </button>
       </div>
 
@@ -202,36 +202,34 @@
   <!-- ===================================================== -->
   <div *ngIf="hayItems" class="acciones-finales">
 
-    <!-- IZQUIERDA -->
     <div class="acciones-left">
 
       <button
         type="button"
-        class="btn-work-secondary"
+        class="btn btn--secondary"
         (click)="preview()"
         [disabled]="!puedePrevisualizar">
-        🔄 Refrescar
+        Refrescar
       </button>
 
       <button
         type="button"
-        class="btn-work-secondary"
+        class="btn btn--secondary"
         (click)="limpiar()"
         [disabled]="cargando || ejecutando || cargandoPeriodo">
-        🧹 Limpiar
+        Limpiar
       </button>
 
     </div>
 
-    <!-- DERECHA -->
     <div class="acciones-right">
 
       <button
         type="button"
-        class="btn-work-primary"
+        class="btn btn--primary"
         (click)="ejecutar()"
         [disabled]="!puedeEjecutar">
-        ▶ Ejecutar liquidación
+        Ejecutar liquidación
       </button>
 
     </div>

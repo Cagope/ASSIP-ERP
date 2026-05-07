@@ -1,0 +1,68 @@
+<div class="page">
+
+  <div class="page-header">
+    <h2>CDATs</h2>
+
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="refrescar()">
+        Refrescar
+      </button>
+
+      <a class="btn btn-primary" [routerLink]="['/cdat/cdats/nuevo']">
+        Nuevo CDAT
+      </a>
+    </div>
+  </div>
+
+  <div *ngIf="cargando">Cargando...</div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <!-- TABLA -->
+  <table class="table table-sm table-bordered" *ngIf="!cargando && lista.length > 0">
+
+    <thead>
+    <tr>
+      <th>Cdat</th>
+      <th>Cliente</th>
+      <th>Fecha Apertura</th>
+      <th>Vencimiento</th>
+      <th class="text-end">Valor</th>
+      <th class="text-end">Saldo</th>
+      <th>Estado</th>
+      <th>Origen</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let c of lista">
+
+      <td>{{ c.codigoCdat }}</td>
+      <td>{{ c.nombreCompleto }}</td>
+      <td>{{ c.fechaAperturaCdat }}</td>
+      <td>{{ c.fechaVencimientoCdat }}</td>
+
+      <td class="text-end">
+        {{ c.valorAperturaCdat | number:'1.0-0' }}
+      </td>
+
+      <td class="text-end">
+        {{ c.saldoActualCdat | number:'1.0-0' }}
+      </td>
+
+      <td>{{ c.estadoCdat }}</td>
+      <td>{{ c.origenCdat }}</td>
+
+    </tr>
+    </tbody>
+
+  </table>
+
+  <!-- VACÍO -->
+  <div *ngIf="!cargando && lista.length === 0" class="empty">
+    No hay CDATs registrados.
+  </div>
+
+</div>

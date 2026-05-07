@@ -22,7 +22,7 @@
     />
   </div>
 
-  <!-- 📋 Tabla principal -->
+  <!--Tabla principal -->
   <table *ngIf="!cargando && filtrados.length > 0" class="table table-striped table-hover">
     <thead>
     <tr>
@@ -46,15 +46,28 @@
       <td>{{ d.comentario }}</td>
       <td>
         <div class="acciones">
-          <button class="btn sm" (click)="editar(d.idDatosPersonal!)">✏️</button>
-          <button class="btn sm danger" (click)="eliminar(d.idDatosPersonal!)">🗑️</button>
+          <button
+            class="btn-action-edit"
+            type="button"
+            (click)="editar(d.idDatosPersonal!)"
+            title="Editar">
+            ✏️
+          </button>
+
+          <button
+            class="btn-action-delete"
+            type="button"
+            (click)="eliminar(d.idDatosPersonal!)"
+            title="Eliminar">
+            🗑️
+          </button>
         </div>
       </td>
     </tr>
     </tbody>
   </table>
 
-  <!-- ⚙️ Estados -->
+  <!--Estados -->
   <div *ngIf="cargando" class="loading">
     <i class="bi bi-hourglass-split"></i> Cargando datos...
   </div>
@@ -67,11 +80,27 @@
     <i class="bi bi-exclamation-triangle"></i> {{ error }}
   </div>
 
-  <!-- 📄 Controles de paginación -->
+  <!--Controles de paginación -->
   <div class="pagination-controls no-print" *ngIf="!cargando && filtrados.length > tamanoPagina">
-    <button (click)="cambiarPagina(pagina - 1)" [disabled]="pagina === 1">⬅️ Anterior</button>
+
+    <button
+      type="button"
+      class="btn btn--secondary"
+      (click)="cambiarPagina(pagina - 1)"
+      [disabled]="pagina === 1">
+      Anterior
+    </button>
+
     <span>Página {{ pagina }} / {{ totalPaginas() }}</span>
-    <button (click)="cambiarPagina(pagina + 1)" [disabled]="pagina >= totalPaginas()">Siguiente ➡️</button>
+
+    <button
+      type="button"
+      class="btn btn--secondary"
+      (click)="cambiarPagina(pagina + 1)"
+      [disabled]="pagina >= totalPaginas()">
+      Siguiente
+    </button>
+
   </div>
 
 </div>

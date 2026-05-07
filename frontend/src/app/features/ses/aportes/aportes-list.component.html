@@ -1,49 +1,53 @@
-<!-- src/app/features/ses/aportes/aportes-list.component.html -->
 <div class="page">
 
   <app-header-actions
-    titulo="📊 Informe Aportes — SES"
+    titulo="Informe Aportes — SES"
     [mostrarNuevo]="false"
     [mostrarExportar]="false"
     [mostrarImprimir]="false">
   </app-header-actions>
 
-  <!-- FILTROS -->
-  <form class="filtros" (ngSubmit)="buscar()">
+  <div class="card">
+    <form class="filtros" (ngSubmit)="buscar()">
 
-    <div class="f-row">
-      <label for="fechaCorte">Fecha de corte</label>
-      <input
-        id="fechaCorte"
-        type="date"
-        [(ngModel)]="fechaCorte"
-        name="fechaCorte"
-      />
-    </div>
+      <div class="f-row">
+        <label for="fechaCorte">Fecha de corte</label>
+        <input
+          id="fechaCorte"
+          type="date"
+          [(ngModel)]="fechaCorte"
+          name="fechaCorte"
+        />
+      </div>
 
-    <div class="f-buttons">
-      <button class="btn btn--primary" type="submit" [disabled]="cargando">
-        🔍 Buscar
-      </button>
-      <button
-        type="button"
-        class="btn btn--cancel"
-        (click)="limpiar()"
-        [disabled]="cargando">
-        🧹 Limpiar
-      </button>
-      <button
-        type="button"
-        class="btn btn--secondary"
-        (click)="exportar()"
-        [disabled]="cargando || aportes.length === 0">
-        📤 Exportar
-      </button>
-    </div>
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()"
+          [disabled]="cargando">
+          Limpiar
+        </button>
 
-  </form>
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="exportar()"
+          [disabled]="cargando || aportes.length === 0">
+          Exportar
+        </button>
 
-  <!-- MENSAJES -->
+        <button
+          class="btn btn--primary"
+          type="submit"
+          [disabled]="cargando">
+          Buscar
+        </button>
+      </div>
+
+    </form>
+  </div>
+
   <div *ngIf="error" class="alert alert--error">
     {{ error }}
   </div>
@@ -52,7 +56,6 @@
     Cargando información, por favor espere...
   </div>
 
-  <!-- RESULTADOS -->
   <div class="results" *ngIf="!cargando">
 
     <div class="summary" *ngIf="aportes.length > 0">
@@ -95,13 +98,11 @@
           <th>Código cuenta</th>
         </tr>
         </thead>
+
         <tbody>
         <tr *ngFor="let a of aportes; let i = index">
           <td>{{ i + 1 }}</td>
-          <td>
-            {{ a.tipoIdentificacion }} -
-            {{ a.numeroIdentificacion }}
-          </td>
+          <td>{{ a.tipoIdentificacion }} - {{ a.numeroIdentificacion }}</td>
           <td>{{ a.nombreCompleto }}</td>
           <td>{{ a.fechaIngreso }}</td>
           <td>{{ a.fechaUltimoPago || '-' }}</td>
@@ -121,6 +122,7 @@
         No hay datos para mostrar. Cambie la fecha de corte y vuelva a buscar.
       </div>
     </ng-template>
+
   </div>
 
 </div>

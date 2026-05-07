@@ -3,7 +3,7 @@
 // ================================================
 
 export const sesMenu = {
-  title: '📊 Superintendencia',
+  title: 'Superintendencia',
   items: [
     {
       label: 'Asociados',

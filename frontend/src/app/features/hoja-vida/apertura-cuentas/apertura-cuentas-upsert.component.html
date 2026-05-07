@@ -185,19 +185,22 @@
 
     <!-- BOTONES -->
     <div class="form-actions full">
-      <button type="submit"
-              class="btn btn--primary"
-              [disabled]="form.invalid">
-        💾 {{ editando ? 'Actualizar' : 'Guardar' }}
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="cancelar()">
+        Cancelar
       </button>
 
-      <button type="button"
-              class="btn btn--cancel"
-              (click)="cancelar()">
-        ↩️ Cancelar
+      <button
+        type="submit"
+        class="btn btn--primary"
+        [disabled]="form.invalid">
+        {{ editando ? 'Actualizar' : 'Guardar' }}
       </button>
+
     </div>
-
   </form>
 
 </div>

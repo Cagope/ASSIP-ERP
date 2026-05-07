@@ -54,21 +54,6 @@
   padding-top: 10px;
 }
 
-.pagination-controls button {
-  background: #0059b3;
-  color: white;
-  border: none;
-  padding: 5px 12px;
-  border-radius: 4px;
-  font-size: 0.78rem;
-  cursor: pointer;
-}
-
-.pagination-controls button:disabled {
-  background: #bbb;
-  cursor: not-allowed;
-}
-
 /* ===== MENSAJES ===== */
 .loading,
 .empty,

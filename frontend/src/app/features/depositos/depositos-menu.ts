@@ -1,45 +1,76 @@
-// ========================================================
-// 🏦 Menú del esquema Depósitos
-// --------------------------------------------------------
-// Este archivo pertenece exclusivamente al equipo del esquema DEPÓSITOS.
-// Aquí se definen las opciones del submenú visible en el panel lateral.
-// ========================================================
-
 export const depositosMenu = {
-  title: '🏦 Depósitos',
+  title: 'Depósitos',
   items: [
-    //  CRUD DE AHORRO
+
     {
-      label: 'Actualización de cuentas',
-      route: '/depositos/cuentas-ahorro',
-      permiso: 'DEPOSITOS_CUENTAS_VIEW'   // ⭐ SOLO ESTE CONTROLADO POR PERMISOS
+      label: 'Operación',
+      children: [
+        {
+          label: 'Actualización de cuentas',
+          route: '/depositos/cuentas-ahorro',
+          permiso: 'DEPOSITOS_CUENTAS_VIEW'
+        }
+      ]
     },
 
-    // 💰 CUENTAS DE AHORRO
-    { label: 'Consulta cuentas de Ahorro', route: '/depositos/informes/consulta-cuentas-ahorro' },
+    {
+      label: 'Procesos',
+      children: [
+        {
+          label: 'Revalorización de aportes',
+          route: '/depositos/procesos/revalorizacion'
+        },
 
-    // 🏛 FORMAS de Ahorro
-    { label: 'Formas de Ahorro', route: '/depositos/formas-ahorro' },
+        {
+          label: 'Liquidación de intereses',
+          children: [
+            {
+              label: 'Interés diario SM',
+              route: '/depositos/procesos/interes-diario-sm'
+            },
+            {
+              label: 'Interés mensual SM',
+              route: '/depositos/procesos/interes-mensual-sm'
+            },
+            {
+              label: 'Interés mensual TAC',
+              route: '/depositos/procesos/interes-mensual-tac'
+            }
+          ]
+        },
 
+        {
+          label: 'Habilidad del asociado',
+          route: '/depositos/procesos/habilidad-asociado'
+        }
+      ]
+    },
 
-    // ===============================
-    // 📈 PROCESOS
-    // ===============================
+    {
+      label: 'Informes',
+      children: [
+        {
+          label: 'Consulta cuentas de ahorro',
+          route: '/depositos/informes/consulta-cuentas-ahorro'
+        },
+        {
+          label: 'Saldos a corte',
+          route: '/depositos/informes/saldos-corte'
+        },
+        {
+          label: 'Cuentas nuevas o retiradas',
+          route: '/depositos/informes/cuentas-nr'
+        },
+        {
+          label: 'Informe por rangos',
+          route: '/depositos/informes/rangos'
+        },
+        {
+          label: 'Inconsistencias de saldos',
+          route: '/depositos/informes/inconsistencias'
+        }
+      ]
+    }
 
-    { label: 'Revalorización de Aportes', route: '/depositos/procesos/revalorizacion' },
-    { label: 'Interés Diario SM', route: '/depositos/procesos/interes-diario-sm' },
-    { label: 'Interés Mensual SM', route: '/depositos/procesos/interes-mensual-sm' },
-    { label: 'Interés Mensual TAC', route: '/depositos/procesos/interes-mensual-tac' },
-    { label: 'Habilidad del Asociado', route: '/depositos/procesos/habilidad-asociado' },
-
-
-    // ===============================
-    // 🧾 INFORMES
-    // ===============================
-
-    { label: 'Saldos a Corte', route: '/depositos/informes/saldos-corte' },
-    { label: 'Cuentas Nuevas o Retiradas', route: '/depositos/informes/cuentas-nr' },
-    { label: 'Informe por Rangos', route: '/depositos/informes/rangos' },
-    { label: 'Inconsistencias de Saldos', route: '/depositos/informes/inconsistencias' },
-  ],
+  ]
 };

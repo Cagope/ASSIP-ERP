@@ -1,7 +1,7 @@
 <div class="page">
 
   <app-header-actions
-    titulo="📄 Maestro de Activos Fijos"
+    titulo="Maestro de Activos Fijos"
     [mostrarNuevo]="false"
     [mostrarImprimir]="true"
     [mostrarExportar]="true"
@@ -118,16 +118,24 @@
   <!-- =========================
        ACCIONES
        ========================= -->
-  <div class="toolbar">
-    <div class="toolbar-left">
-      <button class="btn btn-primary" (click)="consultar()" [disabled]="loading">
-        {{ loading ? 'Cargando...' : 'Consultar' }}
-      </button>
+  <div class="form-actions">
 
-      <button class="btn btn-secondary" type="button" (click)="limpiarFiltros()" [disabled]="loading">
-        Limpiar filtros
-      </button>
-    </div>
+    <button
+      type="button"
+      class="btn btn--secondary"
+      (click)="limpiarFiltros()"
+      [disabled]="loading">
+      Limpiar filtros
+    </button>
+
+    <button
+      type="button"
+      class="btn btn--primary"
+      (click)="consultar()"
+      [disabled]="loading">
+      {{ loading ? 'Consultando...' : 'Consultar' }}
+    </button>
+
   </div>
 
 

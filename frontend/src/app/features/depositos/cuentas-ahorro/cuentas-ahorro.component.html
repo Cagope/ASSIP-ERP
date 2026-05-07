@@ -12,7 +12,7 @@
   <!-- ===================================================== -->
   <div *ngIf="paso === 1" class="list-container">
 
-    <h3>🔍 Buscar Cuenta / Asociado</h3>
+    <h3>Buscar Cuenta / Asociado</h3>
 
     <!-- ⭐ INFO AGENCIA ACTIVA ⭐ -->
     <div class="info-agencia" *ngIf="agenciaActiva">
@@ -43,8 +43,19 @@
              name="segundo_apellido"
              (keyup.enter)="buscar()">
 
-      <button class="btn" (click)="buscar()">Buscar</button>
-      <button class="btn" style="background:#777" (click)="limpiar()">Limpiar</button>
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="buscar()">
+        Buscar
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="limpiar()">
+        Limpiar
+      </button>
     </div>
 
     <!-- ESTADO -->
@@ -79,8 +90,12 @@
         <td class="right">{{ c.saldo_actual_cuenta | number:'1.0-0' }}</td>
 
         <td>
-          <button class="btn sm blue" (click)="seleccionarPersona(c)">
-            🔎 seleccionar
+          <button
+            class="btn-action-edit"
+            type="button"
+            (click)="seleccionarPersona(c)"
+            title="Seleccionar">
+            ✏️
           </button>
         </td>
       </tr>
@@ -99,11 +114,7 @@
   <!-- ===================================================== -->
   <div *ngIf="paso === 2" class="list-container form-container">
 
-    <button class="btn-back" (click)="regresar()">
-      ⬅ Regresar
-    </button>
-
-    <h3>🧑‍💼 Datos del Asociado</h3>
+    <h3>Datos del Asociado</h3>
 
     <div class="persona-box">
       <p><strong>Nombre:</strong> {{ persona?.nombre_completo }}</p>
@@ -119,7 +130,7 @@
 
     <hr>
 
-    <h3>📄 Datos de la Cuenta</h3>
+    <h3>Datos de la Cuenta</h3>
 
     <form (ngSubmit)="validar()">
 
@@ -214,9 +225,23 @@
 
       </div>
 
-      <div class="f-buttons">
-        <button class="btn btn--primary">Validar</button>
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="regresar()">
+          Cancelar
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn--primary">
+          Validar
+        </button>
+
       </div>
+
     </form>
 
     <div *ngIf="validacion"
@@ -226,8 +251,22 @@
       {{ validacion.mensaje }}
     </div>
 
-    <div *ngIf="validacion?.ok" class="f-buttons">
-      <button class="btn btn--success" (click)="crear()">Guardar Cambios</button>
+    <div *ngIf="validacion?.ok" class="form-actions">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="regresar()">
+        Cancelar
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="crear()">
+        Guardar
+      </button>
+
     </div>
 
   </div>
@@ -238,11 +277,16 @@
   <!-- ===================================================== -->
   <div *ngIf="paso === 3" class="list-container">
 
-    <button class="btn" style="background:#777; margin-bottom:10px" (click)="regresar()">
-      ⬅ Regresar
-    </button>
+    <div class="acciones">
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="regresar()">
+        Cancelar
+      </button>
+    </div>
 
-    <h3>📘 Cuenta Creada</h3>
+    <h3>Cuenta Creada</h3>
 
     <p><strong>Cuenta:</strong> {{ detalleCuenta?.codigoCuenta }}</p>
     <p><strong>Forma:</strong> {{ detalleCuenta?.nombreForma }}</p>

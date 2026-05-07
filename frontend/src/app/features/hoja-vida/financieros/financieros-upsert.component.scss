@@ -120,41 +120,6 @@ input:focus {
 }
 
 /* ===========================================================
-   🧭 BOTONES DE ACCIÓN — UNIFICADOS CON SISTEMA GLOBAL
-   ===========================================================
-   📘 Referencia: src/styles/buttons.scss
-   - Usa clases globales: .btn, .btn--primary, .btn--danger
-   - No se redefine color localmente.
-   - Diseño uniforme en todos los CRUDs.
-   =========================================================== */
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 1.25rem;
-
-  &.full {
-    width: 100%;
-  }
-
-  button {
-    min-width: 120px;
-    font-weight: 600;
-    text-transform: capitalize;
-  }
-}
-
-/* === Compatibilidad con alias cortos (btn primary / btn danger) === */
-.btn.primary {
-  @extend .btn--primary !optional;
-}
-
-.btn.danger {
-  @extend .btn--danger !optional;
-}
-
-/* ===========================================================
    📱 RESPONSIVIDAD
    =========================================================== */
 @media (max-width: 768px) {

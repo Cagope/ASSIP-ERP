@@ -57,8 +57,21 @@
 
       <td>
         <div class="acciones">
-          <button class="btn sm" (click)="editar(c.idContrato)" title="Editar">✏️</button>
-          <button class="btn sm danger" (click)="eliminar(c.idContrato)" title="Eliminar">🗑️</button>
+          <button
+            class="btn-action-edit"
+            type="button"
+            (click)="editar(c.idContrato)"
+            title="Editar">
+            ✏️
+          </button>
+
+          <button
+            class="btn-action-delete"
+            type="button"
+            (click)="eliminar(c.idContrato)"
+            title="Eliminar">
+            🗑️
+          </button>
         </div>
       </td>
     </tr>

@@ -53,11 +53,19 @@
 
       <td>
         <div class="acciones">
-          <button class="btn sm" (click)="editar(e.idEps)" title="Editar">
+          <button
+            class="btn-action-edit"
+            type="button"
+            (click)="editar(e.idEps)"
+            title="Editar">
             ✏️
           </button>
 
-          <button class="btn sm danger" (click)="eliminar(e.idEps)" title="Eliminar">
+          <button
+            class="btn-action-delete"
+            type="button"
+            (click)="eliminar(e.idEps)"
+            title="Eliminar">
             🗑️
           </button>
         </div>

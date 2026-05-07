@@ -1,38 +1,47 @@
 package co.assip.erp.depositos.revalorizacion.dto;
 
 import lombok.Data;
+
 import java.math.BigDecimal;
 
-/**
- * 📌 RevalorizacionItemDTO
- * ----------------------------------------------------
- * Resultado técnico del cálculo de revalorización por cuenta.
- *
- * Este DTO se envía al frontend para mostrar el listado:
- *   - Tipo de documento
- *   - Documento
- *   - Nombre completo
- *   - Saldo actual a la fecha contable
- *   - Valor promedio del período
- *   - Valor de la revalorización
- *   - Estado de la cuenta (decodificado)
- */
 @Data
 public class RevalorizacionItemDTO {
+
+    private Integer idCuentaAhorro;
+    private String codigoCuenta;
+
+    private Integer idDatosPersonal;
 
     private String tipoDocumento;
     private String documento;
     private String nombreCompleto;
 
-    /** Saldo actual a la fecha de contabilización */
-    private BigDecimal saldoActual;
+    // =====================================================
+    // 🔹 Valores base
+    // =====================================================
 
-    /** Promedio ponderado calculado en el período */
+    private BigDecimal saldoActual;
     private BigDecimal valorPromedio;
 
-    /** Valor de la revalorización = promedio * tasa */
-    private BigDecimal valorRevalorizacion;
+    // =====================================================
+    // 🔹 Revalorización
+    // =====================================================
 
-    /** Nombre del estado de la cuenta (decodificado) */
+    private BigDecimal valorRevalorizacion;
+    private BigDecimal nuevoSaldo;
+
+    // =====================================================
+    // 🔹 Parámetros
+    // =====================================================
+
+    private BigDecimal tasaRevalorizacion;
+    private Integer tiempoLiquidacion;
+    private BigDecimal minimoForma;
+
+    // =====================================================
+    // 🔹 Estado
+    // =====================================================
+
     private String estadoCuenta;
+
 }

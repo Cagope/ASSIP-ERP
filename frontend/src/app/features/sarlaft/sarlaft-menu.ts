@@ -6,7 +6,7 @@
 // ========================================================
 
 export const sarlaftMenu = {
-  title: '🛡️ SARLAFT',
+  title: 'Sarlaft',
   items: [
     // 🟦 Procesos
     { label: 'Reglas SARLAFT', route: '/sarlaft/reglas' },

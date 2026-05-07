@@ -1,0 +1,75 @@
+.page {
+  padding: 20px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.error {
+  color: red;
+  margin-bottom: 10px;
+}
+.page {
+  padding: 20px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.error {
+  color: red;
+  margin-bottom: 10px;
+}
+
+/* 🔷 TABLA */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  font-size: 13px;
+}
+
+.table th,
+.table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table th {
+  background: #f3f4f6;
+  font-weight: 600;
+  text-align: left;
+}
+
+.table tbody tr:hover {
+  background: #f9fafb;
+}
+
+/* 🔷 ALINEACIÓN */
+.text-end {
+  text-align: right;
+}
+
+/* 🔷 VACÍO */
+.empty {
+  margin-top: 15px;
+  color: #666;
+  font-style: italic;
+}

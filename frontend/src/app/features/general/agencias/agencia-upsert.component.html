@@ -64,10 +64,19 @@
 
     <!-- 🟨 Acciones -->
     <div class="form-actions full">
-      <button type="submit" class="btn sm primary" [disabled]="cargando">
-        💾 {{ id ? 'actualizar' : 'guardar' }}
+      <button
+        type="submit"
+        class="btn btn--primary"
+        [disabled]="cargando">
+        {{ id ? 'Actualizar' : 'Guardar' }}
       </button>
-      <button type="button" class="btn sm danger" (click)="cancelar()">↩️ cancelar</button>
+
+      <button
+        type="button"
+        class="btn btn--cancel"
+        (click)="cancelar()">
+        Cancelar
+      </button>
     </div>
   </form>
 

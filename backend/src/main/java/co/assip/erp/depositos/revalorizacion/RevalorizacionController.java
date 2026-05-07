@@ -1,46 +1,75 @@
 package co.assip.erp.depositos.revalorizacion;
 
+import co.assip.erp.contabilidad.consecutivos_comprobantes.ConsecutivosComprobantesService;
 import co.assip.erp.depositos.revalorizacion.dto.RevalorizacionEntradaDTO;
 import co.assip.erp.depositos.revalorizacion.dto.RevalorizacionItemDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
-/**
- * 🎯 RevalorizacionController
- * ----------------------------------------------------
- * Exposición del proceso técnico de revalorización.
- *
- * Endpoint:
- *   POST /api/v1/depositos/revalorizacion/ejecutar
- *
- * Recibe parámetros desde el frontend:
- *  - agencia
- *  - fechas de evaluación
- *  - fecha de contabilización
- *  - tasa de revalorización
- *
- * Devuelve:
- *  - listado de cuentas con saldo, promedio y valor revalorización
- */
 @RestController
 @RequestMapping("/depositos/revalorizacion")
 @RequiredArgsConstructor
 public class RevalorizacionController {
 
     private final RevalorizacionService service;
+    private final ConsecutivosComprobantesService consecutivosComprobantesService;
 
-    @PostMapping("/ejecutar")
-    public List<RevalorizacionItemDTO> ejecutar(
+    @PostMapping("/liquidar")
+    public List<RevalorizacionItemDTO> liquidar(
             @RequestBody RevalorizacionEntradaDTO input,
             @RequestHeader(name = "usuarioId", required = false) Integer usuarioId
     ) {
-        // Si no llega usuario, usamos uno por defecto (según tus reglas)
+
         if (usuarioId == null) {
-            usuarioId = 1; // Este valor lo cambias según tu seguridad
+            usuarioId = 1;
         }
 
-        return service.ejecutar(input);
+        return service.liquidar(input);
     }
+
+    @PostMapping("/aplicar")
+    public void aplicar(
+            @RequestBody RevalorizacionEntradaDTO input,
+            @RequestHeader(name = "usuarioId", required = false) Integer usuarioId
+    ) {
+
+        if (usuarioId == null) {
+            usuarioId = 1;
+        }
+
+        service.aplicar(input, usuarioId);
+    }
+
+    @GetMapping("/proximo-comprobante/{idAgencia}/{tipoComprobante}")
+    public Map<String, String> obtenerProximoComprobante(
+            @PathVariable Integer idAgencia,
+            @PathVariable String tipoComprobante
+    ) {
+
+        String numero = consecutivosComprobantesService.obtenerNumeroSugerido(
+                tipoComprobante,
+                idAgencia
+        );
+
+        return Map.of(
+                "numeroComprobante",
+                numero
+        );
+    }
+
+    @GetMapping("/ultima-liquidacion/{idAgencia}/{idFormaAhorro}")
+    public Map<String, Object> obtenerUltimaLiquidacion(
+            @PathVariable Integer idAgencia,
+            @PathVariable Integer idFormaAhorro
+    ) {
+
+        return service.obtenerUltimaLiquidacion(
+                idAgencia,
+                idFormaAhorro
+        );
+    }
+
 }

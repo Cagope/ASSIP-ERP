@@ -22,10 +22,21 @@
 
     <!-- 🟨 Acciones -->
     <div class="form-actions full">
-      <button type="submit" class="btn sm primary" [disabled]="cargando">
-        💾 {{ id ? 'actualizar' : 'guardar' }}
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="cancelar()">
+        Cancelar
       </button>
-      <button type="button" class="btn sm danger" (click)="cancelar()">↩️ cancelar</button>
+
+      <button
+        type="submit"
+        class="btn btn--primary"
+        [disabled]="cargando">
+        {{ id ? 'Actualizar' : 'Guardar' }}
+      </button>
+
     </div>
   </form>
 

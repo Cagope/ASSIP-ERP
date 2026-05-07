@@ -36,16 +36,33 @@
     <div class="actions-process">
 
       <div class="actions-process-left">
-        <button class="btn-work-secondary" (click)="limpiar()">🧹 Limpiar</button>
-        <button class="btn-work-secondary" (click)="exportarExcel()" [disabled]="rows.length === 0">
-          📄 Exportar
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()">
+          Limpiar
         </button>
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="exportarExcel()"
+          [disabled]="rows.length === 0">
+          Exportar
+        </button>
+
       </div>
 
       <div class="actions-process-right">
-        <button class="btn-work-primary" (click)="consultar()">
-          🔎 Consultar
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="consultar()">
+          Consultar
         </button>
+
       </div>
 
     </div>

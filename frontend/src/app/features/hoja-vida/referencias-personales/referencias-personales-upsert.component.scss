@@ -110,33 +110,7 @@ select.ng-valid.ng-touched {
   margin-top: 1rem;
 }
 
-.form-actions .btn {
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-}
 
-.btn--primary {
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-
-  &:hover {
-    background-color: #0069d9;
-  }
-}
-
-.btn--cancel {
-  background-color: #e0e0e0;
-  color: #333;
-  border: none;
-
-  &:hover {
-    background-color: #cfcfcf;
-  }
-}
 
 /* ===========================================================
    🧩 RESPONSIVIDAD
@@ -154,9 +128,5 @@ select.ng-valid.ng-touched {
   .form-actions {
     flex-direction: column;
     align-items: stretch;
-  }
-
-  .form-actions .btn {
-    width: 100%;
   }
 }

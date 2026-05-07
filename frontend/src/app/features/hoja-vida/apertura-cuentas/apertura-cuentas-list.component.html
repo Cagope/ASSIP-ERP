@@ -18,7 +18,7 @@
     />
   </div>
 
-  <!-- 📌 Tabla -->
+  <!--Tabla -->
   <table *ngIf="!cargando && filtradas.length > 0" class="table table-striped table-hover align-middle">
     <thead>
     <tr>
@@ -44,7 +44,8 @@
       <!-- Acción -->
       <td class="text-center">
         <button
-          class="btn btn-sm btn-outline-primary"
+          type="button"
+          class="btn-action-edit"
           (click)="gestionar(p)">
           Gestionar
         </button>
@@ -54,14 +55,28 @@
     </tbody>
   </table>
 
-  <!-- 📌 Paginación -->
+  <!--Paginación -->
   <div class="pagination-controls" *ngIf="!cargando && filtradas.length > tamanoPagina">
-    <button (click)="cambiarPagina(pagina - 1)" [disabled]="pagina === 1">Anterior</button>
+    <button
+      type="button"
+      class="btn btn--secondary"
+      (click)="cambiarPagina(pagina - 1)"
+      [disabled]="pagina === 1">
+      Anterior
+    </button>
+
     <span>Página {{ pagina }} / {{ totalPaginas() }}</span>
-    <button (click)="cambiarPagina(pagina + 1)" [disabled]="pagina === totalPaginas()">Siguiente</button>
+
+    <button
+      type="button"
+      class="btn btn--secondary"
+      (click)="cambiarPagina(pagina + 1)"
+      [disabled]="pagina === totalPaginas()">
+      Siguiente
+    </button>
   </div>
 
-  <!-- 📌 Mensajes -->
+  <!--Mensajes -->
   <div *ngIf="cargando" class="loading">
     <i class="bi bi-hourglass-split"></i> Cargando apertura de cuentas...
   </div>

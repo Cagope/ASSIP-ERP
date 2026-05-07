@@ -110,34 +110,6 @@ select.ng-valid.ng-touched {
   margin-top: 1rem;
 }
 
-.actions .btn {
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-}
-
-.actions .btn-primary {
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-
-  &:hover {
-    background-color: #0069d9;
-  }
-}
-
-.actions .btn-secondary {
-  background-color: #e0e0e0;
-  color: #333;
-  border: none;
-
-  &:hover {
-    background-color: #cfcfcf;
-  }
-}
-
 /* ===========================================================
    🧩 RESPONSIVIDAD
    =========================================================== */
@@ -156,7 +128,4 @@ select.ng-valid.ng-touched {
     align-items: stretch;
   }
 
-  .actions .btn {
-    width: 100%;
-  }
 }

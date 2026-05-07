@@ -5,39 +5,60 @@ import * as XLSX from 'xlsx';
 export class RevalorizacionExporterService {
 
   exportarExcel(items: any[], filtros: any): void {
+
     if (!items || items.length === 0) {
       alert('No hay datos para exportar.');
       return;
     }
 
+    // ============================================================
+    // 🧾 Construcción del JSON para Excel
+    // ============================================================
     const data = items.map((x: any) => ({
-      'Tipo Documento': x.tipoDocumento,
+
       'Documento': x.documento,
       'Nombre Completo': x.nombreCompleto,
+
       'Saldo Actual': x.saldoActual,
       'Valor Promedio': x.valorPromedio,
-      'Revalorización': x.valorRevalorizacion,
+      'Valor Revalorización': x.valorRevalorizacion,
+      'Nuevo Saldo': x.nuevoSaldo,
+
+      'Tasa (%)': x.tasaRevalorizacion,
+      'Tiempo Liquidación': x.tiempoLiquidacion,
+      'Mínimo Forma': x.minimoForma,
+
       'Estado Cuenta': x.estadoCuenta
+
     }));
 
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(data);
-    XLSX.utils.book_append_sheet(wb, ws, 'Revalorizacion');
 
-    // -----------------------------------------
-    //  📄 Nombre archivo: revalorizacion_xxx_01
-    // -----------------------------------------
-    const fecha = `${filtros.fechaInicio}_al_${filtros.fechaFin}`;
+    XLSX.utils.book_append_sheet(
+      wb,
+      ws,
+      'Revalorizacion Aportes'
+    );
 
-    // soporte para: filtros.codigoAgencia o filtros.agenciaId
-    const codAgencia =
-      filtros.codigoAgencia
-        ? filtros.codigoAgencia.padStart(2, '0')
-        : (filtros.agenciaId === '0'
-            ? '00'
-            : String(filtros.agenciaId).padStart(2, '0')
-          );
+    // ============================================================
+    // 📄 Nombre del archivo
+    // ============================================================
+    const fecha =
+      filtros.fechaInicio +
+      '_al_' +
+      filtros.fechaFin;
 
-    XLSX.writeFile(wb, `revalorizacion_${fecha}_${codAgencia}.xlsx`);
+    const codigoAgencia =
+      filtros.codigoAgencia ?? '00';
+
+    const codigoForma =
+      filtros.codigoForma ?? 'XX';
+
+    const nombreArchivo =
+      `revalorizacion_aportes_${fecha}_${codigoAgencia}_${codigoForma}.xlsx`;
+
+    XLSX.writeFile(wb, nombreArchivo);
   }
+
 }

@@ -35,8 +35,21 @@
       <td>{{ a.telefonoAgencia }}</td>
       <td>
         <div class="acciones">
-          <button class="btn sm" (click)="editarAgencia(a.idAgencia!)">✏️</button>
-          <button class="btn sm danger" (click)="eliminarAgencia(a.idAgencia!)">🗑️</button>
+          <button
+            class="btn-action-edit"
+            type="button"
+            (click)="editarAgencia(a.idAgencia!)"
+            title="Editar">
+            ✏️
+          </button>
+
+          <button
+            class="btn-action-delete"
+            type="button"
+            (click)="eliminarAgencia(a.idAgencia!)"
+            title="Eliminar">
+            🗑️
+          </button>
         </div>
       </td>
     </tr>

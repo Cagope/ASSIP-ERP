@@ -140,30 +140,6 @@ textarea.ng-valid.ng-touched {
   margin-top: 1rem;
 }
 
-.form-actions .btn {
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-}
-
-/* === Botón principal === */
-.form-actions .btn--primary {
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-
-  &:hover {
-    background-color: #0069d9;
-  }
-
-  &:disabled {
-    background-color: #94c0f9;
-    cursor: not-allowed;
-  }
-}
-
 /* === Botón cancelar === */
 .form-actions .btn--cancel {
   background-color: #e0e0e0;

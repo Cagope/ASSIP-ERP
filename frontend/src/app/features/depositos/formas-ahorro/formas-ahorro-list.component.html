@@ -11,12 +11,12 @@
   <table class="table" *ngIf="!cargando && formas.length > 0; else vacio">
     <thead>
     <tr>
-      <th>código</th>
-      <th>nombre</th>
-      <th>tipo</th>
+      <th>Código</th>
+      <th>Nombre</th>
+      <th>Tipo</th>
       <th>liq.</th>
-      <th>aut</th>
-      <th>acciones</th>
+      <th>Aut</th>
+      <th>Acciones</th>
     </tr>
     </thead>
 
@@ -30,8 +30,21 @@
 
       <td>
         <div class="acciones">
-          <button class="btn sm" (click)="editar(f.id!)">✏️</button>
-          <button class="btn sm danger" (click)="eliminar(f)">🗑️</button>
+          <button
+            class="btn-action-edit"
+            type="button"
+            (click)="editar(f.id!)"
+            title="Editar">
+            ✏️
+          </button>
+
+          <button
+            class="btn-action-delete"
+            type="button"
+            (click)="eliminar(f)"
+            title="Eliminar">
+            🗑️
+          </button>
         </div>
       </td>
     </tr>

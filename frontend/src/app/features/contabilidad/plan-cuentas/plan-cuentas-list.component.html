@@ -35,8 +35,21 @@
 
       <td>
         <div class="acciones">
-          <button class="btn sm" (click)="editarCuenta(c.id!)">✏️</button>
-          <button class="btn sm danger" (click)="eliminarCuenta(c)">🗑️</button>
+          <button
+            class="btn-action-edit"
+            type="button"
+            (click)="editarCuenta(c.id!)"
+            title="Editar">
+            ✏️
+          </button>
+
+          <button
+            class="btn-action-delete"
+            type="button"
+            (click)="eliminarCuenta(c)"
+            title="Eliminar">
+            🗑️
+          </button>
         </div>
       </td>
     </tr>

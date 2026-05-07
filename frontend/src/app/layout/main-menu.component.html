@@ -1,38 +1,126 @@
-<nav class="menu-bar">
+<nav class="side-menu">
+
   <ul class="menu-root">
 
     <li
-      class="menu-root-item"
+      class="menu-section"
       *ngFor="let section of menu; let i = index"
-      [class.open]="isOpen(i)"
-    >
+      [class.open]="isOpen(i)">
 
-      <!-- NIVEL 1 -->
       <button
         type="button"
         class="menu-title"
-        (click)="toggleSection(i)"
-      >
-        {{ section.title }}
+        (click)="toggleSection(i)">
+
+        <span class="menu-title-content">
+          <lucide-icon
+            *ngIf="section.icon"
+            [img]="icons[section.icon]"
+            class="menu-icon">
+          </lucide-icon>
+
+          <span>{{ section.title }}</span>
+        </span>
+
+        <span class="arrow">{{ isOpen(i) ? '▾' : '▸' }}</span>
       </button>
 
-      <!-- NIVEL 2 -->
-      <ul class="menu-dropdown" *ngIf="isOpen(i)">
-        <ng-container *ngFor="let item of section.items">
-          <li *ngIf="tienePermiso(item)">
+      <ul class="menu-items" *ngIf="isOpen(i)">
+
+        <ng-container *ngFor="let item of section.items; let gi = index">
+
+          <!-- ITEM SIMPLE NIVEL 2 -->
+          <li *ngIf="tienePermiso(item) && !item.children">
             <a
               [routerLink]="item.route"
               routerLinkActive="active"
               class="menu-item"
-              (click)="closeMenu()"
-            >
+              (click)="closeMenu()">
               {{ item.label }}
             </a>
           </li>
+
+          <!-- GRUPO NIVEL 2 -->
+          <li
+            class="menu-group"
+            *ngIf="tienePermiso(item) && item.children"
+            [class.active-group]="grupoActivo(item)"
+            [class.open-group]="isGroupOpen(gi)">
+
+            <button
+              type="button"
+              class="menu-group-title"
+              (click)="toggleGroup(gi)">
+              <span>{{ item.label }}</span>
+              <span class="group-arrow">
+                {{ isGroupOpen(gi) ? '▾' : '▸' }}
+              </span>
+            </button>
+
+            <ul class="menu-subitems" *ngIf="isGroupOpen(gi)">
+
+              <ng-container *ngFor="let child of item.children; let si = index">
+
+                <!-- ITEM SIMPLE NIVEL 3 -->
+                <li *ngIf="tienePermiso(child) && !child.children">
+                  <a
+                    [routerLink]="child.route"
+                    routerLinkActive="active"
+                    class="menu-subitem"
+                    (click)="closeMenu()">
+                    {{ child.label }}
+                  </a>
+                </li>
+
+                <!-- SUBGRUPO NIVEL 3 -->
+                <li
+                  class="menu-subgroup"
+                  *ngIf="tienePermiso(child) && child.children"
+                  [class.active-subgroup]="grupoActivo(child)"
+                  [class.open-subgroup]="isSubGroupOpen(gi, si)">
+
+                  <button
+                    type="button"
+                    class="menu-subgroup-title"
+                    (click)="toggleSubGroup(gi, si)">
+                    <span>{{ child.label }}</span>
+                    <span class="subgroup-arrow">
+                      {{ isSubGroupOpen(gi, si) ? '▾' : '▸' }}
+                    </span>
+                  </button>
+
+                  <ul class="menu-sublevel-items" *ngIf="isSubGroupOpen(gi, si)">
+
+                    <ng-container *ngFor="let subchild of child.children">
+
+                      <li *ngIf="tienePermiso(subchild)">
+                        <a
+                          [routerLink]="subchild.route"
+                          routerLinkActive="active"
+                          class="menu-sublevel-item"
+                          (click)="closeMenu()">
+                          {{ subchild.label }}
+                        </a>
+                      </li>
+
+                    </ng-container>
+
+                  </ul>
+
+                </li>
+
+              </ng-container>
+
+            </ul>
+
+          </li>
+
         </ng-container>
+
       </ul>
 
     </li>
 
   </ul>
+
 </nav>

@@ -1,10 +1,7 @@
 <div class="list-container">
 
-  <!-- ==========================================================
-       🧾 ENCABEZADO — Título y acciones principales
-       ========================================================== -->
   <div class="header">
-    <h2>🧾 Afiliaciones registradas</h2>
+    <h2>Afiliaciones registradas</h2>
 
     <div class="actions">
       <input
@@ -13,19 +10,19 @@
         (input)="filtrar()"
         placeholder="Buscar por nombre o documento..."
       />
-      <button type="button" class="btn refresh" (click)="refrescar()">🔄 Actualizar</button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="refrescar()">
+        Actualizar
+      </button>
     </div>
   </div>
 
-  <!-- ==========================================================
-       ⚙️ ESTADOS DEL LISTADO
-       ========================================================== -->
-  <div *ngIf="cargando" class="msg info">⏳ Cargando registros…</div>
+  <div *ngIf="cargando" class="msg info">Cargando registros…</div>
   <div *ngIf="error && !cargando" class="msg err">{{ error }}</div>
 
-  <!-- ==========================================================
-       📋 TABLA PRINCIPAL — Listado de afiliaciones
-       ========================================================== -->
   <table class="data-table" *ngIf="filtrados.length > 0; else vacio">
     <thead>
     <tr>
@@ -33,7 +30,7 @@
       <th>Documento</th>
       <th>Nombre completo</th>
       <th>Fecha actualización</th>
-      <th>Acciones</th>
+      <th class="text-center">Acciones</th>
     </tr>
     </thead>
 
@@ -43,25 +40,41 @@
       <td>{{ d.documento }}</td>
       <td>{{ d.nombres }} {{ d.primerApellido }} {{ d.segundoApellido }}</td>
       <td>{{ d.fechaActualizacion | date:'yyyy-MM-dd' }}</td>
-      <td class="actions">
-        <button class="btn print" (click)="abrirMenu($event, d)">🖨️ Imprimir ▾</button>
+
+      <td class="text-center">
+        <button
+          type="button"
+          class="btn-action-print"
+          (click)="abrirMenu($event, d)">
+          Imprimir
+        </button>
       </td>
     </tr>
     </tbody>
   </table>
 
-  <!-- ==========================================================
-       📄 PAGINACIÓN LOCAL (20 registros por página)
-       ========================================================== -->
-  <div class="pagination" *ngIf="totalPaginas() > 1">
-    <button (click)="cambiarPagina(pagina - 1)" [disabled]="pagina === 1">⬅️</button>
+  <div class="pagination-controls" *ngIf="totalPaginas() > 1">
+
+    <button
+      type="button"
+      class="btn btn--secondary"
+      (click)="cambiarPagina(pagina - 1)"
+      [disabled]="pagina === 1">
+      Anterior
+    </button>
+
     <span>Página {{ pagina }} / {{ totalPaginas() }}</span>
-    <button (click)="cambiarPagina(pagina + 1)" [disabled]="pagina === totalPaginas()">➡️</button>
+
+    <button
+      type="button"
+      class="btn btn--secondary"
+      (click)="cambiarPagina(pagina + 1)"
+      [disabled]="pagina === totalPaginas()">
+      Siguiente
+    </button>
+
   </div>
 
-  <!-- ==========================================================
-       📭 MENSAJE SI NO HAY DATOS
-       ========================================================== -->
   <ng-template #vacio>
     <div class="empty">No hay afiliaciones registradas.</div>
   </ng-template>

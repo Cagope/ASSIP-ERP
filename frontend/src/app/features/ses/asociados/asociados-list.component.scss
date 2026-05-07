@@ -9,52 +9,41 @@
 -------------------------------------- */
 .filtros {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 1rem 1.25rem;
+  align-items: end;
   margin-bottom: 1.5rem;
+}
 
-  .f-row {
-    display: flex;
-    flex-direction: column;
+.f-row {
+  display: flex;
+  flex-direction: column;
+}
 
-    label {
-      font-size: 0.8rem;
-      opacity: .8;
-      margin-bottom: .3rem;
-    }
+.f-row label {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  margin-bottom: 0.3rem;
+}
 
-    input,
-    select {
-      height: 34px;
-      border: 1px solid #ccc;
-      padding: 4px 8px;
-      border-radius: 4px;
-      background: #fff;
-    }
-  }
+.f-row input,
+.f-row select {
+  height: 34px;
+  border: 1px solid #ccc;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: #fff;
+}
 
-  .f-buttons {
-    display: flex;
-    align-items: flex-end;
-    gap: .5rem;
-
-    .btn {
-      padding: .45rem 1rem;
-      border-radius: 4px;
-      font-size: .9rem;
-      cursor: pointer;
-      border: none;
-
-      &.btn--primary {
-        background: #007bff;
-        color: white;
-      }
-
-      &.btn--cancel {
-        background: #ddd;
-      }
-    }
-  }
+/* -------------------------------------
+   🔘 ACCIONES (BOTONES)
+-------------------------------------- */
+.form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
 }
 
 /* -------------------------------------
@@ -94,32 +83,22 @@
     font-size: 0.9rem;
   }
 
-  .right {
-    text-align: right;
-  }
-
   tbody tr:nth-child(even) {
     background: #fafafa;
   }
 }
 
 /* -------------------------------------
-   📥 EXPORTAR EXCEL
+   🧩 UTILIDADES
 -------------------------------------- */
-.export-area {
-  margin-top: 1.5rem;
+.right {
   text-align: right;
+}
 
-  .btn {
-    padding: .45rem 1.2rem;
-    border-radius: 4px;
-    background: #007bff;
-    color: #fff;
-    border: none;
-    cursor: pointer;
+.w-120 {
+  width: 120px;
+}
 
-    &:hover {
-      background: #0069d9;
-    }
-  }
+.mt-2 {
+  margin-top: 1rem;
 }

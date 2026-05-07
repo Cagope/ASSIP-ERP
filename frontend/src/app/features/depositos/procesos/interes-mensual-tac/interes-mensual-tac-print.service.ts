@@ -153,7 +153,7 @@ export class InteresMensualTacPrintService {
             <th class="right">Retención</th>
             <th class="right">Interés neto</th>
 
-            <th class="right">Tasa (%)</th>
+            <th class="right">Tasa pactada</th>
             <th class="right">Saldo actual</th>
             <th>Aplica retención</th>
           </tr>

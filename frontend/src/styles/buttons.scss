@@ -1,162 +1,187 @@
-/* ==========================================================================
-   🎨 ASSIP-ERP — SISTEMA GLOBAL DE BOTONES
-   Archivo: src/styles/buttons.scss
-   Autor: Dirección de Tecnología — ERP ASSIP Solidaria y Financiera
-   Fecha: Octubre 2025
-
-   📘 Propósito:
-   Establece las variantes visuales de todos los botones del sistema.
-   Se utiliza en cabeceras, formularios, toolbars y tablas.
-   ========================================================================== */
-
 @use 'sass:color';
 @use 'tokens' as t;
 
-/* === ⚙️ BASE GENERAL ==================================================== */
+/* =========================
+   BOTONES ESTÁNDAR ERP
+========================= */
+
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 10px 18px;
-  border-radius: t.$radius-sm;
-  font-size: 14px;
-  font-weight: 600;
-  text-transform: uppercase;
-  cursor: pointer;
+  gap: 8px;
+
+  height: 32px;
+  padding: 0 14px;
+
+  border-radius: 6px;
   border: none;
-  transition: all 0.2s ease;
-  letter-spacing: 0.3px;
 
-  i, svg {
-    font-size: 16px;
-    line-height: 1;
-  }
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
 
-  &:hover {
-    transform: translateY(-1px);
-    opacity: 0.9;
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    pointer-events: none;
-  }
-}
-
-/* === 💾 BOTÓN PRINCIPAL (Guardar / Actualizar) ===========================
-   Azul degradado con sombra ligera y respuesta de hover/active.
-   ======================================================================== */
-.btn--primary {
-  background: linear-gradient(90deg,
-    color.adjust(t.$color-primary, $lightness: -5%),
-    color.adjust(t.$color-primary, $lightness: 10%)
-  );
-  color: t.$color-surface;
-  box-shadow: 0 2px 4px rgba(0, 80, 255, 0.25);
-  font-weight: 700;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
-  letter-spacing: 0.4px;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
 
   &:hover:not(:disabled) {
-    filter: brightness(1.07);
     transform: translateY(-1px);
   }
 
   &:active:not(:disabled) {
     transform: translateY(0);
-    box-shadow: 0 1px 2px rgba(0, 80, 255, 0.2);
   }
 
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+    transform: none;
   }
 }
 
-/* === ⚪️ BOTÓN DE CANCELAR (Neutral gris) ================================
-   Fondo gris suave, borde definido y cambio sutil al pasar el mouse.
-   ======================================================================== */
+/* Principal: Guardar / Ejecutar / Validar */
+.btn--primary,
+.btn--success,
+.btn--process {
+  background: #198754;
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(25, 135, 84, 0.25);
+
+  &:hover:not(:disabled) {
+    background: #157347;
+  }
+}
+
+/* Secundario: Cancelar / Regresar / Limpiar */
+.btn--secondary,
 .btn--cancel {
-  background: #e9ecef;
-  color: t.$color-text;
-  border: 1.5px solid color.adjust(t.$color-border, $lightness: -10%);
-  font-weight: 600;
-  border-radius: t.$radius-sm;
-  transition: all 0.25s ease;
+  background: #fff;
+  color: #374151;
+  border: 1px solid #d1d5db;
 
   &:hover:not(:disabled) {
-    background: #dee2e6;
-    color: color.adjust(t.$color-text, $lightness: -10%);
-  }
-
-  &:active:not(:disabled) {
-    background: #d3d7da;
-    color: t.$color-text;
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    background: #f3f3f3;
-    border-color: color.adjust(t.$color-border, $lightness: 10%);
-    color: color.adjust(t.$color-text, $lightness: 25%);
+    background: #f3f4f6;
   }
 }
 
-/* === 🖨️ IMPRIMIR ====================================================== */
+/* Imprimir */
 .btn--print {
-  background: linear-gradient(180deg,
-    color.adjust(t.$color-info, $lightness: 6%), t.$color-info);
-  color: t.$color-surface;
+  background: #0d6efd;
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(13, 110, 253, 0.25);
 
   &:hover:not(:disabled) {
-    filter: brightness(1.05);
+    background: #0b5ed7;
   }
 }
 
-/* === 🧊 BOTONES TRANSPARENTES (“GHOST”) ================================ */
+/* Exportar Excel */
+.btn--excel {
+  background: #198754;
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(25, 135, 84, 0.25);
+
+  &:hover:not(:disabled) {
+    background: #157347;
+  }
+}
+
+/* Peligro */
+.btn--danger,
+.btn--delete {
+  background: #dc3545;
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.25);
+
+  &:hover:not(:disabled) {
+    background: #bb2d3b;
+  }
+}
+
+/* Ghost */
 .btn--ghost {
   background: transparent;
-  color: t.$color-text;
-  border: 1px solid t.$color-border;
-  box-shadow: none;
+  color: #374151;
+  border: 1px solid #d1d5db;
 
-  &:hover {
-    background: #f8f8f8;
+  &:hover:not(:disabled) {
+    background: #f3f4f6;
   }
 }
 
-/* === 💚 NUEVO ========================================================== */
-.btn--new {
-  background: linear-gradient(180deg,
-    color.adjust(t.$color-success, $lightness: 8%), t.$color-success);
-  color: t.$color-surface;
+/* =========================
+   ACCIONES DE FORMULARIO
+========================= */
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: t.$space-5;
+  width: 100%;
 }
 
-/* === 🟧 EDITAR ========================================================= */
-.btn--edit {
-  background: linear-gradient(180deg,
-    color.adjust(t.$color-warning, $lightness: 10%), t.$color-warning);
-  color: t.$color-text;
+.form-actions.full {
+  grid-column: 1 / -1;
 }
 
-/* === 🔴 ELIMINAR / PELIGRO ============================================ */
-.btn--delete, .btn--danger {
-  background: linear-gradient(180deg,
-    color.adjust(t.$color-danger, $lightness: 6%), t.$color-danger);
-  color: t.$color-surface;
-  box-shadow: t.$shadow-sm;
+/* =========================
+   ACCIONES DE TABLA
+========================= */
 
-  &:hover {
-    background: color.adjust(t.$color-danger, $lightness: -4%);
+.acciones {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-action-edit,
+.btn-action-delete {
+  width: 34px;
+  height: 28px;
+  padding: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+
+  background: #fff;
+  transition: all 0.18s ease;
+}
+
+.btn-action-edit {
+  color: #0d6efd;
+  border: 1.5px solid #9ec5fe;
+
+  &:hover:not(:disabled) {
+    background: #e7f1ff;
+    transform: translateY(-1px);
   }
 }
 
-/* === 🧩 BOTONES DE CABECERA ============================================ */
+.btn-action-delete {
+  color: #dc3545;
+  border: 1.5px solid #f1aeb5;
+
+  &:hover:not(:disabled) {
+    background: #f8d7da;
+    transform: translateY(-1px);
+  }
+}
+
+/* =========================
+   CABECERAS
+========================= */
+
 .header-actions {
   display: flex;
   justify-content: space-between;
@@ -177,105 +202,60 @@
   }
 }
 
-/* === 📋 BOTONES DE TABLAS ============================================== */
-.table .btn {
-  padding: 6px 10px;
-  font-size: 12px;
-  border-radius: t.$radius-sm;
-  line-height: 1;
+/* =========================
+   IMPRESIÓN
+========================= */
 
-  &--edit {
-    background: t.$color-warning;
-    color: t.$color-text;
-  }
-
-  &--delete {
-    background: t.$color-danger;
-    color: t.$color-surface;
-  }
-}
-
-/* === 🖨️ MODO IMPRESIÓN ================================================ */
 @media print {
   .btn,
-  .header-actions {
+  .header-actions,
+  .acciones {
     display: none !important;
   }
 }
 
-/* === 🟨 ÁREA DE ACCIONES DE FORMULARIO ================================ */
-/* Uso:
-   <div class="form-actions">
-     <button type="submit" class="btn btn--primary">💾 Guardar</button>
-     <button type="button" class="btn btn--cancel">↩️ Cancelar</button>
-   </div>
-   ----------------------------------------------------------------------
-   Se utiliza en todos los CRUDs y formularios del sistema.
-   Mantiene alineación uniforme, márgenes y proporciones.
-   ====================================================================== */
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 12px; /* igual que header-actions */
-  margin-top: t.$space-5;
-  width: 100%;
-
-  button {
-    @extend .btn;
-    min-width: 130px; /* mismo ancho visual que los de cabecera */
-    padding: 10px 18px;
-    font-size: 14px;
-    font-weight: 600;
-    text-transform: uppercase;
-    border-radius: t.$radius-sm;
-  }
-}
-
-
-/* === ⚙️ BOTONES EN TABLAS — ACCIONES COMPACTAS ==========================
-   Aplica a botones tipo "Gestionar", "Crear", "Ver", etc.
-   Mejora los de Bootstrap manteniendo proporciones pequeñas.
-   ====================================================================== */
-.btn-outline-primary {
-  background: #f8f9fa;
-  color: color.adjust(t.$color-primary, $lightness: -10%);
-  border: 1.5px solid color.adjust(t.$color-primary, $lightness: 10%);
-  font-weight: 700;
-  font-size: 12.5px;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-  padding: 4px 12px;
-  border-radius: t.$radius-sm;
-  transition: all 0.25s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+/* Acción de advertencia suave (no destructiva fuerte) */
+.btn--ghost-danger {
+  background: #fff;
+  color: #dc3545;
+  border: 1.5px solid #f1aeb5;
 
   &:hover:not(:disabled) {
-    background: color.adjust(t.$color-primary, $lightness: 45%);
-    color: color.adjust(t.$color-primary, $lightness: -10%);
-    border-color: color.adjust(t.$color-primary, $lightness: 15%);
+    background: #f8d7da;
+    color: #842029;
     transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 102, 255, 0.25);
-  }
-
-  &:active:not(:disabled) {
-    background: color.adjust(t.$color-primary, $lightness: 38%);
-    transform: translateY(0);
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    background: #f2f2f2;
-    border-color: #ddd;
-    color: #999;
-    cursor: not-allowed;
   }
 }
 
-/* Tamaño reducido uniforme (sm) */
-.btn-sm {
-  font-size: 12px;
-  padding: 4px 10px;
-  line-height: 1.1;
+.btn-action-print {
+  width: 34px;
+  height: 28px;
+  padding: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+
+  background: #fff;
+  color: #0d6efd;
+  border: 1.5px solid #9ec5fe;
+
+  transition: all 0.18s ease;
+
+  &:hover:not(:disabled) {
+    background: #e7f1ff;
+    transform: translateY(-1px);
+  }
+}
+
+.btn-action-text {
+  width: auto;
+  min-width: 78px;
+  padding: 0 10px;
+  white-space: nowrap;
 }

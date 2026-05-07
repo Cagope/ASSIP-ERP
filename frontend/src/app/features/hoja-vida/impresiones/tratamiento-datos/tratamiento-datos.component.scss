@@ -19,36 +19,6 @@
   font-family: "Arial", sans-serif;
 }
 
-/* ===== Barra de acciones (solo vista previa) ===== */
-.actions-top {
-  display: flex;
-  gap: .5rem;
-  align-items: center;
-  justify-content: flex-start;
-  margin-bottom: .6rem;
-}
-
-.actions-top .btn {
-  padding: .38rem .65rem;
-  border-radius: .5rem;
-  border: 1px solid #12903e;
-  background: #12903e;
-  color: #fff;
-  cursor: pointer;
-  text-decoration: none;
-  font-size: .85rem;
-  transition: all .15s ease-in-out;
-}
-
-.actions-top .btn:hover {
-  filter: brightness(1.1);
-}
-
-.actions-top .btn.secondary {
-  border-color: #5a5a5a;
-  background: #6b6b6b;
-}
-
 /* Oculta toolbars viejas */
 .sheet > .toolbar,
 .sheet > .btn-bar {
@@ -247,21 +217,6 @@
   justify-content: flex-end;
 }
 
-.btn {
-  padding: .38rem .65rem;
-  border-radius: .5rem;
-  border: 1px solid #12903e;
-  background: #12903e;
-  color: white;
-  text-decoration: none;
-  cursor: pointer;
-  font-size: .85rem;
-}
-
-.btn.secondary {
-  border-color: #5a5a5a;
-  background: #6b6b6b;
-}
 
 /* ===== Reglas de impresión ===== */
 @media print {

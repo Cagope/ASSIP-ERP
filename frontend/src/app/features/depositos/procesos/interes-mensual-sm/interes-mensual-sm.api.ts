@@ -3,15 +3,70 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
 import { firstValueFrom } from 'rxjs';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class InteresMensualSmApi {
 
   private readonly http = inject(HttpClient);
-  private readonly base = `${environment.apiUrl}/depositos/interes-mensual-sm`;
 
+  private readonly baseUrl =
+    `${environment.apiUrl}/depositos/interes-mensual-sm`;
+
+  // ==========================================================
+  // 🔍 PREVIEW / LIQUIDAR
+  // ==========================================================
   liquidar(body: any): Promise<any> {
+
     return firstValueFrom(
-      this.http.post<any>(`${this.base}/liquidar`, body)
+      this.http.post<any>(
+        `${this.baseUrl}/liquidar`,
+        body
+      )
     );
   }
+
+  // ==========================================================
+  // ✅ APLICAR
+  // ==========================================================
+  aplicar(body: any): Promise<any> {
+
+    return firstValueFrom(
+      this.http.post<any>(
+        `${this.baseUrl}/aplicar`,
+        body
+      )
+    );
+  }
+
+  // ==========================================================
+  // 🔢 PRÓXIMO COMPROBANTE
+  // ==========================================================
+  obtenerProximoComprobante(
+    idAgencia: number,
+    tipoComprobante: string
+  ): Promise<any> {
+
+    return firstValueFrom(
+      this.http.get<any>(
+        `${this.baseUrl}/proximo-comprobante/${idAgencia}/${tipoComprobante}`
+      )
+    );
+  }
+
+// ==========================================================
+// 📌 ÚLTIMA LIQUIDACIÓN
+// ==========================================================
+obtenerUltimaLiquidacion(
+  idAgencia: number,
+  idFormaAhorro: number
+): Promise<any> {
+
+  return firstValueFrom(
+    this.http.get<any>(
+      `${this.baseUrl}/ultima-liquidacion/${idAgencia}/${idFormaAhorro}`
+    )
+  );
+}
+
 }

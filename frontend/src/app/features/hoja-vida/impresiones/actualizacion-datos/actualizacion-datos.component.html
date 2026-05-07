@@ -2,8 +2,19 @@
 
   <!-- Botones superiores -->
   <div class="actions-top no-print" id="top-actions">
-    <button class="btn secondary" (click)="onBack()">Regresar</button>
-    <button class="btn" (click)="onPrint()">Imprimir</button>
+    <button
+      class="btn btn--cancel"
+      type="button"
+      (click)="onBack()">
+      Regresar
+    </button>
+
+    <button
+      class="btn btn--print"
+      type="button"
+      (click)="onPrint()">
+      Imprimir
+    </button>
   </div>
 
   <!-- Encabezado -->

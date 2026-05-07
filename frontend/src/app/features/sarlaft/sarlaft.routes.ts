@@ -4,25 +4,25 @@ export const SARLAFT_ROUTES: Routes = [
 
   // 🟧 Informe: Personas Desactualizadas
   {
-    path: 'informe-desactualizados',
+    path: 'actualizacion',
     loadComponent: () =>
-      import('./informes/actualizacion-list.component')
+      import('./informes/actualizacion/actualizacion-list.component')
         .then(m => m.ActualizacionListComponent),
   },
 
   // 🟦 Informe: Datos Demográficos
   {
-    path: 'informe-demograficos',
+    path: 'demograficos',
     loadComponent: () =>
-      import('./informes/demograficos-list.component')
+      import('./informes/demograficos/demograficos-list.component')
         .then(m => m.DemograficosListComponent),
   },
 
   // 🟥 Informe: Movimientos Inusuales
   {
-    path: 'informe-movimientos-inusuales',
+    path: 'movimientos-inusuales',
     loadComponent: () =>
-      import('./informes/movimientos-inusuales-list.component')
+      import('./informes/movimientos-inusuales/movimientos-inusuales-list.component')
         .then(m => m.MovimientosInusualesListComponent),
   },
 
@@ -30,7 +30,7 @@ export const SARLAFT_ROUTES: Routes = [
   {
     path: 'regla-002',
     loadComponent: () =>
-      import('./informes/regla002-list.component')
+      import('./informes/regla002/regla002-list.component')
         .then(m => m.Regla002ListComponent),
   },
 
@@ -38,14 +38,14 @@ export const SARLAFT_ROUTES: Routes = [
   {
     path: 'regla-003',
     loadComponent: () =>
-      import('./informes/regla003-list.component')
+      import('./informes/regla003/regla003-list.component')
         .then(m => m.Regla003ListComponent),
   },
 
   // 🟩 Redirección por defecto
   {
     path: '',
-    redirectTo: 'informe-desactualizados',
+    redirectTo: 'actualizacion',
     pathMatch: 'full',
   }
 
