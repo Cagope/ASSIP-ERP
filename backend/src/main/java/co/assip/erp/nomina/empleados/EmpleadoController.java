@@ -1,5 +1,6 @@
 package co.assip.erp.nomina.empleados;
 
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import co.assip.erp.nomina.empleados.dto.EmpleadoDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import java.util.List;
 public class EmpleadoController {
 
     private final EmpleadoService service;
+    private final UsuarioSesionService usuarioSesionService;
 
     // ============================================================
     // ✅ LISTAR
@@ -39,11 +41,15 @@ public class EmpleadoController {
     // ============================================================
     @PostMapping
     public ResponseEntity<Integer> crear(
-            @RequestBody EmpleadoDTO dto,
-            @RequestHeader(value = "X-User-Id", required = false) Integer idUsuario
+            @RequestBody EmpleadoDTO dto
     ) {
-        Integer usr = (idUsuario != null ? idUsuario : 1);
-        Integer id = service.crear(dto, usr);
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        Integer id =
+                service.crear(dto, idUsuario);
+
         return ResponseEntity.ok(id);
     }
 
@@ -53,11 +59,14 @@ public class EmpleadoController {
     @PutMapping("/{id}")
     public ResponseEntity<Void> actualizar(
             @PathVariable Integer id,
-            @RequestBody EmpleadoDTO dto,
-            @RequestHeader(value = "X-User-Id", required = false) Integer idUsuario
+            @RequestBody EmpleadoDTO dto
     ) {
-        Integer usr = (idUsuario != null ? idUsuario : 1);
-        service.actualizar(id, dto, usr);
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        service.actualizar(id, dto, idUsuario);
+
         return ResponseEntity.ok().build();
     }
 

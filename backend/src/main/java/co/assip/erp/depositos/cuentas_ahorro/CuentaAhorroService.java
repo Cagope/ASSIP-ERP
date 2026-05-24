@@ -1,26 +1,31 @@
 package co.assip.erp.depositos.cuentas_ahorro;
 
 import co.assip.erp.depositos.cuentas_ahorro.dto.*;
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
 public class CuentaAhorroService {
 
     private final CuentaAhorroRepository repository;
+    private final UsuarioSesionService usuarioSesionService;
 
     // ============================================================
     // 🟦 LISTAR CUENTAS SEGÚN AGENCIAS DEL USUARIO  ⭐ CORREGIDO
     // ============================================================
     public List<CuentaAhorroDTO> listarCuentas() {
 
-        var agencias = SecurityUtils.getAgencias();
-        boolean esAdmin = SecurityUtils.tieneAccesoTotal();
+        var agencias =
+                usuarioSesionService.agencias();
+
+        boolean esAdmin =
+                usuarioSesionService.tieneAccesoTotal();
         boolean tieneVarias = agencias != null && agencias.size() > 1;
 
         // ⭐ ADMIN o usuario con varias agencias → ver TODO
@@ -42,8 +47,8 @@ public class CuentaAhorroService {
     // ============================================================
     public List<CuentaAhorroDTO> listarPorAgencia(Integer idAgencia) {
 
-        if (!SecurityUtils.tieneAccesoTotal() &&
-                !SecurityUtils.perteneceA(idAgencia)) {
+        if (!usuarioSesionService.tieneAccesoTotal() &&
+                !usuarioSesionService.perteneceA(idAgencia)) {
 
             return List.of();
         }
@@ -56,28 +61,40 @@ public class CuentaAhorroService {
     // ============================================================
     public CuentaAhorroDetalleDTO obtenerPorId(Integer id) {
 
-        var agencias = SecurityUtils.getAgencias();
+        var agencias =
+                usuarioSesionService.agencias();
 
-        if (!SecurityUtils.tieneAccesoTotal() &&
+        if (!usuarioSesionService.tieneAccesoTotal() &&
                 !repository.cuentaPerteneceAgencias(id, agencias)) {
+
             return null; // o lanzar 403
         }
 
-        CuentaAhorroDetalleDTO dto = repository.obtenerDetalle(id);
+        CuentaAhorroDetalleDTO dto =
+                repository.obtenerDetalle(id);
+
         if (dto != null) {
-            dto.setBeneficiarios(repository.listarBeneficiarios(id));
-            dto.setPoderes(repository.listarPoderes(id));
+            dto.setBeneficiarios(
+                    repository.listarBeneficiarios(id)
+            );
+
+            dto.setPoderes(
+                    repository.listarPoderes(id)
+            );
         }
+
         return dto;
     }
 
     // ============================================================
     // 🟦 VALIDAR ANTES DE GUARDAR
     // ============================================================
-    public CuentaAhorroGuardarRespuesta validarAntesDeGuardar(CuentaAhorroGuardarDTO dto) {
+    public CuentaAhorroGuardarRespuesta validarAntesDeGuardar(
+            CuentaAhorroGuardarDTO dto
+    ) {
 
-        if (!SecurityUtils.tieneAccesoTotal() &&
-                !SecurityUtils.perteneceA(dto.getIdAgencia())) {
+        if (!usuarioSesionService.tieneAccesoTotal() &&
+                !usuarioSesionService.perteneceA(dto.getIdAgencia())) {
 
             return new CuentaAhorroGuardarRespuesta(
                     false,
@@ -90,9 +107,16 @@ public class CuentaAhorroService {
         Integer idForma = dto.getIdFormaAhorro();
 
         if (idForma != null) {
-            CuentaAhorroDetalleDTO existente = repository.buscarCuentaAportes(idPer);
 
-            if (existente != null && existente.getSaldoActualCuenta() > 0) {
+            CuentaAhorroDetalleDTO existente =
+                    repository.buscarCuentaAportes(idPer);
+
+            if (
+                    existente != null
+                            && existente.getSaldoActualCuenta() != null
+                            && existente.getSaldoActualCuenta().compareTo(BigDecimal.ZERO) > 0
+            ) {
+
                 return new CuentaAhorroGuardarRespuesta(
                         false,
                         "El asociado ya tiene cuenta de aportes con saldo > 0.",
@@ -102,6 +126,7 @@ public class CuentaAhorroService {
         }
 
         if (dto.getTasa() != null && dto.getTasa() < 0) {
+
             return new CuentaAhorroGuardarRespuesta(
                     false,
                     "La tasa no puede ser negativa.",
@@ -109,41 +134,70 @@ public class CuentaAhorroService {
             );
         }
 
-        return new CuentaAhorroGuardarRespuesta(true, "Validación exitosa.", null);
+        return new CuentaAhorroGuardarRespuesta(
+                true,
+                "Validación exitosa.",
+                null
+        );
     }
 
     // ============================================================
     // 🟦 GUARDAR
     // ============================================================
-    public CuentaAhorroGuardarRespuesta guardar(CuentaAhorroGuardarDTO dto) {
+    public CuentaAhorroGuardarRespuesta guardar(
+            CuentaAhorroGuardarDTO dto
+    ) {
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
-        if (idUsuario == null) {
-            return new CuentaAhorroGuardarRespuesta(
-                    false,
-                    "Usuario no autenticado.",
-                    null
-            );
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        var valid =
+                validarAntesDeGuardar(dto);
+
+        if (!valid.isOk()) {
+            return valid;
         }
 
-        var valid = validarAntesDeGuardar(dto);
-        if (!valid.isOk()) return valid;
+        Integer consecutivo =
+                repository.obtenerConsecutivo(
+                        dto.getIdFormaAhorro()
+                );
 
-        Integer consecutivo = repository.obtenerConsecutivo(dto.getIdFormaAhorro());
-        String codigoCuenta = consecutivo.toString();
+        String codigoCuenta =
+                consecutivo.toString();
 
         String fechaFinal = null;
-        if (dto.getPlazoCuenta() != null && dto.getPlazoCuenta() > 0) {
+
+        if (dto.getPlazoCuenta() != null &&
+                dto.getPlazoCuenta() > 0) {
+
             fechaFinal = LocalDate.now()
                     .plusMonths(dto.getPlazoCuenta())
                     .toString();
         }
 
-        Integer idCuenta = repository.guardarCuenta(dto, codigoCuenta, fechaFinal);
+        Integer idCuenta =
+                repository.guardarCuenta(
+                        dto,
+                        codigoCuenta,
+                        fechaFinal
+                );
 
-        repository.actualizarConsecutivo(dto.getIdFormaAhorro());
-        repository.guardarBeneficiarios(idCuenta, dto.getBeneficiarios(), idUsuario);
-        repository.guardarPoderes(idCuenta, dto.getPoderes(), idUsuario);
+        repository.actualizarConsecutivo(
+                dto.getIdFormaAhorro()
+        );
+
+        repository.guardarBeneficiarios(
+                idCuenta,
+                dto.getBeneficiarios(),
+                idUsuario
+        );
+
+        repository.guardarPoderes(
+                idCuenta,
+                dto.getPoderes(),
+                idUsuario
+        );
 
         return new CuentaAhorroGuardarRespuesta(
                 true,
@@ -155,11 +209,14 @@ public class CuentaAhorroService {
     // ============================================================
     // 🟦 ELIMINAR (solo si pertenece a su agencia)
     // ============================================================
-    public CuentaAhorroGuardarRespuesta eliminar(Integer idCuenta) {
+    public CuentaAhorroGuardarRespuesta eliminar(
+            Integer idCuenta
+    ) {
 
-        var agencias = SecurityUtils.getAgencias();
+        var agencias =
+                usuarioSesionService.agencias();
 
-        if (!SecurityUtils.tieneAccesoTotal() &&
+        if (!usuarioSesionService.tieneAccesoTotal() &&
                 !repository.cuentaPerteneceAgencias(idCuenta, agencias)) {
 
             return new CuentaAhorroGuardarRespuesta(
@@ -169,9 +226,11 @@ public class CuentaAhorroService {
             );
         }
 
-        int movs = repository.contarMovimientos(idCuenta);
+        int movs =
+                repository.contarMovimientos(idCuenta);
 
         if (movs > 0) {
+
             return new CuentaAhorroGuardarRespuesta(
                     false,
                     "La cuenta tiene movimientos. No puede eliminarse.",

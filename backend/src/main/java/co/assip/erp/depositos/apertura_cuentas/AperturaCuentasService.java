@@ -5,7 +5,7 @@ import co.assip.erp.depositos.apertura_cuentas.dto.AperturaCuentasEntradaDTO;
 import co.assip.erp.depositos.apertura_cuentas.dto.AperturaCuentasRespuestaDTO;
 import co.assip.erp.depositos.apertura_cuentas.repository.AperturaCuentasRepository;
 
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +17,7 @@ import java.util.List;
 public class AperturaCuentasService {
 
     private final AperturaCuentasRepository repo;
+    private final UsuarioSesionService usuarioSesionService;
 
     // ============================================================
     // 🔹 0. VALIDAR (para el botón Gestionar)
@@ -68,7 +69,8 @@ public class AperturaCuentasService {
 
         boolean tieneAportesActivos = repo.tieneAportesActivos(idPersona);
 
-        var agenciasUsuario = SecurityUtils.getAgencias();
+        var agenciasUsuario =
+                usuarioSesionService.agencias();
         Integer agenciaFiltrar = null;
 
         if (agenciasUsuario != null && agenciasUsuario.size() == 1) {
@@ -99,12 +101,8 @@ public class AperturaCuentasService {
 
         AperturaCuentasRespuestaDTO res = new AperturaCuentasRespuestaDTO(); // ✅ PRIMERO
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
-        if (idUsuario == null) {
-            res.setOk(false);
-            res.setMensaje("Usuario no autenticado.");
-            return res;
-        }
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         System.out.println("➡️ INICIANDO PROCESO DE CREACIÓN DE 2 CUENTAS");
 
@@ -114,7 +112,9 @@ public class AperturaCuentasService {
             return res;
         }
 
-        var agencias = SecurityUtils.getAgencias();
+        var agencias =
+                usuarioSesionService.agencias();
+
         Integer idAgencia = (agencias != null && agencias.size() == 1)
                 ? agencias.get(0)
                 : null;
@@ -134,7 +134,7 @@ public class AperturaCuentasService {
         Integer consecutivoAportes =
                 repo.incrementarYObtenerConsecutivo(1, idAgencia);
 
-        String codigoAportes = String.format("%010d", consecutivoAportes);
+        String codigoAportes = String.format("%06d", consecutivoAportes);
 
         Integer idCuentaAportes = repo.crearCuenta(
                 1,
@@ -169,7 +169,7 @@ public class AperturaCuentasService {
         Integer consecutivoAhorro =
                 repo.incrementarYObtenerConsecutivo(idFormaAhorroSeleccionada, idAgencia);
 
-        String codigoAhorro = String.format("%010d", consecutivoAhorro);
+        String codigoAhorro = String.format("%06d", consecutivoAhorro);
 
         Integer idCuentaAhorro = repo.crearCuenta(
                 idFormaAhorroSeleccionada,

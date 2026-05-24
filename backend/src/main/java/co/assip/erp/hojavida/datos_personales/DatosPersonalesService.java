@@ -1,6 +1,6 @@
 package co.assip.erp.hojavida.datos_personales;
 
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,9 +14,14 @@ import java.util.Optional;
 public class DatosPersonalesService {
 
     private final DatosPersonalesRepository repository;
+    private final UsuarioSesionService usuarioSesionService;
 
-    public DatosPersonalesService(DatosPersonalesRepository repository) {
+    public DatosPersonalesService(
+            DatosPersonalesRepository repository,
+            UsuarioSesionService usuarioSesionService
+    ) {
         this.repository = repository;
+        this.usuarioSesionService = usuarioSesionService;
     }
 
     // ==========================================================
@@ -39,7 +44,8 @@ public class DatosPersonalesService {
         normalizarCampos(nuevo);
         aplicarReglasGenero(nuevo);
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         LocalDate hoy = LocalDate.now();
         nuevo.setFechaCreacion(LocalDateTime.now());
@@ -63,7 +69,8 @@ public class DatosPersonalesService {
             normalizarCampos(actualizado);
             aplicarReglasGenero(actualizado);
 
-            Integer idUsuario = SecurityUtils.getIdUsuario();
+            Integer idUsuario =
+                    usuarioSesionService.idUsuario();
 
             actualizado.setIdDatosPersonal(id);
             actualizado.setFechaCreacion(existente.getFechaCreacion());

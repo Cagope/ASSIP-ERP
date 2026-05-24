@@ -11,6 +11,7 @@ public class SaldosCorteItemDTO {
 
     private String codigoAgencia;
     private String agencia;
+
     private String codigoForma;
     private String forma;
 
@@ -31,5 +32,14 @@ public class SaldosCorteItemDTO {
     private boolean recibeRedesSociales;
 
     private String fechaApertura;
+
+    private Double totalDebitos;
+    private Double totalCreditos;
     private Double saldoCorte;
+    private String direccion;
+    private String departamento;
+    private String ciudad;
+    private String celularDos;
+    private String fechaUltimoMovimiento;
+
 }

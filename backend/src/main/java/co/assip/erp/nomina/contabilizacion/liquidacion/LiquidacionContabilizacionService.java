@@ -1,7 +1,7 @@
 package co.assip.erp.nomina.contabilizacion.liquidacion;
 
 import co.assip.erp.nomina.contabilizacion.liquidacion.dto.*;
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 
 import co.assip.erp.contabilidad.auxiliares_contables.ContabilidadRegistroService;
 import co.assip.erp.contabilidad.auxiliares_contables.dto.MovimientoContableDTO;
@@ -24,6 +24,7 @@ public class LiquidacionContabilizacionService {
     private final LiquidacionContabilizacionRepository repository;
     private final ContabilidadRegistroService contabilidadRegistroService;
     private final PeriodosNominaRepository periodosNominaRepository;
+    private final UsuarioSesionService usuarioSesionService;
 
     // =========================================================
     // PREVIEW CONTABLE
@@ -63,7 +64,8 @@ public class LiquidacionContabilizacionService {
             );
         }
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         List<Integer> agencias = repository.listarAgenciasConMovimientos(idPeriodoNomina);
 
@@ -161,7 +163,7 @@ public class LiquidacionContabilizacionService {
 
             Integer nuevoConsecutivo = consecutivoActual + 1;
 
-            String numeroComprobante = String.format("%010d", nuevoConsecutivo);
+            String numeroComprobante = String.format("%07d", nuevoConsecutivo);
 
             String concepto =
                     "Contabilización liquidación nómina  " + periodoTexto;
@@ -285,7 +287,8 @@ public class LiquidacionContabilizacionService {
     @Transactional
     public void reversarContabilizacion(Integer idPeriodoNomina) {
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         List<Integer> agencias = repository.listarAgenciasConMovimientos(idPeriodoNomina);
 
@@ -349,7 +352,7 @@ public class LiquidacionContabilizacionService {
 
             Integer nuevoConsecutivo = consecutivoActual + 1;
 
-            String numeroComprobante = String.format("%010d", nuevoConsecutivo);
+            String numeroComprobante = String.format("%07d", nuevoConsecutivo);
 
             String concepto =
                     "REVERSIÓN contabilización nómina período " + periodoTexto;

@@ -1,5 +1,6 @@
 package co.assip.erp.nomina.periodos_nomina;
 
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import co.assip.erp.nomina.periodos_nomina.dto.PeriodoAccionDTO;
 import co.assip.erp.nomina.periodos_nomina.dto.PeriodoNominaListDTO;
 import org.springframework.http.ResponseEntity;
@@ -12,9 +13,14 @@ import java.util.List;
 public class PeriodosNominaController {
 
     private final PeriodosNominaService service;
+    private final UsuarioSesionService usuarioSesionService;
 
-    public PeriodosNominaController(PeriodosNominaService service) {
+    public PeriodosNominaController(
+            PeriodosNominaService service,
+            UsuarioSesionService usuarioSesionService
+    ) {
         this.service = service;
+        this.usuarioSesionService = usuarioSesionService;
     }
 
     @GetMapping
@@ -33,11 +39,14 @@ public class PeriodosNominaController {
 
     @PostMapping("/accion")
     public ResponseEntity<Void> accion(
-            @RequestBody PeriodoAccionDTO dto,
-            @RequestHeader(value = "X-User-Id", required = false) Integer idUsuario
+            @RequestBody PeriodoAccionDTO dto
     ) {
-        Integer usr = (idUsuario != null ? idUsuario : 1);
-        service.ejecutarAccion(dto, usr);
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        service.ejecutarAccion(dto, idUsuario);
+
         return ResponseEntity.ok().build();
     }
 }

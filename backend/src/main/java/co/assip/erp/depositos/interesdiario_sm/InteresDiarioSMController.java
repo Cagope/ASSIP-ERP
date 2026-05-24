@@ -1,5 +1,6 @@
 package co.assip.erp.depositos.interesdiario_sm;
 
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import co.assip.erp.contabilidad.consecutivos_comprobantes.ConsecutivosComprobantesService;
 import co.assip.erp.depositos.interesdiario_sm.dto.InteresDiarioSMEntradaDTO;
 import co.assip.erp.depositos.interesdiario_sm.dto.InteresDiarioSMItemDTO;
@@ -16,29 +17,27 @@ public class InteresDiarioSMController {
 
     private final InteresDiarioSMService service;
     private final ConsecutivosComprobantesService consecutivosComprobantesService;
+    private final UsuarioSesionService usuarioSesionService;
 
     @PostMapping("/liquidar")
     public List<InteresDiarioSMItemDTO> liquidar(
-            @RequestBody InteresDiarioSMEntradaDTO input,
-            @RequestHeader(name = "usuarioId", required = false) Integer usuarioId
+            @RequestBody InteresDiarioSMEntradaDTO input
     ) {
-        if (usuarioId == null) {
-            usuarioId = 1;
-        }
+
+        usuarioSesionService.idUsuario();
 
         return service.liquidar(input);
     }
 
     @PostMapping("/aplicar")
     public void aplicar(
-            @RequestBody InteresDiarioSMEntradaDTO input,
-            @RequestHeader(name = "usuarioId", required = false) Integer usuarioId
+            @RequestBody InteresDiarioSMEntradaDTO input
     ) {
-        if (usuarioId == null) {
-            usuarioId = 1;
-        }
 
-        service.aplicar(input, usuarioId);
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        service.aplicar(input, idUsuario);
     }
 
     @GetMapping("/proximo-comprobante/{idAgencia}/{tipoComprobante}")

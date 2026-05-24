@@ -1,6 +1,5 @@
 package co.assip.erp.activosfijos.ingreso;
 
-import co.assip.erp.seguridad.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -127,7 +126,8 @@ public class IngresoActivosRepository {
     public void insertarConceptoContable(
             String tipoComprobante,
             String numeroComprobante,
-            String concepto
+            String concepto,
+            Integer idUsuario
     ) {
         String sql = """
         INSERT INTO contabilidad.conceptos_contables (
@@ -144,11 +144,6 @@ public class IngresoActivosRepository {
             :idUsuario
         )
     """;
-
-        Integer idUsuario = SecurityUtils.getIdUsuario();
-        if (idUsuario == null) {
-            throw new IllegalStateException("No hay usuario autenticado.");
-        }
 
         jdbc.update(sql, Map.of(
                 "tipo", tipoComprobante,
@@ -275,13 +270,9 @@ public class IngresoActivosRepository {
             BigDecimal debito,
             BigDecimal credito,
             BigDecimal base,
-            String detalle
+            String detalle,
+            Integer idUsuario
     ) {
-
-        Integer idUsuario = SecurityUtils.getIdUsuario();
-        if (idUsuario == null) {
-            throw new IllegalStateException("No hay usuario autenticado.");
-        }
 
         String sql = """
         INSERT INTO contabilidad.auxiliares_contables (

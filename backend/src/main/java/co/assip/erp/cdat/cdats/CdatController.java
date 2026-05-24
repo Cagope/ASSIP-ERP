@@ -1,7 +1,6 @@
 package co.assip.erp.cdat.cdats;
-
-import co.assip.erp.cdat.cdats.contabilizacion.CdatAperturaContabilizacionService;
-import co.assip.erp.cdat.cdats.contabilizacion.dto.CdatAperturaPreviewDTO;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.cdat.cdats.dto.CdatAperturaPreviewDTO;
 import co.assip.erp.cdat.cdats.dto.CdatAsociadoValidacionDTO;
 import co.assip.erp.cdat.cdats.dto.CdatFormDTO;
 import co.assip.erp.cdat.cdats.dto.CdatListDTO;
@@ -9,8 +8,9 @@ import co.assip.erp.cdat.cdats.dto.CdatSaveDTO;
 import co.assip.erp.cdat.cdats.dto.CdatSaveResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
+import co.assip.erp.contabilidad.consecutivos_comprobantes.ConsecutivosComprobantesService;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/cdat/cdats")
@@ -19,6 +19,8 @@ public class CdatController {
 
     private final CdatService service;
     private final CdatAperturaContabilizacionService contabilizacionService;
+    private final ConsecutivosComprobantesService consecutivosComprobantesService;
+    private final UsuarioSesionService usuarioSesionService;
 
     @GetMapping
     public List<CdatListDTO> listar() {
@@ -32,7 +34,8 @@ public class CdatController {
 
     @GetMapping("/proximo-codigo")
     public String obtenerProximoCodigo() {
-        Integer idAgencia = 2;
+        Integer idAgencia =
+                usuarioSesionService.agenciaPrincipal();
         return service.obtenerProximoCodigo(idAgencia);
     }
 
@@ -46,6 +49,23 @@ public class CdatController {
         return service.obtenerPorId(idCuentaCdat);
     }
 
+    @GetMapping("/proximo-comprobante/{idAgencia}/{tipoComprobante}")
+    public Map<String, String> obtenerProximoComprobante(
+            @PathVariable Integer idAgencia,
+            @PathVariable String tipoComprobante
+    ) {
+
+        String numero = consecutivosComprobantesService.obtenerNumeroSugerido(
+                tipoComprobante,
+                idAgencia
+        );
+
+        return Map.of(
+                "numeroComprobante",
+                numero
+        );
+    }
+
     @PostMapping("/apertura/preview-contable")
     public CdatAperturaPreviewDTO previewContable(@RequestBody CdatSaveDTO dto) {
         return contabilizacionService.previewApertura(dto);
@@ -53,8 +73,11 @@ public class CdatController {
 
     @PostMapping
     public CdatSaveResponseDTO guardar(@RequestBody CdatSaveDTO dto) {
-        Integer idUsuario = 1;
-        Integer idAgencia = 2;
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        Integer idAgencia =
+                usuarioSesionService.agenciaPrincipal();
         return service.guardar(dto, idUsuario, idAgencia);
     }
 }

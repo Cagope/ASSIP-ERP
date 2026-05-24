@@ -1,7 +1,7 @@
 package co.assip.erp.activosfijos.activos;
 
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import co.assip.erp.activosfijos.activos.dto.*;
-import co.assip.erp.seguridad.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +13,7 @@ import java.util.List;
 public class ActivoFijoService {
 
     private final ActivoFijoRepository repository;
+    private final UsuarioSesionService usuarioSesionService;
 
     // =========================================================
     // 1. LISTADO
@@ -39,11 +40,11 @@ public class ActivoFijoService {
 
         validar(dto);
 
-        // 🔹 Usuario desde contexto (NO obligatorio)
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
-        // 🔹 Agencias del usuario
-        var agencias = SecurityUtils.getAgencias();
+        var agencias =
+                usuarioSesionService.agencias();
 
         // Si tiene una sola agencia, se fuerza (regla existente)
         if (agencias != null && agencias.size() == 1) {
@@ -66,7 +67,8 @@ public class ActivoFijoService {
         validar(dto);
 
         // 🔹 Usuario desde contexto (NO obligatorio)
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         repository.actualizar(idActivoFijo, dto, idUsuario);
     }

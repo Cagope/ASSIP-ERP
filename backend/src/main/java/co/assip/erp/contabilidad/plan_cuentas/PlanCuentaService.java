@@ -1,6 +1,6 @@
 package co.assip.erp.contabilidad.plan_cuentas;
 
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,9 +11,14 @@ import java.util.List;
 public class PlanCuentaService {
 
     private final PlanCuentaRepository repository;
+    private final UsuarioSesionService usuarioSesionService;
 
-    public PlanCuentaService(PlanCuentaRepository repository) {
+    public PlanCuentaService(
+            PlanCuentaRepository repository,
+            UsuarioSesionService usuarioSesionService
+    ) {
         this.repository = repository;
+        this.usuarioSesionService = usuarioSesionService;
     }
 
     // ==========================================================
@@ -43,7 +48,8 @@ public class PlanCuentaService {
         validarOperable(dto);
 
         // 🔐 AUDITORÍA (patrón mínimo y seguro)
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
         dto.setFkSeguridadCreacion(idUsuario);
         dto.setFkSeguridadEdicion(idUsuario);
 

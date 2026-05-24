@@ -13,22 +13,31 @@ public class SaldosCorteController {
 
     private final SaldosCorteService service;
 
-    public SaldosCorteController(SaldosCorteService service) {
+    public SaldosCorteController(
+            SaldosCorteService service
+    ) {
         this.service = service;
     }
 
-    // ============================================================
-    // 🔍 CONSULTA DETALLADA — YA EXISTENTE (NO TOCAR)
-    // ============================================================
     @PostMapping("/corte")
-    public Map<String, Object> consultar(@RequestBody Map<String, Object> filtros) {
+    public Map<String, Object> consultar(
+            @RequestBody Map<String, Object> filtros
+    ) {
 
-        // agencia llega como número → convertir a String
-        String agencia = filtros.get("agencia").toString();
-        String fechaCorte = filtros.get("fechaCorte").toString();
+        String agencia =
+                filtros.getOrDefault("agencia", "0").toString();
 
-        List<SaldosCorteItemDTO> datos = service.consultar(fechaCorte, agencia);
-        SaldosCorteResumenDTO resumen = service.resumen(datos);
+        String fechaCorte =
+                filtros.get("fechaCorte").toString();
+
+        List<SaldosCorteItemDTO> datos =
+                service.consultar(
+                        fechaCorte,
+                        agencia
+                );
+
+        SaldosCorteResumenDTO resumen =
+                service.resumen(datos);
 
         return Map.of(
                 "resumen", resumen,
@@ -36,13 +45,15 @@ public class SaldosCorteController {
         );
     }
 
-    // ============================================================
-    // 🆕 RESUMEN POR AGENCIA Y FORMA DE AHORRO
-    // ============================================================
     @GetMapping("/resumen-agencia")
     public List<Map<String, Object>> resumenPorAgencia(
-            @RequestParam String fechaCorte
+            @RequestParam String fechaCorte,
+            @RequestParam(defaultValue = "0") String agencia
     ) {
-        return service.resumenPorAgencia(fechaCorte);
+        return service.resumenPorAgencia(
+                fechaCorte,
+                agencia
+        );
     }
+
 }

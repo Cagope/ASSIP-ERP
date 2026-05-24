@@ -1,5 +1,6 @@
 package co.assip.erp.nomina.variables_vigencia;
 
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import co.assip.erp.nomina.variables_vigencia.dto.VariablesVigenciaDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import java.util.List;
 public class VariablesVigenciaController {
 
     private final VariablesVigenciaService service;
+    private final UsuarioSesionService usuarioSesionService;
 
     @GetMapping
     public ResponseEntity<List<VariablesVigenciaDTO>> listar() {
@@ -26,22 +28,28 @@ public class VariablesVigenciaController {
 
     @PostMapping
     public ResponseEntity<Void> crear(
-            @RequestBody VariablesVigenciaDTO dto,
-            @RequestHeader(value = "X-User-Id", required = false) Integer idUsuario
+            @RequestBody VariablesVigenciaDTO dto
     ) {
-        Integer usr = (idUsuario != null ? idUsuario : 1);
-        service.crear(dto, usr);
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        service.crear(dto, idUsuario);
+
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Void> actualizar(
             @PathVariable Integer id,
-            @RequestBody VariablesVigenciaDTO dto,
-            @RequestHeader(value = "X-User-Id", required = false) Integer idUsuario
+            @RequestBody VariablesVigenciaDTO dto
     ) {
-        Integer usr = (idUsuario != null ? idUsuario : 1);
-        service.actualizar(id, dto, usr);
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        service.actualizar(id, dto, idUsuario);
+
         return ResponseEntity.ok().build();
     }
 

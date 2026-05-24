@@ -1,6 +1,6 @@
 package co.assip.erp.hojavida.datosfamiliares;
 
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,9 +13,14 @@ import java.util.Optional;
 public class DatosFamiliarService {
 
     private final DatosFamiliarRepository repository;
+    private final UsuarioSesionService usuarioSesionService;
 
-    public DatosFamiliarService(DatosFamiliarRepository repository) {
+    public DatosFamiliarService(
+            DatosFamiliarRepository repository,
+            UsuarioSesionService usuarioSesionService
+    ) {
         this.repository = repository;
+        this.usuarioSesionService = usuarioSesionService;
     }
 
     /** 🔹 Listar todos ordenados por fecha de edición */
@@ -47,7 +52,8 @@ public class DatosFamiliarService {
     public DatosFamiliar crear(DatosFamiliar nuevo) {
         validarTelefonos(nuevo);
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         nuevo.setFechaCreacion(LocalDateTime.now());
         nuevo.setFechaEdicion(LocalDateTime.now());
@@ -64,7 +70,8 @@ public class DatosFamiliarService {
         return repository.findById(id).map(existente -> {
             validarTelefonos(actualizado);
 
-            Integer idUsuario = SecurityUtils.getIdUsuario();
+            Integer idUsuario =
+                    usuarioSesionService.idUsuario();
 
             actualizado.setIdDatosFamiliares(id);
             actualizado.setFechaCreacion(existente.getFechaCreacion());

@@ -57,15 +57,15 @@ public class CuentaAhorroRepository {
             dto.setCodigoCuenta(rs.getString("codigo_cuenta"));
             dto.setIdDatosPersonal(rs.getInt("id_datos_personal"));
             dto.setFechaAperturaCuenta(String.valueOf(rs.getDate("fecha_apertura_cuenta")));
-            dto.setSaldoInicialCuenta(rs.getDouble("saldo_inicial_cuenta"));
-            dto.setSaldoActualCuenta(rs.getDouble("saldo_actual_cuenta"));
+            dto.setSaldoInicialCuenta(rs.getBigDecimal("saldo_inicial_cuenta"));
+            dto.setSaldoActualCuenta(rs.getBigDecimal("saldo_actual_cuenta"));
             dto.setEstadoCuenta(rs.getString("estado_cuenta_cuenta"));
             dto.setFechaEstadoCuenta(String.valueOf(rs.getDate("fecha_estado_cuenta")));
             dto.setGmfCuentaCuenta(rs.getString("gmf_cuenta_cuenta"));
             dto.setFechaGmfCuenta(String.valueOf(rs.getDate("fecha_gmf_cuenta")));
             dto.setLibranzaCuenta(rs.getBoolean("libranza_cuenta"));
             dto.setLibranzaTiempoPago(rs.getString("libranzatiempo_pago"));
-            dto.setCuotaMensualCuenta(rs.getDouble("cuota_mensual_cuenta"));
+            dto.setCuotaMensualCuenta(rs.getBigDecimal("cuota_mensual_cuenta"));
             dto.setRetencionFuenteCuenta(rs.getBoolean("retencion_fuente_cuenta"));
             dto.setPlazoCuenta(rs.getInt("plazo_cuenta"));
             dto.setFechaFinalCuenta(String.valueOf(rs.getDate("fecha_final_cuenta")));
@@ -188,7 +188,7 @@ public class CuentaAhorroRepository {
                     if (!rs.next()) return null;
                     CuentaAhorroDetalleDTO dto = new CuentaAhorroDetalleDTO();
                     dto.setIdCuentaAhorro(rs.getInt("id_cuenta_ahorro"));
-                    dto.setSaldoActualCuenta(rs.getDouble("saldo_actual_cuenta"));
+                    dto.setSaldoActualCuenta(rs.getBigDecimal("saldo_actual_cuenta"));
                     dto.setIdAgencia(rs.getInt("id_agencia"));
                     dto.setCodigoCuenta(rs.getString("codigo_cuenta"));
                     return dto;
@@ -398,7 +398,7 @@ public class CuentaAhorroRepository {
                     dto.setIdAgencia(rs.getInt("id_agencia"));
                     dto.setNombreAgencia(rs.getString("nombre_agencia"));
                     dto.setNombreTitular(rs.getString("nombre_titular"));
-                    dto.setSaldoActual(rs.getDouble("saldo_actual_cuenta"));
+                    dto.setSaldoActual(rs.getBigDecimal("saldo_actual_cuenta"));
                     return dto;
                 }
         );
@@ -430,7 +430,7 @@ public class CuentaAhorroRepository {
             dto.setIdAgencia(rs.getInt("id_agencia"));
             dto.setNombreAgencia(rs.getString("nombre_agencia"));
             dto.setNombreTitular(rs.getString("nombre_titular"));
-            dto.setSaldoActual(rs.getDouble("saldo_actual_cuenta"));
+            dto.setSaldoActual(rs.getBigDecimal("saldo_actual_cuenta"));
             return dto;
         });
     }
@@ -475,15 +475,15 @@ public class CuentaAhorroRepository {
             dto.setCodigoCuenta(rs.getString("codigo_cuenta"));
             dto.setIdDatosPersonal(rs.getInt("id_datos_personal"));
             dto.setFechaAperturaCuenta(String.valueOf(rs.getDate("fecha_apertura_cuenta")));
-            dto.setSaldoInicialCuenta(rs.getDouble("saldo_inicial_cuenta"));
-            dto.setSaldoActualCuenta(rs.getDouble("saldo_actual_cuenta"));
+            dto.setSaldoInicialCuenta(rs.getBigDecimal("saldo_inicial_cuenta"));
+            dto.setSaldoActualCuenta(rs.getBigDecimal("saldo_actual_cuenta"));
             dto.setEstadoCuenta(rs.getString("estado_cuenta_cuenta"));
             dto.setFechaEstadoCuenta(String.valueOf(rs.getDate("fecha_estado_cuenta")));
             dto.setGmfCuentaCuenta(rs.getString("gmf_cuenta_cuenta"));
             dto.setFechaGmfCuenta(String.valueOf(rs.getDate("fecha_gmf_cuenta")));
             dto.setLibranzaCuenta(rs.getBoolean("libranza_cuenta"));
             dto.setLibranzaTiempoPago(rs.getString("libranzatiempo_pago"));
-            dto.setCuotaMensualCuenta(rs.getDouble("cuota_mensual_cuenta"));
+            dto.setCuotaMensualCuenta(rs.getBigDecimal("cuota_mensual_cuenta"));
             dto.setRetencionFuenteCuenta(rs.getBoolean("retencion_fuente_cuenta"));
             dto.setPlazoCuenta(rs.getInt("plazo_cuenta"));
             dto.setFechaFinalCuenta(String.valueOf(rs.getDate("fecha_final_cuenta")));

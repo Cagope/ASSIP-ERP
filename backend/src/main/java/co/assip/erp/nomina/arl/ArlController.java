@@ -1,5 +1,6 @@
 package co.assip.erp.nomina.arl;
 
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import co.assip.erp.nomina.arl.dto.ArlDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import java.util.List;
 public class ArlController {
 
     private final ArlService service;
+    private final UsuarioSesionService usuarioSesionService;
 
     // ============================================================
     // ✅ LISTAR
@@ -35,11 +37,14 @@ public class ArlController {
     // ============================================================
     @PostMapping
     public ResponseEntity<Void> crear(
-            @RequestBody ArlDTO dto,
-            @RequestHeader(value = "X-User-Id", required = false) Integer idUsuario
+            @RequestBody ArlDTO dto
     ) {
-        Integer usr = (idUsuario != null ? idUsuario : 1);
-        service.crear(dto, usr);
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        service.crear(dto, idUsuario);
+
         return ResponseEntity.ok().build();
     }
 
@@ -49,11 +54,14 @@ public class ArlController {
     @PutMapping("/{id}")
     public ResponseEntity<Void> actualizar(
             @PathVariable Integer id,
-            @RequestBody ArlDTO dto,
-            @RequestHeader(value = "X-User-Id", required = false) Integer idUsuario
+            @RequestBody ArlDTO dto
     ) {
-        Integer usr = (idUsuario != null ? idUsuario : 1);
-        service.actualizar(id, dto, usr);
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        service.actualizar(id, dto, idUsuario);
+
         return ResponseEntity.ok().build();
     }
 

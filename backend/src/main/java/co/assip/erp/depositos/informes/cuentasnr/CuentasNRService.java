@@ -1,7 +1,6 @@
 package co.assip.erp.depositos.informes.cuentasnr;
 
-import co.assip.erp.depositos.informes.cuentasnr.dto.CuentasNRRequest;
-import co.assip.erp.depositos.informes.cuentasnr.repository.CuentasNRRepository;
+import co.assip.erp.depositos.informes.cuentasnr.dto.CuentasNRRequestDTO;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,7 +12,7 @@ public class CuentasNRService {
         this.repo = repo;
     }
 
-    public Object resolver(CuentasNRRequest req) {
+    public Object resolver(CuentasNRRequestDTO req) {
 
         if ("NUEVAS".equalsIgnoreCase(req.getTipoInforme())) {
             return repo.cuentasNuevas(req);

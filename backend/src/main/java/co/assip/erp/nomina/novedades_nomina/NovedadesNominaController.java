@@ -2,7 +2,7 @@ package co.assip.erp.nomina.novedades_nomina;
 
 import co.assip.erp.nomina.novedades_nomina.dto.*;
 import co.assip.erp.nomina.periodos_nomina.PeriodoNominaActivoService;
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -17,17 +17,20 @@ public class NovedadesNominaController {
     private final NovedadesNominaMasivoService masivoService;
     private final NovedadCalculoService calculoService;
     private final PeriodoNominaActivoService periodoActivoService;
+    private final UsuarioSesionService usuarioSesionService;
 
     public NovedadesNominaController(
             NovedadesNominaService service,
             NovedadesNominaMasivoService masivoService,
             NovedadCalculoService calculoService,
-            PeriodoNominaActivoService periodoActivoService
+            PeriodoNominaActivoService periodoActivoService,
+            UsuarioSesionService usuarioSesionService
     ) {
         this.service = service;
         this.masivoService = masivoService;
         this.calculoService = calculoService;
         this.periodoActivoService = periodoActivoService;
+        this.usuarioSesionService = usuarioSesionService;
     }
 
     // =========================================================
@@ -54,7 +57,8 @@ public class NovedadesNominaController {
     // =========================================================
     @PostMapping
     public void crear(@RequestBody NovedadNominaFormDTO dto) {
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
         service.crear(dto, idUsuario);
     }
 
@@ -71,7 +75,8 @@ public class NovedadesNominaController {
             @PathVariable Integer id,
             @RequestBody NovedadNominaFormDTO dto
     ) {
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
         service.actualizar(id, dto, idUsuario);
     }
 
@@ -90,7 +95,8 @@ public class NovedadesNominaController {
     public NovedadMasivaResultDTO generarMasivo(
             @RequestBody NovedadMasivaRequestDTO request
     ) {
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
         return masivoService.generarMasivo(request, idUsuario);
     }
 

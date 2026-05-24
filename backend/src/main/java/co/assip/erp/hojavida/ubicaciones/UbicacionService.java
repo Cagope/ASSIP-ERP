@@ -1,6 +1,6 @@
 package co.assip.erp.hojavida.ubicaciones;
 
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,9 +13,14 @@ import java.util.Optional;
 public class UbicacionService {
 
     private final UbicacionRepository repository;
+    private final UsuarioSesionService usuarioSesionService;
 
-    public UbicacionService(UbicacionRepository repository) {
+    public UbicacionService(
+            UbicacionRepository repository,
+            UsuarioSesionService usuarioSesionService
+    ) {
         this.repository = repository;
+        this.usuarioSesionService = usuarioSesionService;
     }
 
     /** 🔹 Listar todos ordenados por fecha de edición descendente */
@@ -42,7 +47,8 @@ public class UbicacionService {
     public Ubicacion crear(Ubicacion nueva) {
         validarContactos(nueva);
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         nueva.setFechaCreacion(LocalDateTime.now());
         nueva.setFechaEdicion(LocalDateTime.now());
@@ -59,7 +65,8 @@ public class UbicacionService {
         return repository.findById(id).map(existente -> {
             validarContactos(actualizada);
 
-            Integer idUsuario = SecurityUtils.getIdUsuario();
+            Integer idUsuario =
+                    usuarioSesionService.idUsuario();
 
             actualizada.setIdUbicacion(id);
             actualizada.setFechaCreacion(existente.getFechaCreacion());

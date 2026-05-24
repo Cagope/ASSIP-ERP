@@ -1,6 +1,5 @@
 package co.assip.erp.cdat.cdats;
 
-import co.assip.erp.cdat.cdats.contabilizacion.CdatAperturaContabilizacionService;
 import co.assip.erp.depositos.movimientos.DepositosMovimientoService;
 import co.assip.erp.depositos.movimientos.dto.DepositosMovimientoDTO;
 import co.assip.erp.cdat.cdats.dto.CdatFormDTO;
@@ -17,6 +16,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 import co.assip.erp.cdat.cdats.dto.CdatAsociadoValidacionDTO;
+import co.assip.erp.cdat.movimientos.CdatMovimientoService;
+import co.assip.erp.cdat.movimientos.dto.CdatMovimientoDTO;
 
 
 @Service
@@ -26,6 +27,7 @@ public class CdatService {
     private final CdatRepository repository;
     private final CdatAperturaContabilizacionService contabilizacionService;
     private final DepositosMovimientoService depositosMovimientoService;
+    private final CdatMovimientoService cdatMovimientoService;
 
     public List<CdatListDTO> listar() {
         return repository.listar();
@@ -95,14 +97,23 @@ public class CdatService {
 
     private void registrarMovimientosApertura(Long idCuentaCdat, CdatSaveDTO dto, Integer idUsuario) {
 
-        repository.crearExtracto(
-                idCuentaCdat,
-                dto,
-                "001",
-                BigDecimal.ZERO,
-                dto.getValorAperturaCdat(),
-                idUsuario
-        );
+        CdatMovimientoDTO movCdat = new CdatMovimientoDTO();
+
+        movCdat.setIdCuentaCdat(idCuentaCdat);
+        movCdat.setFechaMovimiento(dto.getFechaAperturaCdat());
+        movCdat.setTipoComprobante(dto.getTipoComprobante());
+        movCdat.setNumeroComprobante(dto.getNumeroComprobante());
+        movCdat.setTipoMovimiento("001");
+        movCdat.setModulo("11");
+        movCdat.setTarjeta("N");
+        movCdat.setEstablecimiento("APERTURA CDAT");
+        movCdat.setValorDebito(BigDecimal.ZERO);
+        movCdat.setValorCredito(dto.getValorAperturaCdat());
+        movCdat.setModuloOrigen("CDAT");
+        movCdat.setProcesoOrigen("APERTURA_CDAT");
+        movCdat.setIdOrigen(idCuentaCdat);
+
+        cdatMovimientoService.registrarCredito(movCdat, idUsuario);
 
         if (dto.getMediosPago() != null
                 && dto.getMediosPago().getDepositos() != null

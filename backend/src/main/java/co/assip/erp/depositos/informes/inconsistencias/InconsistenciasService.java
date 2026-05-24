@@ -2,7 +2,6 @@ package co.assip.erp.depositos.informes.inconsistencias;
 
 import co.assip.erp.depositos.informes.inconsistencias.dto.InconsistenciasRequest;
 import co.assip.erp.depositos.informes.inconsistencias.dto.InconsistenciaSaldoDTO;
-import co.assip.erp.depositos.informes.inconsistencias.repository.InconsistenciasRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

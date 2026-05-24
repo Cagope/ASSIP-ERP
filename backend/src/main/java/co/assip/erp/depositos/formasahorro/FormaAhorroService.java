@@ -1,6 +1,6 @@
 package co.assip.erp.depositos.formasahorro;
 
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -11,9 +11,14 @@ import java.util.List;
 public class FormaAhorroService {
 
     private final FormaAhorroRepository repo;
+    private final UsuarioSesionService usuarioSesionService;
 
-    public FormaAhorroService(FormaAhorroRepository repo) {
+    public FormaAhorroService(
+            FormaAhorroRepository repo,
+            UsuarioSesionService usuarioSesionService
+    ) {
         this.repo = repo;
+        this.usuarioSesionService = usuarioSesionService;
     }
 
     // ==========================================================
@@ -40,10 +45,8 @@ public class FormaAhorroService {
             throw new RuntimeException("El código ya existe.");
         }
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
-        if (idUsuario == null) {
-            throw new RuntimeException("USUARIO_NO_AUTENTICADO");
-        }
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         // 🔐 Auditoría
         f.setFkSeguridadCreacion(idUsuario);
@@ -60,10 +63,8 @@ public class FormaAhorroService {
         FormaAhorro db = repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("No existe la forma de ahorro."));
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
-        if (idUsuario == null) {
-            throw new RuntimeException("USUARIO_NO_AUTENTICADO");
-        }
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         // Código no se edita
         db.setNombreForma(f.getNombreForma());

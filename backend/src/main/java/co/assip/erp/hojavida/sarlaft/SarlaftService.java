@@ -1,6 +1,6 @@
 package co.assip.erp.hojavida.sarlaft;
 
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,9 +14,14 @@ import java.util.Optional;
 public class SarlaftService {
 
     private final SarlaftRepository repository;
+    private final UsuarioSesionService usuarioSesionService;
 
-    public SarlaftService(SarlaftRepository repository) {
+    public SarlaftService(
+            SarlaftRepository repository,
+            UsuarioSesionService usuarioSesionService
+    ) {
         this.repository = repository;
+        this.usuarioSesionService = usuarioSesionService;
     }
 
     /** 🔹 Listar todos los registros ordenados por fecha de edición descendente */
@@ -38,7 +43,8 @@ public class SarlaftService {
     public Sarlaft crear(Sarlaft nuevo) {
         validarDatos(nuevo);
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         nuevo.setFechaCreacion(java.sql.Timestamp.valueOf(LocalDateTime.now()));
         nuevo.setFechaEdicion(java.sql.Timestamp.valueOf(LocalDateTime.now()));
@@ -55,7 +61,8 @@ public class SarlaftService {
         return repository.findById(id).map(existente -> {
             validarDatos(actualizado);
 
-            Integer idUsuario = SecurityUtils.getIdUsuario();
+            Integer idUsuario =
+                    usuarioSesionService.idUsuario();
 
             actualizado.setIdSarlaft(id);
             actualizado.setFechaCreacion(existente.getFechaCreacion());

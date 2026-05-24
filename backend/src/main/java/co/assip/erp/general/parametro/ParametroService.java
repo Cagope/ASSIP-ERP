@@ -1,6 +1,6 @@
 package co.assip.erp.general.parametro;
 
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,9 +10,14 @@ import java.util.Optional;
 public class ParametroService {
 
     private final ParametroRepository repository;
+    private final UsuarioSesionService usuarioSesionService;
 
-    public ParametroService(ParametroRepository repository) {
+    public ParametroService(
+            ParametroRepository repository,
+            UsuarioSesionService usuarioSesionService
+    ) {
         this.repository = repository;
+        this.usuarioSesionService = usuarioSesionService;
     }
 
     /** 🔹 Listar todos los parámetros */
@@ -30,10 +35,8 @@ public class ParametroService {
     /** 🔹 Crear nuevo parámetro */
     public Parametro guardar(Parametro parametro) {
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
-        if (idUsuario == null) {
-            throw new RuntimeException("USUARIO_NO_AUTENTICADO");
-        }
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         // 🔐 Auditoría
         parametro.setFkSeguridadCreacion(idUsuario);
@@ -47,10 +50,8 @@ public class ParametroService {
 
         Parametro actual = obtenerPorId(id);
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
-        if (idUsuario == null) {
-            throw new RuntimeException("USUARIO_NO_AUTENTICADO");
-        }
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         actual.setIdAgencia(entrada.getIdAgencia());
         actual.setCodigoParametro(entrada.getCodigoParametro());

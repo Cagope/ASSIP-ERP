@@ -2,6 +2,8 @@ package co.assip.erp.depositos.cuentas_ahorro.dto;
 
 import lombok.Data;
 import java.util.List;
+import java.math.BigDecimal;
+import java.math.BigDecimal;
 
 @Data
 public class CuentaAhorroDetalleDTO {
@@ -13,15 +15,15 @@ public class CuentaAhorroDetalleDTO {
     private String codigoCuenta;
     private Integer idDatosPersonal;
     private String fechaAperturaCuenta;
-    private Double saldoInicialCuenta;
-    private Double saldoActualCuenta;
+    private BigDecimal  saldoInicialCuenta;
+    private BigDecimal  saldoActualCuenta;
     private String estadoCuenta;
     private String fechaEstadoCuenta;
     private String gmfCuentaCuenta;
     private String fechaGmfCuenta;
     private Boolean libranzaCuenta;
     private String libranzaTiempoPago;
-    private Double cuotaMensualCuenta;
+    private BigDecimal  cuotaMensualCuenta;
     private Boolean retencionFuenteCuenta;
     private Integer plazoCuenta;
     private String fechaFinalCuenta;

@@ -3,7 +3,7 @@ package co.assip.erp.activosfijos.depreciacion;
 import co.assip.erp.contabilidad.auxiliares_contables.dto.MovimientoContableDTO;
 import co.assip.erp.contabilidad.origen_comprobantes.dto.OrigenComprobanteDTO;
 import co.assip.erp.contabilidad.auxiliares_contables.ContabilidadRegistroService;
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import co.assip.erp.shared.config.EmpresaConfigService;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -22,17 +22,20 @@ public class DepreciacionEjecucionService {
     private final DepreciacionPreviewRepository previewRepository;
     private final ContabilidadRegistroService contabilidadRegistroService;
     private final EmpresaConfigService empresaConfigService;
+    private final UsuarioSesionService usuarioSesionService;
 
     public DepreciacionEjecucionService(
             NamedParameterJdbcTemplate jdbc,
             DepreciacionPreviewRepository previewRepository,
             ContabilidadRegistroService contabilidadRegistroService,
-            EmpresaConfigService empresaConfigService
+            EmpresaConfigService empresaConfigService,
+            UsuarioSesionService usuarioSesionService
     ) {
         this.jdbc = jdbc;
         this.previewRepository = previewRepository;
         this.contabilidadRegistroService = contabilidadRegistroService;
         this.empresaConfigService = empresaConfigService;
+        this.usuarioSesionService = usuarioSesionService;
     }
 
     /**
@@ -48,10 +51,8 @@ public class DepreciacionEjecucionService {
         // =========================================================
         // 🔐 Usuario autenticado (PATRÓN OFICIAL ASSIP)
         // =========================================================
-        Integer idUsuario = SecurityUtils.getIdUsuario();
-        if (idUsuario == null) {
-            throw new IllegalStateException("No hay usuario autenticado.");
-        }
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         // =========================================================
         // 🏢 Tercero contable de la empresa (configurado en general.empresas)

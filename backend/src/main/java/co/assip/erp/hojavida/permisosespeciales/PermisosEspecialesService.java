@@ -1,6 +1,6 @@
 package co.assip.erp.hojavida.permisosespeciales;
 
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,9 +14,14 @@ import java.util.Optional;
 public class PermisosEspecialesService {
 
     private final PermisosEspecialesRepository repository;
+    private final UsuarioSesionService usuarioSesionService;
 
-    public PermisosEspecialesService(PermisosEspecialesRepository repository) {
+    public PermisosEspecialesService(
+            PermisosEspecialesRepository repository,
+            UsuarioSesionService usuarioSesionService
+    ) {
         this.repository = repository;
+        this.usuarioSesionService = usuarioSesionService;
     }
 
     public List<PermisosEspeciales> listar() {
@@ -35,7 +40,8 @@ public class PermisosEspecialesService {
     public PermisosEspeciales crear(PermisosEspeciales nuevo) {
         validarDatos(nuevo);
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         LocalDate hoy = LocalDate.now();
         LocalDateTime ahora = LocalDateTime.now();
@@ -62,7 +68,8 @@ public class PermisosEspecialesService {
 
             validarDatos(actualizado);
 
-            Integer idUsuario = SecurityUtils.getIdUsuario();
+            Integer idUsuario =
+                    usuarioSesionService.idUsuario();
 
             LocalDate hoy = LocalDate.now();
             LocalDateTime ahora = LocalDateTime.now();

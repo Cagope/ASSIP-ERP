@@ -1,7 +1,7 @@
 package co.assip.erp.nomina.cargos;
 
 import co.assip.erp.nomina.cargos.dto.CargoDTO;
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +12,7 @@ import java.util.List;
 public class CargoService {
 
     private final CargoRepository repository;
+    private final UsuarioSesionService usuarioSesionService;
 
     // ============================================================
     // ✅ LISTAR
@@ -32,8 +33,8 @@ public class CargoService {
     // ============================================================
     public Integer crear(CargoDTO dto) {
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
-        if (idUsuario == null) idUsuario = 1;
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         return repository.crear(dto, idUsuario);
     }
@@ -43,8 +44,8 @@ public class CargoService {
     // ============================================================
     public void actualizar(Integer idCargo, CargoDTO dto) {
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
-        if (idUsuario == null) idUsuario = 1;
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         repository.actualizar(idCargo, dto, idUsuario);
     }
@@ -54,8 +55,8 @@ public class CargoService {
     // ============================================================
     public void desactivar(Integer idCargo) {
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
-        if (idUsuario == null) idUsuario = 1;
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         repository.desactivar(idCargo, idUsuario);
     }

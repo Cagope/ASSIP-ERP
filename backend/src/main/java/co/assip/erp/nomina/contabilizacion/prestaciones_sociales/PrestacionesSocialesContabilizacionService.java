@@ -7,7 +7,7 @@ import co.assip.erp.nomina.contabilizacion.prestaciones_sociales.dto.Prestacione
 import co.assip.erp.nomina.contabilizacion.prestaciones_sociales.dto.PrestacionesSocialesContabilizacionResultadoDTO;
 import co.assip.erp.nomina.contabilizacion.liquidacion.dto.LiquidacionMovimientoContableDTO;
 import co.assip.erp.nomina.periodos_nomina.PeriodosNominaRepository;
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +24,7 @@ public class PrestacionesSocialesContabilizacionService {
     private final PrestacionesSocialesContabilizacionRepository repository;
     private final ContabilidadRegistroService contabilidadRegistroService;
     private final PeriodosNominaRepository periodosNominaRepository;
+    private final UsuarioSesionService usuarioSesionService;
 
     // =========================================================
     // PREVIEW CONTABLE
@@ -71,7 +72,8 @@ public class PrestacionesSocialesContabilizacionService {
             );
         }
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         List<Integer> agencias = repository.listarAgenciasConMovimientos(idPeriodoNomina);
 
@@ -148,7 +150,7 @@ public class PrestacionesSocialesContabilizacionService {
 
             Integer nuevoConsecutivo = consecutivoActual + 1;
 
-            String numeroComprobante = String.format("%010d", nuevoConsecutivo);
+            String numeroComprobante = String.format("%07d", nuevoConsecutivo);
 
             String concepto =
                     "Contabilización prestaciones sociales mes " + periodoTexto;
@@ -236,7 +238,8 @@ public class PrestacionesSocialesContabilizacionService {
     @Transactional
     public void reversarContabilizacion(Integer idPeriodoNomina) {
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         List<Integer> agencias = repository.listarAgenciasConMovimientos(idPeriodoNomina);
 
@@ -297,7 +300,7 @@ public class PrestacionesSocialesContabilizacionService {
 
             Integer nuevoConsecutivo = consecutivoActual + 1;
 
-            String numeroComprobante = String.format("%010d", nuevoConsecutivo);
+            String numeroComprobante = String.format("%07d", nuevoConsecutivo);
 
             String concepto =
                     "REVERSIÓN contabilización prestaciones sociales mes " + periodoTexto;

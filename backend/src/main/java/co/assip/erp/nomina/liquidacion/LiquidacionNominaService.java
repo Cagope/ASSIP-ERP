@@ -12,7 +12,7 @@ import co.assip.erp.nomina.novedades_nomina.NovedadesNominaRepository;
 import co.assip.erp.nomina.periodos_nomina.PeriodosNominaRepository;
 import co.assip.erp.nomina.periodos_nomina.PeriodosNominaRepository.PeriodoFechas;
 import co.assip.erp.seguridad.repository.UsuarioAgenciaRepository;
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +26,7 @@ public class LiquidacionNominaService {
 
     private final PeriodosNominaRepository periodosRepo;
     private final UsuarioAgenciaRepository usuarioAgenciaRepo;
+    private final UsuarioSesionService usuarioSesionService;
 
     private final LiquidacionNominaRepository liquidacionRepo;
     private final LiquidacionDetalleRepository detalleRepo;
@@ -98,7 +99,7 @@ public class LiquidacionNominaService {
         periodosRepo.cambiarEstado(
                 idPeriodo,
                 "CERRADO",
-                SecurityUtils.getIdUsuario()
+                usuarioSesionService.idUsuario()
         );
     }
 
@@ -111,7 +112,8 @@ public class LiquidacionNominaService {
             EmpleadoContratoDTO contrato
     ) {
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         Integer idLiquidacion = liquidacionRepo.insertarCabecera(
                 idPeriodoNomina,
@@ -210,7 +212,7 @@ public class LiquidacionNominaService {
 
         return liquidacionRepo.abrirPeriodoEliminarEjecucion(
                 idPeriodoNomina,
-                SecurityUtils.getIdUsuario()
+                usuarioSesionService.idUsuario()
         );
     }
 
@@ -219,7 +221,8 @@ public class LiquidacionNominaService {
     // =========================================================
     private void validarAgencia(Integer fkAgencia) {
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         if (!usuarioAgenciaRepo.existsByIdUsuarioAndIdAgencia(idUsuario, fkAgencia)) {
             throw new IllegalStateException(

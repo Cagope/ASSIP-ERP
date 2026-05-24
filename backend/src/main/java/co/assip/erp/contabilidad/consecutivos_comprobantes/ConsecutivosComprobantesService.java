@@ -68,6 +68,6 @@ public class ConsecutivosComprobantesService {
     }
 
     private String formatear(Integer consecutivo) {
-        return String.format("%010d", consecutivo);
+        return String.format("%07d", consecutivo);
     }
 }

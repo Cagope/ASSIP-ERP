@@ -1,6 +1,6 @@
 package co.assip.erp.depositos.informes.cuentasnr;
 
-import co.assip.erp.depositos.informes.cuentasnr.dto.CuentasNRRequest;
+import co.assip.erp.depositos.informes.cuentasnr.dto.CuentasNRRequestDTO;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,7 +14,7 @@ public class CuentasNRController {
     }
 
     @PostMapping
-    public Object resolver(@RequestBody CuentasNRRequest request) {
+    public Object resolver(@RequestBody CuentasNRRequestDTO request) {
         return service.resolver(request);
     }
 }

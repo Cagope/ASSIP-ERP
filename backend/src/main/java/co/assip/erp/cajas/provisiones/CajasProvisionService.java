@@ -4,7 +4,7 @@ import co.assip.erp.cajas.provisiones.dto.CajasProvisionCerrarDTO;
 import co.assip.erp.cajas.provisiones.dto.CajasProvisionFormDTO;
 import co.assip.erp.cajas.provisiones.dto.CajasProvisionListDTO;
 import co.assip.erp.cajas.provisiones.dto.CajasProvisionSaveDTO;
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +17,7 @@ import java.util.List;
 public class CajasProvisionService {
 
     private final CajasProvisionRepository repository;
+    private final UsuarioSesionService usuarioSesionService;
 
     public List<CajasProvisionListDTO> listar() {
         return repository.listar();
@@ -31,7 +32,8 @@ public class CajasProvisionService {
     public Long guardar(CajasProvisionSaveDTO dto) {
         validar(dto);
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         if (repository.existeProvision(dto.getIdCaja(), dto.getFechaContable(), dto.getIdProvision())) {
             throw new RuntimeException("Ya existe una provisión para esta caja y fecha contable.");
@@ -59,7 +61,8 @@ public class CajasProvisionService {
             throw new RuntimeException("El valor final de cheques no puede ser negativo.");
         }
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         repository.cerrar(
                 dto.getIdProvision(),

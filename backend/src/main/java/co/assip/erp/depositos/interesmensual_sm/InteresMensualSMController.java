@@ -1,5 +1,6 @@
 package co.assip.erp.depositos.interesmensual_sm;
 
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import co.assip.erp.depositos.interesmensual_sm.dto.InteresMensualSMEntradaDTO;
 import co.assip.erp.depositos.interesmensual_sm.dto.InteresMensualSMItemDTO;
 import lombok.RequiredArgsConstructor;
@@ -16,29 +17,27 @@ public class InteresMensualSMController {
 
     private final InteresMensualSMService service;
     private final ConsecutivosComprobantesService consecutivosComprobantesService;
+    private final UsuarioSesionService usuarioSesionService;
 
     @PostMapping("/liquidar")
     public List<InteresMensualSMItemDTO> liquidar(
-            @RequestBody InteresMensualSMEntradaDTO input,
-            @RequestHeader(name = "usuarioId", required = false) Integer usuarioId
+            @RequestBody InteresMensualSMEntradaDTO input
     ) {
-        if (usuarioId == null) {
-            usuarioId = 1;
-        }
+
+        usuarioSesionService.idUsuario();
 
         return service.liquidar(input);
     }
 
     @PostMapping("/aplicar")
     public void aplicar(
-            @RequestBody InteresMensualSMEntradaDTO input,
-            @RequestHeader(name = "usuarioId", required = false) Integer usuarioId
+            @RequestBody InteresMensualSMEntradaDTO input
     ) {
-        if (usuarioId == null) {
-            usuarioId = 1;
-        }
 
-        service.aplicar(input, usuarioId);
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        service.aplicar(input, idUsuario);
     }
 
     @GetMapping("/proximo-comprobante/{idAgencia}/{tipoComprobante}")

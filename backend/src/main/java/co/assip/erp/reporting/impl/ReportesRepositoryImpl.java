@@ -2,6 +2,7 @@ package co.assip.erp.reporting.impl;
 
 import co.assip.erp.reporting.api.ReportQueryRequest;
 import co.assip.erp.reporting.api.ReportResult;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +17,15 @@ import java.util.*;
 public class ReportesRepositoryImpl {
 
     private final JdbcTemplate jdbc;
+    private final UsuarioSesionService usuarioSesionService;
 
     @Autowired
-    public ReportesRepositoryImpl(JdbcTemplate jdbc) {
+    public ReportesRepositoryImpl(
+            JdbcTemplate jdbc,
+            UsuarioSesionService usuarioSesionService
+    ) {
         this.jdbc = jdbc;
+        this.usuarioSesionService = usuarioSesionService;
     }
 
     /**
@@ -143,7 +149,7 @@ public class ReportesRepositoryImpl {
 
                 if (esDepositos && (filters.get("id_agencia") == null || filters.get("id_agencia").toString().isBlank())) {
                     List<Integer> agenciasUsuario =
-                            co.assip.erp.seguridad.utils.SecurityUtils.getAgencias();
+                            usuarioSesionService.agencias();
 
                     if (agenciasUsuario != null && !agenciasUsuario.isEmpty()) {
                         where.append((count++ > 0 ? " AND " : " WHERE "));

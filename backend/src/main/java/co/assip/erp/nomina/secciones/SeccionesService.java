@@ -1,7 +1,7 @@
 package co.assip.erp.nomina.secciones;
 
 import co.assip.erp.nomina.secciones.dto.SeccionNominaDTO;
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +12,7 @@ import java.util.List;
 public class SeccionesService {
 
     private final SeccionesRepository repo;
+    private final UsuarioSesionService usuarioSesionService;
 
     public List<SeccionNominaDTO> listar() {
         return repo.listar();
@@ -22,13 +23,19 @@ public class SeccionesService {
     }
 
     public void crear(SeccionNominaDTO dto) {
-        Integer idUsuario = SecurityUtils.getIdUsuario();
-        repo.crear(dto, idUsuario != null ? idUsuario : 1);
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        repo.crear(dto, idUsuario);
     }
 
     public void actualizar(Integer id, SeccionNominaDTO dto) {
-        Integer idUsuario = SecurityUtils.getIdUsuario();
-        repo.actualizar(id, dto, idUsuario != null ? idUsuario : 1);
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        repo.actualizar(id, dto, idUsuario);
     }
 
     public void eliminar(Integer id) {

@@ -10,7 +10,7 @@ import co.assip.erp.nomina.liquidacion.dto.LiquidacionPreviewExcelDTO;
 import co.assip.erp.nomina.liquidacion.dto.LiquidacionRequestDTO;
 import co.assip.erp.nomina.liquidacion.dto.TotalesLiquidacionDTO;
 import co.assip.erp.seguridad.repository.UsuarioAgenciaRepository;
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +25,7 @@ import co.assip.erp.nomina.periodos_nomina.PeriodosNominaRepository;
 public class LiquidacionPreviewService {
 
     private final UsuarioAgenciaRepository usuarioAgenciaRepo;
+    private final UsuarioSesionService usuarioSesionService;
     private final LiquidacionNominaRepository liquidacionRepo;
 
     private final IbcCalculator ibcCalculator;
@@ -155,7 +156,8 @@ public class LiquidacionPreviewService {
     // =========================================================
     private void validarAgencia(Integer fkAgencia) {
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         if (!usuarioAgenciaRepo.existsByIdUsuarioAndIdAgencia(idUsuario, fkAgencia)) {
             throw new IllegalStateException(

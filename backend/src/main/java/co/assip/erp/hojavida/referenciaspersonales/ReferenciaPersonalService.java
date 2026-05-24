@@ -1,6 +1,6 @@
 package co.assip.erp.hojavida.referenciaspersonales;
 
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,9 +13,14 @@ import java.util.Optional;
 public class ReferenciaPersonalService {
 
     private final ReferenciaPersonalRepository repository;
+    private final UsuarioSesionService usuarioSesionService;
 
-    public ReferenciaPersonalService(ReferenciaPersonalRepository repository) {
+    public ReferenciaPersonalService(
+            ReferenciaPersonalRepository repository,
+            UsuarioSesionService usuarioSesionService
+    ) {
         this.repository = repository;
+        this.usuarioSesionService = usuarioSesionService;
     }
 
     /** 🔹 Listar todos ordenados por fecha de edición descendente */
@@ -47,7 +52,8 @@ public class ReferenciaPersonalService {
     public ReferenciaPersonal crear(ReferenciaPersonal nueva) {
         validarContactos(nueva);
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         nueva.setFechaCreacion(LocalDateTime.now());
         nueva.setFechaEdicion(LocalDateTime.now());
@@ -64,7 +70,8 @@ public class ReferenciaPersonalService {
         return repository.findById(id).map(existente -> {
             validarContactos(actualizada);
 
-            Integer idUsuario = SecurityUtils.getIdUsuario();
+            Integer idUsuario =
+                    usuarioSesionService.idUsuario();
 
             actualizada.setIdReferenciaPersonal(id);
             actualizada.setFechaCreacion(existente.getFechaCreacion());

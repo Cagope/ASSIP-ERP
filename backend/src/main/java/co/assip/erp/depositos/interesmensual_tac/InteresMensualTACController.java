@@ -1,5 +1,6 @@
 package co.assip.erp.depositos.interesmensual_tac;
 
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import co.assip.erp.contabilidad.consecutivos_comprobantes.ConsecutivosComprobantesService;
 import co.assip.erp.depositos.interesmensual_tac.dto.InteresMensualTACEntradaDTO;
 import co.assip.erp.depositos.interesmensual_tac.dto.InteresMensualTACItemDTO;
@@ -16,31 +17,27 @@ public class InteresMensualTACController {
 
     private final InteresMensualTACService service;
     private final ConsecutivosComprobantesService consecutivosComprobantesService;
+    private final UsuarioSesionService usuarioSesionService;
 
     @PostMapping("/liquidar")
     public List<InteresMensualTACItemDTO> liquidar(
-            @RequestBody InteresMensualTACEntradaDTO input,
-            @RequestHeader(name = "usuarioId", required = false) Integer usuarioId
+            @RequestBody InteresMensualTACEntradaDTO input
     ) {
 
-        if (usuarioId == null) {
-            usuarioId = 1;
-        }
+        usuarioSesionService.idUsuario();
 
         return service.liquidar(input);
     }
 
     @PostMapping("/aplicar")
     public void aplicar(
-            @RequestBody InteresMensualTACEntradaDTO input,
-            @RequestHeader(name = "usuarioId", required = false) Integer usuarioId
+            @RequestBody InteresMensualTACEntradaDTO input
     ) {
 
-        if (usuarioId == null) {
-            usuarioId = 1;
-        }
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
-        service.aplicar(input, usuarioId);
+        service.aplicar(input, idUsuario);
     }
 
     @GetMapping("/proximo-comprobante/{idAgencia}/{tipoComprobante}")

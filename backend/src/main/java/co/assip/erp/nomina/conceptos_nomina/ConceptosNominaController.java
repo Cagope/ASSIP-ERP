@@ -1,5 +1,6 @@
 package co.assip.erp.nomina.conceptos_nomina;
 
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import co.assip.erp.nomina.conceptos_nomina.dto.ConceptoNominaDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import java.util.List;
 public class ConceptosNominaController {
 
     private final ConceptosNominaService service;
+    private final UsuarioSesionService usuarioSesionService;
 
     // ============================================================
     // LISTAR
@@ -37,11 +39,14 @@ public class ConceptosNominaController {
     // ============================================================
     @PostMapping
     public ResponseEntity<Void> crear(
-            @RequestBody ConceptoNominaDTO dto,
-            @RequestHeader(value = "X-User-Id", required = false) Integer idUsuario
+            @RequestBody ConceptoNominaDTO dto
     ) {
-        Integer usr = (idUsuario != null ? idUsuario : 1);
-        service.crear(dto, usr);
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        service.crear(dto, idUsuario);
+
         return ResponseEntity.ok().build();
     }
 
@@ -51,11 +56,18 @@ public class ConceptosNominaController {
     @PutMapping("/{codigoConcepto}")
     public ResponseEntity<Void> actualizar(
             @PathVariable String codigoConcepto,
-            @RequestBody ConceptoNominaDTO dto,
-            @RequestHeader(value = "X-User-Id", required = false) Integer idUsuario
+            @RequestBody ConceptoNominaDTO dto
     ) {
-        Integer usr = (idUsuario != null ? idUsuario : 1);
-        service.actualizar(codigoConcepto, dto, usr);
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        service.actualizar(
+                codigoConcepto,
+                dto,
+                idUsuario
+        );
+
         return ResponseEntity.ok().build();
     }
 

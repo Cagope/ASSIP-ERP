@@ -1,7 +1,7 @@
 package co.assip.erp.nomina.empleado_contratos;
 
 import co.assip.erp.nomina.empleado_contratos.dto.EmpleadoContratoDTO;
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +15,7 @@ import co.assip.erp.nomina.empleado_contratos.dto.EmpleadoContratoListViewDTO;
 public class EmpleadoContratoController {
 
     private final EmpleadoContratoService service;
+    private final UsuarioSesionService usuarioSesionService;
 
     // ============================================================
     // LISTAR
@@ -48,8 +49,8 @@ public class EmpleadoContratoController {
     @PostMapping
     public Integer crear(@RequestBody EmpleadoContratoDTO dto) {
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
-        if (idUsuario == null) idUsuario = 1;
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         return service.crear(dto, idUsuario);
     }
@@ -61,8 +62,8 @@ public class EmpleadoContratoController {
     public void actualizar(@PathVariable Integer id,
                            @RequestBody EmpleadoContratoDTO dto) {
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
-        if (idUsuario == null) idUsuario = 1;
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         service.actualizar(id, dto, idUsuario);
     }

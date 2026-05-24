@@ -1,5 +1,6 @@
 package co.assip.erp.depositos.revalorizacion;
 
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import co.assip.erp.contabilidad.consecutivos_comprobantes.ConsecutivosComprobantesService;
 import co.assip.erp.depositos.revalorizacion.dto.RevalorizacionEntradaDTO;
 import co.assip.erp.depositos.revalorizacion.dto.RevalorizacionItemDTO;
@@ -16,31 +17,27 @@ public class RevalorizacionController {
 
     private final RevalorizacionService service;
     private final ConsecutivosComprobantesService consecutivosComprobantesService;
+    private final UsuarioSesionService usuarioSesionService;
 
     @PostMapping("/liquidar")
     public List<RevalorizacionItemDTO> liquidar(
-            @RequestBody RevalorizacionEntradaDTO input,
-            @RequestHeader(name = "usuarioId", required = false) Integer usuarioId
+            @RequestBody RevalorizacionEntradaDTO input
     ) {
 
-        if (usuarioId == null) {
-            usuarioId = 1;
-        }
+        usuarioSesionService.idUsuario();
 
         return service.liquidar(input);
     }
 
     @PostMapping("/aplicar")
     public void aplicar(
-            @RequestBody RevalorizacionEntradaDTO input,
-            @RequestHeader(name = "usuarioId", required = false) Integer usuarioId
+            @RequestBody RevalorizacionEntradaDTO input
     ) {
 
-        if (usuarioId == null) {
-            usuarioId = 1;
-        }
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
-        service.aplicar(input, usuarioId);
+        service.aplicar(input, idUsuario);
     }
 
     @GetMapping("/proximo-comprobante/{idAgencia}/{tipoComprobante}")

@@ -2,7 +2,7 @@ package co.assip.erp.depositos.habilidad_asociado;
 
 import co.assip.erp.depositos.habilidad_asociado.dto.HabilidadAsociadoEntradaDTO;
 import co.assip.erp.depositos.habilidad_asociado.dto.HabilidadAsociadoItemDTO;
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -17,6 +17,7 @@ public class HabilidadAsociadoService {
 
     private final HabilidadAsociadoRepository repository;
     private final NamedParameterJdbcTemplate jdbc;
+    private final UsuarioSesionService usuarioSesionService;
 
     @Transactional(readOnly = true)
     public List<HabilidadAsociadoItemDTO> ejecutar(HabilidadAsociadoEntradaDTO input) {
@@ -49,10 +50,8 @@ public class HabilidadAsociadoService {
             throw new IllegalArgumentException("ERROR|Estado inválido. Solo se permite 'A' o 'I'.");
         }
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
-        if (idUsuario == null) {
-            throw new RuntimeException("USUARIO_NO_AUTENTICADO");
-        }
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         repository.actualizarEstado(
                 idCuentaAhorro,

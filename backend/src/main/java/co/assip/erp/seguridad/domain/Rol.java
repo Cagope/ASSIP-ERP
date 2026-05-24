@@ -22,6 +22,7 @@ public class Rol {
     @Column(name = "descripcion")
     private String descripcion;
 
+    @Builder.Default
     @Column(name = "activo")
     private Boolean activo = true;
 }

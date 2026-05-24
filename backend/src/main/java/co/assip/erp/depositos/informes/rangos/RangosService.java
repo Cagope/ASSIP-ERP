@@ -1,7 +1,6 @@
 package co.assip.erp.depositos.informes.rangos;
 
 import co.assip.erp.depositos.informes.rangos.dto.RangosFiltroDTO;
-import co.assip.erp.depositos.informes.rangos.repository.RangosRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,23 +14,7 @@ public class RangosService {
         this.repository = repository;
     }
 
-    /**
-     * 🧠 consultar()
-     * ------------------------------------------------------------
-     * Valida el request y enruta según tipo:
-     *  - EDAD
-     *  - SALDO
-     *  - ANTIGUEDAD
-     * Usando:
-     *  - agencia
-     *  - fechaCorte
-     *  - rangos (4)
-     */
-    public List<RangosItemDTO> consultar(RangosRequest request) {
-
-        // ============================
-        // VALIDACIONES GENERALES
-        // ============================
+    public List<RangosItemDTO> consultar(RangosRequestDTO request) {
 
         if (request.getTipo() == null || request.getTipo().isBlank()) {
             throw new IllegalArgumentException("Debe indicar el tipo de informe (EDAD, SALDO, ANTIGUEDAD)");
@@ -41,8 +24,12 @@ public class RangosService {
             throw new IllegalArgumentException("Debe enviar fechaCorte (YYYY-MM-DD)");
         }
 
-        if (request.getAgencia() == null || request.getAgencia().isBlank()) {
-            request.setAgencia("0"); // todas por defecto
+        if (request.getIdAgencia() == null) {
+            request.setIdAgencia(0);
+        }
+
+        if (request.getCodigoForma() == null || request.getCodigoForma().isBlank()) {
+            request.setCodigoForma("0");
         }
 
         if (request.getRangos() == null || request.getRangos().isEmpty()) {
@@ -59,12 +46,8 @@ public class RangosService {
             }
         }
 
-        // Normalizar
         String tipo = request.getTipo().trim().toUpperCase();
 
-        // ============================
-        // RUTEO POR TIPO
-        // ============================
         switch (tipo) {
             case "EDAD":
                 return repository.consultarPorEdad(request);

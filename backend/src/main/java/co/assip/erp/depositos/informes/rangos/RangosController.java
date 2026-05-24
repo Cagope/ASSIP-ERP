@@ -1,6 +1,7 @@
 package co.assip.erp.depositos.informes.rangos;
 
 import org.springframework.web.bind.annotation.*;
+import co.assip.erp.depositos.informes.rangos.RangosItemDTO;
 
 import java.util.List;
 
@@ -43,7 +44,7 @@ public class RangosController {
      * Genera el informe según el tipo y los rangos enviados.
      */
     @PostMapping
-    public List<RangosItemDTO> consultar(@RequestBody RangosRequest request) {
+        public List<RangosItemDTO> consultar(@RequestBody RangosRequestDTO request) {
         return service.consultar(request);
     }
 }

@@ -1,7 +1,7 @@
 package co.assip.erp.nomina.eps;
 
 import co.assip.erp.nomina.eps.dto.EpsDTO;
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +12,7 @@ import java.util.List;
 public class EpsService {
 
     private final EpsRepository repo;
+    private final UsuarioSesionService usuarioSesionService;
 
     public List<EpsDTO> listar() {
         return repo.listar();
@@ -23,12 +24,14 @@ public class EpsService {
     }
 
     public Integer crear(EpsDTO dto) {
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
         return repo.crear(dto, idUsuario);
     }
 
     public void actualizar(Integer id, EpsDTO dto) {
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
         repo.actualizar(id, dto, idUsuario);
     }
 

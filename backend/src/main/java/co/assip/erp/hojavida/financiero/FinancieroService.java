@@ -1,6 +1,6 @@
 package co.assip.erp.hojavida.financieros;
 
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,9 +15,14 @@ import java.util.Optional;
 public class FinancieroService {
 
     private final FinancieroRepository repository;
+    private final UsuarioSesionService usuarioSesionService;
 
-    public FinancieroService(FinancieroRepository repository) {
+    public FinancieroService(
+            FinancieroRepository repository,
+            UsuarioSesionService usuarioSesionService
+    ) {
         this.repository = repository;
+        this.usuarioSesionService = usuarioSesionService;
     }
 
     // ================================================================
@@ -40,7 +45,8 @@ public class FinancieroService {
     public Financiero crear(Financiero nuevo) {
         validar(nuevo);
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         nuevo.setFechaCreacion(Timestamp.valueOf(LocalDateTime.now()));
         nuevo.setFechaEdicion(Timestamp.valueOf(LocalDateTime.now()));
@@ -57,7 +63,8 @@ public class FinancieroService {
         return repository.findById(id).map(existente -> {
             validar(actualizado);
 
-            Integer idUsuario = SecurityUtils.getIdUsuario();
+            Integer idUsuario =
+                    usuarioSesionService.idUsuario();
 
             actualizado.setIdFinanciero(id);
             actualizado.setFechaCreacion(existente.getFechaCreacion());

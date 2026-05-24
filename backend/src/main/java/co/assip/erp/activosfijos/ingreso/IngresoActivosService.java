@@ -1,7 +1,7 @@
 package co.assip.erp.activosfijos.ingreso;
 
 import co.assip.erp.activosfijos.ingreso.dto.*;
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +17,7 @@ import java.util.List;
 public class IngresoActivosService {
 
     private final IngresoActivosRepository repository;
+    private final UsuarioSesionService usuarioSesionService;
 
     @Transactional
     public IngresoActivosResponseDTO ingresarActivos(IngresoActivosRequestDTO req) {
@@ -35,10 +36,8 @@ public class IngresoActivosService {
             throw new IllegalArgumentException("idAgencia es obligatoria en el header.");
         }
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
-        if (idUsuario == null) {
-            throw new IllegalStateException("Usuario autenticado no encontrado.");
-        }
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
         // =========================================================
         // HEADER: VALIDACIONES
@@ -62,14 +61,14 @@ public class IngresoActivosService {
         }
 
         // =========================================================
-        // NUMERO COMPROBANTE (10 dígitos)
+        // NUMERO COMPROBANTE (7 dígitos)
         // - Si viene vacío → lo generamos desde tipos_comprobantes (consecutivo)
         // - Si viene → lo normalizamos (solo números + pad a 10)
         // =========================================================
         String numero10;
         if (isBlankDigits(h.getNumeroComprobante())) {
             Integer next = repository.obtenerYActualizarConsecutivo(idAgencia, tipoComp);
-            numero10 = String.format("%010d", next);
+            numero10 = String.format("%07d", next);
         } else {
             numero10 = normalizeNumeroComprobante10(h.getNumeroComprobante());
         }
@@ -111,7 +110,8 @@ public class IngresoActivosService {
         repository.insertarConceptoContable(
                 tipoComp,
                 numero10,
-                detalle
+                detalle,
+                idUsuario
         );
 
         // =========================================================
@@ -189,7 +189,8 @@ public class IngresoActivosService {
                     vh,
                     BigDecimal.ZERO,
                     BigDecimal.ZERO,
-                    detalle
+                    detalle,
+                    idUsuario
             );
 
             // Débito IVA (si hay)
@@ -203,7 +204,8 @@ public class IngresoActivosService {
                         iva,
                         BigDecimal.ZERO,
                         vh,
-                        detalle
+                        detalle,
+                        idUsuario
                 );
             }
 
@@ -218,7 +220,8 @@ public class IngresoActivosService {
                         BigDecimal.ZERO,
                         ret,
                         BigDecimal.ZERO,
-                        detalle
+                        detalle,
+                        idUsuario
                 );
             }
 
@@ -280,7 +283,8 @@ public class IngresoActivosService {
                 BigDecimal.ZERO,
                 neto,
                 BigDecimal.ZERO,
-                detalle
+                detalle,
+                idUsuario
         );
 
         totalCredito = totalCredito.add(neto);
@@ -328,8 +332,8 @@ public class IngresoActivosService {
             throw new IllegalArgumentException("numeroComprobante es obligatorio.");
         }
         if (digits.length() > 10) {
-            throw new IllegalArgumentException("numeroComprobante máximo 10 dígitos.");
+            throw new IllegalArgumentException("numeroComprobante máximo 7 dígitos.");
         }
-        return String.format("%010d", Long.parseLong(digits));
+        return String.format("%07d", Long.parseLong(digits));
     }
 }

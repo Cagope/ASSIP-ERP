@@ -7,7 +7,7 @@ import co.assip.erp.nomina.contabilizacion.aportes_parafiscales.dto.AportesParaf
 import co.assip.erp.nomina.contabilizacion.aportes_parafiscales.dto.AportesParafiscalesContabilizacionResultadoDTO;
 import co.assip.erp.nomina.contabilizacion.liquidacion.dto.LiquidacionMovimientoContableDTO;
 import co.assip.erp.nomina.periodos_nomina.PeriodosNominaRepository;
-import co.assip.erp.seguridad.utils.SecurityUtils;
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +24,7 @@ public class AportesParafiscalesContabilizacionService {
     private final AportesParafiscalesContabilizacionRepository repository;
     private final ContabilidadRegistroService contabilidadRegistroService;
     private final PeriodosNominaRepository periodosNominaRepository;
+    private final UsuarioSesionService usuarioSesionService;
 
     public List<LiquidacionMovimientoContableDTO> preview(Integer idPeriodoNomina) {
         String comprobanteActivo = repository.obtenerComprobanteExistente(idPeriodoNomina);
@@ -61,7 +62,9 @@ public class AportesParafiscalesContabilizacionService {
             );
         }
 
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
         List<Integer> agencias = repository.listarAgenciasConMovimientos(idPeriodoNomina);
 
         if (agencias.isEmpty()) {
@@ -122,7 +125,7 @@ public class AportesParafiscalesContabilizacionService {
             String tipoComprobante = "NM";
             Integer consecutivoActual = repository.obtenerConsecutivoActualConLock(tipoComprobante, idAgencia);
             Integer nuevoConsecutivo = consecutivoActual + 1;
-            String numeroComprobante = String.format("%010d", nuevoConsecutivo);
+            String numeroComprobante = String.format("%07d", nuevoConsecutivo);
 
             String concepto = "Contabilización aportes empleador y parafiscales mes " + periodoTexto;
 
@@ -193,7 +196,8 @@ public class AportesParafiscalesContabilizacionService {
 
     @Transactional
     public void reversarContabilizacion(Integer idPeriodoNomina) {
-        Integer idUsuario = SecurityUtils.getIdUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
         List<Integer> agencias = repository.listarAgenciasConMovimientos(idPeriodoNomina);
         LocalDate fechaComprobante = repository.obtenerFechaComprobante(idPeriodoNomina);
 
@@ -229,7 +233,7 @@ public class AportesParafiscalesContabilizacionService {
 
             Integer consecutivoActual = repository.obtenerConsecutivoActualConLock(tipoComprobante, idAgencia);
             Integer nuevoConsecutivo = consecutivoActual + 1;
-            String numeroComprobante = String.format("%010d", nuevoConsecutivo);
+            String numeroComprobante = String.format("%07d", nuevoConsecutivo);
 
             String concepto = "REVERSIÓN contabilización aportes empleador y parafiscales mes " + periodoTexto;
 

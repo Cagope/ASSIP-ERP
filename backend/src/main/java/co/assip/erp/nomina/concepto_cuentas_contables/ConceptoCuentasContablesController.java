@@ -1,5 +1,6 @@
 package co.assip.erp.nomina.concepto_cuentas_contables;
 
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import co.assip.erp.nomina.concepto_cuentas_contables.dto.ConceptoCuentaContableFormDTO;
 import co.assip.erp.nomina.concepto_cuentas_contables.dto.ConceptoCuentaContableListDTO;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import java.util.List;
 public class ConceptoCuentasContablesController {
 
     private final ConceptoCuentasContablesService service;
+    private final UsuarioSesionService usuarioSesionService;
 
     // LISTAR (opcional por agencia)
     @GetMapping
@@ -36,11 +38,14 @@ public class ConceptoCuentasContablesController {
     // ============================================================
     @PostMapping
     public ResponseEntity<Void> crear(
-            @RequestBody ConceptoCuentaContableFormDTO dto,
-            @RequestHeader(value = "X-User-Id", required = false) Integer idUsuario
+            @RequestBody ConceptoCuentaContableFormDTO dto
     ) {
-        Integer usr = (idUsuario != null ? idUsuario : 1);
-        service.crear(dto, usr);
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        service.crear(dto, idUsuario);
+
         return ResponseEntity.ok().build();
     }
 
@@ -50,11 +55,18 @@ public class ConceptoCuentasContablesController {
     @PutMapping("/{idMapeo}")
     public ResponseEntity<Void> actualizar(
             @PathVariable Integer idMapeo,
-            @RequestBody ConceptoCuentaContableFormDTO dto,
-            @RequestHeader(value = "X-User-Id", required = false) Integer idUsuario
+            @RequestBody ConceptoCuentaContableFormDTO dto
     ) {
-        Integer usr = (idUsuario != null ? idUsuario : 1);
-        service.actualizar(idMapeo, dto, usr);
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        service.actualizar(
+                idMapeo,
+                dto,
+                idUsuario
+        );
+
         return ResponseEntity.ok().build();
     }
 
@@ -63,11 +75,14 @@ public class ConceptoCuentasContablesController {
     // ============================================================
     @DeleteMapping("/{idMapeo}")
     public ResponseEntity<Void> eliminar(
-            @PathVariable Integer idMapeo,
-            @RequestHeader(value = "X-User-Id", required = false) Integer idUsuario
+            @PathVariable Integer idMapeo
     ) {
-        Integer usr = (idUsuario != null ? idUsuario : 1);
-        service.eliminar(idMapeo, usr);
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        service.eliminar(idMapeo, idUsuario);
+
         return ResponseEntity.ok().build();
     }
 }

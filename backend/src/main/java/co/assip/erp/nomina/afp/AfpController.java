@@ -1,5 +1,6 @@
 package co.assip.erp.nomina.afp;
 
+import co.assip.erp.seguridad.service.UsuarioSesionService;
 import co.assip.erp.nomina.afp.dto.AfpDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import java.util.List;
 public class AfpController {
 
     private final AfpService service;
+    private final UsuarioSesionService usuarioSesionService;
 
     // ============================================================
     // ✅ LISTAR
@@ -35,11 +37,14 @@ public class AfpController {
     // ============================================================
     @PostMapping
     public ResponseEntity<Void> crear(
-            @RequestBody AfpDTO dto,
-            @RequestHeader(value = "X-User-Id", required = false) Integer idUsuario
+            @RequestBody AfpDTO dto
     ) {
-        Integer usr = (idUsuario != null ? idUsuario : 1);
-        service.crear(dto, usr);
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        service.crear(dto, idUsuario);
+
         return ResponseEntity.ok().build();
     }
 
@@ -49,11 +54,14 @@ public class AfpController {
     @PutMapping("/{id}")
     public ResponseEntity<Void> actualizar(
             @PathVariable Integer id,
-            @RequestBody AfpDTO dto,
-            @RequestHeader(value = "X-User-Id", required = false) Integer idUsuario
+            @RequestBody AfpDTO dto
     ) {
-        Integer usr = (idUsuario != null ? idUsuario : 1);
-        service.actualizar(id, dto, usr);
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        service.actualizar(id, dto, idUsuario);
+
         return ResponseEntity.ok().build();
     }
 
