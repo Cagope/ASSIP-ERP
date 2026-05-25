@@ -194,7 +194,7 @@ export class IngresoActivosComponent implements OnInit {
       }
 
       const siguiente = (seleccionado.cscComprobante ?? 0) + 1;
-      this.consecutivoSugerido = siguiente.toString().padStart(10, '0');
+      this.consecutivoSugerido = siguiente.toString().padStart(7, '0');
       this.header.get('numeroComprobante')?.setValue(this.consecutivoSugerido);
     });
 

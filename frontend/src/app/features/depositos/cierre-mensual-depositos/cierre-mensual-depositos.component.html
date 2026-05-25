@@ -1,0 +1,582 @@
+<div class="page">
+
+  <div class="page-header">
+
+    <div>
+      <h2>Proceso — Cierre Mensual Depósitos</h2>
+
+      <p>
+        Genera la foto mensual consolidada de cuentas de ahorro.
+      </p>
+    </div>
+
+  </div>
+
+  <!-- PARAMETROS -->
+  <section class="card">
+
+    <h3>Parámetros del cierre</h3>
+
+    <div class="filters-grid">
+
+      <div class="field">
+
+        <label>
+          Agencia
+        </label>
+
+        <select
+          [(ngModel)]="model.idAgencia"
+          (change)="limpiarResultados()">
+
+          <option [ngValue]="null">
+            Seleccione...
+          </option>
+
+          <option
+            *ngFor="let a of agencias"
+            [ngValue]="a.idAgencia">
+
+            {{ a.nombreAgencia || a.nombre || a.descripcion }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+      <div class="field">
+
+        <label>
+          Fecha cierre
+        </label>
+
+        <input
+          type="date"
+          [(ngModel)]="model.fechaCierre"
+          (change)="limpiarResultados()">
+
+      </div>
+
+      <div class="actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="consultar()"
+          [disabled]="modoConsulta || procesando || cargando">
+
+          Generar preview
+
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="aplicar()"
+          [disabled]="modoConsulta || aplicando || !detalle.length">
+
+          Aplicar cierre
+
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="exportarExcel()"
+          [disabled]="!detalle.length">
+
+          Exportar Excel
+
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()">
+
+          Limpiar
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="error"
+      class="alert alert--error">
+
+      {{ error }}
+
+    </div>
+
+    <div
+      *ngIf="procesando && !modoConsulta"
+      class="alert alert--warning">
+
+      Generando preview del cierre mensual...
+      Espere un momento.
+
+    </div>
+
+    <div
+      *ngIf="modoConsulta"
+      class="alert alert--success">
+
+      Está visualizando un cierre mensual ya aplicado.
+      Para generar un nuevo proceso utilice el botón Limpiar.
+
+    </div>
+
+    <div
+      *ngIf="!modoConsulta && detalle.length"
+      class="alert alert--warning">
+
+      Preview generado correctamente.
+      Revise la información antes de aplicar el cierre mensual.
+
+    </div>
+
+  </section>
+
+  <!-- CIERRES GENERADOS -->
+  <section class="card">
+
+    <h3>Cierres generados</h3>
+
+    <p class="section-description">
+      Consulte cierres mensuales previamente aplicados o elimine cierres generados por error.
+    </p>
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+
+        <tr>
+
+          <th>
+            Fecha cierre
+          </th>
+
+          <th class="num">
+            Total cuentas
+          </th>
+
+          <th class="num">
+            Saldo total
+          </th>
+
+          <th class="num">
+            Débitos
+          </th>
+
+          <th class="num">
+            Créditos
+          </th>
+
+          <th>
+            Estado
+          </th>
+
+          <th class="text-end">
+            Acciones
+          </th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let cierre of cierres">
+
+          <td>
+            {{ cierre.fechaCierre }}
+          </td>
+
+          <td class="num">
+            {{ cierre.totalCuentas | number:'1.0-0' }}
+          </td>
+
+          <td class="num">
+            {{ cierre.saldoTotal | number:'1.0-0' }}
+          </td>
+
+          <td class="num">
+            {{ cierre.totalDebitos | number:'1.0-0' }}
+          </td>
+
+          <td class="num">
+            {{ cierre.totalCreditos | number:'1.0-0' }}
+          </td>
+
+          <td>
+            {{ cierre.estado }}
+          </td>
+
+          <td class="text-end">
+
+            <div class="acciones">
+
+              <button
+                type="button"
+                class="btn-action-edit btn-action-text"
+                (click)="verCierre(cierre.idCierreMensual)">
+
+                Ver
+
+              </button>
+
+              <button
+                type="button"
+                class="btn-action-delete btn-action-text"
+                (click)="eliminarCierre(cierre)"
+                [disabled]="procesando">
+
+                Eliminar
+
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+        <tr *ngIf="!cierres.length">
+
+          <td
+            colspan="7"
+            class="empty">
+
+            No hay cierres mensuales generados.
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+  <!-- RESUMEN -->
+  <section
+    *ngIf="detalle.length"
+    class="summary-grid">
+
+    <div class="summary-card">
+
+      <span>
+        Total cuentas
+      </span>
+
+      <strong>
+        {{ resumen.totalCuentas | number:'1.0-0' }}
+      </strong>
+
+    </div>
+
+    <div class="summary-card">
+
+      <span>
+        Saldo total
+      </span>
+
+      <strong>
+        $ {{ resumen.saldoTotal | number:'1.0-0' }}
+      </strong>
+
+    </div>
+
+    <div class="summary-card">
+
+      <span>
+        Débitos
+      </span>
+
+      <strong>
+        $ {{ resumen.totalDebitos | number:'1.0-0' }}
+      </strong>
+
+    </div>
+
+    <div class="summary-card">
+
+      <span>
+        Créditos
+      </span>
+
+      <strong>
+        $ {{ resumen.totalCreditos | number:'1.0-0' }}
+      </strong>
+
+    </div>
+
+    <div class="summary-card">
+
+      <span>
+        Hombres
+      </span>
+
+      <strong>
+        {{ resumen.hombres | number:'1.0-0' }}
+      </strong>
+
+    </div>
+
+    <div class="summary-card">
+
+      <span>
+        Mujeres
+      </span>
+
+      <strong>
+        {{ resumen.mujeres | number:'1.0-0' }}
+      </strong>
+
+    </div>
+
+    <div class="summary-card">
+
+      <span>
+        Jurídicas
+      </span>
+
+      <strong>
+        {{ resumen.juridicas | number:'1.0-0' }}
+      </strong>
+
+    </div>
+
+  </section>
+
+  <!-- RESUMEN FORMAS -->
+  <section
+    *ngIf="resumenFormas.length"
+    class="card">
+
+    <h3>Resumen por forma</h3>
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+
+        <tr>
+
+          <th>
+            Código
+          </th>
+
+          <th>
+            Forma
+          </th>
+
+          <th class="num">
+            Cuentas
+          </th>
+
+          <th class="num">
+            Saldo
+          </th>
+
+          <th class="num">
+            Débitos
+          </th>
+
+          <th class="num">
+            Créditos
+          </th>
+
+          <th class="num">
+            Hombres
+          </th>
+
+          <th class="num">
+            Mujeres
+          </th>
+
+          <th class="num">
+            Jurídicas
+          </th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let item of resumenFormas">
+
+          <td>
+            {{ item.codigoForma }}
+          </td>
+
+          <td>
+            {{ item.nombreForma }}
+          </td>
+
+          <td class="num">
+            {{ item.cantidadCuentas | number:'1.0-0' }}
+          </td>
+
+          <td class="num">
+            {{ item.saldoTotal | number:'1.0-0' }}
+          </td>
+
+          <td class="num">
+            {{ item.totalDebitos | number:'1.0-0' }}
+          </td>
+
+          <td class="num">
+            {{ item.totalCreditos | number:'1.0-0' }}
+          </td>
+
+          <td class="num">
+            {{ item.hombres | number:'1.0-0' }}
+          </td>
+
+          <td class="num">
+            {{ item.mujeres | number:'1.0-0' }}
+          </td>
+
+          <td class="num">
+            {{ item.juridicas | number:'1.0-0' }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+  <!-- DETALLE -->
+  <section
+    *ngIf="detalle.length"
+    class="card">
+
+    <h3>Detalle del cierre mensual</h3>
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+
+        <tr>
+
+          <th>
+            Forma
+          </th>
+
+          <th>
+            Cuenta
+          </th>
+
+          <th>
+            Documento
+          </th>
+
+          <th>
+            Nombre
+          </th>
+
+          <th>
+            Estado
+          </th>
+
+          <th class="num">
+            Saldo
+          </th>
+
+          <th class="num">
+            Débitos
+          </th>
+
+          <th class="num">
+            Créditos
+          </th>
+
+          <th class="num">
+            Tasa
+          </th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let item of detalle">
+
+          <td>
+            {{ item.codigoForma }}
+          </td>
+
+          <td>
+            {{ item.codigoCuenta }}
+          </td>
+
+          <td>
+            {{ item.documento }}
+          </td>
+
+          <td>
+            {{ item.nombreCompleto }}
+          </td>
+
+          <td>
+            {{ item.estadoCuenta }}
+          </td>
+
+          <td class="num">
+            {{ item.saldoCierre | number:'1.0-0' }}
+          </td>
+
+          <td class="num">
+            {{ item.totalDebitos | number:'1.0-0' }}
+          </td>
+
+          <td class="num">
+            {{ item.totalCreditos | number:'1.0-0' }}
+          </td>
+
+          <td class="num">
+            {{ item.tasa | number:'1.2-2' }}
+          </td>
+
+        </tr>
+
+        <tr *ngIf="!detalle.length">
+
+          <td
+            colspan="9"
+            class="empty">
+
+            No hay cuentas para la fecha seleccionada.
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</div>

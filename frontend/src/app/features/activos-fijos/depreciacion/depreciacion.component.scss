@@ -1,3 +1,6 @@
+@use '../../../../styles/forms';
+@use '../../../../styles/informes-base';
+
 .depreciacion-container {
   padding: 1rem 1.25rem;
 }
@@ -7,75 +10,65 @@ h2 {
   font-size: 1.25rem;
 }
 
+/* ============================================================
+   FORMULARIO
+============================================================ */
+
 .depreciacion-form {
-  background: #fff;
-  border-radius: 6px;
   padding: 1rem;
+
   margin-bottom: 1.25rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+
+  background: #fff;
+
+  border-radius: 6px;
+
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .form-grid {
-  display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
 
   .full {
     grid-column: span 4;
   }
+
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
+/* ============================================================
+   HINT
+============================================================ */
 
-  label {
-    font-size: .75rem;
-    font-weight: 600;
-    margin-bottom: .25rem;
-  }
-
-  input,
-  select {
-    height: 32px;
-    padding: 0 .5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: .8rem;
-    background: #fff;
-
-    &:focus {
-      outline: none;
-      border-color: #1976d2;
-    }
-  }
-}
-
-/* ✅ Hint informativo */
 .hint {
-  margin-top: .25rem;
-  font-size: .7rem;
+  margin-top: 0.25rem;
+
   color: #455a64;
+
+  font-size: 0.7rem;
   font-weight: 500;
 }
 
-.form-actions {
-  display: flex;
-  gap: .75rem;
-  margin-top: 1rem;
-}
+/* ============================================================
+   ESTADOS
+============================================================ */
 
 .loading {
-  margin-top: .75rem;
+  margin-top: 0.75rem;
+
   color: #1976d2;
   font-weight: 600;
 }
 
 .error {
-  margin-top: .75rem;
+  margin-top: 0.75rem;
+
   color: #c62828;
   font-weight: 600;
 }
+
+/* ============================================================
+   RESULTADOS
+============================================================ */
 
 .preview-result {
   margin-top: 1.25rem;
@@ -83,13 +76,15 @@ h2 {
 
 .preview-table {
   width: 100%;
+
   border-collapse: collapse;
-  font-size: .75rem;
+
+  font-size: 0.75rem;
 
   th,
   td {
+    padding: 0.35rem 0.5rem;
     border: 1px solid #e0e0e0;
-    padding: .35rem .5rem;
   }
 
   thead {
@@ -101,16 +96,17 @@ h2 {
     font-weight: 700;
   }
 
-  .num {
-    text-align: right;
-  }
-
+  .num,
   .text-right {
     text-align: right;
   }
+
 }
 
-/* ✅ Nuevo bloque: comprobante contable */
+/* ============================================================
+   COMPROBANTE
+============================================================ */
+
 .preview-comprobante {
   margin-top: 1.25rem;
 
@@ -118,37 +114,47 @@ h2 {
     margin-top: 1rem;
   }
 
-  /* hacer el renglón crédito un subdetalle */
   tbody tr:nth-child(even) td {
     background: #fcfcfc;
   }
+
 }
 
 .muted {
   color: #78909c;
 }
 
-/* Responsive */
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
 @media (max-width: 1024px) {
+
   .form-grid {
     grid-template-columns: repeat(2, 1fr);
 
     .full {
       grid-column: span 2;
     }
+
   }
+
 }
 
 @media (max-width: 640px) {
+
   .form-grid {
     grid-template-columns: 1fr;
 
     .full {
       grid-column: span 1;
     }
+
   }
 
   .form-actions {
     flex-direction: column;
+    align-items: stretch;
   }
+
 }

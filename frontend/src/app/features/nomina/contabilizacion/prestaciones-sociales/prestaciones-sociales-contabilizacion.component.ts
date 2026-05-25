@@ -38,6 +38,7 @@ export class PrestacionesSocialesContabilizacionComponent {
   private api = inject(PrestacionesSocialesContabilizacionApi);
   private periodosApi = inject(PeriodosNominaApi);
   private tiposComprobantesApi = inject(TiposComprobantesApi);
+  private prestacionesSocialesExporter = inject(PrestacionesSocialesContabilizacionExporter);
 
   idPeriodoNomina: number | null = null;
   periodos: any[] = [];
@@ -274,7 +275,7 @@ export class PrestacionesSocialesContabilizacionComponent {
 
     const consecutivo = siguiente
       .toString()
-      .padStart(10, '0');
+      .padStart(7, '0');
 
     this.numeroComprobantePreview = consecutivo;
   }
@@ -334,7 +335,7 @@ export class PrestacionesSocialesContabilizacionComponent {
       return;
     }
 
-    PrestacionesSocialesContabilizacionExporter.exportarComprobante(
+    this.prestacionesSocialesExporter.exportarComprobante(
       this.movimientos,
       {
         periodo: this.idPeriodoNomina as number,

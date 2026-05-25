@@ -1,0 +1,60 @@
+<div class="chart-card">
+
+  <div class="chart-header">
+
+    <div>
+      <h3>Tendencia mensual CDAT</h3>
+
+      <small>
+        Aperturas, renovaciones y cancelaciones de los últimos 12 meses.
+      </small>
+    </div>
+
+  </div>
+
+  <div class="legend">
+
+    <span class="legend-item aperturas">Aperturas</span>
+    <span class="legend-item renovaciones">Renovaciones</span>
+    <span class="legend-item cancelaciones">Cancelaciones</span>
+
+  </div>
+
+  <div class="chart-wrapper">
+
+    <svg
+      viewBox="0 0 900 300"
+      preserveAspectRatio="none">
+
+      <line
+        x1="45"
+        y1="260"
+        x2="860"
+        y2="260"
+        class="axis" />
+
+      <polyline
+        [attr.points]="puntosAperturas"
+        class="line aperturas-line" />
+
+      <polyline
+        [attr.points]="puntosRenovaciones"
+        class="line renovaciones-line" />
+
+      <polyline
+        [attr.points]="puntosCancelaciones"
+        class="line cancelaciones-line" />
+
+    </svg>
+
+  </div>
+
+  <div class="months-row">
+
+    <span *ngFor="let item of data">
+      {{ item.periodo }}
+    </span>
+
+  </div>
+
+</div>

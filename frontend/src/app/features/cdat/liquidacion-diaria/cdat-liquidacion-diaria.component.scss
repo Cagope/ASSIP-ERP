@@ -1,0 +1,259 @@
+@use '../../../../styles/forms';
+@use '../../../../styles/informes-base';
+
+.page {
+  padding: 1rem;
+}
+
+h2 {
+  margin: 0 0 1rem;
+
+  color: #0b2545;
+
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+/* =========================================
+   PANEL
+========================================= */
+
+.panel {
+  margin-top: 1rem;
+}
+
+/* =========================================
+   SECTION HEADER
+========================================= */
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+
+  border-bottom: 1px solid #dbe3ec;
+
+  h3 {
+    margin: 0;
+
+    color: #1f2937;
+
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  small {
+    display: block;
+
+    margin-top: 0.2rem;
+
+    color: #64748b;
+
+    font-size: 0.82rem;
+    font-weight: 500;
+  }
+}
+
+/* =========================================
+   GRID
+========================================= */
+
+.grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* =========================================
+   FILAS FORMULARIO
+========================================= */
+
+.f-row {
+  display: flex;
+  flex-direction: column;
+
+  label {
+    margin-bottom: 0.3rem;
+
+    color: #334155;
+
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  input,
+  select {
+    height: 36px;
+
+    padding: 0.35rem 0.55rem;
+
+    background: #fff;
+
+    border: 1px solid #cfd8e3;
+    border-radius: 7px;
+
+    font-size: 0.88rem;
+  }
+}
+
+/* =========================================
+   ACCIONES
+========================================= */
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+
+  margin-top: 1.25rem;
+}
+
+/* =========================================
+   ALERTAS
+========================================= */
+
+.error {
+  margin-bottom: 1rem;
+}
+
+/* =========================================
+   RESUMEN
+========================================= */
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+
+  gap: 1rem;
+
+  margin-top: 1rem;
+}
+
+.summary-card {
+  min-height: 96px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  font-family: inherit;
+}
+
+.summary-card span,
+.summary-card .summary-title {
+  display: block;
+
+  margin-bottom: 0.55rem;
+
+  color: #334155;
+
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.summary-value {
+  display: block;
+  width: 100%;
+
+  text-align: right;
+
+  color: #0f172a;
+
+  font-size: 1.45rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.summary-value.amount {
+  letter-spacing: 0.4px;
+}
+
+/* =========================================
+   TABLAS
+========================================= */
+
+.data-table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  font-size: 0.88rem;
+
+  th {
+    padding: 0.6rem;
+
+    text-align: left;
+
+    color: #334155;
+
+    font-weight: 700;
+  }
+
+  td {
+    padding: 0.55rem 0.6rem;
+  }
+
+  tr:hover {
+    background: #f8fafc;
+  }
+
+  .right {
+    text-align: right;
+  }
+}
+
+/* =========================================
+   TOTALES
+========================================= */
+
+.totals {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+
+  gap: 0.75rem;
+
+  margin-top: 1rem;
+
+  p {
+    margin: 0;
+    padding: 0.75rem;
+  }
+}
+
+.ok {
+  color: #047857;
+  font-weight: 800;
+}
+
+.bad {
+  color: #b91c1c;
+  font-weight: 800;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1000px) {
+
+  .grid-4,
+  .summary-grid,
+  .totals {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+
+}

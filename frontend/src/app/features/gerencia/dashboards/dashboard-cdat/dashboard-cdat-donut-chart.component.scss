@@ -1,0 +1,110 @@
+.chart-card {
+  background: #ffffff;
+  border: 1px solid #dbe3ec;
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.chart-header {
+  margin-bottom: 1rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  small {
+    color: #64748b;
+  }
+}
+
+.donut-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.donut-container {
+  display: flex;
+  justify-content: center;
+}
+
+.donut-chart {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.donut-center {
+  width: 105px;
+  height: 105px;
+  border-radius: 50%;
+  background: #ffffff;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  strong {
+    font-size: 1.4rem;
+    color: #0f172a;
+  }
+
+  span {
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.legend-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.legend-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.legend-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+}
+
+.legend-label {
+  font-size: 0.86rem;
+  color: #334155;
+}
+
+.legend-right {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+@media (max-width: 900px) {
+
+  .donut-layout {
+    grid-template-columns: 1fr;
+  }
+
+}

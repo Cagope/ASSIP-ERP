@@ -1,27 +1,67 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
-import { SeccionNominaDTO } from './secciones.api';
 
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService
+} from '../../../shared/services/excel-export.service';
+
+import {
+  SeccionNominaDTO
+} from './secciones.api';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class SeccionesNominaExporterService {
 
-  exportar(items: SeccionNominaDTO[]): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportar(
+    items: SeccionNominaDTO[]
+  ): void {
 
     if (!items || items.length === 0) {
       alert('No hay información para exportar.');
       return;
     }
 
-    const data = items.map(x => ({
-      'Código': x.codigo,
-      'Nombre Sección': x.nombreSeccion,
-      'Activo': x.activo ? 'SI' : 'NO'
-    }));
+    this.excelExport.exportar({
 
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
+      nombreArchivo:
+        'secciones_nomina.xlsx',
 
-    XLSX.utils.book_append_sheet(wb, ws, 'Secciones');
-    XLSX.writeFile(wb, 'secciones_nomina.xlsx');
+      hojas: [
+
+        {
+          nombreHoja:
+            'Secciones',
+
+          titulo:
+            'SECCIONES NÓMINA',
+
+          columnas: [
+            'Código',
+            'Nombre Sección',
+            'Activo'
+          ],
+
+          filas: items.map(x => [
+            x.codigo || '',
+            x.nombreSeccion || '',
+            x.activo ? 'SI' : 'NO'
+          ]),
+
+          anchos: [
+            18,
+            42,
+            12
+          ]
+        }
+
+      ]
+
+    });
   }
 }

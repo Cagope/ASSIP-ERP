@@ -1,0 +1,595 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h2>Estadísticos CDAT</h2>
+      <small>Informe gerencial y comparativo de captación CDAT.</small>
+    </div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="card filtros-card">
+    <div class="section-header">
+      <div>
+        <h3>Filtros de consulta</h3>
+        <small>Consulte la información estadística por fecha de corte.</small>
+      </div>
+    </div>
+
+    <div class="filters-grid">
+      <div class="f-row">
+        <label>Fecha corte actual</label>
+        <input type="date" [(ngModel)]="fechaCorteActual">
+      </div>
+
+      <div class="f-row">
+        <label>Fecha corte anterior</label>
+        <input type="date" [(ngModel)]="fechaCorteAnterior">
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn--secondary" (click)="volver()">Volver</button>
+      <button type="button" class="btn btn--primary" (click)="consultar()">Consultar</button>
+      <button type="button" class="btn btn--secondary" (click)="imprimir()">Imprimir</button>
+      <button type="button" class="btn btn--secondary" (click)="exportarExcel()">Exportar Excel</button>
+    </div>
+  </div>
+
+  <!-- RESUMEN EJECUTIVO -->
+  <div class="card">
+    <div class="section-header">
+      <div>
+        <h3>Resumen ejecutivo</h3>
+        <small>Indicadores generales de captación CDAT.</small>
+      </div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="stat-card">
+        <span class="stat-label">Total CDAT</span>
+        <span class="stat-value">{{ resumen?.totalCdats || 0 }}</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-label">Valor captado</span>
+        <span class="stat-value">$ {{ resumen?.valorTotalCaptado || 0 | number:'1.0-0' }}</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-label">Promedio tasa</span>
+        <span class="stat-value">{{ resumen?.promedioTasa || 0 | number:'1.2-2' }}%</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-label">Promedio plazo</span>
+        <span class="stat-value">{{ resumen?.promedioPlazo || 0 | number:'1.0-0' }} meses</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-label">Vencen 30 días</span>
+        <span class="stat-value">{{ resumen?.vencen30Dias || 0 }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- POR RANGOS -->
+  <div class="card">
+    <div class="section-header">
+
+      <div>
+        <h3>Informe por rangos</h3>
+
+        <small>
+          Distribución por valor del título CDAT.
+        </small>
+      </div>
+
+      <div class="form-actions section-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="imprimirBloque(
+        'Informe por rangos',
+        'RANGOS',
+        rangos,
+        obtenerConceptoGrupo
+      )">
+
+          Imprimir bloque
+
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="exportarBloque(
+        'Informe por rangos',
+        'RANGOS',
+        rangos,
+        obtenerConceptoGrupo
+      )">
+
+          Exportar bloque
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <table class="data-table">
+      <thead>
+      <tr>
+        <th>Rango</th>
+        <th class="right">Cantidad</th>
+        <th class="right">Valor total</th>
+        <th class="right">Promedio tasa</th>
+        <th class="right">% participación</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr
+        *ngFor="let r of rangos"
+        class="clickable-row"
+        (click)="verDetalle('RANGOS', r.concepto)">
+        <td>{{ r.concepto }}</td>
+        <td class="right">{{ r.cantidad | number:'1.0-0' }}</td>
+        <td class="right">$ {{ r.valorTotal | number:'1.0-0' }}</td>
+        <td class="right">{{ r.promedioTasa | number:'1.2-2' }}%</td>
+        <td class="right">{{ r.participacion | number:'1.2-2' }}%</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <ng-container *ngIf="mostrarDetalle('RANGOS')">
+      <ng-container *ngTemplateOutlet="detalleBloque"></ng-container>
+    </ng-container>
+  </div>
+
+  <!-- POR AMORTIZACION -->
+  <div class="card">
+    <div class="section-header">
+
+      <div>
+        <h3>Informe por amortización</h3>
+
+        <small>
+          Distribución por pago de intereses.
+        </small>
+      </div>
+
+      <div class="form-actions section-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="imprimirBloque(
+        'Informe por amortización',
+        'AMORTIZACION',
+        amortizacion,
+        obtenerConceptoGrupo
+      )">
+
+          Imprimir bloque
+
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="exportarBloque(
+        'Informe por amortización',
+        'AMORTIZACION',
+        amortizacion,
+        obtenerConceptoGrupo
+      )">
+
+          Exportar bloque
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <table class="data-table">
+      <thead>
+      <tr>
+        <th>Amortización</th>
+        <th class="right">Cantidad</th>
+        <th class="right">Valor total</th>
+        <th class="right">Promedio tasa</th>
+        <th class="right">% participación</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr
+        *ngFor="let r of amortizacion"
+        class="clickable-row"
+        (click)="verDetalle('AMORTIZACION', r.concepto)">
+        <td>{{ r.concepto }}</td>
+        <td class="right">{{ r.cantidad | number:'1.0-0' }}</td>
+        <td class="right">$ {{ r.valorTotal | number:'1.0-0' }}</td>
+        <td class="right">{{ r.promedioTasa | number:'1.2-2' }}%</td>
+        <td class="right">{{ r.participacion | number:'1.2-2' }}%</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <ng-container *ngIf="mostrarDetalle('AMORTIZACION')">
+      <ng-container *ngTemplateOutlet="detalleBloque"></ng-container>
+    </ng-container>
+  </div>
+
+  <!-- POR PLAZO -->
+  <div class="card">
+    <div class="section-header">
+
+      <div>
+        <h3>CDAT corto y largo plazo</h3>
+
+        <small>
+          Distribución por plazo de captación.
+        </small>
+      </div>
+
+      <div class="form-actions section-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="imprimirBloque(
+        'CDAT corto y largo plazo',
+        'PLAZOS',
+        plazos,
+        obtenerConceptoGrupo
+      )">
+
+          Imprimir bloque
+
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="exportarBloque(
+        'CDAT corto y largo plazo',
+        'PLAZOS',
+        plazos,
+        obtenerConceptoGrupo
+      )">
+
+          Exportar bloque
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <table class="data-table">
+      <thead>
+      <tr>
+        <th>Plazo</th>
+        <th class="right">Cantidad</th>
+        <th class="right">Valor total</th>
+        <th class="right">Promedio tasa</th>
+        <th class="right">% participación</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr
+        *ngFor="let r of plazos"
+        class="clickable-row"
+        (click)="verDetalle('PLAZOS', r.concepto)">
+        <td>{{ r.concepto }}</td>
+        <td class="right">{{ r.cantidad | number:'1.0-0' }}</td>
+        <td class="right">$ {{ r.valorTotal | number:'1.0-0' }}</td>
+        <td class="right">{{ r.promedioTasa | number:'1.2-2' }}%</td>
+        <td class="right">{{ r.participacion | number:'1.2-2' }}%</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <ng-container *ngIf="mostrarDetalle('PLAZOS')">
+      <ng-container *ngTemplateOutlet="detalleBloque"></ng-container>
+    </ng-container>
+  </div>
+
+  <!-- POR PLAZO DETALLE -->
+  <div class="card">
+    <div class="section-header">
+
+      <div>
+        <h3>CDAT por plazo</h3>
+
+        <small>
+          Distribución por plazo exacto de captación.
+        </small>
+      </div>
+
+      <div class="form-actions section-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="imprimirBloque(
+        'CDAT por plazo',
+        'PLAZOS_DETALLE',
+        plazosDetalle,
+        obtenerConceptoGrupo
+      )">
+
+          Imprimir bloque
+
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="exportarBloque(
+        'CDAT por plazo',
+        'PLAZOS_DETALLE',
+        plazosDetalle,
+        obtenerConceptoGrupo
+      )">
+
+          Exportar bloque
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <table class="data-table">
+      <thead>
+      <tr>
+        <th>Plazo</th>
+        <th class="right">Cantidad</th>
+        <th class="right">Valor total</th>
+        <th class="right">Promedio tasa</th>
+        <th class="right">% participación</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr
+        *ngFor="let r of plazosDetalle"
+        class="clickable-row"
+        (click)="verDetalle('PLAZOS_DETALLE', r.concepto)">
+        <td>{{ r.concepto }} meses</td>
+        <td class="right">{{ r.cantidad | number:'1.0-0' }}</td>
+        <td class="right">$ {{ r.valorTotal | number:'1.0-0' }}</td>
+        <td class="right">{{ r.promedioTasa | number:'1.2-2' }}%</td>
+        <td class="right">{{ r.participacion | number:'1.2-2' }}%</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <ng-container *ngIf="mostrarDetalle('PLAZOS_DETALLE')">
+      <ng-container *ngTemplateOutlet="detalleBloque"></ng-container>
+    </ng-container>
+  </div>
+
+  <!-- TASAS -->
+  <div class="card">
+    <div class="section-header">
+
+      <div>
+        <h3>Tasas de captación</h3>
+
+        <small>
+          Distribución por tasas nominales anuales.
+        </small>
+      </div>
+
+      <div class="form-actions section-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="imprimirBloque(
+        'Tasas de captación',
+        'TASAS',
+        tasas,
+        obtenerConceptoTasa
+      )">
+
+          Imprimir bloque
+
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="exportarBloque(
+        'Tasas de captación',
+        'TASAS',
+        tasas,
+        obtenerConceptoTasa
+      )">
+
+          Exportar bloque
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <table class="data-table">
+      <thead>
+      <tr>
+        <th>Tasa</th>
+        <th class="right">Cantidad</th>
+        <th class="right">Valor total</th>
+        <th class="right">% participación</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr
+        *ngFor="let r of tasas"
+        class="clickable-row"
+        (click)="verDetalle('TASAS', r.tasa)">
+        <td>{{ r.tasa }}</td>
+        <td class="right">{{ r.cantidad | number:'1.0-0' }}</td>
+        <td class="right">$ {{ r.valorTotal | number:'1.0-0' }}</td>
+        <td class="right">{{ r.participacion | number:'1.2-2' }}%</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <ng-container *ngIf="mostrarDetalle('TASAS')">
+      <ng-container *ngTemplateOutlet="detalleBloque"></ng-container>
+    </ng-container>
+  </div>
+
+  <!-- TASAS DETALLE -->
+  <div class="card">
+    <div class="section-header">
+
+      <div>
+        <h3>Tasas de captación por tasa exacta</h3>
+
+        <small>
+          Distribución por tasa nominal anual exacta.
+        </small>
+      </div>
+
+      <div class="form-actions section-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="imprimirBloque(
+        'Tasas de captación por tasa exacta',
+        'TASAS_DETALLE',
+        tasasDetalle,
+        obtenerConceptoTasa
+      )">
+
+          Imprimir bloque
+
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="exportarBloque(
+        'Tasas de captación por tasa exacta',
+        'TASAS_DETALLE',
+        tasasDetalle,
+        obtenerConceptoTasa
+      )">
+
+          Exportar bloque
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <table class="data-table">
+      <thead>
+      <tr>
+        <th>Tasa</th>
+        <th class="right">Cantidad</th>
+        <th class="right">Valor total</th>
+        <th class="right">% participación</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr
+        *ngFor="let r of tasasDetalle"
+        class="clickable-row"
+        (click)="verDetalle('TASAS_DETALLE', r.tasa)">
+        <td>{{ r.tasa }}</td>
+        <td class="right">{{ r.cantidad | number:'1.0-0' }}</td>
+        <td class="right">$ {{ r.valorTotal | number:'1.0-0' }}</td>
+        <td class="right">{{ r.participacion | number:'1.2-2' }}%</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <ng-container *ngIf="mostrarDetalle('TASAS_DETALLE')">
+      <ng-container *ngTemplateOutlet="detalleBloque"></ng-container>
+    </ng-container>
+  </div>
+
+  <!-- TEMPLATE DETALLE -->
+  <ng-template #detalleBloque>
+
+    <div class="detalle-bloque">
+
+      <div class="section-header">
+        <div>
+          <h3>Detalle del bloque</h3>
+          <small>{{ detalleTitulo }}</small>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiarDetalle()">
+          Cerrar
+        </button>
+      </div>
+
+      <div *ngIf="cargandoDetalle" class="loading">
+        Cargando detalle...
+      </div>
+
+      <div *ngIf="errorDetalle" class="error">
+        {{ errorDetalle }}
+      </div>
+
+      <table
+        *ngIf="!cargandoDetalle && detalle.length"
+        class="data-table">
+
+        <thead>
+        <tr>
+          <th>CDAT</th>
+          <th>Documento</th>
+          <th>Asociado</th>
+          <th>Agencia</th>
+          <th>F. Apertura</th>
+          <th>F. Vencimiento</th>
+          <th class="right">Plazo</th>
+          <th class="right">Tasa</th>
+          <th class="right">Valor</th>
+          <th>Estado</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let d of detalle">
+          <td>{{ d.codigoCdat }}</td>
+          <td>{{ d.documento }}</td>
+          <td>{{ d.nombreCompleto }}</td>
+          <td>{{ d.agencia }}</td>
+          <td>{{ d.fechaAperturaCdat }}</td>
+          <td>{{ d.fechaVencimientoCdat }}</td>
+          <td class="right">{{ d.plazoMeses | number:'1.0-0' }}</td>
+          <td class="right">{{ d.tasaNominalAnual | number:'1.2-2' }}%</td>
+          <td class="right">$ {{ d.saldoActualCdat | number:'1.0-0' }}</td>
+          <td>{{ d.estadoCdat }}</td>
+        </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </ng-template>
+
+</div>

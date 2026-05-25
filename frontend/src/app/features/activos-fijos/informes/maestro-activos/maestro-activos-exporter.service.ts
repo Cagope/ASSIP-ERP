@@ -1,182 +1,256 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
 
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService
+} from '../../../../shared/services/excel-export.service';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class MaestroActivosExporterService {
 
-  exportar(rows: any[], nombreAgencia?: string): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportar(
+    rows: any[],
+    nombreAgencia?: string
+  ): void {
 
     if (!rows || rows.length === 0) {
       alert('No hay información para exportar.');
       return;
     }
 
-    const data = rows.map(r => {
+    this.excelExport.exportar({
 
-      // ------------------------------
-      // Responsable / Proveedor (Nombre + Documento)
-      // ------------------------------
-      const responsableNombre = String(r?.nombre_responsable ?? '').trim();
-      const responsableDoc = String(r?.documento_responsable ?? '').trim();
+      nombreArchivo:
+        this.buildFileName(nombreAgencia),
 
-      const proveedorNombre = String(r?.nombre_proveedor ?? '').trim();
-      const proveedorDoc = String(r?.documento_proveedor ?? '').trim();
+      hojas: [
 
-      const responsableFull = this.personaConDocumento(responsableNombre, responsableDoc);
-      const proveedorFull = this.personaConDocumento(proveedorNombre, proveedorDoc);
+        {
+          nombreHoja: 'Maestro Activos',
 
-      return {
+          titulo: 'Maestro general de activos fijos',
 
-        // ============================================================
-        // ✅ IDENTIFICACIÓN DEL ACTIVO
-        // ============================================================
-        'ID Activo': r?.id_activo_fijo ?? '',
-        'Placa': r?.placa_activo ?? '',
-        'Nombre Activo': r?.nombre_activo ?? '',
+          columnas: [
 
-        // ============================================================
-        // ✅ FECHAS
-        // ============================================================
-        'Fecha Ingreso': r?.fecha_ingreso ?? '',
-        'Fecha Garantía': r?.fecha_garantia ?? '',
-        'Fecha Baja': r?.fecha_baja ?? '',
-        'Fecha Última Depreciación': r?.fecha_ultima_depreciacion ?? '',
+            'ID Activo',
+            'Placa',
+            'Nombre Activo',
 
-        // ============================================================
-        // ✅ AGENCIA (ID + CÓDIGO + NOMBRE)
-        // ============================================================
-        'ID Agencia': r?.id_agencia ?? '',
-        'Código Agencia': r?.codigo_agencia ?? '',
-        'Agencia': r?.nombre_agencia ?? '',
+            'Fecha Ingreso',
+            'Fecha Garantía',
+            'Fecha Baja',
+            'Fecha Última Depreciación',
 
-        // ============================================================
-        // ✅ ESTADO (ID + CÓDIGO + NOMBRE)
-        // ============================================================
-        'ID Estado': r?.id_estado_activo ?? '',
-        'Código Estado': r?.codigo_estado ?? '',
-        'Estado': r?.nombre_estado ?? '',
+            'ID Agencia',
+            'Código Agencia',
+            'Agencia',
 
-        // ============================================================
-        // ✅ BLOQUE (ID + CÓDIGO + NOMBRE)
-        // ============================================================
-        'ID Bloque': r?.id_bloque ?? '',
-        'Código Bloque': r?.codigo_bloque ?? '',
-        'Bloque': r?.nombre_bloque ?? '',
+            'ID Estado',
+            'Código Estado',
+            'Estado',
 
-        // ============================================================
-        // ✅ LOCALIZACIÓN
-        // ============================================================
-        'ID Localización': r?.id_localizacion ?? '',
-        'Localización': r?.nombre_localizacion ?? '',
+            'ID Bloque',
+            'Código Bloque',
+            'Bloque',
 
-        // ============================================================
-        // ✅ CLASIFICACIÓN / ADQUISICIÓN
-        // ============================================================
-        'ID Tipo Adquisición': r?.id_tipo_adquisicion ?? '',
-        'Código Tipo Adquisición': r?.codigo_adquisicion ?? '',
-        'Tipo Adquisición': r?.nombre_tipo_adquisicion ?? '',
+            'ID Localización',
+            'Localización',
 
-        'ID Forma Depreciación': r?.id_forma_depreciacion ?? '',
-        'Código Forma Depreciación': r?.codigo_forma ?? '',
-        'Forma Depreciación': r?.nombre_forma ?? '',
+            'ID Tipo Adquisición',
+            'Código Tipo Adquisición',
+            'Tipo Adquisición',
 
-        'Meses Depreciación': Number(r?.meses_depreciacion ?? 0),
+            'ID Forma Depreciación',
+            'Código Forma Depreciación',
+            'Forma Depreciación',
 
-        // ============================================================
-        // ✅ VALORES
-        // ============================================================
-        'Valor Adquisición': Number(r?.valor_adquisicion ?? 0),
-        'Valor Mensual Depreciación': Number(r?.valor_mensual ?? 0),
-        'Depreciación Acumulada': Number(r?.valor_depreciacion_acumulada ?? 0),
-        'Valor Neto': Number(r?.valor_neto ?? 0),
+            'Meses Depreciación',
 
-        // ============================================================
-        // ✅ RESPONSABLE / PROVEEDOR
-        // ============================================================
-        'ID Responsable': r?.id_datos_personal_responsable ?? '',
-        'Responsable (Documento)': responsableFull,
+            'Valor Adquisición',
+            'Valor Mensual Depreciación',
+            'Depreciación Acumulada',
+            'Valor Neto',
 
-        'ID Proveedor': r?.id_datos_personal_proveedor ?? '',
-        'Proveedor (Documento)': proveedorFull,
+            'ID Responsable',
+            'Responsable (Documento)',
 
-        // ============================================================
-        // ✅ CUENTAS CONTABLES (SEPARADAS)
-        // ============================================================
+            'ID Proveedor',
+            'Proveedor (Documento)',
 
-        // CTA ACTIVO
-        'ID Cta Activo': r?.id_catalogo_cuenta_activo ?? '',
-        'Cta Activo Código': r?.codigo_cuenta_activo ?? '',
-        'Cta Activo Nombre': r?.nombre_cuenta_activo ?? '',
+            'ID Cta Activo',
+            'Cta Activo Código',
+            'Cta Activo Nombre',
 
-        // CTA DEPRECIACIÓN
-        'ID Cta Depreciación': r?.id_catalogo_cuenta_depreciacion ?? '',
-        'Cta Depreciación Código': r?.codigo_cuenta_depreciacion ?? '',
-        'Cta Depreciación Nombre': r?.nombre_cuenta_depreciacion ?? '',
+            'ID Cta Depreciación',
+            'Cta Depreciación Código',
+            'Cta Depreciación Nombre',
 
-        // CTA GASTO
-        'ID Cta Gasto': r?.id_catalogo_cuenta_gasto ?? '',
-        'Cta Gasto Código': r?.codigo_cuenta_gasto ?? '',
-        'Cta Gasto Nombre': r?.nombre_cuenta_gasto ?? '',
+            'ID Cta Gasto',
+            'Cta Gasto Código',
+            'Cta Gasto Nombre',
 
-        // CTA CONTROL
-        'ID Cta Control': r?.id_catalogo_cuenta_control ?? '',
-        'Cta Control Código': r?.codigo_cuenta_control ?? '',
-        'Cta Control Nombre': r?.nombre_cuenta_control ?? '',
-      };
+            'ID Cta Control',
+            'Cta Control Código',
+            'Cta Control Nombre'
+          ],
+
+          filas: rows.map(r => {
+
+            const responsable =
+              this.personaConDocumento(
+                r?.nombre_responsable,
+                r?.documento_responsable
+              );
+
+            const proveedor =
+              this.personaConDocumento(
+                r?.nombre_proveedor,
+                r?.documento_proveedor
+              );
+
+            return [
+
+              r?.id_activo_fijo ?? '',
+              r?.placa_activo ?? '',
+              r?.nombre_activo ?? '',
+
+              r?.fecha_ingreso ?? '',
+              r?.fecha_garantia ?? '',
+              r?.fecha_baja ?? '',
+              r?.fecha_ultima_depreciacion ?? '',
+
+              r?.id_agencia ?? '',
+              r?.codigo_agencia ?? '',
+              r?.nombre_agencia ?? '',
+
+              r?.id_estado_activo ?? '',
+              r?.codigo_estado ?? '',
+              r?.nombre_estado ?? '',
+
+              r?.id_bloque ?? '',
+              r?.codigo_bloque ?? '',
+              r?.nombre_bloque ?? '',
+
+              r?.id_localizacion ?? '',
+              r?.nombre_localizacion ?? '',
+
+              r?.id_tipo_adquisicion ?? '',
+              r?.codigo_adquisicion ?? '',
+              r?.nombre_tipo_adquisicion ?? '',
+
+              r?.id_forma_depreciacion ?? '',
+              r?.codigo_forma ?? '',
+              r?.nombre_forma ?? '',
+
+              Number(r?.meses_depreciacion ?? 0),
+
+              Number(r?.valor_adquisicion ?? 0),
+              Number(r?.valor_mensual ?? 0),
+              Number(r?.valor_depreciacion_acumulada ?? 0),
+              Number(r?.valor_neto ?? 0),
+
+              r?.id_datos_personal_responsable ?? '',
+              responsable,
+
+              r?.id_datos_personal_proveedor ?? '',
+              proveedor,
+
+              r?.id_catalogo_cuenta_activo ?? '',
+              r?.codigo_cuenta_activo ?? '',
+              r?.nombre_cuenta_activo ?? '',
+
+              r?.id_catalogo_cuenta_depreciacion ?? '',
+              r?.codigo_cuenta_depreciacion ?? '',
+              r?.nombre_cuenta_depreciacion ?? '',
+
+              r?.id_catalogo_cuenta_gasto ?? '',
+              r?.codigo_cuenta_gasto ?? '',
+              r?.nombre_cuenta_gasto ?? '',
+
+              r?.id_catalogo_cuenta_control ?? '',
+              r?.codigo_cuenta_control ?? '',
+              r?.nombre_cuenta_control ?? ''
+
+            ];
+
+          }),
+
+          anchos: [
+            14, 16, 40,
+            14, 14, 14, 18,
+            12, 16, 28,
+            12, 16, 24,
+            12, 16, 24,
+            14, 24,
+            16, 18, 28,
+            16, 18, 28,
+            18,
+            18, 22, 22, 18,
+            14, 34,
+            14, 34,
+            14, 18, 34,
+            14, 18, 34,
+            14, 18, 34,
+            14, 18, 34
+          ]
+        }
+
+      ]
+
     });
 
-    // ============================================================
-    // ✅ Construcción Excel
-    // ============================================================
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(data);
-    ws['!cols'] = this.autoWidth(data);
-
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Maestro Activos');
-
-    // ============================================================
-    // ✅ Nombre archivo
-    // ============================================================
-    const hoy = new Date();
-    const yyyy = hoy.getFullYear();
-    const mm = String(hoy.getMonth() + 1).padStart(2, '0');
-    const dd = String(hoy.getDate()).padStart(2, '0');
-
-    const ag = (nombreAgencia || 'TODAS')
-      .replace(/\s+/g, '_')
-      .replace(/[^\w\-]/g, '');
-
-    const filename = `maestro_activos_full_${ag}_${yyyy}-${mm}-${dd}.xlsx`;
-
-    XLSX.writeFile(wb, filename);
   }
 
-  // ============================================================
-  // ✅ Utils
-  // ============================================================
-  private personaConDocumento(nombre: string, documento: string): string {
-    const n = (nombre || '').trim();
-    const d = (documento || '').trim();
+  private personaConDocumento(
+    nombre: string,
+    documento: string
+  ): string {
 
-    if (!n && !d) return '';
-    if (n && d) return `${n} (${d})`;
+    const n =
+      (nombre || '').trim();
+
+    const d =
+      (documento || '').trim();
+
+    if (!n && !d) {
+      return '';
+    }
+
+    if (n && d) {
+      return `${n} (${d})`;
+    }
+
     return n || d;
   }
 
-  private autoWidth(rows: any[]): { wch: number }[] {
-    if (!rows || rows.length === 0) return [];
+  private buildFileName(
+    nombreAgencia?: string
+  ): string {
 
-    const headers = Object.keys(rows[0] || {});
-    const widths = headers.map(h => Math.max(h.length, 14));
+    const hoy = new Date();
 
-    for (const row of rows) {
-      headers.forEach((h, i) => {
-        const val = row?.[h];
-        const len = String(val ?? '').length;
-        widths[i] = Math.max(widths[i], Math.min(len, 55));
-      });
-    }
+    const yyyy =
+      hoy.getFullYear();
 
-    return widths.map(w => ({ wch: w + 2 }));
+    const mm =
+      String(hoy.getMonth() + 1)
+        .padStart(2, '0');
+
+    const dd =
+      String(hoy.getDate())
+        .padStart(2, '0');
+
+    const ag =
+      (nombreAgencia || 'TODAS')
+        .replace(/\s+/g, '_')
+        .replace(/[^\w\-]/g, '');
+
+    return `maestro_activos_full_${ag}_${yyyy}-${mm}-${dd}.xlsx`;
   }
 }

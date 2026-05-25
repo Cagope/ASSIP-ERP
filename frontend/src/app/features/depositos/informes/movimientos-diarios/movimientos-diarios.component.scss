@@ -1,0 +1,121 @@
+@use '../informes-base';
+
+/* =========================================
+   FILTROS
+========================================= */
+
+.filtros {
+  grid-template-columns:
+    165px
+    165px
+    minmax(180px, 1fr)
+    minmax(210px, 1fr)
+    minmax(230px, 1fr)
+    auto;
+
+  .f-row {
+
+    label {
+      margin-bottom: 5px;
+
+      color: #374151;
+
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    input,
+    select {
+      height: 38px;
+
+      border-radius: 8px;
+
+      font-size: 13px;
+    }
+
+  }
+
+}
+
+/* =========================================
+   RESUMEN
+========================================= */
+
+.resumen {
+
+  .cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .card {
+
+    &.green {
+      border-left-color: #198754;
+    }
+
+    &.red {
+      border-left-color: #dc3545;
+    }
+
+    &.gray {
+      border-left-color: #6b7280;
+    }
+
+  }
+
+}
+
+/* =========================================
+   ACCIONES
+========================================= */
+
+.form-actions-result {
+  margin-top: 14px;
+}
+
+/* =========================================
+   VALORES
+========================================= */
+
+.positive {
+  color: #047857;
+  font-weight: 600;
+}
+
+.negative {
+  color: #b42318;
+  font-weight: 600;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1300px) {
+
+  .filtros {
+    grid-template-columns:
+      165px
+      165px
+      1fr
+      1fr;
+
+    .form-actions {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .resumen .cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+}
+
+@media (max-width: 700px) {
+
+  .filtros,
+  .resumen .cards {
+    grid-template-columns: 1fr;
+  }
+
+}

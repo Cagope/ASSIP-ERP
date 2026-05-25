@@ -1,49 +1,101 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
 
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService
+} from '../../../../shared/services/excel-export.service';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class InteresMensualSmExporterService {
 
-  exportarExcel(items: any[], filtros: any): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportarExcel(
+    items: any[],
+    filtros: any
+  ): void {
+
     if (!items || items.length === 0) {
       alert('No hay datos para exportar.');
       return;
     }
 
-    // ============================================================
-    // 🧾 Construcción del JSON para Excel
-    // ============================================================
-    const data = items.map((x: any) => ({
-      'Documento': x.documento,
-      'Nombre Completo': x.nombreCompleto,
+    const fecha =
+      `${filtros.fechaProceso}_liq_${filtros.fechaLiquidacion}`;
 
-      'Saldo Mínimo Mes': x.saldoMinimoMes,
-      'Interés Bruto': x.interesBruto,
-      'Retención': x.retencion,
-      'Interés Neto': x.interesNeto,
+    const codigoAgencia =
+      filtros.codigoAgencia ?? '00';
 
-      'Tasa (%)': x.tasaInteres,
-      'Tiempo Liquidación': x.tiempoLiquidacion,
-      'Mínimo Forma': x.minimoForma,
+    const codigoForma =
+      filtros.codigoForma ?? 'XX';
 
-      'Retención Aplicada': x.aplicaRetencion ? 'Sí' : 'No'
-    }));
+    this.excelExport.exportar({
 
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(data);
-    XLSX.utils.book_append_sheet(wb, ws, 'Interes Mensual SM');
+      nombreArchivo:
+        `interes_mensual_sm_${fecha}_${codigoAgencia}_${codigoForma}.xlsx`,
 
-    // ============================================================
-    // 📄 Nombre del archivo (MEJORADO)
-    // ============================================================
-    const fecha = filtros.fechaProceso + '_liq_' + filtros.fechaLiquidacion;
+      hojas: [
 
-    const codigoAgencia = filtros.codigoAgencia ?? '00';
-    const codigoForma = filtros.codigoForma ?? 'XX';
+        {
+          nombreHoja:
+            'Interes Mensual SM',
 
-    const nombreArchivo =
-      `interes_mensual_sm_${fecha}_${codigoAgencia}_${codigoForma}.xlsx`;
+          titulo:
+            'INTERÉS MENSUAL SALDO MÍNIMO',
 
-    XLSX.writeFile(wb, nombreArchivo);
+          filtros: [
+            ['Fecha proceso', filtros.fechaProceso || ''],
+            ['Fecha liquidación', filtros.fechaLiquidacion || ''],
+            ['Agencia', codigoAgencia],
+            ['Forma', codigoForma]
+          ],
+
+          columnas: [
+            'Documento',
+            'Nombre Completo',
+            'Saldo Mínimo Mes',
+            'Interés Bruto',
+            'Retención',
+            'Interés Neto',
+            'Tasa (%)',
+            'Tiempo Liquidación',
+            'Mínimo Forma',
+            'Retención Aplicada'
+          ],
+
+          filas: items.map((x: any) => [
+            x.documento || '',
+            x.nombreCompleto || '',
+            Number(x.saldoMinimoMes || 0),
+            Number(x.interesBruto || 0),
+            Number(x.retencion || 0),
+            Number(x.interesNeto || 0),
+            Number(x.tasaInteres || 0),
+            x.tiempoLiquidacion || '',
+            Number(x.minimoForma || 0),
+            x.aplicaRetencion ? 'Sí' : 'No'
+          ]),
+
+          anchos: [
+            18,
+            42,
+            18,
+            18,
+            18,
+            18,
+            12,
+            18,
+            18,
+            18
+          ]
+        }
+
+      ]
+
+    });
   }
 }

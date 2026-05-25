@@ -6,10 +6,18 @@
 
    📘 Propósito:
    Define la estructura visual general de todas las vistas:
-   contenedores, tarjetas, cabeceras, toolbars y grillas de formularios.
+   contenedores, tarjetas, cabeceras, toolbars, tablas y grillas.
    ========================================================================== */
 
 @use 'tokens' as t;
+
+/* === 📄 PÁGINA BASE ====================================================== */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: t.$space-6;
+  padding: t.$space-5;
+}
 
 /* === 📦 CONTENEDOR PRINCIPAL ============================================ */
 .container {
@@ -32,25 +40,42 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: t.$space-4;
   padding-bottom: t.$space-4;
   border-bottom: 1px solid t.$color-border;
 
-  h2 {
+  h1,
+  h2,
+  h3 {
     margin: 0;
+    color: t.$color-text;
+    font-weight: t.$font-weight-semibold;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+  }
+
+  h2 {
     font-size: 1.125rem;
-    font-weight: 600;
+  }
+
+  p {
+    margin: t.$space-1 0 0;
+    color: t.$color-text-muted;
+    font-size: t.$font-size-md;
   }
 
   .actions {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     align-items: center;
     gap: t.$space-3;
 
     .btn {
       height: 40px;
       padding: 0 t.$space-4;
-      font-weight: 600;
+      font-weight: t.$font-weight-semibold;
       line-height: 1;
     }
 
@@ -68,21 +93,28 @@
   }
 }
 
-/* === 🧰 TOOLBAR INTERNA (BUSCADORES / FILTROS) ========================== */
+/* === 🧰 TOOLBAR ========================================================== */
 .toolbar {
   display: flex;
+  flex-wrap: wrap;
   gap: t.$space-3;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: t.$space-6;
+}
 
-  input {
-    flex: 1 1 auto;
-    padding: t.$space-2 t.$space-3;
-    border: 1px solid t.$color-border;
-    border-radius: t.$radius-sm;
-    font-size: 0.95rem;
-  }
+/* === 🔎 FILTROS ========================================================== */
+.filters {
+  display: grid;
+  gap: t.$space-4;
+  align-items: end;
+}
+
+/* === 🎛️ ACCIONES DE FORMULARIOS ======================================== */
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: t.$space-3;
+  align-items: center;
 }
 
 /* === 🧮 GRILLA DE FORMULARIOS =========================================== */
@@ -92,10 +124,103 @@
   grid-template-columns: repeat(12, 1fr);
 
   .field {
-    grid-column: span 6; // medio ancho
+    grid-column: span 6;
   }
 
   .field-full {
-    grid-column: 1 / -1; // ancho completo
+    grid-column: 1 / -1;
   }
+}
+
+/* === 📋 TABLAS =========================================================== */
+.table-container {
+  overflow-x: auto;
+  background: t.$color-surface;
+  border: 1px solid t.$color-border;
+  border-radius: t.$radius-md;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  thead {
+    background: t.$table-header-bg;
+  }
+
+  th,
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid t.$color-border;
+    text-align: left;
+    font-size: t.$font-size-md;
+  }
+
+  th {
+    color: t.$color-text;
+    font-weight: t.$font-weight-semibold;
+    white-space: nowrap;
+  }
+
+  tbody tr:hover {
+    background: t.$table-row-hover;
+  }
+}
+
+/* === 🔢 ALINEACIÓN NUMÉRICA ============================================= */
+.right {
+  text-align: right;
+}
+
+/* === 📊 RESÚMENES ======================================================== */
+.summary-grid {
+  display: grid;
+  gap: t.$space-4;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.summary-card {
+  background: t.$color-surface;
+  border: 1px solid t.$color-border;
+  border-radius: t.$radius-md;
+  padding: t.$space-4;
+
+  .label {
+    display: block;
+    margin-bottom: t.$space-2;
+    color: t.$color-text-muted;
+    font-size: t.$font-size-sm;
+    font-weight: t.$font-weight-medium;
+  }
+
+  .value {
+    font-size: 1.35rem;
+    font-weight: t.$font-weight-bold;
+    color: t.$color-text;
+  }
+}
+
+/* === ⏳ ESTADOS ========================================================== */
+.loading,
+.empty,
+.error {
+  padding: t.$space-5;
+  border-radius: t.$radius-md;
+  font-size: t.$font-size-base;
+}
+
+.loading {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.empty {
+  background: #f9fafb;
+  color: t.$color-text-muted;
+}
+
+.error {
+  background: #fef2f2;
+  color: t.$color-danger;
+  border: 1px solid #fecaca;
 }

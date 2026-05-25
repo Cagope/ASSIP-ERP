@@ -1,48 +1,104 @@
+@use '../../../../styles/forms';
+@use '../../../../styles/informes-base';
+
+/* =========================================
+   USUARIOS LIST
+========================================= */
+
 .usuarios-list {
   padding: 1rem;
 }
 
-.loading {
-  text-align: center;
+/* =========================================
+   ESTADOS
+========================================= */
+
+.loading,
+.empty,
+.error {
   padding: 1rem;
-  font-weight: bold;
-  color: #555;
+
+  text-align: center;
+
+  border-radius: 8px;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.loading {
+  background: #f8fafc;
+
+  color: #667085;
 }
 
 .empty {
-  text-align: center;
-  padding: 1rem;
-  color: #777;
+  background: #f9fafb;
+
+  color: #6b7280;
+
   font-style: italic;
 }
 
 .error {
-  text-align: center;
-  padding: 1rem;
-  color: #b3261e;
-  font-weight: bold;
+  background: #fef2f2;
+
+  color: #991b1b;
+
+  border: 1px solid #fecaca;
 }
+
+/* =========================================
+   ACCIONES
+========================================= */
 
 .acciones {
   display: flex;
-  gap: 0.3rem;
+  justify-content: flex-end;
+
+  gap: 0.4rem;
+
+  flex-wrap: wrap;
 
   .btn {
-    padding: 0.25rem 0.5rem;
+    min-height: 30px;
+
+    padding: 0 10px;
+
+    border-radius: 6px;
+
+    font-size: 12px;
+    font-weight: 600;
   }
 }
 
+/* =========================================
+   BADGES
+========================================= */
+
 .badge {
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.3rem;
-  color: white;
-  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 24px;
+
+  padding: 0 10px;
+
+  border-radius: 999px;
+
+  color: #fff;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  text-transform: uppercase;
 }
 
 .badge-success {
-  background-color: #28a745;
+  background: #198754;
 }
 
 .badge-danger {
-  background-color: #dc3545;
+  background: #dc3545;
 }

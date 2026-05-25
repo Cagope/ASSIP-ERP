@@ -1,75 +1,135 @@
+@use '../../../../styles/forms';
+@use '../../../../styles/informes-base';
+
+/* =========================================
+   PAGE
+========================================= */
+
 .page {
-  padding: 20px;
+  padding: 1rem;
 }
 
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 15px;
-}
-
-.header-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.error {
-  color: red;
-  margin-bottom: 10px;
-}
-.page {
-  padding: 20px;
-}
+/* =========================================
+   HEADER
+========================================= */
 
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+
+  margin-bottom: 1rem;
 }
 
 .header-actions {
   display: flex;
-  gap: 10px;
+  gap: 0.75rem;
 }
+
+/* =========================================
+   ALERTAS
+========================================= */
 
 .error {
-  color: red;
-  margin-bottom: 10px;
+  margin-bottom: 1rem;
+
+  padding: 0.75rem 1rem;
+
+  background: #fef2f2;
+
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+
+  color: #b91c1c;
+  font-size: 0.88rem;
+  font-weight: 600;
 }
 
-/* 🔷 TABLA */
+/* =========================================
+   TABLA
+========================================= */
+
+.table-wrap {
+  overflow-x: auto;
+}
+
 .table {
   width: 100%;
+
   border-collapse: collapse;
+
   background: #fff;
+
   font-size: 13px;
+
+  th,
+  td {
+    padding: 0.7rem 0.8rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  th {
+    background: #f8fafc;
+
+    color: #334155;
+
+    font-weight: 700;
+    text-align: left;
+
+    white-space: nowrap;
+  }
+
+  td {
+    color: #0f172a;
+  }
+
+  tbody tr:hover {
+    background: #f8fafc;
+  }
 }
 
-.table th,
-.table td {
-  padding: 8px 10px;
-  border-bottom: 1px solid #e5e7eb;
-}
+/* =========================================
+   ALIGN
+========================================= */
 
-.table th {
-  background: #f3f4f6;
-  font-weight: 600;
-  text-align: left;
-}
-
-.table tbody tr:hover {
-  background: #f9fafb;
-}
-
-/* 🔷 ALINEACIÓN */
 .text-end {
   text-align: right;
+  white-space: nowrap;
 }
 
-/* 🔷 VACÍO */
+/* =========================================
+   EMPTY
+========================================= */
+
 .empty {
-  margin-top: 15px;
-  color: #666;
-  font-style: italic;
+  margin-top: 1rem;
+
+  padding: 1rem;
+
+  background: #fff;
+
+  border: 1px dashed #d1d5db;
+  border-radius: 8px;
+
+  color: #64748b;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 768px) {
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .header-actions {
+    flex-direction: column;
+  }
+
 }

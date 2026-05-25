@@ -1,122 +1,129 @@
-.page {
-  padding: 1rem;
-}
+@use '../informes-base';
 
-.form-panel {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  align-items: end;
+/* =========================================
+   FILTROS
+========================================= */
 
-  .form-group {
-    display: flex;
-    flex-direction: column;
+.filtros {
+  grid-template-columns:
+    180px
+    minmax(220px, 1fr)
+    minmax(220px, 1fr)
+    170px
+    auto;
+
+  .f-row {
 
     label {
+      margin-bottom: 5px;
+
+      color: #374151;
+
       font-size: 12px;
       font-weight: 600;
-      color: #6b7280;
-      margin-bottom: 5px;
     }
 
     input,
     select {
-      height: 34px;
-      padding: 4px 9px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      background: #fff;
+      height: 38px;
+
+      border-radius: 8px;
+
       font-size: 13px;
     }
+
   }
 
-  .form-actions {
-    grid-column: 1 / -1;
-  }
 }
 
-.rangos-table {
-  grid-column: 1 / -1;
+/* =========================================
+   RANGOS
+========================================= */
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-
-    th,
-    td {
-      padding: 8px;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    th {
-      background: #f3f4f6;
-      text-align: left;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    input {
-      width: 100%;
-      height: 32px;
-      padding: 4px 8px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-    }
-  }
-}
-
-.loading,
-.error {
-  margin-top: 1rem;
-  padding: 12px;
-  text-align: center;
-}
-
-.error {
-  color: #b91c1c;
-  background: #fee2e2;
-  border-radius: 6px;
-}
-
-.resumen-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.card h3 {
+  margin-top: 0;
   margin-bottom: 12px;
 
-  h3 {
-    margin: 0;
-    font-size: 17px;
-    font-weight: 700;
+  font-size: 17px;
+  font-weight: 700;
+
+  color: #111827;
+}
+
+.tabla-rangos {
+  max-width: 520px;
+
+  input {
+    width: 100%;
+    height: 38px;
+
+    padding: 0 9px;
+
+    border-radius: 8px;
+
+    background: #fff;
+
+    font-size: 13px;
   }
 }
 
-.resumen-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
+/* =========================================
+   RESUMEN
+========================================= */
 
-  th,
-  td {
-    padding: 9px 8px;
-    border-bottom: 1px solid #e5e7eb;
+.resumen {
+
+  .cards {
+    grid-template-columns: repeat(4, 1fr);
   }
 
-  th {
-    background: #f3f4f6;
-    text-align: left;
-    font-weight: 700;
+  .card {
+    border-left-color: #0d6efd;
   }
+
 }
 
-@media (max-width: 900px) {
-  .form-panel {
+/* =========================================
+   ACCIONES
+========================================= */
+
+.form-actions-result {
+  margin-top: 14px;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1200px) {
+
+  .filtros {
+    grid-template-columns:
+      180px
+      1fr
+      1fr
+      170px;
+
+    .form-actions {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .resumen .cards {
     grid-template-columns: repeat(2, 1fr);
   }
+
 }
 
-@media (max-width: 600px) {
-  .form-panel {
+@media (max-width: 700px) {
+
+  .filtros,
+  .resumen .cards {
     grid-template-columns: 1fr;
   }
+
+  .tabla-rangos {
+    max-width: 100%;
+  }
+
 }

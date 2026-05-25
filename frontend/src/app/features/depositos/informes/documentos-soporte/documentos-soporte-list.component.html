@@ -1,0 +1,250 @@
+<div class="page">
+
+  <app-header-actions
+    titulo="Informe documentos soporte"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <div class="card">
+
+    <form class="filtros filtros-ajustados" (ngSubmit)="buscar()">
+
+      <div class="f-row f-row-agencia">
+
+        <label>Agencia</label>
+
+        <select
+          [(ngModel)]="filtros.agencia"
+          name="agencia">
+
+          <option [ngValue]="0">
+            Todas
+          </option>
+
+          <option
+            *ngFor="let a of agencias"
+            [ngValue]="a.idAgencia">
+
+            {{ a.nombreAgencia }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+      <div class="f-row f-row-fecha">
+
+        <label>Fecha entrega inicial</label>
+
+        <input
+          type="date"
+          [(ngModel)]="filtros.fechaDesde"
+          name="fechaDesde" />
+
+      </div>
+
+      <div class="f-row f-row-fecha">
+
+        <label>Fecha entrega final</label>
+
+        <input
+          type="date"
+          [(ngModel)]="filtros.fechaHasta"
+          name="fechaHasta" />
+
+      </div>
+
+      <div class="form-actions form-actions-top">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()">
+
+          Limpiar
+
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="cargando">
+
+          Buscar
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+  <div *ngIf="cargando" class="loading">
+    Cargando...
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <div class="card" *ngIf="resumen">
+
+    <section class="resumen">
+
+      <h3>Resumen del informe</h3>
+
+      <div class="cards">
+
+        <div class="card blue">
+
+          <div class="label">
+            Total documentos
+          </div>
+
+          <div class="value big right">
+            {{ resumen.totalDocumentos | number:'1.0-0' }}
+          </div>
+
+        </div>
+
+        <div class="card green">
+
+          <div class="label">
+            Documentos físicos
+          </div>
+
+          <div class="value big right">
+            {{ resumen.totalDocumentosFisicos | number:'1.0-0' }}
+          </div>
+
+        </div>
+
+        <div class="card blue">
+
+          <div class="label">
+            Activos
+          </div>
+
+          <div class="value big right">
+            {{ resumen.activos | number:'1.0-0' }}
+          </div>
+
+        </div>
+
+        <div class="card green">
+
+          <div class="label">
+            Inactivos
+          </div>
+
+          <div class="value big right">
+            {{ resumen.inactivos | number:'1.0-0' }}
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <p *ngIf="items.length > 0" class="note">
+      Los datos completos se exportan solamente en Excel.
+    </p>
+
+    <div *ngIf="items.length > 0" class="form-actions">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="exportar()"
+        [disabled]="items.length === 0">
+
+        Exportar Excel
+
+      </button>
+
+    </div>
+
+  </div>
+
+  <div
+    *ngIf="resumenAgencias.length > 0"
+    class="card resumen-agencias">
+
+    <h3 class="mt-3">
+      Resumen por agencia y forma
+    </h3>
+
+    <ng-container *ngFor="let ag of resumenAgencias">
+
+      <h4 class="agencia-title">
+        {{ ag.codigoAgencia }} — {{ ag.nombreAgencia }}
+      </h4>
+
+      <table class="tabla-resumen">
+
+        <thead>
+
+        <tr>
+          <th>Cod. Forma</th>
+          <th>Nombre forma</th>
+          <th>Tipo soporte</th>
+          <th class="right">Documentos</th>
+          <th class="right">Físicos</th>
+          <th class="right">Activos</th>
+          <th class="right">Inactivos</th>
+          <th class="right">Perdidos</th>
+          <th class="right">Robados</th>
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let f of ag.formas">
+
+          <td>{{ f.codigoForma }}</td>
+
+          <td>{{ f.nombreForma }}</td>
+
+          <td>{{ f.descripcionSoporte }}</td>
+
+          <td class="right">
+            {{ f.totalDocumentos | number:'1.0-0' }}
+          </td>
+
+          <td class="right">
+            {{ f.totalDocumentosFisicos | number:'1.0-0' }}
+          </td>
+
+          <td class="right">
+            {{ f.activos | number:'1.0-0' }}
+          </td>
+
+          <td class="right">
+            {{ f.inactivos | number:'1.0-0' }}
+          </td>
+
+          <td class="right">
+            {{ f.perdidos | number:'1.0-0' }}
+          </td>
+
+          <td class="right">
+            {{ f.robados | number:'1.0-0' }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </ng-container>
+
+  </div>
+
+</div>

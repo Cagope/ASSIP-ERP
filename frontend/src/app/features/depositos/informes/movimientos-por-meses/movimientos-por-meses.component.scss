@@ -1,0 +1,181 @@
+@use '../informes-base';
+
+/* =========================================
+   FILTROS
+========================================= */
+
+.filtros {
+  grid-template-columns:
+    170px
+    minmax(220px, 1fr)
+    minmax(220px, 1fr)
+    150px
+    300px
+    auto;
+
+  .f-row {
+
+    label {
+      margin-bottom: 5px;
+
+      color: #374151;
+
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    input,
+    select {
+      height: 38px;
+
+      border-radius: 8px;
+
+      font-size: 13px;
+    }
+
+  }
+
+}
+
+/* =========================================
+   TIPO INFORME
+========================================= */
+
+.tipo-informe {
+
+  .toggle-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    height: 38px;
+
+    overflow: hidden;
+
+    background: #fff;
+
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+  }
+
+  .toggle-button {
+    border: none;
+
+    background: #fff;
+
+    color: #374151;
+
+    cursor: pointer;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    transition: all 0.2s ease;
+  }
+
+  .toggle-button.active {
+    background: #0d6efd;
+    color: #fff;
+  }
+
+}
+
+/* =========================================
+   RESUMEN
+========================================= */
+
+.resumen {
+
+  .cards {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .card {
+
+    &.blue {
+      border-left-color: #0d6efd;
+    }
+
+    &.green {
+      border-left-color: #198754;
+    }
+
+    &.red {
+      border-left-color: #dc3545;
+    }
+
+    &.gray {
+      border-left-color: #6b7280;
+    }
+
+  }
+
+}
+
+/* =========================================
+   ACCIONES
+========================================= */
+
+.form-actions-result {
+  margin-top: 14px;
+}
+
+/* =========================================
+   TABLA
+========================================= */
+
+.tabla-resumen {
+
+  th,
+  td {
+    white-space: nowrap;
+  }
+
+}
+
+/* =========================================
+   VALORES
+========================================= */
+
+.positive {
+  color: #047857;
+  font-weight: 600;
+}
+
+.negative {
+  color: #b42318;
+  font-weight: 600;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1300px) {
+
+  .filtros {
+    grid-template-columns:
+      170px
+      1fr
+      1fr
+      150px;
+
+    .tipo-informe,
+    .form-actions {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .resumen .cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+}
+
+@media (max-width: 700px) {
+
+  .filtros,
+  .resumen .cards {
+    grid-template-columns: 1fr;
+  }
+
+}

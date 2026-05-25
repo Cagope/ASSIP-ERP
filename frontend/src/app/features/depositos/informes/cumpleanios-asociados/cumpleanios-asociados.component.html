@@ -1,0 +1,241 @@
+<div class="page">
+
+  <app-header-actions
+    titulo="Cumpleaños de asociados"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="true"
+    [mostrarExportar]="false"
+    (imprimir)="imprimir()">
+  </app-header-actions>
+
+  <div class="card">
+
+    <form
+      class="filtros"
+      (ngSubmit)="buscar()">
+
+      <div class="f-row">
+        <label>Fecha inicial</label>
+
+        <input
+          type="date"
+          [(ngModel)]="filtros.fechaInicial"
+          name="fechaInicial">
+      </div>
+
+      <div class="f-row">
+        <label>Fecha final</label>
+
+        <input
+          type="date"
+          [(ngModel)]="filtros.fechaFinal"
+          name="fechaFinal">
+      </div>
+
+      <div class="f-row">
+        <label>Agencia</label>
+
+        <select
+          [(ngModel)]="filtros.idAgencia"
+          name="idAgencia">
+
+          <option [ngValue]="0">
+            Seleccione agencia
+          </option>
+
+          <option
+            *ngFor="let a of agencias"
+            [ngValue]="a.idAgencia">
+
+            {{ a.nombreAgencia }}
+
+          </option>
+
+        </select>
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()">
+
+          Limpiar
+
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="cargando">
+
+          Buscar
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+  <div
+    *ngIf="cargando"
+    class="loading">
+
+    Cargando informe...
+
+  </div>
+
+  <div
+    *ngIf="error"
+    class="error">
+
+    {{ error }}
+
+  </div>
+
+  <div
+    class="card"
+    *ngIf="resumen">
+
+    <section class="resumen">
+
+      <h3>Resumen</h3>
+
+      <div class="resumen-totales">
+
+        <div class="mini-card gray">
+
+          <div class="label">
+            Total asociados
+          </div>
+
+          <div class="value right">
+            {{ resumen.totalAsociados | number:'1.0-0' }}
+          </div>
+
+        </div>
+
+        <div class="mini-card blue">
+
+          <div class="label">
+            Rango de fechas
+          </div>
+
+          <div class="value right">
+            {{ resumen.rangoFechas }}
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <div class="form-actions form-actions-result">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="exportar()"
+        [disabled]="items.length === 0">
+
+        Exportar Excel
+
+      </button>
+
+    </div>
+
+  </div>
+
+  <div
+    class="card"
+    *ngIf="items.length > 0">
+
+    <h3>Detalle de cumpleaños</h3>
+
+    <div class="table-container">
+
+      <table class="tabla-resumen">
+
+        <thead>
+
+        <tr>
+
+          <th>Documento</th>
+          <th>Nombre</th>
+          <th>Fecha nacimiento</th>
+
+          <th class="right">
+            Día
+          </th>
+
+          <th class="right">
+            Edad
+          </th>
+
+          <th>Ciudad</th>
+          <th>Celular</th>
+          <th>Correo</th>
+
+          <th class="right">
+            Saldo aportes
+          </th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let item of items">
+
+          <td>
+            {{ item.documento }}
+          </td>
+
+          <td>
+            {{ item.nombreCompleto }}
+          </td>
+
+          <td>
+            {{ item.fechaNacimiento }}
+          </td>
+
+          <td class="right">
+            {{ item.diaCumpleanios | number:'1.0-0' }}
+          </td>
+
+          <td class="right">
+            {{ item.edad | number:'1.0-0' }}
+          </td>
+
+          <td>
+            {{ item.ciudad }}
+          </td>
+
+          <td>
+            {{ item.celular }}
+          </td>
+
+          <td>
+            {{ item.correo }}
+          </td>
+
+          <td class="right">
+            {{ item.saldoAportes | number:'1.2-2' }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>

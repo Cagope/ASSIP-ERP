@@ -1,10 +1,15 @@
-/* ============================
-   Encabezado del módulo
-   ============================ */
+@use '../../../../styles/forms';
+@use '../../../../styles/informes-base';
+
+/* =========================================
+   HEADER
+========================================= */
+
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+
   margin-bottom: 1rem;
 
   .actions {
@@ -13,48 +18,72 @@
   }
 }
 
-/* ============================
-   Tabla principal
-   ============================ */
+/* =========================================
+   TABLA
+========================================= */
+
 table {
   width: 100%;
   border-collapse: collapse;
 
+  font-size: 0.88rem;
+
   th,
   td {
-    padding: 0.5rem;
+    padding: 0.65rem 0.75rem;
     border-bottom: 1px solid #e5e7eb;
   }
 
   th {
-    background: #f9fafb;
+    background: #f8fafc;
+
     text-align: left;
-    text-transform: lowercase;
+
+    color: #334155;
+
+    font-weight: 700;
+    text-transform: none;
   }
 
   td {
+    color: #0f172a;
+
     text-transform: uppercase;
+  }
+
+  tbody tr:hover {
+    background: #f8fafc;
   }
 }
 
-/* ============================
-   Acciones por fila
-   ============================ */
+/* =========================================
+   ACCIONES
+========================================= */
+
 .acciones {
   display: flex;
-  gap: 0.4rem;
+  gap: 0.45rem;
 }
 
-/* ============================
-   Botones pequeños
-   ============================ */
+/* =========================================
+   BOTONES SMALL
+========================================= */
+
 .btn.sm {
-  font-size: 0.8rem;
-  padding: 0.2rem 0.4rem;
+  height: 30px;
+
+  padding: 0 0.7rem;
+
   border: 1px solid #d1d5db;
-  background: #fff;
-  border-radius: 0.25rem;
+  border-radius: 7px;
+
+  background: #ffffff;
+
   cursor: pointer;
+
+  font-size: 0.78rem;
+  font-weight: 700;
+
   transition: all 0.15s ease-in-out;
 
   &:hover {
@@ -71,26 +100,55 @@ table {
   }
 }
 
-/* ============================
-   Estados
-   ============================ */
+/* =========================================
+   ESTADOS
+========================================= */
+
 .loading {
   margin-top: 1rem;
+
   text-align: center;
-  font-style: italic;
+
   color: #6b7280;
+
+  font-style: italic;
 }
 
 .empty {
   margin-top: 1rem;
+
   text-align: center;
+
   color: #9ca3af;
+
   font-size: 0.9rem;
 }
 
 .error {
   margin-top: 1rem;
+
   text-align: center;
+
   color: #dc2626;
-  font-weight: bold;
+
+  font-weight: 700;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 768px) {
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .actions,
+  .acciones {
+    flex-wrap: wrap;
+  }
+
 }

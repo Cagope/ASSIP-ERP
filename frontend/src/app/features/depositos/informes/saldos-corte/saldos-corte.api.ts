@@ -20,10 +20,16 @@ export class SaldosCorteApi {
   // ======================================================
   // 🆕 Resumen por agencia y forma
   // ======================================================
-  resumenPorAgencia(fechaCorte: string) {
+  resumenPorAgencia(
+    fechaCorte: string,
+    agencia: number
+  ) {
     return this.http
       .get<any[]>(`${this.base}/resumen-agencia`, {
-        params: { fechaCorte }
+        params: {
+          fechaCorte,
+          agencia
+        }
       })
       .toPromise();
   }

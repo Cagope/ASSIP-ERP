@@ -1,80 +1,125 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
 
-import { PermisoEspecial } from './permisos-especiales.api';
+import {
+  ExcelExportService
+} from '../../../shared/services/excel-export.service';
 
-/**
- * 📦 Servicio de exportación a Excel — Permisos Especiales
- * ------------------------------------------------------------
- * Genera un archivo Excel con los permisos de comunicación
- * otorgados o no por cada persona del esquema Hoja de Vida.
- *
- * Mantiene el formato estándar del ERP ASSIP.
- */
-@Injectable({ providedIn: 'root' })
+import {
+  PermisoEspecial
+} from './permisos-especiales.api';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class PermisosEspecialesExporterService {
 
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
   exportarExcel(
-    registros: (PermisoEspecial & { documento?: string; nombrePersona?: string })[]
+    registros: (PermisoEspecial & {
+      documento?: string;
+      nombrePersona?: string;
+    })[]
   ): void {
+
     if (!registros || registros.length === 0) {
-      alert('⚠️ No hay registros de Permisos Especiales para exportar.');
+      alert('No hay registros de Permisos Especiales para exportar.');
       return;
     }
 
-    const dataExport = registros.map(p => ({
-      Documento: p.documento ?? '',
-      'Nombre Persona': p.nombrePersona ?? '',
+    this.excelExport.exportar({
 
-      // 🟩 Permisos de contacto
-      'Recibe Llamadas Telefónicas': p.recibeLlamadas ? 'Sí' : 'No',
-      'Fecha Autorización Llamadas': p.fechaLlamadas
-        ? new Date(p.fechaLlamadas).toLocaleDateString()
-        : '',
+      nombreArchivo:
+        `permisos_especiales_${this.fechaArchivo()}.xlsx`,
 
-      'Recibe Mensajes SMS': p.recibeMsm ? 'Sí' : 'No',
-      'Fecha Autorización SMS': p.fechaSms
-        ? new Date(p.fechaSms).toLocaleDateString()
-        : '',
+      hojas: [
 
-      'Recibe Correos Electrónicos': p.recibeEmails ? 'Sí' : 'No',
-      'Fecha Autorización Emails': p.fechaEmails
-        ? new Date(p.fechaEmails).toLocaleDateString()
-        : '',
+        {
+          nombreHoja:
+            'PermisosEspeciales',
 
-      'Recibe Correspondencia Física (Cartas)': p.recibeCartas ? 'Sí' : 'No',
-      'Fecha Autorización Cartas': p.fechaCartas
-        ? new Date(p.fechaCartas).toLocaleDateString()
-        : '',
+          titulo:
+            'PERMISOS ESPECIALES',
 
-      'Recibe Información por Redes Sociales': p.recibeRedesSociales ? 'Sí' : 'No',
-      'Fecha Autorización Redes Sociales': p.fechaRedesSociales
-        ? new Date(p.fechaRedesSociales).toLocaleDateString()
-        : '',
+          columnas: [
+            'Documento',
+            'Nombre Persona',
+            'Recibe Llamadas Telefónicas',
+            'Fecha Autorización Llamadas',
+            'Recibe Mensajes SMS',
+            'Fecha Autorización SMS',
+            'Recibe Correos Electrónicos',
+            'Fecha Autorización Emails',
+            'Recibe Correspondencia Física (Cartas)',
+            'Fecha Autorización Cartas',
+            'Recibe Información por Redes Sociales',
+            'Fecha Autorización Redes Sociales',
+            'Fecha Creación',
+            'Fecha Edición'
+          ],
 
-      // Auditoría
-      'Fecha Creación': p.fechaCreacion ? new Date(p.fechaCreacion).toLocaleString() : '',
-      'Fecha Edición': p.fechaEdicion ? new Date(p.fechaEdicion).toLocaleString() : '',
-    }));
+          filas: registros.map(p => [
+            p.documento || '',
+            p.nombrePersona || '',
+            p.recibeLlamadas ? 'Sí' : 'No',
+            p.fechaLlamadas
+              ? new Date(p.fechaLlamadas).toLocaleDateString()
+              : '',
+            p.recibeMsm ? 'Sí' : 'No',
+            p.fechaSms
+              ? new Date(p.fechaSms).toLocaleDateString()
+              : '',
+            p.recibeEmails ? 'Sí' : 'No',
+            p.fechaEmails
+              ? new Date(p.fechaEmails).toLocaleDateString()
+              : '',
+            p.recibeCartas ? 'Sí' : 'No',
+            p.fechaCartas
+              ? new Date(p.fechaCartas).toLocaleDateString()
+              : '',
+            p.recibeRedesSociales ? 'Sí' : 'No',
+            p.fechaRedesSociales
+              ? new Date(p.fechaRedesSociales).toLocaleDateString()
+              : '',
+            p.fechaCreacion
+              ? new Date(p.fechaCreacion).toLocaleString()
+              : '',
+            p.fechaEdicion
+              ? new Date(p.fechaEdicion).toLocaleString()
+              : ''
+          ]),
 
-    // 📊 Crear hoja Excel
-    const ws = XLSX.utils.json_to_sheet(dataExport);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'PermisosEspeciales');
+          anchos: [
+            14,
+            28,
+            28,
+            22,
+            26,
+            22,
+            30,
+            22,
+            34,
+            22,
+            34,
+            22,
+            20,
+            20
+          ]
+        }
 
-    // 📏 Ajustar columnas
-    (ws as any)['!cols'] = [
-      { wch: 14 }, { wch: 28 },
-      { wch: 28 }, { wch: 22 },
-      { wch: 26 }, { wch: 22 },
-      { wch: 30 }, { wch: 22 },
-      { wch: 34 }, { wch: 22 },
-      { wch: 34 }, { wch: 22 },
-      { wch: 20 }, { wch: 20 },
-    ];
+      ]
 
-    const fecha = new Date();
-    const sufijo = `${fecha.getFullYear()}${String(fecha.getMonth() + 1).padStart(2, '0')}${String(fecha.getDate()).padStart(2, '0')}`;
-    XLSX.writeFile(wb, `permisos_especiales_${sufijo}.xlsx`);
+    });
+  }
+
+  private fechaArchivo(): string {
+
+    const fecha =
+      new Date();
+
+    return `${fecha.getFullYear()}${String(fecha.getMonth() + 1).padStart(2, '0')}${String(fecha.getDate()).padStart(2, '0')}`;
   }
 }

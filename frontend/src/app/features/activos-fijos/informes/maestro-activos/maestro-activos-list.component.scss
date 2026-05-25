@@ -1,9 +1,9 @@
+@use '../../../../../styles/forms';
+@use '../../../../../styles/informes-base';
+
 /* ============================================================
-   📄 MAESTRO ACTIVOS - LISTADO
-   - Filtros claros y separados
-   - Autocomplete profesional
-   - Responsivo
-   ============================================================ */
+   MAESTRO ACTIVOS - LISTADO
+============================================================ */
 
 .page {
   display: flex;
@@ -12,55 +12,32 @@
 }
 
 /* ============================================================
-   ✅ FILTROS
-   ============================================================ */
+   FILTROS
+============================================================ */
+
 .filters {
-  display: grid;
   grid-template-columns: repeat(12, 1fr);
-  gap: 12px;
 
   padding: 12px;
-  border-radius: 12px;
+
   background: #fff;
+
   border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-
-  label {
-    font-weight: 600;
-    font-size: 12px;
-    color: rgba(0, 0, 0, 0.75);
-  }
-
-  .form-control {
-    height: 36px;
-    border-radius: 10px;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    padding: 8px 10px;
-    font-size: 13px;
-
-    &:focus {
-      outline: none;
-      border-color: rgba(0, 0, 0, 0.35);
-      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
-    }
-  }
+.filters .form-group:nth-child(1),
+.filters .form-group:nth-child(2),
+.filters .form-group:nth-child(3),
+.filters .form-group:nth-child(4),
+.filters .form-group:nth-child(5) {
+  grid-column: span 3;
 }
-
-/* Distribución en grid */
-.filters .form-group:nth-child(1) { grid-column: span 3; } /* Agencia */
-.filters .form-group:nth-child(2) { grid-column: span 3; } /* Bloque */
-.filters .form-group:nth-child(3) { grid-column: span 3; } /* Localización */
-.filters .form-group:nth-child(4) { grid-column: span 3; } /* Responsable */
-.filters .form-group:nth-child(5) { grid-column: span 3; } /* Proveedor */
 
 /* ============================================================
-   ✅ AUTOCOMPLETE
-   ============================================================ */
+   AUTOCOMPLETE
+============================================================ */
+
 .autocomplete {
   position: relative;
 
@@ -75,20 +52,25 @@
 
     .btn-clear {
       position: absolute;
-      right: 8px;
       top: 50%;
-      transform: translateY(-50%);
+      right: 8px;
+
       width: 24px;
       height: 24px;
+
+      transform: translateY(-50%);
+
       border: none;
       border-radius: 50%;
-      cursor: pointer;
-      font-size: 13px;
-      line-height: 24px;
-      text-align: center;
 
       background: rgba(0, 0, 0, 0.06);
       color: rgba(0, 0, 0, 0.65);
+
+      cursor: pointer;
+
+      font-size: 13px;
+      line-height: 24px;
+      text-align: center;
 
       &:hover {
         background: rgba(0, 0, 0, 0.12);
@@ -103,17 +85,20 @@
     left: 0;
     right: 0;
 
+    max-height: 240px;
     margin: 0;
     padding: 6px;
+
+    overflow: auto;
+
     list-style: none;
 
-    border-radius: 12px;
     background: #fff;
-    border: 1px solid rgba(0, 0, 0, 0.10);
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
 
-    max-height: 240px;
-    overflow: auto;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
 
     li {
       display: flex;
@@ -121,17 +106,19 @@
       gap: 2px;
 
       padding: 8px 10px;
+
       border-radius: 10px;
+
       cursor: pointer;
 
       strong {
-        font-size: 13px;
         color: rgba(0, 0, 0, 0.88);
+        font-size: 13px;
       }
 
       small {
-        font-size: 12px;
         color: rgba(0, 0, 0, 0.55);
+        font-size: 12px;
       }
 
       &:hover {
@@ -142,8 +129,9 @@
 }
 
 /* ============================================================
-   ✅ TOOLBAR (mantiene tu estilo)
-   ============================================================ */
+   TOOLBAR
+============================================================ */
+
 .toolbar {
   display: flex;
   align-items: center;
@@ -151,9 +139,11 @@
   gap: 12px;
 
   padding: 10px 12px;
-  border-radius: 12px;
+
   background: #fff;
+
   border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
 
   .toolbar-left,
   .toolbar-right {
@@ -162,90 +152,82 @@
     gap: 10px;
   }
 
-  .toolbar-right {
-    .form-control {
-      width: 360px;
-      height: 36px;
-      border-radius: 10px;
-      border: 1px solid rgba(0, 0, 0, 0.15);
-      padding: 8px 10px;
-      font-size: 13px;
-
-      &:focus {
-        outline: none;
-        border-color: rgba(0, 0, 0, 0.35);
-        box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
-      }
-    }
+  .toolbar-right .form-control {
+    width: 360px;
   }
 }
 
 /* ============================================================
-   ✅ RESUMEN / MENSAJES
-   ============================================================ */
-.summary {
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.7);
-}
+   RESUMEN
+============================================================ */
 
-.empty {
-  padding: 18px;
-  border-radius: 12px;
-  background: #fff;
-  border: 1px dashed rgba(0, 0, 0, 0.18);
-  color: rgba(0, 0, 0, 0.65);
+.summary {
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 13px;
 }
 
 /* ============================================================
-   ✅ TABLA
-   ============================================================ */
+   TABLA
+============================================================ */
+
 .table-wrap {
-  border-radius: 12px;
   overflow: hidden;
+
   background: #fff;
+
   border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
 
   table {
     margin: 0;
   }
 
   th {
+    color: rgba(0, 0, 0, 0.65);
+
     font-size: 12px;
     font-weight: 700;
-    text-transform: uppercase;
+
     letter-spacing: 0.3px;
-    color: rgba(0, 0, 0, 0.65);
+    text-transform: uppercase;
+
     white-space: nowrap;
   }
 
   td {
-    font-size: 13px;
     vertical-align: middle;
+    font-size: 13px;
   }
 }
 
 /* ============================================================
-   ✅ RESPONSIVE
-   ============================================================ */
+   RESPONSIVE
+============================================================ */
+
 @media (max-width: 1200px) {
+
   .filters {
     grid-template-columns: repeat(6, 1fr);
   }
 
-  .filters .form-group:nth-child(1) { grid-column: span 3; }
-  .filters .form-group:nth-child(2) { grid-column: span 3; }
-  .filters .form-group:nth-child(3) { grid-column: span 3; }
-  .filters .form-group:nth-child(4) { grid-column: span 3; }
-  .filters .form-group:nth-child(5) { grid-column: span 3; }
+  .filters .form-group:nth-child(1),
+  .filters .form-group:nth-child(2),
+  .filters .form-group:nth-child(3),
+  .filters .form-group:nth-child(4),
+  .filters .form-group:nth-child(5) {
+    grid-column: span 3;
+  }
 
   .toolbar .toolbar-right .form-control {
     width: 280px;
   }
+
 }
 
 @media (max-width: 768px) {
+
   .filters {
-    grid-template-columns: repeat(1, 1fr);
+    grid-template-columns: 1fr;
   }
 
   .filters .form-group {
@@ -255,13 +237,14 @@
   .toolbar {
     flex-direction: column;
     align-items: stretch;
-
-    .toolbar-right {
-      width: 100%;
-
-      .form-control {
-        width: 100%;
-      }
-    }
   }
+
+  .toolbar .toolbar-right {
+    width: 100%;
+  }
+
+  .toolbar .toolbar-right .form-control {
+    width: 100%;
+  }
+
 }

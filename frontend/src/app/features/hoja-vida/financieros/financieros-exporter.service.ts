@@ -1,101 +1,162 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
-import { Financiero } from '../../../shared/models/financiero.model';
 
-/**
- * 💰 Servicio de exportación a Excel — Información Financiera
- * ------------------------------------------------------------
- * Genera un archivo Excel con los datos financieros de los afiliados.
- * Mantiene el formato uniforme del ERP ASSIP.
- */
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService
+} from '../../../shared/services/excel-export.service';
+
+import {
+  Financiero
+} from '../../../shared/models/financiero.model';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class FinancierosExporterService {
-  /**
-   * 📤 Exporta la lista de registros financieros al formato Excel.
-   * Cada fila representa los valores de ingresos, egresos y patrimonio
-   * de una persona (relación 1:1 con Datos Personales).
-   */
-  exportarExcel(financieros: (Financiero & {
-    documento?: string;
-    nombrePersona?: string;
-  })[]): void {
+
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportarExcel(
+    financieros: (Financiero & {
+      documento?: string;
+      nombrePersona?: string;
+    })[]
+  ): void {
+
     if (!financieros || financieros.length === 0) {
-      alert('⚠️ No hay registros financieros para exportar.');
+      alert('No hay registros financieros para exportar.');
       return;
     }
 
-    // ==========================================================
-    // 🧮 Preparar los datos para exportación
-    // ==========================================================
-    const financierosDecod = financieros.map(f => ({
-      Documento: f.documento ?? '',
-      'Nombre Persona': f.nombrePersona ?? '',
+    this.excelExport.exportar({
 
-      // --- Ingresos ---
-      'Salario': f.valorSalario ?? 0,
-      'Pensión': f.valorPension ?? 0,
-      'Ingresos Arriendo': f.ingresosArriendo ?? 0,
-      'Comisiones': f.ingresosComisiones ?? 0,
-      'Otros Ingresos': f.otrosIngresos ?? 0,
-      'Comentario Otros Ingresos': f.comentarioOtrosIngresos ?? '',
-      'Origen de Fondos': f.origenFondos ?? '',
-      'Total Ingresos':
-        (f.valorSalario ?? 0) +
-        (f.valorPension ?? 0) +
-        (f.ingresosArriendo ?? 0) +
-        (f.ingresosComisiones ?? 0) +
-        (f.otrosIngresos ?? 0),
+      nombreArchivo:
+        `financieros_${this.fechaArchivo()}.xlsx`,
 
-      // --- Egresos ---
-      'Egresos Familiares': f.egresosFamiliares ?? 0,
-      'Egresos Arriendo': f.egresosArriendo ?? 0,
-      'Egresos Crédito': f.egresosCredito ?? 0,
-      'Otros Egresos': f.otrosEgresos ?? 0,
-      'Comentario Otros Egresos': f.comentarioOtrosEgresos ?? '',
-      'Total Egresos':
-        (f.egresosFamiliares ?? 0) +
-        (f.egresosArriendo ?? 0) +
-        (f.egresosCredito ?? 0) +
-        (f.otrosEgresos ?? 0),
+      hojas: [
 
-      // --- Patrimonio ---
-      'Total Activos': f.totalActivos ?? 0,
-      'Total Pasivos': f.totalPasivos ?? 0,
-      'Patrimonio Neto': (f.totalActivos ?? 0) - (f.totalPasivos ?? 0),
-      'Deuda Relación Financiera': f.deudaRelacionFinanciera ?? 0,
-      'Relación Financiera': f.relacionFinanciera ?? '',
+        {
+          nombreHoja:
+            'Financieros',
 
-      // --- Auditoría ---
-      'Fecha Creación': f.fechaCreacion
-        ? new Date(f.fechaCreacion).toLocaleString()
-        : '',
-      'Fecha Actualización': f.fechaActualizacion
-        ? new Date(f.fechaActualizacion).toLocaleString()
-        : ''
-    }));
+          titulo:
+            'INFORMACIÓN FINANCIERA',
 
-    // ==========================================================
-    // 📗 Generar archivo Excel
-    // ==========================================================
-    const ws = XLSX.utils.json_to_sheet(financierosDecod);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Financieros');
+          columnas: [
+            'Documento',
+            'Nombre Persona',
+            'Salario',
+            'Pensión',
+            'Ingresos Arriendo',
+            'Comisiones',
+            'Otros Ingresos',
+            'Comentario Otros Ingresos',
+            'Origen de Fondos',
+            'Total Ingresos',
+            'Egresos Familiares',
+            'Egresos Arriendo',
+            'Egresos Crédito',
+            'Otros Egresos',
+            'Comentario Otros Egresos',
+            'Total Egresos',
+            'Total Activos',
+            'Total Pasivos',
+            'Patrimonio Neto',
+            'Deuda Relación Financiera',
+            'Relación Financiera',
+            'Fecha Creación',
+            'Fecha Actualización'
+          ],
 
-    // Ajustar el ancho de las columnas
-    (ws as any)['!cols'] = [
-      { wch: 14 }, { wch: 26 }, // Documento, Nombre Persona
-      { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 12 }, { wch: 14 }, // Ingresos
-      { wch: 24 }, { wch: 20 }, { wch: 16 },
-      { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 24 }, { wch: 16 }, // Egresos
-      { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 20 }, { wch: 20 }, // Patrimonio
-      { wch: 20 }, { wch: 20 } // Fechas
-    ];
+          filas: financieros.map(f => {
 
-    const fecha = new Date();
-    const sufijo = `${fecha.getFullYear()}${String(
-      fecha.getMonth() + 1
-    ).padStart(2, '0')}${String(fecha.getDate()).padStart(2, '0')}`;
+            const totalIngresos =
+              Number(f.valorSalario || 0)
+              + Number(f.valorPension || 0)
+              + Number(f.ingresosArriendo || 0)
+              + Number(f.ingresosComisiones || 0)
+              + Number(f.otrosIngresos || 0);
 
-    XLSX.writeFile(wb, `financieros_${sufijo}.xlsx`);
+            const totalEgresos =
+              Number(f.egresosFamiliares || 0)
+              + Number(f.egresosArriendo || 0)
+              + Number(f.egresosCredito || 0)
+              + Number(f.otrosEgresos || 0);
+
+            const patrimonioNeto =
+              Number(f.totalActivos || 0)
+              - Number(f.totalPasivos || 0);
+
+            return [
+              f.documento || '',
+              f.nombrePersona || '',
+              Number(f.valorSalario || 0),
+              Number(f.valorPension || 0),
+              Number(f.ingresosArriendo || 0),
+              Number(f.ingresosComisiones || 0),
+              Number(f.otrosIngresos || 0),
+              f.comentarioOtrosIngresos || '',
+              f.origenFondos || '',
+              totalIngresos,
+              Number(f.egresosFamiliares || 0),
+              Number(f.egresosArriendo || 0),
+              Number(f.egresosCredito || 0),
+              Number(f.otrosEgresos || 0),
+              f.comentarioOtrosEgresos || '',
+              totalEgresos,
+              Number(f.totalActivos || 0),
+              Number(f.totalPasivos || 0),
+              patrimonioNeto,
+              Number(f.deudaRelacionFinanciera || 0),
+              f.relacionFinanciera || '',
+              f.fechaCreacion
+                ? new Date(f.fechaCreacion).toLocaleString()
+                : '',
+              f.fechaActualizacion
+                ? new Date(f.fechaActualizacion).toLocaleString()
+                : ''
+            ];
+          }),
+
+          anchos: [
+            14,
+            26,
+            12,
+            12,
+            14,
+            12,
+            14,
+            24,
+            20,
+            16,
+            14,
+            14,
+            14,
+            14,
+            24,
+            16,
+            14,
+            14,
+            14,
+            20,
+            20,
+            20,
+            20
+          ]
+        }
+
+      ]
+
+    });
+  }
+
+  private fechaArchivo(): string {
+
+    const fecha =
+      new Date();
+
+    return `${fecha.getFullYear()}${String(fecha.getMonth() + 1).padStart(2, '0')}${String(fecha.getDate()).padStart(2, '0')}`;
   }
 }

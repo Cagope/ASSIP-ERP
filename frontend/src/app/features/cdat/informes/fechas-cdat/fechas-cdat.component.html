@@ -1,0 +1,261 @@
+<div class="page">
+
+  <div class="page-header">
+
+    <div>
+      <h2>Informes por fechas CDAT</h2>
+
+      <small>
+        Informes operativos y estadísticos de CDAT.
+      </small>
+    </div>
+
+  </div>
+
+  <!-- FILTROS -->
+  <div class="card filtros-card">
+
+    <div class="section-header">
+
+      <div>
+        <h3>Filtros de consulta</h3>
+
+        <small>
+          Consulte información operativa CDAT por rango de fechas.
+        </small>
+      </div>
+
+    </div>
+
+    <div class="filters-grid">
+
+      <div class="f-row">
+
+        <label>Tipo informe</label>
+
+        <select [(ngModel)]="tipoInforme">
+
+          <option value="NUEVOS">CDAT nuevos</option>
+          <option value="CANCELADOS">CDAT cancelados</option>
+          <option value="VENCER">Próximos a vencer</option>
+          <option value="VENCIDOS">CDAT vencidos</option>
+          <option value="RENOVADOS">CDAT renovados</option>
+
+        </select>
+
+      </div>
+
+      <div class="f-row">
+
+        <label>Fecha inicial</label>
+
+        <input
+          type="date"
+          [(ngModel)]="fechaInicial">
+
+      </div>
+
+      <div class="f-row">
+
+        <label>Fecha final</label>
+
+        <input
+          type="date"
+          [(ngModel)]="fechaFinal">
+
+      </div>
+
+    </div>
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="volver()">
+        Volver
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="consultar()"
+        [disabled]="cargando">
+        Consultar
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="imprimir()"
+        [disabled]="!resultados.length">
+        Imprimir
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="exportarExcel()"
+        [disabled]="!resultados.length">
+        Exportar Excel
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- RESUMEN -->
+  <div class="card">
+
+    <div class="section-header">
+
+      <div>
+        <h3>Resumen ejecutivo</h3>
+
+        <small>
+          Indicadores generales del informe seleccionado.
+        </small>
+      </div>
+
+    </div>
+
+    <div class="cards-grid">
+
+      <div class="stat-card">
+        <span class="stat-label">Cantidad títulos</span>
+        <span class="stat-value">{{ resumen.cantidad | number:'1.0-0' }}</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-label">Valor total</span>
+        <span class="stat-value">$ {{ resumen.valorTotal | number:'1.0-0' }}</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-label">Promedio tasa</span>
+        <span class="stat-value">{{ resumen.promedioTasa | number:'1.2-2' }}%</span>
+      </div>
+
+      <div class="stat-card">
+        <span class="stat-label">Promedio plazo</span>
+        <span class="stat-value">{{ resumen.promedioPlazo | number:'1.0-0' }} meses</span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- RESULTADO -->
+  <div class="card">
+
+    <div class="section-header">
+
+      <div>
+        <h3>Resultado de consulta</h3>
+
+        <small>
+          Detalle operativo de títulos CDAT.
+        </small>
+      </div>
+
+      <div
+        class="resultado-badge"
+        *ngIf="resultados.length">
+
+        {{ resultados.length | number:'1.0-0' }} registros encontrados
+
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="error"
+      class="alert alert-error">
+
+      {{ error }}
+
+    </div>
+
+    <div
+      *ngIf="cargando"
+      class="loading-box">
+
+      Consultando información...
+
+    </div>
+
+    <div
+      *ngIf="!cargando"
+      class="table-container">
+
+      <table class="data-table">
+
+        <thead>
+        <tr>
+          <th>CDAT</th>
+          <th>Documento</th>
+          <th>Asociado</th>
+          <th>Agencia</th>
+          <th>Fecha apertura</th>
+          <th>Fecha vencimiento</th>
+          <th class="right">Plazo</th>
+          <th class="right">Tasa</th>
+          <th class="right">Valor</th>
+          <th>Estado</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr
+          *ngFor="let r of resultados"
+          class="clickable-row">
+
+          <td>{{ r.codigoCdat }}</td>
+          <td>{{ r.documento }}</td>
+          <td>{{ r.nombreCompleto }}</td>
+          <td>{{ r.agencia }}</td>
+          <td>{{ r.fechaApertura }}</td>
+          <td>{{ r.fechaVencimiento }}</td>
+
+          <td class="right">
+            {{ r.plazoMeses | number:'1.0-0' }}
+          </td>
+
+          <td class="right">
+            {{ r.tasa | number:'1.2-2' }}%
+          </td>
+
+          <td class="right">
+            $ {{ r.valor | number:'1.0-0' }}
+          </td>
+
+          <td>
+            <span class="estado-badge">
+              {{ r.estado }}
+            </span>
+          </td>
+
+        </tr>
+
+        <tr *ngIf="!resultados.length">
+
+          <td
+            colspan="10"
+            class="empty-row">
+
+            No hay información para mostrar.
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>

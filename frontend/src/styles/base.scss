@@ -3,18 +3,20 @@
    Archivo: src/styles/base.scss
    Autor: Dirección de Tecnología — ERP ASSIP Solidaria y Financiera
    Fecha: Octubre 2025
-
-   📘 Propósito:
-   Define la base visual del sistema, tipografía, colores generales,
-   normalización de elementos HTML y estilo de textos.
-   Este módulo debe cargarse antes de `layout.scss` y `buttons.scss`.
    ========================================================================== */
 
 @use 'tokens' as t;
 
-/* === 🧩 VARIABLES DE FUENTE Y NORMALIZACIÓN ============================== */
+/* === 🧩 VARIABLES GLOBALES ============================================== */
 :root {
-  --font-sans: "Inter", "Roboto", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-sans:
+    'Inter',
+    'Roboto',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Arial,
+    sans-serif;
 }
 
 /* === 🌍 CONFIGURACIÓN GLOBAL ============================================ */
@@ -23,44 +25,114 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
+
   background: t.$color-bg;
   color: t.$color-text;
+
   font-family: var(--font-sans);
   font-size: 16px;
   line-height: 1.5;
+
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* === 📝 TIPOGRAFÍA BASE ================================================== */
-h1, h2, h3 {
-  font-weight: 600;
+/* === 📦 NORMALIZACIÓN ==================================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* === 📝 TIPOGRAFÍA ======================================================= */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0 0 t.$space-4;
   color: t.$color-text;
-  margin: 0 0 t.$space-4 0;
+  font-weight: t.$font-weight-semibold;
+  line-height: 1.2;
 }
 
-h1 { font-size: 1.75rem; }   // 28px
-h2 { font-size: 1.375rem; }  // 22px
-h3 { font-size: 1.125rem; }  // 18px
+h1 {
+  font-size: 1.75rem;
+}
 
-p, label, input, button {
+h2 {
+  font-size: 1.375rem;
+}
+
+h3 {
+  font-size: 1.125rem;
+}
+
+h4 {
   font-size: 1rem;
 }
 
-.muted { color: t.$color-text-muted; }
+h5 {
+  font-size: 0.95rem;
+}
 
-/* === 🔗 ENLACES ========================================================= */
+h6 {
+  font-size: 0.9rem;
+}
+
+p {
+  margin: 0 0 t.$space-3;
+}
+
+/* === 🔤 ELEMENTOS DE FORMULARIO ========================================= */
+label,
+input,
+select,
+textarea,
+button {
+  font-family: inherit;
+}
+
+input,
+select,
+textarea,
+button {
+  font-size: t.$font-size-base;
+}
+
+/* === 🔗 ENLACES ========================================================== */
 a {
   color: t.$color-primary;
   text-decoration: none;
   transition: color 0.2s ease;
 
   &:hover {
-    text-decoration: underline;
     color: t.$color-primary-600;
+    text-decoration: underline;
   }
 }
 
-/* === 📦 NORMALIZACIÓN DE CAJAS ========================================= */
-* {
-  box-sizing: border-box;
+/* === 🪶 UTILIDADES ======================================================= */
+.muted {
+  color: t.$color-text-muted;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.right {
+  text-align: right;
+}
+
+.w-100 {
+  width: 100%;
+}
+
+/* === 🖨️ IMPRESIÓN ======================================================== */
+@media print {
+  body {
+    background: #fff;
+  }
 }

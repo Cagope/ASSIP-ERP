@@ -1,36 +1,45 @@
 /* =============================================================================
-   💰 FORMATOS NUMÉRICOS — Campos, Listados y Totales
-   ERP ASSIP — Estilos unificados para valores numéricos y financieros
-   -----------------------------------------------------------------------------
-   Incluye:
-     - Inputs con directiva [numericFormat]
-     - Celdas y totales en listados y reportes
-     - Colores semánticos coherentes con el tema corporativo
+   💰 ASSIP-ERP — FORMATOS NUMÉRICOS
+   Archivo: src/styles/_numbers.scss
    ========================================================================== */
 
-@use './tokens' as tokens;
+@use './tokens' as t;
 
 /* =============================================================================
-   🧮 ENTRADAS NUMÉRICAS (Directiva [numericFormat])
-   -------------------------------------------------------------------------- */
+   🧮 CAMPOS NUMÉRICOS
+   Directiva: [numericFormat]
+   ========================================================================== */
+
 input[numericFormat],
 input[type='text'][numericFormat],
 input[formControlName][numericFormat] {
   text-align: right;
-  font-variant-numeric: tabular-nums;
-  padding-right: 0.5rem;
-  font-family: "Inter", "Roboto Mono", monospace;
-  color: #111;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  transition: all 0.2s ease;
 
-  /* ✳️ Enfocado */
+  font-family:
+    'Inter',
+    'Roboto Mono',
+    monospace;
+
+  font-variant-numeric: tabular-nums;
+
+  padding-right: t.$space-2;
+
+  color: t.$color-text;
+  background-color: #fff;
+
+  border: 1px solid #ccc;
+  border-radius: t.$radius-sm;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+
+  /* ✳️ Enfoque */
   &:focus {
     outline: none;
-    border-color: tokens.$color-primary;
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
+    border-color: t.$color-primary;
+    box-shadow: 0 0 0 2px rgba(15, 98, 254, 0.15);
     background-color: #f9fcff;
   }
 
@@ -49,68 +58,89 @@ input[formControlName][numericFormat] {
   /* ❌ Campo inválido */
   &.ng-invalid.ng-touched:not(:focus) {
     background-color: #fff5f5;
-    border-color: #dc2626;
+    border-color: t.$color-danger;
   }
 }
 
 /* =============================================================================
-   📊 LISTADOS Y REPORTES NUMÉRICOS
-   -------------------------------------------------------------------------- */
-.text-right-number {
+   📊 VALORES NUMÉRICOS EN TABLAS / REPORTES
+   ========================================================================== */
+
+.text-right-number,
+.money,
+.numeric,
+.right-number {
   text-align: right !important;
-  font-family: "Roboto Mono", monospace;
+
+  font-family:
+    'Roboto Mono',
+    monospace;
+
   font-variant-numeric: tabular-nums;
+
   white-space: nowrap;
-  padding-right: 0.5rem;
+  padding-right: t.$space-2;
+
   color: #222;
 }
 
-/* 🎯 Variantes semánticas */
-.text-right-number.sm {
-  font-size: 0.85rem;
+/* === VARIANTES =========================================================== */
+
+.text-right-number.sm,
+.money.sm {
+  font-size: t.$font-size-sm;
   color: #555;
 }
 
-/* ✅ Total general */
-.text-right-number.total {
-  font-weight: 600;
+/* ✅ Totales */
+.text-right-number.total,
+.money.total {
+  font-weight: t.$font-weight-semibold;
   color: #0c641d;
   background-color: #f2fff2;
   border-top: 1px solid #b6e6b6;
 }
 
-/* 📘 Subtotal */
-.text-right-number.subtotal {
-  font-weight: 500;
+/* 📘 Subtotales */
+.text-right-number.subtotal,
+.money.subtotal {
+  font-weight: t.$font-weight-medium;
   color: #004085;
   background-color: #f3f8ff;
 }
 
-/* 🔴 Negativo */
-.text-right-number.negative {
+/* 🔴 Negativos */
+.text-right-number.negative,
+.money.negative {
   color: #b91c1c;
 }
 
-/* 🪶 Hover en filas interactivas */
-tr:hover .text-right-number {
+/* 🪶 Hover */
+tr:hover .text-right-number,
+tr:hover .money {
   background-color: #fafafa;
 }
 
-/* 🚫 Vacíos */
-.text-right-number:empty::after {
+/* 🚫 Valores vacíos */
+.text-right-number:empty::after,
+.money:empty::after {
   content: '—';
   color: #999;
 }
 
 /* =============================================================================
-   📱 RESPONSIVIDAD (solo para campos y listados numéricos)
+   📱 RESPONSIVE
    ========================================================================== */
+
 @media (max-width: 768px) {
   input[numericFormat] {
     font-size: 0.9rem;
   }
 
-  .text-right-number {
+  .text-right-number,
+  .money,
+  .numeric,
+  .right-number {
     font-size: 0.9rem;
   }
 }

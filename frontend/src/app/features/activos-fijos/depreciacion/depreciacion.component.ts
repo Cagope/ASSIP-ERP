@@ -126,7 +126,7 @@ export class DepreciacionComponent implements OnInit {
       if (!tc) return;
 
       const siguiente = (tc.cscComprobante ?? 0) + 1;
-      const consecutivo = siguiente.toString().padStart(10, '0');
+      const consecutivo = siguiente.toString().padStart(7, '0');
 
       this.consecutivoSugerido = consecutivo;
       this.form.get('numeroComprobante')!.setValue(consecutivo);

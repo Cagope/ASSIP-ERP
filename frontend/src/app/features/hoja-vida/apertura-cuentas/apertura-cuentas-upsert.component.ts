@@ -83,7 +83,7 @@ export class AperturaCuentasUpsertComponent implements OnInit {
           null;
 
         this.codigoFormaConsecutivo = consecutivo
-          ? consecutivo.toString().padStart(10, '0')
+          ? consecutivo.toString().padStart(6, '0')
           : null;
       } else {
         this.codigoFormaConsecutivo = null;
@@ -160,7 +160,7 @@ export class AperturaCuentasUpsertComponent implements OnInit {
         null;
 
       this.codigoFormaConsecutivo = consecutivo
-        ? consecutivo.toString().padStart(10, '0')
+        ? consecutivo.toString().padStart(6, '0')
         : null;
 
     } else {
@@ -192,7 +192,7 @@ export class AperturaCuentasUpsertComponent implements OnInit {
 
         if (this.formaAportes) {
           this.codigoAportes = String(this.formaAportes.consecutivo)
-            .padStart(10, '0');
+            .padStart(6, '0');
         }
 
         if (this.formaAportes &&

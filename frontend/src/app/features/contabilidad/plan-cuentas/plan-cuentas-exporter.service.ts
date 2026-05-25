@@ -1,27 +1,94 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
-import { PlanCuenta } from './plan-cuentas.api';
 
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService
+} from '../../../shared/services/excel-export.service';
+
+import {
+  PlanCuenta
+} from './plan-cuentas.api';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class PlanCuentasExporterService {
 
-  exportar(items: PlanCuenta[]): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
 
-    const data = items.map(i => ({
-      Agencia: i.idAgencia,
-      Código: i.codigoCuenta,
-      Nombre: i.nombre,
-      Naturaleza: i.naturaleza === 'D' ? 'Débito' : 'Crédito',
-      Nivel: i.nivel,
-      Operable: i.operable ? 'SI' : 'NO',
-      'Control Entrada/Salida': i.controlEntradaSalida ? 'SI' : 'NO',
-      'Tipo Especial': i.tipoEspecial ?? ''
-    }));
+  exportar(
+    items: PlanCuenta[]
+  ): void {
 
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
+    if (!items || items.length === 0) {
+      alert('No hay información para exportar.');
+      return;
+    }
 
-    XLSX.utils.book_append_sheet(wb, ws, 'Plan de Cuentas');
-    XLSX.writeFile(wb, 'plan_cuentas.xlsx');
+    this.excelExport.exportar({
+
+      nombreArchivo: 'plan_cuentas.xlsx',
+
+      hojas: [
+
+        {
+          nombreHoja: 'Plan de Cuentas',
+
+          titulo: 'PLAN DE CUENTAS',
+
+          columnas: [
+            'Agencia',
+            'Código',
+            'Nombre',
+            'Naturaleza',
+            'Nivel',
+            'Operable',
+            'Control Entrada/Salida',
+            'Tipo Especial'
+          ],
+
+          filas: items.map(i => [
+
+            i.idAgencia ?? '',
+
+            i.codigoCuenta || '',
+
+            i.nombre || '',
+
+            i.naturaleza === 'D'
+              ? 'Débito'
+              : 'Crédito',
+
+            i.nivel ?? '',
+
+            i.operable
+              ? 'SI'
+              : 'NO',
+
+            i.controlEntradaSalida
+              ? 'SI'
+              : 'NO',
+
+            i.tipoEspecial || ''
+
+          ]),
+
+          anchos: [
+            12,
+            18,
+            42,
+            16,
+            10,
+            12,
+            24,
+            20
+          ]
+        }
+
+      ]
+
+    });
   }
 }

@@ -9,36 +9,60 @@
 
   <div class="card">
 
-    <form class="filtros" (ngSubmit)="buscar()">
+    <form class="filtros filtros-ajustados" (ngSubmit)="buscar()">
 
-      <div class="f-row">
+      <div class="f-row f-row-agencia">
+
         <label>Agencia</label>
-        <select [(ngModel)]="filtros.agencia" name="agencia">
-          <option value="0">Todas</option>
-          <option *ngFor="let a of agencias" [value]="a.idAgencia">
-            {{ a.nombreAgencia }}
+
+        <select
+          [(ngModel)]="filtros.agencia"
+          name="agencia">
+
+          <option [ngValue]="0">
+            Todas
           </option>
+
+          <option
+            *ngFor="let a of agencias"
+            [ngValue]="a.idAgencia">
+
+            {{ a.nombreAgencia }}
+
+          </option>
+
         </select>
+
       </div>
 
-      <div class="f-row">
+      <div class="f-row f-row-fecha">
+
         <label>Fecha de corte</label>
-        <input type="date" [(ngModel)]="filtros.fechaCorte" name="fechaCorte" />
+
+        <input
+          type="date"
+          [(ngModel)]="filtros.fechaCorte"
+          name="fechaCorte" />
+
       </div>
 
-      <div class="form-actions">
+      <div class="form-actions form-actions-top">
 
         <button
           type="button"
           class="btn btn--secondary"
           (click)="limpiar()">
+
           Limpiar
+
         </button>
 
         <button
           type="submit"
           class="btn btn--primary">
+
           Buscar
+
         </button>
 
       </div>
@@ -98,32 +122,74 @@
 
   <div *ngIf="resumenAgencias.length > 0" class="card resumen-agencias">
 
-    <h3 class="mt-3">Resumen por agencia y forma</h3>
+    <h3 class="mt-3">
+      Resumen por agencia y forma
+    </h3>
 
     <ng-container *ngFor="let ag of resumenAgencias">
 
       <h4 class="agencia-title">
-        {{ ag.idAgencia }} — {{ ag.nombreAgencia }}
+        {{ ag.codigoAgencia }} — {{ ag.nombreAgencia }}
       </h4>
 
       <table class="tabla-resumen">
+
         <thead>
+
         <tr>
           <th>Cod. Forma</th>
           <th>Nombre forma</th>
+          <th class="right">Cuentas</th>
+          <th class="right">Débitos</th>
+          <th class="right">Créditos</th>
           <th class="right">Saldo</th>
-          <th class="right">Cantidad</th>
+          <th class="right">Promedio</th>
+          <th class="right">Mínimo</th>
+          <th class="right">Máximo</th>
         </tr>
+
         </thead>
 
         <tbody>
+
         <tr *ngFor="let f of ag.formas">
+
           <td>{{ f.codigoForma }}</td>
+
           <td>{{ f.nombreForma }}</td>
-          <td class="right">{{ f.saldo | number:'1.0-0' }}</td>
-          <td class="right">{{ f.cantidad }}</td>
+
+          <td class="right">
+            {{ f.cantidad | number:'1.0-0' }}
+          </td>
+
+          <td class="right">
+            {{ f.totalDebitos | number:'1.0-0' }}
+          </td>
+
+          <td class="right">
+            {{ f.totalCreditos | number:'1.0-0' }}
+          </td>
+
+          <td class="right">
+            {{ f.saldo | number:'1.0-0' }}
+          </td>
+
+          <td class="right">
+            {{ f.saldoPromedio | number:'1.0-0' }}
+          </td>
+
+          <td class="right">
+            {{ f.saldoMinimo | number:'1.0-0' }}
+          </td>
+
+          <td class="right">
+            {{ f.saldoMaximo | number:'1.0-0' }}
+          </td>
+
         </tr>
+
         </tbody>
+
       </table>
 
     </ng-container>

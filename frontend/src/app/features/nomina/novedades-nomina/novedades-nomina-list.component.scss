@@ -1,42 +1,87 @@
+@use '../../../../styles/forms';
+@use '../../../../styles/informes-base';
+
+/* =========================================
+   NOVEDADES LIST
+========================================= */
+
 .novedades-list {
+
+  /* =========================================
+     TABLA
+  ========================================= */
 
   table {
     width: 100%;
+
     border-collapse: collapse;
 
     th,
     td {
-      padding: 0.5rem;
+      padding: 9px 10px;
+
       border-bottom: 1px solid #e5e7eb;
+
+      font-size: 13px;
     }
 
     th {
-      background: #f9fafb;
+      background: #f8fafc;
+
+      color: #374151;
+
       text-align: left;
+
+      font-weight: 700;
+    }
+
+    td {
+      color: #111827;
     }
 
     td.nombre {
-      font-weight: 600;
+      font-weight: 700;
     }
 
     td.right {
       text-align: right;
     }
+
+    tbody tr:hover {
+      background: #f9fafb;
+    }
   }
+
+  /* =========================================
+     ACCIONES
+  ========================================= */
 
   .acciones {
     display: flex;
-    gap: 0.4rem;
     justify-content: flex-end;
+
+    gap: 0.4rem;
+
+    flex-wrap: wrap;
   }
 
+  /* =========================================
+     BOTONES SMALL
+  ========================================= */
+
   .btn.sm {
-    font-size: 0.8rem;
-    padding: 0.2rem 0.4rem;
-    border: 1px solid #d1d5db;
+    min-height: 30px;
+
+    padding: 0 10px;
+
+    border-radius: 6px;
+
     background: #fff;
-    border-radius: 0.25rem;
-    cursor: pointer;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    transition: all 0.15s ease-in-out;
 
     &:hover {
       background: #f3f4f6;
@@ -52,64 +97,55 @@
     }
   }
 
+  /* =========================================
+     ESTADOS
+  ========================================= */
+
   .loading,
   .empty {
     margin-top: 1rem;
+
+    padding: 12px;
+
+    border-radius: 8px;
+
     text-align: center;
-    color: #6b7280;
+
+    color: #667085;
+
+    background: #f8fafc;
+
+    font-size: 13px;
+    font-weight: 600;
   }
 }
 
-.empleado {
-  font-weight: 500;
-}
-
-.valor {
-  font-weight: 600;
-  color: #1e3a8a;
-}
-
-.center {
-  text-align: center;
-}
-
-.periodo {
-  font-weight: 600;
-  color: #1e3a8a;
-}
-
-.periodo small {
-  font-size: 0.75rem;
-  color: #6b7280;
-}
-
-.empleado {
-  font-weight: 500;
-}
-
-.valor {
-  font-weight: 600;
-  color: #0f172a;
-}
+/* =========================================
+   TOOLBAR
+========================================= */
 
 .toolbar {
   display: grid;
   grid-template-columns: 320px 1fr;
+
   gap: 12px;
   align-items: end;
+
   margin-bottom: 16px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-}
 
-.form-group label {
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #374151;
+  label {
+    margin-bottom: 6px;
+
+    color: #374151;
+
+    font-size: 12px;
+    font-weight: 600;
+  }
 }
 
 .search-group {
@@ -119,11 +155,52 @@
 }
 
 .form-control {
-  height: 40px;
+  height: 38px;
+
+  border-radius: 8px;
+
+  font-size: 13px;
 }
 
+/* =========================================
+   UTILIDADES
+========================================= */
+
+.empleado {
+  font-weight: 600;
+}
+
+.valor {
+  color: #0f172a;
+
+  font-weight: 700;
+}
+
+.center {
+  text-align: center;
+}
+
+.periodo {
+  color: #1e3a8a;
+
+  font-weight: 700;
+
+  small {
+    color: #6b7280;
+
+    font-size: 12px;
+    font-weight: 500;
+  }
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
 @media (max-width: 768px) {
+
   .toolbar {
     grid-template-columns: 1fr;
   }
+
 }

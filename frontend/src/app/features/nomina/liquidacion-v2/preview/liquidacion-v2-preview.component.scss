@@ -1,17 +1,25 @@
+@use '../../../../styles/forms';
+@use '../../../../styles/informes-base';
+
+/* =========================================
+   LIQUIDACION PREVIEW
+========================================= */
+
 .liquidacion-preview {
+  padding: 24px;
 
-  padding: 16px;
+  /* =========================================
+     FORMULARIO
+  ========================================= */
 
-  // =========================================================
-  // FORMULARIO
-  // =========================================================
   .formulario {
     margin-bottom: 20px;
 
     .form-grid {
       display: grid;
       grid-template-columns: 1.2fr 1.2fr 1fr;
-      gap: 16px;
+
+      gap: 1rem 1.25rem;
       align-items: end;
     }
 
@@ -20,16 +28,49 @@
       flex-direction: column;
 
       label {
+        margin-bottom: 5px;
+
+        color: #374151;
+
+        font-size: 12px;
         font-weight: 600;
-        margin-bottom: 6px;
-        font-size: 13px;
-        text-transform: lowercase;
-        color: #444;
       }
 
-      .form-control {
-        height: 36px;
-        font-size: 14px;
+      .form-control,
+      input,
+      select,
+      textarea {
+        width: 100%;
+        min-height: 38px;
+
+        padding: 0 10px;
+
+        border-radius: 8px;
+
+        background: #fff;
+
+        color: #111827;
+
+        font-size: 13px;
+
+        box-sizing: border-box;
+
+        &:focus {
+          outline: none;
+
+          border-color: #198754;
+
+          box-shadow: 0 0 0 2px rgba(25, 135, 84, 0.12);
+        }
+      }
+
+      textarea {
+        min-height: 90px;
+
+        padding-top: 10px;
+        padding-bottom: 10px;
+
+        resize: vertical;
       }
     }
 
@@ -40,159 +81,219 @@
 
       .btn {
         width: 100%;
-        min-height: 36px;
+        min-height: 38px;
+
         font-weight: 700;
-        letter-spacing: .2px;
       }
     }
   }
 
-  // =========================================================
-  // ESTADOS
-  // =========================================================
-  .loading {
-    padding: 12px 14px;
-    color: #555;
-    font-style: italic;
+  /* =========================================
+     ESTADOS
+  ========================================= */
+
+  .loading,
+  .empty-state {
+    margin-bottom: 16px;
+
+    padding: 14px;
+
+    border-radius: 8px;
+
     font-size: 13px;
-    background: #f7f7f7;
-    border: 1px solid #e5e5e5;
-    border-radius: 6px;
-    margin-bottom: 14px;
+    font-weight: 600;
+  }
+
+  .loading {
+    background: #f8fafc;
+
+    border: 1px solid #e5e7eb;
+
+    color: #667085;
+  }
+
+  .empty-state {
+    background: #fafafa;
+
+    border: 1px dashed #d8d8d8;
+
+    color: #666;
+
+    text-align: center;
   }
 
   .error {
+    margin-bottom: 16px;
+
     padding: 12px 14px;
-    background: #fdecea;
-    color: #b71c1c;
-    border: 1px solid #f5c6cb;
-    border-radius: 6px;
-    margin-bottom: 14px;
+
+    background: #fef2f2;
+
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+
+    color: #991b1b;
+
     font-size: 13px;
+    font-weight: 600;
   }
 
   .success {
+    margin-bottom: 16px;
+
     padding: 12px 14px;
-    background: #eaf7ea;
-    color: #1b5e20;
-    border: 1px solid #cfe8cf;
-    border-radius: 6px;
-    margin-bottom: 14px;
+
+    background: #ecfdf3;
+
+    border: 1px solid #b7ebc6;
+    border-radius: 8px;
+
+    color: #166534;
+
     font-size: 13px;
+    font-weight: 600;
   }
 
-  // =========================================================
-  // RESUMEN GLOBAL
-  // =========================================================
+  /* =========================================
+     RESUMEN GLOBAL
+  ========================================= */
+
   .resumen-global {
     display: grid;
     grid-template-columns: repeat(4, minmax(180px, 1fr));
+
     gap: 12px;
+
     margin: 18px 0 20px;
 
     .resumen-item {
-      background: #f5f5f5;
-      padding: 12px;
-      border-radius: 6px;
-      text-align: center;
+      padding: 14px 16px;
+
+      background: #f8fafc;
+
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
 
       strong {
         display: block;
+
+        margin-bottom: 6px;
+
+        color: #667085;
+
         font-size: 12px;
-        color: #666;
-        margin-bottom: 4px;
+        font-weight: 700;
       }
 
       span {
+        display: block;
+
+        text-align: right;
+
+        color: #111827;
+
         font-size: 18px;
         font-weight: 700;
-        color: #111;
       }
 
       &.neto {
-        background: #e3f2fd;
+        background: #eff6ff;
+
+        border-color: #bfdbfe;
 
         span {
-          color: #0d47a1;
+          color: #1d4ed8;
         }
       }
     }
   }
 
-  // =========================================================
-  // ESTADO VACÍO
-  // =========================================================
-  .empty-state {
-    padding: 16px;
-    background: #fafafa;
-    border: 1px dashed #d8d8d8;
-    border-radius: 6px;
-    color: #666;
-    font-size: 13px;
-    text-align: center;
-    margin-bottom: 18px;
-  }
+  /* =========================================
+     CONTRATO CARD
+  ========================================= */
 
-  // =========================================================
-  // CONTRATO CARD
-  // =========================================================
   .contrato-card {
-    border: 1px solid #ddd;
-    border-radius: 6px;
     margin-bottom: 24px;
+
     overflow: hidden;
+
     background: #fff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
 
     .contrato-header {
       display: grid;
       grid-template-columns: 2fr 1fr 1fr 1fr;
+
       gap: 12px;
-      background: #fafafa;
-      padding: 14px 12px;
-      border-bottom: 1px solid #ddd;
+
+      padding: 14px 16px;
+
+      background: #f8fafc;
+
+      border-bottom: 1px solid #e5e7eb;
 
       div {
+        color: #374151;
+
         font-size: 13px;
-        color: #222;
 
         strong {
+          color: #111827;
+
           font-weight: 700;
         }
       }
 
       .neto {
+        color: #166534;
+
         font-weight: 700;
-        color: #1b5e20;
       }
     }
 
     table.detalle {
       width: 100%;
-      border-collapse: collapse;
+
       margin: 0;
 
+      border-collapse: collapse;
+
       thead {
-        background: #f0f0f0;
+        background: #f8fafc;
 
         th {
-          padding: 8px 10px;
-          font-size: 11px;
-          text-transform: uppercase;
+          padding: 10px;
+
+          border-bottom: 1px solid #e5e7eb;
+
+          color: #374151;
+
+          font-size: 12px;
           font-weight: 700;
-          border-bottom: 1px solid #d5d5d5;
-          color: #222;
+
+          text-transform: uppercase;
         }
       }
 
       tbody {
         tr {
-          border-bottom: 1px solid #eee;
+          border-bottom: 1px solid #e5e7eb;
+
+          &:hover {
+            background: #f9fbff;
+          }
         }
 
         td {
-          padding: 8px 10px;
+          padding: 9px 10px;
+
+          color: #111827;
+
           font-size: 13px;
-          color: #222;
         }
 
         .center {
@@ -208,10 +309,13 @@
         }
 
         .empty-row {
-          text-align: center;
+          padding: 14px;
+
           color: #777;
+
+          text-align: center;
+
           font-style: italic;
-          padding: 12px;
         }
       }
     }
@@ -219,30 +323,40 @@
     .totales-contrato {
       display: flex;
       justify-content: flex-end;
-      gap: 24px;
-      padding: 10px 12px;
-      background: #fafafa;
-      border-top: 1px solid #ddd;
       flex-wrap: wrap;
 
+      gap: 18px 24px;
+
+      padding: 12px 16px;
+
+      background: #f8fafc;
+
+      border-top: 1px solid #e5e7eb;
+
       span {
+        color: #374151;
+
         font-size: 13px;
-        color: #222;
 
         strong {
           margin-left: 4px;
+
+          color: #111827;
+
           font-weight: 700;
         }
       }
     }
   }
 
-  // =========================================================
-  // BOTONES
-  // =========================================================
+  /* =========================================
+     BOTONES
+  ========================================= */
+
   .btn {
+    border-radius: 8px;
+
     font-size: 13px;
-    border-radius: 6px;
   }
 
   .btn.primary {
@@ -252,35 +366,146 @@
   .btn.secondary {
     font-weight: 600;
   }
+}
 
-  // =========================================================
-  // ACCIONES FINALES
-  // =========================================================
-  .acciones-finales {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 24px;
-    flex-wrap: wrap;
+/* =========================================
+   PREVIEW BUTTON
+========================================= */
 
-    .btn {
-      min-width: 180px;
-    }
+.btn-preview {
+  min-width: 200px;
+  height: 36px;
+
+  padding: 0 14px;
+
+  border: 1px solid #d6dbe6;
+  border-radius: 8px;
+
+  background: #f8fafc;
+
+  color: #374151;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.15s ease-in-out;
+
+  &:hover:not(:disabled) {
+    background: #eef3ff;
+
+    border-color: #9bb3f0;
+
+    color: #1f3a8a;
   }
 
-  // =========================================================
-  // RESPONSIVE
-  // =========================================================
-  @media (max-width: 992px) {
+  &:active:not(:disabled) {
+    background: #dde7ff;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+
+    cursor: not-allowed;
+  }
+}
+
+/* =========================================
+   ACCIONES FINALES
+========================================= */
+
+.acciones-finales {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-top: 18px;
+  padding-top: 14px;
+
+  border-top: 1px solid #e5e7eb;
+
+  flex-wrap: wrap;
+}
+
+.acciones-left,
+.acciones-right {
+  display: flex;
+
+  gap: 8px;
+
+  flex-wrap: wrap;
+}
+
+/* =========================================
+   BOTONES PROCESO
+========================================= */
+
+.btn-work-primary,
+.btn-work-secondary {
+  height: 36px;
+
+  padding: 0 16px;
+
+  border-radius: 8px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-work-primary {
+  border: none;
+
+  background: #16a34a;
+
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: #15803d;
+  }
+}
+
+.btn-work-secondary {
+  border: 1px solid #d6dbe6;
+
+  background: #f8fafc;
+
+  color: #374151;
+
+  &:hover:not(:disabled) {
+    background: #eef2f7;
+  }
+}
+
+.btn-work-primary:disabled,
+.btn-work-secondary:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 992px) {
+
+  .liquidacion-preview {
+
     .formulario {
+
       .form-grid {
         grid-template-columns: 1fr;
       }
 
-      .actions {
-        .btn {
-          width: 100%;
-        }
+      .actions .btn {
+        width: 100%;
       }
     }
 
@@ -289,126 +514,53 @@
     }
 
     .contrato-card {
+
       .contrato-header {
         grid-template-columns: 1fr 1fr;
       }
     }
   }
 
-  @media (max-width: 576px) {
+}
+
+@media (max-width: 576px) {
+
+  .liquidacion-preview {
+    padding: 1rem;
+
     .resumen-global {
       grid-template-columns: 1fr;
     }
 
     .contrato-card {
+
       .contrato-header {
         grid-template-columns: 1fr;
       }
 
       .totales-contrato {
-        justify-content: flex-start;
-        gap: 10px;
         flex-direction: column;
-      }
-    }
 
-    .acciones-finales {
-      .btn {
-        width: 100%;
-        min-width: 100%;
+        justify-content: flex-start;
+
+        gap: 10px;
       }
     }
   }
-}
 
-.btn-preview {
-  min-width: 200px;
-  height: 34px;
-  padding: 0 14px;
-  border: 1px solid #d6dbe6;
-  border-radius: 6px;
-  background: #f8f9fb;
-  color: #374151;
-  font-size: 12.5px;
-  font-weight: 600;
-  transition: all .2s ease;
-}
+  .acciones-finales,
+  .acciones-left,
+  .acciones-right {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-.btn-preview:hover:not(:disabled) {
-  background: #eef3ff;
-  border-color: #9bb3f0;
-  color: #1f3a8a;
-}
+  .acciones-finales .btn,
+  .btn-preview,
+  .btn-work-primary,
+  .btn-work-secondary {
+    width: 100%;
+    min-width: 100%;
+  }
 
-.btn-preview:active:not(:disabled) {
-  background: #dde7ff;
-}
-
-.btn-preview:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.acciones-finales {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid #e5e7eb;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.acciones-left,
-.acciones-right {
-  display: flex;
-  gap: 8px;
-}
-
-/* =========================
-   Botones proceso
-========================= */
-
-/* acción principal */
-.btn-work-primary {
-  height: 34px;
-  padding: 0 16px;
-  border-radius: 6px;
-  border: none;
-  background: #16a34a;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.btn-work-primary:hover:not(:disabled) {
-  background: #15803d;
-}
-
-/* acciones secundarias */
-.btn-work-secondary {
-  height: 34px;
-  padding: 0 14px;
-  border-radius: 6px;
-  border: 1px solid #d6dbe6;
-  background: #f8f9fb;
-  color: #374151;
-  font-size: 13px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.btn-work-secondary:hover:not(:disabled) {
-  background: #eef2f7;
-}
-
-/* disabled */
-.btn-work-primary:disabled,
-.btn-work-secondary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }

@@ -1,24 +1,81 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
-import { TipoComprobante } from './tipos-comprobantes.api';
 
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService
+} from '../../../shared/services/excel-export.service';
+
+import {
+  TipoComprobante
+} from './tipos-comprobantes.api';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class TiposComprobantesExporterService {
 
-  exportar(items: TipoComprobante[]): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
 
-    const data = items.map(t => ({
-      Agencia: t.idAgencia,
-      Tipo: t.tipoComprobante,
-      Nombre: t.nombreTipoComprobante,
-      Consecutivo: t.cscComprobante,
-      Activo: t.comprobanteActivo ? 'SI' : 'NO'
-    }));
+  exportar(
+    items: TipoComprobante[]
+  ): void {
 
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
+    if (!items || items.length === 0) {
+      alert('No hay información para exportar.');
+      return;
+    }
 
-    XLSX.utils.book_append_sheet(wb, ws, 'Tipos de Comprobantes');
-    XLSX.writeFile(wb, 'tipos_comprobantes.xlsx');
+    this.excelExport.exportar({
+
+      nombreArchivo:
+        'tipos_comprobantes.xlsx',
+
+      hojas: [
+
+        {
+          nombreHoja:
+            'Tipos de Comprobantes',
+
+          titulo:
+            'TIPOS DE COMPROBANTES',
+
+          columnas: [
+            'Agencia',
+            'Tipo',
+            'Nombre',
+            'Consecutivo',
+            'Activo'
+          ],
+
+          filas: items.map(t => [
+
+            t.idAgencia ?? '',
+
+            t.tipoComprobante || '',
+
+            t.nombreTipoComprobante || '',
+
+            t.cscComprobante ?? '',
+
+            t.comprobanteActivo
+              ? 'SI'
+              : 'NO'
+
+          ]),
+
+          anchos: [
+            12,
+            14,
+            42,
+            16,
+            12
+          ]
+        }
+
+      ]
+
+    });
   }
 }

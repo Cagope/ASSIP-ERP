@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
+
+import {
+  ExcelExportService
+} from '../../../../shared/services/excel-export.service';
 
 export interface MovimientosActivosExportMeta {
   agencia?: string;
@@ -7,123 +10,164 @@ export interface MovimientosActivosExportMeta {
   movimiento?: string;
   fechaIni?: string | null;
   fechaFin?: string | null;
-
-  // ✅ opcional (si quieres llevarlo como dato de control)
   idActivoFijo?: number | null;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class MovimientosActivosExporterService {
 
-  // ============================================================
-  // ✅ EXPORTAR A EXCEL (XLSX)
-  // ============================================================
-  exportar(rows: any[], meta?: MovimientosActivosExportMeta): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportar(
+    rows: any[],
+    meta?: MovimientosActivosExportMeta
+  ): void {
 
     if (!rows || rows.length === 0) {
       alert('No hay información para exportar.');
       return;
     }
 
-    const fechaGen = new Date();
-    const fechaTexto = fechaGen.toLocaleString('es-CO');
+    const fechaTexto =
+      new Date().toLocaleString('es-CO');
 
-    // ============================================================
-    // ✅ HOJA 1: MOVIMIENTOS
-    // ============================================================
-    const data = rows.map(r => ({
-      'Fecha': r?.fecha ?? '',
-      'Hora': r?.hora ?? '',
+    this.excelExport.exportar({
 
-      'ID Activo': r?.id_activo_fijo ?? '',
-      'Placa': r?.placa_activo ?? '',
-      'Activo': r?.nombre_activo ?? '',
+      nombreArchivo:
+        this.buildFileName(meta?.agencia, meta?.activo),
 
-      'ID Agencia': r?.id_agencia ?? '',
-      'Agencia': r?.nombre_agencia ?? '',
+      hojas: [
 
-      'Tipo Movimiento': r?.codigo_movimiento ?? '',
-      'Movimiento': r?.nombre_movimiento ?? '',
+        {
+          nombreHoja: 'Filtros',
 
-      'Tipo Comprobante': r?.tipo_comprobante ?? '',
-      'Número Comprobante': r?.numero_comprobante ?? '',
+          titulo: 'Filtros movimientos activos',
 
-      'Débito': Number(r?.valor_debito ?? 0),
-      'Crédito': Number(r?.valor_credito ?? 0),
-    }));
+          columnas: [
+            'Campo',
+            'Valor'
+          ],
 
-    const wsMov = XLSX.utils.json_to_sheet(data);
+          filas: [
+            ['Agencia', meta?.agencia || 'TODAS'],
+            ['Activo', meta?.activo || 'TODOS'],
+            ['Movimiento', meta?.movimiento || 'TODOS'],
+            ['Fecha Inicial', meta?.fechaIni || ''],
+            ['Fecha Final', meta?.fechaFin || ''],
+            ['Generado', fechaTexto],
+            ['Total filas', rows.length]
+          ],
 
-    // ✅ Anchos recomendados
-    wsMov['!cols'] = [
-      { wch: 12 }, // Fecha
-      { wch: 10 }, // Hora
-      { wch: 10 }, // ID Activo
-      { wch: 12 }, // Placa
-      { wch: 35 }, // Activo
-      { wch: 10 }, // ID Agencia
-      { wch: 30 }, // Agencia
-      { wch: 14 }, // Tipo Mov
-      { wch: 22 }, // Movimiento
-      { wch: 16 }, // Tipo comp
-      { wch: 18 }, // Número comp
-      { wch: 14 }, // Débito
-      { wch: 14 }, // Crédito
-    ];
+          anchos: [
+            18,
+            60
+          ]
+        },
 
-    // ============================================================
-    // ✅ HOJA 2: METADATOS (FILTROS)
-    // ============================================================
-    const metaRows = [
-      { 'Campo': 'Agencia', 'Valor': meta?.agencia ?? 'TODAS' },
-      { 'Campo': 'Activo', 'Valor': meta?.activo ?? 'TODOS' },
-      { 'Campo': 'Movimiento', 'Valor': meta?.movimiento ?? 'TODOS' },
-      { 'Campo': 'Fecha Inicial', 'Valor': meta?.fechaIni ?? '' },
-      { 'Campo': 'Fecha Final', 'Valor': meta?.fechaFin ?? '' },
-      { 'Campo': 'Generado', 'Valor': fechaTexto },
-      { 'Campo': 'Total filas', 'Valor': rows.length }
-    ];
+        {
+          nombreHoja: 'Movimientos',
 
-    const wsMeta = XLSX.utils.json_to_sheet(metaRows);
-    wsMeta['!cols'] = [{ wch: 18 }, { wch: 60 }];
+          titulo: 'Movimientos de activos',
 
-    // ============================================================
-    // ✅ LIBRO
-    // ============================================================
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, wsMeta, 'Filtros');
-    XLSX.utils.book_append_sheet(wb, wsMov, 'Movimientos');
+          columnas: [
+            'Fecha',
+            'Hora',
+            'ID Activo',
+            'Placa',
+            'Activo',
+            'ID Agencia',
+            'Agencia',
+            'Tipo Movimiento',
+            'Movimiento',
+            'Tipo Comprobante',
+            'Número Comprobante',
+            'Débito',
+            'Crédito'
+          ],
 
-    // ============================================================
-    // ✅ NOMBRE ARCHIVO
-    // ============================================================
-    const fileName = this.buildFileName(meta?.agencia, meta?.activo);
+          filas: rows.map(r => [
+            r?.fecha || '',
+            r?.hora || '',
+            r?.id_activo_fijo ?? '',
+            r?.placa_activo || '',
+            r?.nombre_activo || '',
+            r?.id_agencia ?? '',
+            r?.nombre_agencia || '',
+            r?.codigo_movimiento || '',
+            r?.nombre_movimiento || '',
+            r?.tipo_comprobante || '',
+            r?.numero_comprobante || '',
+            Number(r?.valor_debito || 0),
+            Number(r?.valor_credito || 0)
+          ]),
 
-    XLSX.writeFile(wb, fileName);
+          anchos: [
+            12,
+            10,
+            10,
+            12,
+            35,
+            10,
+            30,
+            14,
+            22,
+            16,
+            18,
+            14,
+            14
+          ]
+        }
+
+      ]
+
+    });
   }
 
-  // ============================================================
-  // ✅ Nombre del archivo
-  // ============================================================
-  private buildFileName(agencia?: string, activo?: string): string {
+  private buildFileName(
+    agencia?: string,
+    activo?: string
+  ): string {
 
-    const ag = (agencia || 'TODAS')
-      .toUpperCase()
-      .replaceAll(' ', '_')
-      .replaceAll('/', '-')
-      .replaceAll('.', '');
+    const ag =
+      this.limpiarNombreArchivo(
+        agencia || 'TODAS'
+      );
 
-    const act = (activo || 'TODOS')
-      .toUpperCase()
-      .replaceAll(' ', '_')
-      .replaceAll('/', '-')
-      .replaceAll('.', '');
+    const act =
+      this.limpiarNombreArchivo(
+        activo || 'TODOS'
+      );
 
-    const hoy = new Date();
-    const yyyy = hoy.getFullYear();
-    const mm = String(hoy.getMonth() + 1).padStart(2, '0');
-    const dd = String(hoy.getDate()).padStart(2, '0');
+    const hoy =
+      new Date();
+
+    const yyyy =
+      hoy.getFullYear();
+
+    const mm =
+      String(hoy.getMonth() + 1)
+        .padStart(2, '0');
+
+    const dd =
+      String(hoy.getDate())
+        .padStart(2, '0');
 
     return `MOVIMIENTOS_ACTIVOS_${ag}_${act}_${yyyy}${mm}${dd}.xlsx`;
+  }
+
+  private limpiarNombreArchivo(
+    value: string
+  ): string {
+
+    return value
+      .toUpperCase()
+      .replaceAll(' ', '_')
+      .replaceAll('/', '-')
+      .replaceAll('.', '');
   }
 }

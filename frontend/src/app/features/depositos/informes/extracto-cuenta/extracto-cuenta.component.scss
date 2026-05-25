@@ -1,0 +1,222 @@
+@use '../../../../../styles/informes-base';
+
+/* =========================================
+   FILTROS
+========================================= */
+
+.filtros-busqueda,
+.filtros-extracto {
+  display: grid;
+
+  gap: 14px;
+  align-items: end;
+}
+
+.filtros-busqueda {
+  grid-template-columns:
+    170px
+    minmax(180px, 1fr)
+    minmax(180px, 1fr)
+    minmax(180px, 1fr)
+    170px
+    auto;
+}
+
+.filtros-extracto {
+  grid-template-columns:
+    165px
+    165px
+    auto;
+
+  margin-top: 16px;
+}
+
+/* =========================================
+   FORM ACTIONS
+========================================= */
+
+.filtros-busqueda .form-actions,
+.filtros-extracto .form-actions {
+  width: auto;
+
+  margin-top: 0;
+
+  display: flex;
+  flex-direction: row;
+  align-items: end;
+  justify-content: flex-end;
+
+  gap: 10px;
+}
+
+/* =========================================
+   TABLA
+========================================= */
+
+.selected {
+  background: #eef2ff;
+}
+
+/* =========================================
+   BOXES
+========================================= */
+
+.cuenta-box,
+.datos-asociado,
+.resumen-extracto {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 12px;
+
+  div {
+    padding: 10px 12px;
+
+    background: #f9fafb;
+
+    border-left: 4px solid #9ca3af;
+    border-radius: 8px;
+  }
+
+  span {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #6b7280;
+
+    font-size: 12px;
+  }
+
+  strong {
+    display: block;
+
+    color: #111827;
+
+    font-size: 14px;
+    font-weight: 700;
+  }
+}
+
+/* =========================================
+   HEADER EXTRACTO
+========================================= */
+
+.extracto-header {
+  display: flex;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+
+  border-bottom: 2px solid #111827;
+
+  h2 {
+    margin: 0;
+
+    color: #111827;
+
+    font-size: 20px;
+    font-weight: 800;
+  }
+
+  p {
+    margin: 4px 0 0;
+
+    color: #4b5563;
+
+    font-size: 13px;
+  }
+
+  .periodo {
+    display: grid;
+    grid-template-columns: auto auto;
+
+    gap: 4px 10px;
+
+    font-size: 13px;
+
+    span {
+      color: #6b7280;
+    }
+
+    strong {
+      text-align: right;
+    }
+  }
+}
+
+/* =========================================
+   DATOS ASOCIADO
+========================================= */
+
+.datos-asociado {
+  margin-bottom: 14px;
+}
+
+/* =========================================
+   RESUMEN
+========================================= */
+
+.resumen-extracto {
+  grid-template-columns: repeat(4, 1fr);
+
+  margin-bottom: 14px;
+
+  div {
+    border-left-color: #2563eb;
+  }
+
+  strong {
+    text-align: right;
+
+    font-size: 16px;
+  }
+}
+
+/* =========================================
+   ACCIONES
+========================================= */
+
+.acciones-extracto {
+  margin-bottom: 10px;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 900px) {
+
+  .filtros-busqueda,
+  .filtros-extracto,
+  .cuenta-box,
+  .datos-asociado,
+  .resumen-extracto {
+    grid-template-columns: 1fr;
+  }
+
+  .extracto-header {
+    flex-direction: column;
+  }
+
+  .filtros-busqueda .form-actions,
+  .filtros-extracto .form-actions {
+    justify-content: flex-start;
+  }
+
+}
+
+/* =========================================
+   PRINT
+========================================= */
+
+@media print {
+
+  .extracto-print {
+    page-break-inside: avoid;
+  }
+
+}

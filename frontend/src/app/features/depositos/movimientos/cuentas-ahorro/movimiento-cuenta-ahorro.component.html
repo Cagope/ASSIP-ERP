@@ -1,0 +1,788 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h2>Inclusión de movimientos a cuentas de ahorro</h2>
+      <p>
+        Registro manual de movimientos administrativos sobre cuentas de depósitos.
+      </p>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert--error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="mensaje" class="alert alert--success">
+    {{ mensaje }}
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- BUSQUEDA -->
+  <!-- ========================================================= -->
+
+  <section class="card">
+
+    <h3>Buscar asociado / cuenta</h3>
+
+    <div class="filters">
+
+      <div class="form-field">
+        <label>Documento</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtros.documento"
+          (keyup.enter)="buscar()">
+      </div>
+
+      <div class="form-field">
+        <label>Nombres</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtros.nombres"
+          (keyup.enter)="buscar()">
+      </div>
+
+      <div class="form-field">
+        <label>Primer apellido</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtros.primerApellido"
+          (keyup.enter)="buscar()">
+      </div>
+
+      <div class="form-field">
+        <label>Segundo apellido</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtros.segundoApellido"
+          (keyup.enter)="buscar()">
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="buscar()"
+          [disabled]="cargando">
+
+          Buscar
+
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()">
+
+          Limpiar
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ========================================================= -->
+  <!-- LISTADO -->
+  <!-- ========================================================= -->
+
+  <section class="card" *ngIf="cuentas.length > 0">
+
+    <h3>Cuentas encontradas</h3>
+
+    <div class="table-wrap">
+
+      <table class="data-table">
+
+        <thead>
+        <tr>
+
+          <th>Cuenta</th>
+          <th>Forma</th>
+          <th>Documento</th>
+          <th>Asociado</th>
+          <th>Estado</th>
+          <th class="right">Saldo</th>
+          <th>Mensaje</th>
+          <th class="center">Acción</th>
+
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr
+          *ngFor="let cuenta of cuentas"
+          [class.row-disabled]="!cuenta.estadoOperativo">
+
+          <td>{{ cuenta.codigoCuenta }}</td>
+
+          <td>
+            {{ cuenta.codigoForma }}
+            -
+            {{ cuenta.nombreForma }}
+          </td>
+
+          <td>{{ cuenta.documento }}</td>
+
+          <td>{{ cuenta.nombreAsociado }}</td>
+
+          <td>
+            {{ cuenta.estadoCuenta }}
+            -
+            {{ cuenta.descripcionEstadoCuenta }}
+          </td>
+
+          <td class="right">
+            {{ cuenta.saldoActualCuenta | number:'1.2-2' }}
+          </td>
+
+          <td>
+
+            <span
+              class="badge"
+              [class.badge--ok]="cuenta.estadoOperativo"
+              [class.badge--warn]="!cuenta.estadoOperativo">
+
+              {{ cuenta.mensajeOperativo }}
+
+            </span>
+
+          </td>
+
+          <td class="center">
+
+            <button
+              type="button"
+              class="btn btn--secondary btn-sm"
+              (click)="seleccionarCuenta(cuenta)"
+              [disabled]="!cuenta.estadoOperativo">
+
+              {{ cuenta.estadoOperativo ? 'Seleccionar' : 'No disponible' }}
+
+            </button>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- CUENTA SELECCIONADA -->
+  <!-- ========================================================= -->
+
+  <section class="card selected-card" *ngIf="cuentaSeleccionada">
+
+    <div class="selected-header">
+
+      <div>
+
+        <h3>Cuenta seleccionada</h3>
+
+        <p>
+          Información operativa de la cuenta y validaciones previas del movimiento.
+        </p>
+
+      </div>
+
+      <div
+        class="status-pill"
+        [class.status-pill--ok]="cuentaSeleccionada.estadoOperativo"
+        [class.status-pill--warn]="!cuentaSeleccionada.estadoOperativo">
+
+        {{ cuentaSeleccionada.descripcionEstadoCuenta }}
+
+      </div>
+
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- DATOS -->
+    <!-- ========================================================= -->
+
+    <div class="selected-grid">
+
+      <div>
+        <span>Asociado</span>
+        <strong>{{ cuentaSeleccionada.nombreAsociado }}</strong>
+      </div>
+
+      <div>
+        <span>Documento</span>
+        <strong>{{ cuentaSeleccionada.documento }}</strong>
+      </div>
+
+      <div>
+        <span>Cuenta</span>
+        <strong>{{ cuentaSeleccionada.codigoCuenta }}</strong>
+      </div>
+
+      <div>
+        <span>Forma ahorro</span>
+
+        <strong>
+          {{ cuentaSeleccionada.codigoForma }}
+          -
+          {{ cuentaSeleccionada.nombreForma }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Agencia</span>
+
+        <strong>
+          {{ cuentaSeleccionada.codigoAgencia }}
+          -
+          {{ cuentaSeleccionada.nombreAgencia }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Fecha apertura</span>
+
+        <strong>
+          {{ cuentaSeleccionada.fechaAperturaCuenta || 'No registra' }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Estado</span>
+
+        <strong>
+          {{ cuentaSeleccionada.estadoCuenta }}
+          -
+          {{ cuentaSeleccionada.descripcionEstadoCuenta }}
+        </strong>
+      </div>
+
+      <div>
+        <span>GMF</span>
+
+        <strong>
+          {{ cuentaSeleccionada.gmfCuenta === 'S'
+          ? 'Sí aplica'
+          : 'No aplica' }}
+        </strong>
+      </div>
+
+    </div>
+
+    <div class="extracto-actions">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="verMovimientos()"
+        [disabled]="!cuentaSeleccionada">
+
+        Ver movimientos
+
+      </button>
+
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- ADVERTENCIAS -->
+    <!-- ========================================================= -->
+
+    <div class="operativo-card">
+
+      <div class="section-title">
+        Características operativas
+      </div>
+
+      <div class="operativo-cards">
+
+        <div class="operativo-item">
+
+          <span>Documento soporte</span>
+
+          <strong>
+            {{ documentoSoporteTexto() }}
+          </strong>
+
+        </div>
+
+        <div class="operativo-item">
+
+          <span>Cuenta conjunta</span>
+
+          <strong>
+            {{ textoCuentaConjunta() }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div
+      class="apoderado-alert"
+      *ngIf="tieneApoderado()">
+
+      <div class="apoderado-title">
+
+        ⚠ Apoderado registrado
+
+      </div>
+
+      <div class="apoderado-grid">
+
+        <div>
+
+          <span>Documento</span>
+
+          <strong>
+            {{ cuentaSeleccionada.documentoPoder }}
+          </strong>
+
+        </div>
+
+        <div>
+
+          <span>Nombre</span>
+
+          <strong>
+            {{ cuentaSeleccionada.nombrePoder }}
+          </strong>
+
+        </div>
+
+        <div>
+
+          <span>Teléfono</span>
+
+          <strong>
+            {{ cuentaSeleccionada.telefonoPoder || 'No registra' }}
+          </strong>
+
+        </div>
+
+        <div>
+
+          <span>Celular</span>
+
+          <strong>
+            {{ cuentaSeleccionada.celularPoder || 'No registra' }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- SALDOS -->
+    <!-- ========================================================= -->
+
+    <div class="saldo-resumen">
+
+      <div class="saldo-item saldo-principal">
+
+        <span>Saldo de la cuenta</span>
+
+        <strong>
+          {{ cuentaSeleccionada.saldoActualCuenta | number:'1.2-2' }}
+        </strong>
+
+      </div>
+
+      <div class="saldo-item">
+
+        <span>Valor en canje</span>
+
+        <strong>
+          {{ cuentaSeleccionada.valorEnCanje | number:'1.2-2' }}
+        </strong>
+
+      </div>
+
+      <div class="saldo-item">
+
+        <span>Valor GMF</span>
+
+        <strong>0.00</strong>
+
+      </div>
+
+      <div class="saldo-item saldo-disponible">
+
+        <span>Valor disponible</span>
+
+        <strong>
+          {{ valorDisponibleCuenta() | number:'1.2-2' }}
+        </strong>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- MOVIMIENTO -->
+  <!-- ========================================================= -->
+
+  <section class="card" *ngIf="cuentaSeleccionada">
+
+    <h3>Datos del movimiento</h3>
+
+    <div class="movement-grid">
+
+      <div class="form-field">
+
+        <label>Fecha movimiento</label>
+
+        <input
+          type="date"
+          [(ngModel)]="movimiento.fechaMovimiento"
+          (change)="consultarPreview()">
+
+      </div>
+
+      <div class="form-field">
+
+        <label>Tipo de movimiento</label>
+
+        <select
+          [(ngModel)]="movimiento.tipoMovimiento"
+          (change)="consultarPreview()">
+
+          <option value="">Seleccione...</option>
+
+          <option
+            *ngFor="let tipo of tiposMovimiento"
+            [value]="tipo.codigoMovimiento">
+
+            {{ tipo.codigoMovimiento }} - {{ tipo.descripcion }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+      <div class="form-field">
+
+        <label>Valor movimiento</label>
+
+        <input
+          type="text"
+          name="valorMovimiento"
+          numericFormat
+          autocomplete="off"
+          class="input-number"
+          [(ngModel)]="movimiento.valorMovimiento"
+          (blur)="consultarPreview()">
+
+      </div>
+
+      <div class="form-field">
+
+        <label>Tipo comprobante</label>
+
+        <select [(ngModel)]="movimiento.tipoComprobante">
+          <option value="">Seleccione</option>
+
+          <option
+            *ngFor="let t of tiposComprobantes"
+            [ngValue]="t.tipoComprobante">
+
+            {{ t.tipoComprobante }} — {{ t.nombreTipoComprobante }}
+
+          </option>
+        </select>
+
+      </div>
+
+      <div class="form-field">
+
+        <label>Número comprobante</label>
+
+        <input
+          type="text"
+          autocomplete="off"
+          [(ngModel)]="movimiento.numeroComprobante"
+          (blur)="formatearNumeroComprobante()">
+
+      </div>
+
+      <div class="form-field full">
+
+        <label>Detalle</label>
+
+        <input
+          type="text"
+          autocomplete="off"
+          [(ngModel)]="movimiento.detalle">
+
+      </div>
+
+    </div>
+
+    <section
+      class="preview-card"
+      *ngIf="preview">
+
+      <div class="preview-header">
+
+        <div>
+          <h3>Vista previa del movimiento</h3>
+
+          <p>
+            Validación financiera antes de aplicar el proceso.
+          </p>
+        </div>
+
+        <div
+          class="preview-badge"
+          [class.preview-badge--credito]="esCredito()"
+          [class.preview-badge--debito]="esDebito()">
+
+          {{ esCredito() ? 'CRÉDITO' : 'DÉBITO' }}
+
+        </div>
+
+      </div>
+
+      <div class="saldo-resumen-preview">
+
+        <div class="saldo-item saldo-principal">
+
+          <span>Saldo actual</span>
+
+          <strong>
+            {{ preview.saldoActual | number:'1.2-2' }}
+          </strong>
+
+        </div>
+
+        <div class="saldo-item">
+
+          <span>Valor movimiento</span>
+
+          <strong>
+            {{ preview.valorMovimiento | number:'1.2-2' }}
+          </strong>
+
+        </div>
+
+        <div class="saldo-item">
+
+          <span>Valor GMF</span>
+
+          <strong>
+            {{ preview.valorGmf | number:'1.2-2' }}
+          </strong>
+
+        </div>
+
+        <div class="saldo-item saldo-disponible">
+
+          <span>Nuevo saldo</span>
+
+          <strong>
+            {{ preview.saldoFinal | number:'1.2-2' }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <div
+      *ngIf="preview?.sarlaft"
+      class="sarlaft-alert"
+      [ngClass]="{
+    'alert-rojo': preview?.sarlaft?.severidad === 'ROJO',
+    'alert-amarillo': preview?.sarlaft?.severidad === 'AMARILLO',
+    'alert-verde': preview?.sarlaft?.severidad === 'VERDE'
+  }">
+
+      <div>
+
+        <strong>SARLAFT:</strong>
+
+        <span *ngIf="!preview?.sarlaft?.alertas?.length">
+      {{ preview?.sarlaft?.descripcion }}
+    </span>
+
+        <span *ngIf="preview?.sarlaft?.alertas?.length">
+      Evaluación SARLAFT con alertas.
+    </span>
+
+      </div>
+
+      <div
+        class="sarlaft-list"
+        *ngIf="preview?.sarlaft?.alertas?.length">
+
+        <div
+          class="sarlaft-item"
+          *ngFor="let alerta of preview?.sarlaft?.alertas">
+
+          <div>
+            <strong>
+              Regla {{ alerta.nombreRegla }}
+            </strong>
+          </div>
+
+          <div>
+            {{ alerta.descripcion }}
+          </div>
+
+          <div
+            *ngIf="alerta.accionRecomendada"
+            class="accion">
+
+            <strong>Acción recomendada:</strong>
+            {{ alerta.accionRecomendada }}
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div *ngIf="preview?.sarlaft?.nombreRegla">
+
+        <strong>Regla:</strong>
+
+        {{ preview?.sarlaft?.nombreRegla }}
+
+      </div>
+
+      <div
+        *ngIf="preview?.sarlaft?.accionRecomendada"
+        class="accion">
+
+        <strong>Acción recomendada:</strong>
+
+        {{ preview?.sarlaft?.accionRecomendada }}
+
+      </div>
+
+    </div>
+
+    <div class="form-actions end">
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="aplicar()"
+        [disabled]="cargando || preview?.sarlaft?.bloqueaOperacion">
+
+        Aplicar movimiento
+
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- RESULTADO -->
+  <!-- ========================================================= -->
+
+  <section class="card result-card" *ngIf="resultado">
+
+    <div class="result-header">
+
+      <div>
+
+        <h3>
+          Movimiento aplicado correctamente
+        </h3>
+
+        <p>
+          El movimiento fue registrado en extractos y saldo de la cuenta.
+        </p>
+
+      </div>
+
+      <div class="result-ok">
+
+        ✔ OK
+
+      </div>
+
+    </div>
+
+    <div class="preview-grid">
+
+      <div>
+        <span>Cuenta</span>
+        <strong>{{ resultado.codigoCuenta }}</strong>
+      </div>
+
+      <div>
+        <span>Asociado</span>
+        <strong>{{ resultado.nombreAsociado }}</strong>
+      </div>
+
+      <div>
+        <span>Movimiento</span>
+
+        <strong>
+          {{ resultado.tipoMovimiento }}
+          -
+          {{ resultado.descripcionMovimiento }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Saldo anterior</span>
+
+        <strong>
+          {{ resultado.saldoAnterior | number:'1.2-2' }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Valor</span>
+
+        <strong>
+          {{ resultado.valorMovimiento | number:'1.2-2' }}
+        </strong>
+      </div>
+
+      <div class="saldo-final">
+
+        <span>Saldo final</span>
+
+        <strong>
+          {{ resultado.saldoFinal | number:'1.2-2' }}
+        </strong>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <app-extracto-cuenta-shared
+    *ngIf="mostrarExtracto && cuentaSeleccionada"
+    [idCuentaAhorro]="cuentaSeleccionada.idCuentaAhorro"
+    (cerrar)="mostrarExtracto = false">
+  </app-extracto-cuenta-shared>
+
+</div>

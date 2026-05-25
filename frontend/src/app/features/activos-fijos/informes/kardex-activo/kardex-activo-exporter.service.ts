@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
+
+import {
+  ExcelExportService
+} from '../../../../shared/services/excel-export.service';
 
 export interface KardexActivoExportMeta {
   agencia?: string;
@@ -9,95 +12,144 @@ export interface KardexActivoExportMeta {
   idActivoFijo?: number | null;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class KardexActivoExporterService {
 
-  exportar(rows: any[], meta?: KardexActivoExportMeta): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportar(
+    rows: any[],
+    meta?: KardexActivoExportMeta
+  ): void {
 
     if (!rows || rows.length === 0) {
       alert('No hay información para exportar.');
       return;
     }
 
-    const fechaGen = new Date();
-    const fechaTexto = fechaGen.toLocaleString('es-CO');
+    const fechaTexto =
+      new Date().toLocaleString('es-CO');
 
-    // ============================================================
-    // HOJA 1: MOVIMIENTOS (KARDEX)
-    // ============================================================
-    const data = rows.map(r => ({
-      'Fecha': r?.fecha ?? '',
-      'Hora': r?.hora ?? '',
+    this.excelExport.exportar({
 
-      'Tipo Movimiento': r?.codigo_movimiento ?? '',
-      'Movimiento': r?.nombre_movimiento ?? '',
+      nombreArchivo:
+        this.buildFileName(meta?.agencia, meta?.activo),
 
-      'Tipo Comprobante': r?.tipo_comprobante ?? '',
-      'Número Comprobante': r?.numero_comprobante ?? '',
+      hojas: [
 
-      'Débito': Number(r?.valor_debito ?? 0),
-      'Crédito': Number(r?.valor_credito ?? 0),
-    }));
+        {
+          nombreHoja: 'Filtros',
 
-    const ws = XLSX.utils.json_to_sheet(data);
+          titulo: 'Filtros kardex activo',
 
-    ws['!cols'] = [
-      { wch: 12 }, // Fecha
-      { wch: 10 }, // Hora
-      { wch: 14 }, // Tipo mov
-      { wch: 28 }, // Movimiento
-      { wch: 18 }, // Tipo comp
-      { wch: 18 }, // Numero comp
-      { wch: 14 }, // Debito
-      { wch: 14 }, // Credito
-    ];
+          columnas: [
+            'Campo',
+            'Valor'
+          ],
 
-    // ============================================================
-    // HOJA 2: FILTROS (METADATA)
-    // ============================================================
-    const metaRows = [
-      { 'Campo': 'Agencia', 'Valor': meta?.agencia ?? 'TODAS' },
-      { 'Campo': 'Activo', 'Valor': meta?.activo ?? '' },
-      { 'Campo': 'Fecha Inicial', 'Valor': meta?.fechaIni ?? '' },
-      { 'Campo': 'Fecha Final', 'Valor': meta?.fechaFin ?? '' },
-      { 'Campo': 'Generado', 'Valor': fechaTexto },
-      { 'Campo': 'Total filas', 'Valor': rows.length }
-    ];
+          filas: [
+            ['Agencia', meta?.agencia || 'TODAS'],
+            ['Activo', meta?.activo || ''],
+            ['Fecha Inicial', meta?.fechaIni || ''],
+            ['Fecha Final', meta?.fechaFin || ''],
+            ['Generado', fechaTexto],
+            ['Total filas', rows.length]
+          ],
 
-    const wsMeta = XLSX.utils.json_to_sheet(metaRows);
-    wsMeta['!cols'] = [{ wch: 18 }, { wch: 60 }];
+          anchos: [
+            18,
+            60
+          ]
+        },
 
-    // ============================================================
-    // LIBRO
-    // ============================================================
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, wsMeta, 'Filtros');
-    XLSX.utils.book_append_sheet(wb, ws, 'Kardex');
+        {
+          nombreHoja: 'Kardex',
 
-    const fileName = this.buildFileName(meta?.agencia, meta?.activo);
-    XLSX.writeFile(wb, fileName);
+          titulo: 'Kardex de activo fijo',
+
+          columnas: [
+            'Fecha',
+            'Hora',
+            'Tipo Movimiento',
+            'Movimiento',
+            'Tipo Comprobante',
+            'Número Comprobante',
+            'Débito',
+            'Crédito'
+          ],
+
+          filas: rows.map(r => [
+            r?.fecha || '',
+            r?.hora || '',
+            r?.codigo_movimiento || '',
+            r?.nombre_movimiento || '',
+            r?.tipo_comprobante || '',
+            r?.numero_comprobante || '',
+            Number(r?.valor_debito || 0),
+            Number(r?.valor_credito || 0)
+          ]),
+
+          anchos: [
+            12,
+            10,
+            14,
+            28,
+            18,
+            18,
+            14,
+            14
+          ]
+        }
+
+      ]
+
+    });
   }
 
-  private buildFileName(agencia?: string, activo?: string): string {
+  private buildFileName(
+    agencia?: string,
+    activo?: string
+  ): string {
 
-    const ag = (agencia || 'TODAS')
+    const ag =
+      this.limpiarNombreArchivo(
+        agencia || 'TODAS'
+      );
+
+    const act =
+      this.limpiarNombreArchivo(
+        activo || 'ACTIVO'
+      ).slice(0, 40);
+
+    const hoy = new Date();
+
+    const yyyy =
+      hoy.getFullYear();
+
+    const mm =
+      String(hoy.getMonth() + 1)
+        .padStart(2, '0');
+
+    const dd =
+      String(hoy.getDate())
+        .padStart(2, '0');
+
+    return `KARDEX_ACTIVO_${ag}_${act}_${yyyy}${mm}${dd}.xlsx`;
+  }
+
+  private limpiarNombreArchivo(
+    value: string
+  ): string {
+
+    return value
       .toUpperCase()
       .replaceAll(' ', '_')
       .replaceAll('/', '-')
       .replaceAll('.', '');
-
-    const act = (activo || 'ACTIVO')
-      .toUpperCase()
-      .replaceAll(' ', '_')
-      .replaceAll('/', '-')
-      .replaceAll('.', '')
-      .slice(0, 40);
-
-    const hoy = new Date();
-    const yyyy = hoy.getFullYear();
-    const mm = String(hoy.getMonth() + 1).padStart(2, '0');
-    const dd = String(hoy.getDate()).padStart(2, '0');
-
-    return `KARDEX_ACTIVO_${ag}_${act}_${yyyy}${mm}${dd}.xlsx`;
   }
 }

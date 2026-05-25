@@ -1,16 +1,58 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
 
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService
+} from '../../../../shared/services/excel-export.service';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class InconsistenciasExporterService {
 
-  exportar(items: any[]) {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
 
-    const hoja = XLSX.utils.json_to_sheet(items);
-    const wb = XLSX.utils.book_new();
+  exportar(
+    items: any[]
+  ): void {
 
-    XLSX.utils.book_append_sheet(wb, hoja, 'Inconsistencias');
+    if (!items || items.length === 0) {
+      alert('No hay información para exportar.');
+      return;
+    }
 
-    XLSX.writeFile(wb, `inconsistencias_saldos.xlsx`);
+    const columnas =
+      Object.keys(items[0] || {});
+
+    this.excelExport.exportar({
+
+      nombreArchivo:
+        'inconsistencias_saldos.xlsx',
+
+      hojas: [
+
+        {
+          nombreHoja:
+            'Inconsistencias',
+
+          titulo:
+            'INCONSISTENCIAS DE SALDOS',
+
+          columnas,
+
+          filas:
+            items.map(item =>
+              columnas.map(c => item[c])
+            ),
+
+          anchos:
+            columnas.map(() => 24)
+        }
+
+      ]
+
+    });
   }
 }

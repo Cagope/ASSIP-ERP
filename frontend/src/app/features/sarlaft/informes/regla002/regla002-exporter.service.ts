@@ -1,53 +1,112 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
 
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService
+} from '../../../../shared/services/excel-export.service';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class Regla002ExporterService {
 
-  exportarListado(lista: any[]): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportarListado(
+    lista: any[]
+  ): void {
 
     if (!lista || lista.length === 0) {
-      console.warn('⚠ No hay datos para exportar');
+      alert('No hay datos para exportar.');
       return;
     }
 
-    // ==========================================================
-    // 🎯 Mapeo EXACTO de los nombres del backend
-    // ==========================================================
-    const map = (x: any) => ({
-      Documento: x.documento,
-      TipoDocumento: x.tipoDocumento,
-      Nombre: x.nombreCompleto,
-      Edad: x.edad,
-      Zona: x.nombreZona,
-      Subzona: x.nombreSubZona,
-      SaldoAportes: x.saldoAportes,
-      FechaAperturaCuenta: x.fechaAperturaCuenta,
+    this.excelExport.exportar({
 
-      // 📞 Contacto
-      Telefono: x.telefono,
-      Celular1: x.celularUno,
-      Celular2: x.celularDos,
-      CorreoPersonal: x.correoPersonal,
+      nombreArchivo:
+        'informe_regla002.xlsx',
 
-      // 🟣 Permisos Especiales
-      RecibeLlamadas: x.recibeLlamadas,
-      RecibeMSM: x.recibeMsm,
-      RecibeEmails: x.recibeEmails,
-      RecibeCartas: x.recibeCartas,
-      RecibeRedesSociales: x.recibeRedesSociales
+      hojas: [
+
+        {
+          nombreHoja:
+            'Regla_002',
+
+          titulo:
+            'INFORME REGLA 002',
+
+          columnas: [
+            'Documento',
+            'Tipo Documento',
+            'Nombre',
+            'Edad',
+            'Zona',
+            'Subzona',
+            'Saldo Aportes',
+            'Fecha Apertura Cuenta',
+            'Teléfono',
+            'Celular 1',
+            'Celular 2',
+            'Correo Personal',
+            'Recibe Llamadas',
+            'Recibe MSM',
+            'Recibe Emails',
+            'Recibe Cartas',
+            'Recibe Redes Sociales'
+          ],
+
+          filas: lista.map(x => [
+            x.documento || '',
+            x.tipoDocumento || '',
+            x.nombreCompleto || '',
+            Number(x.edad || 0),
+            x.nombreZona || '',
+            x.nombreSubZona || '',
+            Number(x.saldoAportes || 0),
+            x.fechaAperturaCuenta || '',
+            x.telefono || '',
+            x.celularUno || '',
+            x.celularDos || '',
+            x.correoPersonal || '',
+            this.siNo(x.recibeLlamadas),
+            this.siNo(x.recibeMsm),
+            this.siNo(x.recibeEmails),
+            this.siNo(x.recibeCartas),
+            this.siNo(x.recibeRedesSociales)
+          ]),
+
+          anchos: [
+            18,
+            18,
+            42,
+            10,
+            22,
+            22,
+            18,
+            22,
+            16,
+            16,
+            16,
+            34,
+            18,
+            16,
+            16,
+            16,
+            22
+          ]
+        }
+
+      ]
+
     });
+  }
 
-    const rows = lista.map(map);
+  private siNo(
+    value: any
+  ): string {
 
-    // ==========================================================
-    // 📘 Crear workbook
-    // ==========================================================
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(rows);
-    XLSX.utils.book_append_sheet(wb, ws, 'Regla_002');
-
-    const filename = `informe_regla002.xlsx`;
-    XLSX.writeFile(wb, filename);
+    return value ? 'SI' : 'NO';
   }
 }

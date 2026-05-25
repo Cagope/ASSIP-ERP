@@ -1,0 +1,126 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h2>Consulta de CDATs</h2>
+      <p>Consulta general de títulos CDAT, titulares, saldos, tasas y estados.</p>
+    </div>
+  </div>
+
+  <div class="card filtros-card">
+    <div class="grid grid-5">
+
+      <div class="f-row">
+        <label>Documento</label>
+        <input type="text" [(ngModel)]="filtros.documento" placeholder="Documento">
+      </div>
+
+      <div class="f-row">
+        <label>Nombres</label>
+        <input type="text" [(ngModel)]="filtros.nombres" placeholder="Nombres">
+      </div>
+
+      <div class="f-row">
+        <label>Primer apellido</label>
+        <input type="text" [(ngModel)]="filtros.primer_apellido" placeholder="Primer apellido">
+      </div>
+
+      <div class="f-row">
+        <label>Segundo apellido</label>
+        <input type="text" [(ngModel)]="filtros.segundo_apellido" placeholder="Segundo apellido">
+      </div>
+
+      <div class="f-row">
+        <label>Código CDAT</label>
+        <input type="text" [(ngModel)]="filtros.codigo_cdat" placeholder="Código CDAT">
+      </div>
+
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-secondary" (click)="limpiar()">
+        Limpiar
+      </button>
+
+      <button class="btn btn-primary" (click)="buscar()" [disabled]="cargando">
+        Buscar
+      </button>
+
+    </div>
+  </div>
+
+  <div class="alert alert-error" *ngIf="error">
+    {{ error }}
+  </div>
+
+  <div class="card" *ngIf="cdats.length > 0">
+
+    <div class="table-header">
+      <div>
+        <h3>CDATs encontrados</h3>
+        <small>Total registros: {{ cdats.length }}</small>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+        <tr>
+          <th>CDAT</th>
+          <th>Documento</th>
+          <th>Asociado</th>
+          <th>Estado</th>
+          <th>Plazo</th>
+          <th class="right">Saldo</th>
+          <th class="right">Tasa</th>
+          <th>Vencimiento</th>
+          <th class="center">Acciones</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let c of cdats">
+          <td><strong>{{ c.codigo_cdat }}</strong></td>
+          <td>{{ c.documento }}</td>
+          <td>{{ nombreCompleto(c) }}</td>
+
+          <td>
+            <span class="estado" [class.estado-activo]="c.estado_cdat === 'A'">
+              {{ estadoTexto(c) }}
+            </span>
+          </td>
+
+          <td>{{ c.plazo_meses }} meses</td>
+
+          <td class="right">
+            {{ c.saldo_actual_cdat | number:'1.0-2' }}
+          </td>
+
+          <td class="right">
+            {{ c.tasa_nominal_anual | number:'1.0-2' }}%
+          </td>
+
+          <td>{{ c.fecha_vencimiento_cdat }}</td>
+
+          <td class="center">
+            <div class="table-actions">
+              <button class="btn-table btn-view" (click)="verDetalle(c)">
+                Detalle
+              </button>
+
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <app-consulta-cdats-detalle
+    *ngIf="seleccionada"
+    [cdat]="seleccionada">
+  </app-consulta-cdats-detalle>
+
+
+</div>

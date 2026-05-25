@@ -1,0 +1,469 @@
+<div class="page">
+
+  <app-header-actions
+    titulo="Extracto de cuenta"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <div class="card no-print">
+
+    <form
+      class="filtros-busqueda"
+      (ngSubmit)="buscarCuentas()">
+
+      <div class="f-row">
+        <label>Documento</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtrosBusqueda.documento"
+          name="documento">
+      </div>
+
+      <div class="f-row">
+        <label>Nombres</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtrosBusqueda.nombres"
+          name="nombres">
+      </div>
+
+      <div class="f-row">
+        <label>Primer apellido</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtrosBusqueda.primerApellido"
+          name="primerApellido">
+      </div>
+
+      <div class="f-row">
+        <label>Segundo apellido</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtrosBusqueda.segundoApellido"
+          name="segundoApellido">
+      </div>
+
+      <div class="f-row">
+        <label>Código cuenta</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtrosBusqueda.codigoCuenta"
+          name="codigoCuenta">
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()">
+          Limpiar
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="cargandoBusqueda">
+          Buscar
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+  <div
+    *ngIf="cargandoBusqueda"
+    class="loading no-print">
+    Buscando cuentas...
+  </div>
+
+  <div
+    *ngIf="error"
+    class="error no-print">
+    {{ error }}
+  </div>
+
+  <div
+    *ngIf="cuentas.length > 0"
+    class="card no-print">
+
+    <h3>Cuentas encontradas</h3>
+
+    <div class="table-container">
+
+      <table class="tabla-resumen">
+
+        <thead>
+        <tr>
+          <th>Cuenta</th>
+          <th>Documento</th>
+          <th>Nombre</th>
+          <th>Forma</th>
+          <th>Agencia</th>
+          <th class="right">Saldo actual</th>
+          <th></th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr
+          *ngFor="let c of cuentas"
+          [class.selected]="cuentaSeleccionada?.idCuentaAhorro === c.idCuentaAhorro">
+
+          <td>{{ c.codigoCuenta }}</td>
+          <td>{{ c.documento }}</td>
+          <td>{{ c.nombreCompleto }}</td>
+          <td>{{ c.codigoForma }} - {{ c.nombreForma }}</td>
+          <td>{{ c.nombreAgencia }}</td>
+
+          <td class="right">
+            {{ c.saldoActual | number:'1.2-2' }}
+          </td>
+
+          <td class="right">
+            <button
+              type="button"
+              class="btn btn--secondary"
+              (click)="seleccionarCuenta(c)">
+              Seleccionar
+            </button>
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+  <div
+    *ngIf="cuentaSeleccionada"
+    class="card no-print">
+
+    <h3>Cuenta seleccionada</h3>
+
+    <div class="cuenta-box">
+
+      <div>
+        <span>Cuenta</span>
+        <strong>{{ cuentaSeleccionada.codigoCuenta }}</strong>
+      </div>
+
+      <div>
+        <span>Documento</span>
+        <strong>{{ cuentaSeleccionada.documento }}</strong>
+      </div>
+
+      <div>
+        <span>Nombre</span>
+        <strong>{{ cuentaSeleccionada.nombreCompleto }}</strong>
+      </div>
+
+      <div>
+        <span>Forma</span>
+        <strong>
+          {{ cuentaSeleccionada.codigoForma }} -
+          {{ cuentaSeleccionada.nombreForma }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Agencia</span>
+        <strong>{{ cuentaSeleccionada.nombreAgencia }}</strong>
+      </div>
+
+      <div>
+        <span>Saldo actual</span>
+        <strong>{{ cuentaSeleccionada.saldoActual | number:'1.2-2' }}</strong>
+      </div>
+
+    </div>
+
+    <form
+      class="filtros-extracto"
+      (ngSubmit)="consultar()">
+
+      <div class="f-row">
+        <label>Fecha inicial</label>
+
+        <input
+          type="date"
+          [(ngModel)]="filtros.fechaInicial"
+          name="fechaInicial">
+      </div>
+
+      <div class="f-row">
+        <label>Fecha final</label>
+
+        <input
+          type="date"
+          [(ngModel)]="filtros.fechaFinal"
+          name="fechaFinal">
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="cargando">
+          Consultar extracto
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+  <div
+    *ngIf="cargando"
+    class="loading no-print">
+    Consultando extracto...
+  </div>
+
+  <div
+    *ngIf="resumen"
+    id="extracto-pdf"
+    class="card extracto-print">
+
+    <div class="extracto-header">
+
+      <div>
+        <h2>EXTRACTO DE MOVIMIENTOS</h2>
+        <p>ERP ASSIP SOLIDARIA Y FINANCIERA</p>
+      </div>
+
+      <div class="periodo">
+        <span>Desde</span>
+        <strong>{{ filtros.fechaInicial | date:'yyyy-MM-dd' }}</strong>
+
+        <span>Hasta</span>
+        <strong>{{ filtros.fechaFinal | date:'yyyy-MM-dd' }}</strong>
+      </div>
+
+    </div>
+
+    <div class="datos-asociado">
+
+      <div>
+        <span>Señor(a)</span>
+        <strong>{{ resumen.nombreCompleto }}</strong>
+      </div>
+
+      <div>
+        <span>Documento</span>
+        <strong>{{ resumen.documento }}</strong>
+      </div>
+
+      <div>
+        <span>Dirección</span>
+        <strong>{{ resumen.direccion || '-' }}</strong>
+      </div>
+
+      <div>
+        <span>Cuenta número</span>
+        <strong>{{ resumen.codigoCuenta }}</strong>
+      </div>
+
+      <div>
+        <span>Tipo de depósito</span>
+        <strong>{{ resumen.codigoForma }} - {{ resumen.nombreForma }}</strong>
+      </div>
+
+      <div>
+        <span>Agencia</span>
+        <strong>{{ resumen.nombreAgencia }}</strong>
+      </div>
+
+    </div>
+
+    <div class="resumen-extracto">
+
+      <div>
+        <span>Saldo inicial</span>
+        <strong>{{ resumen.saldoInicial | number:'1.2-2' }}</strong>
+      </div>
+
+      <div>
+        <span>Total créditos</span>
+        <strong>{{ resumen.totalCreditos | number:'1.2-2' }}</strong>
+      </div>
+
+      <div>
+        <span>Total débitos</span>
+        <strong>{{ resumen.totalDebitos | number:'1.2-2' }}</strong>
+      </div>
+
+      <div>
+        <span>Nuevo saldo</span>
+        <strong>{{ resumen.saldoFinal | number:'1.2-2' }}</strong>
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="movimientos.length > 0"
+      class="acciones-extracto no-print">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="imprimir()">
+        Imprimir
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="exportar()">
+        Exportar Excel
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="generarPdf()">
+
+        PDF
+
+      </button>
+
+    </div>
+
+    <div
+      *ngIf="movimientos.length > 0"
+      class="table-container">
+
+      <table class="tabla-extracto">
+
+        <thead>
+
+        <tr>
+
+          <th rowspan="2">
+            Fecha
+          </th>
+
+          <th colspan="2">
+            Concepto
+          </th>
+
+          <th colspan="2">
+            Comprobante
+          </th>
+
+          <th
+            rowspan="2"
+            class="right">
+
+            Débito
+
+          </th>
+
+          <th
+            rowspan="2"
+            class="right">
+
+            Crédito
+
+          </th>
+
+          <th
+            rowspan="2"
+            class="right">
+
+            Saldo
+
+          </th>
+
+        </tr>
+
+        <tr>
+
+          <th>
+            Tipo
+          </th>
+
+          <th>
+            Descripción
+          </th>
+
+          <th>
+            Tipo
+          </th>
+
+          <th>
+            Número
+          </th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let m of movimientos">
+
+          <td>
+            {{ m.fechaMovimiento | date:'yyyy-MM-dd' }}
+          </td>
+
+          <td>
+            {{ m.tipoMovimiento }}
+          </td>
+
+          <td>
+            {{ m.descripcionMovimiento }}
+          </td>
+
+          <td>
+            {{ m.tipoComprobante }}
+          </td>
+
+          <td>
+            {{ m.numeroComprobante }}
+          </td>
+
+          <td class="right">
+            {{ m.debito | number:'1.2-2' }}
+          </td>
+
+          <td class="right">
+            {{ m.credito | number:'1.2-2' }}
+          </td>
+
+          <td class="right">
+            {{ m.saldo | number:'1.2-2' }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <div
+      *ngIf="movimientos.length === 0"
+      class="empty">
+      No hay movimientos en el rango seleccionado.
+    </div>
+
+  </div>
+
+</div>

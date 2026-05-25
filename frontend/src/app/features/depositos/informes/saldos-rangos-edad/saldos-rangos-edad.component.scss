@@ -1,0 +1,115 @@
+@use '../../../../../styles/informes-base';
+
+.filtros {
+  grid-template-columns:
+    170px
+    minmax(220px, 1fr)
+    minmax(220px, 1fr)
+    150px
+    auto;
+}
+
+.filtros .form-actions {
+  width: auto;
+  margin-top: 0;
+
+  display: flex;
+  flex-direction: row;
+  align-items: end;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.resumen {
+  .cards {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .card {
+    &.blue {
+      border-left-color: #0d6efd;
+    }
+
+    &.green {
+      border-left-color: #198754;
+    }
+
+    &.red {
+      border-left-color: #dc3545;
+    }
+
+    &.gray {
+      border-left-color: #6b7280;
+    }
+  }
+}
+
+.tabla-resumen {
+
+  th,
+  td {
+    white-space: nowrap;
+  }
+
+  input {
+    width: 100%;
+    height: 30px;
+    padding: 4px 8px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+
+    background: #fff;
+
+    font-size: 13px;
+  }
+
+  .input-number {
+    text-align: right;
+  }
+}
+
+.positive {
+  color: #047857;
+  font-weight: 600;
+}
+
+.negative {
+  color: #b42318;
+  font-weight: 600;
+}
+
+.chart-box {
+  width: 100%;
+  height: 320px;
+}
+
+@media (max-width: 1300px) {
+
+  .filtros {
+    grid-template-columns:
+      170px
+      1fr
+      1fr
+      150px
+      auto;
+  }
+
+  .resumen .cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+}
+
+@media (max-width: 700px) {
+
+  .filtros,
+  .resumen .cards {
+    grid-template-columns: 1fr;
+  }
+
+  .filtros .form-actions {
+    justify-content: flex-start;
+  }
+
+}

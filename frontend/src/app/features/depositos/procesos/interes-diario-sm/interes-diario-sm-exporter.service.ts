@@ -1,54 +1,31 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
 
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService
+} from '../../../../shared/services/excel-export.service';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class InteresDiarioSmExporterService {
 
-  exportarExcel(items: any[], filtros: any): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportarExcel(
+    items: any[],
+    filtros: any
+  ): void {
 
     if (!items || items.length === 0) {
       alert('No hay datos para exportar.');
       return;
     }
 
-    // ============================================================
-    // 🧾 Construcción del JSON para Excel
-    // ============================================================
-    const data = items.map((x: any) => ({
-
-      'Documento': x.documento,
-      'Nombre Completo': x.nombreCompleto,
-
-      'Saldo Mínimo Día': x.saldoMinimoDia,
-      'Interés Bruto': x.interesBruto,
-      'Retención': x.retencion,
-      'Interés Neto': x.interesNeto,
-
-      'Tasa (%)': x.tasaInteres,
-      'Tiempo Liquidación': x.tiempoLiquidacion,
-      'Mínimo Forma': x.minimoForma,
-
-      'Retención Aplicada':
-        x.aplicaRetencion ? 'Sí' : 'No'
-    }));
-
-    const wb = XLSX.utils.book_new();
-
-    const ws = XLSX.utils.json_to_sheet(data);
-
-    XLSX.utils.book_append_sheet(
-      wb,
-      ws,
-      'Interes Diario SM'
-    );
-
-    // ============================================================
-    // 📄 Nombre archivo
-    // ============================================================
     const fecha =
-      filtros.fechaProceso
-      + '_liq_'
-      + filtros.fechaLiquidacion;
+      `${filtros.fechaProceso}_liq_${filtros.fechaLiquidacion}`;
 
     const codigoAgencia =
       filtros.codigoAgencia ?? '00';
@@ -56,10 +33,69 @@ export class InteresDiarioSmExporterService {
     const codigoForma =
       filtros.codigoForma ?? 'XX';
 
-    const nombreArchivo =
-      `interes_diario_sm_${fecha}_${codigoAgencia}_${codigoForma}.xlsx`;
+    this.excelExport.exportar({
 
-    XLSX.writeFile(wb, nombreArchivo);
+      nombreArchivo:
+        `interes_diario_sm_${fecha}_${codigoAgencia}_${codigoForma}.xlsx`,
+
+      hojas: [
+
+        {
+          nombreHoja:
+            'Interes Diario SM',
+
+          titulo:
+            'INTERÉS DIARIO SALDO MÍNIMO',
+
+          filtros: [
+            ['Fecha proceso', filtros.fechaProceso || ''],
+            ['Fecha liquidación', filtros.fechaLiquidacion || ''],
+            ['Agencia', codigoAgencia],
+            ['Forma', codigoForma]
+          ],
+
+          columnas: [
+            'Documento',
+            'Nombre Completo',
+            'Saldo Mínimo Día',
+            'Interés Bruto',
+            'Retención',
+            'Interés Neto',
+            'Tasa (%)',
+            'Tiempo Liquidación',
+            'Mínimo Forma',
+            'Retención Aplicada'
+          ],
+
+          filas: items.map((x: any) => [
+            x.documento || '',
+            x.nombreCompleto || '',
+            Number(x.saldoMinimoDia || 0),
+            Number(x.interesBruto || 0),
+            Number(x.retencion || 0),
+            Number(x.interesNeto || 0),
+            Number(x.tasaInteres || 0),
+            x.tiempoLiquidacion || '',
+            Number(x.minimoForma || 0),
+            x.aplicaRetencion ? 'Sí' : 'No'
+          ]),
+
+          anchos: [
+            18,
+            42,
+            18,
+            18,
+            18,
+            18,
+            12,
+            18,
+            18,
+            18
+          ]
+        }
+
+      ]
+
+    });
   }
-
 }

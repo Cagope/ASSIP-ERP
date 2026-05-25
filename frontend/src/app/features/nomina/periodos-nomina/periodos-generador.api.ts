@@ -42,4 +42,5 @@ export class PeriodosGeneradorApi {
       data
     );
   }
+
 }

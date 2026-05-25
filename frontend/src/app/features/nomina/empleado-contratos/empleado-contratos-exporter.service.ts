@@ -1,113 +1,153 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
 
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService
+} from '../../../shared/services/excel-export.service';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class EmpleadoContratosExporterService {
 
-  exportar(items: any[]): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportar(
+    items: any[]
+  ): void {
 
     if (!items || items.length === 0) {
       alert('No hay información para exportar.');
       return;
     }
 
-    const data = items.map(x => ({
+    this.excelExport.exportar({
 
-      // =========================
-      // CONTRATO
-      // =========================
+      nombreArchivo:
+        'empleado_contratos.xlsx',
 
-      'ID Contrato': x.idContrato,
+      hojas: [
 
-      // =========================
-      // EMPLEADO
-      // =========================
+        {
+          nombreHoja:
+            'Contratos',
 
-      'ID Empleado': x.idEmpleado,
-      'Documento': x.documentoEmpleado ?? '',
-      'Nombre Empleado': x.nombreEmpleado ?? '',
+          titulo:
+            'CONTRATOS DE EMPLEADOS',
 
-      // =========================
-      // FECHAS
-      // =========================
+          columnas: [
+            'ID Contrato',
+            'ID Empleado',
+            'Documento',
+            'Nombre Empleado',
+            'Fecha Inicio',
+            'Fecha Fin',
+            'ID Tipo Contrato',
+            'Tipo Contrato',
+            'ID Sección',
+            'Sección',
+            'ID Cargo',
+            'Cargo',
+            'Salario Base',
+            'Periodo Pago',
+            'Salario Integral',
+            'ID EPS',
+            'EPS',
+            'ID AFP',
+            'AFP',
+            'ID Cesantías',
+            'Cesantías',
+            'ID ARL',
+            'ARL',
+            'ID Caja',
+            'Caja Compensación',
+            'ID Cuenta Nómina',
+            'Cuenta Nómina',
+            'ID Forma Ahorro',
+            'Forma Ahorro',
+            'Fecha Renovación',
+            'Clase Riesgo ARL',
+            '% ARL',
+            'Activo'
+          ],
 
-      'Fecha Inicio': x.fechaInicio ?? '',
-      'Fecha Fin': x.fechaFin ?? '',
+          filas: items.map(x => [
+            x.idContrato ?? '',
+            x.idEmpleado ?? '',
+            x.documentoEmpleado || '',
+            x.nombreEmpleado || '',
+            x.fechaInicio || '',
+            x.fechaFin || '',
+            x.idTipoContrato ?? '',
+            x.tipoContratoNombre || '',
+            x.idSeccion ?? '',
+            x.nombreSeccion || '',
+            x.idCargo ?? '',
+            x.nombreCargo || '',
+            Number(x.salarioBase || 0),
+            x.periodoPago || '',
+            x.salarioIntegral ? 'SI' : 'NO',
+            x.idEps ?? '',
+            x.nombreEps || '',
+            x.idAfp ?? '',
+            x.nombreAfp || '',
+            x.idCesantias ?? '',
+            x.nombreCesantias || '',
+            x.idArl ?? '',
+            x.nombreArl || '',
+            x.idCajaCompensacion ?? '',
+            x.nombreCajaCompensacion || '',
+            x.idCuentaAhorroNomina ?? '',
+            x.cuentaNominaDisplay || '',
+            x.idFormaAhorroNomina ?? '',
+            x.nombreFormaAhorroNomina || '',
+            x.fechaEnvioNotaRenovacion || '',
+            x.claseRiesgoArl || '',
+            Number(x.porcentajeArl || 0),
+            x.activo ? 'SI' : 'NO'
+          ]),
 
-      // =========================
-      // TIPO CONTRATO
-      // =========================
+          anchos: [
+            14,
+            14,
+            18,
+            38,
+            16,
+            16,
+            18,
+            26,
+            14,
+            28,
+            14,
+            28,
+            18,
+            16,
+            18,
+            12,
+            30,
+            12,
+            30,
+            16,
+            30,
+            12,
+            30,
+            12,
+            34,
+            18,
+            28,
+            18,
+            28,
+            18,
+            18,
+            12,
+            12
+          ]
+        }
 
-      'ID Tipo Contrato': x.idTipoContrato ?? '',
-      'Tipo Contrato': x.tipoContratoNombre ?? '',
+      ]
 
-      // =========================
-      // SECCIÓN / CARGO
-      // =========================
-
-      'ID Sección': x.idSeccion ?? '',
-      'Sección': x.nombreSeccion ?? '',
-
-      'ID Cargo': x.idCargo ?? '',
-      'Cargo': x.nombreCargo ?? '',
-
-      // =========================
-      // VALORES
-      // =========================
-
-      'Salario Base': x.salarioBase ?? 0,
-      'Periodo Pago': x.periodoPago ?? '',
-      'Salario Integral': x.salarioIntegral ? 'SI' : 'NO',
-
-      // =========================
-      // AFILIACIONES
-      // =========================
-
-      'ID EPS': x.idEps ?? '',
-      'EPS': x.nombreEps ?? '',
-
-      'ID AFP': x.idAfp ?? '',
-      'AFP': x.nombreAfp ?? '',
-
-      'ID Cesantías': x.idCesantias ?? '',
-      'Cesantías': x.nombreCesantias ?? '',
-
-      'ID ARL': x.idArl ?? '',
-      'ARL': x.nombreArl ?? '',
-
-      'ID Caja': x.idCajaCompensacion ?? '',
-      'Caja Compensación': x.nombreCajaCompensacion ?? '',
-
-      // =========================
-      // CUENTA NÓMINA
-      // =========================
-
-      'ID Cuenta Nómina': x.idCuentaAhorroNomina ?? '',
-      'Cuenta Nómina': x.cuentaNominaDisplay ?? '',
-
-      'ID Forma Ahorro': x.idFormaAhorroNomina ?? '',
-      'Forma Ahorro': x.nombreFormaAhorroNomina ?? '',
-
-      // =========================
-      // ARL / RENOVACIÓN
-      // =========================
-
-      'Fecha Renovación': x.fechaEnvioNotaRenovacion ?? '',
-      'Clase Riesgo ARL': x.claseRiesgoArl ?? '',
-      '% ARL': x.porcentajeArl ?? 0,
-
-      // =========================
-      // ESTADO
-      // =========================
-
-      'Activo': x.activo ? 'SI' : 'NO',
-
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-
-    XLSX.utils.book_append_sheet(wb, ws, 'Contratos');
-    XLSX.writeFile(wb, 'empleado_contratos.xlsx');
+    });
   }
 }

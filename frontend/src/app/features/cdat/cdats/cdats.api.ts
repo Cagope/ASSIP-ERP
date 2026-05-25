@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 export interface CdatListDTO {
@@ -232,6 +232,18 @@ export class CdatsApi {
     return this.http.post<CdatAperturaPreviewDTO>(
       `${this.baseUrl}/apertura/preview-contable`,
       dto
+    );
+  }
+
+  obtenerProximoComprobante(
+    idAgencia: number,
+    tipoComprobante: string
+  ): Promise<any> {
+
+    return firstValueFrom(
+      this.http.get<any>(
+        `${this.baseUrl}/proximo-comprobante/${idAgencia}/${tipoComprobante}`
+      )
     );
   }
 

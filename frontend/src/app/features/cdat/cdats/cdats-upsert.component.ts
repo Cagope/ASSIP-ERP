@@ -199,9 +199,20 @@ export class CdatsUpsertComponent extends CdatsUpsertValores implements OnInit {
       next: (res: any) => {
         const data = res?.data ?? [];
 
-        this.resultados = data.filter((c: any) =>
-          String(c.codigo_estado ?? '').trim().toUpperCase() === 'A'
-        );
+        this.resultados = data.filter((c: any) => {
+
+          const estado =
+            String(c.codigo_estado ?? '')
+              .trim()
+              .toUpperCase();
+
+          const forma =
+            Number(c.id_forma_ahorro ?? c.idFormaAhorro);
+
+          return estado === 'A';
+
+
+        });
 
         this.resultados = this.resultados.sort((a: any, b: any) =>
           String(a.codigo_forma ?? '').localeCompare(String(b.codigo_forma ?? ''))
@@ -329,21 +340,7 @@ export class CdatsUpsertComponent extends CdatsUpsertValores implements OnInit {
 
     this.guardando = true;
 
-    this.model.beneficiarios = this.beneficiarios;
-    this.model.cheques = this.cheques;
-
-    this.model.mediosPago = {
-      idCaja: this.model.idCaja,
-      valorEfectivo: this.model.valorEfectivo || 0,
-      valorCheques: this.model.valorCheque || 0,
-      valorDepositos: this.model.valorDepositos || 0,
-      valorBancos: this.model.valorBanco || 0,
-      valorTrasladosAgencias: this.model.valorTrasladosAgencias || 0,
-      cheques: this.cheques || [],
-      depositos: this.depositos || [],
-      bancos: this.bancos || [],
-      trasladosAgencias: this.trasladosAgencias || []
-    };
+    this.prepararMediosPago();
 
     this.api.guardar(this.model).subscribe({
       next: () => {
@@ -469,27 +466,28 @@ export class CdatsUpsertComponent extends CdatsUpsertValores implements OnInit {
     this.calcularPlazos();
   }
 
-  cargarConsecutivoComprobante(): void {
+  async cargarConsecutivoComprobante(): Promise<void> {
+
     this.model.numeroComprobante = '';
 
     if (!this.model.idAgencia || !this.model.tipoComprobante) {
       return;
     }
 
-    const tc = this.tiposComprobantes.find(
-      t => t.tipoComprobante === this.model.tipoComprobante
-    );
+    try {
+      const res = await this.api.obtenerProximoComprobante(
+        this.model.idAgencia,
+        this.model.tipoComprobante
+      );
 
-    if (!tc) {
-      this.error = 'El tipo de comprobante seleccionado no es válido para la agencia.';
-      return;
+      this.model.numeroComprobante =
+        res?.numeroComprobante ?? '';
+
+    } catch (err: any) {
+      this.error =
+        err?.error?.message ||
+        'No se pudo obtener el consecutivo.';
     }
-
-    const siguiente = Number(tc.cscComprobante || 0) + 1;
-
-    this.model.numeroComprobante = siguiente
-      .toString()
-      .padStart(10, '0');
   }
 
   cargarTiposComprobantes(): void {
@@ -596,21 +594,7 @@ export class CdatsUpsertComponent extends CdatsUpsertValores implements OnInit {
       return;
     }
 
-    this.model.beneficiarios = this.beneficiarios;
-    this.model.cheques = this.cheques;
-
-    this.model.mediosPago = {
-      idCaja: this.model.idCaja,
-      valorEfectivo: this.model.valorEfectivo || 0,
-      valorCheques: this.model.valorCheque || 0,
-      valorDepositos: this.model.valorDepositos || 0,
-      valorBancos: this.model.valorBanco || 0,
-      valorTrasladosAgencias: this.model.valorTrasladosAgencias || 0,
-      cheques: this.cheques || [],
-      depositos: this.depositos || [],
-      bancos: this.bancos || [],
-      trasladosAgencias: this.trasladosAgencias || []
-    };
+    this.prepararMediosPago();
 
     this.api.previewAperturaContable(this.model).subscribe({
       next: res => {
@@ -626,6 +610,10 @@ export class CdatsUpsertComponent extends CdatsUpsertValores implements OnInit {
     this.previewContable = null;
   }
 
+  volverListado(): void {
+    this.router.navigate(['/cdat/cdats']);
+  }
+
   totalMediosPago(): number {
     return Number(this.model.valorEfectivo || 0)
       + Number(this.model.valorCheque || 0)
@@ -637,5 +625,27 @@ export class CdatsUpsertComponent extends CdatsUpsertValores implements OnInit {
   mediosPagoCuadran(): boolean {
     return this.totalMediosPago() === Number(this.model.valorAperturaCdat || 0);
   }
+
+  private prepararMediosPago(): void {
+
+    this.model.beneficiarios = this.beneficiarios;
+    this.model.cheques = this.cheques;
+
+    this.model.mediosPago = {
+      idCaja: this.model.idCaja,
+
+      valorEfectivo: this.model.valorEfectivo || 0,
+      valorCheques: this.model.valorCheque || 0,
+      valorDepositos: this.model.valorDepositos || 0,
+      valorBancos: this.model.valorBanco || 0,
+      valorTrasladosAgencias: this.model.valorTrasladosAgencias || 0,
+
+      cheques: this.cheques || [],
+      depositos: this.depositos || [],
+      bancos: this.bancos || [],
+      trasladosAgencias: this.trasladosAgencias || []
+    };
+  }
+
 
 }

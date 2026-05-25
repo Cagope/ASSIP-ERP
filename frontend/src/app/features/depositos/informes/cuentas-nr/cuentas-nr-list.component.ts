@@ -58,8 +58,20 @@ export class CuentasNRListComponent implements OnInit {
       this.agencias = ag ?? [];
 
       // 🔹 Formas de ahorro
-      const fo = await this.formasApi.listar().toPromise();
-      this.formas = fo ?? [];
+      const fo =
+        await this.formasApi.listar().toPromise();
+
+      this.formas = Array.from(
+        new Map(
+          (fo || []).map(f => [
+            f.codigoForma,
+            f
+          ])
+        ).values()
+      ).sort((a: any, b: any) =>
+        String(a.codigoForma)
+          .localeCompare(String(b.codigoForma))
+      );
 
     } catch (e) {
       console.error('Error cargando catálogos:', e);
@@ -74,7 +86,7 @@ export class CuentasNRListComponent implements OnInit {
   async buscar(): Promise<void> {
     this.error = '';
 
-    if (!this.filtros.forma) {
+    if (!this.filtros.forma || this.filtros.forma === '0') {
       this.error = 'Seleccione una forma.';
       return;
     }
@@ -88,7 +100,7 @@ export class CuentasNRListComponent implements OnInit {
 
     try {
       const body = {
-        agencia: this.filtros.agencia,
+        idAgencia: Number(this.filtros.agencia || 0),
         forma: this.filtros.forma,
         tipoInforme: this.filtros.tipoInforme,
         fechaInicial: this.filtros.fechaInicial,

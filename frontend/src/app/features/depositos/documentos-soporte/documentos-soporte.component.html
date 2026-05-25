@@ -1,0 +1,348 @@
+<div class="page">
+
+  <app-header-actions
+    titulo="Documentos soporte"
+    subtitle="Administración de libretas y órdenes"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <div class="list-container">
+
+    <h3>Buscar cuenta / asociado</h3>
+
+    <div
+      class="info-agencia"
+      *ngIf="agenciaActiva">
+
+      <strong>Agencia activa:</strong>
+
+      {{
+      agenciaActiva.nombre_agencia
+      || agenciaActiva.nombreAgencia
+      || ('Agencia ' + agenciaActiva.id_agencia)
+      }}
+
+    </div>
+
+    <div class="filters">
+
+      <input
+        type="text"
+        placeholder="Documento"
+        [(ngModel)]="filtros.documento"
+        name="documento"
+        (keyup.enter)="buscar()">
+
+      <input
+        type="text"
+        placeholder="Nombres"
+        [(ngModel)]="filtros.nombres"
+        name="nombres"
+        (keyup.enter)="buscar()">
+
+      <input
+        type="text"
+        placeholder="Primer apellido"
+        [(ngModel)]="filtros.primerApellido"
+        name="primerApellido"
+        (keyup.enter)="buscar()">
+
+      <input
+        type="text"
+        placeholder="Segundo apellido"
+        [(ngModel)]="filtros.segundoApellido"
+        name="segundoApellido"
+        (keyup.enter)="buscar()">
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="buscar()"
+        [disabled]="cargando">
+
+        Buscar
+
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="limpiar()">
+
+        Limpiar
+
+      </button>
+
+    </div>
+
+    <div
+      *ngIf="cargando"
+      class="loading">
+
+      Buscando cuentas...
+
+    </div>
+
+    <div
+      *ngIf="error"
+      class="error">
+
+      {{ error }}
+
+    </div>
+
+    <div
+      *ngIf="mensaje"
+      class="empty">
+
+      {{ mensaje }}
+
+    </div>
+
+    <table
+      *ngIf="!cargando && cuentas.length > 0"
+      class="data-table">
+
+      <thead>
+
+      <tr>
+        <th>#</th>
+        <th>Código</th>
+        <th>Documento</th>
+        <th>Nombre del ahorrador</th>
+        <th>Tipo de ahorro</th>
+        <th>Documento soporte</th>
+        <th>Estado</th>
+        <th class="right">Saldo actual</th>
+        <th>Acciones</th>
+      </tr>
+
+      </thead>
+
+      <tbody>
+
+      <tr
+        *ngFor="let c of cuentas; let i = index"
+        [class.selected]="
+          cuentaSeleccionada?.idCuentaAhorro === c.idCuentaAhorro
+        ">
+
+        <td>{{ i + 1 }}</td>
+        <td>{{ c.codigoCuenta }}</td>
+        <td>{{ c.documento }}</td>
+        <td>{{ c.nombreCompleto }}</td>
+        <td>{{ c.nombreForma }}</td>
+        <td>{{ c.descripcionSoporte }}</td>
+        <td>{{ c.estadoCuenta }}</td>
+
+        <td class="right">
+          {{ c.saldoActual | number:'1.0-0' }}
+        </td>
+
+        <td class="acciones-tabla">
+
+          <button
+            *ngIf="!c.tieneDocumentoActivo"
+            type="button"
+            class="btn btn--primary btn-sm"
+            (click)="prepararAccion(c, 'INCLUIR')"
+            [disabled]="!!accion">
+
+            Crear
+
+          </button>
+
+          <button
+            *ngIf="c.tieneDocumentoActivo"
+            type="button"
+            class="btn btn--secondary btn-sm"
+            (click)="prepararAccion(c, 'CAMBIAR')"
+            [disabled]="!!accion">
+
+            Cambiar
+
+          </button>
+
+          <button
+            *ngIf="c.tieneDocumentoActivo"
+            type="button"
+            class="btn btn--ghost-danger btn-sm"
+            (click)="prepararAccion(c, 'INACTIVAR')"
+            [disabled]="!!accion">
+
+            Inhabilitar
+
+          </button>
+
+        </td>
+
+      </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+  <div
+    *ngIf="cuentaSeleccionada && accion"
+    class="form-container cambio-documento-card">
+
+    <div class="section-header">
+      <div>
+        <h3>{{ tituloAccion }}</h3>
+        <p>
+          Gestión operativa del documento soporte de la cuenta seleccionada.
+        </p>
+      </div>
+    </div>
+
+    <div class="info-panel">
+
+      <div class="info-item">
+        <span>Cuenta</span>
+        <strong>{{ cuentaSeleccionada.codigoCuenta }}</strong>
+      </div>
+
+      <div class="info-item wide">
+        <span>Asociado</span>
+        <strong>{{ cuentaSeleccionada.nombreCompleto }}</strong>
+      </div>
+
+      <div class="info-item">
+        <span>Documento</span>
+        <strong>{{ cuentaSeleccionada.documento }}</strong>
+      </div>
+
+      <div class="info-item">
+        <span>Tipo soporte</span>
+        <strong>{{ cuentaSeleccionada.descripcionSoporte }}</strong>
+      </div>
+
+      <ng-container *ngIf="documentoActivo">
+
+        <div class="info-item">
+          <span>Documento actual</span>
+          <strong>
+            {{ documentoActivo.numeroInicial }} - {{ documentoActivo.numeroFinal }}
+          </strong>
+        </div>
+
+        <div class="info-item">
+          <span>Fecha entrega</span>
+          <strong>{{ documentoActivo.fechaEntrega }}</strong>
+        </div>
+
+        <div class="info-item">
+          <span>Estado</span>
+          <strong>{{ documentoActivo.estadoDocumento }}</strong>
+        </div>
+
+      </ng-container>
+
+    </div>
+
+    <div
+      *ngIf="accion === 'INCLUIR' || accion === 'CAMBIAR'"
+      class="form-section">
+
+      <h4>Nuevo documento</h4>
+
+      <div class="form-grid">
+
+        <div class="f-row">
+
+          <label>Nuevo número inicial</label>
+
+          <input
+            type="text"
+            maxlength="10"
+            inputmode="numeric"
+            [(ngModel)]="numeroInicial"
+            (input)="soloNumerosDocumento()">
+
+        </div>
+
+        <div
+          class="f-row"
+          *ngIf="
+        numeroInicial
+        && cuentaSeleccionada?.cantidadSoporte
+      ">
+
+          <label>Número final generado</label>
+
+          <div class="input-preview">
+
+            {{
+            (
+            +numeroInicial
+            + cuentaSeleccionada.cantidadSoporte
+            - 1
+            )
+            .toString()
+            .padStart(10, '0')
+            }}
+
+          </div>
+
+        </div>
+
+        <div class="f-row">
+
+          <label>Fecha entrega</label>
+
+          <input
+            type="date"
+            [(ngModel)]="fechaEntrega">
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="accion === 'CAMBIAR'"
+      class="validacion-box ok">
+
+      El documento actual será inactivado y se generará un nuevo rango operativo.
+
+    </div>
+
+    <div
+      *ngIf="accion === 'INACTIVAR'"
+      class="validacion-box err">
+
+      El documento soporte actual será inhabilitado.
+
+    </div>
+
+    <div class="f-buttons form-actions-final">
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="guardar()"
+        [disabled]="guardando">
+
+        Guardar
+
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="accion = ''">
+
+        Cancelar
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

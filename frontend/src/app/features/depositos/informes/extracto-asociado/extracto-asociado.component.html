@@ -1,0 +1,519 @@
+<div class="page">
+
+  <app-header-actions
+    titulo="Extracto asociado"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <!-- BUSQUEDA -->
+  <div class="card no-print">
+
+    <form
+      class="filtros-busqueda"
+      (ngSubmit)="buscarAsociados()">
+
+      <div class="f-row">
+        <label>Documento</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtrosBusqueda.documento"
+          name="documento">
+      </div>
+
+      <div class="f-row">
+        <label>Nombres</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtrosBusqueda.nombres"
+          name="nombres">
+      </div>
+
+      <div class="f-row">
+        <label>Primer apellido</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtrosBusqueda.primerApellido"
+          name="primerApellido">
+      </div>
+
+      <div class="f-row">
+        <label>Segundo apellido</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtrosBusqueda.segundoApellido"
+          name="segundoApellido">
+      </div>
+
+      <div class="f-row">
+        <label>Código cuenta</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtrosBusqueda.codigoCuenta"
+          name="codigoCuenta">
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()">
+
+          Limpiar
+
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="cargandoBusqueda">
+
+          Buscar
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+  <!-- ERROR -->
+  <div
+    *ngIf="error"
+    class="error no-print">
+
+    {{ error }}
+
+  </div>
+
+  <!-- CARGANDO -->
+  <div
+    *ngIf="cargandoBusqueda"
+    class="loading no-print">
+
+    Buscando asociados...
+
+  </div>
+
+  <!-- ASOCIADOS -->
+  <div
+    *ngIf="asociados.length > 0"
+    class="card no-print">
+
+    <h3>Asociados encontrados</h3>
+
+    <div class="table-container">
+
+      <table class="tabla">
+
+        <thead>
+
+        <tr>
+
+          <th>Documento</th>
+          <th>Nombre</th>
+          <th>Dirección</th>
+
+          <th class="right">
+            Total cuentas
+          </th>
+
+          <th class="right">
+            Saldo total
+          </th>
+
+          <th></th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr
+          *ngFor="let a of asociados"
+          [class.selected]="asociadoSeleccionado?.idDatosPersonal === a.idDatosPersonal">
+
+          <td>{{ a.documento }}</td>
+
+          <td>{{ a.nombreCompleto }}</td>
+
+          <td>{{ a.direccion }}</td>
+
+          <td class="right">
+            {{ a.totalCuentas }}
+          </td>
+
+          <td class="right">
+            {{ a.saldoTotal | number:'1.2-2' }}
+          </td>
+
+          <td class="right">
+
+            <button
+              type="button"
+              class="btn btn--secondary"
+              (click)="seleccionarAsociado(a)">
+
+              Seleccionar
+
+            </button>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+  <!-- FILTROS EXTRACTO -->
+  <div
+    *ngIf="asociadoSeleccionado"
+    class="card no-print">
+
+    <h3>Asociado seleccionado</h3>
+
+    <div class="asociado-box">
+
+      <div>
+        <span>Documento</span>
+        <strong>{{ asociadoSeleccionado.documento }}</strong>
+      </div>
+
+      <div>
+        <span>Nombre</span>
+        <strong>{{ asociadoSeleccionado.nombreCompleto }}</strong>
+      </div>
+
+      <div>
+        <span>Total cuentas</span>
+        <strong>{{ asociadoSeleccionado.totalCuentas }}</strong>
+      </div>
+
+      <div>
+        <span>Saldo total</span>
+        <strong>
+          {{ asociadoSeleccionado.saldoTotal | number:'1.2-2' }}
+        </strong>
+      </div>
+
+    </div>
+
+    <form
+      class="filtros-extracto"
+      (ngSubmit)="consultar()">
+
+      <div class="f-row">
+
+        <label>Fecha inicial</label>
+
+        <input
+          type="date"
+          [(ngModel)]="filtros.fechaInicial"
+          name="fechaInicial">
+
+      </div>
+
+      <div class="f-row">
+
+        <label>Fecha final</label>
+
+        <input
+          type="date"
+          [(ngModel)]="filtros.fechaFinal"
+          name="fechaFinal">
+
+      </div>
+
+      <div class="f-row">
+
+        <label>Forma ahorro</label>
+
+        <select
+          [(ngModel)]="filtros.codigoForma"
+          name="codigoForma">
+
+          <option value="0">
+            Todas
+          </option>
+
+          <option
+            *ngFor="let f of formas"
+            [value]="f.codigoForma">
+
+            {{ f.codigoForma }} - {{ f.nombreForma }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="cargando">
+
+          Consultar extracto
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+  <!-- CARGANDO -->
+  <div
+    *ngIf="cargando"
+    class="loading no-print">
+
+    Consultando extracto...
+
+  </div>
+
+  <!-- RESULTADO -->
+  <div
+    *ngIf="resumen"
+    class="card">
+
+    <div class="extracto-header">
+
+      <div>
+
+        <h2>
+          EXTRACTO CONSOLIDADO ASOCIADO
+        </h2>
+
+        <p>
+          {{ resumen.razonSocial }}
+        </p>
+
+      </div>
+
+      <div class="periodo">
+
+        <span>Desde</span>
+
+        <strong>
+          {{ filtros.fechaInicial | date:'yyyy-MM-dd' }}
+        </strong>
+
+        <span>Hasta</span>
+
+        <strong>
+          {{ filtros.fechaFinal | date:'yyyy-MM-dd' }}
+        </strong>
+
+      </div>
+
+    </div>
+
+    <!-- DATOS -->
+    <div class="datos-box">
+
+      <div>
+        <span>Documento</span>
+        <strong>{{ resumen.documento }}</strong>
+      </div>
+
+      <div>
+        <span>Nombre</span>
+        <strong>{{ resumen.nombreCompleto }}</strong>
+      </div>
+
+      <div>
+        <span>Dirección</span>
+        <strong>{{ resumen.direccion }}</strong>
+      </div>
+
+      <div>
+        <span>Total cuentas</span>
+        <strong>{{ resumen.totalCuentas }}</strong>
+      </div>
+
+    </div>
+
+    <!-- RESUMEN -->
+    <div class="resumen-box">
+
+      <div>
+        <span>Saldo inicial</span>
+
+        <strong>
+          {{ resumen.saldoInicial | number:'1.2-2' }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Total créditos</span>
+
+        <strong>
+          {{ resumen.totalCreditos | number:'1.2-2' }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Total débitos</span>
+
+        <strong>
+          {{ resumen.totalDebitos | number:'1.2-2' }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Saldo final</span>
+
+        <strong>
+          {{ resumen.saldoFinal | number:'1.2-2' }}
+        </strong>
+      </div>
+
+    </div>
+
+    <!-- CUENTAS -->
+    <h3>Cuentas del asociado</h3>
+
+    <div class="table-container">
+
+      <table class="tabla">
+
+        <thead>
+
+        <tr>
+
+          <th>Cuenta</th>
+          <th>Forma</th>
+          <th>Agencia</th>
+
+          <th class="right">Saldo inicial</th>
+          <th class="right">Créditos</th>
+          <th class="right">Débitos</th>
+          <th class="right">Saldo final</th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let c of cuentas">
+
+          <td>{{ c.codigoCuenta }}</td>
+
+          <td>
+            {{ c.codigoForma }} - {{ c.nombreForma }}
+          </td>
+
+          <td>{{ c.nombreAgencia }}</td>
+
+          <td class="right">
+            {{ c.saldoInicial | number:'1.2-2' }}
+          </td>
+
+          <td class="right">
+            {{ c.totalCreditos | number:'1.2-2' }}
+          </td>
+
+          <td class="right">
+            {{ c.totalDebitos | number:'1.2-2' }}
+          </td>
+
+          <td class="right">
+            {{ c.saldoFinal | number:'1.2-2' }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <!-- MOVIMIENTOS -->
+    <h3>Movimientos</h3>
+
+    <div class="table-container">
+
+      <table class="tabla">
+
+        <thead>
+
+        <tr>
+
+          <th>Fecha</th>
+          <th>Cuenta</th>
+          <th>Forma</th>
+          <th>Movimiento</th>
+          <th>Concepto</th>
+          <th>T.C.</th>
+          <th>Número</th>
+
+          <th class="right">Débito</th>
+          <th class="right">Crédito</th>
+          <th class="right">Saldo</th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let m of movimientos">
+
+          <td>
+            {{ m.fechaMovimiento | date:'yyyy-MM-dd' }}
+          </td>
+
+          <td>{{ m.codigoCuenta }}</td>
+
+          <td>{{ m.codigoForma }}</td>
+
+          <td>{{ m.tipoMovimiento }}</td>
+
+          <td>{{ m.descripcionMovimiento }}</td>
+
+          <td>{{ m.tipoComprobante }}</td>
+
+          <td>{{ m.numeroComprobante }}</td>
+
+          <td class="right">
+            {{ m.debito | number:'1.2-2' }}
+          </td>
+
+          <td class="right">
+            {{ m.credito | number:'1.2-2' }}
+          </td>
+
+          <td class="right">
+            {{ m.saldoCuenta | number:'1.2-2' }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>

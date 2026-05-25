@@ -1,0 +1,332 @@
+<div class="page">
+
+  <h2>Simulador CDAT</h2>
+
+  <!-- PASO 1 — BUSCAR CUENTA / ASOCIADO -->
+  <div *ngIf="paso === 1" class="list-container panel">
+
+    <div class="section-header">
+      <div>
+        <h3>Buscar cuenta / asociado</h3>
+        <small>Consulte el asociado para realizar la simulación del CDAT.</small>
+      </div>
+    </div>
+
+    <div class="info-agencia" *ngIf="agenciaActiva">
+      <strong>Agencia activa:</strong>
+      {{ agenciaActiva.nombre_agencia || agenciaActiva.nombreAgencia || ('Agencia ' + agenciaActiva.id_agencia) }}
+    </div>
+
+    <div class="filters filtros-busqueda">
+
+      <div class="f-row">
+        <label>Documento</label>
+        <input type="text" [(ngModel)]="filtros.documento" (keyup.enter)="buscar()">
+      </div>
+
+      <div class="f-row">
+        <label>Nombres</label>
+        <input type="text" [(ngModel)]="filtros.nombres" (keyup.enter)="buscar()">
+      </div>
+
+      <div class="f-row">
+        <label>Primer apellido</label>
+        <input type="text" [(ngModel)]="filtros.primer_apellido" (keyup.enter)="buscar()">
+      </div>
+
+      <div class="f-row">
+        <label>Segundo apellido</label>
+        <input type="text" [(ngModel)]="filtros.segundo_apellido" (keyup.enter)="buscar()">
+      </div>
+
+      <div class="form-actions full">
+        <button type="button" class="btn btn--secondary" (click)="volverListado()">Volver</button>
+        <button type="button" class="btn btn--secondary" (click)="limpiar()">Limpiar</button>
+        <button type="button" class="btn btn--primary" (click)="buscar()">Buscar</button>
+      </div>
+
+    </div>
+
+    <div *ngIf="cargandoBusqueda" class="loading">
+      Buscando cuentas...
+    </div>
+
+    <div *ngIf="errorBusqueda" class="error">
+      {{ errorBusqueda }}
+    </div>
+
+    <table *ngIf="!cargandoBusqueda && resultados.length > 0" class="data-table">
+      <thead>
+      <tr>
+        <th>#</th>
+        <th>Código</th>
+        <th>Documento</th>
+        <th>Nombre</th>
+        <th>Forma</th>
+        <th>Estado</th>
+        <th class="right">Saldo</th>
+        <th>Acción</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr *ngFor="let c of resultados; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ c.codigo_cuenta }}</td>
+        <td>{{ c.documento }}</td>
+        <td>{{ c.nombre_completo }}</td>
+        <td>{{ c.nombre_forma_ahorro }}</td>
+        <td>{{ c.nombre_estado }}</td>
+        <td class="right">{{ c.saldo_actual_cuenta | number:'1.0-0' }}</td>
+        <td>
+          <button
+            type="button"
+            class="btn-action-edit btn-action-text"
+            (click)="seleccionarPersona(c)">
+            Seleccionar
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+  </div>
+
+  <!-- PASO 2 — SIMULADOR CDAT -->
+  <div *ngIf="paso === 2" class="list-container form-container">
+
+    <!-- DATOS DEL ASOCIADO -->
+    <div class="persona-box full">
+
+      <div class="section-header">
+        <div>
+          <h3>Datos del asociado</h3>
+          <small>Información principal del asociado y cuenta consultada.</small>
+        </div>
+      </div>
+
+      <div class="persona-grid">
+        <p><strong>Nombre:</strong> {{ persona?.nombre_completo }}</p>
+        <p><strong>Documento:</strong> {{ persona?.documento }}</p>
+        <p><strong>Cuenta:</strong> {{ persona?.codigo_cuenta }}</p>
+        <p><strong>Forma:</strong> {{ persona?.nombre_forma_ahorro }}</p>
+        <p><strong>Saldo:</strong> {{ persona?.saldo_actual_cuenta | number:'1.0-0' }}</p>
+        <p><strong>Agencia:</strong> {{ persona?.agencia }}</p>
+      </div>
+
+    </div>
+
+    <!-- DATOS DE SIMULACIÓN -->
+    <div class="persona-box full nuevo-cdat-panel">
+
+      <div class="section-header">
+        <div>
+          <h3>Datos de simulación CDAT</h3>
+          <small>Configure las condiciones financieras para proyectar el resultado.</small>
+        </div>
+      </div>
+
+      <div class="grid grid-2 gap nuevo-cdat-grid">
+
+        <div class="f-row total-cdat">
+          <label>Valor CDAT</label>
+
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="model.valorCdat">
+        </div>
+
+        <div class="f-row">
+          <label>Tasa nominal anual</label>
+
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="model.tasaNominalAnual"
+            (ngModelChange)="calcularTasaEfectivaAnual()">
+        </div>
+
+        <div class="f-row">
+          <label>Tasa efectiva anual</label>
+
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="model.tasaEfectivaAnual"
+            disabled>
+        </div>
+
+        <div class="f-row">
+          <label>Fecha apertura</label>
+
+          <input
+            type="date"
+            [(ngModel)]="model.fechaApertura"
+            (change)="calcularFechaVencimiento()">
+        </div>
+
+        <div class="f-row">
+          <label>Plazo meses</label>
+
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="model.plazoMeses"
+            (ngModelChange)="calcularFechaVencimiento()">
+        </div>
+
+        <div class="f-row">
+          <label>Fecha vencimiento</label>
+
+          <input
+            type="date"
+            [value]="model.fechaVencimiento"
+            disabled>
+        </div>
+
+        <div class="f-row">
+          <label>Pago de intereses</label>
+
+          <select [(ngModel)]="model.formaPagoInteres">
+            <option value="MENSUAL">Mensual</option>
+            <option value="VENCIMIENTO">Al vencimiento</option>
+          </select>
+        </div>
+
+        <div class="f-row">
+          <label>Aplica Retención en la fuente.?</label>
+
+          <select [(ngModel)]="model.aplicaRetencion">
+            <option [ngValue]="true">Sí</option>
+            <option [ngValue]="false">No</option>
+          </select>
+        </div>
+
+        <div class="f-row">
+          <label>Base retención diaria</label>
+
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="model.baseRetencion"
+            disabled>
+        </div>
+
+        <div class="f-row">
+          <label>Porcentaje retención</label>
+
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="model.porcentajeRetencion"
+            disabled>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ACCIONES -->
+    <div class="form-actions">
+      <button type="button" class="btn btn--secondary" (click)="volver()">
+        Volver
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="generarSimulacion()">
+        Generar simulación
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        [disabled]="flujo.length === 0"
+        (click)="imprimir()">
+        Imprimir
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        [disabled]="flujo.length === 0"
+        (click)="exportarExcel()">
+        Exportar Excel
+      </button>
+    </div>
+
+    <!-- RESULTADO -->
+    <div *ngIf="flujo.length > 0" class="persona-box full resultado-panel">
+
+      <div class="section-header">
+        <div>
+          <h3>Resultado de la simulación</h3>
+          <small>Proyección de intereses para el asociado.</small>
+        </div>
+      </div>
+
+      <table class="data-table tabla-simulacion">
+        <thead>
+        <tr>
+          <th>Periodo</th>
+          <th>Fecha pago</th>
+          <th class="right">Días</th>
+          <th class="right">Capital</th>
+          <th class="right">Interés bruto</th>
+          <th class="right">Retención</th>
+          <th class="right">Interés neto</th>
+          <th class="right">Pago cliente</th>
+          <th class="right">Saldo final</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let item of flujo">
+          <td>{{ item.periodo }}</td>
+          <td>{{ item.fechaPago }}</td>
+          <td class="right">{{ item.dias }}</td>
+          <td class="right">{{ item.capital | number:'1.0-0' }}</td>
+          <td class="right">{{ item.interesBruto | number:'1.0-0' }}</td>
+          <td class="right">{{ item.valorRetencion | number:'1.0-0' }}</td>
+          <td class="right">{{ item.interesNeto | number:'1.0-0' }}</td>
+          <td class="right">{{ item.pagoCliente | number:'1.0-0' }}</td>
+          <td class="right total-final">{{ item.saldoFinal | number:'1.0-0' }}</td>
+        </tr>
+        </tbody>
+      </table>
+
+    </div>
+
+    <!-- RESUMEN -->
+    <div *ngIf="resumen" class="persona-box full resumen-simulacion">
+
+      <div class="section-header">
+        <div>
+          <h3>Resumen final</h3>
+          <small>Totales calculados de la simulación.</small>
+        </div>
+      </div>
+
+      <div class="persona-grid">
+        <p><strong>Capital:</strong> {{ resumen.capital | number:'1.0-0' }}</p>
+        <p><strong>Total interés bruto:</strong> {{ resumen.totalInteresBruto | number:'1.0-0' }}</p>
+        <p><strong>Total retención:</strong> {{ resumen.totalRetencion | number:'1.0-0' }}</p>
+        <p><strong>Total interés neto:</strong> {{ resumen.totalInteresNeto | number:'1.0-0' }}</p>
+        <p><strong>Total pago cliente:</strong> {{ resumen.totalPagoCliente | number:'1.0-0' }}</p>
+        <p><strong>Valor al vencimiento:</strong> {{ resumen.valorAlVencimiento | number:'1.0-0' }}</p>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

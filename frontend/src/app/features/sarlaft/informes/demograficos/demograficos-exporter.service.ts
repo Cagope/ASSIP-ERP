@@ -1,132 +1,162 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
 
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService,
+  ExcelSheetOptions
+} from '../../../../shared/services/excel-export.service';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class DemograficosExporterService {
 
-  exportarListado(fecha: string, registros: any[], stats: any) {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
 
-    /* ==========================================================
-       1) HOJA DETALLE — TODOS LOS CAMPOS DEL BACKEND
-       ========================================================== */
-    const detalleSheet = XLSX.utils.json_to_sheet(registros);
+  exportarListado(
+    fecha: string,
+    registros: any[],
+    stats: any
+  ): void {
 
+    if (!registros || registros.length === 0) {
+      alert('No hay datos para exportar.');
+      return;
+    }
 
-    /* ==========================================================
-       2) HOJA ESTADÍSTICAS
-       - Convertimos cada grupo en una tabla clara
-       ========================================================== */
+    const hojas: ExcelSheetOptions[] = [
+      this.crearHojaDetalle(registros),
+      this.crearHojaEstadisticas(stats)
+    ];
 
-    const estadisticasRows: any[] = [];
+    this.excelExport.exportar({
+      nombreArchivo:
+        `informe_demografico_${fecha}.xlsx`,
+      hojas
+    });
+  }
 
-    // 🔹 Resumen general
-    estadisticasRows.push(
-      { Categoria: 'TOTAL ASOCIADOS', Cantidad: stats.total, Valor: '' },
-      { Categoria: 'TOTAL APORTES', Cantidad: '', Valor: stats.resumen.totalAportes },
-      { Categoria: 'PROMEDIO APORTES', Cantidad: '', Valor: stats.resumen.promedioAportes },
-      {},
-      { Categoria: '--- DISTRIBUCIÓN POR GÉNERO ---' }
+  private crearHojaDetalle(
+    registros: any[]
+  ): ExcelSheetOptions {
+
+    const columnas =
+      Object.keys(registros[0] || {});
+
+    return {
+      nombreHoja: 'Detalle',
+      titulo: 'INFORME DEMOGRÁFICO - DETALLE',
+      columnas,
+      filas: registros.map(r =>
+        columnas.map(c => r[c])
+      ),
+      anchos: columnas.map(() => 24)
+    };
+  }
+
+  private crearHojaEstadisticas(
+    stats: any
+  ): ExcelSheetOptions {
+
+    const filas: any[][] = [];
+
+    filas.push(
+      ['TOTAL ASOCIADOS', Number(stats?.total || 0), ''],
+      ['TOTAL APORTES', '', Number(stats?.resumen?.totalAportes || 0)],
+      ['PROMEDIO APORTES', '', Number(stats?.resumen?.promedioAportes || 0)],
+      []
     );
 
-    // 🔹 Género (cantidades y aportes)
-    Object.keys(stats.genero).forEach(key => {
-      estadisticasRows.push({
-        Categoria: key,
-        Cantidad: stats.genero[key],
-        Valor: stats.aportexGenero[key] || 0
-      });
+    this.agregarGrupo(
+      filas,
+      'DISTRIBUCIÓN POR GÉNERO',
+      stats?.genero,
+      stats?.aportexGenero
+    );
+
+    this.agregarGrupo(
+      filas,
+      'RANGOS DE EDAD',
+      stats?.rangosEdad
+    );
+
+    this.agregarGrupo(
+      filas,
+      'TIPO VIVIENDA',
+      stats?.tipoVivienda
+    );
+
+    this.agregarGrupo(
+      filas,
+      'ZONAS',
+      stats?.zonas
+    );
+
+    this.agregarGrupo(
+      filas,
+      'SUBZONAS',
+      stats?.subzonas
+    );
+
+    this.agregarGrupo(
+      filas,
+      'ESCOLARIDAD',
+      stats?.escolaridad
+    );
+
+    this.agregarGrupo(
+      filas,
+      'OCUPACIÓN',
+      stats?.ocupacion
+    );
+
+    this.agregarGrupo(
+      filas,
+      'MUNICIPIO (Dirección)',
+      stats?.municipio
+    );
+
+    return {
+      nombreHoja: 'Estadisticas',
+      titulo: 'INFORME DEMOGRÁFICO - ESTADÍSTICAS',
+      columnas: [
+        'Categoría',
+        'Cantidad',
+        'Valor'
+      ],
+      filas,
+      anchos: [
+        38,
+        18,
+        20
+      ]
+    };
+  }
+
+  private agregarGrupo(
+    filas: any[][],
+    titulo: string,
+    cantidades: any,
+    valores?: any
+  ): void {
+
+    filas.push([]);
+    filas.push([
+      `--- ${titulo} ---`,
+      '',
+      ''
+    ]);
+
+    Object.keys(cantidades || {}).forEach(key => {
+      filas.push([
+        key,
+        Number(cantidades[key] || 0),
+        valores
+          ? Number(valores[key] || 0)
+          : ''
+      ]);
     });
-
-    estadisticasRows.push({}, { Categoria: '--- RANGOS DE EDAD ---' });
-
-    // 🔹 Rangos de edad
-    Object.keys(stats.rangosEdad).forEach(key => {
-      estadisticasRows.push({
-        Categoria: key,
-        Cantidad: stats.rangosEdad[key],
-        Valor: ''
-      });
-    });
-
-    estadisticasRows.push({}, { Categoria: '--- TIPO VIVIENDA ---' });
-
-    // 🔹 Tipo vivienda
-    Object.keys(stats.tipoVivienda).forEach(key => {
-      estadisticasRows.push({
-        Categoria: key,
-        Cantidad: stats.tipoVivienda[key],
-        Valor: ''
-      });
-    });
-
-    estadisticasRows.push({}, { Categoria: '--- ZONAS ---' });
-
-    // 🔹 Zonas
-    Object.keys(stats.zonas).forEach(key => {
-      estadisticasRows.push({
-        Categoria: key,
-        Cantidad: stats.zonas[key],
-        Valor: ''
-      });
-    });
-
-    estadisticasRows.push({}, { Categoria: '--- SUBZONAS ---' });
-
-    // 🔹 Subzonas
-    Object.keys(stats.subzonas).forEach(key => {
-      estadisticasRows.push({
-        Categoria: key,
-        Cantidad: stats.subzonas[key],
-        Valor: ''
-      });
-    });
-
-    estadisticasRows.push({}, { Categoria: '--- ESCOLARIDAD ---' });
-
-    // 🔹 Escolaridad
-    Object.keys(stats.escolaridad).forEach(key => {
-      estadisticasRows.push({
-        Categoria: key,
-        Cantidad: stats.escolaridad[key],
-        Valor: ''
-      });
-    });
-
-    estadisticasRows.push({}, { Categoria: '--- OCUPACIÓN ---' });
-
-    // 🔹 Ocupación
-    Object.keys(stats.ocupacion).forEach(key => {
-      estadisticasRows.push({
-        Categoria: key,
-        Cantidad: stats.ocupacion[key],
-        Valor: ''
-      });
-    });
-
-    estadisticasRows.push({}, { Categoria: '--- MUNICIPIO (Dirección) ---' });
-
-    // 🔹 Municipio
-    Object.keys(stats.municipio).forEach(key => {
-      estadisticasRows.push({
-        Categoria: key,
-        Cantidad: stats.municipio[key],
-        Valor: ''
-      });
-    });
-
-
-    // Crear hoja Excel
-    const estadisticasSheet = XLSX.utils.json_to_sheet(estadisticasRows);
-
-
-    /* ==========================================================
-       3) LIBRO FINAL
-       ========================================================== */
-    const book = XLSX.utils.book_new();
-
-    XLSX.utils.book_append_sheet(book, detalleSheet, 'Detalle');
-    XLSX.utils.book_append_sheet(book, estadisticasSheet, 'Estadisticas');
-
-    XLSX.writeFile(book, `informe_demografico_${fecha}.xlsx`);
   }
 }

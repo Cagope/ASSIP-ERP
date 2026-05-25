@@ -1,47 +1,102 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
 
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService
+} from '../../../../shared/services/excel-export.service';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class NovedadesConceptoInformeExporterService {
 
-  exportar(items: any[]): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportar(
+    items: any[]
+  ): void {
 
     if (!items || items.length === 0) {
       alert('No hay información para exportar.');
       return;
     }
 
-    const data = items.map(x => ({
+    this.excelExport.exportar({
 
-      'Año': x.anio,
-      'Mes': x.mes,
-      'Período': x.numeroPeriodo,
+      nombreArchivo:
+        'informe_novedades_concepto.xlsx',
 
-      'Documento': x.documento,
-      'Empleado': x.nombreEmpleado,
+      hojas: [
 
-      'Agencia': `${x.codigoAgencia} - ${x.nombreAgencia}`,
+        {
+          nombreHoja:
+            'Informe',
 
-      'Concepto': x.codigoConcepto,
-      'Nombre Concepto': x.nombreConcepto,
-      'Tipo': x.tipoConcepto,
+          titulo:
+            'INFORME NOVEDADES POR CONCEPTO',
 
-      'Fecha Inicial': x.fechaInicial,
-      'Fecha Final': x.fechaFinal,
+          columnas: [
+            'Año',
+            'Mes',
+            'Período',
+            'Documento',
+            'Empleado',
+            'Agencia',
+            'Concepto',
+            'Nombre Concepto',
+            'Tipo',
+            'Fecha Inicial',
+            'Fecha Final',
+            'Cantidad',
+            'Valor',
+            'Origen',
+            'Estado',
+            'Observación'
+          ],
 
-      'Cantidad': x.cantidad,
-      'Valor': x.valor,
+          filas: items.map(x => [
+            x.anio ?? '',
+            x.mes ?? '',
+            x.numeroPeriodo ?? '',
+            x.documento || '',
+            x.nombreEmpleado || '',
+            `${x.codigoAgencia || ''} - ${x.nombreAgencia || ''}`,
+            x.codigoConcepto || '',
+            x.nombreConcepto || '',
+            x.tipoConcepto || '',
+            x.fechaInicial || '',
+            x.fechaFinal || '',
+            Number(x.cantidad || 0),
+            Number(x.valor || 0),
+            x.origen || '',
+            x.estado || '',
+            x.observacion || ''
+          ]),
 
-      'Origen': x.origen,
-      'Estado': x.estado,
-      'Observación': x.observacion
+          anchos: [
+            10,
+            10,
+            10,
+            18,
+            38,
+            28,
+            14,
+            40,
+            14,
+            16,
+            16,
+            16,
+            18,
+            18,
+            16,
+            40
+          ]
+        }
 
-    }));
+      ]
 
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-
-    XLSX.utils.book_append_sheet(wb, ws, 'Informe');
-    XLSX.writeFile(wb, 'informe_novedades_concepto.xlsx');
+    });
   }
 }

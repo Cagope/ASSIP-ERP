@@ -1,55 +1,75 @@
-<div class="rangos-container">
+<div class="page">
 
-  <h2>Informe por Rangos</h2>
+  <app-header-actions
+    titulo="Informe por rangos"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
 
   <div class="card">
 
-    <form [formGroup]="form" (ngSubmit)="consultar()" class="form-panel">
+    <form
+      [formGroup]="form"
+      (ngSubmit)="consultar()"
+      class="filtros">
 
-      <div class="form-group">
-        <label>Tipo de Informe</label>
+      <div class="f-row">
+        <label>Tipo de informe</label>
+
         <select formControlName="tipo">
-          <option value="EDAD">Por Edad</option>
-          <option value="SALDO">Por Saldo</option>
-          <option value="ANTIGUEDAD">Por Antigüedad</option>
+          <option value="EDAD">Por edad</option>
+          <option value="SALDO">Por saldo</option>
+          <option value="ANTIGUEDAD">Por antigüedad</option>
         </select>
       </div>
 
-      <div class="form-group">
+      <div class="f-row">
         <label>Agencia</label>
-        <select formControlName="agencia">
-          <option *ngFor="let a of agencias" [value]="a.id">
-            {{ a.nombre }}
+
+        <select formControlName="idAgencia">
+          <option [ngValue]="0">Todas</option>
+
+          <option
+            *ngFor="let a of agencias"
+            [ngValue]="a.idAgencia">
+            {{ a.nombreAgencia }}
           </option>
         </select>
       </div>
 
-      <div class="form-group">
-        <label>Fecha de Corte</label>
-        <input type="date" formControlName="fechaCorte">
+      <div class="f-row">
+        <label>Forma de ahorro</label>
+
+        <select formControlName="codigoForma">
+          <option [ngValue]="'0'">
+            Todas las formas
+          </option>
+
+          <option
+            *ngFor="let f of formas"
+            [ngValue]="f.codigoForma">
+            {{ f.codigoForma }} - {{ f.nombreForma | titlecase }}
+          </option>
+        </select>
       </div>
 
-      <div class="rangos-table" formArrayName="rangos">
-        <table>
-          <thead>
-          <tr>
-            <th>#</th>
-            <th>Desde</th>
-            <th>Hasta</th>
-          </tr>
-          </thead>
+      <div class="f-row">
+        <label>Fecha de corte</label>
 
-          <tbody>
-          <tr *ngFor="let r of rangos.controls; let i = index" [formGroupName]="i">
-            <td>{{ i + 1 }}</td>
-            <td><input type="number" formControlName="desde"></td>
-            <td><input type="number" formControlName="hasta"></td>
-          </tr>
-          </tbody>
-        </table>
+        <input
+          type="date"
+          formControlName="fechaCorte">
       </div>
 
       <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()">
+          Limpiar
+        </button>
+
         <button
           type="submit"
           class="btn btn--primary"
@@ -62,14 +82,109 @@
 
   </div>
 
-  <div *ngIf="cargando" class="loading">
-    Cargando...
+  <div
+    class="card"
+    [formGroup]="form">
+
+    <h3>Rangos</h3>
+
+    <div class="table-container">
+
+      <table
+        class="tabla-resumen tabla-rangos"
+        formArrayName="rangos">
+
+        <thead>
+        <tr>
+          <th>#</th>
+          <th class="right">Desde</th>
+          <th class="right">Hasta</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr
+          *ngFor="let r of rangos.controls; let i = index"
+          [formGroupName]="i">
+
+          <td>
+            {{ i + 1 }}
+          </td>
+
+          <td>
+            <input
+              type="text"
+              numericFormat
+              class="input-number"
+              formControlName="desde">
+          </td>
+
+          <td>
+            <input
+              type="text"
+              numericFormat
+              class="input-number"
+              formControlName="hasta">
+          </td>
+
+        </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
   </div>
 
-  <div *ngIf="!cargando && resumen.length > 0" class="resumen-box card">
+  <div
+    *ngIf="cargando"
+    class="loading">
+    Cargando informe...
+  </div>
 
-    <div class="header">
-      <h3>Resumen del Informe</h3>
+  <div
+    *ngIf="error"
+    class="error">
+    {{ error }}
+  </div>
+
+  <div
+    *ngIf="!cargando && resumen.length > 0"
+    class="card">
+
+    <section class="resumen">
+
+      <h3>Resumen del informe</h3>
+
+      <div class="cards">
+
+        <div
+          class="card blue"
+          *ngFor="let r of resumen; let i = index">
+
+          <div class="label">
+            Rango {{ i + 1 }}
+          </div>
+
+          <div class="value right">
+            {{ r.cuentas | number:'1.0-0' }}
+          </div>
+
+          <div class="label">
+            Saldo
+          </div>
+
+          <div class="value right">
+            {{ r.saldo | number:'1.2-2' }}
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <div class="form-actions form-actions-result">
 
       <button
         type="button"
@@ -77,30 +192,15 @@
         (click)="exportar()">
         Exportar Excel
       </button>
+
     </div>
-
-    <table class="resumen-table">
-      <thead>
-      <tr>
-        <th>Rango</th>
-        <th>Cuentas</th>
-        <th>Total Saldos</th>
-      </tr>
-      </thead>
-
-      <tbody>
-      <tr *ngFor="let r of resumen; let i = index">
-        <td><strong>Rango {{ i + 1 }}</strong></td>
-        <td>{{ r.cuentas | number }}</td>
-        <td>{{ r.saldo | currency:'COP':'symbol-narrow':'1.2-2' }}</td>
-      </tr>
-      </tbody>
-    </table>
 
   </div>
 
-  <div style="display:none">
+  <div style="display: none">
+
     <table id="tablaCompleta">
+
       <tr *ngFor="let item of resultados">
         <td>{{ item.codigoCuenta }}</td>
         <td>{{ item.codigoAgencia }}</td>
@@ -113,7 +213,9 @@
         <td>{{ item.edadAnios }}</td>
         <td>{{ item.antiguedadAnios }}</td>
       </tr>
+
     </table>
+
   </div>
 
 </div>

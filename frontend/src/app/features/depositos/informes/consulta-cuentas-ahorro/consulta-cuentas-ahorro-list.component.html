@@ -1,43 +1,91 @@
 <div class="list-container">
-  <header class="page-header">
-    <h2>Cuentas de Ahorro</h2>
-  </header>
+  <app-header-actions
+    titulo="Cuentas de Ahorro"
+    subtitulo="Consulta general de cuentas de ahorro y asociados."
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
 
-  <div class="filters grid grid-5 gap-sm">
-    <div>
-      <label>Documento</label>
-      <input type="text" [(ngModel)]="filtros.documento" (keyup.enter)="buscar()" />
-    </div>
+  <div class="card">
 
-    <div>
-      <label>Nombres</label>
-      <input type="text" [(ngModel)]="filtros.nombres" (keyup.enter)="buscar()" />
-    </div>
+    <form
+      class="filtros-busqueda"
+      (ngSubmit)="buscar()">
 
-    <div>
-      <label>Primer Apellido</label>
-      <input type="text" [(ngModel)]="filtros.primer_apellido" (keyup.enter)="buscar()" />
-    </div>
+      <div class="f-row">
+        <label>Documento</label>
 
-    <div>
-      <label>Segundo Apellido</label>
-      <input type="text" [(ngModel)]="filtros.segundo_apellido" (keyup.enter)="buscar()" />
-    </div>
+        <input
+          type="text"
+          [(ngModel)]="filtros.documento"
+          name="documento"
+          (keyup.enter)="buscar()">
+      </div>
 
-    <div>
-      <label>Código Cuenta</label>
-      <input type="text" [(ngModel)]="filtros.codigo_cuenta" (keyup.enter)="buscar()" />
-    </div>
+      <div class="f-row">
+        <label>Nombres</label>
 
-    <div class="form-actions full">
-      <button type="button" class="btn btn--secondary" (click)="limpiar()">
-        Limpiar
-      </button>
+        <input
+          type="text"
+          [(ngModel)]="filtros.nombres"
+          name="nombres"
+          (keyup.enter)="buscar()">
+      </div>
 
-      <button type="button" class="btn btn--primary" (click)="buscar()">
-        Buscar
-      </button>
-    </div>
+      <div class="f-row">
+        <label>Primer apellido</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtros.primer_apellido"
+          name="primer_apellido"
+          (keyup.enter)="buscar()">
+      </div>
+
+      <div class="f-row">
+        <label>Segundo apellido</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtros.segundo_apellido"
+          name="segundo_apellido"
+          (keyup.enter)="buscar()">
+      </div>
+
+      <div class="f-row">
+        <label>Código cuenta</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtros.codigo_cuenta"
+          name="codigo_cuenta"
+          (keyup.enter)="buscar()">
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()">
+
+          Limpiar
+
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn--primary">
+
+          Buscar
+
+        </button>
+
+      </div>
+
+    </form>
+
   </div>
 
   <div *ngIf="cargando" class="loading">Cargando cuentas...</div>

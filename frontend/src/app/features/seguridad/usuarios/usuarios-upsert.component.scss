@@ -1,81 +1,151 @@
-/* Espaciado general del formulario */
+@use '../../../../styles/forms';
+@use '../../../../styles/informes-base';
+
+/* =========================================
+   PAGE
+========================================= */
+
 .page {
-  padding: 10px 0;
+  padding: 12px 0;
 }
 
-/* Estilo consistente de labels */
+/* =========================================
+   LABELS
+========================================= */
+
 label {
-  font-weight: 500;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
+
+  color: #374151;
+
+  font-size: 13px;
+  font-weight: 600;
 }
 
-/* Ajuste para checkboxes */
+/* =========================================
+   CHECKBOXES
+========================================= */
+
 .form-check {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
   margin-top: 6px;
 
   .form-check-input {
-    margin-right: 6px;
+    width: 16px;
+    height: 16px;
+
+    margin: 0;
+
+    cursor: pointer;
+  }
+
+  label {
+    margin-bottom: 0;
+
+    cursor: pointer;
   }
 }
 
-/* Tabla interna o listas si se agregan más elementos */
+/* =========================================
+   TABLAS
+========================================= */
+
 .table {
-  font-size: 0.85rem;
+  font-size: 13px;
 }
 
-/* Botones */
+/* =========================================
+   BOTONES
+========================================= */
+
 button.btn {
-  min-width: 100px;
+  min-width: 110px;
 }
 
-/* 🔹 Título */
+/* =========================================
+   TITULO
+========================================= */
+
 .label-title {
-  font-weight: 600;
+  margin-bottom: 8px;
+
+  color: #111827;
+
   font-size: 14px;
-  margin-bottom: 6px;
-  text-transform: lowercase;
+  font-weight: 700;
+
+  text-transform: uppercase;
 }
 
-/* 🔹 Contenedor tipo tarjeta */
+/* =========================================
+   CONTENEDOR AGENCIAS
+========================================= */
+
 .agencias-card {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 10px;
-  padding: 5px 0;
+
+  gap: 12px;
+
+  padding: 6px 0;
 }
 
-/* 🔹 Cada fila */
+/* =========================================
+   ITEM AGENCIA
+========================================= */
+
 .agencia-item {
   display: flex;
   align-items: center;
+
   gap: 10px;
+
   padding: 12px 14px;
-  background: #f7f9fc;
-  border: 1px solid #dce3ee;
-  border-radius: 8px;
+
+  background: #f8fafc;
+
+  border: 1px solid #dbe3ee;
+  border-radius: 10px;
+
   cursor: pointer;
-  transition: 0.2s ease-in-out;
+
+  transition: all 0.18s ease-in-out;
+
+  &:hover {
+    background: #eef4ff;
+
+    border-color: #b9d0ff;
+
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.08);
+  }
 }
 
-.agencia-item:hover {
-  background: #eef4ff;
-  border-color: #b9d0ff;
-}
+/* =========================================
+   CHECK AGENCIA
+========================================= */
 
-/* 🔹 Checkbox */
 .agencia-check {
   width: 18px;
   height: 18px;
+
   cursor: pointer;
 }
 
-/* 🔹 Texto */
+/* =========================================
+   INFO AGENCIA
+========================================= */
+
 .agencia-info {
-  flex-grow: 1;
+  flex: 1;
 }
 
 .agencia-nombre {
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
+  color: #1f2937;
+
+  font-size: 13px;
+  font-weight: 600;
 }

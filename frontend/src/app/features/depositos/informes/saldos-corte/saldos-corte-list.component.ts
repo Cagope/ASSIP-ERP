@@ -25,8 +25,10 @@ export class SaldosCorteListComponent implements OnInit {
   agencias: any[] = [];
 
   filtros = {
-    agencia: '0',
-    fechaCorte: ''
+    agencia: 0,
+    fechaCorte: new Date()
+      .toISOString()
+      .split('T')[0]
   };
 
   cargando = false;
@@ -57,7 +59,14 @@ export class SaldosCorteListComponent implements OnInit {
       grupos[id].formas.push({
         codigoForma: item.codigoForma,
         nombreForma: item.nombreForma,
-        detalle: [] // se llenará después
+        cantidad: item.cantidad,
+        totalDebitos: item.totalDebitos,
+        totalCreditos: item.totalCreditos,
+        saldo: item.saldo,
+        saldoPromedio: item.saldoPromedio,
+        saldoMinimo: item.saldoMinimo,
+        saldoMaximo: item.saldoMaximo,
+        detalle: []
       });
     }
 
@@ -81,66 +90,95 @@ export class SaldosCorteListComponent implements OnInit {
   // 🔍 Buscar
   // ============================================================
   async buscar() {
+
     this.error = '';
 
     if (!this.filtros.fechaCorte.trim()) {
-      this.error = 'Debe seleccionar una fecha de corte.';
+
+      this.error =
+        'Debe seleccionar una fecha de corte.';
+
       return;
+
     }
 
     this.cargando = true;
 
     try {
-      // 🔍 Consulta principal (detalle)
-      const res = await this.api.consultar({
-        agencia: Number(this.filtros.agencia),
-        fechaCorte: this.filtros.fechaCorte
-      });
-
-      this.resumen = res.resumen;
-      this.items = res.items;
 
       // ============================================================
-      // 🆕 CONSULTAR SIEMPRE EL RESUMEN POR AGENCIA
+      // 🔍 CONSULTA PRINCIPAL
+      // ============================================================
+      const res =
+        await this.api.consultar({
+          agencia: this.filtros.agencia,
+          fechaCorte: this.filtros.fechaCorte
+        });
+
+      this.resumen =
+        res.resumen;
+
+      this.items =
+        res.items || [];
+
+      // ============================================================
+      // 📊 RESUMEN EJECUTIVO POR AGENCIA / FORMA
       // ============================================================
       const resumenData =
-        await this.api.resumenPorAgencia(this.filtros.fechaCorte) ?? [];
+        await this.api.resumenPorAgencia(
+          this.filtros.fechaCorte,
+          this.filtros.agencia
+        ) || [];
 
-      // 🔍 Filtrar si es una sola agencia
-      if (this.filtros.agencia !== '0') {
-        this.resumenAgencias = this.agruparResumen(
-          resumenData.filter(r => r.idAgencia == Number(this.filtros.agencia))
-        );
-      } else {
-        this.resumenAgencias = this.agruparResumen(resumenData);
-      }
+      this.resumenAgencias =
+        this.agruparResumen(resumenData);
 
       // ============================================================
-      // 🟦 COMPLETAR DETALLE POR AGENCIA Y FORMA (para print)
+      // 🟦 COMPLETAR DETALLE POR AGENCIA Y FORMA
       // ============================================================
       for (const ag of this.resumenAgencias) {
+
         for (const forma of ag.formas) {
-          forma.detalle = this.items.filter(
-            x =>
-              x.codigoAgencia == ag.codigoAgencia &&
-              x.codigoForma == forma.codigoForma
-          );
+
+          forma.detalle =
+            this.items.filter(
+              x =>
+                x.codigoAgencia === ag.codigoAgencia &&
+                x.codigoForma === forma.codigoForma
+            );
+
         }
+
       }
 
     } catch (e) {
-      console.error('Error consultando saldos corte:', e);
-      this.error = 'No se pudo obtener el informe.';
+
+      console.error(
+        'Error consultando saldos corte:',
+        e
+      );
+
+      this.error =
+        'No se pudo obtener el informe.';
+
     } finally {
+
       this.cargando = false;
+
     }
+
   }
 
   // ============================================================
   // 🧹 Limpiar
   // ============================================================
   limpiar() {
-    this.filtros = { agencia: '0', fechaCorte: '' };
+    this.filtros = {
+      agencia: 0,
+      fechaCorte: new Date()
+        .toISOString()
+        .split('T')[0]
+    };
     this.items = [];
     this.resumen = null;
     this.resumenAgencias = [];
@@ -155,7 +193,10 @@ export class SaldosCorteListComponent implements OnInit {
       alert('No hay datos para exportar.');
       return;
     }
-    this.exporter.exportarExcel(this.items);
+    this.exporter.exportarExcel(
+      this.items,
+      this.filtros.fechaCorte
+    );
   }
 
   // ============================================================

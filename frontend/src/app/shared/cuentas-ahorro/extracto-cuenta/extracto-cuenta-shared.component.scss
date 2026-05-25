@@ -1,0 +1,150 @@
+.extracto-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: rgba(15, 23, 42, 0.45);
+  padding: 24px;
+  overflow: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.extracto-modal {
+  width: min(1400px, 96vw);
+  max-height: 92vh;
+  overflow: auto;
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.35);
+}
+
+.extracto-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.filters {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.f-row {
+  display: flex;
+  flex-direction: column;
+
+  label {
+    font-size: 12px;
+    margin-bottom: 4px;
+    font-weight: 600;
+  }
+
+  input {
+    height: 34px;
+    padding: 4px 8px;
+  }
+}
+
+.card {
+  width: 100%;
+  background: #fff;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #e5e7eb;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: 18px 32px;
+}
+
+.resume-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.resume-item,
+.info-grid div {
+  display: flex;
+  flex-direction: column;
+
+  label {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 4px;
+  }
+
+  strong {
+    font-size: 15px;
+  }
+}
+
+.table-container {
+  width: 100%;
+  overflow: auto;
+  max-height: 58vh;
+}
+
+.data-table {
+  width: 100%;
+  min-width: 980px;
+  border-collapse: collapse;
+
+  th,
+  td {
+    border: 1px solid #e5e7eb;
+    padding: 8px;
+    font-size: 13px;
+  }
+
+  th {
+    background: #f3f4f6;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+}
+
+.right {
+  text-align: right;
+}
+
+.loading {
+  padding: 1rem;
+  font-weight: 600;
+}
+
+.alert {
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.alert--error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.bottom-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}

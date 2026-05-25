@@ -1,0 +1,386 @@
+<div class="page">
+
+  <app-header-actions
+    titulo="Entradas y salidas entre fechas"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <div class="card">
+
+    <form
+      class="filtros"
+      (ngSubmit)="buscar()">
+
+      <div class="f-row">
+        <label>Fecha inicial</label>
+        <input
+          type="date"
+          [(ngModel)]="filtros.fechaInicial"
+          name="fechaInicial">
+      </div>
+
+      <div class="f-row">
+        <label>Fecha final</label>
+        <input
+          type="date"
+          [(ngModel)]="filtros.fechaFinal"
+          name="fechaFinal">
+      </div>
+
+      <div class="f-row">
+        <label>Agencia</label>
+        <select
+          [(ngModel)]="filtros.idAgencia"
+          name="idAgencia">
+
+          <option [ngValue]="0">Todas</option>
+
+          <option
+            *ngFor="let a of agencias"
+            [ngValue]="a.idAgencia">
+            {{ a.nombreAgencia }}
+          </option>
+
+        </select>
+      </div>
+
+      <div class="f-row">
+        <label>Forma de ahorro</label>
+        <select
+          [(ngModel)]="filtros.codigoForma"
+          name="codigoForma">
+
+          <option [ngValue]="'0'">Todas</option>
+
+          <option
+            *ngFor="let f of formas"
+            [ngValue]="f.codigoForma">
+            {{ f.codigoForma }} - {{ f.nombreForma }}
+          </option>
+
+        </select>
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()">
+          Limpiar
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="cargando">
+          Buscar
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+  <div *ngIf="cargando" class="loading">
+    Cargando informe...
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <div
+    class="card"
+    *ngIf="resumen">
+
+    <section class="resumen">
+
+      <h3>Resumen del informe</h3>
+
+      <div class="cards">
+
+        <div class="card blue">
+          <div class="label">Días con movimiento</div>
+          <div class="value big right">
+            {{ resumen.totalDias | number:'1.0-0' }}
+          </div>
+        </div>
+
+        <div class="card gray">
+          <div class="label">Total movimientos</div>
+          <div class="value big right">
+            {{ resumen.totalMovimientos | number:'1.0-0' }}
+          </div>
+        </div>
+
+        <div class="card green">
+          <div class="label">Total entradas</div>
+          <div class="value big right">
+            {{ resumen.totalEntradas | number:'1.2-2' }}
+          </div>
+        </div>
+
+        <div class="card red">
+          <div class="label">Total salidas</div>
+          <div class="value big right">
+            {{ resumen.totalSalidas | number:'1.2-2' }}
+          </div>
+        </div>
+
+        <div
+          class="card"
+          [class.green]="resumen.totalNeto >= 0"
+          [class.red]="resumen.totalNeto < 0">
+
+          <div class="label">Neto</div>
+          <div class="value big right">
+            {{ resumen.totalNeto | number:'1.2-2' }}
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <div
+      *ngIf="items.length > 0"
+      class="form-actions form-actions-result">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="exportar()">
+        Exportar Excel
+      </button>
+
+    </div>
+
+  </div>
+
+  <div
+    *ngIf="items.length > 0"
+    class="card">
+
+    <h3>Detalle diario</h3>
+
+    <div class="table-container">
+
+      <table class="tabla-resumen">
+
+        <thead>
+        <tr>
+          <th>Fecha</th>
+          <th class="right">Movimientos</th>
+          <th class="right">Entradas</th>
+          <th class="right">Salidas</th>
+          <th class="right">Neto</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let item of items">
+
+          <td>
+            <button
+              type="button"
+              class="link-button"
+              (click)="verResumenForma(item)">
+              {{ item.fechaMovimiento | date:'yyyy-MM-dd' }}
+            </button>
+          </td>
+
+          <td class="right">
+            {{ item.cantidadMovimientos | number:'1.0-0' }}
+          </td>
+
+          <td class="right positive">
+            {{ item.entradas | number:'1.2-2' }}
+          </td>
+
+          <td class="right negative">
+            {{ item.salidas | number:'1.2-2' }}
+          </td>
+
+          <td
+            class="right"
+            [class.positive]="item.neto >= 0"
+            [class.negative]="item.neto < 0">
+            {{ item.neto | number:'1.2-2' }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+  <div
+    *ngIf="itemsFormas.length > 0"
+    class="card">
+
+    <h3>
+      Resumen por forma —
+      {{ fechaSeleccionada | date:'yyyy-MM-dd' }}
+    </h3>
+
+    <div class="table-container">
+
+      <table class="tabla-resumen">
+
+        <thead>
+        <tr>
+          <th>Forma</th>
+          <th class="right">Movimientos</th>
+          <th class="right">Entradas</th>
+          <th class="right">Salidas</th>
+          <th class="right">Neto</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let f of itemsFormas">
+
+          <td>
+            <button
+              type="button"
+              class="link-button"
+              (click)="verDetalleForma(f)">
+              {{ f.codigoForma }} - {{ f.nombreForma }}
+            </button>
+          </td>
+
+          <td class="right">
+            {{ f.cantidadMovimientos | number:'1.0-0' }}
+          </td>
+
+          <td class="right positive">
+            {{ f.entradas | number:'1.2-2' }}
+          </td>
+
+          <td class="right negative">
+            {{ f.salidas | number:'1.2-2' }}
+          </td>
+
+          <td
+            class="right"
+            [class.positive]="f.neto >= 0"
+            [class.negative]="f.neto < 0">
+            {{ f.neto | number:'1.2-2' }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+  <div
+    *ngIf="itemsDetalle.length > 0"
+    class="card">
+
+    <h3>
+      Detalle movimientos —
+      {{ fechaSeleccionada | date:'yyyy-MM-dd' }}
+      —
+      {{ formaSeleccionada }}
+    </h3>
+
+    <div class="table-container">
+
+      <table class="tabla-resumen">
+
+        <thead>
+        <tr>
+          <th>Cuenta</th>
+          <th>Documento</th>
+          <th>Nombre</th>
+          <th>Tipo movimiento</th>
+          <th>Número</th>
+          <th class="right">Débito</th>
+          <th class="right">Crédito</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let d of itemsDetalle">
+
+          <td>
+            {{ d.codigoCuenta }}
+          </td>
+
+          <td>
+            {{ d.documento }}
+          </td>
+
+          <td>
+            {{ d.nombreCompleto }}
+          </td>
+
+          <td>
+            {{ d.codigoMovimiento }} - {{ d.nombreMovimiento }}
+          </td>
+
+          <td>
+            {{ d.numeroMovimiento }}
+          </td>
+
+          <td class="right negative">
+            {{ d.debito | number:'1.2-2' }}
+          </td>
+
+          <td class="right positive">
+            {{ d.credito | number:'1.2-2' }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <div
+      *ngIf="resumenDetalle"
+      class="totales-detalle">
+
+  <span>
+    Movimientos
+    <strong>
+      {{ resumenDetalle.totalMovimientos | number:'1.0-0' }}
+    </strong>
+  </span>
+
+      <span>
+    <strong>
+      {{ resumenDetalle.totalSalidas | number:'1.2-2' }}
+    </strong>
+  </span>
+
+      <span>
+    <strong>
+      {{ resumenDetalle.totalEntradas | number:'1.2-2' }}
+    </strong>
+  </span>
+
+    </div>
+
+  </div>
+
+</div>

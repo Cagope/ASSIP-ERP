@@ -1,0 +1,484 @@
+<div class="detalle-wrapper">
+
+  <!-- =========================
+       HEADER
+  ========================== -->
+
+  <div class="detalle-header">
+
+    <div>
+      <h3>
+        CDAT {{ cdat.codigo_cdat }}
+      </h3>
+
+      <small>
+        {{ nombreCompleto() }}
+      </small>
+    </div>
+
+    <div
+      class="estado-badge"
+      [class.estado-activo]="esActivo()"
+    >
+      {{ cdat.descripcion_estado_cdat || cdat.estado_cdat }}
+    </div>
+
+  </div>
+
+  <!-- =========================
+       DATOS GENERALES
+  ========================== -->
+
+  <div class="section">
+
+    <h4>Datos generales</h4>
+
+    <div class="grid grid-4">
+
+      <div class="item">
+        <label>Documento</label>
+        <span>{{ cdat.documento }}</span>
+      </div>
+
+      <div class="item">
+        <label>Tipo documento</label>
+        <span>{{ cdat.tipo_documento }}</span>
+      </div>
+
+      <div class="item">
+        <label>Agencia</label>
+        <span>
+          {{ cdat.codigo_agencia }} - {{ cdat.nombre_agencia }}
+        </span>
+      </div>
+
+      <div class="item">
+        <label>Modalidad</label>
+        <span>{{ cdat.modalidad_cdat }}</span>
+      </div>
+
+      <div class="item">
+        <label>Fecha apertura</label>
+        <span>{{ cdat.fecha_apertura_cdat }}</span>
+      </div>
+
+      <div class="item">
+        <label>Fecha vencimiento</label>
+        <span>{{ cdat.fecha_vencimiento_cdat }}</span>
+      </div>
+
+      <div class="item">
+        <label>Plazo meses</label>
+        <span>{{ cdat.plazo_meses }}</span>
+      </div>
+
+      <div class="item">
+        <label>Plazo días</label>
+        <span>{{ cdat.plazo_dias }}</span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- =========================
+       VALORES
+  ========================== -->
+
+  <div class="section">
+
+    <h4>Valores y tasas</h4>
+
+    <div class="grid grid-4">
+
+      <div class="item">
+        <label>Valor apertura</label>
+
+        <span class="amount">
+          {{ cdat.valor_apertura_cdat | number:'1.0-2' }}
+        </span>
+      </div>
+
+      <div class="item">
+        <label>Saldo actual</label>
+
+        <span class="amount">
+          {{ cdat.saldo_actual_cdat | number:'1.0-2' }}
+        </span>
+      </div>
+
+      <div class="item">
+        <label>Tasa nominal anual</label>
+
+        <span>
+          {{ cdat.tasa_nominal_anual | number:'1.0-2' }}%
+        </span>
+      </div>
+
+      <div class="item">
+        <label>Tasa efectiva anual</label>
+
+        <span>
+          {{ cdat.tasa_efectiva_anual | number:'1.0-2' }}%
+        </span>
+      </div>
+
+      <div class="item">
+        <label>Tasa nominal mensual</label>
+
+        <span>
+          {{ cdat.tasa_nominal_mensual | number:'1.0-2' }}%
+        </span>
+      </div>
+
+      <div class="item">
+        <label>Tasa efectiva mensual</label>
+
+        <span>
+          {{ cdat.tasa_efectiva_mensual | number:'1.0-2' }}%
+        </span>
+      </div>
+
+      <div class="item">
+        <label>Retención</label>
+
+        <span>
+          {{ siNo(cdat.retencion_fuente_cdat) }}
+        </span>
+      </div>
+
+      <div class="item">
+        <label>Amortización</label>
+
+        <span>
+          {{ cdat.nombre_amortizacion }}
+        </span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- =========================
+       LIQUIDACIONES
+  ========================== -->
+
+  <div class="section">
+
+    <h4>Liquidaciones</h4>
+
+    <div class="grid grid-4">
+
+      <div class="item">
+        <label>Última liquidación</label>
+        <span>{{ cdat.fecha_ultima_liquidacion }}</span>
+      </div>
+
+      <div class="item">
+        <label>Próxima liquidación</label>
+        <span>{{ cdat.fecha_proxima_liquidacion }}</span>
+      </div>
+
+      <div class="item">
+        <label>Último traslado</label>
+        <span>{{ cdat.fecha_ultimo_traslado_interes }}</span>
+      </div>
+
+      <div class="item">
+        <label>Próximo traslado</label>
+        <span>{{ cdat.fecha_proximo_traslado_interes }}</span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- =========================
+       CUENTAS RELACIONADAS
+  ========================== -->
+
+  <div class="section">
+
+    <h4>Cuentas relacionadas</h4>
+
+    <div class="grid grid-4">
+
+      <div class="item">
+        <label>Cuenta ahorro</label>
+
+        <span>
+          {{ cdat.codigo_cuenta_ahorro }}
+        </span>
+      </div>
+
+      <div class="item">
+        <label>Forma ahorro</label>
+
+        <span>
+          {{ cdat.codigo_forma_ahorro }}
+          -
+          {{ cdat.nombre_forma_ahorro }}
+        </span>
+      </div>
+
+      <div class="item">
+        <label>Cuenta aportes</label>
+
+        <span>
+          {{ cdat.codigo_cuenta_aportes }}
+        </span>
+      </div>
+
+      <div class="item">
+        <label>Forma aportes</label>
+
+        <span>
+          {{ cdat.codigo_forma_aportes }}
+          -
+          {{ cdat.nombre_forma_aportes }}
+        </span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- =========================
+       COTITULAR
+  ========================== -->
+
+  <div
+    class="section"
+    *ngIf="tieneCotitular()"
+  >
+
+    <h4>Cotitular</h4>
+
+    <div class="grid grid-2">
+
+      <div class="item">
+        <label>Documento</label>
+
+        <span>
+          {{ cdat.documento_cotitular }}
+        </span>
+      </div>
+
+      <div class="item">
+        <label>Nombre</label>
+
+        <span>
+          {{ nombreCotitular() }}
+        </span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- =========================
+       OBSERVACIÓN
+  ========================== -->
+
+  <div
+    class="section"
+    *ngIf="cdat.observacion"
+  >
+
+    <h4>Observaciones</h4>
+
+    <div class="observacion-box">
+      {{ cdat.observacion }}
+    </div>
+
+  </div>
+
+  <!-- =========================
+     EXTRACTO CDAT
+========================== -->
+
+  <div class="section">
+
+    <h4>Extracto CDAT</h4>
+
+    <!-- FILTROS -->
+
+    <div class="extracto-filtros">
+
+      <div class="f-row">
+        <label>Fecha inicial</label>
+
+        <input
+          type="date"
+          [(ngModel)]="fechaInicial"
+        />
+      </div>
+
+      <div class="f-row">
+        <label>Fecha final</label>
+
+        <input
+          type="date"
+          [(ngModel)]="fechaFinal"
+        />
+      </div>
+
+      <div class="f-actions">
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="consultarExtracto()"
+          [disabled]="cargandoExtracto">
+
+          Consultar
+
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--print"
+          (click)="imprimirExtracto()"
+          [disabled]="movimientos.length === 0">
+
+          Imprimir
+
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--excel"
+          (click)="exportarExtracto()"
+          [disabled]="movimientos.length === 0">
+
+          Exportar Excel
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- ERROR -->
+
+    <div
+      class="extracto-error"
+      *ngIf="errorExtracto"
+    >
+      {{ errorExtracto }}
+    </div>
+
+    <!-- CARGANDO -->
+
+    <div
+      class="extracto-loading"
+      *ngIf="cargandoExtracto"
+    >
+      Consultando extracto...
+    </div>
+
+
+    <!-- TABLA -->
+
+    <div
+      class="extracto-table-container"
+      *ngIf="movimientos.length > 0"
+    >
+
+      <table class="extracto-table">
+
+        <thead>
+
+        <tr>
+
+          <th>Fecha</th>
+          <th>Comprobante</th>
+          <th>Movimiento</th>
+
+          <th class="right">
+            Débito
+          </th>
+
+          <th class="right">
+            Crédito
+          </th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let m of movimientos">
+
+          <td>
+            {{ m.fecha_movimiento }}
+          </td>
+
+          <td>
+            {{ m.tipo_comprobante }}
+            -
+            {{ m.numero_comprobante }}
+          </td>
+
+          <td>
+            {{ m.descripcion_movimiento }}
+          </td>
+
+          <td class="right">
+            {{ m.valor_debito | number:'1.0-2' }}
+          </td>
+
+          <td class="right">
+            {{ m.valor_credito | number:'1.0-2' }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <div class="extracto-table-container" *ngIf="resumenPorMovimiento.length > 0">
+
+      <h4>Resumen por movimiento</h4>
+
+      <table class="extracto-table">
+
+        <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Movimiento</th>
+
+          <th class="right">
+            Valor
+          </th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let r of resumenPorMovimiento">
+
+          <td>
+            {{ r.tipoMovimiento }}
+          </td>
+
+          <td>
+            {{ r.descripcionMovimiento }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+  </div>
+
+</div>

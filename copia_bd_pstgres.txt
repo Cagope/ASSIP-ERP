@@ -9,3 +9,12 @@ Se copia y se pega en power shell
   -v `
   -f "D:\backups_assip\assip_erp_$(Get-Date -Format 'yyyyMMdd_HHmmss').backup" `
   assip_erp
+
+Extraer
+& "C:\Program Files\PostgreSQL\17\bin\pg_restore.exe" `
+  -U postgres `
+  -h localhost `
+  -p 5432 `
+  -s `
+  -f "D:\backups_assip\schema_extract.sql" `
+  "D:\backups_assip\SU_assip_erp_20260519_163346.backup"

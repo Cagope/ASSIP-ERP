@@ -13,43 +13,86 @@
 
       <div class="f-row">
         <label>Agencia</label>
-        <select [(ngModel)]="filtros.agencia" name="agencia">
-          <option value="0">Todas</option>
-          <option *ngFor="let a of agencias" [value]="a.idAgencia">
-            {{ a.nombreAgencia }}
+
+        <select
+          [(ngModel)]="filtros.agencia"
+          name="agencia">
+
+          <option [ngValue]="'0'">
+            Todas
           </option>
+
+          <option
+            *ngFor="let a of agencias"
+            [ngValue]="a.idAgencia">
+
+            {{ a.nombreAgencia }}
+
+          </option>
+
         </select>
       </div>
 
       <div class="f-row">
-        <label>Forma</label>
-        <select [(ngModel)]="filtros.forma" name="forma">
-          <option value="">Seleccione…</option>
-          <option *ngFor="let f of formas" [value]="f.codigoForma">
-            {{ f.codigoForma }} — {{ f.nombreForma }}
+        <label>Forma de ahorro</label>
+
+        <select
+          [(ngModel)]="filtros.forma"
+          name="forma">
+
+          <option [ngValue]="'0'">
+            Todas las formas
           </option>
+
+          <option
+            *ngFor="let f of formas"
+            [ngValue]="f.codigoForma">
+
+            {{ f.codigoForma }} - {{ f.nombreForma | titlecase }}
+
+          </option>
+
         </select>
       </div>
 
       <div class="f-row">
         <label>Tipo de informe</label>
-        <select [(ngModel)]="filtros.tipoInforme" name="tipoInforme">
-          <option value="NUEVAS">Cuentas nuevas</option>
-          <option value="RETIRADAS">Cuentas retiradas</option>
+
+        <select
+          [(ngModel)]="filtros.tipoInforme"
+          name="tipoInforme">
+
+          <option value="NUEVAS">
+            Cuentas nuevas
+          </option>
+
+          <option value="RETIRADAS">
+            Cuentas retiradas
+          </option>
+
         </select>
       </div>
 
       <div class="f-row">
         <label>Fecha inicial</label>
-        <input type="date" [(ngModel)]="filtros.fechaInicial" name="fechaInicial" />
+
+        <input
+          type="date"
+          [(ngModel)]="filtros.fechaInicial"
+          name="fechaInicial">
       </div>
 
       <div class="f-row">
         <label>Fecha final</label>
-        <input type="date" [(ngModel)]="filtros.fechaFinal" name="fechaFinal" />
+
+        <input
+          type="date"
+          [(ngModel)]="filtros.fechaFinal"
+          name="fechaFinal">
       </div>
 
       <div class="form-actions">
+
         <button
           type="button"
           class="btn btn--secondary"
@@ -59,21 +102,53 @@
 
         <button
           type="submit"
-          class="btn btn--primary">
+          class="btn btn--primary"
+          [disabled]="cargando">
           Buscar
         </button>
+
       </div>
 
     </form>
 
   </div>
 
-  <div *ngIf="cargando" class="loading">Cargando...</div>
-  <div *ngIf="error" class="error">{{ error }}</div>
+  <div *ngIf="cargando" class="loading">
+    Cargando informe...
+  </div>
 
-  <div class="card" *ngIf="!cargando && !error">
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
 
-    <div *ngIf="resultados.length > 0" class="form-actions">
+  <div
+    *ngIf="resultados.length > 0"
+    class="card">
+
+    <section class="resumen">
+
+      <h3>Resumen del informe</h3>
+
+      <div class="cards">
+
+        <div class="card blue">
+
+          <div class="label">
+            Total registros
+          </div>
+
+          <div class="value right">
+            {{ resultados.length | number:'1.0-0' }}
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <div class="form-actions form-actions-result">
+
       <button
         type="button"
         class="btn btn--secondary"
@@ -87,44 +162,79 @@
         (click)="imprimir()">
         Imprimir
       </button>
+
     </div>
 
-    <table class="tabla-resumen" *ngIf="resultados.length > 0">
-      <thead>
-      <tr>
-        <th>Cuenta</th>
-        <th>Documento</th>
-        <th>Nombre</th>
-        <th>Agencia</th>
-        <th>Forma</th>
-        <th *ngIf="filtros.tipoInforme === 'NUEVAS'">Fecha apertura</th>
-        <th *ngIf="filtros.tipoInforme === 'RETIRADAS'">Fecha retiro</th>
-        <th class="right">Saldo</th>
-      </tr>
-      </thead>
+  </div>
 
-      <tbody>
-      <tr *ngFor="let x of resultados">
-        <td>{{ x.codigo_cuenta }}</td>
-        <td>{{ x.documento }}</td>
-        <td>{{ x.nombre_completo }}</td>
-        <td>{{ x.agencia }}</td>
-        <td>{{ x.forma }}</td>
+  <div
+    *ngIf="resultados.length > 0"
+    class="card">
 
-        <td *ngIf="filtros.tipoInforme === 'NUEVAS'">{{ x.fecha_apertura }}</td>
-        <td *ngIf="filtros.tipoInforme === 'RETIRADAS'">{{ x.fecha_retiro }}</td>
+    <h3>Detalle</h3>
 
-        <td class="right">
-          {{ (x.saldo_inicial ?? x.ultimo_saldo) | number:'1.0-0' }}
-        </td>
-      </tr>
-      </tbody>
-    </table>
+    <div class="table-container">
 
-    <div *ngIf="resultados.length === 0" class="empty">
-      No hay resultados para mostrar.
+      <table class="tabla-resumen">
+
+        <thead>
+        <tr>
+          <th>Cuenta</th>
+          <th>Documento</th>
+          <th>Nombre</th>
+          <th>Agencia</th>
+          <th>Forma</th>
+
+          <th *ngIf="filtros.tipoInforme === 'NUEVAS'">
+            Fecha apertura
+          </th>
+
+          <th *ngIf="filtros.tipoInforme === 'RETIRADAS'">
+            Fecha retiro
+          </th>
+
+          <th class="right">
+            Saldo
+          </th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let x of resultados">
+
+          <td>{{ x.codigo_cuenta }}</td>
+          <td>{{ x.documento }}</td>
+          <td>{{ x.nombre_completo }}</td>
+          <td>{{ x.agencia }}</td>
+          <td>{{ x.forma }}</td>
+
+          <td *ngIf="filtros.tipoInforme === 'NUEVAS'">
+            {{ x.fecha_apertura }}
+          </td>
+
+          <td *ngIf="filtros.tipoInforme === 'RETIRADAS'">
+            {{ x.fecha_retiro }}
+          </td>
+
+          <td class="right">
+            {{ (x.saldo_inicial ?? x.ultimo_saldo) | number:'1.2-2' }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
     </div>
 
+  </div>
+
+  <div
+    *ngIf="!cargando && !error && resultados.length === 0"
+    class="empty">
+    No hay resultados para mostrar.
   </div>
 
 </div>

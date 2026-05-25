@@ -4,7 +4,11 @@ import { LoginComponent } from './core/auth/login/login.component';
 import { MainLayoutComponent } from './layout/main-layout.component';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent },
+
+  {
+    path: 'login',
+    component: LoginComponent
+  },
 
   {
     path: '',
@@ -43,6 +47,14 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/cdat/cdat.routes')
             .then(m => m.CDAT_ROUTES),
+      },
+
+      // === GERENCIA ===
+      {
+        path: 'gerencia',
+        loadChildren: () =>
+          import('./features/gerencia/gerencia.routes')
+            .then(m => m.GERENCIA_ROUTES),
       },
 
       // === SARLAFT ===
@@ -90,11 +102,15 @@ export const routes: Routes = [
         path: 'ses',
         loadChildren: () =>
           import('./features/ses/ses.routes')
-            .then(m => m.sesRoutes),   // ✔️ LA LÍNEA CORRECTA
+            .then(m => m.sesRoutes),
       },
 
     ],
   },
 
-  { path: '**', redirectTo: '' },
+  {
+    path: '**',
+    redirectTo: ''
+  }
+
 ];

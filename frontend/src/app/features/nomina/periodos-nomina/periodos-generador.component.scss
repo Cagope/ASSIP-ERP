@@ -1,95 +1,372 @@
+@use '../../../../styles/forms';
+@use '../../../../styles/informes-base';
+
+/* =========================================
+   PAGE
+========================================= */
+
 .page {
-  padding: 16px;
+  padding: 24px;
 }
 
-/* =========================
-   Card contenedor
-========================= */
+/* =========================================
+   TITULOS
+========================================= */
+
+.subtitle {
+  margin: -8px 0 18px;
+
+  color: #667085;
+
+  font-size: 13px;
+}
+
+/* =========================================
+   CARD
+========================================= */
+
 .card {
   background: #fff;
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-  margin-bottom: 16px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+
+  padding: 18px;
+
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
 }
 
-/* =========================
-   Grid formulario
-========================= */
+/* =========================================
+   FORMULARIO
+========================================= */
+
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 1rem 1.25rem;
 }
 
-/* Campo ocupa toda la fila */
-.full {
+.form-group.full {
   grid-column: 1 / -1;
 }
 
-/* =========================
-   Acciones
-========================= */
-.actions {
-  margin-top: 14px;
+.form-group {
   display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  flex-wrap: wrap;
+  flex-direction: column;
+
+  label {
+    margin-bottom: 5px;
+
+    color: #374151;
+
+    font-size: 12px;
+    font-weight: 600;
+  }
 }
 
-/* =========================
-   Loading
-========================= */
-.loading {
-  padding: 20px;
-  text-align: center;
-  font-weight: 500;
+/* =========================================
+   AUTOCOMPLETE EMPLEADO
+========================================= */
+
+app-empleado-autocomplete {
+  display: block;
+  width: 100%;
+
+  input {
+    width: 100%;
+    min-height: 38px;
+
+    font-size: 13px;
+  }
 }
-/* =========================
-   Botones estándar ERP
-========================= */
-.btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+
+/* =========================================
+   CONTRATO INFO
+========================================= */
+
+.contrato-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+
   gap: 8px;
 
-  height: 32px;
-  padding: 0 14px;
+  margin-top: 8px;
+  padding: 12px 14px;
 
-  border-radius: 6px;
-  border: none;
+  background: #f8fafc;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+
+  color: #374151;
+
+  font-size: 13px;
+}
+
+/* =========================================
+   VALOR
+========================================= */
+
+.valor-destacado {
+  margin-top: 10px;
+}
+
+.valor-input {
+  min-height: 42px;
+
+  background-color: #f8fafc;
+
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+
+  color: #1e3a8a;
+
+  text-align: right;
+
+  font-size: 20px;
+  font-weight: 700;
+
+  &:focus {
+    outline: none;
+
+    border-color: #2563eb;
+
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+  }
+}
+
+/* =========================================
+   PERIODO ACTIVO
+========================================= */
+
+.periodo-activo {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  margin: 12px 0 18px;
+  padding: 12px 16px;
+
+  background: #eef2ff;
+
+  border-left: 5px solid #3f51b5;
+  border-radius: 8px;
+
+  color: #1f2937;
+
+  font-size: 14px;
+
+  strong {
+    color: #1e3a8a;
+
+    font-weight: 700;
+
+    white-space: nowrap;
+  }
+
+  span {
+    color: #111827;
+
+    font-size: 14px;
+    font-weight: 600;
+  }
+}
+
+/* =========================================
+   ACCIONES
+========================================= */
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 10px;
+
+  margin-top: 16px;
+}
+
+/* =========================================
+   LOADING
+========================================= */
+
+.loading {
+  margin-top: 1rem;
+
+  padding: 14px;
+
+  border-radius: 8px;
+
+  background: #f8fafc;
+
+  color: #667085;
 
   font-size: 13px;
   font-weight: 600;
-  cursor: pointer;
-
-  transition: all 0.15s ease-in-out;
 }
 
-/* Acción principal: Nuevo / Guardar / Ejecutar */
-.btn--primary {
-  background: #198754;
-  color: #fff;
+/* =========================================
+   INPUT NUMERICO
+========================================= */
+
+.no-spinner::-webkit-outer-spin-button,
+.no-spinner::-webkit-inner-spin-button {
+  margin: 0;
+
+  -webkit-appearance: none;
 }
 
-.btn--primary:hover:not(:disabled) {
-  background: #157347;
+.no-spinner[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
 }
 
-/* Acción secundaria: Cancelar / Limpiar / Exportar */
-.btn--secondary {
+.input-right {
+  text-align: right !important;
+}
+
+/* =========================================
+   NOVEDADES CARD
+========================================= */
+
+.novedades-card {
+  margin-bottom: 18px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 12px;
+
+  h5 {
+    margin: 0;
+
+    color: #1f2937;
+
+    font-size: 15px;
+    font-weight: 700;
+  }
+}
+
+.badge-total {
+  padding: 4px 10px;
+
+  background: #eef2ff;
+
+  border: 1px solid #c7d2fe;
+  border-radius: 999px;
+
+  color: #3730a3;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* =========================================
+   TABLA
+========================================= */
+
+.tabla-wrapper {
+  overflow-x: auto;
+}
+
+.table-novedades {
+  width: 100%;
+
+  border-collapse: collapse;
+
   background: #fff;
-  color: #374151;
-  border: 1px solid #d1d5db;
+
+  font-size: 13px;
+
+  thead th {
+    padding: 10px 12px;
+
+    background: #f8fafc;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    color: #374151;
+
+    text-align: left;
+
+    font-weight: 700;
+  }
+
+  tbody td {
+    padding: 10px 12px;
+
+    border-bottom: 1px solid #eef2f7;
+
+    vertical-align: top;
+
+    color: #111827;
+  }
+
+  tbody tr:hover {
+    background: #f9fbff;
+  }
+
+  .concepto {
+    color: #1e3a8a;
+
+    font-weight: 700;
+  }
+
+  .observacion {
+    color: #4b5563;
+
+    white-space: normal;
+    word-break: break-word;
+  }
 }
 
-.btn--secondary:hover:not(:disabled) {
-  background: #f3f4f6;
+.text-right {
+  text-align: right;
 }
 
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+/* =========================================
+   EMPTY
+========================================= */
+
+.empty-state {
+  padding: 14px 12px;
+
+  background: #fafafa;
+
+  border: 1px dashed #d1d5db;
+  border-radius: 8px;
+
+  color: #6b7280;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 700px) {
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .actions .btn {
+    width: 100%;
+  }
+
+  .periodo-activo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
 }

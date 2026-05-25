@@ -1,30 +1,35 @@
-@use 'sass:color';
 @use 'tokens' as t;
 
-/* =========================
-   BOTONES ESTÁNDAR ERP
-========================= */
+/* ==========================================================================
+   🔘 ASSIP-ERP — BOTONES ESTÁNDAR ERP
+   Archivo: src/styles/buttons.scss
+   ========================================================================== */
 
+/* === BOTÓN BASE ========================================================== */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: t.$space-2;
 
   height: 32px;
   padding: 0 14px;
 
-  border-radius: 6px;
   border: none;
+  border-radius: t.$radius-sm;
 
-  font-size: 13px;
-  font-weight: 600;
+  font-size: t.$font-size-md;
+  font-weight: t.$font-weight-semibold;
   line-height: 1;
   text-transform: uppercase;
   letter-spacing: 0.2px;
 
   cursor: pointer;
-  transition: all 0.15s ease-in-out;
+  transition: background 0.15s ease-in-out,
+    border-color 0.15s ease-in-out,
+    color 0.15s ease-in-out,
+    transform 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
 
   &:hover:not(:disabled) {
     transform: translateY(-1px);
@@ -41,43 +46,10 @@
   }
 }
 
-/* Principal: Guardar / Ejecutar / Validar */
+/* === VARIANTES PRINCIPALES ============================================== */
 .btn--primary,
 .btn--success,
-.btn--process {
-  background: #198754;
-  color: #fff;
-  box-shadow: 0 2px 4px rgba(25, 135, 84, 0.25);
-
-  &:hover:not(:disabled) {
-    background: #157347;
-  }
-}
-
-/* Secundario: Cancelar / Regresar / Limpiar */
-.btn--secondary,
-.btn--cancel {
-  background: #fff;
-  color: #374151;
-  border: 1px solid #d1d5db;
-
-  &:hover:not(:disabled) {
-    background: #f3f4f6;
-  }
-}
-
-/* Imprimir */
-.btn--print {
-  background: #0d6efd;
-  color: #fff;
-  box-shadow: 0 2px 4px rgba(13, 110, 253, 0.25);
-
-  &:hover:not(:disabled) {
-    background: #0b5ed7;
-  }
-}
-
-/* Exportar Excel */
+.btn--process,
 .btn--excel {
   background: #198754;
   color: #fff;
@@ -88,7 +60,28 @@
   }
 }
 
-/* Peligro */
+.btn--secondary,
+.btn--cancel,
+.btn--ghost {
+  background: #fff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+
+  &:hover:not(:disabled) {
+    background: #f3f4f6;
+  }
+}
+
+.btn--print {
+  background: #0d6efd;
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(13, 110, 253, 0.25);
+
+  &:hover:not(:disabled) {
+    background: #0b5ed7;
+  }
+}
+
 .btn--danger,
 .btn--delete {
   background: #dc3545;
@@ -100,121 +93,6 @@
   }
 }
 
-/* Ghost */
-.btn--ghost {
-  background: transparent;
-  color: #374151;
-  border: 1px solid #d1d5db;
-
-  &:hover:not(:disabled) {
-    background: #f3f4f6;
-  }
-}
-
-/* =========================
-   ACCIONES DE FORMULARIO
-========================= */
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 12px;
-  margin-top: t.$space-5;
-  width: 100%;
-}
-
-.form-actions.full {
-  grid-column: 1 / -1;
-}
-
-/* =========================
-   ACCIONES DE TABLA
-========================= */
-
-.acciones {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.btn-action-edit,
-.btn-action-delete {
-  width: 34px;
-  height: 28px;
-  padding: 0;
-
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 6px;
-  font-size: 13px;
-  line-height: 1;
-  cursor: pointer;
-
-  background: #fff;
-  transition: all 0.18s ease;
-}
-
-.btn-action-edit {
-  color: #0d6efd;
-  border: 1.5px solid #9ec5fe;
-
-  &:hover:not(:disabled) {
-    background: #e7f1ff;
-    transform: translateY(-1px);
-  }
-}
-
-.btn-action-delete {
-  color: #dc3545;
-  border: 1.5px solid #f1aeb5;
-
-  &:hover:not(:disabled) {
-    background: #f8d7da;
-    transform: translateY(-1px);
-  }
-}
-
-/* =========================
-   CABECERAS
-========================= */
-
-.header-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: t.$space-4;
-
-  h2 {
-    font-size: 18px;
-    font-weight: 700;
-    color: t.$color-text;
-    margin: 0;
-  }
-
-  .actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-}
-
-/* =========================
-   IMPRESIÓN
-========================= */
-
-@media print {
-  .btn,
-  .header-actions,
-  .acciones {
-    display: none !important;
-  }
-}
-
-/* Acción de advertencia suave (no destructiva fuerte) */
 .btn--ghost-danger {
   background: #fff;
   color: #dc3545;
@@ -223,10 +101,42 @@
   &:hover:not(:disabled) {
     background: #f8d7da;
     color: #842029;
-    transform: translateY(-1px);
   }
 }
 
+/* === TAMAÑOS ============================================================= */
+.btn.sm,
+.btn--sm {
+  height: 28px;
+  padding: 0 10px;
+  font-size: t.$font-size-sm;
+}
+
+/* === ACCIONES DE FORMULARIO ============================================= */
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: t.$space-3;
+  margin-top: t.$space-5;
+  width: 100%;
+}
+
+.form-actions.full {
+  grid-column: 1 / -1;
+}
+
+/* === ACCIONES DE TABLA =================================================== */
+.acciones {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-action-edit,
+.btn-action-delete,
 .btn-action-print {
   width: 34px;
   height: 28px;
@@ -236,20 +146,43 @@
   align-items: center;
   justify-content: center;
 
-  border-radius: 6px;
-  font-size: 13px;
+  border-radius: t.$radius-sm;
+  font-size: t.$font-size-md;
   line-height: 1;
   cursor: pointer;
 
   background: #fff;
-  color: #0d6efd;
-  border: 1.5px solid #9ec5fe;
-
   transition: all 0.18s ease;
 
   &:hover:not(:disabled) {
-    background: #e7f1ff;
     transform: translateY(-1px);
+  }
+}
+
+.btn-action-edit {
+  color: #0d6efd;
+  border: 1.5px solid #9ec5fe;
+
+  &:hover:not(:disabled) {
+    background: #e7f1ff;
+  }
+}
+
+.btn-action-delete {
+  color: #dc3545;
+  border: 1.5px solid #f1aeb5;
+
+  &:hover:not(:disabled) {
+    background: #f8d7da;
+  }
+}
+
+.btn-action-print {
+  color: #0d6efd;
+  border: 1.5px solid #9ec5fe;
+
+  &:hover:not(:disabled) {
+    background: #e7f1ff;
   }
 }
 
@@ -258,4 +191,35 @@
   min-width: 78px;
   padding: 0 10px;
   white-space: nowrap;
+}
+
+/* === CABECERAS CON ACCIONES ============================================= */
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: t.$space-4;
+  margin-bottom: t.$space-4;
+
+  h2 {
+    margin: 0;
+    color: t.$color-text;
+    font-size: 18px;
+    font-weight: t.$font-weight-bold;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: t.$space-3;
+  }
+}
+
+/* === IMPRESIÓN =========================================================== */
+@media print {
+  .btn,
+  .header-actions,
+  .acciones {
+    display: none !important;
+  }
 }

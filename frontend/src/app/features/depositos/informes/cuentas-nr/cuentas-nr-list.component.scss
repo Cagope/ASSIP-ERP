@@ -1,119 +1,82 @@
-.page {
-  padding: 1rem;
-}
+@use '../informes-base';
 
-/* CARD GENERAL */
+/* =========================================
+   CARD
+========================================= */
+
 .card {
-  background: #fff;
-  border-radius: 10px;
-  padding: 18px 20px;
   margin-bottom: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-/* FILTROS */
+/* =========================================
+   FILTROS
+========================================= */
+
 .filtros {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 150px 150px;
-  gap: 14px;
-  align-items: end;
+  grid-template-columns:
+    2fr
+    1fr
+    1fr
+    150px
+    150px;
 
   .f-row {
-    display: flex;
-    flex-direction: column;
-
-    label {
-      font-size: 12px;
-      font-weight: 600;
-      color: #6b7280;
-      margin-bottom: 5px;
-    }
-
-    input,
-    select {
-      height: 34px;
-      padding: 4px 9px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      background: #fff;
-      font-size: 13px;
-    }
 
     input:focus,
     select:focus {
       outline: none;
+
       border-color: #198754;
+
       box-shadow: 0 0 0 2px rgba(25, 135, 84, 0.12);
     }
+
   }
 
   .form-actions {
     grid-column: 1 / -1;
+
     margin-top: 6px;
   }
 }
 
-/* MENSAJES */
-.loading,
-.error,
-.empty {
-  margin-top: 1rem;
-  padding: 12px;
-  text-align: center;
-  color: #6b7280;
-}
+/* =========================================
+   TABLA
+========================================= */
 
-.error {
-  color: #b91c1c;
-  background: #fee2e2;
-  border-radius: 6px;
-}
-
-/* TABLA */
 .tabla-resumen {
-  width: 100%;
-  border-collapse: collapse;
   margin-top: 14px;
-  font-size: 13px;
-
-  th,
-  td {
-    padding: 9px 8px;
-    border-bottom: 1px solid #e5e7eb;
-    vertical-align: middle;
-  }
-
-  th {
-    background: #f3f4f6;
-    color: #111827;
-    font-weight: 700;
-    text-align: left;
-  }
-
-  tbody tr:hover {
-    background: #f9fafb;
-  }
 
   .right {
     text-align: right;
   }
 }
 
-/* BOTONES DE RESULTADOS */
+/* =========================================
+   ACCIONES
+========================================= */
+
 .card > .form-actions:first-child {
   margin-top: 0;
   margin-bottom: 12px;
 }
 
-/* RESPONSIVE */
+/* =========================================
+   RESPONSIVE
+========================================= */
+
 @media (max-width: 1100px) {
+
   .filtros {
     grid-template-columns: repeat(2, 1fr);
   }
+
 }
 
 @media (max-width: 700px) {
+
   .filtros {
     grid-template-columns: 1fr;
   }
+
 }

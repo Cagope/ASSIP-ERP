@@ -1,19 +1,124 @@
-/* =============================================================================
-   📱 RESPONSIVIDAD GLOBAL — ERP ASSIP
+/* ==========================================================================
+   📱 ASSIP-ERP — RESPONSIVIDAD GLOBAL
+   Archivo: src/styles/_responsive.scss
    ========================================================================== */
 
+@use './tokens' as t;
+
+/* ==========================================================================
+   💻 TABLETS
+   ========================================================================== */
+@media (max-width: 992px) {
+
+  .page,
+  .report-page {
+    padding: t.$space-4;
+  }
+
+  .card,
+  .report-card,
+  .form-container {
+    padding: t.$space-5;
+  }
+
+  .card-header,
+  .header-actions,
+  .report-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .toolbar,
+  .form-actions,
+  .report-actions {
+    width: 100%;
+  }
+}
+
+/* ==========================================================================
+   📱 MÓVILES
+   ========================================================================== */
 @media (max-width: 768px) {
-  html, body {
+
+  html,
+  body {
     font-size: 14px;
+  }
+
+  .page,
+  .report-page {
+    padding: t.$space-3;
+    gap: t.$space-4;
+  }
+
+  .card,
+  .report-card,
+  .form-container {
+    padding: t.$space-4;
+  }
+
+  .toolbar,
+  .filters,
+  .report-filters,
+  .form-actions,
+  .report-actions,
+  .header-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-group,
+  .f-row,
+  .field {
+    grid-column: 1 / -1;
   }
 
   input,
   select,
-  textarea {
+  textarea,
+  button {
     font-size: 14px;
   }
 
-  table {
+  table,
+  .data-table,
+  .report-table {
     font-size: 0.9rem;
+  }
+
+  .table-container {
+    overflow-x: auto;
+  }
+
+  .btn {
+    width: 100%;
+  }
+
+  .acciones {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+/* ==========================================================================
+   📲 MÓVILES PEQUEÑOS
+   ========================================================================== */
+@media (max-width: 480px) {
+
+  .card-header h1,
+  .report-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pagination-controls {
+    gap: t.$space-2;
   }
 }

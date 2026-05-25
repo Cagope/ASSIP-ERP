@@ -1,0 +1,175 @@
+@use '../../../../../styles/informes-base';
+
+/* ============================================================
+   FILTROS
+============================================================ */
+.filtros {
+
+  grid-template-columns:
+    minmax(280px, 1fr)
+    170px
+    170px
+    auto;
+
+}
+
+.filtros .form-actions {
+
+  width: auto;
+  margin-top: 0;
+
+  display: flex;
+  flex-direction: row;
+  align-items: end;
+  justify-content: flex-end;
+  gap: 10px;
+
+}
+
+/* ============================================================
+   RESUMEN GENERAL
+============================================================ */
+.resumen {
+
+  .cards {
+
+    grid-template-columns:
+      repeat(4, 1fr);
+
+  }
+
+  .card {
+
+    &.blue {
+      border-left-color: #0d6efd;
+    }
+
+    &.green {
+      border-left-color: #198754;
+    }
+
+  }
+
+}
+
+.note {
+
+  margin-top: 12px;
+
+  font-size: 13px;
+
+  color: #6b7280;
+
+}
+
+/* ============================================================
+   RESUMEN POR AGENCIA
+============================================================ */
+.resumen-agencias {
+
+  margin-top: 16px;
+
+  h3 {
+
+    margin-top: 0;
+    margin-bottom: 12px;
+
+    font-size: 17px;
+    font-weight: 700;
+
+  }
+
+}
+
+.agencia-title {
+
+  margin-top: 18px;
+  margin-bottom: 8px;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  color: #374151;
+
+}
+
+/* ============================================================
+   TABLA RESUMEN
+============================================================ */
+.tabla-resumen {
+
+  width: 100%;
+
+  border-collapse: collapse;
+
+  font-size: 13px;
+
+  th {
+
+    background: #f3f4f6;
+
+    padding: 10px 8px;
+
+    text-align: left;
+
+    border-bottom: 1px solid #d1d5db;
+
+    font-weight: 700;
+
+  }
+
+  td {
+
+    padding: 9px 8px;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    vertical-align: middle;
+
+  }
+
+  tbody tr:hover {
+
+    background: #fafafa;
+
+  }
+
+}
+
+.right {
+  text-align: right;
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media (max-width: 900px) {
+
+  .filtros {
+
+    grid-template-columns:
+      1fr
+      170px
+      170px
+      auto;
+
+  }
+
+}
+
+@media (max-width: 700px) {
+
+  .filtros,
+  .resumen .cards {
+
+    grid-template-columns: 1fr;
+
+  }
+
+  .filtros .form-actions {
+
+    justify-content: flex-start;
+
+  }
+
+}

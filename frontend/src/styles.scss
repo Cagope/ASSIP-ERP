@@ -6,12 +6,12 @@
    ========================================================================== */
 
 /* === Importar módulos base (orden jerárquico) ============================ */
-@use 'sass:color';
 @use './styles/tokens';
 @use './styles/base';
 @use './styles/layout';
 @use './styles/buttons';
 @use './styles/forms';
+@use './styles/informes-base';
 
 /* === Módulos temáticos adicionales ======================================= */
 @use './styles/icons';

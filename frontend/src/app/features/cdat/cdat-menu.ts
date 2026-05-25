@@ -4,45 +4,78 @@ export const cdatMenu = {
 
   items: [
 
+    // =============================
+    // OPERACIÓN
+    // =============================
     {
       label: 'Operación',
       children: [
+
         {
           label: 'Inclusión de CDAT',
           route: '/cdat/cdats'
+        },
+
+        {
+          label: 'Cancelación / Renovación',
+          route: '/cdat/cancelacion'
         }
+
       ]
     },
 
+    // =============================
+    // PROCESOS
+    // =============================
     {
       label: 'Procesos',
       children: [
+
         {
           label: 'Liquidación diaria',
-          route: '/cdat/procesos/liquidacion-diaria'
+          route: '/cdat/liquidacion-diaria'
         },
+
         {
-          label: 'Cancelación / Renovación',
-          route: '/cdat/procesos/cancelacion-renovacion'
+          label: 'Cierre mensual CDAT',
+          route: '/cdat/cierre-mensual-cdat'
+        },
+
+        {
+          label: 'Causación mensual CDAT',
+          route: '/cdat/causacion-mensual-cdat'
         }
+
       ]
     },
 
+    // =============================
+    // CONSULTAS / INFORMES
+    // =============================
     {
       label: 'Informes',
       children: [
+
         {
-          label: 'Consulta de CDAT',
+          label: 'Consulta de CDATs',
           route: '/cdat/informes/consulta-cdats'
         },
+
         {
-          label: 'Extractos CDAT',
-          route: '/cdat/informes/extractos'
+          label: 'Simulador CDAT',
+          route: '/cdat/informes/simulador-cdat'
         },
+
         {
-          label: 'Vencimientos',
-          route: '/cdat/informes/vencimientos'
+          label: 'Estadísticos CDAT',
+          route: '/cdat/informes/estadisticos-cdat'
+        },
+
+        {
+          label: 'Informes por fechas CDAT',
+          route: '/cdat/informes/fechas-cdat'
         }
+
       ]
     }
 

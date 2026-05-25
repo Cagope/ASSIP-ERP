@@ -1,0 +1,283 @@
+<div class="page">
+
+  <div class="page-header">
+    <h2>Causación mensual CDAT</h2>
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <div class="card">
+
+    <div class="section-header">
+      <div>
+        <h3>Parámetros del proceso</h3>
+
+        <small>
+          Seleccione la fecha de corte mensual y la fecha contable del comprobante.
+        </small>
+      </div>
+    </div>
+
+    <div class="grid grid-4">
+
+      <div class="f-row">
+        <label>Agencia</label>
+
+        <select
+          [(ngModel)]="model.idAgencia"
+          (ngModelChange)="onChangeAgencia()">
+
+          <option [ngValue]="null">
+            Seleccione agencia
+          </option>
+
+          <option
+            *ngFor="let a of agencias"
+            [ngValue]="a.idAgencia">
+
+            {{ a.codigoAgencia }} - {{ a.nombreAgencia }}
+
+          </option>
+
+        </select>
+      </div>
+
+      <div class="f-row">
+        <label>Fecha corte</label>
+
+        <input
+          type="date"
+          [(ngModel)]="model.fechaCorte">
+      </div>
+
+      <div class="f-row">
+        <label>Fecha contable</label>
+
+        <input
+          type="date"
+          [(ngModel)]="model.fechaContable">
+      </div>
+
+      <div class="f-row">
+        <label>Tipo comprobante</label>
+
+        <select
+          [(ngModel)]="model.tipoComprobante"
+          (ngModelChange)="cargarProximoComprobante()">
+
+          <option value="">
+            Seleccione
+          </option>
+
+          <option
+            *ngFor="let t of tiposComprobantes"
+            [value]="t.tipoComprobante">
+
+            {{ t.tipoComprobante }}
+            - {{ t.nombreTipoComprobante }}
+
+          </option>
+
+        </select>
+      </div>
+
+      <div class="f-row">
+        <label>Número comprobante</label>
+
+        <input
+          type="text"
+          [(ngModel)]="model.numeroComprobante"
+          disabled>
+      </div>
+
+    </div>
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="limpiar()">
+
+        Limpiar
+
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        [disabled]="procesando"
+        (click)="generarPreview()">
+
+        {{ preview ? 'Regenerar preview' : 'Generar preview' }}
+
+      </button>
+
+      <button
+        *ngIf="preview"
+        type="button"
+        class="btn btn--primary"
+        [disabled]="procesando"
+        (click)="aplicar()">
+
+        Aplicar causación mensual
+
+      </button>
+
+    </div>
+
+  </div>
+
+  <div *ngIf="preview" class="panel">
+
+    <div class="section-header">
+      <div>
+        <h3>Resumen de causación</h3>
+
+        <small>
+          Resultado calculado antes de aplicar el proceso.
+        </small>
+      </div>
+    </div>
+
+    <div class="summary-grid">
+
+      <div class="summary-card">
+        <span class="summary-title">CDATs</span>
+
+        <strong class="summary-value amount">
+          {{ preview.totalCdats }}
+        </strong>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-title">Capital</span>
+
+        <strong class="summary-value amount">
+          {{ preview.totalCapital | number:'1.0-2' }}
+        </strong>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-title">Interés</span>
+
+        <strong class="summary-value amount">
+          {{ preview.totalInteres | number:'1.0-2' }}
+        </strong>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-title">Retención</span>
+
+        <strong class="summary-value amount">
+          {{ preview.totalRetencion | number:'1.0-2' }}
+        </strong>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-title">Neto</span>
+
+        <strong class="summary-value amount">
+          {{ preview.totalNeto | number:'1.0-2' }}
+        </strong>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div *ngIf="preview?.items?.length" class="panel">
+
+    <div class="section-header">
+      <div>
+        <h3>Detalle por CDAT</h3>
+
+        <small>
+          CDATs incluidos en la causación mensual.
+        </small>
+      </div>
+    </div>
+
+    <table class="data-table">
+
+      <thead>
+      <tr>
+
+        <th>CDAT</th>
+        <th>Documento</th>
+        <th>Nombre</th>
+
+        <th class="right">
+          Saldo base
+        </th>
+
+        <th class="right">
+          Tasa
+        </th>
+
+        <th class="right">
+          Días
+        </th>
+
+        <th class="right">
+          Interés
+        </th>
+
+        <th class="right">
+          Retención
+        </th>
+
+        <th class="right">
+          Neto
+        </th>
+
+      </tr>
+      </thead>
+
+      <tbody>
+
+      <tr *ngFor="let item of preview?.items || []">
+
+        <td>{{ item.codigoCdat }}</td>
+
+        <td>{{ item.documento }}</td>
+
+        <td>{{ item.nombreCompleto }}</td>
+
+        <td class="right">
+          {{ item.saldoBase | number:'1.0-2' }}
+        </td>
+
+        <td class="right">
+          {{ item.tasaNominalAnual | number:'1.2-6' }}%
+        </td>
+
+        <td class="right">
+          {{ item.diasCausados }}
+        </td>
+
+        <td class="right">
+          {{ item.valorInteres | number:'1.0-2' }}
+        </td>
+
+        <td class="right">
+          {{ item.valorRetencion | number:'1.0-2' }}
+        </td>
+
+        <td class="right">
+          {{ item.valorNeto | number:'1.0-2' }}
+        </td>
+
+      </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+  <div *ngIf="preview" class="panel">
+
+</div>

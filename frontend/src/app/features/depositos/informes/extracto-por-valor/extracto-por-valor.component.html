@@ -1,0 +1,315 @@
+<div class="page">
+
+  <app-header-actions
+    titulo="Extracto por valor"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <div class="card">
+
+    <form
+      class="filtros"
+      (ngSubmit)="buscar()">
+
+      <div class="f-row">
+        <label>Fecha inicial</label>
+
+        <input
+          type="date"
+          [(ngModel)]="filtros.fechaInicial"
+          name="fechaInicial">
+      </div>
+
+      <div class="f-row">
+        <label>Fecha final</label>
+
+        <input
+          type="date"
+          [(ngModel)]="filtros.fechaFinal"
+          name="fechaFinal">
+      </div>
+
+      <div class="f-row">
+        <label>Agencia</label>
+
+        <select
+          [(ngModel)]="filtros.idAgencia"
+          name="idAgencia">
+
+          <option [ngValue]="0">
+            Todas
+          </option>
+
+          <option
+            *ngFor="let a of agencias"
+            [ngValue]="a.idAgencia">
+
+            {{ a.nombreAgencia }}
+
+          </option>
+
+        </select>
+      </div>
+
+      <div class="f-row">
+        <label>Forma ahorro</label>
+
+        <label>Forma de ahorro</label>
+
+        <select
+          [(ngModel)]="filtros.codigoForma"
+          name="codigoForma">
+
+          <option [ngValue]="'0'">
+            Todas las formas
+          </option>
+
+          <option
+            *ngFor="let f of formas"
+            [ngValue]="f.codigoForma">
+
+            {{ f.codigoForma }} - {{ f.nombreForma | titlecase }}
+
+          </option>
+
+        </select>
+      </div>
+
+      <div class="f-row">
+        <label>Valor</label>
+
+        <input
+          type="text"
+          numericFormat
+          class="input-number"
+          [(ngModel)]="filtros.valor"
+          name="valor">
+      </div>
+
+      <div class="f-row">
+        <label>Tipo búsqueda</label>
+
+        <select
+          [(ngModel)]="filtros.tipoBusqueda"
+          name="tipoBusqueda">
+
+          <option value="A">
+            Ambos
+          </option>
+
+          <option value="D">
+            Débitos
+          </option>
+
+          <option value="C">
+            Créditos
+          </option>
+
+        </select>
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()">
+
+          Limpiar
+
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="cargando">
+
+          Buscar
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+  <div
+    *ngIf="cargando"
+    class="loading">
+
+    Cargando informe...
+
+  </div>
+
+  <div
+    *ngIf="error"
+    class="error">
+
+    {{ error }}
+
+  </div>
+
+  <div
+    *ngIf="resumen"
+    class="card">
+
+    <section class="resumen">
+
+      <h3>
+        Resumen general
+      </h3>
+
+      <div class="cards">
+
+        <div class="card gray">
+
+          <div class="label">
+            Total movimientos
+          </div>
+
+          <div class="value right">
+            {{ resumen.totalMovimientos | number:'1.0-0' }}
+          </div>
+
+        </div>
+
+        <div class="card red">
+
+          <div class="label">
+            Total débitos
+          </div>
+
+          <div class="value right">
+            {{ resumen.totalDebitos | number:'1.2-2' }}
+          </div>
+
+        </div>
+
+        <div class="card green">
+
+          <div class="label">
+            Total créditos
+          </div>
+
+          <div class="value right">
+            {{ resumen.totalCreditos | number:'1.2-2' }}
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <div
+      *ngIf="items.length > 0"
+      class="form-actions-result">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="exportar()">
+
+        Exportar Excel
+
+      </button>
+
+    </div>
+
+  </div>
+
+  <div
+    *ngIf="items.length > 0"
+    class="card">
+
+    <h3>
+      Resultado
+    </h3>
+
+    <div class="table-container">
+
+      <table class="tabla-resumen">
+
+        <thead>
+
+        <tr>
+
+          <th>Fecha</th>
+          <th>Hora</th>
+          <th>Agencia</th>
+          <th>Forma</th>
+          <th>Cuenta</th>
+          <th>Documento</th>
+          <th>Nombre</th>
+          <th>Movimiento</th>
+
+          <th class="right">
+            Débito
+          </th>
+
+          <th class="right">
+            Crédito
+          </th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let item of items">
+
+          <td>
+            {{ item.fechaMovimiento | date:'yyyy-MM-dd' }}
+          </td>
+
+          <td>
+            {{ item.horaMovimiento }}
+          </td>
+
+          <td>
+            {{ item.codigoAgencia }} - {{ item.nombreAgencia }}
+          </td>
+
+          <td>
+            {{ item.codigoForma }} - {{ item.nombreForma }}
+          </td>
+
+          <td>
+            {{ item.codigoCuenta }}
+          </td>
+
+          <td>
+            {{ item.documento }}
+          </td>
+
+          <td>
+            {{ item.nombreCompleto }}
+          </td>
+
+          <td>
+            {{ item.codigoMovimiento }} - {{ item.nombreMovimiento }}
+          </td>
+
+          <td class="right negative">
+            {{ item.debito | number:'1.2-2' }}
+          </td>
+
+          <td class="right positive">
+            {{ item.credito | number:'1.2-2' }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>

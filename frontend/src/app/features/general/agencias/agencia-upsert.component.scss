@@ -1,7 +1,177 @@
-/* ==========================================================================
-   🌐 ASSIP-ERP — Agencias Upsert
-   Usa estilos globales desde src/styles/forms.scss
-   ========================================================================== */
+/* =========================================
+   ASSIP ERP — AGENCIAS UPSERT
+========================================= */
 
-@use '../../../../styles/forms' as *;
+@use '../../../../styles/forms';
+@use '../../../../styles/informes-base';
 
+/* =========================================
+   PAGE
+========================================= */
+
+.page {
+  padding: 24px;
+}
+
+/* =========================================
+   CARD
+========================================= */
+
+.card {
+  margin-top: 1rem;
+}
+
+/* =========================================
+   TITULOS
+========================================= */
+
+h3 {
+  margin: 0 0 1rem;
+
+  padding-bottom: 0.45rem;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  color: #1f2937;
+
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: -0.5rem 0 0;
+
+  color: #6b7280;
+
+  font-size: 13px;
+}
+
+/* =========================================
+   FORMULARIO
+========================================= */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+
+  gap: 1rem 1.25rem;
+}
+
+.f-row {
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+
+  label {
+    margin-bottom: 5px;
+
+    color: #374151;
+
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    min-height: 38px;
+
+    padding: 0 10px;
+
+    border-radius: 8px;
+
+    background: #fff;
+
+    color: #111827;
+
+    font-size: 13px;
+    box-sizing: border-box;
+  }
+
+  textarea {
+    min-height: 90px;
+
+    padding-top: 10px;
+    padding-bottom: 10px;
+
+    resize: vertical;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+
+    border-color: #198754;
+
+    box-shadow: 0 0 0 2px rgba(25, 135, 84, 0.12);
+  }
+
+  input[readonly] {
+    background: #f9fafb;
+
+    color: #374151;
+
+    font-weight: 600;
+  }
+}
+
+/* =========================================
+   ACCIONES
+========================================= */
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+
+  gap: 0.75rem;
+
+  margin-top: 1.25rem;
+}
+
+/* =========================================
+   MENSAJES
+========================================= */
+
+.loading {
+  margin-top: 1rem;
+
+  font-weight: 600;
+}
+
+.error {
+  margin-top: 1rem;
+}
+
+.success {
+  margin-top: 1rem;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 700px) {
+
+  .page {
+    padding: 1rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    width: 100%;
+
+    flex-direction: column;
+    justify-content: stretch;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+  }
+
+}

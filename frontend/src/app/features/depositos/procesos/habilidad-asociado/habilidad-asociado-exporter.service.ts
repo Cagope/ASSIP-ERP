@@ -1,127 +1,168 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
 
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService,
+  ExcelSheetOptions
+} from '../../../../shared/services/excel-export.service';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class HabilidadAsociadoExporterService {
 
-  exportarExcel(items: any[], filtros: any): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportarExcel(
+    items: any[],
+    filtros: any
+  ): void {
+
     if (!items || items.length === 0) {
       alert('No hay datos para exportar.');
       return;
     }
 
-    const wb = XLSX.utils.book_new();
+    const habiles =
+      items.filter(
+        x => (x.resultado || '').toUpperCase() === 'HÁBIL'
+      );
 
-    // ============================
-    // Separar HÁBILES / INHÁBILES
-    // ============================
-    const habiles = items.filter(x => (x.resultado || '').toUpperCase() === 'HÁBIL');
-    const inHabiles = items.filter(x => (x.resultado || '').toUpperCase() !== 'HÁBIL');
+    const inHabiles =
+      items.filter(
+        x => (x.resultado || '').toUpperCase() !== 'HÁBIL'
+      );
 
-    this.agregarHojaPorZonaYSubzona(wb, 'HÁBILES', habiles);
-    this.agregarHojaPorZonaYSubzona(wb, 'INHÁBILES', inHabiles);
+    const fechaInicio =
+      filtros.fechaInicio ?? 'sin_fecha_i';
 
-    // ============================
-    // Nombre del archivo
-    // ============================
-    const fechaInicio   = filtros.fechaInicio ?? 'sin_fecha_i';
-    const fechaFin      = filtros.fechaFin ?? 'sin_fecha_f';
-    const codigoAgencia = filtros.agenciaId ?? '00';
+    const fechaFin =
+      filtros.fechaFin ?? 'sin_fecha_f';
 
-    const nombreArchivo =
-      `habilidad_asociado_${fechaInicio}_${fechaFin}_${codigoAgencia}.xlsx`;
+    const codigoAgencia =
+      filtros.agenciaId ?? '00';
 
-    XLSX.writeFile(wb, nombreArchivo);
+    this.excelExport.exportar({
+
+      nombreArchivo:
+        `habilidad_asociado_${fechaInicio}_${fechaFin}_${codigoAgencia}.xlsx`,
+
+      hojas: [
+        this.crearHojaPorZonaYSubzona(
+          'HÁBILES',
+          habiles,
+          filtros
+        ),
+        this.crearHojaPorZonaYSubzona(
+          'INHÁBILES',
+          inHabiles,
+          filtros
+        )
+      ]
+
+    });
   }
 
-  // ============================================================
-  // Construye hoja con:
-  //  Zona
-  //    Subzona
-  //      Detalle
-  //      TOTAL Subzona
-  //    ...
-  //  total zona
-  //  TOTAL GENERAL
-  // ============================================================
-  private agregarHojaPorZonaYSubzona(
-    wb: XLSX.WorkBook,
+  private crearHojaPorZonaYSubzona(
     nombreHoja: string,
-    lista: any[]
-  ): void {
+    lista: any[],
+    filtros: any
+  ): ExcelSheetOptions {
 
-    const rows: any[][] = [];
-
-    // Si no hay datos, sólo ponemos un mensaje
     if (!lista || lista.length === 0) {
-      rows.push([`No hay registros para ${nombreHoja}`]);
-      const ws = XLSX.utils.aoa_to_sheet(rows);
-      XLSX.utils.book_append_sheet(wb, ws, nombreHoja);
-      return;
+      return {
+        nombreHoja,
+        titulo: nombreHoja,
+        filtros: this.filtrosHoja(filtros),
+        columnas: [
+          'Mensaje'
+        ],
+        filas: [
+          [
+            `No hay registros para ${nombreHoja}`
+          ]
+        ],
+        anchos: [
+          40
+        ]
+      };
     }
 
-    const zonasUnicas = Array.from(
-      new Set((lista.map(x => x.zona ?? 'SIN_ZONA')))
-    );
+    const filas: any[][] = [];
+
+    const zonasUnicas =
+      Array.from(
+        new Set(
+          lista.map(x => x.zona ?? 'SIN_ZONA')
+        )
+      );
 
     let totalGeneral = 0;
 
     zonasUnicas.forEach(zona => {
-      const itemsZona = lista.filter(x => (x.zona ?? 'SIN_ZONA') === zona);
+
+      const itemsZona =
+        lista.filter(
+          x => (x.zona ?? 'SIN_ZONA') === zona
+        );
+
       if (itemsZona.length === 0) {
         return;
       }
 
-      // Encabezado de zona
-      rows.push(['Zona', zona]);
-      rows.push([]); // línea en blanco
+      filas.push([
+        'Zona',
+        zona
+      ]);
 
-      const subzonas = Array.from(
-        new Set((itemsZona.map(x => x.subzona ?? 'SIN_SUBZONA')))
-      );
+      filas.push([]);
+
+      const subzonas =
+        Array.from(
+          new Set(
+            itemsZona.map(x => x.subzona ?? 'SIN_SUBZONA')
+          )
+        );
 
       let totalZona = 0;
 
       subzonas.forEach(subzona => {
-        const itemsSubzona = itemsZona.filter(
-          x => (x.subzona ?? 'SIN_SUBZONA') === subzona
-        );
+
+        const itemsSubzona =
+          itemsZona.filter(
+            x => (x.subzona ?? 'SIN_SUBZONA') === subzona
+          );
+
         if (itemsSubzona.length === 0) {
           return;
         }
 
-        // Encabezado de subzona
-        rows.push(['Subzona', subzona]);
-        rows.push([]); // blanco
-
-        // Cabecera de columnas
-        rows.push([
-          'Documento',
-          'Nombre',
-          'Edad',
-          'Tipo Persona',
-          'Saldo Actual',
-          'Aportes',
-          'Resultado'
+        filas.push([
+          'Subzona',
+          subzona
         ]);
 
-        // Filas de detalle
-        itemsSubzona.forEach(r => {
-          rows.push([
-            r.documento,
-            r.nombre,
-            r.edad,
-            r.tipoPersona === '1' ? 'Natural' : 'Jurídica',
-            Number(r.saldoHoy ?? 0),
-            Number(r.totalAportes ?? 0),
-            r.resultado
+        filas.push([]);
+
+        for (const r of itemsSubzona) {
+          filas.push([
+            r.documento || '',
+            r.nombre || '',
+            Number(r.edad || 0),
+            r.tipoPersona === '1'
+              ? 'Natural'
+              : 'Jurídica',
+            Number(r.saldoHoy || 0),
+            Number(r.totalAportes || 0),
+            r.resultado || ''
           ]);
-        });
+        }
 
-        rows.push([]); // blanco
+        filas.push([]);
 
-        // TOTAL Subzona
-        rows.push([
+        filas.push([
           'TOTAL',
           subzona,
           '',
@@ -131,13 +172,13 @@ export class HabilidadAsociadoExporterService {
           itemsSubzona.length
         ]);
 
-        rows.push([]); // blanco
+        filas.push([]);
 
-        totalZona += itemsSubzona.length;
+        totalZona +=
+          itemsSubzona.length;
       });
 
-      // total zona
-      rows.push([
+      filas.push([
         'total zona',
         zona,
         '',
@@ -147,13 +188,13 @@ export class HabilidadAsociadoExporterService {
         totalZona
       ]);
 
-      rows.push([]); // separación entre zonas
+      filas.push([]);
 
-      totalGeneral += totalZona;
+      totalGeneral +=
+        totalZona;
     });
 
-    // TOTAL GENERAL al final de la hoja
-    rows.push([
+    filas.push([
       'TOTAL GENERAL',
       '',
       '',
@@ -163,7 +204,40 @@ export class HabilidadAsociadoExporterService {
       totalGeneral
     ]);
 
-    const ws = XLSX.utils.aoa_to_sheet(rows);
-    XLSX.utils.book_append_sheet(wb, ws, nombreHoja);
+    return {
+      nombreHoja,
+      titulo: nombreHoja,
+      filtros: this.filtrosHoja(filtros),
+      columnas: [
+        'Documento',
+        'Nombre',
+        'Edad',
+        'Tipo Persona',
+        'Saldo Actual',
+        'Aportes',
+        'Resultado'
+      ],
+      filas,
+      anchos: [
+        18,
+        42,
+        10,
+        16,
+        18,
+        18,
+        16
+      ]
+    };
+  }
+
+  private filtrosHoja(
+    filtros: any
+  ): any[][] {
+
+    return [
+      ['Fecha inicio', filtros?.fechaInicio || ''],
+      ['Fecha fin', filtros?.fechaFin || ''],
+      ['Agencia', filtros?.agenciaId ?? '']
+    ];
   }
 }

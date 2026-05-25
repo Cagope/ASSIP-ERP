@@ -1,0 +1,142 @@
+@use '../informes-base';
+
+/* =========================================
+   FILTROS
+========================================= */
+
+.filtros {
+  grid-template-columns:
+    160px
+    minmax(190px, 1fr)
+    minmax(210px, 1fr)
+    130px
+    150px
+    150px
+    auto;
+}
+
+/* =========================================
+   RESUMEN
+========================================= */
+
+.resumen {
+
+  .cards {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .card {
+
+    &.blue {
+      border-left-color: #2563eb;
+    }
+
+    &.green {
+      border-left-color: #198754;
+    }
+
+    &.red {
+      border-left-color: #dc3545;
+    }
+
+    &.gray {
+      border-left-color: #6b7280;
+    }
+
+  }
+
+}
+
+/* =========================================
+   ACCIONES
+========================================= */
+
+.form-actions-result {
+  margin-top: 14px;
+}
+
+/* =========================================
+   TABLA
+========================================= */
+
+.tabla {
+  width: 100%;
+
+  margin-top: 8px;
+
+  border-collapse: collapse;
+
+  font-size: 13px;
+
+  th,
+  td {
+    padding: 9px 8px;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    vertical-align: top;
+  }
+
+  th {
+    background: #f8fafc;
+
+    text-align: left;
+    white-space: nowrap;
+
+    color: #334155;
+
+    font-weight: 700;
+  }
+
+  td {
+    color: #111827;
+  }
+
+  tbody tr:hover {
+    background: #f9fafb;
+  }
+}
+
+/* =========================================
+   RIESGO
+========================================= */
+
+.riesgo-bajo {
+  color: #047857;
+  font-weight: 700;
+}
+
+.riesgo-medio {
+  color: #b45309;
+  font-weight: 700;
+}
+
+.riesgo-alto {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1400px) {
+
+  .filtros {
+    grid-template-columns: repeat(3, 1fr);
+
+    .form-actions {
+      grid-column: 1 / -1;
+    }
+  }
+
+}
+
+@media (max-width: 700px) {
+
+  .filtros,
+  .resumen .cards {
+    grid-template-columns: 1fr;
+  }
+
+}

@@ -1,29 +1,83 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
-import { ConceptoNominaListDTO } from './conceptos-nomina.api';
 
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService
+} from '../../../shared/services/excel-export.service';
+
+import {
+  ConceptoNominaListDTO
+} from './conceptos-nomina.api';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class ConceptosNominaExporterService {
 
-  exportar(items: ConceptoNominaListDTO[]): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportar(
+    items: ConceptoNominaListDTO[]
+  ): void {
 
     if (!items || items.length === 0) {
       alert('No hay información para exportar.');
       return;
     }
 
-    const data = items.map(x => ({
-      'Código': x.codigoConcepto,
-      'Nombre': x.nombreConcepto,
-      'Tipo': x.tipoConcepto,
-      'Es fijo': x.esFijo ? 'SI' : 'NO',
-      'Activo': x.activo ? 'SI' : 'NO',
-    }));
+    this.excelExport.exportar({
 
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
+      nombreArchivo:
+        `conceptos_nomina_${this.fechaArchivo()}.xlsx`,
 
-    XLSX.utils.book_append_sheet(wb, ws, 'ConceptosNomina');
-    XLSX.writeFile(wb, 'conceptos_nomina.xlsx');
+      hojas: [
+
+        {
+          nombreHoja:
+            'ConceptosNomina',
+
+          titulo:
+            'CONCEPTOS NÓMINA',
+
+          columnas: [
+            'Código',
+            'Nombre',
+            'Tipo',
+            'Es fijo',
+            'Activo'
+          ],
+
+          filas: items.map(x => [
+            x.codigoConcepto || '',
+            x.nombreConcepto || '',
+            x.tipoConcepto || '',
+            x.esFijo ? 'SI' : 'NO',
+            x.activo ? 'SI' : 'NO'
+          ]),
+
+          anchos: [
+            16,
+            40,
+            18,
+            12,
+            12
+          ]
+        }
+
+      ]
+
+    });
+
   }
+
+  private fechaArchivo(): string {
+
+    const fecha =
+      new Date();
+
+    return `${fecha.getFullYear()}${String(fecha.getMonth() + 1).padStart(2, '0')}${String(fecha.getDate()).padStart(2, '0')}`;
+  }
+
 }

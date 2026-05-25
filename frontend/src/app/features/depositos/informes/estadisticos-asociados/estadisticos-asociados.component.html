@@ -1,0 +1,215 @@
+<div class="page">
+
+  <app-header-actions
+    titulo="Estadísticos de asociados"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="true"
+    [mostrarExportar]="false"
+    (imprimir)="imprimir()">
+  </app-header-actions>
+
+  <div class="card">
+
+    <form class="filtros" (ngSubmit)="buscar()">
+
+      <div class="f-row">
+        <label>Fecha de corte</label>
+        <input
+          type="date"
+          [(ngModel)]="filtros.fechaCorte"
+          name="fechaCorte">
+      </div>
+
+      <div class="f-row">
+        <label>Agencia</label>
+        <select
+          [(ngModel)]="filtros.idAgencia"
+          name="idAgencia">
+
+          <option [ngValue]="0">
+            Todas las agencias
+          </option>
+
+          <option
+            *ngFor="let a of agencias"
+            [ngValue]="a.idAgencia">
+            {{ a.nombreAgencia }}
+          </option>
+
+        </select>
+      </div>
+
+      <div class="f-row">
+        <label>Forma de ahorro</label>
+
+        <select
+          [(ngModel)]="filtros.codigoForma"
+          name="codigoForma">
+
+          <option [ngValue]="'0'">
+            Todas las formas
+          </option>
+
+          <option
+            *ngFor="let f of formas"
+            [ngValue]="f.codigoForma">
+            {{ f.codigoForma }} - {{ f.nombreForma | titlecase }}
+          </option>
+
+        </select>
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()">
+          Limpiar
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="cargando">
+          Buscar
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+  <div *ngIf="cargando" class="loading">
+    Cargando informe...
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <div class="card" *ngIf="resumen">
+
+    <section class="resumen">
+
+      <h3>Resumen general</h3>
+
+      <div class="resumen-totales">
+
+        <div class="mini-card gray">
+          <div class="label">Total asociados</div>
+          <div class="value right">
+            {{ resumen.totalAsociados | number:'1.0-0' }}
+          </div>
+        </div>
+
+        <div class="mini-card green">
+          <div class="label">Total aportes</div>
+          <div class="value right">
+            {{ resumen.totalAportes | number:'1.2-2' }}
+          </div>
+        </div>
+
+        <div class="mini-card blue">
+          <div class="label">Bloques estadísticos</div>
+          <div class="value right">
+            {{ grupos().length | number:'1.0-0' }}
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <div class="form-actions form-actions-result">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="exportar()"
+        [disabled]="items.length === 0">
+        Exportar Excel
+      </button>
+
+    </div>
+
+  </div>
+
+  <ng-container *ngIf="items.length > 0">
+
+    <div
+      class="card"
+      *ngFor="let grupo of grupos()">
+
+      <div class="section-header">
+
+        <div>
+          <h3>{{ grupo }}</h3>
+          <p>
+            Distribución de asociados por categoría.
+          </p>
+        </div>
+
+        <div class="totales-detalle compact">
+          <span>
+            Asociados
+            <strong>{{ totalGrupo(grupo) | number:'1.0-0' }}</strong>
+          </span>
+
+          <span>
+            Saldo
+            <strong>{{ saldoGrupo(grupo) | number:'1.2-2' }}</strong>
+          </span>
+        </div>
+
+      </div>
+
+      <div class="stat-grid">
+
+        <div class="chart-box">
+          <canvas [id]="chartId(grupo)"></canvas>
+        </div>
+
+        <div class="table-container">
+
+          <table class="tabla-resumen">
+
+            <thead>
+            <tr>
+              <th>Categoría</th>
+              <th class="right">Cantidad</th>
+              <th class="right">Participación</th>
+              <th class="right">Saldo aportes</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr *ngFor="let item of itemsPorGrupo(grupo)">
+              <td>{{ item.categoria }}</td>
+
+              <td class="right">
+                {{ item.cantidad | number:'1.0-0' }}
+              </td>
+
+              <td class="right">
+                {{ item.porcentaje | number:'1.2-2' }} %
+              </td>
+
+              <td class="right">
+                {{ item.saldoTotal | number:'1.2-2' }}
+              </td>
+            </tr>
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </ng-container>
+
+</div>

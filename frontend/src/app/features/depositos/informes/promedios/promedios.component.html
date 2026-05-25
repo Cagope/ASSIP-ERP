@@ -1,0 +1,417 @@
+<div class="page">
+
+  <app-header-actions
+    titulo="Informe de promedios"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="true"
+    [mostrarExportar]="false"
+    (imprimir)="imprimir()">
+  </app-header-actions>
+
+  <div class="card">
+
+    <form
+      class="filtros"
+      (ngSubmit)="buscar()">
+
+      <div class="f-row">
+        <label>Fecha de corte</label>
+
+        <input
+          type="date"
+          [(ngModel)]="filtros.fechaCorte"
+          name="fechaCorte">
+      </div>
+
+      <div class="f-row">
+        <label>Agencia</label>
+
+        <select
+          [(ngModel)]="filtros.idAgencia"
+          name="idAgencia">
+
+          <option [ngValue]="0">
+            Seleccione agencia
+          </option>
+
+          <option
+            *ngFor="let a of agencias"
+            [ngValue]="a.idAgencia">
+
+            {{ a.nombreAgencia }}
+
+          </option>
+
+        </select>
+      </div>
+
+      <div class="f-row">
+        <label>Forma de ahorro</label>
+
+        <select
+          [(ngModel)]="filtros.codigoForma"
+          name="codigoForma">
+
+          <option [ngValue]="'0'">
+            Todas las formas
+          </option>
+
+          <option
+            *ngFor="let f of formasAhorro"
+            [ngValue]="f.codigoForma">
+
+            {{ f.codigoForma }} - {{ f.nombreForma | titlecase }}
+
+          </option>
+
+        </select>
+      </div>
+      <div class="f-row">
+
+        <label>Límite pantalla</label>
+
+        <input
+          type="text"
+          numericFormat
+          class="input-number"
+          [(ngModel)]="filtros.limitePantalla"
+          name="limitePantalla">
+
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()">
+
+          Limpiar
+
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="cargando">
+
+          Buscar
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+  <div
+    *ngIf="cargando"
+    class="loading">
+
+    Cargando informe...
+
+  </div>
+
+  <div
+    *ngIf="error"
+    class="error">
+
+    {{ error }}
+
+  </div>
+
+  <div
+    class="card"
+    *ngIf="resumen">
+
+    <section class="resumen">
+
+      <h3>Resumen general</h3>
+
+      <div class="resumen-totales">
+
+        <div class="mini-card gray">
+
+          <div class="label">
+            Total cuentas
+          </div>
+
+          <div class="value right">
+            {{ resumen.totalCuentas | number:'1.0-0' }}
+          </div>
+
+        </div>
+
+        <div class="mini-card green">
+
+          <div class="label">
+            Total saldos
+          </div>
+
+          <div class="value right">
+            {{ resumen.totalSaldos | number:'1.2-2' }}
+          </div>
+
+        </div>
+
+        <div class="mini-card blue">
+
+          <div class="label">
+            Saldo promedio
+          </div>
+
+          <div class="value right">
+            {{ resumen.saldoPromedio | number:'1.2-2' }}
+          </div>
+
+        </div>
+
+        <div class="mini-card blue">
+
+          <div class="label">
+            Saldo mayor
+          </div>
+
+          <div class="value right">
+            {{ resumen.saldoMayor | number:'1.2-2' }}
+          </div>
+
+        </div>
+
+        <div class="mini-card red">
+
+          <div class="label">
+            Saldo menor
+          </div>
+
+          <div class="value right">
+            {{ resumen.saldoMenor | number:'1.2-2' }}
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <div class="form-actions form-actions-result">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="exportar()">
+
+        Exportar Excel
+
+      </button>
+
+    </div>
+
+  </div>
+
+  <div
+    class="card"
+    *ngIf="formas.length > 0">
+
+    <h3>Resumen por forma</h3>
+
+    <div class="table-container">
+
+      <table class="tabla-resumen">
+
+        <thead>
+
+        <tr>
+
+          <th>Forma</th>
+
+          <th class="right">
+            Cuentas
+          </th>
+
+          <th class="right">
+            Total saldos
+          </th>
+
+          <th class="right">
+            Promedio
+          </th>
+
+          <th class="right">
+            Mayor
+          </th>
+
+          <th class="right">
+            Menor
+          </th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let item of formas">
+
+          <td>
+            {{ item.codigoForma }} - {{ item.nombreForma }}
+          </td>
+
+          <td class="right">
+            {{ item.totalCuentas | number:'1.0-0' }}
+          </td>
+
+          <td class="right">
+            {{ item.totalSaldos | number:'1.2-2' }}
+          </td>
+
+          <td class="right">
+            {{ item.saldoPromedio | number:'1.2-2' }}
+          </td>
+
+          <td class="right">
+            {{ item.saldoMayor | number:'1.2-2' }}
+          </td>
+
+          <td class="right">
+            {{ item.saldoMenor | number:'1.2-2' }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+  <div
+    class="card"
+    *ngIf="mayores.length > 0">
+
+    <h3>
+      Mayores saldos
+    </h3>
+
+    <div class="table-container">
+
+      <table class="tabla-resumen">
+
+        <thead>
+
+        <tr>
+
+          <th>Forma</th>
+          <th>Cuenta</th>
+          <th>Documento</th>
+          <th>Nombre</th>
+
+          <th class="right">
+            Saldo
+          </th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let item of mayores">
+
+          <td>
+            {{ item.codigoForma }} - {{ item.nombreForma }}
+          </td>
+
+          <td>
+            {{ item.codigoCuenta }}
+          </td>
+
+          <td>
+            {{ item.documento }}
+          </td>
+
+          <td>
+            {{ item.nombreCompleto }}
+          </td>
+
+          <td class="right">
+            {{ item.saldoCorte | number:'1.2-2' }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+  <div
+    class="card"
+    *ngIf="menores.length > 0">
+
+    <h3>
+      Menores saldos
+    </h3>
+
+    <div class="table-container">
+
+      <table class="tabla-resumen">
+
+        <thead>
+
+        <tr>
+
+          <th>Forma</th>
+          <th>Cuenta</th>
+          <th>Documento</th>
+          <th>Nombre</th>
+
+          <th class="right">
+            Saldo
+          </th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let item of menores">
+
+          <td>
+            {{ item.codigoForma }} - {{ item.nombreForma }}
+          </td>
+
+          <td>
+            {{ item.codigoCuenta }}
+          </td>
+
+          <td>
+            {{ item.documento }}
+          </td>
+
+          <td>
+            {{ item.nombreCompleto }}
+          </td>
+
+          <td class="right">
+            {{ item.saldoCorte | number:'1.2-2' }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>

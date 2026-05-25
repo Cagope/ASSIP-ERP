@@ -1,57 +1,115 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
-import { Agencia } from './agencia.api';
 
-/**
- * 📦 Servicio para exportar el listado de agencias a Excel
- * Usa los datos ya cargados en el componente (sin pedir al backend).
- */
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService
+} from '../../../shared/services/excel-export.service';
+
+import {
+  Agencia
+} from './agencia.api';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class AgenciasExporterService {
-  exportarExcel(agencias: Agencia[]): void {
+
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportarExcel(
+    agencias: Agencia[]
+  ): void {
+
     if (!agencias || agencias.length === 0) {
       alert('No hay datos para exportar.');
       return;
     }
 
-    // 🔹 Armar filas legibles
-    const rows = agencias.map(a => ({
-      'Código': a.codigoAgencia ?? '',
-      'Nombre de Agencia': a.nombreAgencia ?? '',
-      'Sigla': a.siglaAgencia ?? '',
-      'Dirección': a.direccionAgencia ?? '',
-      'Departamento': (a as any).nombreDepartamento ?? a.idDepartamento ?? '',
-      'Ciudad': (a as any).nombreCiudad ?? a.idCiudad ?? '',
-      'Correo': a.correoAgencia ?? '',
-      'Celular': a.celularAgencia ?? '',
-      'Teléfono': a.telefonoAgencia ?? '',
-      'Fecha Creación': a.fechaCreacion ? new Date(a.fechaCreacion).toLocaleString() : '',
-      'Fecha Edición': a.fechaEdicion ? new Date(a.fechaEdicion).toLocaleString() : '',
-    }));
+    this.excelExport.exportar({
 
-    // 🔹 Crear hoja y libro Excel
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Agencias');
+      nombreArchivo:
+        `agencias_${this.fechaArchivo()}.xlsx`,
 
-    // 🔹 Ajuste de ancho de columnas
-    (ws as any)['!cols'] = [
-      { wch: 10 },
-      { wch: 32 },
-      { wch: 10 },
-      { wch: 40 },
-      { wch: 24 },
-      { wch: 24 },
-      { wch: 28 },
-      { wch: 14 },
-      { wch: 14 },
-      { wch: 22 },
-      { wch: 22 },
-    ];
+      hojas: [
 
-    // 🔹 Guardar archivo
-    const d = new Date();
-    const fecha = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
-    XLSX.writeFile(wb, `agencias_${fecha}.xlsx`);
+        {
+          nombreHoja:
+            'Agencias',
+
+          titulo:
+            'LISTADO DE AGENCIAS',
+
+          columnas: [
+            'Código',
+            'Nombre de Agencia',
+            'Sigla',
+            'Dirección',
+            'Departamento',
+            'Ciudad',
+            'Correo',
+            'Celular',
+            'Teléfono',
+            'Fecha Creación',
+            'Fecha Edición'
+          ],
+
+          filas: agencias.map(a => [
+
+            a.codigoAgencia || '',
+
+            a.nombreAgencia || '',
+
+            a.siglaAgencia || '',
+
+            a.direccionAgencia || '',
+
+            (a as any).nombreDepartamento ?? a.idDepartamento ?? '',
+
+            (a as any).nombreCiudad ?? a.idCiudad ?? '',
+
+            a.correoAgencia || '',
+
+            a.celularAgencia || '',
+
+            a.telefonoAgencia || '',
+
+            a.fechaCreacion
+              ? new Date(a.fechaCreacion).toLocaleString()
+              : '',
+
+            a.fechaEdicion
+              ? new Date(a.fechaEdicion).toLocaleString()
+              : ''
+
+          ]),
+
+          anchos: [
+            10,
+            32,
+            10,
+            40,
+            24,
+            24,
+            28,
+            14,
+            14,
+            22,
+            22
+          ]
+        }
+
+      ]
+
+    });
+  }
+
+  private fechaArchivo(): string {
+
+    const d =
+      new Date();
+
+    return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
   }
 }

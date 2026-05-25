@@ -1,0 +1,445 @@
+<div class="dashboard-page">
+
+  <div class="dashboard-header">
+
+    <div>
+      <h2>Dashboard Gerencial — Depósitos</h2>
+      <p>Indicadores consolidados de captación y cuentas de ahorro.</p>
+    </div>
+
+    <div class="filters">
+
+      <div class="filter-field">
+
+        <label>
+          Fecha de evaluación
+        </label>
+
+        <input
+          type="date"
+          [(ngModel)]="fechaCorte">
+
+      </div>
+
+      <button
+        class="btn btn--primary"
+        (click)="consultar()">
+
+        Actualizar
+
+      </button>
+
+      <button
+        class="btn btn--secondary"
+        (click)="exportarExcel()">
+
+        Exportar Excel
+
+      </button>
+
+    </div>
+
+  </div>
+
+  <div
+    *ngIf="error"
+    class="alert alert--error">
+    {{ error }}
+  </div>
+
+  <div
+    *ngIf="cargando"
+    class="loading-card">
+    Cargando dashboard...
+  </div>
+
+  <ng-container *ngIf="resumen">
+
+    <div class="kpis-grid">
+
+      <div class="kpi-card kpi-card--main">
+        <span>Total depósitos</span>
+        <strong>{{ resumen.saldoTotal | number:'1.2-2' }}</strong>
+      </div>
+
+      <div class="kpi-card">
+        <span>Total cuentas</span>
+        <strong>{{ resumen.totalCuentas | number:'1.2-2' }}</strong>
+      </div>
+
+      <div class="kpi-card">
+        <span>Aportes sociales</span>
+        <strong>{{ resumen.saldoAportes | number:'1.2-2' }}</strong>
+      </div>
+
+      <div class="kpi-card">
+
+  <span>
+    Total asociados
+  </span>
+
+        <strong>
+          {{
+          resumen.hombres +
+          resumen.mujeres +
+          resumen.juridicas
+          | number:'1.0-0'
+          }}
+        </strong>
+
+      </div>
+
+      <div class="kpi-card">
+        <span>Hombres</span>
+        <strong>{{ resumen.hombres | number:'1.0-0' }}</strong>
+      </div>
+
+      <div class="kpi-card">
+        <span>Mujeres</span>
+        <strong>{{ resumen.mujeres | number:'1.0-0' }}</strong>
+      </div>
+
+      <div class="kpi-card">
+        <span>Jurídicas</span>
+        <strong>{{ resumen.juridicas | number:'1.0-0' }}</strong>
+      </div>
+
+    </div>
+
+    <!-- FORMAS -->
+    <div class="card">
+
+      <div class="section-header">
+
+        <div class="section-title-block">
+
+          <h3>
+            Evolución por forma de ahorro
+          </h3>
+
+          <div class="section-subtitle">
+
+      <span>
+        Comparativo de cuentas y saldos por forma
+      </span>
+
+            <span class="separator">
+        •
+      </span>
+
+            <span class="badge-periodo">
+        Corte anterior:
+        {{ fechaCorteAnterior | date:'yyyy-MM-dd' }}
+      </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="table-container">
+
+        <table class="data-table data-table--wide">
+
+          <thead>
+          <tr>
+            <th class="sticky-col">Forma</th>
+            <th class="right">Cuentas<br>corte ant.</th>
+            <th class="right">Saldo<br>corte ant.</th>
+            <th class="right">Cuentas<br>actuales</th>
+            <th class="right">Saldo<br>actual</th>
+            <th class="right">Ingresos</th>
+            <th class="right">Egresos</th>
+            <th class="right">Variación<br>saldo</th>
+            <th class="right">% crec.</th>
+          </tr>
+          </thead>
+
+          <tbody>
+
+          <tr *ngFor="let f of formas">
+
+            <td class="sticky-col forma-name">
+              {{ f.nombreForma }}
+            </td>
+
+            <td class="right muted">
+              {{ f.cuentasAnteriores | number:'1.0-0' }}
+            </td>
+
+            <td class="right muted">
+              $ {{ f.saldoAnterior | number:'1.2-2' }}
+            </td>
+
+            <td class="right">
+              {{ f.cuentasActuales | number:'1.0-0' }}
+            </td>
+
+            <td class="right money">
+              $ {{ f.saldoActual | number:'1.2-2' }}
+            </td>
+
+            <td class="right positive">
+              $ {{ f.ingresosPeriodo | number:'1.2-2' }}
+            </td>
+
+            <td class="right negative">
+              $ {{ f.egresosPeriodo | number:'1.2-2' }}
+            </td>
+
+            <td
+              class="right"
+              [class.positive]="f.variacionSaldo >= 0"
+              [class.negative]="f.variacionSaldo < 0">
+
+              <span *ngIf="f.variacionSaldo > 0">+</span>
+              $ {{ f.variacionSaldo | number:'1.2-2' }}
+
+            </td>
+
+            <td
+              class="right percent-cell"
+              [class.positive]="f.porcentajeCrecimiento >= 0"
+              [class.negative]="f.porcentajeCrecimiento < 0">
+
+              <span *ngIf="f.porcentajeCrecimiento > 0">▲</span>
+              <span *ngIf="f.porcentajeCrecimiento < 0">▼</span>
+
+              {{ f.porcentajeCrecimiento | number:'1.2-2' }} %
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+    <!-- AGENCIAS -->
+    <div class="card">
+
+      <div class="section-header">
+
+        <div class="section-title-block">
+
+          <h3>
+            Participación por agencias
+          </h3>
+
+          <div class="section-subtitle">
+            Captación consolidada por agencia
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="table-container">
+
+        <table class="data-table data-table--wide">
+
+          <thead>
+
+          <tr>
+
+            <th class="right">
+              #
+            </th>
+
+            <th>
+              Agencia
+            </th>
+
+            <th class="right">
+              Ctas.<br>Aportes
+            </th>
+
+            <th class="right">
+              Valor<br>Aportes
+            </th>
+
+            <th class="right">
+              %<br>Aportes
+            </th>
+
+            <th class="right">
+              Ctas.<br>Ahorros
+            </th>
+
+            <th class="right">
+              Valor<br>Ahorros
+            </th>
+
+            <th class="right">
+              %<br>Ahorros
+            </th>
+
+          </tr>
+
+          </thead>
+
+          <tbody>
+
+          <tr *ngFor="let a of agencias">
+
+            <td class="right ranking-cell">
+              {{ a.ranking }}
+            </td>
+
+            <td>
+              {{ a.concepto }}
+            </td>
+
+            <td class="right">
+              {{ a.cuentasAportes | number:'1.0-0' }}
+            </td>
+
+            <td class="right money">
+              $ {{ a.valorAportes | number:'1.2-2' }}
+            </td>
+
+            <td class="right positive">
+              {{ a.participacionAportes | number:'1.2-2' }} %
+            </td>
+
+            <td class="right">
+              {{ a.cuentasAhorros | number:'1.0-0' }}
+            </td>
+
+            <td class="right money">
+              $ {{ a.valorAhorros | number:'1.2-2' }}
+            </td>
+
+            <td class="right positive">
+              {{ a.participacionAhorros | number:'1.2-2' }} %
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+    <!-- TENDENCIA -->
+    <div class="card">
+
+      <div class="section-header">
+
+        <div class="section-title-block">
+
+          <h3>
+            Evolución últimos 12 meses
+          </h3>
+
+          <div class="section-subtitle">
+            Comportamiento mensual de aportes sociales y depósitos
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="trend-chart">
+
+        <div
+          class="trend-month"
+          *ngFor="let t of tendencia">
+
+          <div class="trend-bars">
+
+            <!-- APORTES -->
+            <div class="trend-bar-block">
+
+              <div class="trend-tooltip">
+
+                <strong>
+                  Aportes
+                </strong>
+
+                <span>
+              {{ t.periodo }}
+            </span>
+
+                <span>
+              $ {{ formatearValor(t.saldoAportes) }}
+            </span>
+
+              </div>
+
+              <div
+                class="trend-bar trend-bar--aportes"
+                [style.height.px]="obtenerAlturaAportes(t.saldoAportes)">
+              </div>
+
+            </div>
+
+            <!-- DEPOSITOS -->
+            <div class="trend-bar-block">
+
+              <div class="trend-tooltip">
+
+                <strong>
+                  Depósitos
+                </strong>
+
+                <span>
+              {{ t.periodo }}
+            </span>
+
+                <span>
+              $ {{ formatearValor(t.saldoDepositos) }}
+            </span>
+
+              </div>
+
+              <div
+                class="trend-bar trend-bar--depositos"
+                [style.height.px]="obtenerAlturaDepositos(t.saldoDepositos)">
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="trend-label">
+            {{ t.periodo }}
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="trend-legend">
+
+        <div class="legend-item">
+
+          <span class="legend-color legend-color--aportes"></span>
+
+          Aportes
+
+        </div>
+
+        <div class="legend-item">
+
+          <span class="legend-color legend-color--depositos"></span>
+
+          Depósitos
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </ng-container>
+
+</div>

@@ -1,13 +1,22 @@
+@use '../../../../styles/forms';
+@use '../../../../styles/informes-base';
+
+/* =========================================
+   PAGE
+========================================= */
+
 .page {
-  padding: 2rem;
-  max-width: 1300px;
-  margin: auto;
+  padding: 24px;
 }
 
-/* ====== FILTROS ====== */
+/* =========================================
+   FILTROS
+========================================= */
+
 .filtros {
   display: grid;
   grid-template-columns: repeat(3, minmax(220px, 1fr));
+
   gap: 1rem 1.25rem;
   align-items: end;
 }
@@ -15,78 +24,115 @@
 .f-row {
   display: flex;
   flex-direction: column;
+
   min-width: 0;
+
+  label {
+    margin-bottom: 5px;
+
+    color: #374151;
+
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  input,
+  select {
+    width: 100%;
+    height: 38px;
+
+    padding: 0 10px;
+
+    border-radius: 8px;
+
+    background: #fff;
+
+    color: #111827;
+
+    font-size: 13px;
+    box-sizing: border-box;
+
+    &:focus {
+      outline: none;
+
+      border-color: #198754;
+
+      box-shadow: 0 0 0 2px rgba(25, 135, 84, 0.12);
+    }
+  }
 }
 
-.f-row label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 0.35rem;
-}
-
-.f-row input,
-.f-row select {
-  width: 100%;
-  height: 36px;
-  padding: 6px 10px;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  background: #fff;
-  font-size: 0.85rem;
-  color: #111827;
-  box-sizing: border-box;
-}
-
-.f-row input:focus,
-.f-row select:focus {
-  outline: none;
-  border-color: #198754;
-  box-shadow: 0 0 0 2px rgba(25, 135, 84, 0.12);
-}
+/* =========================================
+   ACCIONES
+========================================= */
 
 .form-actions {
   grid-column: 1 / -1;
+
   display: flex;
   justify-content: flex-end;
+
   gap: 0.75rem;
+
   margin-top: 0.5rem;
 }
 
-/* ====== TARJETAS ====== */
+/* =========================================
+   TARJETAS
+========================================= */
+
 .cards {
   display: grid;
-  gap: 1.2rem;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+
+  gap: 1rem;
+
   margin-bottom: 2rem;
 }
 
-.card.orange {
-  border-left: 5px solid #ea580c;
-}
+.card {
+  &.orange {
+    border-left: 5px solid #ea580c;
+  }
 
-.card.blue {
-  border-left: 5px solid #2563eb;
+  &.blue {
+    border-left: 5px solid #2563eb;
+  }
 }
 
 .value.big {
-  font-size: 1.9rem;
+  display: block;
+
   text-align: right;
+
+  color: #111827;
+
+  font-size: 24px;
+  font-weight: 700;
 }
 
-/* ====== BARRAS ====== */
+/* =========================================
+   DASHBOARD / BARRAS
+========================================= */
+
 .dashboard h3 {
-  margin-top: 2.8rem;
-  padding-top: 1.2rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+
   border-top: 1px solid #e5e7eb;
-  font-size: 1.1rem;
-  font-weight: 600;
+
+  color: #111827;
+
+  font-size: 17px;
+  font-weight: 700;
 }
 
 .bar-list {
   display: flex;
   flex-direction: column;
+
   gap: 0.8rem;
+
   margin-top: 1rem;
   margin-bottom: 2.5rem;
 }
@@ -95,64 +141,121 @@
   display: grid;
   grid-template-columns: 180px 1fr 120px;
   align-items: center;
+
   gap: 1rem;
+
   padding: 0.2rem 0;
 }
 
 .bar {
-  background: #e5e7eb;
   height: 14px;
-  border-radius: 6px;
+
   overflow: hidden;
+
+  background: #e5e7eb;
+
+  border-radius: 999px;
 }
 
 .bar-fill {
   height: 100%;
-  border-radius: 6px;
+
+  border-radius: 999px;
 }
 
-.gender { background: linear-gradient(90deg, #2563eb, #3b82f6); }
-.age    { background: linear-gradient(90deg, #7c3aed, #a78bfa); }
-.house  { background: linear-gradient(90deg, #ea580c, #fb923c); }
-.zone   { background: linear-gradient(90deg, #059669, #34d399); }
-.school { background: linear-gradient(90deg, #0ea5e9, #38bdf8); }
-.job    { background: linear-gradient(90deg, #7c3aed, #c084fc); }
-.town   { background: linear-gradient(90deg, #9333ea, #d946ef); }
+/* =========================================
+   COLORES BARRAS
+========================================= */
 
-.bar-value {
-  font-weight: 700;
+.gender {
+  background: linear-gradient(90deg, #2563eb, #3b82f6);
+}
+
+.age {
+  background: linear-gradient(90deg, #7c3aed, #a78bfa);
+}
+
+.house {
+  background: linear-gradient(90deg, #ea580c, #fb923c);
+}
+
+.zone {
+  background: linear-gradient(90deg, #059669, #34d399);
+}
+
+.school {
+  background: linear-gradient(90deg, #0ea5e9, #38bdf8);
+}
+
+.job {
+  background: linear-gradient(90deg, #7c3aed, #c084fc);
+}
+
+.town {
+  background: linear-gradient(90deg, #9333ea, #d946ef);
+}
+
+/* =========================================
+   VALORES
+========================================= */
+
+.bar-value,
+.count,
+.amount {
   text-align: right;
+
+  font-weight: 700;
 }
 
 .bar-values {
   display: flex;
   justify-content: flex-end;
-  gap: 1.2rem;
-  width: 100%;
-}
 
-.count,
-.amount {
-  font-weight: 700;
-  text-align: right;
+  gap: 1.2rem;
+
+  width: 100%;
 }
 
 .amount {
   color: #2563eb;
 }
 
+/* =========================================
+   ESTADOS
+========================================= */
+
 .loading,
 .error {
   margin-top: 1rem;
+
+  padding: 12px;
+
+  border-radius: 8px;
+
+  font-size: 13px;
   font-weight: 600;
-  font-size: 0.9rem;
+}
+
+.loading {
+  background: #f8fafc;
+
+  color: #667085;
 }
 
 .error {
-  color: #b30000;
+  background: #fef2f2;
+
+  color: #991b1b;
+
+  border: 1px solid #fecaca;
 }
 
+/* =========================================
+   RESPONSIVE
+========================================= */
+
 @media (max-width: 900px) {
+
   .filtros {
     grid-template-columns: repeat(2, minmax(200px, 1fr));
   }
@@ -160,9 +263,11 @@
   .bar-item {
     grid-template-columns: 140px 1fr 90px;
   }
+
 }
 
 @media (max-width: 600px) {
+
   .filtros {
     grid-template-columns: 1fr;
   }
@@ -177,10 +282,12 @@
 
   .bar-item {
     grid-template-columns: 1fr;
+
     gap: 0.4rem;
   }
 
   .bar-value {
     text-align: left;
   }
+
 }

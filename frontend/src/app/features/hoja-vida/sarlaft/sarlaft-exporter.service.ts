@@ -1,101 +1,198 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-import { Sarlaft } from './sarlaft.api';
-import { CatalogosApi, CodigoNombreDTO } from '../../../shared/catalogos/catalogos.api';
+import {
+  ExcelExportService
+} from '../../../shared/services/excel-export.service';
 
-/**
- * 📦 Servicio de exportación a Excel — SARLAFT
- * Decodifica catálogos de PEPS y Parentescos.
- * Mantiene el formato uniforme del ERP ASSIP.
- */
-@Injectable({ providedIn: 'root' })
+import {
+  Sarlaft
+} from './sarlaft.api';
+
+import {
+  CatalogosApi,
+  CodigoNombreDTO
+} from '../../../shared/catalogos/catalogos.api';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class SarlaftExporterService {
-  constructor(private catalogos: CatalogosApi) {}
+
+  constructor(
+    private catalogos: CatalogosApi,
+    private excelExport: ExcelExportService
+  ) {
+  }
 
   exportarExcel(
-    registros: (Sarlaft & { documento?: string; nombrePersona?: string })[]
+    registros: (Sarlaft & {
+      documento?: string;
+      nombrePersona?: string;
+    })[]
   ): void {
+
     if (!registros || registros.length === 0) {
-      alert('⚠️ No hay registros SARLAFT para exportar.');
+      alert('No hay registros SARLAFT para exportar.');
       return;
     }
 
     forkJoin({
-      tiposPeps: this.catalogos.listarTiposPeps().pipe(catchError(() => of([] as CodigoNombreDTO[]))),
-      parentescos: this.catalogos.listarParentescos().pipe(catchError(() => of([] as CodigoNombreDTO[]))),
+      tiposPeps:
+        this.catalogos
+          .listarTiposPeps()
+          .pipe(catchError(() => of([] as CodigoNombreDTO[]))),
+
+      parentescos:
+        this.catalogos
+          .listarParentescos()
+          .pipe(catchError(() => of([] as CodigoNombreDTO[])))
     }).subscribe({
-      next: (cat) => {
-        const mapTiposPeps = new Map<string | number, string>(
-          (cat.tiposPeps ?? []).map((t: CodigoNombreDTO) => [t.codigo, t.nombre])
-        );
-        const mapParentescos = new Map<string | number, string>(
-          (cat.parentescos ?? []).map((p: CodigoNombreDTO) => [p.codigo, p.nombre])
-        );
 
-        const sarlaftDecod = registros.map(s => ({
-          Documento: s.documento ?? '',
-          'Nombre Persona': s.nombrePersona ?? '',
+      next: cat => {
 
-          // 🟩 Exoneración UIAF
-          'Exonerado UIAF': s.exoneracionUiaf ? 'Sí' : 'No',
-          'Fecha Exoneración': s.fechaExoneracion ? new Date(s.fechaExoneracion).toLocaleDateString() : '',
+        const mapTiposPeps =
+          new Map<string | number, string>(
+            (cat.tiposPeps || []).map((t: CodigoNombreDTO) => [
+              t.codigo,
+              t.nombre
+            ])
+          );
 
-          // 🟦 PEPS
-          'Es PEPS': s.asociadoPeps ? 'Sí' : 'No',
-          'Tipo PEPS': mapTiposPeps.get(s.tipoPeps ?? '') ?? '',
-          'Observaciones PEPS': s.observacionesPeps ?? '',
-          'Fecha Inicial PEPS': s.fechaInicialPeps ? new Date(s.fechaInicialPeps).toLocaleDateString() : '',
-          'Fecha Final PEPS': s.fechaFinalPeps ? new Date(s.fechaFinalPeps).toLocaleDateString() : '',
+        const mapParentescos =
+          new Map<string | number, string>(
+            (cat.parentescos || []).map((p: CodigoNombreDTO) => [
+              p.codigo,
+              p.nombre
+            ])
+          );
 
-          // 🟧 Familiares PEPS
-          'Tiene Familiares PEPS': s.familiaPeps ? 'Sí' : 'No',
-          'Tipo PEPS Familiar': mapTiposPeps.get(s.tipoFamiliaPeps ?? '') ?? '',
-          'Parentesco': mapParentescos.get(s.codigoParentesco ?? '') ?? '',
-          'Cédula Familiar': s.cedulaFamiliaPeps ?? '',
-          'Nombre Familiar': s.nombreFamiliaPeps ?? '',
+        this.excelExport.exportar({
 
-          // 🟨 Moneda Extranjera
-          'Transacciones en Moneda Extranjera': s.monedaExtranjera ? 'Sí' : 'No',
-          'Observación Moneda Extranjera': s.observacionMonedaExtranjera ?? '',
+          nombreArchivo:
+            `sarlaft_${this.fechaArchivo()}.xlsx`,
 
-          // 🟫 Cuenta en el Extranjero
-          'Cuenta en el Extranjero': s.cuentaExtranjero ? 'Sí' : 'No',
-          'Tipo Moneda Extranjera': s.tipoMonedaExtranjera ?? '',
-          'Número de Cuenta': s.numeroCuentaExtranjero ?? '',
-          'Banco Extranjero': s.nombreBancoExtranjero ?? '',
-          'Ciudad Cuenta Extranjero': s.ciudadCuentaExtranjero ?? '',
-          'País Cuenta Extranjero': s.paisCuentaExtranjero ?? '',
+          hojas: [
 
-          'Fecha Creación': s.fechaCreacion ? new Date(s.fechaCreacion).toLocaleString() : '',
-          'Fecha Edición': s.fechaEdicion ? new Date(s.fechaEdicion).toLocaleString() : ''
-        }));
+            {
+              nombreHoja:
+                'SARLAFT',
 
-        // 📊 Generar hoja Excel
-        const ws = XLSX.utils.json_to_sheet(sarlaftDecod);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'SARLAFT');
+              titulo:
+                'SARLAFT',
 
-        // 📏 Ajustar columnas
-        (ws as any)['!cols'] = [
-          { wch: 14 }, { wch: 28 }, { wch: 16 }, { wch: 18 },
-          { wch: 14 }, { wch: 22 }, { wch: 30 }, { wch: 16 },
-          { wch: 16 }, { wch: 18 }, { wch: 26 }, { wch: 24 },
-          { wch: 28 }, { wch: 30 }, { wch: 26 }, { wch: 26 },
-          { wch: 20 }, { wch: 22 }, { wch: 22 }, { wch: 22 },
-          { wch: 22 }, { wch: 20 }, { wch: 20 }, { wch: 22 },
-        ];
+              columnas: [
+                'Documento',
+                'Nombre Persona',
+                'Exonerado UIAF',
+                'Fecha Exoneración',
+                'Es PEPS',
+                'Tipo PEPS',
+                'Observaciones PEPS',
+                'Fecha Inicial PEPS',
+                'Fecha Final PEPS',
+                'Tiene Familiares PEPS',
+                'Tipo PEPS Familiar',
+                'Parentesco',
+                'Cédula Familiar',
+                'Nombre Familiar',
+                'Transacciones en Moneda Extranjera',
+                'Observación Moneda Extranjera',
+                'Cuenta en el Extranjero',
+                'Tipo Moneda Extranjera',
+                'Número de Cuenta',
+                'Banco Extranjero',
+                'Ciudad Cuenta Extranjero',
+                'País Cuenta Extranjero',
+                'Fecha Creación',
+                'Fecha Edición'
+              ],
 
-        const fecha = new Date();
-        const sufijo = `${fecha.getFullYear()}${String(fecha.getMonth() + 1).padStart(2, '0')}${String(fecha.getDate()).padStart(2, '0')}`;
-        XLSX.writeFile(wb, `sarlaft_${sufijo}.xlsx`);
+              filas: registros.map(s => [
+                s.documento || '',
+                s.nombrePersona || '',
+                s.exoneracionUiaf ? 'Sí' : 'No',
+                s.fechaExoneracion
+                  ? new Date(s.fechaExoneracion).toLocaleDateString()
+                  : '',
+                s.asociadoPeps ? 'Sí' : 'No',
+                mapTiposPeps.get(s.tipoPeps || '') || '',
+                s.observacionesPeps || '',
+                s.fechaInicialPeps
+                  ? new Date(s.fechaInicialPeps).toLocaleDateString()
+                  : '',
+                s.fechaFinalPeps
+                  ? new Date(s.fechaFinalPeps).toLocaleDateString()
+                  : '',
+                s.familiaPeps ? 'Sí' : 'No',
+                mapTiposPeps.get(s.tipoFamiliaPeps || '') || '',
+                mapParentescos.get(s.codigoParentesco || '') || '',
+                s.cedulaFamiliaPeps || '',
+                s.nombreFamiliaPeps || '',
+                s.monedaExtranjera ? 'Sí' : 'No',
+                s.observacionMonedaExtranjera || '',
+                s.cuentaExtranjero ? 'Sí' : 'No',
+                s.tipoMonedaExtranjera || '',
+                s.numeroCuentaExtranjero || '',
+                s.nombreBancoExtranjero || '',
+                s.ciudadCuentaExtranjero || '',
+                s.paisCuentaExtranjero || '',
+                s.fechaCreacion
+                  ? new Date(s.fechaCreacion).toLocaleString()
+                  : '',
+                s.fechaEdicion
+                  ? new Date(s.fechaEdicion).toLocaleString()
+                  : ''
+              ]),
+
+              anchos: [
+                14,
+                28,
+                16,
+                18,
+                14,
+                22,
+                30,
+                16,
+                16,
+                18,
+                26,
+                24,
+                28,
+                30,
+                26,
+                26,
+                20,
+                22,
+                22,
+                22,
+                22,
+                20,
+                20,
+                22
+              ]
+            }
+
+          ]
+
+        });
+
       },
-      error: (err) => {
-        console.error('❌ Error exportando SARLAFT:', err);
+
+      error: err => {
+        console.error('Error exportando SARLAFT:', err);
         alert('No se pudieron cargar los catálogos de referencia.');
       }
+
     });
+  }
+
+  private fechaArchivo(): string {
+
+    const fecha =
+      new Date();
+
+    return `${fecha.getFullYear()}${String(fecha.getMonth() + 1).padStart(2, '0')}${String(fecha.getDate()).padStart(2, '0')}`;
   }
 }

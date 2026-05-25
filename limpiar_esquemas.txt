@@ -1,0 +1,33 @@
+Limpiar tablas CDAT
+TRUNCATE TABLE
+cdat.extractos_cuentas_cdats,
+cdat.causaciones_mensuales_intereses_detalle,
+cdat.causaciones_mensuales_intereses,
+cdat.cierres_mensuales_cdats_detalle,
+cdat.cierres_mensuales_cdats,
+cdat.beneficiarios_cdats,
+cdat.liquidaciones_diarias_control,
+cdat.cuentas_cdats
+RESTART IDENTITY;
+
+Limpiar tablas de nomina
+
+TRUNCATE TABLE 
+nomina.liquidacion_detalle,
+nomina.liquidaciones,
+nomina.eventos_liquidacion,
+nomina.novedades_nomina,
+nomina.periodos_nomina,
+nomina.empleado_contratos,
+nomina.empleados
+RESTART IDENTITY;
+
+
+TRUNCATE TABLE
+depositos.beneficiarios_cuenta_ahorros,
+depositos.canjes_cuentas_ahorros,
+depositos.cuentas_ahorro_conjuntas,
+depositos.extractos_cuentas_ahorros,
+depositos.poderes_cuentas_ahorro,
+depositos.cuentas_ahorro
+RESTART IDENTITY;

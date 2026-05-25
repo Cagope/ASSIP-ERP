@@ -37,7 +37,7 @@ export class LiquidacionContabilizacionComponent {
   private api = inject(LiquidacionContabilizacionApi);
   private periodosApi = inject(PeriodosNominaApi);
   private tiposComprobantesApi = inject(TiposComprobantesApi);
-
+  private liquidacionContabilizacionExporter = inject(LiquidacionContabilizacionExporter);
 
   idPeriodoNomina: number | null = null;
   periodos: any[] = [];
@@ -265,7 +265,7 @@ export class LiquidacionContabilizacionComponent {
 
     const consecutivo = siguiente
       .toString()
-      .padStart(10, '0');
+      .padStart(7, '0');
 
     this.numeroComprobantePreview = consecutivo;
 
@@ -326,7 +326,7 @@ export class LiquidacionContabilizacionComponent {
       return;
     }
 
-    LiquidacionContabilizacionExporter.exportarComprobante(
+    this.liquidacionContabilizacionExporter.exportarComprobante(
       this.movimientos,
       {
         periodo: this.idPeriodoNomina as number,

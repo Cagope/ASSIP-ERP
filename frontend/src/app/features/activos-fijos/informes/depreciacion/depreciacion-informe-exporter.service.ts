@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
+
+import {
+  ExcelExportService
+} from '../../../../shared/services/excel-export.service';
 
 export interface DepreciacionInformeExportMeta {
   agencia?: string;
@@ -7,89 +10,139 @@ export interface DepreciacionInformeExportMeta {
   fechaFin?: string | null;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class DepreciacionInformeExporterService {
 
-  // ============================================================
-  // ✅ EXPORTAR A EXCEL (XLSX)
-  // ============================================================
-  exportar(rows: any[], meta?: DepreciacionInformeExportMeta): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportar(
+    rows: any[],
+    meta?: DepreciacionInformeExportMeta
+  ): void {
 
     if (!rows || rows.length === 0) {
       alert('No hay información para exportar.');
       return;
     }
 
-    const fechaGen = new Date();
-    const fechaTexto = fechaGen.toLocaleString('es-CO');
+    const fechaTexto =
+      new Date().toLocaleString('es-CO');
 
-    // ============================================================
-    // ✅ HOJA 1: INFORME DEPRECIACIÓN
-    // ============================================================
-    const data = rows.map(r => ({
-      'Fecha': r?.fecha ?? '',
-      'Placa': r?.placa_activo ?? '',
-      'Activo': r?.nombre_activo ?? '',
+    this.excelExport.exportar({
 
-      'Valor adquisición': Number(r?.valor_adquisicion ?? 0),
-      'Dep. mensual': Number(r?.valor_depreciacion_mes ?? 0),
-      'Dep. acumulada': Number(r?.valor_depreciacion_acumulada ?? 0),
-      'Neto': Number(r?.valor_neto ?? 0),
-    }));
+      nombreArchivo:
+        this.buildFileName(meta?.agencia),
 
-    const wsDep = XLSX.utils.json_to_sheet(data);
+      hojas: [
 
-    wsDep['!cols'] = [
-      { wch: 12 }, // Fecha
-      { wch: 14 }, // Placa
-      { wch: 40 }, // Activo
-      { wch: 18 }, // Valor adquisición
-      { wch: 16 }, // Dep mensual
-      { wch: 18 }, // Dep acumulada
-      { wch: 14 }, // Neto
-    ];
+        {
+          nombreHoja: 'Filtros',
 
-    // ============================================================
-    // ✅ HOJA 2: FILTROS
-    // ============================================================
-    const metaRows = [
-      { 'Campo': 'Agencia', 'Valor': meta?.agencia ?? 'TODAS' },
-      { 'Campo': 'Fecha Inicial', 'Valor': meta?.fechaIni ?? '' },
-      { 'Campo': 'Fecha Final', 'Valor': meta?.fechaFin ?? '' },
-      { 'Campo': 'Generado', 'Valor': fechaTexto },
-      { 'Campo': 'Total filas', 'Valor': rows.length }
-    ];
+          titulo: 'Filtros informe depreciación',
 
-    const wsMeta = XLSX.utils.json_to_sheet(metaRows);
-    wsMeta['!cols'] = [{ wch: 18 }, { wch: 60 }];
+          columnas: [
+            'Campo',
+            'Valor'
+          ],
 
-    // ============================================================
-    // ✅ LIBRO
-    // ============================================================
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, wsMeta, 'Filtros');
-    XLSX.utils.book_append_sheet(wb, wsDep, 'Depreciacion');
+          filas: [
+            [
+              'Agencia',
+              meta?.agencia || 'TODAS'
+            ],
+            [
+              'Fecha Inicial',
+              meta?.fechaIni || ''
+            ],
+            [
+              'Fecha Final',
+              meta?.fechaFin || ''
+            ],
+            [
+              'Generado',
+              fechaTexto
+            ],
+            [
+              'Total filas',
+              rows.length
+            ]
+          ],
 
-    // ============================================================
-    // ✅ NOMBRE ARCHIVO
-    // ============================================================
-    const fileName = this.buildFileName(meta?.agencia);
+          anchos: [
+            18,
+            60
+          ]
+        },
 
-    XLSX.writeFile(wb, fileName);
+        {
+          nombreHoja: 'Depreciacion',
+
+          titulo: 'Informe depreciación',
+
+          columnas: [
+            'Fecha',
+            'Placa',
+            'Activo',
+            'Valor adquisición',
+            'Dep. mensual',
+            'Dep. acumulada',
+            'Neto'
+          ],
+
+          filas: rows.map(r => [
+            r?.fecha || '',
+            r?.placa_activo || '',
+            r?.nombre_activo || '',
+            Number(r?.valor_adquisicion || 0),
+            Number(r?.valor_depreciacion_mes || 0),
+            Number(r?.valor_depreciacion_acumulada || 0),
+            Number(r?.valor_neto || 0)
+          ]),
+
+          anchos: [
+            12,
+            14,
+            40,
+            18,
+            16,
+            18,
+            14
+          ]
+        }
+
+      ]
+
+    });
   }
 
-  private buildFileName(agencia?: string): string {
+  private buildFileName(
+    agencia?: string
+  ): string {
 
-    const ag = (agencia || 'TODAS')
-      .toUpperCase()
-      .replaceAll(' ', '_')
-      .replaceAll('/', '-')
-      .replaceAll('.', '');
+    const ag =
+      (agencia || 'TODAS')
+        .toUpperCase()
+        .replaceAll(' ', '_')
+        .replaceAll('/', '-')
+        .replaceAll('.', '');
 
     const hoy = new Date();
-    const yyyy = hoy.getFullYear();
-    const mm = String(hoy.getMonth() + 1).padStart(2, '0');
-    const dd = String(hoy.getDate()).padStart(2, '0');
+
+    const yyyy =
+      hoy.getFullYear();
+
+    const mm =
+      String(hoy.getMonth() + 1)
+        .padStart(2, '0');
+
+    const dd =
+      String(hoy.getDate())
+        .padStart(2, '0');
 
     return `DEPRECIACION_${ag}_${yyyy}${mm}${dd}.xlsx`;
   }

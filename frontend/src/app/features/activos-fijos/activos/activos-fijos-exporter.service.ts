@@ -1,34 +1,89 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
-import { ActivoFijoListDTO } from './activos-fijos.api';
 
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService
+} from '../../../shared/services/excel-export.service';
+import {
+  ActivoFijoListDTO
+} from './activos-fijos.api';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class ActivosFijosExporterService {
 
-  exportar(items: ActivoFijoListDTO[]): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportar(
+    items: ActivoFijoListDTO[]
+  ): void {
 
     if (!items || items.length === 0) {
       alert('No hay información para exportar.');
       return;
     }
 
-    const data = items.map(a => ({
+    this.excelExport.exportar({
 
-      'Placa': a.placaActivo,
-      'Nombre Activo': a.nombreActivo,
-      'Agencia': a.nombreAgencia,
-      'Fecha Ingreso': a.fechaIngreso,
-      'Meses Depreciación': a.mesesDepreciacion,
-      'Valor Adquisición': a.valorAdquisicion,
-      'Valor Mensual Depreciación': a.valorMensual,
-      'Estado': a.nombreEstadoActivo
+      nombreArchivo: 'activos_fijos.xlsx',
 
-    }));
+      hojas: [
 
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
+        {
+          nombreHoja: 'Activos Fijos',
 
-    XLSX.utils.book_append_sheet(wb, ws, 'Activos Fijos');
-    XLSX.writeFile(wb, 'activos_fijos.xlsx');
+          titulo: 'Listado de activos fijos',
+
+          columnas: [
+            'Placa',
+            'Nombre Activo',
+            'Agencia',
+            'Fecha Ingreso',
+            'Meses Depreciación',
+            'Valor Adquisición',
+            'Valor Mensual Depreciación',
+            'Estado'
+          ],
+
+          filas: items.map(a => [
+
+            a.placaActivo || '',
+
+            a.nombreActivo || '',
+
+            a.nombreAgencia || '',
+
+            a.fechaIngreso || '',
+
+            Number(a.mesesDepreciacion || 0),
+
+            Number(a.valorAdquisicion || 0),
+
+            Number(a.valorMensual || 0),
+
+            a.nombreEstadoActivo || ''
+
+          ]),
+
+          anchos: [
+            18,
+            42,
+            28,
+            18,
+            18,
+            22,
+            26,
+            22
+          ]
+        }
+
+      ]
+
+    });
+
   }
+
 }

@@ -1,12 +1,12 @@
-import { Component, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
+import { HeaderActionsComponent } from '../../../../shared/header-actions/header-actions.component';
+import { GeneralApi } from '../../../../shared/general/general.api';
+
 import { InconsistenciasApi, InconsistenciasRequest } from './inconsistencias.api';
 import { InconsistenciasExporterService } from './inconsistencias-exporter.service';
-
-// 🔹 Necesario para el header superior
-import { HeaderActionsComponent } from '../../../../shared/header-actions/header-actions.component';
 
 @Component({
   selector: 'app-inconsistencias-list',
@@ -19,31 +19,42 @@ import { HeaderActionsComponent } from '../../../../shared/header-actions/header
   templateUrl: './inconsistencias-list.component.html',
   styleUrls: ['./inconsistencias-list.component.scss']
 })
-export class InconsistenciasListComponent {
+export class InconsistenciasListComponent implements OnInit {
 
-  private api = inject(InconsistenciasApi);
-  private exporter = inject(InconsistenciasExporterService);
+  private readonly api = inject(InconsistenciasApi);
+  private readonly generalApi = inject(GeneralApi);
+  private readonly exporter = inject(InconsistenciasExporterService);
 
   cargando = false;
   error = '';
   items: any[] = [];
 
-  agencias = [
-    { id: '0', nombre: 'Todas' },
-    { id: '1', nombre: 'Agencia 01' },
-    { id: '2', nombre: 'Agencia 02' },
-    { id: '3', nombre: 'Agencia 03' }
-  ];
+  agencias: any[] = [];
 
   filtros: InconsistenciasRequest = {
     agencia: '0',
     fechaCorte: ''
   };
 
-  // ============================================================
-  // 🔍 Buscar inconsistencias
-  // ============================================================
-  buscar() {
+  async ngOnInit(): Promise<void> {
+    await this.cargarAgencias();
+  }
+
+  async cargarAgencias(): Promise<void> {
+    try {
+      const agencias =
+        await this.generalApi.listarAgencias().toPromise();
+
+      this.agencias =
+        agencias || [];
+
+    } catch (e) {
+      console.error('Error cargando agencias:', e);
+      this.agencias = [];
+    }
+  }
+
+  buscar(): void {
 
     if (!this.filtros.fechaCorte) {
       this.error = 'Debe seleccionar una fecha de corte';
@@ -66,23 +77,21 @@ export class InconsistenciasListComponent {
     });
   }
 
-  // ============================================================
-  // 🧹 Limpiar formulario
-  // ============================================================
-  limpiar() {
+  limpiar(): void {
     this.filtros = {
       agencia: '0',
       fechaCorte: ''
     };
+
     this.items = [];
     this.error = '';
   }
 
-  // ============================================================
-  // 📥 Exportar a Excel
-  // ============================================================
-  exportar() {
-    if (!this.items || this.items.length === 0) return;
+  exportar(): void {
+    if (!this.items || this.items.length === 0) {
+      return;
+    }
+
     this.exporter.exportar(this.items);
   }
 }

@@ -1,73 +1,105 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
 
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService
+} from '../../../shared/services/excel-export.service';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class NovedadesNominaExporterService {
 
-  exportar(items: any[]): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportar(
+    items: any[]
+  ): void {
 
     if (!items || items.length === 0) {
       alert('No hay información para exportar.');
       return;
     }
 
-    const data = items.map(x => ({
+    this.excelExport.exportar({
 
-      // =========================
-      // NOVEDAD
-      // =========================
-      'ID Novedad': x.idNovedad ?? '',
+      nombreArchivo:
+        'novedades_nomina.xlsx',
 
-      // =========================
-      // EMPLEADO
-      // =========================
-      'ID Empleado': x.idEmpleado ?? '',
-      'Documento': x.documentoEmpleado ?? '',
-      'Nombre Empleado': x.nombreEmpleado ?? '',
+      hojas: [
 
-      // =========================
-      // CONTRATO / CONCEPTO
-      // =========================
-      'ID Contrato': x.idContrato ?? '',
-      'Concepto': x.codigoConcepto ?? '',
+        {
+          nombreHoja:
+            'Novedades',
 
-      // =========================
-      // FECHAS
-      // =========================
-      'Fecha Inicial': x.fechaInicial ?? '',
-      'Fecha Final': x.fechaFinal ?? '',
+          titulo:
+            'NOVEDADES NÓMINA',
 
-      // =========================
-      // VALORES
-      // =========================
-      'Cantidad': x.cantidad ?? 0,
-      'Valor': x.valor ?? 0,
+          columnas: [
+            'ID Novedad',
+            'ID Empleado',
+            'Documento',
+            'Nombre Empleado',
+            'ID Contrato',
+            'Concepto',
+            'Fecha Inicial',
+            'Fecha Final',
+            'Cantidad',
+            'Valor',
+            'Estado',
+            'Observación',
+            'Año',
+            'Mes',
+            'Número Período',
+            'Tipo Período',
+            'Agencia'
+          ],
 
-      // =========================
-      // ESTADO / OBSERVACIÓN
-      // =========================
-      'Estado': x.estado ?? '',
-      'Observación': x.observacion ?? '',
+          filas: items.map(x => [
+            x.idNovedad ?? '',
+            x.idEmpleado ?? '',
+            x.documentoEmpleado ?? '',
+            x.nombreEmpleado ?? '',
+            x.idContrato ?? '',
+            x.codigoConcepto ?? '',
+            x.fechaInicial ?? '',
+            x.fechaFinal ?? '',
+            Number(x.cantidad ?? 0),
+            Number(x.valor ?? 0),
+            x.estado ?? '',
+            x.observacion ?? '',
+            x.anio ?? '',
+            x.mes ?? '',
+            x.numeroPeriodo ?? '',
+            x.tipoPeriodo ?? '',
+            x.fkAgencia ?? ''
+          ]),
 
-      // =========================
-      // PERÍODO
-      // =========================
-      'Año': x.anio ?? '',
-      'Mes': x.mes ?? '',
-      'Número Período': x.numeroPeriodo ?? '',
-      'Tipo Período': x.tipoPeriodo ?? '',
+          anchos: [
+            14,
+            14,
+            18,
+            40,
+            14,
+            16,
+            16,
+            16,
+            14,
+            18,
+            16,
+            42,
+            10,
+            10,
+            16,
+            18,
+            14
+          ]
+        }
 
-      // =========================
-      // AGENCIA
-      // =========================
-      'Agencia': x.fkAgencia ?? ''
+      ]
 
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-
-    XLSX.utils.book_append_sheet(wb, ws, 'Novedades');
-    XLSX.writeFile(wb, 'novedades_nomina.xlsx');
+    });
   }
 }

@@ -1,16 +1,23 @@
 <div class="page">
 
   <div class="page-header">
-    <h2>CDATs</h2>
+    <h2>Inclusión de CDATs</h2>
 
     <div class="header-actions">
-      <button class="btn btn-secondary" (click)="refrescar()">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="refrescar()">
         Refrescar
       </button>
 
-      <a class="btn btn-primary" [routerLink]="['/cdat/cdats/nuevo']">
+      <a
+        class="btn btn--primary"
+        [routerLink]="['/cdat/cdats/nuevo']">
         Nuevo CDAT
       </a>
+
     </div>
   </div>
 

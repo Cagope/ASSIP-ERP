@@ -1,12 +1,24 @@
-import * as XLSX from 'xlsx';
-import { LiquidacionMovimientoContableDTO } from '../liquidacion/liquidacion-contabilizacion.api';
+import { Injectable } from '@angular/core';
 
+import {
+  ExcelExportService
+} from '../../../../shared/services/excel-export.service';
+
+import {
+  LiquidacionMovimientoContableDTO
+} from '../liquidacion/liquidacion-contabilizacion.api';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class PrestacionesSocialesContabilizacionExporter {
 
-  // =========================================================
-  // EXPORTAR COMPROBANTE CONTABLE (REPORTE)
-  // =========================================================
-  static exportarComprobante(
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportarComprobante(
     movimientos: LiquidacionMovimientoContableDTO[],
     params: {
       periodo: number;
@@ -20,62 +32,71 @@ export class PrestacionesSocialesContabilizacionExporter {
     }
   ): void {
 
-    if (!movimientos || movimientos.length === 0) return;
+    if (!movimientos || movimientos.length === 0) {
+      alert('No hay información para exportar.');
+      return;
+    }
 
     const mes2 = String(params.mes).padStart(2, '0');
     const agencia2 = String(params.codigoAgencia).padStart(2, '0');
     const mesTexto = `${params.anio}-${mes2}`;
 
-    const header = [
-      ['COMPROBANTE CONTABLE PRESTACIONES SOCIALES'],
-      [`Mes nómina: ${mesTexto}`],
-      [`Fecha contabilización: ${params.fechaContabilizacion ?? ''}`],
-      [`Documento: ${params.tipoComprobante} ${params.numeroComprobante}`],
-      []
-    ];
+    this.excelExport.exportar({
+      nombreArchivo:
+        `comprobante_prestaciones_sociales_${params.anio}_${mes2}_${agencia2}.xlsx`,
 
-    const rows = movimientos.map((m, i) => ({
+      hojas: [
+        {
+          nombreHoja: 'Prestaciones',
 
-      '#': i + 1,
+          titulo: 'COMPROBANTE CONTABLE PRESTACIONES SOCIALES',
 
-      'Agencia': m.idAgencia,
+          filtros: [
+            ['Mes nómina', mesTexto],
+            ['Fecha contabilización', params.fechaContabilizacion || ''],
+            ['Documento', `${params.tipoComprobante} ${params.numeroComprobante}`]
+          ],
 
-      'Cuenta': m.codigoCuenta,
+          columnas: [
+            '#',
+            'Agencia',
+            'Cuenta',
+            'Nombre cuenta',
+            'Tercero',
+            'Empleado referencia',
+            'Débito',
+            'Crédito',
+            'Base movimiento',
+            'Documento tercero'
+          ],
 
-      'Nombre cuenta': m.nombreCuenta,
+          filas: movimientos.map((m, i) => [
+            i + 1,
+            m.idAgencia ?? '',
+            m.codigoCuenta || '',
+            m.nombreCuenta || '',
+            m.nombreTercero || '',
+            m.nombreEmpleadoReferencia || '',
+            Number(m.debito || 0),
+            Number(m.credito || 0),
+            Number(m.valorBase || 0),
+            m.documentoTercero || ''
+          ]),
 
-      'Tercero': m.nombreTercero ?? '',
-
-      'Empleado referencia': m.nombreEmpleadoReferencia ?? '',
-
-      'Débito': Number(m.debito ?? 0),
-
-      'Crédito': Number(m.credito ?? 0),
-
-      'Base movimiento': Number(m.valorBase ?? 0),
-
-      'Documento tercero': m.documentoTercero ?? ''
-
-    }));
-
-    const ws = XLSX.utils.aoa_to_sheet(header);
-
-    XLSX.utils.sheet_add_json(ws, rows, {
-      origin: 'A6'
+          anchos: [
+            8,
+            12,
+            18,
+            38,
+            34,
+            34,
+            18,
+            18,
+            18,
+            20
+          ]
+        }
+      ]
     });
-
-    const wb = XLSX.utils.book_new();
-
-    XLSX.utils.book_append_sheet(
-      wb,
-      ws,
-      'Prestaciones'
-    );
-
-    const fileName =
-      `comprobante_prestaciones_sociales_${params.anio}_${mes2}_${agencia2}.xlsx`;
-
-    XLSX.writeFile(wb, fileName);
   }
-
 }

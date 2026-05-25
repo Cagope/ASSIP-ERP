@@ -1,53 +1,85 @@
-/* ==========================================================
-   🌐 Paginación Global — ASSIP-ERP
-   ==========================================================
-   Uso: Listados con paginación local (Datos Personales,
-   Ubicaciones, Directivos, etc.)
-   ========================================================== */
-@use 'sass:color';
+/* ==========================================================================
+   🌐 ASSIP-ERP — PAGINACIÓN GLOBAL
+   Archivo: src/styles/_pagination.scss
+   ========================================================================== */
+
 @use './tokens' as t;
 
+/* === CONTENEDOR ========================================================== */
 .pagination-controls {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.75rem;
-  margin: 1.5rem auto 0 auto;
+  flex-wrap: wrap;
+
+  gap: t.$space-3;
+
   width: 100%;
+  margin: t.$space-6 auto 0;
+
   text-align: center;
-  font-size: 0.9rem;
   color: t.$color-text-muted;
 
+  font-size: t.$font-size-md;
+
   span {
-    font-weight: 500;
+    font-weight: t.$font-weight-medium;
   }
 
   button {
+    min-width: 34px;
+    height: 32px;
+
+    padding: 0 t.$space-3;
+
     background: t.$color-surface;
+    color: t.$color-text;
+
     border: 1px solid t.$color-border;
     border-radius: t.$radius-sm;
-    padding: 0.3rem 0.6rem;
+
     cursor: pointer;
+
+    font-size: t.$font-size-sm;
+    font-weight: t.$font-weight-semibold;
     text-transform: uppercase;
-    font-weight: 600;
-    color: t.$color-text;
-    transition: background-color 0.15s ease-in-out, transform 0.1s ease-in-out;
+
+    transition:
+      background-color 0.15s ease-in-out,
+      border-color 0.15s ease-in-out,
+      transform 0.1s ease-in-out;
 
     &:hover:not(:disabled) {
-      background-color: color.scale(t.$color-surface, $lightness: -5%);
+      background-color: #f3f4f6;
+      border-color: #cfd4dc;
       transform: translateY(-1px);
     }
 
     &:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+      transform: none;
     }
   }
 }
 
-/* 🔹 Responsivo: oculta el texto de página en pantallas pequeñas */
+/* === VARIANTE SIMPLE ===================================================== */
+.pagination-controls.compact {
+  gap: t.$space-2;
+
+  button {
+    min-width: 28px;
+    height: 28px;
+    padding: 0 t.$space-2;
+    font-size: t.$font-size-xs;
+  }
+}
+
+/* === RESPONSIVE ========================================================== */
 @media (max-width: 600px) {
-  .pagination-controls span {
-    display: none;
+  .pagination-controls {
+    span {
+      display: none;
+    }
   }
 }

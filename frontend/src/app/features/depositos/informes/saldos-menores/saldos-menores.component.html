@@ -1,0 +1,184 @@
+<div class="page">
+  <app-header-actions
+    titulo="Saldos menores"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <div class="card">
+    <form class="filtros" (ngSubmit)="buscar()">
+
+      <div class="f-row">
+        <label>Fecha de corte</label>
+        <input type="date" [(ngModel)]="filtros.fechaCorte" name="fechaCorte">
+      </div>
+
+      <div class="f-row">
+        <label>Agencia</label>
+        <select [(ngModel)]="filtros.idAgencia" name="idAgencia">
+          <option [ngValue]="0">Seleccione agencia</option>
+          <option *ngFor="let a of agencias" [ngValue]="a.idAgencia">
+            {{ a.nombreAgencia }}
+          </option>
+        </select>
+      </div>
+
+      <div class="f-row">
+        <label>Forma de ahorro</label>
+
+        <select
+          [(ngModel)]="filtros.codigoForma"
+          name="codigoForma">
+
+          <option [ngValue]="'0'">
+            Todas las formas
+          </option>
+
+          <option
+            *ngFor="let f of formas"
+            [ngValue]="f.codigoForma">
+
+            {{ f.codigoForma }} - {{ f.nombreForma | titlecase }}
+
+          </option>
+
+        </select>
+      </div>
+
+      <div class="f-row">
+        <label>Valor máximo</label>
+        <input
+          type="text"
+          numericFormat
+          class="input-number"
+          [(ngModel)]="filtros.valorMaximo"
+          name="valorMaximo">
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn--secondary" (click)="limpiar()">
+          Limpiar
+        </button>
+
+        <button type="submit" class="btn btn--primary" [disabled]="cargando">
+          Buscar
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <div *ngIf="cargando" class="loading">
+    Cargando informe...
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <div class="card" *ngIf="resumen">
+
+    <section class="resumen">
+
+      <h3>Resumen del informe</h3>
+
+      <div class="cards">
+
+        <div class="card gray">
+          <div class="label">Total cuentas</div>
+          <div class="value right">
+            {{ resumen.totalCuentas | number:'1.0-0' }}
+          </div>
+        </div>
+
+        <div class="card green">
+          <div class="label">Total saldos</div>
+          <div class="value right">
+            {{ resumen.totalSaldos | number:'1.2-2' }}
+          </div>
+        </div>
+
+        <div class="card blue">
+          <div class="label">Saldo promedio</div>
+          <div class="value right">
+            {{ resumen.saldoPromedio | number:'1.2-2' }}
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <div class="form-actions form-actions-result">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="exportar()">
+        Exportar Excel
+      </button>
+
+    </div>
+
+  </div>
+
+  <ng-container *ngIf="items.length > 0">
+
+    <div
+      class="card"
+      *ngFor="let grupo of formasConDatos()">
+
+      <h3>
+        {{ grupo.codigoForma }} - {{ grupo.nombreForma }}
+      </h3>
+
+      <div class="totales-detalle">
+        <span>
+          Cuentas
+          <strong>{{ grupo.items.length | number:'1.0-0' }}</strong>
+        </span>
+
+        <span>
+          Total saldo
+          <strong>{{ totalForma(grupo.items) | number:'1.2-2' }}</strong>
+        </span>
+      </div>
+
+      <div class="table-container">
+        <table class="tabla-resumen">
+
+          <thead>
+          <tr>
+            <th>Agencia</th>
+            <th>Cuenta</th>
+            <th>Documento</th>
+            <th>Nombre</th>
+            <th>Fecha apertura</th>
+            <th>Estado</th>
+            <th class="right">Saldo corte</th>
+          </tr>
+          </thead>
+
+          <tbody>
+          <tr *ngFor="let item of grupo.items">
+            <td>{{ item.nombreAgencia }}</td>
+            <td>{{ item.codigoCuenta }}</td>
+            <td>{{ item.documento }}</td>
+            <td>{{ item.nombreCompleto }}</td>
+            <td>{{ item.fechaApertura }}</td>
+            <td>{{ item.estadoCuenta }}</td>
+            <td class="right">
+              {{ item.saldoCorte | number:'1.2-2' }}
+            </td>
+          </tr>
+          </tbody>
+
+        </table>
+      </div>
+
+    </div>
+
+  </ng-container>
+
+</div>

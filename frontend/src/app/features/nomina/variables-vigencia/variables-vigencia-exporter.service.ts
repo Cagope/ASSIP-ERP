@@ -1,55 +1,151 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
-import { VariablesVigenciaListDTO, VariablesVigenciaFormDTO } from './variables-vigencia.api';
 
-type ExportDTO = VariablesVigenciaListDTO & Partial<VariablesVigenciaFormDTO>;
+import {
+  ExcelExportService
+} from '../../../shared/services/excel-export.service';
 
-@Injectable({ providedIn: 'root' })
+import {
+  VariablesVigenciaListDTO,
+  VariablesVigenciaFormDTO
+} from './variables-vigencia.api';
+
+type ExportDTO =
+  VariablesVigenciaListDTO &
+  Partial<VariablesVigenciaFormDTO>;
+
+@Injectable({
+  providedIn: 'root'
+})
 export class VariablesVigenciaExporterService {
 
-  exportar(items: ExportDTO[]): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportar(
+    items: ExportDTO[]
+  ): void {
 
     if (!items || items.length === 0) {
       alert('No hay información para exportar.');
       return;
     }
 
-    const data = items.map(x => ({
-      'ID': x.idVariable ?? '',
-      'Fecha inicial': x.fechaInicial ?? '',
-      'Fecha final': x.fechaFinal ?? '',
+    this.excelExport.exportar({
 
-      'SMMLV': (x as any).smmlv ?? '',
-      'Aux transporte': (x as any).auxTransporte ?? '',
+      nombreArchivo:
+        'variables_vigencia.xlsx',
 
-      '% Salud empleado': (x as any).porcSaludEmpleado ?? '',
-      '% Salud empleador': (x as any).porcSaludEmpleador ?? '',
+      hojas: [
 
-      '% Pensión empleado': (x as any).porcPensionEmpleado ?? '',
-      '% Pensión empleador': (x as any).porcPensionEmpleador ?? '',
+        {
+          nombreHoja:
+            'VariablesVigencia',
 
-      '% Caja compensación': (x as any).porcCajaCompensacion ?? '',
-      '% SENA': (x as any).porcSena ?? '',
-      '% ICBF': (x as any).porcIcbf ?? '',
+          titulo:
+            'VARIABLES DE VIGENCIA NÓMINA',
 
-      '% Prov. prima': (x as any).porProvisionPrima ?? '',
-      '% Prov. vacaciones': (x as any).porProvisionVacaciones ?? '',
-      '% Prov. cesantías': (x as any).porProvisionCesantias ?? '',
-      '% Prov. interés cesantías': (x as any).porProvisionInteresCesantias ?? '',
+          columnas: [
+            'ID',
+            'Fecha inicial',
+            'Fecha final',
 
-      'Tope IBC mínimo (SMMLV)': (x as any).topeIbcMinSmmlv ?? '',
-      'Tope IBC máximo (SMMLV)': (x as any).topeIbcMaxSmmlv ?? '',
+            'SMMLV',
+            'Aux transporte',
 
-      'Exonerado salud': ((x as any).exoneradoSalud ? 'SI' : 'NO'),
-      'Exonerado parafiscales': ((x as any).exoneradoParafiscales ? 'SI' : 'NO'),
+            '% Salud empleado',
+            '% Salud empleador',
 
-      'Activo': (x.activo ? 'SI' : 'NO'),
-    }));
+            '% Pensión empleado',
+            '% Pensión empleador',
 
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
+            '% Caja compensación',
+            '% SENA',
+            '% ICBF',
 
-    XLSX.utils.book_append_sheet(wb, ws, 'VariablesVigencia');
-    XLSX.writeFile(wb, 'variables_vigencia.xlsx');
+            '% Prov. prima',
+            '% Prov. vacaciones',
+            '% Prov. cesantías',
+            '% Prov. interés cesantías',
+
+            'Tope IBC mínimo (SMMLV)',
+            'Tope IBC máximo (SMMLV)',
+
+            'Exonerado salud',
+            'Exonerado parafiscales',
+
+            'Activo'
+          ],
+
+          filas: items.map(x => [
+
+            x.idVariable ?? '',
+            x.fechaInicial ?? '',
+            x.fechaFinal ?? '',
+
+            Number((x as any).smmlv ?? 0),
+            Number((x as any).auxTransporte ?? 0),
+
+            Number((x as any).porcSaludEmpleado ?? 0),
+            Number((x as any).porcSaludEmpleador ?? 0),
+
+            Number((x as any).porcPensionEmpleado ?? 0),
+            Number((x as any).porcPensionEmpleador ?? 0),
+
+            Number((x as any).porcCajaCompensacion ?? 0),
+            Number((x as any).porcSena ?? 0),
+            Number((x as any).porcIcbf ?? 0),
+
+            Number((x as any).porProvisionPrima ?? 0),
+            Number((x as any).porProvisionVacaciones ?? 0),
+            Number((x as any).porProvisionCesantias ?? 0),
+            Number((x as any).porProvisionInteresCesantias ?? 0),
+
+            Number((x as any).topeIbcMinSmmlv ?? 0),
+            Number((x as any).topeIbcMaxSmmlv ?? 0),
+
+            (x as any).exoneradoSalud ? 'SI' : 'NO',
+            (x as any).exoneradoParafiscales ? 'SI' : 'NO',
+
+            x.activo ? 'SI' : 'NO'
+          ]),
+
+          anchos: [
+            12,
+            16,
+            16,
+
+            18,
+            18,
+
+            20,
+            20,
+
+            20,
+            20,
+
+            22,
+            16,
+            16,
+
+            20,
+            22,
+            22,
+            28,
+
+            24,
+            24,
+
+            18,
+            24,
+
+            12
+          ]
+        }
+
+      ]
+
+    });
   }
 }

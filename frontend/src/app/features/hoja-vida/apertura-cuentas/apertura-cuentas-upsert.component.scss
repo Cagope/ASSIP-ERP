@@ -1,92 +1,8 @@
-/* ===========================================================
-   💳 FORMULARIO DE APERTURA DE CUENTA — Estilos específicos
-   Basado en el diseño general del ERP ASSIP.
-   =========================================================== */
+@use '../datos-personales/datos-personales-upsert.component' as *;
 
 /* ===========================================================
-   🎨 CONTENEDOR PRINCIPAL
-   =========================================================== */
-
-.form-container {
-  display: block;
-  background: #fff;
-  border-radius: 10px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-}
-
-/* === Título principal === */
-h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 1rem;
-}
-
-/* === Encabezado de sección === */
-fieldset legend {
-  font-weight: 600;
-  color: #1f2937;
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-/* ===========================================================
-   📐 DISTRIBUCIÓN DE CAMPOS
-   =========================================================== */
-
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-}
-
-.form-group.full {
-  grid-column: 1 / -1;
-}
-
-.form-group.sm {
-  min-width: 160px;
-}
-
-/* ===========================================================
-   🧾 CAMPOS DE ENTRADA
-   =========================================================== */
-
-input,
-select {
-  width: 100%;
-  padding: 0.45rem 0.6rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  transition: all 0.2s ease;
-  background-color: #fff;
-
-  &:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
-  }
-}
-
-label {
-  display: block;
-  font-weight: 500;
-  color: #333;
-  margin-bottom: 0.25rem;
-}
-
-.error-text {
-  color: #dc3545;
-  font-size: 0.8rem;
-  margin-top: 2px;
-}
-
-/* ===========================================================
-   🎯 PERSONALIZACIONES APERTURA DE CUENTA
-   =========================================================== */
+   PERSONALIZACIONES APERTURA CUENTA
+=========================================================== */
 
 input[formControlName='documentoApoderado']::placeholder {
   color: #999;
@@ -95,19 +11,22 @@ input[formControlName='documentoApoderado']::placeholder {
 
 [numericFormat] {
   text-align: right;
+
   font-family: 'Courier New', monospace;
   letter-spacing: 0.5px;
 }
 
 /* ===========================================================
-   🔔 MENSAJE DE BLOQUEO
-   =========================================================== */
+   ALERTAS
+=========================================================== */
 
 .alert {
   padding: 0.75rem 1rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
+
   border-left: 4px solid;
+  border-radius: 6px;
+
+  font-size: 0.9rem;
 }
 
 .alert-warning {
@@ -117,24 +36,10 @@ input[formControlName='documentoApoderado']::placeholder {
 }
 
 /* ===========================================================
-   🧭 ACCIONES
-   =========================================================== */
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-
-/* ===========================================================
-   📱 RESPONSIVE
-   =========================================================== */
+   RESPONSIVE
+=========================================================== */
 
 @media (max-width: 768px) {
-  .form-container {
-    padding: 1rem;
-  }
 
   .form-row {
     grid-template-columns: 1fr;
@@ -143,9 +48,10 @@ input[formControlName='documentoApoderado']::placeholder {
   .form-actions {
     flex-direction: column;
     align-items: stretch;
-
-    .btn {
-      width: 100%;
-    }
   }
+
+  .form-actions .btn {
+    width: 100%;
+  }
+
 }

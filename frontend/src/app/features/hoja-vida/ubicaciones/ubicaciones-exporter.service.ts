@@ -1,41 +1,66 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-import { Ubicacion } from '../../../shared/models/ubicacion.model';
-import { CatalogosApi, CodigoNombreDTO, Departamento, Ciudad } from '../../../shared/catalogos/catalogos.api';
-import { GeneralApi, SubZonaDTO } from '../../../shared/general/general.api';
+import {
+  ExcelExportService
+} from '../../../shared/services/excel-export.service';
 
-/**
- * 📦 Servicio de exportación a Excel — Listado de Ubicaciones
- * Decodifica País, Departamento, Ciudad y Sub Zona antes de exportar.
- */
-@Injectable({ providedIn: 'root' })
+import {
+  Ubicacion
+} from '../../../shared/models/ubicacion.model';
+
+import {
+  CatalogosApi,
+  CodigoNombreDTO,
+  Departamento,
+  Ciudad
+} from '../../../shared/catalogos/catalogos.api';
+
+import {
+  GeneralApi,
+  SubZonaDTO
+} from '../../../shared/general/general.api';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class UbicacionesExporterService {
+
   constructor(
     private catalogos: CatalogosApi,
-    private general: GeneralApi
-  ) {}
+    private general: GeneralApi,
+    private excelExport: ExcelExportService
+  ) {
+  }
 
   exportarExcel(
-    ubicaciones: (Ubicacion & { documento?: string; nombrePersona?: string })[]
+    ubicaciones: (Ubicacion & {
+      documento?: string;
+      nombrePersona?: string;
+    })[]
   ): void {
+
     if (!ubicaciones || ubicaciones.length === 0) {
-      alert('⚠️ No hay ubicaciones para exportar.');
+      alert('No hay ubicaciones para exportar.');
       return;
     }
 
-    // 🔹 Reunir IDs de departamentos usados
-    const idsDepartamentos = [...new Set(ubicaciones.map(u => u.idDepartamento).filter((id): id is number => !!id))];
+    const idsDepartamentos = [
+      ...new Set(
+        ubicaciones
+          .map(u => u.idDepartamento)
+          .filter((id): id is number => !!id)
+      )
+    ];
 
     const observablesCiudades =
       idsDepartamentos.length > 0
         ? idsDepartamentos.map(id =>
-            this.catalogos
-              .listarCiudadesPorDepartamento(Number(id))
-              .pipe(catchError(() => of([] as Ciudad[])))
-          )
+          this.catalogos
+            .listarCiudadesPorDepartamento(Number(id))
+            .pipe(catchError(() => of([] as Ciudad[])))
+        )
         : [of([] as Ciudad[])];
 
     forkJoin({
@@ -44,74 +69,132 @@ export class UbicacionesExporterService {
       subZonas: this.general.listarSubZonas(),
       ciudadesPorDepto: forkJoin(observablesCiudades)
     }).subscribe({
-      next: (cat) => {
-        const todasCiudades = (cat.ciudadesPorDepto ?? []).flat();
 
-        // 🗺️ Mapas de referencia
-        const mapPaises = new Map<string | number, string>(
-          (cat.paises ?? []).map((p: CodigoNombreDTO) => [p.codigo, p.nombre])
-        );
-        const mapDeptos = new Map<number, string>(
-          (cat.departamentos ?? []).map((d: Departamento) => [d.idDepartamento, d.nombreDepartamento])
-        );
-        const mapCiudades = new Map<number, string>(
-          todasCiudades.map((c: Ciudad) => [c.idCiudad, c.nombreCiudad])
-        );
-        const mapSubZonas = new Map<string | number, string>(
-          (cat.subZonas ?? []).map((s: SubZonaDTO) => [s.idSubZona, s.nombreSubZona])
-        );
+      next: cat => {
 
-        // 🧩 Decodificar campos
-        const ubicacionesDecod = ubicaciones.map(u => ({
-          Documento: u.documento ?? '',
-          'Nombre Persona': u.nombrePersona ?? '',
-          Dirección: u.direccion ?? '',
-          Barrio: u.barrio ?? '',
-          Teléfono: u.telefono ?? '',
-          'Celular 1': u.celularUno ?? '',
-          'Celular 2': u.celularDos ?? '',
-          Correo: u.correo ?? '',
-          País: mapPaises.get(u.idPais ?? '') ?? '',
-          Departamento: mapDeptos.get(u.idDepartamento ?? 0) ?? '',
-          Ciudad: mapCiudades.get(u.idCiudad ?? 0) ?? '',
-          'Sub Zona': mapSubZonas.get(u.idSubZona ?? '') ?? '',
-          'Fecha Creación': u.fechaCreacion ? new Date(u.fechaCreacion).toLocaleString() : '',
-          'Fecha Edición': u.fechaEdicion ? new Date(u.fechaEdicion).toLocaleString() : ''
-        }));
+        const todasCiudades =
+          (cat.ciudadesPorDepto || []).flat();
 
-        // 📊 Generar hoja y libro
-        const ws = XLSX.utils.json_to_sheet(ubicacionesDecod);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Ubicaciones');
+        const mapPaises =
+          new Map<string | number, string>(
+            (cat.paises || []).map((p: CodigoNombreDTO) => [
+              p.codigo,
+              p.nombre
+            ])
+          );
 
-        // 🧾 Ajuste de anchos de columna
-        (ws as any)['!cols'] = [
-          { wch: 14 }, // Documento
-          { wch: 30 }, // Nombre
-          { wch: 40 }, // Dirección
-          { wch: 22 }, // Barrio
-          { wch: 12 }, // Teléfono
-          { wch: 14 }, // Celular 1
-          { wch: 14 }, // Celular 2
-          { wch: 30 }, // Correo
-          { wch: 20 }, // País
-          { wch: 22 }, // Departamento
-          { wch: 24 }, // Ciudad
-          { wch: 22 }, // Sub Zona
-          { wch: 22 }, // Fecha Creación
-          { wch: 22 }  // Fecha Edición
-        ];
+        const mapDeptos =
+          new Map<number, string>(
+            (cat.departamentos || []).map((d: Departamento) => [
+              d.idDepartamento,
+              d.nombreDepartamento
+            ])
+          );
 
-        // 🗓️ Nombre del archivo
-        const fecha = new Date();
-        const sufijo = `${fecha.getFullYear()}${String(fecha.getMonth() + 1).padStart(2, '0')}${String(fecha.getDate()).padStart(2, '0')}`;
+        const mapCiudades =
+          new Map<number, string>(
+            todasCiudades.map((c: Ciudad) => [
+              c.idCiudad,
+              c.nombreCiudad
+            ])
+          );
 
-        XLSX.writeFile(wb, `ubicaciones_${sufijo}.xlsx`);
+        const mapSubZonas =
+          new Map<string | number, string>(
+            (cat.subZonas || []).map((s: SubZonaDTO) => [
+              s.idSubZona,
+              s.nombreSubZona
+            ])
+          );
+
+        this.excelExport.exportar({
+
+          nombreArchivo:
+            `ubicaciones_${this.fechaArchivo()}.xlsx`,
+
+          hojas: [
+
+            {
+              nombreHoja:
+                'Ubicaciones',
+
+              titulo:
+                'UBICACIONES',
+
+              columnas: [
+                'Documento',
+                'Nombre Persona',
+                'Dirección',
+                'Barrio',
+                'Teléfono',
+                'Celular 1',
+                'Celular 2',
+                'Correo',
+                'País',
+                'Departamento',
+                'Ciudad',
+                'Sub Zona',
+                'Fecha Creación',
+                'Fecha Edición'
+              ],
+
+              filas: ubicaciones.map(u => [
+                u.documento || '',
+                u.nombrePersona || '',
+                u.direccion || '',
+                u.barrio || '',
+                u.telefono || '',
+                u.celularUno || '',
+                u.celularDos || '',
+                u.correo || '',
+                mapPaises.get(u.idPais || '') || '',
+                mapDeptos.get(u.idDepartamento || 0) || '',
+                mapCiudades.get(u.idCiudad || 0) || '',
+                mapSubZonas.get(u.idSubZona || '') || '',
+                u.fechaCreacion
+                  ? new Date(u.fechaCreacion).toLocaleString()
+                  : '',
+                u.fechaEdicion
+                  ? new Date(u.fechaEdicion).toLocaleString()
+                  : ''
+              ]),
+
+              anchos: [
+                14,
+                30,
+                40,
+                22,
+                12,
+                14,
+                14,
+                30,
+                20,
+                22,
+                24,
+                22,
+                22,
+                22
+              ]
+            }
+
+          ]
+
+        });
       },
-      error: (err) => {
+
+      error: err => {
         console.error('Error exportando ubicaciones:', err);
         alert('No se pudieron cargar los catálogos de referencia.');
       }
+
     });
+  }
+
+  private fechaArchivo(): string {
+
+    const fecha =
+      new Date();
+
+    return `${fecha.getFullYear()}${String(fecha.getMonth() + 1).padStart(2, '0')}${String(fecha.getDate()).padStart(2, '0')}`;
   }
 }

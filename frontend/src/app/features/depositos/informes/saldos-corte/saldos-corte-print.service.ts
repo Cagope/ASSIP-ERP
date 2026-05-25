@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class SaldosCortePrintService {
 
   imprimir(
@@ -13,9 +15,19 @@ export class SaldosCortePrintService {
       return;
     }
 
-    const html = this.buildHTML(resumenAgencias, fechaCorte);
+    const html =
+      this.buildHTML(
+        resumenAgencias,
+        fechaCorte
+      );
 
-    const win = window.open('', '_blank', 'width=1200,height=800');
+    const win =
+      window.open(
+        '',
+        '_blank',
+        'width=1200,height=800'
+      );
+
     if (!win) {
       alert('Bloqueador de ventanas emergentes activo.');
       return;
@@ -24,19 +36,28 @@ export class SaldosCortePrintService {
     win.document.open();
     win.document.write(html);
     win.document.close();
-    win.onload = () => win.print();
+
+    win.onload = () =>
+      win.print();
   }
 
-  // ==========================================================
-  // 🖨️ HTML COMPLETO
-  // ==========================================================
-  private buildHTML(agencias: any[], fechaCorte: string): string {
+  private buildHTML(
+    agencias: any[],
+    fechaCorte: string
+  ): string {
 
     let nroPagina = 1;
 
-    const bloques = agencias
-      .map(ag => this.bloqueAgencia(ag, fechaCorte, nroPagina++))
-      .join('<div style="page-break-after: always;"></div>');
+    const bloques =
+      agencias
+        .map(ag =>
+          this.bloqueAgencia(
+            ag,
+            fechaCorte,
+            nroPagina++
+          )
+        )
+        .join('<div style="page-break-after: always;"></div>');
 
     return `
       <html>
@@ -46,18 +67,18 @@ export class SaldosCortePrintService {
 
         <style>
 
-          @page { size: letter portrait; margin: 10mm 12mm; }
+          @page {
+            size: letter portrait;
+            margin: 10mm 12mm;
+          }
 
           body {
             font-family: Arial, sans-serif;
-            font-size: 11px;
+            font-size: 10px;
             margin: 0;
             color: #222;
           }
 
-          /* ============================ */
-          /* ENCABEZADO REAL (FUNCIONA)   */
-          /* ============================ */
           .enc {
             display: flex;
             align-items: center;
@@ -65,40 +86,37 @@ export class SaldosCortePrintService {
           }
 
           .enc img {
-            height: 40px;
+            height: 38px;
             margin-right: 10px;
           }
 
           .enc .tit {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             margin: 0;
             line-height: 1.1;
           }
 
           .enc .sub {
-            font-size: 11px;
+            font-size: 10px;
             margin: 1px 0 0 0;
           }
 
           .pagina {
             margin-left: auto;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
           }
 
-          /* ============================ */
-          /* AGENCIA Y FORMAS            */
-          /* ============================ */
           h2 {
-            font-size: 14px;
+            font-size: 13px;
             margin: 6px 0 3px;
             border-bottom: 1px solid #777;
             padding-bottom: 2px;
           }
 
           h3 {
-            font-size: 12px;
+            font-size: 11px;
             margin: 4px 0 2px;
           }
 
@@ -111,13 +129,15 @@ export class SaldosCortePrintService {
           th {
             background: #f4f4f4;
             border-bottom: 1px solid #555;
-            padding: 3px 4px;
+            padding: 2px 4px;
             text-align: left;
+            font-size: 10px;
           }
 
           td {
-            padding: 3px 4px;
-            border: none !important;   /* 🔥 SIN LÍNEAS */
+            padding: 2px 4px;
+            border: none !important;
+            font-size: 10px;
           }
 
           .right {
@@ -144,105 +164,153 @@ export class SaldosCortePrintService {
         </style>
 
       </head>
+
       <body>
-
         ${bloques}
-
       </body>
+
       </html>
     `;
   }
 
-  // ==========================================================
-  // 🟦 BLOQUE AGENCIA CON ENCABEZADO + PÁGINA
-  // ==========================================================
-  private bloqueAgencia(ag: any, fecha: string, pagina: number): string {
+  private bloqueAgencia(
+    ag: any,
+    fecha: string,
+    pagina: number
+  ): string {
 
-    const totalAgencia = ag.formas
-      .flatMap((f: any) => f.detalle)
-      .reduce((acc: any, x: any) => acc + (x.saldoCorte ?? 0), 0);
+    const totalAgencia =
+      ag.formas
+        .flatMap((f: any) => f.detalle)
+        .reduce(
+          (acc: number, x: any) =>
+            acc + Number(x.saldoCorte || 0),
+          0
+        );
 
-    const formasHTML = ag.formas
-      .map((f: any) => this.bloqueForma(f))
-      .join('');
+    const formasHTML =
+      ag.formas
+        .map((f: any) =>
+          this.bloqueForma(f)
+        )
+        .join('');
 
     return `
       <section>
 
-        <!-- 🔥 ENCABEZADO REAL (Chrome sí lo imprime) -->
         <div class="enc">
+
           <img src="${window.location.origin}/assets/LOGO_EMPRESA.png">
+
           <div>
-            <div class="tit">Saldos a una Fecha de Corte</div>
-            <div class="sub">Fecha de corte: ${fecha}</div>
+            <div class="tit">
+              Saldos a una Fecha de Corte
+            </div>
+
+            <div class="sub">
+              Fecha de corte: ${fecha}
+            </div>
           </div>
 
-          <div class="pagina">Página ${pagina}</div>
+          <div class="pagina">
+            Página ${pagina}
+          </div>
+
         </div>
 
-        <h2>Agencia ${ag.codigoAgencia} — ${ag.nombreAgencia}</h2>
+        <h2>
+          Agencia ${ag.codigoAgencia} — ${ag.nombreAgencia}
+        </h2>
 
         ${formasHTML}
 
         <div class="total-agencia">
           TOTAL AGENCIA:
-          ${totalAgencia.toLocaleString('es-CO', { minimumFractionDigits: 2 })}
+          ${this.formatearMoneda(totalAgencia)}
         </div>
 
       </section>
     `;
   }
 
-  // ==========================================================
-  // 🟩 BLOQUE FORMA (compacto)
-  // ==========================================================
-  private bloqueForma(f: any): string {
+  private bloqueForma(
+    f: any
+  ): string {
 
-    const orden = [...f.detalle].sort((a, b) =>
-      (a.nombreCompleto ?? '').localeCompare(b.nombreCompleto ?? '')
-    );
+    const orden =
+      [...f.detalle].sort((a, b) =>
+        (a.nombreCompleto ?? '')
+          .localeCompare(b.nombreCompleto ?? '')
+      );
 
-    const total = orden.reduce(
-      (acc, x) => acc + (x.saldoCorte ?? 0),
-      0
-    );
+    const total =
+      orden.reduce(
+        (acc: number, x: any) =>
+          acc + Number(x.saldoCorte || 0),
+        0
+      );
 
-    const filas = orden
-      .map(d => `
-         <tr>
-            <td>${d.codigoCuenta}</td>
-            <td>${d.documento}</td>
-            <td>${d.nombreCompleto}</td>
-            <td>${d.estadoCuentaNombre}</td>
-            <td class="right">${d.saldoCorte.toLocaleString('es-CO')}</td>
-         </tr>
-      `).join('');
+    const filas =
+      orden
+        .map(d => `
+          <tr>
+            <td>${d.codigoCuenta || ''}</td>
+            <td>${d.documento || ''}</td>
+            <td>${d.nombreCompleto || ''}</td>
+            <td>${d.estadoCuentaNombre || ''}</td>
+            <td class="right">
+              ${this.formatearMoneda(d.saldoCorte)}
+            </td>
+          </tr>
+        `)
+        .join('');
 
     return `
       <section style="page-break-inside: avoid;">
 
-        <h3>Código Forma ${f.codigoForma} — ${f.nombreForma}</h3>
+        <h3>
+          Código Forma ${f.codigoForma} — ${f.nombreForma}
+        </h3>
 
         <table>
+
           <thead>
             <tr>
               <th>Cuenta</th>
               <th>Documento</th>
               <th>Nombre</th>
               <th>Estado</th>
-              <th class="right">Saldo a Corte</th>
+              <th class="right">Saldo</th>
             </tr>
           </thead>
-          <tbody>${filas}</tbody>
+
+          <tbody>
+            ${filas}
+          </tbody>
+
         </table>
 
         <div class="total-forma">
           TOTAL ${f.nombreForma}:
-          ${total.toLocaleString('es-CO', { minimumFractionDigits: 2 })}
+          ${this.formatearMoneda(total)}
         </div>
 
       </section>
     `;
+  }
+
+  private formatearMoneda(
+    valor: any
+  ): string {
+
+    return Number(valor || 0)
+      .toLocaleString(
+        'es-CO',
+        {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }
+      );
   }
 
 }

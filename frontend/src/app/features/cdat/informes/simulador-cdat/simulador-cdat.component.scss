@@ -1,0 +1,311 @@
+@use '../../../../../styles/informes-base';
+
+/* =====================================================
+   CONTENEDORES PRINCIPALES
+===================================================== */
+
+.list-container,
+.form-container,
+.form {
+  margin-top: 1rem;
+}
+
+/* =====================================================
+   GRIDS
+===================================================== */
+
+.filters,
+.grid {
+  display: grid;
+  gap: 0.8rem 1rem;
+}
+
+.filters {
+  grid-template-columns: repeat(4, 1fr);
+  align-items: end;
+  margin-bottom: 1rem;
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+/* =====================================================
+   FORMULARIOS
+===================================================== */
+
+.input-number {
+  text-align: right;
+}
+
+/* =====================================================
+   BLOQUES VISUALES
+===================================================== */
+
+.info-agencia,
+.info,
+.persona-box {
+  background: #f8fbff;
+  padding: 1rem;
+  margin-bottom: 1rem;
+
+  border-radius: 10px;
+  border: 1px solid #d8e3f0;
+}
+
+.info-agencia p,
+.info p,
+.persona-box p {
+  margin: 0.2rem 0;
+}
+
+.persona-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem 1.5rem;
+}
+
+.persona-grid p {
+  margin: 0;
+}
+
+/* =====================================================
+   BOTONES
+===================================================== */
+
+.f-buttons {
+  margin-top: 1.5rem;
+
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+/* =====================================================
+   FILTROS BUSQUEDA
+===================================================== */
+
+.filtros-busqueda {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  align-items: end;
+}
+
+.filtros-busqueda .full {
+  grid-column: 1 / -1;
+}
+
+.filtros-busqueda .form-actions {
+  width: auto;
+  margin-top: 0;
+
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* =====================================================
+   SECTION HEADER
+===================================================== */
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  margin: 1.25rem 0 0.75rem;
+  padding: 0.75rem 0;
+
+  border-bottom: 1px solid #dbe3ec;
+}
+
+.section-header h3 {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.section-header small {
+  display: block;
+  margin-top: 0.15rem;
+
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+/* =====================================================
+   TITULOS PRINCIPALES DE BLOQUE
+===================================================== */
+
+.persona-box.full > .section-header:first-child {
+  padding: 0.8rem 0 1rem;
+  margin-bottom: 1.2rem;
+
+  border-bottom: 2px solid #d9e2ec;
+}
+
+.persona-box.full > .section-header:first-child h3 {
+  font-size: 1.85rem !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  color: #0b2545 !important;
+}
+
+.persona-box.full > .section-header:first-child small {
+  display: block !important;
+
+  font-size: 1.05rem !important;
+  line-height: 1.5 !important;
+
+  color: #425466 !important;
+  font-weight: 500 !important;
+}
+
+/* =====================================================
+   NUEVO CDAT PANEL
+===================================================== */
+
+.nuevo-cdat-panel {
+  background: #f8fbff;
+
+  border: 1px solid #cfe0f5;
+  border-left: 5px solid #2563eb;
+
+  border-radius: 10px;
+}
+
+.nuevo-cdat-grid {
+  margin-top: 1rem;
+}
+
+.nuevo-cdat-panel .section-header:first-child {
+  margin: -0.8rem -1rem 1rem;
+  padding: 1rem;
+
+  background: #eef5ff;
+
+  border-radius: 10px 10px 0 0;
+  border-bottom: 1px solid #cfe0f5;
+}
+
+/* =====================================================
+   TOTAL CDAT
+===================================================== */
+
+.total-cdat input {
+  font-weight: 800;
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+/* =====================================================
+   SIMULADOR CDAT
+===================================================== */
+
+.resultado-panel {
+  border-left: 5px solid #2563eb;
+}
+
+.resumen-simulacion {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+}
+
+.nota-simulacion {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+
+  border-radius: 8px;
+
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+
+  color: #1e3a8a;
+
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.total-final {
+  font-weight: 900;
+  color: #047857;
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 900px) {
+
+  .filters,
+  .grid-2,
+  .grid-3,
+  .persona-grid,
+  .filtros-busqueda {
+    grid-template-columns: 1fr;
+  }
+
+  .f-buttons {
+    justify-content: stretch;
+    flex-direction: column;
+  }
+
+  .section-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .filtros-busqueda .form-actions {
+    justify-content: flex-start;
+  }
+
+}
+
+/* =====================================================
+   PRINT
+===================================================== */
+
+@media print {
+
+  .f-buttons {
+    display: none !important;
+  }
+
+  .list-container,
+  .form-container,
+  .persona-box {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+
+}
+
+/* =====================================================
+   BOARD PRINCIPAL SIMULADOR
+===================================================== */
+
+.list-container,
+.form-container,
+.form,
+.persona-box {
+  background: #ffffff;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  border: 1px solid #dbe3ec;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  margin-top: 1rem;
+}
+
+.page > h2 {
+  margin-bottom: 1.5rem;
+}

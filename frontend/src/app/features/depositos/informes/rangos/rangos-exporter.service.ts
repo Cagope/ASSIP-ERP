@@ -1,221 +1,483 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
+
+import {
+  ExcelExportService,
+  ExcelSheetOptions
+} from '../../../../shared/services/excel-export.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RangosExporterService {
 
-  exportar(resumen: any[], detalle: any[], request: any): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportar(
+    resumen: any[],
+    detalle: any[],
+    request: any
+  ): void {
 
     if (!detalle || detalle.length === 0) {
       console.warn('No hay datos para exportar');
       return;
     }
 
-    // ============================================================
-    // HOJA 1 — INFORME COMPLETO CON CORTES
-    // ============================================================
-    const hoja1 = this.generarHojaCortes(resumen, detalle, request);
+    const hojas: ExcelSheetOptions[] = [
 
-    // ============================================================
-    // HOJA 2 — RESUMEN GENERAL (el de pantalla)
-    // ============================================================
-    const hoja2 = this.generarHojaResumen(resumen, request);
+      this.crearHojaInforme(
+        resumen,
+        detalle,
+        request
+      ),
 
-    // ============================================================
-    // HOJA 3 — RESUMEN POR FORMA
-    // ============================================================
-    const hoja3 = this.generarHojaPorForma(detalle, resumen, request);
+      this.crearHojaResumen(
+        resumen,
+        request
+      ),
 
-    // ============================================================
-    // CREAR LIBRO FINAL
-    // ============================================================
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, hoja1, 'Informe');
-    XLSX.utils.book_append_sheet(wb, hoja2, 'Resumen General');
-    XLSX.utils.book_append_sheet(wb, hoja3, 'Resumen por Forma');
+      this.crearHojaPorForma(
+        detalle,
+        resumen,
+        request
+      )
 
-    XLSX.writeFile(wb, 'informe_rangos.xlsx');
+    ];
+
+    this.excelExport.exportar({
+
+      nombreArchivo:
+        'informe_rangos.xlsx',
+
+      hojas
+
+    });
+
   }
 
   // ============================================================
-  // HOJA 1 — CORTES COMPLETOS
+  // HOJA 1 — INFORME COMPLETO
   // ============================================================
-  private generarHojaCortes(resumen: any[], detalle: any[], request: any): XLSX.WorkSheet {
+  private crearHojaInforme(
+    resumen: any[],
+    detalle: any[],
+    request: any
+  ): ExcelSheetOptions {
 
-    const wsData: any[][] = [];
-    let fila = 0;
+    const filas: any[][] = [];
 
-    wsData[fila++] = ['INFORME POR RANGOS – DEPÓSITOS'];
-    wsData[fila++] = [`Fecha de corte: ${request.fechaCorte}`];
-    wsData[fila++] = [`Agencia: ${request.agencia}`];
-    wsData[fila++] = [];
-    wsData[fila++] = [];
-
-    const agencias = this.agrupar(detalle, 'codigoAgencia');
+    const agencias =
+      this.agrupar(detalle, 'codigoAgencia');
 
     for (const ag of agencias) {
 
-      wsData[fila++] = [`AGENCIA ${ag.clave}`];
-      wsData[fila++] = [];
+      filas.push([
+        `AGENCIA ${ag.clave}`
+      ]);
 
-      const datosAgencia = detalle.filter(x => x.codigoAgencia === ag.clave);
+      filas.push([]);
 
-      const formas = this.agrupar(datosAgencia, 'codigoForma');
+      const datosAgencia =
+        detalle.filter(
+          (x: any) =>
+            x.codigoAgencia === ag.clave
+        );
+
+      const formas =
+        this.agrupar(
+          datosAgencia,
+          'codigoForma'
+        );
 
       for (const f of formas) {
 
-        wsData[fila++] = [`FORMA ${f.clave}`];
-        wsData[fila++] = [];
+        filas.push([
+          `FORMA ${f.clave}`
+        ]);
 
-        const datosForma = datosAgencia.filter(x => x.codigoForma === f.clave);
+        filas.push([]);
+
+        const datosForma =
+          datosAgencia.filter(
+            (x: any) =>
+              x.codigoForma === f.clave
+          );
 
         for (let i = 0; i < resumen.length; i++) {
 
-          const rangoFiltro = request.rangos[i];
-          const desc = this.descripcionRango(request.tipo, rangoFiltro.desde, rangoFiltro.hasta);
+          const rangoFiltro =
+            request.rangos[i];
 
-          wsData[fila++] = [`RANGO ${i+1}: ${desc}`];
-          wsData[fila++] = ['Documento', 'Nombre', 'Cuenta', 'Saldo', 'Edad', 'Antigüedad'];
+          const desc =
+            this.descripcionRango(
+              request.tipo,
+              rangoFiltro.desde,
+              rangoFiltro.hasta
+            );
 
-          const datosRango = datosForma.filter(x => this.cumpleRango(request.tipo, x, rangoFiltro));
+          filas.push([
+            `RANGO ${i + 1}: ${desc}`
+          ]);
+
+          filas.push([
+            'Documento',
+            'Nombre',
+            'Cuenta',
+            'Saldo',
+            'Edad',
+            'Antigüedad'
+          ]);
+
+          const datosRango =
+            datosForma.filter(
+              (x: any) =>
+                this.cumpleRango(
+                  request.tipo,
+                  x,
+                  rangoFiltro
+                )
+            );
 
           for (const d of datosRango) {
-            wsData[fila++] = [
+
+            filas.push([
               d.documento,
               d.nombreCompleto,
               d.codigoCuenta,
-              d.saldo,
-              d.edadAnios,
-              d.antiguedadAnios
-            ];
+              Number(d.saldo || 0),
+              Number(d.edadAnios || 0),
+              Number(d.antiguedadAnios || 0)
+            ]);
+
           }
 
-          const totalSaldo = datosRango.reduce((a, b) => a + b.saldo, 0);
+          const totalSaldo =
+            datosRango.reduce(
+              (a: number, b: any) =>
+                a + Number(b.saldo || 0),
+              0
+            );
 
-          wsData[fila++] = [];
-          wsData[fila++] = [`TOTAL RANGO ${i+1}`, datosRango.length, totalSaldo];
-          wsData[fila++] = [];
+          filas.push([]);
+
+          filas.push([
+            `TOTAL RANGO ${i + 1}`,
+            datosRango.length,
+            totalSaldo
+          ]);
+
+          filas.push([]);
+
         }
 
-        const totalForma = datosForma.reduce((a,b)=>a+b.saldo,0);
+        const totalForma =
+          datosForma.reduce(
+            (a: number, b: any) =>
+              a + Number(b.saldo || 0),
+            0
+          );
 
-        wsData[fila++] = [];
-        wsData[fila++] = [`TOTAL FORMA ${f.clave}`, datosForma.length, totalForma];
-        wsData[fila++] = [];
+        filas.push([]);
+
+        filas.push([
+          `TOTAL FORMA ${f.clave}`,
+          datosForma.length,
+          totalForma
+        ]);
+
+        filas.push([]);
+
       }
 
-      const totalAg = datosAgencia.reduce((a,b)=>a+b.saldo,0);
+      const totalAg =
+        datosAgencia.reduce(
+          (a: number, b: any) =>
+            a + Number(b.saldo || 0),
+          0
+        );
 
-      wsData[fila++] = [];
-      wsData[fila++] = [`TOTAL AGENCIA ${ag.clave}`, datosAgencia.length, totalAg];
-      wsData[fila++] = [];
+      filas.push([]);
+
+      filas.push([
+        `TOTAL AGENCIA ${ag.clave}`,
+        datosAgencia.length,
+        totalAg
+      ]);
+
+      filas.push([]);
+
     }
 
-    const hoja = XLSX.utils.aoa_to_sheet(wsData);
-    this.autoAjustarColumnas(hoja);
-    return hoja;
+    return {
+
+      nombreHoja:
+        'Informe',
+
+      titulo:
+        'INFORME POR RANGOS – DEPÓSITOS',
+
+      filtros: [
+        ['Fecha corte', request.fechaCorte || ''],
+        ['Agencia', request.agencia || ''],
+        ['Tipo', request.tipo || '']
+      ],
+
+      columnas: [],
+
+      filas,
+
+      anchos: [
+        18,
+        42,
+        18,
+        18,
+        14,
+        14
+      ]
+
+    };
+
   }
 
   // ============================================================
-  // HOJA 2 — RESUMEN GENERAL (pantalla)
+  // HOJA 2 — RESUMEN
   // ============================================================
-  private generarHojaResumen(resumen: any[], request: any): XLSX.WorkSheet {
+  private crearHojaResumen(
+    resumen: any[],
+    request: any
+  ): ExcelSheetOptions {
 
-    const datos = resumen.map((r, i) => ({
-      Rango: `Rango ${i+1}`,
-      Descripcion: this.descripcionRango(request.tipo, request.rangos[i].desde, request.rangos[i].hasta),
-      Cuentas: r.cuentas,
-      TotalSaldo: r.saldo
-    }));
+    return {
 
-    const hoja = XLSX.utils.json_to_sheet(datos);
-    this.autoAjustarColumnas(hoja);
+      nombreHoja:
+        'Resumen General',
 
-    return hoja;
+      titulo:
+        'RESUMEN GENERAL',
+
+      columnas: [
+        'Rango',
+        'Descripción',
+        'Cuentas',
+        'Total saldo'
+      ],
+
+      filas:
+        resumen.map((r: any, i: number) => [
+
+          `Rango ${i + 1}`,
+
+          this.descripcionRango(
+            request.tipo,
+            request.rangos[i].desde,
+            request.rangos[i].hasta
+          ),
+
+          Number(r.cuentas || 0),
+
+          Number(r.saldo || 0)
+
+        ]),
+
+      anchos: [
+        18,
+        42,
+        18,
+        22
+      ]
+
+    };
+
   }
 
   // ============================================================
   // HOJA 3 — RESUMEN POR FORMA
   // ============================================================
-  private generarHojaPorForma(detalle: any[], resumen: any[], request: any): XLSX.WorkSheet {
+  private crearHojaPorForma(
+    detalle: any[],
+    resumen: any[],
+    request: any
+  ): ExcelSheetOptions {
 
-    const formas = this.agrupar(detalle, 'codigoForma');
+    const filas: any[][] = [];
 
-    const salida: any[] = [];
+    const formas =
+      this.agrupar(
+        detalle,
+        'codigoForma'
+      );
 
     for (const f of formas) {
 
-      salida.push({ Forma: f.clave, Descripcion: '', Cuentas: '', TotalSaldo: '' });
-
-      const datosForma = detalle.filter(x => x.codigoForma === f.clave);
+      const datosForma =
+        detalle.filter(
+          (x: any) =>
+            x.codigoForma === f.clave
+        );
 
       for (let i = 0; i < resumen.length; i++) {
 
-        const rf = request.rangos[i];
-        const desc = this.descripcionRango(request.tipo, rf.desde, rf.hasta);
+        const rf =
+          request.rangos[i];
 
-        const datosRango = datosForma.filter(x => this.cumpleRango(request.tipo, x, rf));
+        const desc =
+          this.descripcionRango(
+            request.tipo,
+            rf.desde,
+            rf.hasta
+          );
 
-        const total = datosRango.reduce((a,b)=>a+b.saldo,0);
+        const datosRango =
+          datosForma.filter(
+            (x: any) =>
+              this.cumpleRango(
+                request.tipo,
+                x,
+                rf
+              )
+          );
 
-        salida.push({
-          Forma: f.clave,
-          Descripcion: `Rango ${i+1}: ${desc}`,
-          Cuentas: datosRango.length,
-          TotalSaldo: total
-        });
+        const total =
+          datosRango.reduce(
+            (a: number, b: any) =>
+              a + Number(b.saldo || 0),
+            0
+          );
+
+        filas.push([
+          f.clave,
+          `Rango ${i + 1}: ${desc}`,
+          datosRango.length,
+          total
+        ]);
+
       }
 
-      salida.push({});
+      filas.push([]);
+
     }
 
-    const hoja = XLSX.utils.json_to_sheet(salida);
-    this.autoAjustarColumnas(hoja);
+    return {
 
-    return hoja;
+      nombreHoja:
+        'Resumen por Forma',
+
+      titulo:
+        'RESUMEN POR FORMA',
+
+      columnas: [
+        'Forma',
+        'Descripción',
+        'Cuentas',
+        'Total saldo'
+      ],
+
+      filas,
+
+      anchos: [
+        18,
+        42,
+        18,
+        22
+      ]
+
+    };
+
   }
 
   // ============================================================
-  // Validaciones y utilidades
+  // UTILIDADES
   // ============================================================
-  private cumpleRango(tipo: string, item: any, rango: any): boolean {
-    if (tipo === 'EDAD') return item.edadAnios >= rango.desde && item.edadAnios <= rango.hasta;
-    if (tipo === 'SALDO') return item.saldo >= rango.desde && item.saldo <= rango.hasta;
-    if (tipo === 'ANTIGUEDAD') return item.antiguedadAnios >= rango.desde && item.antiguedadAnios <= rango.hasta;
+  private cumpleRango(
+    tipo: string,
+    item: any,
+    rango: any
+  ): boolean {
+
+    if (tipo === 'EDAD') {
+      return item.edadAnios >= rango.desde
+        && item.edadAnios <= rango.hasta;
+    }
+
+    if (tipo === 'SALDO') {
+      return item.saldo >= rango.desde
+        && item.saldo <= rango.hasta;
+    }
+
+    if (tipo === 'ANTIGUEDAD') {
+      return item.antiguedadAnios >= rango.desde
+        && item.antiguedadAnios <= rango.hasta;
+    }
+
     return false;
   }
 
-  private descripcionRango(tipo: string, desde: number, hasta: number): string {
-    if (tipo === 'EDAD') return `Edad entre ${desde} y ${hasta} años`;
-    if (tipo === 'SALDO') return `Saldo entre ${desde.toLocaleString()} y ${hasta.toLocaleString()}`;
-    if (tipo === 'ANTIGUEDAD') return `Antigüedad entre ${desde} y ${hasta} años`;
+  private descripcionRango(
+    tipo: string,
+    desde: number,
+    hasta: number
+  ): string {
+
+    if (tipo === 'EDAD') {
+      return `Edad entre ${desde} y ${hasta} años`;
+    }
+
+    if (tipo === 'SALDO') {
+      return `Saldo entre ${desde.toLocaleString()} y ${hasta.toLocaleString()}`;
+    }
+
+    if (tipo === 'ANTIGUEDAD') {
+      return `Antigüedad entre ${desde} y ${hasta} años`;
+    }
+
     return `${desde} - ${hasta}`;
   }
 
-  private agrupar(datos: any[], campo: string) {
-    const mapa = new Map<string, { cuentas: number, saldo: number }>();
-    for (const x of datos) {
-      const c = x[campo];
-      if (!mapa.has(c)) mapa.set(c, { cuentas: 0, saldo: 0 });
+  private agrupar(
+    datos: any[],
+    campo: string
+  ): any[] {
+
+    const mapa =
+      new Map<
+        string,
+        {
+          cuentas: number;
+          saldo: number;
+        }
+      >();
+
+    for (const x of datos || []) {
+
+      const c =
+        x[campo];
+
+      if (!mapa.has(c)) {
+
+        mapa.set(c, {
+          cuentas: 0,
+          saldo: 0
+        });
+
+      }
+
       mapa.get(c)!.cuentas++;
-      mapa.get(c)!.saldo += x.saldo;
+
+      mapa.get(c)!.saldo +=
+        Number(x.saldo || 0);
+
     }
-    return Array.from(mapa.entries()).map(([clave, v]) => ({ clave, ...v }));
+
+    return Array.from(
+      mapa.entries()
+    ).map(([clave, v]) => ({
+      clave,
+      ...v
+    }));
+
   }
 
-  private autoAjustarColumnas(hoja: XLSX.WorkSheet) {
-    const rango = XLSX.utils.decode_range(hoja['!ref'] || '');
-    const anchuras: any[] = [];
-    for (let C = rango.s.c; C <= rango.e.c; C++) {
-      let maxWidth = 12;
-      for (let R = rango.s.r; R <= rango.e.r; R++) {
-        const celda = hoja[XLSX.utils.encode_cell({ r: R, c: C })];
-        if (celda?.v) maxWidth = Math.max(maxWidth, celda.v.toString().length + 2);
-      }
-      anchuras.push({ wch: maxWidth });
-    }
-    hoja['!cols'] = anchuras;
-  }
 }

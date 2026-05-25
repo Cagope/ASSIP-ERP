@@ -2,7 +2,6 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ExtractoModalComponent } from './consulta-extracto-modal.component'; // ✅ Import del modal
 
-
 /**
  * 🧾 Detalle de Cuenta de Ahorro
  * ------------------------------------------------------------
@@ -14,8 +13,9 @@ import { ExtractoModalComponent } from './consulta-extracto-modal.component'; //
   standalone: true,
   imports: [CommonModule, ExtractoModalComponent], // ✅ Incluir el modal aquí
   templateUrl: './consulta-cuentas-ahorro-detalle.component.html',
-  styleUrls: ['./consulta-cuentas-ahorro-detalle.component.scss']
+  styleUrls: ['./consulta-cuentas-ahorro-detalle.component.scss'],
 })
+
 export class CuentasAhorroDetalleComponent {
   @Input() cuenta: any;
   @Output() cerrar = new EventEmitter<void>();

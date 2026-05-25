@@ -1,123 +1,184 @@
 @use '../../datos-personales/datos-personales-list.component' as *;
 
+/* ============================================================
+   CONTENEDOR
+============================================================ */
+
 .list-container {
-  background: #fff;
-  border-radius: 8px;
   padding: 16px 20px;
+
+  background: #fff;
+
+  border-radius: 8px;
+
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-
-    h2 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #1e293b;
-      margin: 0;
-    }
-
-    .actions {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-
-      input {
-        height: 32px;
-        padding: 0 10px;
-        border: 1px solid #d1d5db;
-        border-radius: 6px;
-        font-size: 0.85rem;
-      }
-
-      /* ❌ eliminado .btn.refresh */
-    }
-  }
-
-  .data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.85rem;
-
-    th,
-    td {
-      padding: 8px 10px;
-      border-bottom: 1px solid #e5e7eb;
-      text-align: left;
-    }
-
-    thead th {
-      background: #f9fafb;
-      font-weight: 600;
-    }
-
-    tbody tr:hover {
-      background: #f3f6f8;
-    }
-
-    td.actions {
-      text-align: center;
-      white-space: nowrap;
-    }
-
-    /* ❌ eliminado .btn.print */
-  }
-
-  .msg {
-    &.info {
-      color: #0369a1;
-    }
-    &.err {
-      color: #dc2626;
-    }
-  }
-
-  .empty {
-    text-align: center;
-    color: #64748b;
-    margin-top: 1rem;
-    font-weight: 500;
-  }
 }
 
-/* 🚀 Menú contextual */
+/* ============================================================
+   HEADER
+============================================================ */
+
+.list-container .header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 12px;
+
+  h2 {
+    margin: 0;
+
+    color: #1e293b;
+
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+}
+
+/* ============================================================
+   ACTIONS
+============================================================ */
+
+.list-container .actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  input {
+    height: 32px;
+    padding: 0 10px;
+
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+
+    font-size: 0.85rem;
+  }
+
+}
+
+/* ============================================================
+   TABLA
+============================================================ */
+
+.data-table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  font-size: 0.85rem;
+
+  th,
+  td {
+    padding: 8px 10px;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    text-align: left;
+  }
+
+  thead th {
+    background: #f9fafb;
+    font-weight: 600;
+  }
+
+  tbody tr:hover {
+    background: #f3f6f8;
+  }
+
+  td.actions {
+    text-align: center;
+    white-space: nowrap;
+  }
+
+}
+
+/* ============================================================
+   MENSAJES
+============================================================ */
+
+.msg {
+
+  &.info {
+    color: #0369a1;
+  }
+
+  &.err {
+    color: #dc2626;
+  }
+
+}
+
+.empty {
+  margin-top: 1rem;
+
+  text-align: center;
+
+  color: #64748b;
+
+  font-weight: 500;
+}
+
+/* ============================================================
+   DROPDOWN GLOBAL
+============================================================ */
+
 .global-dropdown {
   position: fixed;
-  background: #fff;
-  border-radius: 6px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+
   z-index: 999999;
+
   min-width: 220px;
   padding: 6px 0;
+
+  background: #fff;
+
+  border-radius: 6px;
+
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+
   animation: fadeIn 0.12s ease-out;
 
   .menu-item {
-    width: 100%;
-    border: none;
-    background: none;
-    text-align: left;
-    padding: 8px 14px;
-    font-size: 0.85rem;
-    cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
 
+    width: 100%;
+    padding: 8px 14px;
+
+    border: none;
+
+    background: none;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    font-size: 0.85rem;
+
     &:hover {
       background: #f1f5f9;
     }
+
   }
+
 }
 
+/* ============================================================
+   ANIMACIÓN
+============================================================ */
+
 @keyframes fadeIn {
+
   from {
     opacity: 0;
     transform: translateY(-3px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
+
 }

@@ -1,0 +1,411 @@
+<div class="extracto-overlay">
+
+  <div class="extracto-modal" #extractoModal>
+
+    <!-- HEADER -->
+
+    <div class="modal-top">
+
+      <div>
+
+        <h2>
+          Extracto de cuenta
+        </h2>
+
+        <p>
+          {{ resumen?.nombreAgencia || 'Consulta detallada de movimientos.' }}
+        </p>
+
+      </div>
+
+    </div>
+
+    <!-- FILTROS -->
+
+    <div class="filters">
+
+      <div class="f-row">
+
+        <label>
+          Fecha inicial
+        </label>
+
+        <input
+          type="date"
+          [(ngModel)]="fechaInicial">
+
+      </div>
+
+      <div class="f-row">
+
+        <label>
+          Fecha final
+        </label>
+
+        <input
+          type="date"
+          [(ngModel)]="fechaFinal">
+
+      </div>
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="consultar()">
+
+        Consultar
+
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="cerrarVentana()">
+
+        Cerrar
+
+      </button>
+
+    </div>
+
+    <!-- ERROR -->
+
+    <div
+      *ngIf="error"
+      class="alert alert--error">
+
+      {{ error }}
+
+    </div>
+
+    <!-- LOADING -->
+
+    <div
+      *ngIf="cargando"
+      class="loading">
+
+      Consultando extracto...
+
+    </div>
+
+    <!-- CONTENIDO -->
+
+    <ng-container *ngIf="resumen">
+
+      <!-- INFORMACIÓN CUENTA -->
+
+      <div class="card">
+
+        <div class="card-title">
+          Información cuenta
+        </div>
+
+        <div class="info-grid">
+
+          <!-- FILA 1 -->
+
+          <div>
+            <label>Forma ahorro</label>
+
+            <strong>
+              {{ resumen.codigoForma }}
+              -
+              {{ resumen.nombreForma }}
+            </strong>
+          </div>
+
+          <div>
+            <label>Cuenta</label>
+
+            <strong>
+              {{ resumen.codigoCuenta }}
+            </strong>
+          </div>
+
+          <!-- FILA 2 -->
+
+          <div>
+            <label>Documento</label>
+
+            <strong>
+              {{ resumen.documento }}
+            </strong>
+          </div>
+
+          <div>
+            <label>Asociado</label>
+
+            <strong>
+              {{ resumen.nombreCompleto }}
+            </strong>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- RESUMEN -->
+
+      <div class="card">
+
+        <div class="card-title">
+          Resumen financiero
+        </div>
+
+        <div class="resume-grid">
+
+          <div class="resume-item">
+
+            <label>
+              Saldo inicial
+            </label>
+
+            <strong>
+              {{ resumen.saldoInicial | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+          <div class="resume-item">
+
+            <label>
+              Total créditos
+            </label>
+
+            <strong>
+              {{ resumen.totalCreditos | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+          <div class="resume-item">
+
+            <label>
+              Total débitos
+            </label>
+
+            <strong>
+              {{ resumen.totalDebitos | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+          <div class="resume-item">
+
+            <label>
+              Saldo final
+            </label>
+
+            <strong>
+              {{ resumen.saldoFinal | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ESTADÍSTICAS -->
+
+      <div
+        class="card"
+        *ngIf="estadisticas">
+
+        <div class="card-title">
+          Estadísticas
+        </div>
+
+        <div class="resume-grid">
+
+          <div class="resume-item">
+
+            <label>
+              Cantidad movimientos
+            </label>
+
+            <strong>
+              {{ estadisticas.cantidadMovimientos }}
+            </strong>
+
+          </div>
+
+          <div class="resume-item">
+
+            <label>
+              Promedio créditos
+            </label>
+
+            <strong>
+              {{ estadisticas.promedioCreditos | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+          <div class="resume-item">
+
+            <label>
+              Promedio débitos
+            </label>
+
+            <strong>
+              {{ estadisticas.promedioDebitos | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+          <div class="resume-item">
+
+            <label>
+              Crédito máximo
+            </label>
+
+            <strong>
+              {{ estadisticas.creditoMaximo | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+          <div class="resume-item">
+
+            <label>
+              Débito máximo
+            </label>
+
+            <strong>
+              {{ estadisticas.debitoMaximo | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+          <div class="resume-item">
+
+            <label>
+              Valor movilizado
+            </label>
+
+            <strong>
+              {{ estadisticas.valorMovilizado | number:'1.2-2' }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- MOVIMIENTOS -->
+
+      <div class="card">
+
+        <div class="card-title">
+          Movimientos
+        </div>
+
+        <div class="table-container">
+
+          <table class="data-table">
+
+            <thead>
+
+            <tr>
+
+              <th>Fecha</th>
+
+              <th>Hora</th>
+
+              <th>Movimiento</th>
+
+              <th>Comprobante</th>
+
+              <th class="right">
+                Débito
+              </th>
+
+              <th class="right">
+                Crédito
+              </th>
+
+              <th class="right">
+                Saldo
+              </th>
+
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            <tr
+              *ngFor="let item of movimientos">
+
+              <td>
+                {{ item.fechaMovimiento }}
+              </td>
+
+              <td>
+                {{ item.horaMovimiento }}
+              </td>
+
+              <td>
+                {{ item.tipoMovimiento }}
+                -
+                {{ item.descripcionMovimiento }}
+              </td>
+
+              <td>
+                {{ item.tipoComprobante }}
+                -
+                {{ item.numeroComprobante }}
+              </td>
+
+              <td class="right">
+                {{ item.debito | number:'1.2-2' }}
+              </td>
+
+              <td class="right">
+                {{ item.credito | number:'1.2-2' }}
+              </td>
+
+              <td class="right">
+                {{ item.saldo | number:'1.2-2' }}
+              </td>
+
+            </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </ng-container>
+
+
+    <div class="bottom-actions">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="irInicio()">
+
+        Regresar al inicio
+
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="cerrarVentana()">
+
+        Cerrar ventana
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

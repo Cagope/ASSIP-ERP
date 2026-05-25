@@ -1,29 +1,77 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
-import { CargoListDTO } from './cargos.api';
 
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService
+} from '../../../shared/services/excel-export.service';
+
+import {
+  CargoListDTO
+} from './cargos.api';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class CargosExporterService {
 
-  exportar(items: CargoListDTO[]): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportar(
+    items: CargoListDTO[]
+  ): void {
 
     if (!items || items.length === 0) {
       alert('No hay información para exportar.');
       return;
     }
 
-    const data = items.map(c => ({
+    this.excelExport.exportar({
 
-      'ID': c.idCargo,
-      'Nombre Cargo': c.nombreCargo,
-      'Activo': c.activo ? 'SI' : 'NO',
+      nombreArchivo:
+        `cargos_${this.fechaArchivo()}.xlsx`,
 
-    }));
+      hojas: [
 
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
+        {
+          nombreHoja:
+            'Cargos',
 
-    XLSX.utils.book_append_sheet(wb, ws, 'Cargos');
-    XLSX.writeFile(wb, 'cargos.xlsx');
+          titulo:
+            'LISTADO DE CARGOS',
+
+          columnas: [
+            'ID',
+            'Nombre Cargo',
+            'Activo'
+          ],
+
+          filas: items.map(c => [
+            c.idCargo,
+            c.nombreCargo,
+            c.activo ? 'SI' : 'NO'
+          ]),
+
+          anchos: [
+            12,
+            40,
+            12
+          ]
+        }
+
+      ]
+
+    });
+
   }
+
+  private fechaArchivo(): string {
+
+    const fecha =
+      new Date();
+
+    return `${fecha.getFullYear()}${String(fecha.getMonth() + 1).padStart(2, '0')}${String(fecha.getDate()).padStart(2, '0')}`;
+  }
+
 }

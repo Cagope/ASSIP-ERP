@@ -1,0 +1,307 @@
+<div class="page">
+
+  <app-header-actions
+    titulo="Asociados sin movimientos"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <div class="card">
+
+    <form
+      class="filtros"
+      (ngSubmit)="consultar()">
+
+      <div class="f-row">
+        <label>Fecha corte</label>
+
+        <input
+          type="date"
+          [(ngModel)]="filtros.fechaCorte"
+          name="fechaCorte">
+      </div>
+
+      <div class="f-row">
+        <label>Agencia</label>
+
+        <select
+          [(ngModel)]="filtros.idAgencia"
+          name="idAgencia">
+
+          <option [ngValue]="0">
+            Todas
+          </option>
+
+          <option
+            *ngFor="let a of agencias"
+            [ngValue]="a.idAgencia">
+
+            {{ a.nombreAgencia }}
+
+          </option>
+
+        </select>
+      </div>
+
+      <div class="f-row">
+        <label>Forma de ahorro</label>
+
+        <select
+          [(ngModel)]="filtros.codigoForma"
+          name="codigoForma">
+
+          <option [ngValue]="'0'">
+            Todas las formas
+          </option>
+
+          <option
+            *ngFor="let f of formas"
+            [ngValue]="f.codigoForma">
+
+            {{ f.codigoForma }} - {{ f.nombreForma | titlecase }}
+
+          </option>
+
+        </select>
+      </div>
+
+      <div class="f-row">
+        <label>Días mínimos</label>
+
+        <input
+          type="text"
+          numericFormat
+          class="input-number"
+          [(ngModel)]="filtros.diasMinimos"
+          name="diasMinimos">
+      </div>
+
+      <div class="f-row">
+        <label>Tipo saldo</label>
+
+        <select
+          [(ngModel)]="filtros.tipoSaldo"
+          name="tipoSaldo">
+
+          <option [ngValue]="0">
+            Todos
+          </option>
+
+          <option [ngValue]="1">
+            Con saldo
+          </option>
+
+          <option [ngValue]="2">
+            Sin saldo
+          </option>
+
+        </select>
+      </div>
+
+      <div class="f-row">
+        <label>Saldo mínimo</label>
+
+        <input
+          type="text"
+          numericFormat
+          class="input-number"
+          [(ngModel)]="filtros.saldoMinimo"
+          name="saldoMinimo">
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()">
+
+          Limpiar
+
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="cargando">
+
+          Consultar
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+  <div
+    *ngIf="error"
+    class="error">
+
+    {{ error }}
+
+  </div>
+
+  <div
+    *ngIf="cargando"
+    class="loading">
+
+    Consultando informe...
+
+  </div>
+
+  <div
+    *ngIf="resumen"
+    class="card">
+
+    <section class="resumen">
+
+      <h3>Resumen general</h3>
+
+      <div class="cards">
+
+        <div class="card gray">
+          <div class="label">Total cuentas</div>
+          <div class="value right">
+            {{ resumen.totalCuentas | number:'1.0-0' }}
+          </div>
+        </div>
+
+        <div class="card green">
+          <div class="label">Con saldo</div>
+          <div class="value right">
+            {{ resumen.totalConSaldo | number:'1.0-0' }}
+          </div>
+        </div>
+
+        <div class="card red">
+          <div class="label">Sin saldo</div>
+          <div class="value right">
+            {{ resumen.totalSinSaldo | number:'1.0-0' }}
+          </div>
+        </div>
+
+        <div class="card blue">
+          <div class="label">Saldo total</div>
+          <div class="value right">
+            {{ resumen.saldoTotal | number:'1.2-2' }}
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <div
+      *ngIf="items.length > 0"
+      class="form-actions-result">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="exportar()">
+        Exportar Excel
+      </button>
+
+
+    </div>
+
+  </div>
+
+  <div
+    *ngIf="items.length > 0"
+    class="card">
+
+    <h3>Detalle</h3>
+
+    <div class="table-container">
+
+      <table class="tabla">
+
+        <thead>
+
+        <tr>
+
+          <th>Agencia</th>
+          <th>Cuenta</th>
+          <th>Documento</th>
+          <th>Nombre</th>
+          <th>Forma</th>
+          <th>Fecha apertura</th>
+          <th>Último movimiento</th>
+
+          <th class="right">
+            Días sin movimiento
+          </th>
+
+          <th class="right">
+            Saldo actual
+          </th>
+
+          <th>Estado</th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let item of items">
+
+          <td>
+            {{ item.codigoAgencia }} - {{ item.nombreAgencia }}
+          </td>
+
+          <td>
+            {{ item.codigoCuenta }}
+          </td>
+
+          <td>
+            {{ item.documento }}
+          </td>
+
+          <td>
+            {{ item.nombreCompleto }}
+          </td>
+
+          <td>
+            {{ item.codigoForma }} - {{ item.nombreForma }}
+          </td>
+
+          <td>
+            {{ item.fechaAperturaCuenta | date:'yyyy-MM-dd' }}
+          </td>
+
+          <td>
+            {{ item.fechaUltimoMovimiento | date:'yyyy-MM-dd' }}
+          </td>
+
+          <td
+            class="right"
+            [ngClass]="claseDias(item.diasSinMovimiento)">
+
+            {{ item.diasSinMovimiento | number:'1.0-0' }}
+
+          </td>
+
+          <td class="right">
+            {{ item.saldoActual | number:'1.2-2' }}
+          </td>
+
+          <td>
+            {{ item.estadoCuenta }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>

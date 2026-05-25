@@ -1,50 +1,47 @@
-/* ============================================================
-   🎨 ACTUALIZACIÓN DATOS PERSONA NATURALES — ASSIP-ERP
-   Basado en estilo corporativo de afiliación
-   ============================================================ */
-
-/* ===== Importa el estilo base del formulario ===== */
 @use '../afiliacion-formulario/afiliacion-formulario.component' as *;
 
-/* ===== Ajustes específicos ===== */
 .title,
 .form-title-large {
-  color: #0d5728;
-  text-transform: uppercase;
-  text-align: center;
   margin: 1rem 0 0.75rem;
+
+  text-align: center;
+  text-transform: uppercase;
+
+  color: #0d5728;
+
   font-size: 1.2rem;
   font-weight: 700;
 }
 
 .block h2 {
-  color: #12903e;
-  font-size: 1rem;
+  margin-bottom: 0.4rem;
+  padding-bottom: 0.25rem;
+
   border-bottom: 1px solid #ddd;
-  padding-bottom: .25rem;
-  margin-bottom: .4rem;
+
+  color: #12903e;
+
+  font-size: 1rem;
   text-transform: uppercase;
 }
 
-/* Quitar paginación en impresión */
-@media print {
-  .print-footer {
-    display: none !important;
-  }
-}
-
-/* Ajuste de espacio entre líneas finales (firma/huella) */
 .signatures {
   margin-top: 1.25rem;
 }
 
 .sig-area {
+  margin-bottom: 0.4rem;
+
   border-bottom: 2px solid #111;
-  margin-bottom: .4rem;
 }
 
-/* Mejor espaciado en bloque de certificación */
 section.block:last-of-type .card .line {
-  margin-bottom: .25rem;
-  font-size: .95rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.95rem;
+}
+
+@media print {
+  .print-footer {
+    display: none !important;
+  }
 }

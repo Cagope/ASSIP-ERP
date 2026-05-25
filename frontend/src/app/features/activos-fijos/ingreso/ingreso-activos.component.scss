@@ -1,44 +1,66 @@
+@use '../../../../styles/forms';
+@use '../../../../styles/informes-base';
+
+/* ============================================================
+   INGRESO ACTIVOS
+============================================================ */
+
 .ingreso-activos-form {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
 }
 
+/* ============================================================
+   CARD
+============================================================ */
+
 .card {
-  background: #fff;
-  border-radius: 8px;
   padding: 1rem 1.25rem;
+
+  background: #fff;
+
+  border-radius: 8px;
+
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
-.card-header {
+.card-header,
+.item-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
+}
+
+.card-header {
   margin-bottom: 1rem;
 }
 
-legend {
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-.item {
-  border-top: 1px solid #ddd;
-  padding-top: 1rem;
-  margin-top: 1rem;
-}
-
 .item-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 0.75rem;
 }
 
+legend {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+/* ============================================================
+   ITEMS
+============================================================ */
+
+.item {
+  margin-top: 1rem;
+  padding-top: 1rem;
+
+  border-top: 1px solid #ddd;
+}
+
+/* ============================================================
+   GRID
+============================================================ */
+
 .grid {
-  display: grid;
-  gap: 1rem;
 
   &.grid-2 {
     grid-template-columns: repeat(2, 1fr);
@@ -47,96 +69,86 @@ legend {
   &.grid-3 {
     grid-template-columns: repeat(3, 1fr);
   }
+
 }
+
+/* ============================================================
+   FORM GROUP
+============================================================ */
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  position: relative; // 👈 CLAVE para autocomplete
-
-  label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
-  }
-
-  input,
-  textarea {
-    padding: 0.45rem 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 0.9rem;
-
-    &:focus {
-      outline: none;
-      border-color: #1976d2;
-      box-shadow: 0 0 0 1px rgba(25, 118, 210, 0.25);
-    }
-  }
+  position: relative;
 
   small {
-    font-size: 0.75rem;
     color: #777;
+    font-size: 0.75rem;
   }
+
 }
 
-/* =====================================================
+/* ============================================================
    AUTOCOMPLETE
-   ===================================================== */
+============================================================ */
 
 .autocomplete {
-  input {
-    background-color: #fff;
-  }
 
   .autocomplete-list {
     position: absolute;
+    z-index: 20;
+
     top: calc(100% + 2px);
     left: 0;
     right: 0;
-    z-index: 20;
 
-    background: #fff;
-    border: 1px solid #d1d5db;
-    border-radius: 4px;
     max-height: 220px;
-    overflow-y: auto;
 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-
-    list-style: none;
     margin: 0;
     padding: 0;
+
+    overflow-y: auto;
+
+    list-style: none;
+
+    background: #fff;
+
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 
   .autocomplete-list li {
-    padding: 0.45rem 0.6rem;
-    cursor: pointer;
-    font-size: 0.85rem;
-    line-height: 1.2;
-
     display: flex;
     flex-direction: column;
 
+    padding: 0.45rem 0.6rem;
+
+    cursor: pointer;
+
+    font-size: 0.85rem;
+    line-height: 1.2;
+
     strong {
-      font-weight: 600;
       color: #1f2937;
+      font-weight: 600;
     }
 
     small {
-      font-size: 0.75rem;
       color: #6b7280;
+      font-size: 0.75rem;
     }
 
     &:hover {
       background-color: #e3f2fd;
     }
+
   }
+
 }
 
-/* =====================================================
-   ACCIONES
-   ===================================================== */
+/* ============================================================
+   ACTIONS
+============================================================ */
 
 .actions {
   display: flex;
@@ -144,29 +156,36 @@ legend {
   gap: 0.75rem;
 }
 
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
+/* ============================================================
+   INPUT NUMBER
+============================================================ */
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-input[type="number"] {
-  -moz-appearance: textfield; /* Firefox */
+input[type='number'] {
+  -moz-appearance: textfield;
 }
-/* =====================================================
-   RESUMEN TOTALES – UNA SOLA FILA
-   ===================================================== */
+
+/* ============================================================
+   RESUMEN
+============================================================ */
 
 .resumen-totales {
-  background: #f8f9fa;
-  border-top: 3px solid #198754;
   padding: 12px 16px;
+
+  background: #f8f9fa;
+
+  border-top: 3px solid #198754;
 }
 
-/* ⚠️ AQUÍ está la clave */
 .resumen-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+
   gap: 24px;
   align-items: center;
 }
@@ -174,45 +193,56 @@ input[type="number"] {
 .resumen-item {
   display: flex;
   flex-direction: column;
-  text-align: right; /* ← números a la derecha */
+
+  text-align: right;
 }
 
 .resumen-item .label {
-  font-size: 11px;
   color: #6c757d;
+
+  font-size: 11px;
   text-transform: uppercase;
 }
 
 .resumen-item .value {
+  color: #212529;
+
   font-size: 18px;
   font-weight: 600;
-  color: #212529;
 }
+
+/* ============================================================
+   TABLAS CONTABLES
+============================================================ */
+
 .tabla-contable {
   width: 100%;
-  border-collapse: collapse;
+
   margin-top: 8px;
-}
 
-.tabla-contable th,
-.tabla-contable td {
-  border: 1px solid #ddd;
-  padding: 6px 8px;
-}
+  border-collapse: collapse;
 
-.tabla-contable th {
-  background: #f4f6f8;
-  text-align: left;
-}
+  th,
+  td {
+    padding: 6px 8px;
+    border: 1px solid #ddd;
+  }
 
-.tabla-contable .num {
-  text-align: right;
-  white-space: nowrap;
+  th {
+    background: #f4f6f8;
+    text-align: left;
+  }
+
+  .num {
+    text-align: right;
+    white-space: nowrap;
+  }
+
 }
 
 .tabla-fija {
-  table-layout: fixed;
   width: 100%;
+  table-layout: fixed;
 }
 
 .tabla-fija th:first-child,
@@ -224,4 +254,29 @@ input[type="number"] {
 .tabla-fija td.num {
   width: 20%;
   text-align: right;
+}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+
+@media (max-width: 900px) {
+
+  .grid.grid-2,
+  .grid.grid-3,
+  .resumen-row {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  .actions,
+  .card-header,
+  .item-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
 }

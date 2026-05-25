@@ -1,0 +1,245 @@
+<div class="page">
+
+  <h2>Liquidación diaria CDAT</h2>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <div class="card">
+
+    <div class="section-header">
+      <div>
+        <h3>Parámetros del proceso</h3>
+        <small>Seleccione la fecha real liquidada y la fecha contable del comprobante.</small>
+      </div>
+    </div>
+
+    <div class="grid grid-4">
+
+      <div class="f-row">
+        <label>Agencia</label>
+        <select [(ngModel)]="model.idAgencia" (ngModelChange)="onChangeAgencia()">
+          <option [ngValue]="null">Seleccione agencia</option>
+
+          <option *ngFor="let a of agencias" [ngValue]="a.idAgencia">
+            {{ a.codigoAgencia }} - {{ a.nombreAgencia }}
+          </option>
+        </select>
+      </div>
+
+      <div class="f-row">
+        <label>Fecha liquidación</label>
+        <input type="date" [(ngModel)]="model.fechaLiquidacion">
+      </div>
+
+      <div class="f-row">
+        <label>Fecha contable</label>
+        <input type="date" [(ngModel)]="model.fechaContable">
+      </div>
+
+      <div class="f-row">
+        <label>Tipo comprobante</label>
+
+        <select
+          [(ngModel)]="model.tipoComprobante"
+          (ngModelChange)="cargarProximoComprobante()">
+
+          <option value="">Seleccione</option>
+
+          <option
+            *ngFor="let t of tiposComprobantes"
+            [value]="t.tipoComprobante">
+
+            {{ t.tipoComprobante }} - {{ t.nombreTipoComprobante }}
+
+          </option>
+
+        </select>
+      </div>
+
+      <div class="f-row">
+        <label>Número comprobante</label>
+
+        <input
+          type="text"
+          [(ngModel)]="model.numeroComprobante"
+          disabled>
+      </div>
+
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn--secondary" (click)="limpiar()">Limpiar</button>
+
+      <button type="button" class="btn btn--primary" [disabled]="procesando" (click)="generarPreview()">
+        {{ preview ? 'Regenerar preview' : 'Generar preview' }}
+      </button>
+    </div>
+
+  </div>
+
+  <div *ngIf="preview" class="panel">
+
+    <div class="section-header">
+      <div>
+        <h3>Resumen de liquidación</h3>
+        <small>Resultado calculado antes de aplicar el proceso.</small>
+      </div>
+    </div>
+
+    <div class="summary-grid">
+
+      <div class="summary-card">
+        <span class="summary-title">CDATs</span>
+
+        <strong class="summary-value amount">
+          {{ preview.totalCdats }}
+        </strong>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-title">Interés</span>
+
+        <strong class="summary-value amount">
+          {{ preview.totalInteres | number:'1.0-2' }}
+        </strong>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-title">Retención</span>
+
+        <strong class="summary-value amount">
+          {{ preview.totalRetencion | number:'1.0-2' }}
+        </strong>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-title">Neto</span>
+
+        <strong class="summary-value amount">
+          {{ preview.totalNeto | number:'1.0-2' }}
+        </strong>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-title">Trasladado depósitos</span>
+
+        <strong class="summary-value amount">
+          {{ preview.totalTrasladadoDepositos | number:'1.0-2' }}
+        </strong>
+      </div>
+
+      <div class="summary-card">
+        <span class="summary-title">No trasladado</span>
+
+        <strong class="summary-value amount">
+          {{ preview.totalNoTrasladado | number:'1.0-2' }}
+        </strong>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div *ngIf="preview?.items?.length" class="panel">
+
+    <div class="section-header">
+      <div>
+        <h3>Detalle por CDAT</h3>
+        <small>CDATs incluidos en la liquidación diaria.</small>
+      </div>
+    </div>
+
+    <table class="data-table">
+      <thead>
+      <tr>
+        <th>CDAT</th>
+        <th>Documento</th>
+        <th>Nombre</th>
+        <th class="right">Capital</th>
+        <th class="right">Tasa</th>
+        <th class="right">Interés</th>
+        <th class="right">Retención</th>
+        <th class="right">Neto</th>
+        <th class="right">Valor trasladado</th>
+        <th>Forma / cuenta ahorro</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr *ngFor="let item of preview?.items || []">
+        <td>{{ item.codigoCdat }}</td>
+        <td>{{ item.documento }}</td>
+        <td>{{ item.nombreCompleto }}</td>
+        <td class="right">{{ item.capitalCdat | number:'1.0-2' }}</td>
+        <td class="right">{{ item.tasaNominalAnual | number:'1.2-6' }}%</td>
+        <td class="right">{{ item.interesDiario | number:'1.0-2' }}</td>
+        <td class="right">{{ item.retencion | number:'1.0-2' }}</td>
+        <td class="right">{{ item.interesNeto | number:'1.0-2' }}</td>
+        <td class="right">{{ item.valorTrasladoDepositos | number:'1.0-2' }}</td>
+        <td>
+          {{ item.codigoFormaAhorro || '-' }}
+          <span *ngIf="item.codigoCuentaAhorro">
+            - {{ item.codigoCuentaAhorro }}
+          </span>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+  </div>
+
+  <div *ngIf="preview" class="panel">
+
+    <div class="section-header">
+      <div>
+        <h3>Comprobante contable</h3>
+        <small>Preview del comprobante generado por la liquidación diaria.</small>
+      </div>
+    </div>
+
+    <table class="data-table">
+      <thead>
+      <tr>
+        <th>Cuenta</th>
+        <th>Detalle</th>
+        <th class="right">Débito</th>
+        <th class="right">Crédito</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr *ngFor="let m of preview?.movimientosContables || []">
+        <td>{{ m.codigoCuenta || m.idCatalogoCuenta }} - {{ m.nombreCuenta }}</td>
+        <td>{{ m.detalleMovimiento }}</td>
+        <td class="right">{{ m.valorDebito | number:'1.0-2' }}</td>
+        <td class="right">{{ m.valorCredito | number:'1.0-2' }}</td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="totals">
+      <p><strong>Total débito:</strong> {{ preview.totalDebito | number:'1.0-2' }}</p>
+      <p><strong>Total crédito:</strong> {{ preview.totalCredito | number:'1.0-2' }}</p>
+      <p><strong>Diferencia:</strong> {{ preview.diferenciaContable | number:'1.0-2' }}</p>
+      <p>
+        <strong>Estado:</strong>
+        <span class="ok" *ngIf="preview.cuadrado">✔ Cuadrado</span>
+        <span class="bad" *ngIf="!preview.cuadrado">✖ No cuadra</span>
+      </p>
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn--primary"
+        [disabled]="!preview.cuadrado || procesando"
+        (click)="aplicar()">
+        Aplicar liquidación diaria
+      </button>
+    </div>
+
+  </div>
+
+</div>

@@ -1,28 +1,70 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
-import { EpsListDTO } from './eps.api';
 
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService
+} from '../../../shared/services/excel-export.service';
+
+import {
+  EpsListDTO
+} from './eps.api';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class EpsExporterService {
 
-  exportar(items: EpsListDTO[]): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportar(
+    items: EpsListDTO[]
+  ): void {
 
     if (!items || items.length === 0) {
       alert('No hay información para exportar.');
       return;
     }
 
-    const data = items.map(x => ({
-      'ID': x.idEps,
-      'Nombre EPS': x.nombreEps,
-      'Documento': x.documento ?? '',
-      'Activo': x.activo ? 'SI' : 'NO',
-    }));
+    this.excelExport.exportar({
 
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
+      nombreArchivo:
+        'eps.xlsx',
 
-    XLSX.utils.book_append_sheet(wb, ws, 'EPS');
-    XLSX.writeFile(wb, 'eps.xlsx');
+      hojas: [
+
+        {
+          nombreHoja:
+            'EPS',
+
+          titulo:
+            'LISTADO EPS',
+
+          columnas: [
+            'ID',
+            'Nombre EPS',
+            'Documento',
+            'Activo'
+          ],
+
+          filas: items.map(x => [
+            x.idEps ?? '',
+            x.nombreEps || '',
+            x.documento || '',
+            x.activo ? 'SI' : 'NO'
+          ]),
+
+          anchos: [
+            12,
+            40,
+            18,
+            12
+          ]
+        }
+
+      ]
+
+    });
   }
 }

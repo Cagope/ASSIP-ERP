@@ -1,45 +1,83 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
-import { ConceptoCuentaContableListDTO } from './concepto-cuentas-contables.api';
 
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService
+} from '../../../shared/services/excel-export.service';
+
+import {
+  ConceptoCuentaContableListDTO
+} from './concepto-cuentas-contables.api';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class ConceptoCuentasContablesExporterService {
 
-  exportar(items: ConceptoCuentaContableListDTO[]): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportar(
+    items: ConceptoCuentaContableListDTO[]
+  ): void {
 
     if (!items || items.length === 0) {
       alert('No hay información para exportar.');
       return;
     }
 
-    // ==========================================
-    // DATA (alineado con el LIST + PRINT)
-    // ==========================================
-    const data = items.map(x => ({
-      'Concepto': x.codigoConcepto ?? '',
-      'Agencia': x.nombreAgencia ?? '',
-      'Cuenta Débito': x.cuentaDebito ?? '',
-      'Cuenta Crédito': x.cuentaCredito ?? '',
-      'Activo': x.activo ? 'SI' : 'NO',
-    }));
+    this.excelExport.exportar({
 
-    // ==========================================
-    // EXCEL
-    // ==========================================
-    const ws = XLSX.utils.json_to_sheet(data);
+      nombreArchivo:
+        `concepto_cuentas_contables_${this.fechaArchivo()}.xlsx`,
 
-    // Auto ancho de columnas
-    ws['!cols'] = [
-      { wch: 18 }, // Concepto
-      { wch: 30 }, // Agencia
-      { wch: 35 }, // Cuenta Débito
-      { wch: 35 }, // Cuenta Crédito
-      { wch: 10 }, // Activo
-    ];
+      hojas: [
 
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'ConceptoCuentasContables');
+        {
+          nombreHoja:
+            'ConceptosContables',
 
-    XLSX.writeFile(wb, 'concepto_cuentas_contables.xlsx');
+          titulo:
+            'CONCEPTO CUENTAS CONTABLES',
+
+          columnas: [
+            'Concepto',
+            'Agencia',
+            'Cuenta Débito',
+            'Cuenta Crédito',
+            'Activo'
+          ],
+
+          filas: items.map(x => [
+            x.codigoConcepto || '',
+            x.nombreAgencia || '',
+            x.cuentaDebito || '',
+            x.cuentaCredito || '',
+            x.activo ? 'SI' : 'NO'
+          ]),
+
+          anchos: [
+            18,
+            30,
+            35,
+            35,
+            10
+          ]
+        }
+
+      ]
+
+    });
+
   }
+
+  private fechaArchivo(): string {
+
+    const fecha =
+      new Date();
+
+    return `${fecha.getFullYear()}${String(fecha.getMonth() + 1).padStart(2, '0')}${String(fecha.getDate()).padStart(2, '0')}`;
+  }
+
 }

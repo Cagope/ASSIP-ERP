@@ -1,0 +1,193 @@
+<div class="page">
+
+  <app-header-actions
+    titulo="Movimientos por meses"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="true"
+    [mostrarExportar]="false"
+    (imprimir)="imprimir()">
+  </app-header-actions>
+
+  <div class="card">
+    <form class="filtros" (ngSubmit)="buscar()">
+
+      <div class="f-row">
+        <label>Fecha de corte</label>
+        <input type="date" [(ngModel)]="filtros.fechaCorte" name="fechaCorte">
+      </div>
+
+      <div class="f-row">
+        <label>Agencia</label>
+        <select [(ngModel)]="filtros.idAgencia" name="idAgencia">
+          <option *ngFor="let a of agencias" [ngValue]="a.idAgencia">
+            {{ a.nombreAgencia }}
+          </option>
+        </select>
+      </div>
+
+      <div class="f-row">
+        <label>Forma de ahorro</label>
+
+        <select
+          [(ngModel)]="filtros.codigoForma"
+          name="codigoForma">
+
+          <option [ngValue]="'0'">
+            Todas las formas
+          </option>
+
+          <option
+            *ngFor="let f of formas"
+            [ngValue]="f.codigoForma">
+
+            {{ f.codigoForma }} - {{ f.nombreForma | titlecase }}
+
+          </option>
+
+        </select>
+      </div>
+
+      <div class="f-row">
+        <label>N° meses hacia atrás</label>
+        <input
+          type="text"
+          numericFormat
+          class="input-number"
+          [(ngModel)]="filtros.meses"
+          name="meses">
+      </div>
+
+      <div class="f-row tipo-informe">
+        <label>Tipo informe</label>
+
+        <div class="toggle-group">
+          <button
+            type="button"
+            class="toggle-button"
+            [class.active]="filtros.tipoInforme === 'RESUMEN'"
+            (click)="filtros.tipoInforme = 'RESUMEN'">
+            Resumen
+          </button>
+
+          <button
+            type="button"
+            class="toggle-button"
+            [class.active]="filtros.tipoInforme === 'ASOCIADO'"
+            (click)="filtros.tipoInforme = 'ASOCIADO'">
+            Por asociado
+          </button>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn--secondary" (click)="limpiar()">
+          Limpiar
+        </button>
+
+        <button type="submit" class="btn btn--primary" [disabled]="cargando">
+          Buscar
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <div *ngIf="cargando" class="loading">
+    Cargando informe...
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="mensaje" class="loading">
+    {{ mensaje }}
+  </div>
+
+  <div class="card" *ngIf="meses.length > 0">
+
+    <section class="resumen">
+
+      <h3>Resumen del informe</h3>
+
+      <div class="cards">
+
+        <div class="card gray">
+          <div class="label">Total movimientos</div>
+          <div class="value right">
+            {{ totalMovimientos | number:'1.0-0' }}
+          </div>
+        </div>
+
+        <div
+          class="card blue"
+          *ngIf="filtros.tipoInforme === 'ASOCIADO'">
+          <div class="label">Asociados</div>
+          <div class="value right">
+            {{ cantidadAsociados() | number:'1.0-0' }}
+          </div>
+        </div>
+
+        <div class="card green">
+          <div class="label">Total entradas</div>
+          <div class="value right">
+            {{ totalEntradas | number:'1.2-2' }}
+          </div>
+        </div>
+
+        <div class="card red">
+          <div class="label">Total salidas</div>
+          <div class="value right">
+            {{ totalSalidas | number:'1.2-2' }}
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <div class="form-actions form-actions-result">
+      <button type="button" class="btn btn--secondary" (click)="exportar()">
+        Exportar Excel
+      </button>
+    </div>
+
+  </div>
+
+  <div class="card" *ngIf="meses.length > 0">
+
+    <h3>Detalle mensual</h3>
+
+    <div class="table-container">
+
+      <table class="tabla-resumen tabla-resumen-meses">
+
+        <thead>
+        <tr>
+          <th>Mes</th>
+          <th class="right">Entradas</th>
+          <th class="right">Salidas</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let mes of meses">
+          <td>{{ mes }}</td>
+
+          <td class="right positive">
+            {{ obtenerResumenMes(mes).entradas | number:'1.2-2' }}
+          </td>
+
+          <td class="right negative">
+            {{ obtenerResumenMes(mes).salidas | number:'1.2-2' }}
+          </td>
+        </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>

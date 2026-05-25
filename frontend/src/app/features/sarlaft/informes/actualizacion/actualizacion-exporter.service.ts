@@ -1,61 +1,142 @@
 import { Injectable } from '@angular/core';
-import * as XLSX from 'xlsx';
 
-@Injectable({ providedIn: 'root' })
+import {
+  ExcelExportService,
+  ExcelSheetOptions
+} from '../../../../shared/services/excel-export.service';
+
+@Injectable({
+  providedIn: 'root'
+})
 export class ActualizacionExporterService {
 
-  exportarListado(fecha: string, lista: any[]): void {
+  constructor(
+    private excelExport: ExcelExportService
+  ) {
+  }
+
+  exportarListado(
+    fecha: string,
+    lista: any[]
+  ): void {
 
     if (!lista || lista.length === 0) {
-      console.warn('⚠ No hay datos para exportar');
+      alert('No hay datos para exportar.');
       return;
     }
 
-    const actualizados = lista.filter(x => x.estado === 'ACTUALIZADO');
-    const desactualizados = lista.filter(x => x.estado === 'DESACTUALIZADO');
+    const actualizados =
+      lista.filter(x => x.estado === 'ACTUALIZADO');
 
-    // ==========================================================
-    // 🎯 Mapeo EXACTO de los nombres del backend
-    // ==========================================================
-    const map = (x: any) => ({
-      Documento: x.documento,
-      Nombre: x.nombreCompleto,                         // ✔ nombres reales
-      FechaActualización: x.fechaActualizacion,
-      DíasDesactualizados: x.diasDesactualizado,
-      SaldoAportes: x.saldoAportes,
-      FechaAperturaCuenta: x.fechaAperturaCuenta,
+    const desactualizados =
+      lista.filter(x => x.estado === 'DESACTUALIZADO');
 
-      // Contacto
-      Teléfono: x.telefono,
-      Celular1: x.celularUno,
-      Celular2: x.celularDos,
-      CorreoPersonal: x.correoPersonal,
-      Zona: x.nombreZona,
-      Subzona: x.nombreSubZona,
+    const hojas: ExcelSheetOptions[] = [
+      this.crearHoja(
+        'Actualizados',
+        actualizados,
+        fecha
+      ),
+      this.crearHoja(
+        'Desactualizados',
+        desactualizados,
+        fecha
+      )
+    ];
 
-      // Permisos Especiales
-      RecibeLlamadas: x.recibeLlamadas,
-      RecibeMSM: x.recibeMsm,
-      RecibeEmails: x.recibeEmails,
-      RecibeCartas: x.recibeCartas,
-      RecibeRedesSociales: x.recibeRedesSociales
+    this.excelExport.exportar({
+
+      nombreArchivo:
+        `informe_actualizacion_${fecha}.xlsx`,
+
+      hojas
+
     });
+  }
 
-    const hojaActualizados = actualizados.map(map);
-    const hojaDesactualizados = desactualizados.map(map);
+  private crearHoja(
+    nombreHoja: string,
+    items: any[],
+    fecha: string
+  ): ExcelSheetOptions {
 
-    // ==========================================================
-    // 📘 Crear workbook
-    // ==========================================================
-    const wb = XLSX.utils.book_new();
+    return {
 
-    const ws1 = XLSX.utils.json_to_sheet(hojaActualizados);
-    XLSX.utils.book_append_sheet(wb, ws1, 'Actualizados');
+      nombreHoja,
 
-    const ws2 = XLSX.utils.json_to_sheet(hojaDesactualizados);
-    XLSX.utils.book_append_sheet(wb, ws2, 'Desactualizados');
+      titulo:
+        `INFORME ACTUALIZACIÓN - ${nombreHoja.toUpperCase()}`,
 
-    const filename = `informe_actualizacion_${fecha}.xlsx`;
-    XLSX.writeFile(wb, filename);
+      filtros: [
+        ['Fecha corte', fecha || '']
+      ],
+
+      columnas: [
+        'Documento',
+        'Nombre',
+        'Fecha actualización',
+        'Días desactualizados',
+        'Saldo aportes',
+        'Fecha apertura cuenta',
+        'Teléfono',
+        'Celular 1',
+        'Celular 2',
+        'Correo personal',
+        'Zona',
+        'Subzona',
+        'Recibe llamadas',
+        'Recibe MSM',
+        'Recibe emails',
+        'Recibe cartas',
+        'Recibe redes sociales'
+      ],
+
+      filas: (items || []).map(x => [
+        x.documento || '',
+        x.nombreCompleto || '',
+        x.fechaActualizacion || '',
+        Number(x.diasDesactualizado || 0),
+        Number(x.saldoAportes || 0),
+        x.fechaAperturaCuenta || '',
+        x.telefono || '',
+        x.celularUno || '',
+        x.celularDos || '',
+        x.correoPersonal || '',
+        x.nombreZona || '',
+        x.nombreSubZona || '',
+        this.siNo(x.recibeLlamadas),
+        this.siNo(x.recibeMsm),
+        this.siNo(x.recibeEmails),
+        this.siNo(x.recibeCartas),
+        this.siNo(x.recibeRedesSociales)
+      ]),
+
+      anchos: [
+        18,
+        42,
+        20,
+        20,
+        18,
+        22,
+        16,
+        16,
+        16,
+        34,
+        22,
+        22,
+        18,
+        16,
+        16,
+        16,
+        22
+      ]
+    };
+  }
+
+  private siNo(
+    value: any
+  ): string {
+
+    return value ? 'SI' : 'NO';
   }
 }

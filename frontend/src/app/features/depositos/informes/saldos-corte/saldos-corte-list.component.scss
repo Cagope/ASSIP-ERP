@@ -1,77 +1,50 @@
-.page {
-  padding: 1rem;
-}
+@use '../informes-base';
 
-/* FILTROS */
+/* =========================================
+   FILTROS
+========================================= */
+
 .filtros {
-  display: grid;
-  grid-template-columns: 1fr 180px;
-  gap: 14px;
-  align-items: end;
+  grid-template-columns:
+    minmax(280px, 1fr)
+    170px
+    auto;
 
   .f-row {
-    display: flex;
-    flex-direction: column;
 
     label {
+      margin-bottom: 5px;
+
+      color: #374151;
+
       font-size: 12px;
       font-weight: 600;
-      color: #6b7280;
-      margin-bottom: 5px;
     }
 
     input,
     select {
-      height: 34px;
-      padding: 4px 9px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      background: #fff;
+      height: 38px;
+
+      border-radius: 8px;
+
       font-size: 13px;
     }
+
   }
 
-  .form-actions {
-    grid-column: 1 / -1;
-  }
 }
 
-/* ESTADOS */
-.loading,
-.error,
-.empty {
-  margin-top: 1rem;
-  padding: 12px;
-  text-align: center;
-  color: #6b7280;
-}
+/* =========================================
+   RESUMEN GENERAL
+========================================= */
 
-.error {
-  color: #b91c1c;
-  background: #fee2e2;
-  border-radius: 6px;
-}
-
-/* RESUMEN GENERAL */
 .resumen {
-  h3 {
-    margin-top: 0;
-    margin-bottom: 12px;
-    font-size: 17px;
-    font-weight: 700;
-  }
 
   .cards {
-    display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
   }
 
   .card {
-    padding: 14px;
-    border-radius: 8px;
-    background: #f9fafb;
-    border-left: 4px solid #9ca3af;
 
     &.blue {
       border-left-color: #0d6efd;
@@ -81,38 +54,35 @@
       border-left-color: #198754;
     }
 
-    .label {
-      font-size: 12px;
-      color: #6b7280;
-      margin-bottom: 6px;
-    }
-
-    .value {
-      font-size: 20px;
-      font-weight: 700;
-      color: #111827;
-
-      &.right {
-        text-align: right;
-        display: block;
-      }
-    }
   }
+
 }
+
+/* =========================================
+   NOTA
+========================================= */
 
 .note {
   margin-top: 12px;
-  font-size: 13px;
+
   color: #6b7280;
+
+  font-size: 13px;
 }
 
-/* RESUMEN POR AGENCIA */
+/* =========================================
+   RESUMEN POR AGENCIA
+========================================= */
+
 .resumen-agencias {
   margin-top: 16px;
 
   h3 {
     margin-top: 0;
     margin-bottom: 12px;
+
+    color: #111827;
+
     font-size: 17px;
     font-weight: 700;
   }
@@ -121,43 +91,36 @@
 .agencia-title {
   margin-top: 18px;
   margin-bottom: 8px;
+
+  color: #374151;
+
   font-size: 15px;
   font-weight: 700;
-  color: #374151;
 }
 
-/* TABLAS */
-.tabla-resumen {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 8px;
-  font-size: 13px;
+/* =========================================
+   RESPONSIVE
+========================================= */
 
-  th,
-  td {
-    padding: 9px 8px;
-    border-bottom: 1px solid #e5e7eb;
+@media (max-width: 900px) {
+
+  .filtros {
+    grid-template-columns:
+      1fr
+      170px;
+
+    .form-actions {
+      grid-column: 1 / -1;
+    }
   }
 
-  th {
-    background: #f3f4f6;
-    text-align: left;
-    font-weight: 700;
-    color: #111827;
-  }
-
-  tbody tr:hover {
-    background: #f9fafb;
-  }
-}
-
-.right {
-  text-align: right;
 }
 
 @media (max-width: 700px) {
+
   .filtros,
   .resumen .cards {
     grid-template-columns: 1fr;
   }
+
 }

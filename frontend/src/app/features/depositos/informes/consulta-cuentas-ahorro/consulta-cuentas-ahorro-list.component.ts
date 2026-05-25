@@ -6,6 +6,7 @@ import { ReportingService } from '../../../../shared/reporting/reporting.service
 import { ReportQueryRequest, ReportResult } from '../../../../shared/reporting/reporting.api';
 import { CuentasAhorroDetalleComponent } from './consulta-cuentas-ahorro-detalle.component';
 import { ExtractoModalComponent } from './consulta-extracto-modal.component';
+import { HeaderActionsComponent } from '../../../../shared/header-actions/header-actions.component';
 
 
 // ⭐ Importar SARLAFT
@@ -21,6 +22,7 @@ import {
   imports: [
     CommonModule,
     FormsModule,
+    HeaderActionsComponent,
     CuentasAhorroDetalleComponent,
     ExtractoModalComponent
   ],

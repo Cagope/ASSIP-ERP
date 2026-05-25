@@ -1,0 +1,195 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h2>Proceso — Cierre Mensual CDAT</h2>
+      <p>Genera la foto mensual de los CDAT activos a la fecha de corte.</p>
+    </div>
+  </div>
+
+  <section class="card">
+    <h3>Parámetros del cierre</h3>
+
+    <div class="filters-grid">
+
+      <div class="field">
+        <label>Agencia</label>
+        <select [(ngModel)]="model.idAgencia" (change)="preview = null">
+          <option [ngValue]="null">Seleccione...</option>
+          <option *ngFor="let a of agencias" [ngValue]="a.idAgencia">
+            {{ a.nombreAgencia || a.nombre || a.descripcion }}
+          </option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Fecha de corte</label>
+        <input
+          type="date"
+          [(ngModel)]="model.fechaCorte"
+          (change)="preview = null">
+      </div>
+
+      <div class="actions">
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="generarPreview()"
+          [disabled]="procesando">
+          Generar preview
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="aplicar()"
+          [disabled]="procesando || !preview || preview.existeCierre">
+          Aplicar cierre
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--ghost"
+          (click)="limpiar()"
+          [disabled]="procesando">
+          Limpiar
+        </button>
+      </div>
+
+    </div>
+
+    <div *ngIf="error" class="alert alert--error">
+      {{ error }}
+    </div>
+
+    <div *ngIf="mensaje" class="alert alert--success">
+      {{ mensaje }}
+    </div>
+  </section>
+
+  <section *ngIf="preview" class="summary-grid">
+
+    <div class="summary-card">
+      <span>Fecha corte</span>
+      <strong>{{ preview.fechaCorte }}</strong>
+    </div>
+
+    <div class="summary-card">
+      <span>Total CDAT</span>
+      <strong>{{ preview.totalCdats }}</strong>
+    </div>
+
+    <div class="summary-card">
+      <span>Total capital</span>
+      <strong>{{ preview.totalCapital | number:'1.2-2' }}</strong>
+    </div>
+
+    <div class="summary-card">
+      <span>Estado</span>
+      <strong>{{ preview.estado }}</strong>
+    </div>
+
+  </section>
+
+  <section *ngIf="preview" class="card">
+    <h3>Detalle del cierre mensual</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+        <tr>
+          <th>CDAT</th>
+          <th>Documento</th>
+          <th>Nombre</th>
+          <th>Vencimiento</th>
+          <th>Última Liq.</th>
+          <th>Próxima Liq.</th>
+          <th class="num">Saldo</th>
+          <th class="num">Tasa</th>
+          <th>Retención</th>
+          <th>Amort.</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let item of preview.items">
+          <td>{{ item.codigoCdat }}</td>
+          <td>{{ item.documento }}</td>
+          <td>{{ item.nombreCompleto }}</td>
+          <td>{{ item.fechaVencimientoCdat }}</td>
+          <td>{{ item.fechaUltimaLiquidacion }}</td>
+          <td>{{ item.fechaProximaLiquidacion }}</td>
+          <td class="num">{{ item.saldoActualCdat | number:'1.2-2' }}</td>
+          <td class="num">{{ item.tasaNominalAnual | number:'1.4-4' }}</td>
+          <td>{{ item.retencionFuenteCdat ? 'Sí' : 'No' }}</td>
+          <td>{{ item.amortizacionDeposito }}</td>
+        </tr>
+
+        <tr *ngIf="!preview.items?.length">
+          <td colspan="10" class="empty">
+            No hay CDAT activos para la fecha seleccionada.
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="card">
+    <h3>Cierres generados</h3>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+        <tr>
+          <th>Fecha corte</th>
+          <th>Agencia</th>
+          <th>Año</th>
+          <th>Mes</th>
+          <th class="num">CDAT</th>
+          <th class="num">Capital</th>
+          <th>Estado</th>
+          <th></th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let c of cierres">
+          <td>{{ c.fechaCorte }}</td>
+          <td>{{ c.idAgencia }}</td>
+          <td>{{ c.anio }}</td>
+          <td>{{ c.mes }}</td>
+          <td class="num">{{ c.totalCdats }}</td>
+          <td class="num">{{ c.totalCapital | number:'1.2-2' }}</td>
+          <td>{{ c.estado }}</td>
+          <td class="text-end">
+            <div class="acciones">
+              <button
+                type="button"
+                class="btn-action-edit btn-action-text"
+                (click)="verCierre(c.idCierreMensualCdat)">
+                Ver
+              </button>
+
+              <button
+                type="button"
+                class="btn-action-delete btn-action-text"
+                (click)="eliminarCierre(c)"
+                [disabled]="procesando">
+                Eliminar
+              </button>
+            </div>
+          </td>
+        </tr>
+
+        <tr *ngIf="!cierres?.length">
+          <td colspan="8" class="empty">
+            No hay cierres mensuales registrados.
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>

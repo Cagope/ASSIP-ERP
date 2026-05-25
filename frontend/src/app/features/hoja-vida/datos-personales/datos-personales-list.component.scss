@@ -1,7 +1,10 @@
+@use '../../../../styles/informes-base';
+
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+
   margin-bottom: 1rem;
 
   .actions {
@@ -10,79 +13,77 @@
   }
 }
 
-/* 🔍 Buscador */
+/* 🔍 FILTRO */
 .filtro {
   margin-bottom: 1rem;
 
   input {
     width: 100%;
-    padding: 0.4rem 0.6rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.25rem;
-    font-size: 0.9rem;
-    transition: border-color 0.2s ease-in-out;
-
-    &:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 1px #3b82f6;
-    }
   }
 }
 
-/* 📋 Tabla */
+/* 📋 TABLA */
 .table {
+
   width: 100%;
   border-collapse: collapse;
 
-  th, td {
+  th,
+  td {
     padding: 0.5rem;
     border-bottom: 1px solid #e5e7eb;
   }
 
   th {
     background: #f9fafb;
+
     text-align: left;
-    text-transform: lowercase;
+
     font-weight: 600;
   }
 
   td {
-    text-transform: uppercase;
     font-size: 0.85rem;
+    text-transform: uppercase;
   }
+
 }
 
-/* 🔘 Acciones */
+/* 🔘 ACCIONES */
 .acciones {
   display: flex;
   gap: 0.4rem;
 }
 
-/* Estados */
-.loading,
-.empty,
-.error {
-  text-align: center;
-  margin-top: 1rem;
-  font-size: 0.9rem;
-}
-
-.loading { color: #3b82f6; }
-.empty { color: #6b7280; }
-.error { color: #dc2626; font-weight: 500; }
-
-/* 📄 Paginación */
+/* 📄 PAGINACIÓN */
 .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
+
   gap: 0.6rem;
+
   margin-top: 1rem;
+
   font-size: 0.9rem;
 
   span {
     color: #374151;
     font-weight: 500;
   }
+}
+
+@media (max-width: 768px) {
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .header .actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
 }

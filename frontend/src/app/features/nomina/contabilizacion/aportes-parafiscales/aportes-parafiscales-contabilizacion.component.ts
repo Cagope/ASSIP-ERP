@@ -36,6 +36,8 @@ export class AportesParafiscalesContabilizacionComponent {
   private api = inject(AportesParafiscalesContabilizacionApi);
   private periodosApi = inject(PeriodosNominaApi);
   private tiposComprobantesApi = inject(TiposComprobantesApi);
+  private aportesParafiscalesExporter =
+    inject(AportesParafiscalesContabilizacionExporter);
 
   idPeriodoNomina: number | null = null;
   periodos: any[] = [];
@@ -207,7 +209,7 @@ export class AportesParafiscalesContabilizacionComponent {
     if (!tc) return;
 
     const siguiente = (tc.cscComprobante ?? 0) + 1;
-    this.numeroComprobantePreview = siguiente.toString().padStart(10, '0');
+    this.numeroComprobantePreview = siguiente.toString().padStart(7, '0');
   }
 
   cargarFechaPeriodo(): void {
@@ -257,7 +259,7 @@ export class AportesParafiscalesContabilizacionComponent {
       return;
     }
 
-    AportesParafiscalesContabilizacionExporter.exportarComprobante(
+    this.aportesParafiscalesExporter.exportarComprobante(
       this.movimientos,
       {
         periodo: this.idPeriodoNomina as number,

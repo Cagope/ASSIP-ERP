@@ -10,21 +10,25 @@
   font-weight: 500;
 }
 
-/* ===== CONTENEDOR PRINCIPAL ===== */
+/* ===== CONTENEDOR ===== */
+
 .apertura-cuentas-list {
   padding: 1rem;
 }
 
-/* ===== BUSCADOR ===== */
-.filtro input {
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  padding: 6px 10px;
-  width: 280px;
-  max-width: 100%;
+/* ===== FILTRO ===== */
+
+.filtro {
+
+  input {
+    width: 280px;
+    max-width: 100%;
+  }
+
 }
 
 /* ===== TABLAS ===== */
+
 .table {
   font-size: 0.85rem;
 }
@@ -38,28 +42,25 @@
   background: #f0f4ff;
 }
 
-/* ===== BADGE OBLIGATORIA ===== */
-.badge {
-  font-size: 0.65rem;
-  padding: 4px 6px;
-  border-radius: 4px;
-}
+/* ===== BADGE ===== */
 
-/* ===== CONTROLES DE PAGINACIÓN ===== */
-.pagination-controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  padding-top: 10px;
+.badge {
+  padding: 4px 6px;
+
+  border-radius: 4px;
+
+  font-size: 0.65rem;
 }
 
 /* ===== MENSAJES ===== */
+
 .loading,
 .empty,
 .error {
-  text-align: center;
   padding: 20px 0;
+
+  text-align: center;
+
   font-size: 0.9rem;
   color: #555;
 }
