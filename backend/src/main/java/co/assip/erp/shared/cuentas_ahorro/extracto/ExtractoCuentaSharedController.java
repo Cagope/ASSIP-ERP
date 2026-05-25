@@ -1,6 +1,7 @@
 package co.assip.erp.shared.cuentas_ahorro.extracto;
 
-import co.assip.erp.shared.cuentas_ahorro.extracto.dto.*;
+import co.assip.erp.shared.cuentas_ahorro.extracto.dto.ExtractoCuentaSharedRequestDTO;
+import co.assip.erp.shared.cuentas_ahorro.extracto.dto.ExtractoCuentaSharedResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

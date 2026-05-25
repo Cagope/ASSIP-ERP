@@ -1,6 +1,10 @@
 package co.assip.erp.depositos.movimientos.cuentasahorro;
 
-import co.assip.erp.depositos.movimientos.cuentasahorro.dto.*;
+import co.assip.erp.depositos.movimientos.cuentasahorro.dto.CuentaMovimientoDTO;
+import co.assip.erp.depositos.movimientos.cuentasahorro.dto.MovimientoCuentaPreviewDTO;
+import co.assip.erp.depositos.movimientos.cuentasahorro.dto.MovimientoCuentaRequestDTO;
+import co.assip.erp.depositos.movimientos.cuentasahorro.dto.MovimientoCuentaResponseDTO;
+import co.assip.erp.depositos.movimientos.cuentasahorro.dto.TipoMovimientoDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

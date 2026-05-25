@@ -15,6 +15,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DepositosMovimientoService {
 
+    private static final String TARJETA_NO = "N";
+    private static final String ESTADO_ACTIVO = "A";
+
     private final DepositosMovimientoRepository repository;
 
     @Transactional
@@ -22,6 +25,7 @@ public class DepositosMovimientoService {
             DepositosMovimientoDTO dto,
             Integer idUsuario
     ) {
+        validarUsuario(idUsuario);
         validarBase(dto);
 
         BigDecimal valor = nvl(dto.getValorDebito());
@@ -64,6 +68,7 @@ public class DepositosMovimientoService {
             DepositosMovimientoDTO dto,
             Integer idUsuario
     ) {
+        validarUsuario(idUsuario);
         validarBase(dto);
 
         BigDecimal valor = nvl(dto.getValorCredito());
@@ -117,11 +122,14 @@ public class DepositosMovimientoService {
             Integer idUsuario,
             boolean validarEstado
     ) {
+        validarUsuario(idUsuario);
+
         if (movimientos == null || movimientos.isEmpty()) {
             throw new RuntimeException("No se recibieron movimientos de depósitos.");
         }
 
         movimientos.forEach(this::validarBase);
+        movimientos.forEach(this::normalizarMovimientoMasivo);
 
         List<Integer> idsCuentas = movimientos.stream()
                 .map(DepositosMovimientoDTO::getIdCuentaAhorro)
@@ -166,6 +174,14 @@ public class DepositosMovimientoService {
 
                     BigDecimal saldoNuevo = saldoAnterior.add(credito).subtract(debito);
 
+                    if (saldoNuevo.compareTo(BigDecimal.ZERO) < 0) {
+                        throw new RuntimeException(
+                                "La cuenta "
+                                        + c.idCuentaAhorro()
+                                        + " quedaría con saldo negativo."
+                        );
+                    }
+
                     return new DepositosMovimientoRepository.CuentaSaldoDTO(
                             c.idCuentaAhorro(),
                             saldoNuevo,
@@ -173,20 +189,6 @@ public class DepositosMovimientoService {
                     );
                 })
                 .toList();
-
-        movimientos.forEach(m -> {
-            m.setValorDebito(nvl(m.getValorDebito()));
-            m.setValorCredito(nvl(m.getValorCredito()));
-
-            if (m.getValorDebito().compareTo(BigDecimal.ZERO) <= 0
-                    && m.getValorCredito().compareTo(BigDecimal.ZERO) <= 0) {
-                throw new RuntimeException("Todos los movimientos masivos deben tener valor.");
-            }
-
-            if (m.getTarjeta() == null || m.getTarjeta().isBlank()) {
-                m.setTarjeta("N");
-            }
-        });
 
         repository.actualizarSaldoBatch(saldosNuevos, idUsuario);
         repository.insertarExtractosBatch(movimientos, idUsuario);
@@ -205,23 +207,72 @@ public class DepositosMovimientoService {
             throw new RuntimeException("La fecha del movimiento es obligatoria.");
         }
 
-        if (dto.getTipoMovimiento() == null || dto.getTipoMovimiento().isBlank()) {
+        if (isBlank(dto.getTipoMovimiento())) {
             throw new RuntimeException("El tipo de movimiento de depósitos es obligatorio.");
         }
 
-        if (dto.getModulo() == null || dto.getModulo().isBlank()) {
+        if (isBlank(dto.getModulo())) {
             throw new RuntimeException("El módulo del movimiento de depósitos es obligatorio.");
         }
 
-        if (dto.getTarjeta() == null || dto.getTarjeta().isBlank()) {
-            dto.setTarjeta("N");
+        dto.setTipoMovimiento(trim(dto.getTipoMovimiento()));
+        dto.setModulo(trim(dto.getModulo()));
+        dto.setTarjeta(isBlank(dto.getTarjeta()) ? TARJETA_NO : trim(dto.getTarjeta()));
+
+        if (dto.getTipoComprobante() != null) {
+            dto.setTipoComprobante(trim(dto.getTipoComprobante()));
+        }
+
+        if (dto.getNumeroComprobante() != null) {
+            dto.setNumeroComprobante(trim(dto.getNumeroComprobante()));
+        }
+
+        if (dto.getEstablecimiento() != null) {
+            dto.setEstablecimiento(trim(dto.getEstablecimiento()));
+        }
+    }
+
+    private void normalizarMovimientoMasivo(DepositosMovimientoDTO movimiento) {
+        movimiento.setValorDebito(nvl(movimiento.getValorDebito()));
+        movimiento.setValorCredito(nvl(movimiento.getValorCredito()));
+
+        if (movimiento.getValorDebito().compareTo(BigDecimal.ZERO) < 0) {
+            throw new RuntimeException("No se permiten débitos negativos.");
+        }
+
+        if (movimiento.getValorCredito().compareTo(BigDecimal.ZERO) < 0) {
+            throw new RuntimeException("No se permiten créditos negativos.");
+        }
+
+        if (movimiento.getValorDebito().compareTo(BigDecimal.ZERO) <= 0
+                && movimiento.getValorCredito().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Todos los movimientos masivos deben tener valor.");
+        }
+
+        if (movimiento.getValorDebito().compareTo(BigDecimal.ZERO) > 0
+                && movimiento.getValorCredito().compareTo(BigDecimal.ZERO) > 0) {
+            throw new RuntimeException("Un movimiento no puede tener débito y crédito al mismo tiempo.");
         }
     }
 
     private void validarCuentaActiva(String estadoCuenta) {
-        if (!"A".equalsIgnoreCase(String.valueOf(estadoCuenta).trim())) {
+        if (!ESTADO_ACTIVO.equalsIgnoreCase(String.valueOf(estadoCuenta).trim())) {
             throw new RuntimeException("La cuenta de ahorro no está activa.");
         }
+    }
+
+    private void validarUsuario(Integer idUsuario) {
+        if (idUsuario == null) {
+            throw new RuntimeException("El usuario del movimiento es obligatorio.");
+        }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
+    private String trim(String value) {
+        return value == null ? "" : value.trim();
     }
 
     private BigDecimal nvl(BigDecimal value) {

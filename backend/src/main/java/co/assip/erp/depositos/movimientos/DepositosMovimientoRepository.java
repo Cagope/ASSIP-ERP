@@ -13,9 +13,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DepositosMovimientoRepository {
 
+    private static final String TARJETA_NO = "N";
+
     private final NamedParameterJdbcTemplate jdbc;
 
     public CuentaSaldoDTO obtenerCuentaConLock(Integer idCuentaAhorro) {
+
+        validarCuenta(idCuentaAhorro);
 
         String sql = """
             SELECT
@@ -27,22 +31,58 @@ public class DepositosMovimientoRepository {
             FOR UPDATE
         """;
 
-        return jdbc.query(sql,
+        return jdbc.query(
+                sql,
                 new MapSqlParameterSource("idCuentaAhorro", idCuentaAhorro),
                 rs -> {
                     if (!rs.next()) {
                         return null;
                     }
 
-                    return new CuentaSaldoDTO(
-                            rs.getInt("id_cuenta_ahorro"),
-                            rs.getBigDecimal("saldo_actual_cuenta"),
-                            rs.getString("estado_cuenta_cuenta")
-                    );
-                });
+                    return mapCuentaSaldo(rs);
+                }
+        );
     }
 
-    public void actualizarSaldo(Integer idCuentaAhorro, BigDecimal nuevoSaldo, Integer idUsuario) {
+    public List<CuentaSaldoDTO> obtenerCuentasConLock(List<Integer> idsCuentas) {
+
+        if (idsCuentas == null || idsCuentas.isEmpty()) {
+            throw new RuntimeException("No se recibieron cuentas para bloqueo.");
+        }
+
+        String sql = """
+            SELECT
+                id_cuenta_ahorro,
+                saldo_actual_cuenta,
+                estado_cuenta_cuenta
+            FROM depositos.cuentas_ahorro
+            WHERE id_cuenta_ahorro IN (:ids)
+            FOR UPDATE
+        """;
+
+        return jdbc.query(
+                sql,
+                new MapSqlParameterSource("ids", idsCuentas),
+                (rs, rowNum) -> mapCuentaSaldo(rs)
+        );
+    }
+
+    public void actualizarSaldo(
+            Integer idCuentaAhorro,
+            BigDecimal nuevoSaldo,
+            Integer idUsuario
+    ) {
+
+        validarCuenta(idCuentaAhorro);
+        validarUsuario(idUsuario);
+
+        if (nuevoSaldo == null) {
+            throw new RuntimeException("El nuevo saldo es obligatorio.");
+        }
+
+        if (nuevoSaldo.compareTo(BigDecimal.ZERO) < 0) {
+            throw new RuntimeException("No se puede actualizar una cuenta con saldo negativo.");
+        }
 
         String sql = """
             UPDATE depositos.cuentas_ahorro
@@ -52,15 +92,111 @@ public class DepositosMovimientoRepository {
              WHERE id_cuenta_ahorro = :idCuentaAhorro
         """;
 
-        jdbc.update(sql, new MapSqlParameterSource()
-                .addValue("nuevoSaldo", nuevoSaldo)
-                .addValue("idUsuario", idUsuario)
-                .addValue("idCuentaAhorro", idCuentaAhorro));
+        int updated = jdbc.update(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("nuevoSaldo", nuevoSaldo)
+                        .addValue("idUsuario", idUsuario)
+                        .addValue("idCuentaAhorro", idCuentaAhorro)
+        );
+
+        if (updated <= 0) {
+            throw new RuntimeException("No fue posible actualizar el saldo de la cuenta.");
+        }
     }
 
-    public void insertarExtracto(DepositosMovimientoDTO dto, Integer idUsuario) {
+    public void actualizarSaldoBatch(
+            List<CuentaSaldoDTO> cuentas,
+            Integer idUsuario
+    ) {
+
+        validarUsuario(idUsuario);
+
+        if (cuentas == null || cuentas.isEmpty()) {
+            throw new RuntimeException("No se recibieron cuentas para actualizar saldo.");
+        }
+
+        cuentas.forEach(c -> {
+            validarCuenta(c.idCuentaAhorro());
+
+            if (c.saldoActual() == null) {
+                throw new RuntimeException(
+                        "El saldo nuevo es obligatorio para la cuenta "
+                                + c.idCuentaAhorro()
+                );
+            }
+
+            if (c.saldoActual().compareTo(BigDecimal.ZERO) < 0) {
+                throw new RuntimeException(
+                        "La cuenta "
+                                + c.idCuentaAhorro()
+                                + " quedaría con saldo negativo."
+                );
+            }
+        });
 
         String sql = """
+            UPDATE depositos.cuentas_ahorro
+               SET saldo_actual_cuenta = :saldoNuevo,
+                   fk_seguridad_edicion = :idUsuario,
+                   fecha_edicion = CURRENT_TIMESTAMP
+             WHERE id_cuenta_ahorro = :idCuentaAhorro
+        """;
+
+        MapSqlParameterSource[] batch = cuentas.stream()
+                .map(c -> new MapSqlParameterSource()
+                        .addValue("idCuentaAhorro", c.idCuentaAhorro())
+                        .addValue("saldoNuevo", c.saldoActual())
+                        .addValue("idUsuario", idUsuario))
+                .toArray(MapSqlParameterSource[]::new);
+
+        jdbc.batchUpdate(sql, batch);
+    }
+
+    public void insertarExtracto(
+            DepositosMovimientoDTO dto,
+            Integer idUsuario
+    ) {
+
+        validarMovimiento(dto);
+        validarUsuario(idUsuario);
+
+        String sql = insertExtractoSql();
+
+        int inserted = jdbc.update(
+                sql,
+                buildExtractoParams(dto, idUsuario)
+        );
+
+        if (inserted <= 0) {
+            throw new RuntimeException("No fue posible registrar el extracto.");
+        }
+    }
+
+    public void insertarExtractosBatch(
+            List<DepositosMovimientoDTO> movimientos,
+            Integer idUsuario
+    ) {
+
+        validarUsuario(idUsuario);
+
+        if (movimientos == null || movimientos.isEmpty()) {
+            throw new RuntimeException("No se recibieron extractos para registrar.");
+        }
+
+        movimientos.forEach(this::validarMovimiento);
+
+        String sql = insertExtractoSql();
+
+        MapSqlParameterSource[] batch = movimientos.stream()
+                .map(m -> buildExtractoParams(m, idUsuario))
+                .toArray(MapSqlParameterSource[]::new);
+
+        jdbc.batchUpdate(sql, batch);
+    }
+
+    private String insertExtractoSql() {
+        return """
             INSERT INTO depositos.extractos_cuentas_ahorros (
                 id_cuenta_ahorro,
                 fecha_movimiento,
@@ -92,19 +228,97 @@ public class DepositosMovimientoRepository {
                 :idUsuario
             )
         """;
+    }
 
-        jdbc.update(sql, new MapSqlParameterSource()
+    private MapSqlParameterSource buildExtractoParams(
+            DepositosMovimientoDTO dto,
+            Integer idUsuario
+    ) {
+
+        return new MapSqlParameterSource()
                 .addValue("idCuentaAhorro", dto.getIdCuentaAhorro())
                 .addValue("fechaMovimiento", dto.getFechaMovimiento())
-                .addValue("tipoComprobante", dto.getTipoComprobante())
-                .addValue("numeroComprobante", dto.getNumeroComprobante())
-                .addValue("tipoMovimiento", dto.getTipoMovimiento())
+                .addValue("tipoComprobante", trim(dto.getTipoComprobante()))
+                .addValue("numeroComprobante", trim(dto.getNumeroComprobante()))
+                .addValue("tipoMovimiento", trim(dto.getTipoMovimiento()))
                 .addValue("valorDebito", nvl(dto.getValorDebito()))
                 .addValue("valorCredito", nvl(dto.getValorCredito()))
-                .addValue("modulo", dto.getModulo())
-                .addValue("tarjeta", dto.getTarjeta() == null ? "N" : dto.getTarjeta())
-                .addValue("establecimiento", dto.getEstablecimiento())
-                .addValue("idUsuario", idUsuario));
+                .addValue("modulo", trim(dto.getModulo()))
+                .addValue("tarjeta", isBlank(dto.getTarjeta()) ? TARJETA_NO : trim(dto.getTarjeta()))
+                .addValue("establecimiento", trim(dto.getEstablecimiento()))
+                .addValue("idUsuario", idUsuario);
+    }
+
+    private CuentaSaldoDTO mapCuentaSaldo(java.sql.ResultSet rs)
+            throws java.sql.SQLException {
+
+        return new CuentaSaldoDTO(
+                rs.getInt("id_cuenta_ahorro"),
+                nvl(rs.getBigDecimal("saldo_actual_cuenta")),
+                rs.getString("estado_cuenta_cuenta")
+        );
+    }
+
+    private void validarMovimiento(DepositosMovimientoDTO dto) {
+
+        if (dto == null) {
+            throw new RuntimeException("El movimiento de depósitos es obligatorio.");
+        }
+
+        validarCuenta(dto.getIdCuentaAhorro());
+
+        if (dto.getFechaMovimiento() == null) {
+            throw new RuntimeException("La fecha del movimiento es obligatoria.");
+        }
+
+        if (isBlank(dto.getTipoMovimiento())) {
+            throw new RuntimeException("El tipo de movimiento es obligatorio.");
+        }
+
+        if (isBlank(dto.getModulo())) {
+            throw new RuntimeException("El módulo es obligatorio.");
+        }
+
+        BigDecimal debito = nvl(dto.getValorDebito());
+        BigDecimal credito = nvl(dto.getValorCredito());
+
+        if (debito.compareTo(BigDecimal.ZERO) < 0) {
+            throw new RuntimeException("No se permiten débitos negativos.");
+        }
+
+        if (credito.compareTo(BigDecimal.ZERO) < 0) {
+            throw new RuntimeException("No se permiten créditos negativos.");
+        }
+
+        if (debito.compareTo(BigDecimal.ZERO) <= 0
+                && credito.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("El movimiento no tiene valor.");
+        }
+
+        if (debito.compareTo(BigDecimal.ZERO) > 0
+                && credito.compareTo(BigDecimal.ZERO) > 0) {
+            throw new RuntimeException("El movimiento no puede tener débito y crédito al mismo tiempo.");
+        }
+    }
+
+    private void validarCuenta(Integer idCuentaAhorro) {
+        if (idCuentaAhorro == null) {
+            throw new RuntimeException("La cuenta de ahorro es obligatoria.");
+        }
+    }
+
+    private void validarUsuario(Integer idUsuario) {
+        if (idUsuario == null) {
+            throw new RuntimeException("El usuario es obligatorio.");
+        }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
+    private String trim(String value) {
+        return value == null ? null : value.trim();
     }
 
     private BigDecimal nvl(BigDecimal value) {
@@ -117,101 +331,4 @@ public class DepositosMovimientoRepository {
             String estadoCuenta
     ) {
     }
-
-    public List<CuentaSaldoDTO> obtenerCuentasConLock(List<Integer> idsCuentas) {
-
-        String sql = """
-        SELECT
-            id_cuenta_ahorro,
-            saldo_actual_cuenta,
-            estado_cuenta_cuenta
-        FROM depositos.cuentas_ahorro
-        WHERE id_cuenta_ahorro IN (:ids)
-        FOR UPDATE
-    """;
-
-        return jdbc.query(
-                sql,
-                new MapSqlParameterSource("ids", idsCuentas),
-                (rs, rowNum) -> new CuentaSaldoDTO(
-                        rs.getInt("id_cuenta_ahorro"),
-                        rs.getBigDecimal("saldo_actual_cuenta"),
-                        rs.getString("estado_cuenta_cuenta")
-                )
-        );
-    }
-
-    public void actualizarSaldoBatch(List<CuentaSaldoDTO> cuentas, Integer idUsuario) {
-
-        String sql = """
-        UPDATE depositos.cuentas_ahorro
-           SET saldo_actual_cuenta = :saldoNuevo,
-               fk_seguridad_edicion = :idUsuario,
-               fecha_edicion = CURRENT_TIMESTAMP
-         WHERE id_cuenta_ahorro = :idCuentaAhorro
-    """;
-
-        MapSqlParameterSource[] batch = cuentas.stream()
-                .map(c -> new MapSqlParameterSource()
-                        .addValue("idCuentaAhorro", c.idCuentaAhorro())
-                        .addValue("saldoNuevo", c.saldoActual())
-                        .addValue("idUsuario", idUsuario))
-                .toArray(MapSqlParameterSource[]::new);
-
-        jdbc.batchUpdate(sql, batch);
-    }
-
-    public void insertarExtractosBatch(List<DepositosMovimientoDTO> movimientos, Integer idUsuario) {
-
-        String sql = """
-        INSERT INTO depositos.extractos_cuentas_ahorros (
-            id_cuenta_ahorro,
-            fecha_movimiento,
-            hora_movimiento,
-            tipo_comprobante,
-            numero_comprobante,
-            tipo_movimiento,
-            valor_debito,
-            valor_credito,
-            modulo,
-            tarjeta,
-            establecimiento,
-            fk_seguridad_creacion,
-            fk_seguridad_edicion
-        )
-        VALUES (
-            :idCuentaAhorro,
-            :fechaMovimiento,
-            CURRENT_TIME,
-            :tipoComprobante,
-            :numeroComprobante,
-            :tipoMovimiento,
-            :valorDebito,
-            :valorCredito,
-            :modulo,
-            :tarjeta,
-            :establecimiento,
-            :idUsuario,
-            :idUsuario
-        )
-    """;
-
-        MapSqlParameterSource[] batch = movimientos.stream()
-                .map(m -> new MapSqlParameterSource()
-                        .addValue("idCuentaAhorro", m.getIdCuentaAhorro())
-                        .addValue("fechaMovimiento", m.getFechaMovimiento())
-                        .addValue("tipoComprobante", m.getTipoComprobante())
-                        .addValue("numeroComprobante", m.getNumeroComprobante())
-                        .addValue("tipoMovimiento", m.getTipoMovimiento())
-                        .addValue("valorDebito", nvl(m.getValorDebito()))
-                        .addValue("valorCredito", nvl(m.getValorCredito()))
-                        .addValue("modulo", m.getModulo())
-                        .addValue("tarjeta", m.getTarjeta() == null ? "N" : m.getTarjeta())
-                        .addValue("establecimiento", m.getEstablecimiento())
-                        .addValue("idUsuario", idUsuario))
-                .toArray(MapSqlParameterSource[]::new);
-
-        jdbc.batchUpdate(sql, batch);
-    }
-
 }

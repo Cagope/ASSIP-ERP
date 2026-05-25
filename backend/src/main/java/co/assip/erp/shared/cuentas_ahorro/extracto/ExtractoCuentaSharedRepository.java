@@ -245,12 +245,14 @@ public class ExtractoCuentaSharedRepository {
                 (rs, rowNum) ->
                         ExtractoCuentaSharedMovimientoDTO.builder()
                                 .fechaMovimiento(
-                                        rs.getDate("fecha_movimiento")
-                                                .toLocalDate()
+                                        rs.getDate("fecha_movimiento") != null
+                                                ? rs.getDate("fecha_movimiento").toLocalDate()
+                                                : null
                                 )
                                 .horaMovimiento(
-                                        rs.getTime("hora_movimiento")
-                                                .toLocalTime()
+                                        rs.getTime("hora_movimiento") != null
+                                                ? rs.getTime("hora_movimiento").toLocalTime()
+                                                : null
                                 )
                                 .tipoMovimiento(rs.getString("tipo_movimiento"))
                                 .descripcionMovimiento(rs.getString("descripcion_movimiento"))
@@ -274,29 +276,35 @@ public class ExtractoCuentaSharedRepository {
     ) {
 
         String sql = """
-            SELECT
-                COALESCE(c.saldo_inicial_cuenta, 0)
-                +
-                COALESCE((
-                    SELECT
-                        SUM(COALESCE(e.valor_credito, 0))
-                        -
-                        SUM(COALESCE(e.valor_debito, 0))
-                    FROM depositos.extractos_cuentas_ahorros e
-                    WHERE e.id_cuenta_ahorro = c.id_cuenta_ahorro
-                      AND e.fecha_movimiento < ?::date
-                ), 0) AS saldo
+        SELECT
+            COALESCE(c.saldo_inicial_cuenta, 0)
+            +
+            COALESCE((
+                SELECT
+                    SUM(COALESCE(e.valor_credito, 0))
+                    -
+                    SUM(COALESCE(e.valor_debito, 0))
+                FROM depositos.extractos_cuentas_ahorros e
+                WHERE e.id_cuenta_ahorro = c.id_cuenta_ahorro
+                  AND e.fecha_movimiento < ?::date
+            ), 0) AS saldo
 
-            FROM depositos.cuentas_ahorro c
+        FROM depositos.cuentas_ahorro c
 
-            WHERE c.id_cuenta_ahorro = ?
-            """;
+        WHERE c.id_cuenta_ahorro = ?
+        """;
 
-        return jdbc.queryForObject(
+        BigDecimal saldo = jdbc.query(
                 sql,
-                BigDecimal.class,
+                rs -> rs.next()
+                        ? rs.getBigDecimal("saldo")
+                        : BigDecimal.ZERO,
                 fechaInicial,
                 idCuenta
         );
+
+        return saldo != null
+                ? saldo
+                : BigDecimal.ZERO;
     }
 }
