@@ -13,6 +13,7 @@ import co.assip.erp.sarlaft.evaluacion.dto.ReglasInput;
 import co.assip.erp.seguridad.service.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -114,6 +115,7 @@ public class MovimientoCuentaAhorroService {
                 .build();
     }
 
+    @Transactional
     public MovimientoCuentaResponseDTO aplicar(MovimientoCuentaRequestDTO request) {
         validarRequestAplicar(request);
 

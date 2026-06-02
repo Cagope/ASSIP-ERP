@@ -6,8 +6,11 @@ import co.assip.erp.cajas.provisiones.dto.CajasProvisionListDTO;
 import co.assip.erp.cajas.provisiones.dto.CajasProvisionSaveDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import co.assip.erp.cajas.provisiones.dto.CajaDisponibleDTO;
+import co.assip.erp.cajas.provisiones.dto.CajaEstadoDTO;
 
 import java.util.List;
+import co.assip.erp.cajas.provisiones.dto.CajaProvisionActivaDTO;
 
 @RestController
 @RequestMapping("/cajas/provisiones")
@@ -16,19 +19,32 @@ public class CajasProvisionController {
 
     private final CajasProvisionService service;
 
-    @GetMapping
-    public List<CajasProvisionListDTO> listar() {
-        return service.listar();
+    @GetMapping("/estado-cajas")
+    public List<CajaEstadoDTO> listarEstadoCajas(
+            @RequestParam Integer idAgencia,
+            @RequestParam String fechaContable
+    ) {
+        return service.listarEstadoCajas(
+                idAgencia,
+                java.time.LocalDate.parse(fechaContable)
+        );
     }
 
-    @GetMapping("/{idProvision}")
-    public CajasProvisionFormDTO obtenerPorId(@PathVariable Long idProvision) {
-        return service.obtenerPorId(idProvision);
+    @GetMapping("/activa-usuario")
+    public CajaProvisionActivaDTO obtenerProvisionActivaUsuario() {
+        return service.obtenerProvisionActivaUsuario();
     }
 
     @PostMapping
     public Long guardar(@RequestBody CajasProvisionSaveDTO dto) {
         return service.guardar(dto);
+    }
+
+    @PostMapping("/vincular")
+    public Long vincularUsuarioCaja(
+            @RequestBody CajasProvisionSaveDTO dto
+    ) {
+        return service.vincularUsuarioCaja(dto);
     }
 
     @PostMapping("/cerrar")
@@ -45,5 +61,12 @@ public class CajasProvisionController {
                 idAgencia,
                 java.time.LocalDate.parse(fecha)
         );
+    }
+
+    @GetMapping("/disponibles")
+    public List<CajaDisponibleDTO> listarCajasDisponibles(
+            @RequestParam Integer idAgencia
+    ) {
+        return service.listarCajasDisponibles(idAgencia);
     }
 }

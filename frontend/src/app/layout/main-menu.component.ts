@@ -12,7 +12,8 @@ import {
   Settings,
   LockKeyhole,
   PiggyBank,
-  Gauge
+  Gauge,
+  Wallet
 } from 'lucide-angular';
 
 import {
@@ -66,7 +67,8 @@ export class MainMenuComponent implements OnInit {
     general: Settings,
     seguridad: LockKeyhole,
     cdat: PiggyBank,
-    gerencia: Gauge
+    gerencia: Gauge,
+    cajas: Wallet
   };
 
   openedIndex: number | null = null;

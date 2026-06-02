@@ -46,7 +46,9 @@ public final class SecurityUtils {
             try {
                 return (List<Integer>) list;
             } catch (Exception e) {
-                return Collections.emptyList();
+                throw new SecurityException(
+                        "No fue posible obtener las agencias del usuario."
+                );
             }
         }
         return Collections.emptyList();

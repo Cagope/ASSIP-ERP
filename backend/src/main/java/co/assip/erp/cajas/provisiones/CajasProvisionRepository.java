@@ -7,9 +7,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import co.assip.erp.cajas.provisiones.dto.CajaDisponibleDTO;
+import co.assip.erp.cajas.provisiones.dto.CajaEstadoDTO;
 
 import java.util.List;
 import java.util.Optional;
+import co.assip.erp.cajas.provisiones.dto.CajaProvisionActivaDTO;
+
 
 @Repository
 @RequiredArgsConstructor
@@ -232,4 +236,203 @@ public class CajasProvisionRepository {
                         .build()
         );
     }
+
+    public Optional<CajasProvisionFormDTO> obtenerPorCajaYFecha(
+            Long idCaja,
+            java.time.LocalDate fechaContable
+    ) {
+        String sql = """
+        SELECT
+            id_provision,
+            id_caja,
+            fecha_contable,
+            estado,
+            efectivo_inicio,
+            cheques_inicio,
+            fk_usuario_apertura
+        FROM cajas.provisiones_diarias
+        WHERE id_caja = :idCaja
+          AND fecha_contable = :fechaContable
+    """;
+
+        List<CajasProvisionFormDTO> result = jdbc.query(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idCaja", idCaja)
+                        .addValue("fechaContable", fechaContable),
+                (rs, rowNum) -> CajasProvisionFormDTO.builder()
+                        .idProvision(rs.getLong("id_provision"))
+                        .idCaja(rs.getLong("id_caja"))
+                        .fechaContable(rs.getObject("fecha_contable", java.time.LocalDate.class))
+                        .estado(rs.getString("estado"))
+                        .efectivoInicio(rs.getBigDecimal("efectivo_inicio"))
+                        .chequesInicio(rs.getBigDecimal("cheques_inicio"))
+                        .fkUsuarioApertura(rs.getInt("fk_usuario_apertura"))
+                        .build()
+        );
+
+        return result.stream().findFirst();
+    }
+
+    public Optional<CajasProvisionFormDTO> obtenerUltimoCierre(Long idCaja) {
+        String sql = """
+        SELECT
+            id_provision,
+            id_caja,
+            fecha_contable,
+            estado,
+            efectivo_fin AS efectivo_inicio,
+            cheques_fin AS cheques_inicio,
+            fk_usuario_apertura
+        FROM cajas.provisiones_diarias
+        WHERE id_caja = :idCaja
+          AND estado = 'CERRADA'
+        ORDER BY fecha_contable DESC
+        LIMIT 1
+    """;
+
+        List<CajasProvisionFormDTO> result = jdbc.query(
+                sql,
+                new MapSqlParameterSource("idCaja", idCaja),
+                (rs, rowNum) -> CajasProvisionFormDTO.builder()
+                        .idProvision(rs.getLong("id_provision"))
+                        .idCaja(rs.getLong("id_caja"))
+                        .fechaContable(rs.getObject("fecha_contable", java.time.LocalDate.class))
+                        .estado(rs.getString("estado"))
+                        .efectivoInicio(rs.getBigDecimal("efectivo_inicio"))
+                        .chequesInicio(rs.getBigDecimal("cheques_inicio"))
+                        .fkUsuarioApertura(rs.getInt("fk_usuario_apertura"))
+                        .build()
+        );
+
+        return result.stream().findFirst();
+    }
+
+    public List<CajaDisponibleDTO> listarCajasDisponibles(Integer idAgencia) {
+        String sql = """
+        SELECT
+            id_caja,
+            codigo_caja,
+            descripcion
+        FROM cajas.cajas
+        WHERE id_agencia = :idAgencia
+          AND activa = TRUE
+        ORDER BY codigo_caja
+    """;
+
+        return jdbc.query(
+                sql,
+                new MapSqlParameterSource("idAgencia", idAgencia),
+                (rs, rowNum) -> CajaDisponibleDTO.builder()
+                        .idCaja(rs.getLong("id_caja"))
+                        .codigoCaja(rs.getString("codigo_caja"))
+                        .descripcionCaja(rs.getString("descripcion"))
+                        .build()
+        );
+    }
+
+    public List<CajaEstadoDTO> listarEstadoCajas(
+            Integer idAgencia,
+            java.time.LocalDate fechaContable
+    ) {
+        String sql = """
+        SELECT
+            c.id_caja,
+            c.codigo_caja,
+            c.descripcion,
+
+            p.id_provision,
+            p.estado,
+            p.fk_usuario_apertura,
+            p.fecha_apertura,
+
+            CASE
+                WHEN p.id_provision IS NULL THEN TRUE
+                ELSE FALSE
+            END AS disponible
+
+        FROM cajas.cajas c
+
+        LEFT JOIN cajas.provisiones_diarias p
+               ON p.id_caja = c.id_caja
+              AND p.fecha_contable = :fechaContable
+              AND p.estado = 'ABIERTA'
+
+        WHERE c.id_agencia = :idAgencia
+          AND c.activa = TRUE
+
+        ORDER BY c.codigo_caja
+    """;
+
+        return jdbc.query(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idAgencia", idAgencia)
+                        .addValue("fechaContable", fechaContable),
+                (rs, rowNum) -> CajaEstadoDTO.builder()
+                        .idCaja(rs.getLong("id_caja"))
+                        .codigoCaja(rs.getString("codigo_caja"))
+                        .descripcionCaja(rs.getString("descripcion"))
+                        .idProvision(rs.getObject("id_provision") != null ? rs.getLong("id_provision") : null)
+                        .estado(rs.getString("estado"))
+                        .fkUsuarioApertura(rs.getObject("fk_usuario_apertura") != null ? rs.getInt("fk_usuario_apertura") : null)
+                        .fechaApertura(rs.getObject("fecha_apertura", java.time.LocalDateTime.class))
+                        .disponible(rs.getBoolean("disponible"))
+                        .build()
+        );
+    }
+
+    public java.util.Optional<CajaProvisionActivaDTO> obtenerProvisionActivaUsuario(
+            Integer idUsuario
+    ) {
+
+        String sql = """
+    SELECT
+        c.id_caja,
+        c.codigo_caja,
+        c.descripcion AS descripcion_caja,
+
+        a.id_agencia,
+        a.codigo_agencia,
+        a.nombre_agencia,
+
+        p.id_provision,
+        p.fecha_contable,
+        p.estado
+
+    FROM cajas.provisiones_diarias p
+
+    INNER JOIN cajas.cajas c
+            ON c.id_caja = p.id_caja
+
+    INNER JOIN general.datos_agencias a
+            ON a.id_agencia = c.id_agencia
+
+    WHERE p.estado = 'ABIERTA'
+      AND p.fk_usuario_apertura = :idUsuario
+      AND p.fecha_contable = CURRENT_DATE
+
+    LIMIT 1
+    """;
+
+        List<CajaProvisionActivaDTO> result = jdbc.query(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idUsuario", idUsuario),
+                (rs, rowNum) -> CajaProvisionActivaDTO.builder()
+                        .idCaja(rs.getLong("id_caja"))
+                        .codigoCaja(rs.getString("codigo_caja"))
+                        .descripcionCaja(rs.getString("descripcion_caja"))
+                        .idAgencia(rs.getInt("id_agencia"))
+                        .codigoAgencia(rs.getString("codigo_agencia"))
+                        .nombreAgencia(rs.getString("nombre_agencia"))
+                        .idProvision(rs.getLong("id_provision"))
+                        .fechaContable(rs.getObject("fecha_contable", java.time.LocalDate.class))
+                        .estado(rs.getString("estado"))
+                        .build()
+        );
+
+        return result.stream().findFirst();
+    }
+
 }

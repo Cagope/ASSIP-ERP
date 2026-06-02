@@ -1,0 +1,221 @@
+<div class="page">
+
+  <app-header-actions
+    titulo="Vincular caja"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <div class="card">
+
+    <form
+      class="filtros"
+      (ngSubmit)="vincular()">
+
+      <div class="f-row">
+        <label>Fecha contable</label>
+
+        <input
+          type="date"
+          [(ngModel)]="fechaContable"
+          name="fechaContable"
+          readonly>
+      </div>
+
+      <div class="f-row">
+        <label>Caja</label>
+
+        <select
+          [(ngModel)]="idCaja"
+          name="idCaja"
+          (ngModelChange)="onChangeCaja()">
+
+          <option [ngValue]="null">
+            Seleccione caja
+          </option>
+
+          <option
+            *ngFor="let c of cajasEstado"
+            [ngValue]="c.idCaja"
+            [disabled]="!c.disponible">
+
+            {{ c.codigoCaja }} - {{ c.descripcionCaja }}
+            {{ c.disponible ? '' : ' — ABIERTA usuario ' + c.fkUsuarioApertura }}
+
+          </option>
+
+        </select>
+      </div>
+
+      <div class="f-row">
+        <label>Efectivo inicial</label>
+
+        <input
+          type="text"
+          numericFormat
+          class="input-number"
+          [(ngModel)]="efectivoInicio"
+          name="efectivoInicio">
+      </div>
+
+      <div class="f-row">
+        <label>Cheques iniciales</label>
+
+        <input
+          type="text"
+          numericFormat
+          class="input-number"
+          [(ngModel)]="chequesInicio"
+          name="chequesInicio">
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()"
+          [disabled]="cargando">
+
+          Limpiar
+
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="cargando">
+
+          {{ cargando ? 'Vinculando...' : 'Vincular caja' }}
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+  <div
+    *ngIf="error"
+    class="error">
+
+    {{ error }}
+
+  </div>
+
+  <div
+    *ngIf="mensaje"
+    class="validacion-box ok">
+
+    {{ mensaje }}
+
+  </div>
+
+  <div
+    *ngIf="idProvisionActiva"
+    class="card">
+
+    <h3>Caja activa del usuario</h3>
+
+    <div class="resumen-totales">
+
+      <div class="mini-card green">
+        <div class="label">Caja</div>
+        <div class="value">{{ cajaActivaTexto }}</div>
+      </div>
+
+      <div class="mini-card blue">
+        <div class="label">Fecha</div>
+        <div class="value">{{ fechaContable }}</div>
+      </div>
+
+      <div class="mini-card gray">
+        <div class="label">Provisión</div>
+        <div class="value">{{ idProvisionActiva }}</div>
+      </div>
+
+      <div class="mini-card green">
+        <div class="label">Estado</div>
+        <div class="value">ABIERTA</div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="card">
+
+    <h3>
+      Estado de cajas del día
+    </h3>
+
+    <div class="table-container">
+
+      <table class="tabla-resumen tabla-cajas">
+
+        <thead>
+        <tr>
+          <th>Caja</th>
+          <th>Descripción</th>
+          <th>Estado</th>
+          <th>Usuario</th>
+          <th>Provisión</th>
+          <th>Acción</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let item of cajasEstado">
+
+          <td>{{ item.codigoCaja }}</td>
+
+          <td>{{ item.descripcionCaja }}</td>
+
+          <td>
+            <span
+              [class.positive]="item.disponible"
+              [class.negative]="!item.disponible">
+              {{ item.disponible ? 'DISPONIBLE' : item.estado }}
+            </span>
+          </td>
+
+          <td>
+            {{ item.fkUsuarioApertura || '' }}
+          </td>
+
+          <td>
+            {{ item.idProvision || '' }}
+          </td>
+
+          <td>
+            <button
+              type="button"
+              class="btn-action-edit btn-action-text"
+              (click)="seleccionarCajaDisponible(item)"
+              [disabled]="!item.disponible">
+
+              {{ item.disponible ? 'Seleccionar' : 'No disponible' }}
+
+            </button>
+          </td>
+
+        </tr>
+
+        <tr *ngIf="cajasEstado.length === 0">
+          <td colspan="6" class="empty">
+            No hay cajas registradas para la agencia actual.
+          </td>
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>

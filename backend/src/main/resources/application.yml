@@ -58,3 +58,7 @@ logging:
     org.flywaydb.core.internal.sqlscript: debug # 🔍 Detalle línea a línea
     org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: warn
     org.springframework.web.servlet.handler: warn
+
+assip:
+  archivos:
+    firmas: D:/assip-erp/archivos/firmas

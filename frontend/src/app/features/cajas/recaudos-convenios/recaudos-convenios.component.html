@@ -1,0 +1,248 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h2>Caja — Recaudos de convenios</h2>
+      <p>Registro operativo de recaudos recibidos por caja para convenios activos.</p>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert--error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="mensaje" class="alert alert--success">
+    {{ mensaje }}
+  </div>
+
+  <section
+    class="card provision-card"
+    *ngIf="provisionActiva">
+
+    <div class="provision-grid">
+
+      <div class="provision-item">
+        <span>Agencia</span>
+        <strong>
+          {{ provisionActiva.codigoAgencia }} - {{ provisionActiva.nombreAgencia }}
+        </strong>
+      </div>
+
+      <div class="provision-item">
+        <span>Caja</span>
+        <strong>
+          {{ provisionActiva.codigoCaja }} - {{ provisionActiva.descripcionCaja }}
+        </strong>
+      </div>
+
+      <div class="provision-item">
+        <span>Fecha contable</span>
+        <strong>
+          {{ provisionActiva.fechaContable }}
+        </strong>
+      </div>
+
+    </div>
+
+  </section>
+
+  <section class="card">
+
+    <h3>Nuevo recaudo</h3>
+
+    <div class="movement-grid">
+
+      <div class="form-field full">
+
+        <label>Convenio</label>
+
+        <select
+          [(ngModel)]="idConvenio"
+          name="idConvenio"
+          (change)="seleccionarConvenio()">
+
+          <option [ngValue]="null">
+            Seleccione un convenio
+          </option>
+
+          <option
+            *ngFor="let convenio of convenios"
+            [ngValue]="convenio.idConvenio">
+
+            {{ convenio.codigoConvenio }} - {{ convenio.nombreConvenio }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+      <div
+        class="convenio-box full"
+        *ngIf="convenioSeleccionado">
+
+        <div>
+          <span>Cuenta destino</span>
+          <strong>
+            {{ convenioSeleccionado.codigoCuenta }}
+          </strong>
+        </div>
+
+        <div>
+          <span>Titular</span>
+          <strong>
+            {{ convenioSeleccionado.documentoTitular }}
+            -
+            {{ convenioSeleccionado.nombreTitular }}
+          </strong>
+        </div>
+
+        <div>
+          <span>Agencia</span>
+          <strong>
+            {{ convenioSeleccionado.codigoAgencia }}
+            -
+            {{ convenioSeleccionado.nombreAgencia }}
+          </strong>
+        </div>
+
+      </div>
+
+      <div class="form-field">
+
+        <label>Documento soporte</label>
+
+        <input
+          type="text"
+          name="documentoSoporte"
+          autocomplete="off"
+          [(ngModel)]="documentoSoporte">
+
+      </div>
+
+      <div class="form-field">
+
+        <label>Valor recaudo</label>
+
+        <input
+          type="text"
+          name="valorRecaudo"
+          autocomplete="off"
+          numericFormat
+          class="input-number"
+          [(ngModel)]="valorRecaudo">
+
+      </div>
+
+    </div>
+
+    <div class="form-actions end">
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="aplicar()"
+        [disabled]="guardando || cargando">
+
+        Guardar recaudo
+
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="limpiarFormulario()"
+        [disabled]="guardando">
+
+        Limpiar
+
+      </button>
+
+    </div>
+
+  </section>
+
+  <section class="card">
+
+    <div class="section-title-row">
+
+      <div>
+        <h3>Recaudos registrados</h3>
+        <p>Recaudos capturados en la provisión activa.</p>
+      </div>
+
+      <div class="total-box">
+        <span>Total recaudos</span>
+        <strong>
+          {{ totalRecaudos() | number:'1.2-2' }}
+        </strong>
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="cargando"
+      class="loading">
+      Cargando...
+    </div>
+
+    <div
+      *ngIf="!cargando && recaudos.length === 0"
+      class="empty">
+      No hay recaudos registrados para esta provisión.
+    </div>
+
+    <div
+      class="table-wrap"
+      *ngIf="!cargando && recaudos.length > 0">
+
+      <table class="data-table">
+
+        <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Convenio</th>
+          <th>Cuenta</th>
+          <th>Documento soporte</th>
+          <th class="right">Valor</th>
+          <th>Estado</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let item of recaudos">
+
+          <td>
+            {{ item.fechaRecaudo }}
+          </td>
+
+          <td>
+            {{ item.codigoConvenio }} - {{ item.nombreConvenio }}
+          </td>
+
+          <td>
+            {{ item.codigoCuenta }}
+          </td>
+
+          <td>
+            {{ item.documentoSoporte }}
+          </td>
+
+          <td class="right">
+            {{ item.valorRecaudo | number:'1.2-2' }}
+          </td>
+
+          <td>
+            {{ item.estadoRecaudo }}
+          </td>
+
+        </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</div>

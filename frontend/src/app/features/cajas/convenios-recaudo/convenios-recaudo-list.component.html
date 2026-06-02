@@ -1,0 +1,112 @@
+<div class="convenios-recaudo-list">
+
+  <app-header-actions
+    titulo="Convenios de recaudo"
+    (nuevo)="nuevo()"
+    (imprimir)="imprimirListado()"
+    (exportar)="exportarExcel()">
+  </app-header-actions>
+
+  <table
+    id="tabla-convenios-recaudo"
+    *ngIf="!cargando && lista.length > 0"
+    class="table table-striped">
+
+    <thead>
+    <tr>
+      <th>agencia</th>
+      <th>código</th>
+      <th>convenio</th>
+      <th>documento</th>
+      <th>titular</th>
+      <th>cuenta</th>
+      <th>forma</th>
+      <th class="right">saldo</th>
+      <th>estado</th>
+      <th>acciones</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr *ngFor="let item of lista">
+
+      <td>
+        {{ item.codigoAgencia }} - {{ item.nombreAgencia }}
+      </td>
+
+      <td>
+        {{ item.codigoConvenio }}
+      </td>
+
+      <td>
+        {{ item.nombreConvenio }}
+      </td>
+
+      <td>
+        {{ item.documento }}
+      </td>
+
+      <td>
+        {{ item.nombreTitular }}
+      </td>
+
+      <td>
+        {{ item.codigoCuenta }}
+      </td>
+
+      <td>
+        {{ item.codigoForma }} - {{ item.nombreForma }}
+      </td>
+
+      <td class="right">
+        {{ item.saldoActual | number:'1.2-2' }}
+      </td>
+
+      <td>
+        <span
+          [class.estado-activo]="item.estado === 'A'"
+          [class.estado-inactivo]="item.estado !== 'A'">
+          {{ estadoTexto(item.estado) }}
+        </span>
+      </td>
+
+      <td>
+        <div class="acciones">
+
+          <button
+            class="btn-action-edit"
+            type="button"
+            (click)="editar(item)"
+            title="Editar">
+            ✏️
+          </button>
+
+          <button
+            class="btn-action-delete"
+            type="button"
+            (click)="eliminar(item)"
+            title="Eliminar">
+            🗑️
+          </button>
+
+        </div>
+      </td>
+
+    </tr>
+    </tbody>
+
+  </table>
+
+  <div *ngIf="cargando" class="loading">
+    Cargando...
+  </div>
+
+  <div *ngIf="!cargando && lista.length === 0" class="empty">
+    No hay convenios de recaudo registrados.
+  </div>
+
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+</div>

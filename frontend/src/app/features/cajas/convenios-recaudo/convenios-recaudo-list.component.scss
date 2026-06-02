@@ -1,0 +1,100 @@
+@use '../../../../styles/forms';
+@use '../../../../styles/informes-base';
+
+/* =========================================
+   TABLA
+========================================= */
+
+.table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 9px 10px;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    font-size: 13px;
+  }
+
+  th {
+    background: #f8fafc;
+
+    color: #374151;
+
+    text-align: left;
+
+    font-weight: 700;
+
+    text-transform: none;
+  }
+
+  td {
+    color: #111827;
+
+    text-transform: none;
+  }
+
+  tbody tr:hover {
+    background: #f9fafb;
+  }
+}
+
+/* =========================================
+   ACCIONES
+========================================= */
+
+.acciones {
+  display: flex;
+  gap: 0.4rem;
+
+  flex-wrap: wrap;
+}
+
+.right {
+  text-align: right;
+}
+
+/* =========================================
+   ESTADOS
+========================================= */
+
+.estado-activo {
+  color: #15803d;
+  font-weight: 600;
+}
+
+.estado-inactivo {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+/* =========================================
+   MENSAJES
+========================================= */
+
+.loading,
+.empty,
+.error {
+  margin-top: 1rem;
+}
+
+.error {
+  color: #dc2626;
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 700px) {
+
+  .table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+}

@@ -1,0 +1,298 @@
+<div
+  class="print-overlay"
+  *ngIf="visible">
+
+  <div class="print-modal">
+
+    <div class="print-header">
+
+      <div>
+
+        <h2>
+          Declaración de Operaciones en Efectivo
+        </h2>
+
+        <p>
+          Formato SARLAFT
+        </p>
+
+      </div>
+
+      <div class="header-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="cerrarVentana()">
+
+          Cerrar
+
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="imprimir()"
+          [disabled]="!formato">
+
+          Imprimir
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="error"
+      class="alert alert--error">
+
+      {{ error }}
+
+    </div>
+
+    <div
+      *ngIf="cargando"
+      class="loading">
+
+      Cargando formato...
+
+    </div>
+
+    <div
+      *ngIf="formato"
+      id="lavado-activos-print-area"
+      class="print-sheet">
+
+      <!-- ENCABEZADO EMPRESA -->
+
+      <div class="print-company-header">
+
+        <div class="company-logo">
+
+          <img src="assets/logo-print.png" alt="COOPVALLE">
+
+        </div>
+
+        <div class="company-info">
+
+          <strong>
+            DECLARACIÓN DE OPERACIONES EN EFECTIVO
+          </strong>
+
+          <span>
+            Cuantías determinadas en el estatuto del sistema financiero
+          </span>
+
+        </div>
+
+        <div class="company-code">
+          LAFT-F-004
+        </div>
+
+      </div>
+
+      <!-- INFORMACIÓN OPERACIÓN -->
+
+      <div class="section">
+
+        <div class="section-title">
+
+          Información de la operación
+
+        </div>
+
+        <div class="grid-4">
+
+          <div>
+            <label>Fecha</label>
+            <strong>{{ formato.fechaContable }}</strong>
+          </div>
+
+          <div>
+            <label>Agencia</label>
+            <strong>{{ formato.nombreAgencia }}</strong>
+          </div>
+
+          <div>
+            <label>Cuenta</label>
+            <strong>{{ formato.numeroProducto }}</strong>
+          </div>
+
+          <div>
+            <label>Comprobante</label>
+            <strong>{{ formato.numeroComprobante }}</strong>
+          </div>
+
+          <div>
+            <label>Producto</label>
+            <strong>{{ formato.descripcionProducto }}</strong>
+          </div>
+
+          <div>
+            <label>Tipo operación</label>
+            <strong>{{ formato.tipoTransaccion }}</strong>
+          </div>
+
+          <div>
+            <label>Valor</label>
+            <strong>
+              {{ formato.valorTransaccion | number:'1.2-2' }}
+            </strong>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- BENEFICIARIO -->
+
+      <div class="section">
+
+        <div class="section-title">
+          Beneficiario
+        </div>
+
+        <div class="inline-row">
+          <span>
+            <label>Documento:</label>
+            <strong>{{ formato.documento }}</strong>
+          </span>
+
+          <span class="wide">
+            <label>Nombre:</label>
+            <strong>{{ formato.nombreCompleto }}</strong>
+          </span>
+        </div>
+
+      </div>
+
+      <!-- PERSONA REALIZA -->
+
+      <div class="section">
+
+        <div class="section-title">
+          Persona que realiza la operación
+        </div>
+
+        <div class="inline-row">
+          <span>
+            <label>Documento:</label>
+            <strong>{{ formato.documentoRealiza }}</strong>
+          </span>
+
+          <span>
+            <label>Tipo documento:</label>
+            <strong>{{ formato.tipoDocumentoRealiza }}</strong>
+          </span>
+
+          <span class="wide">
+            <label>Nombre:</label>
+            <strong>{{ nombreRealiza() }}</strong>
+          </span>
+        </div>
+
+        <div class="inline-row">
+          <span class="wide">
+            <label>Dirección:</label>
+            <strong>{{ formato.direccionRealiza }}</strong>
+          </span>
+
+          <span>
+            <label>Teléfono:</label>
+            <strong>{{ formato.telefonoRealiza }}</strong>
+          </span>
+        </div>
+
+      </div>
+
+      <!-- BENEFICIARIO REAL -->
+
+      <div class="section">
+
+        <div class="section-title">
+
+          Persona en nombre de la cual se realiza la operación
+
+        </div>
+
+        <div class="grid-3">
+
+          <div>
+            <label>Nombre</label>
+            <strong>{{ formato.nombreBeneficiario }}</strong>
+          </div>
+
+          <div>
+            <label>Dirección</label>
+            <strong>{{ formato.direccionBeneficiario }}</strong>
+          </div>
+
+          <div>
+            <label>Teléfono</label>
+            <strong>{{ formato.telefonoBeneficiario }}</strong>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ORIGEN -->
+
+      <div class="section">
+
+        <div class="section-title">
+
+          Origen de fondos
+
+        </div>
+
+        <div class="origen-box">
+
+          {{ formato.actividadEconomica }}
+
+        </div>
+
+      </div>
+
+      <!-- FIRMAS -->
+
+      <div class="firmas">
+
+        <div class="firma-box">
+
+          <div class="firma-linea"></div>
+
+          <span>
+            Firma persona que realiza
+          </span>
+
+        </div>
+
+        <div class="firma-box">
+
+          <div class="firma-linea"></div>
+
+          <span>
+            Huella índice derecho
+          </span>
+
+        </div>
+
+        <div class="firma-box">
+
+          <div class="firma-linea"></div>
+
+          <span>
+            Firma funcionario
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

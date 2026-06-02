@@ -1,0 +1,117 @@
+@use '../../../../../styles/informes-base';
+
+.filtros {
+  grid-template-columns:
+    170px
+    minmax(260px, 1fr)
+    170px
+    170px
+    auto;
+}
+
+.filtros .form-actions {
+  width: auto;
+  margin-top: 0;
+
+  display: flex;
+  flex-direction: row;
+  align-items: end;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.tabla-resumen {
+
+  th,
+  td {
+    white-space: nowrap;
+  }
+
+  .input-number {
+    text-align: right;
+  }
+}
+
+.validacion-box {
+  margin-top: 1rem;
+}
+
+/* =====================================================
+   TABLA CAJAS
+===================================================== */
+
+.tabla-cajas {
+  width: 100%;
+  table-layout: auto;
+
+  th,
+  td {
+    padding: 8px 10px;
+    white-space: nowrap;
+    vertical-align: middle;
+    text-align: left;
+  }
+
+  th:nth-child(1),
+  td:nth-child(1) {
+    width: 90px;
+  }
+
+  th:nth-child(2),
+  td:nth-child(2) {
+    min-width: 320px;
+  }
+
+  th:nth-child(3),
+  td:nth-child(3) {
+    width: 140px;
+  }
+
+  th:nth-child(4),
+  td:nth-child(4) {
+    width: 110px;
+  }
+
+  th:nth-child(5),
+  td:nth-child(5) {
+    width: 110px;
+  }
+
+  th:nth-child(6),
+  td:nth-child(6) {
+    width: 140px;
+  }
+
+  td:last-child {
+    text-align: left;
+  }
+
+  .btn-action-edit {
+    margin: 0;
+  }
+}
+
+@media (max-width: 1300px) {
+
+  .filtros {
+    grid-template-columns:
+      170px
+      1fr
+      170px
+      170px
+      auto;
+  }
+
+}
+
+@media (max-width: 700px) {
+
+  .filtros {
+    grid-template-columns: 1fr;
+  }
+
+  .filtros .form-actions {
+    justify-content: flex-start;
+  }
+
+}

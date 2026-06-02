@@ -50,7 +50,7 @@ public class FinancieroController {
         try {
             return ResponseEntity.ok(service.crear(f));
         } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().build();
         }
     }
 

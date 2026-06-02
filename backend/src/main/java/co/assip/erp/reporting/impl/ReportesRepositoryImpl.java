@@ -155,11 +155,17 @@ public class ReportesRepositoryImpl {
                         where.append((count++ > 0 ? " AND " : " WHERE "));
                         where.append(" id_agencia = ANY(?) ");
                         params.add(agenciasUsuario.toArray(new Integer[0]));
+                    } else {
+                        throw new SecurityException(
+                                "El usuario no tiene agencias permitidas para consultar depósitos."
+                        );
                     }
                 }
 
-            } catch (Exception ignored) {
-                // Si ocurre un error, el reporte sigue sin filtro.
+            } catch (Exception e) {
+                throw new SecurityException(
+                        "No fue posible validar las agencias permitidas del usuario."
+                );
             }
 
             sql.append(where);

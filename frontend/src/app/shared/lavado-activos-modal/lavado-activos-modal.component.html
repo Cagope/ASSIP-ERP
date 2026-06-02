@@ -1,0 +1,290 @@
+<div class="extracto-overlay" *ngIf="visible && mostrarCaptura">
+  <div class="extracto-modal">
+
+    <div class="modal-top">
+      <div>
+        <h2>Formato lavado de activos</h2>
+        <p>Complete los datos requeridos para guardar e imprimir el formato.</p>
+      </div>
+    </div>
+
+    <div *ngIf="error" class="alert alert--error">
+      {{ error }}
+    </div>
+
+    <div *ngIf="mensaje" class="alert alert--success">
+      {{ mensaje }}
+    </div>
+
+    <!-- INFORMACIÓN GENERAL -->
+    <div class="card">
+
+      <div class="card-title">
+        Información de la operación
+      </div>
+
+      <div class="info-grid">
+
+        <div>
+          <label>Nombre del asociado</label>
+          <strong>{{ form.nombreCompleto }}</strong>
+        </div>
+
+        <div>
+          <label>Documento</label>
+          <strong>{{ form.documento }}</strong>
+        </div>
+
+        <div>
+          <label>Fecha</label>
+          <strong>{{ form.fechaContable }}</strong>
+        </div>
+
+        <div>
+          <label>Producto</label>
+          <strong>{{ form.descripcionProducto }}</strong>
+        </div>
+
+        <div>
+          <label>Código producto</label>
+          <strong>{{ form.numeroProducto }}</strong>
+        </div>
+
+        <div>
+          <label>Operación</label>
+          <strong>{{ form.tipoTransaccion }}</strong>
+        </div>
+
+        <div>
+          <label>Valor operación</label>
+          <strong>{{ form.valorTransaccion | number:'1.2-2' }}</strong>
+        </div>
+
+        <div>
+          <label>Comprobante</label>
+          <strong>{{ form.numeroComprobante }}</strong>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- PERSONA QUE REALIZA -->
+    <div class="card">
+
+      <div class="card-title card-title--alert">
+        Persona que realiza la operación
+      </div>
+
+      <div class="filters">
+
+        <div class="f-row">
+          <label>Documento</label>
+          <input
+            type="text"
+            [(ngModel)]="form.documentoRealiza"
+            name="documentoRealiza"
+            (blur)="autocompletarPersonaRealiza()">
+        </div>
+
+        <div class="f-row">
+          <label>&nbsp;</label>
+          <button
+            type="button"
+            class="btn btn--secondary"
+            (click)="autocompletarPersonaRealiza()">
+            Buscar
+          </button>
+        </div>
+
+        <div class="f-row">
+          <label>Tipo documento</label>
+          <select
+            [(ngModel)]="form.tipoDocumentoRealiza"
+            name="tipoDocumentoRealiza">
+
+            <option value="">Seleccione...</option>
+
+            <option
+              *ngFor="let item of tiposDocumento"
+              [value]="item.codigo">
+              {{ item.codigo }} - {{ item.nombre }}
+            </option>
+
+          </select>
+        </div>
+
+        <div class="f-row">
+          <label>Departamento</label>
+          <select
+            [(ngModel)]="form.departamentoRealiza"
+            name="departamentoRealiza"
+            (change)="cargarCiudadesRealiza()">
+
+            <option value="">Seleccione...</option>
+
+            <option
+              *ngFor="let item of departamentos"
+              [value]="item.idDepartamento">
+              {{ item.nombreDepartamento }}
+            </option>
+
+          </select>
+        </div>
+
+        <div class="f-row">
+          <label>Ciudad</label>
+          <select
+            [(ngModel)]="form.ciudadRealiza"
+            name="ciudadRealiza">
+
+            <option value="">Seleccione...</option>
+
+            <option
+              *ngFor="let item of ciudadesRealiza"
+              [value]="item.idCiudad">
+              {{ item.nombreCiudad }}
+            </option>
+
+          </select>
+        </div>
+
+        <div class="f-row">
+          <label>Primer apellido</label>
+          <input
+            type="text"
+            [(ngModel)]="form.primerApellidoRealiza"
+            name="primerApellidoRealiza">
+        </div>
+
+        <div class="f-row">
+          <label>Segundo apellido</label>
+          <input
+            type="text"
+            [(ngModel)]="form.segundoApellidoRealiza"
+            name="segundoApellidoRealiza">
+        </div>
+
+        <div class="f-row">
+          <label>Primer nombre</label>
+          <input
+            type="text"
+            [(ngModel)]="form.primerNombreRealiza"
+            name="primerNombreRealiza">
+        </div>
+
+        <div class="f-row">
+          <label>Otros nombres</label>
+          <input
+            type="text"
+            [(ngModel)]="form.segundoNombreRealiza"
+            name="segundoNombreRealiza">
+        </div>
+
+        <div class="f-row full">
+          <label>Dirección</label>
+          <input
+            type="text"
+            [(ngModel)]="form.direccionRealiza"
+            name="direccionRealiza">
+        </div>
+
+        <div class="f-row full">
+          <label>Teléfono</label>
+          <input
+            type="text"
+            [(ngModel)]="form.telefonoRealiza"
+            name="telefonoRealiza">
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- PERSONA EN NOMBRE DE LA CUAL -->
+    <div class="card">
+
+      <div class="card-title card-title--alert">
+        Persona en nombre de la cual se realiza la operación
+      </div>
+
+      <div class="filters">
+
+        <div class="f-row full">
+          <label>Nombre</label>
+          <input
+            type="text"
+            [(ngModel)]="form.nombreBeneficiario"
+            name="nombreBeneficiario">
+        </div>
+
+        <div class="f-row full">
+          <label>Dirección</label>
+          <input
+            type="text"
+            [(ngModel)]="form.direccionBeneficiario"
+            name="direccionBeneficiario">
+        </div>
+
+        <div class="f-row full">
+          <label>Teléfono</label>
+          <input
+            type="text"
+            [(ngModel)]="form.telefonoBeneficiario"
+            name="telefonoBeneficiario">
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ORIGEN DE FONDOS -->
+    <div class="card">
+
+      <div class="card-title">
+        Origen de fondos
+      </div>
+
+      <div class="filters">
+
+        <div class="f-row full">
+          <label>Comentario / origen de fondos</label>
+          <textarea
+            rows="4"
+            [(ngModel)]="form.actividadEconomica"
+            name="actividadEconomica">
+          </textarea>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="bottom-actions">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="cerrarModal()">
+        Cancelar
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="guardar()"
+        [disabled]="cargando">
+        Guardar formato
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<app-lavado-activos-print
+  [visible]="mostrarPrint"
+  [idFormato]="idFormatoPrint"
+  (cerrar)="cerrarPrint()">
+</app-lavado-activos-print>

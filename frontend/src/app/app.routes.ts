@@ -49,6 +49,14 @@ export const routes: Routes = [
             .then(m => m.CDAT_ROUTES),
       },
 
+      // === CAJAS ===
+      {
+        path: 'cajas',
+        loadChildren: () =>
+          import('./features/cajas/cajas.routes')
+            .then(m => m.CAJAS_ROUTES),
+      },
+
       // === GERENCIA ===
       {
         path: 'gerencia',

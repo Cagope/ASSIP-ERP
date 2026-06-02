@@ -50,7 +50,9 @@ public class SecurityConfig {
                                 "/auth/**",              // compatibilidad
                                 "/api/v1/catalogos/**",  // 🔓 catálogos públicos
                                 "/api/v1/public/**",     // 🔓 endpoints de libre acceso
-                                "/error"                 // errores de Spring
+                                "/error",                 // errores de Spring
+                                "/shared/archivos/**",
+                                "/api/v1/shared/archivos/**"
                         ).permitAll()
                         .anyRequest().authenticated() // 🔐 todo lo demás requiere token
                 )

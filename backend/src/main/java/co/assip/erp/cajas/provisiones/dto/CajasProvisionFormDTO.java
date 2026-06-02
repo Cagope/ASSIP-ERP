@@ -21,4 +21,6 @@ public class CajasProvisionFormDTO {
 
     private String estado;
 
+    private Integer fkUsuarioApertura;
+
 }

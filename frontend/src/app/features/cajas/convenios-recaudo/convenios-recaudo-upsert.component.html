@@ -1,0 +1,178 @@
+<div class="form-container convenios-recaudo-upsert">
+
+  <h5>
+    {{
+    route.snapshot.paramMap.get('id')
+    ? 'editar convenio de recaudo'
+    : 'nuevo convenio de recaudo'
+    }}
+  </h5>
+
+  <form
+    [formGroup]="form"
+    (ngSubmit)="guardar()"
+    class="form-grid">
+
+    <div class="form-group full" *ngIf="provisionActiva">
+      <label>agencia activa</label>
+      <input
+        type="text"
+        [value]="provisionActiva.codigoAgencia + ' - ' + provisionActiva.nombreAgencia"
+        readonly />
+    </div>
+
+    <div class="form-group sm">
+      <label for="documento">documento *</label>
+
+      <input
+        id="documento"
+        type="text"
+        formControlName="documento"
+        maxlength="20"
+        [readonly]="editando" />
+    </div>
+
+    <div class="form-group sm">
+      <label>&nbsp;</label>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="buscarCuentas()"
+        [disabled]="editando || buscando">
+        {{ buscando ? 'Buscando...' : 'Buscar' }}
+      </button>
+    </div>
+
+    <div
+      class="form-group full cuentas-info"
+      *ngIf="busqueda">
+
+      <strong>
+        {{ busqueda.nombreTitular }}
+      </strong>
+
+      <div>
+        Documento:
+        {{ busqueda.documento }}
+      </div>
+
+      <div>
+        Cuenta aportes:
+        {{ busqueda.codigoCuentaAportes }}
+      </div>
+
+      <div>
+        Saldo aportes:
+        {{ busqueda.saldoAportes | number:'1.2-2' }}
+      </div>
+
+      <div>
+        Fecha apertura:
+        {{ busqueda.fechaAperturaAportes }}
+      </div>
+
+      <div class="mensaje">
+        {{ busqueda.mensaje }}
+      </div>
+
+    </div>
+
+    <div
+      class="form-group full"
+      *ngIf="error">
+
+      <div class="error">
+        {{ error }}
+      </div>
+
+    </div>
+
+    <div class="form-group full">
+      <label for="idCuentaAhorro">cuenta convenio *</label>
+
+      <select
+        id="idCuentaAhorro"
+        formControlName="idCuentaAhorro"
+        [disabled]="editando">
+
+        <option [ngValue]="null">
+          Seleccione una cuenta
+        </option>
+
+        <option
+          *ngFor="let c of cuentas"
+          [ngValue]="c.idCuentaAhorro">
+
+          {{ c.codigoCuenta }}
+          -
+          {{ c.codigoForma }}
+          -
+          {{ c.nombreForma }}
+          -
+          Saldo:
+          {{ c.saldoActual | number:'1.2-2' }}
+
+        </option>
+
+      </select>
+    </div>
+
+    <div class="form-group sm">
+      <label for="codigoConvenio">código *</label>
+
+      <input
+        id="codigoConvenio"
+        type="text"
+        formControlName="codigoConvenio"
+        maxlength="20" />
+    </div>
+
+    <div class="form-group full">
+      <label for="nombreConvenio">nombre *</label>
+
+      <input
+        id="nombreConvenio"
+        type="text"
+        formControlName="nombreConvenio"
+        maxlength="150" />
+    </div>
+
+    <div class="form-group sm">
+      <label for="estado">estado *</label>
+
+      <select
+        id="estado"
+        formControlName="estado">
+
+        <option value="A">Activo</option>
+        <option value="I">Inactivo</option>
+
+      </select>
+    </div>
+
+    <div class="form-actions full">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="router.navigate(['/cajas/convenios-recaudo'])">
+        Cancelar
+      </button>
+
+      <button
+        type="submit"
+        class="btn btn--primary"
+        [disabled]="form.invalid">
+        {{
+        route.snapshot.paramMap.get('id')
+        ? 'Actualizar'
+        : 'Guardar'
+        }}
+      </button>
+
+    </div>
+
+  </form>
+
+</div>

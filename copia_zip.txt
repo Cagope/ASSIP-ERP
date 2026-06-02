@@ -34,3 +34,96 @@ $itemsToZip = Get-ChildItem -Path $source -Recurse -File | Where-Object {
 Compress-Archive -Path $itemsToZip.FullName -DestinationPath $zipFile -CompressionLevel Optimal -Force
 
 Write-Host "`n✅ Backup creado correctamente:`n$zipFile`n"
+
+
+o este mejorado se copia y se pega en poer.
+
+
+# 🗓 Fecha y hora actual
+$timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
+
+# 📁 Origen y destino
+$source = "D:\assip-erp"
+$backupDir = "D:\backups_assip"
+$zipFile = "$backupDir\assip-erp_backup_$timestamp.zip"
+
+# 🛠 Crear carpeta de backup si no existe
+if (-not (Test-Path $backupDir)) {
+    New-Item -ItemType Directory -Path $backupDir | Out-Null
+}
+
+# 🧹 Carpetas y archivos a excluir
+$excludeDirs = @(
+    "node_modules",
+    "target",
+    ".idea",
+    ".git",
+    "dist",
+    ".angular"
+)
+
+$excludeFiles = @(
+    "*.log",
+    "hs_err_pid*.log",
+    "replay_pid*.log",
+    "*.tmp"
+)
+
+# 📦 Crear carpeta temporal limpia
+$tempDir = "$env:TEMP\assip-erp_backup_$timestamp"
+
+if (Test-Path $tempDir) {
+    Remove-Item $tempDir -Recurse -Force
+}
+
+New-Item -ItemType Directory -Path $tempDir | Out-Null
+
+# 🔁 Copiar conservando estructura
+Get-ChildItem -Path $source -Recurse -File | Where-Object {
+
+    $fullPath = $_.FullName
+
+    $isExcludedDir = $false
+    foreach ($dir in $excludeDirs) {
+        if ($fullPath -like "*\$dir\*") {
+            $isExcludedDir = $true
+            break
+        }
+    }
+
+    $isExcludedFile = $false
+    foreach ($pattern in $excludeFiles) {
+        if ($_.Name -like $pattern) {
+            $isExcludedFile = $true
+            break
+        }
+    }
+
+    -not $isExcludedDir -and -not $isExcludedFile
+
+} | ForEach-Object {
+
+    $relativePath = $_.FullName.Substring($source.Length).TrimStart('\')
+    $destinationFile = Join-Path $tempDir $relativePath
+    $destinationFolder = Split-Path $destinationFile -Parent
+
+    if (-not (Test-Path $destinationFolder)) {
+        New-Item -ItemType Directory -Path $destinationFolder -Force | Out-Null
+    }
+
+    Copy-Item $_.FullName -Destination $destinationFile -Force
+}
+
+# 📦 Comprimir carpeta temporal conservando estructura
+Compress-Archive `
+    -Path "$tempDir\*" `
+    -DestinationPath $zipFile `
+    -CompressionLevel Optimal `
+    -Force
+
+# 🧽 Limpiar temporal
+Remove-Item $tempDir -Recurse -Force
+
+Write-Host "`n✅ Backup creado correctamente:"
+Write-Host $zipFile
+Write-Host ""

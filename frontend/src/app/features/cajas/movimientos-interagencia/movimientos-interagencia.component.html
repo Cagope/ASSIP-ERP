@@ -1,0 +1,677 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h2>Caja — Movimientos interagencia</h2>
+      <p>Consignaciones y retiros sobre cuentas de ahorro de otras agencias.</p>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert--error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="mensaje" class="alert alert--success">
+    {{ mensaje }}
+  </div>
+
+  <section
+    class="card provision-card"
+    *ngIf="provisionActiva">
+
+    <div class="provision-grid">
+
+      <div class="provision-item">
+        <span>Agencia caja</span>
+        <strong>
+          {{ provisionActiva.codigoAgencia }} - {{ provisionActiva.nombreAgencia }}
+        </strong>
+      </div>
+
+      <div class="provision-item">
+        <span>Caja</span>
+        <strong>
+          {{ provisionActiva.codigoCaja }} - {{ provisionActiva.descripcionCaja }}
+        </strong>
+      </div>
+
+      <div class="provision-item">
+        <span>Fecha contable</span>
+        <strong>
+          {{ provisionActiva.fechaContable }}
+        </strong>
+      </div>
+
+    </div>
+
+  </section>
+
+  <section class="card">
+
+    <h3>Buscar asociado / cuenta</h3>
+
+    <div class="filters">
+
+      <div class="form-field">
+        <label>Documento</label>
+        <input
+          type="text"
+          [(ngModel)]="documento"
+          name="documento"
+          (keyup.enter)="buscarCuentas()">
+      </div>
+
+      <div class="form-field">
+        <label>Nombres</label>
+        <input
+          type="text"
+          [(ngModel)]="nombres"
+          name="nombres"
+          (keyup.enter)="buscarCuentas()">
+      </div>
+
+      <div class="form-field">
+        <label>Primer apellido</label>
+        <input
+          type="text"
+          [(ngModel)]="primerApellido"
+          name="primerApellido"
+          (keyup.enter)="buscarCuentas()">
+      </div>
+
+      <div class="form-field">
+        <label>Segundo apellido</label>
+        <input
+          type="text"
+          [(ngModel)]="segundoApellido"
+          name="segundoApellido"
+          (keyup.enter)="buscarCuentas()">
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="buscarCuentas()"
+          [disabled]="buscando">
+
+          {{ buscando ? 'Buscando...' : 'Buscar' }}
+
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiarTodo()">
+
+          Limpiar
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <section
+    class="card"
+    *ngIf="!cuentaSeleccionada && cuentas.length > 0">
+
+    <h3>Cuentas encontradas</h3>
+
+    <div class="table-wrap">
+
+      <table class="data-table">
+
+        <thead>
+        <tr>
+          <th>Agencia cuenta</th>
+          <th>Cuenta</th>
+          <th>Forma</th>
+          <th>Documento</th>
+          <th>Asociado</th>
+          <th>Estado</th>
+          <th class="right">Saldo</th>
+          <th class="right">Canje</th>
+          <th class="right">Disponible</th>
+          <th>Mensaje</th>
+          <th class="center">Acción</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr
+          *ngFor="let c of cuentas"
+          [class.row-disabled]="!c.estadoOperativo">
+
+          <td>{{ c.codigoAgenciaCuenta }} - {{ c.nombreAgenciaCuenta }}</td>
+          <td>{{ c.codigoCuenta }}</td>
+          <td>{{ c.codigoForma }} - {{ c.nombreForma }}</td>
+          <td>{{ c.documento }}</td>
+          <td>{{ c.nombreAsociado }}</td>
+          <td>{{ c.estadoCuenta }}</td>
+
+          <td class="right">
+            {{ c.saldoActual | number:'1.2-2' }}
+          </td>
+
+          <td class="right">
+            {{ c.valorCanje | number:'1.2-2' }}
+          </td>
+
+          <td class="right">
+            {{ c.saldoDisponible | number:'1.2-2' }}
+          </td>
+
+          <td>
+            <span
+              class="badge"
+              [class.badge--ok]="c.estadoOperativo"
+              [class.badge--warn]="!c.estadoOperativo">
+
+              {{ c.mensajeOperativo }}
+
+            </span>
+          </td>
+
+          <td class="center">
+
+            <button
+              type="button"
+              class="btn btn--secondary btn-sm"
+              (click)="seleccionarCuentaDirecta(c)"
+              [disabled]="!c.estadoOperativo">
+
+              {{ c.estadoOperativo ? 'Seleccionar' : 'No disponible' }}
+
+            </button>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+  <section
+    class="card selected-card"
+    *ngIf="cuentaSeleccionada">
+
+    <div class="selected-header">
+
+      <div>
+        <h3>Cuenta seleccionada</h3>
+        <p>Información operativa de la cuenta y validaciones previas del movimiento.</p>
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary btn-sm"
+          (click)="cuentaSeleccionada = null; idCuentaAhorro = null; previewData = null">
+
+          Cambiar cuenta
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <div class="selected-grid">
+
+      <div>
+        <span>Agencia cuenta</span>
+        <strong>
+          {{ cuentaSeleccionada.codigoAgenciaCuenta }} -
+          {{ cuentaSeleccionada.nombreAgenciaCuenta }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Asociado</span>
+        <strong>{{ cuentaSeleccionada.nombreAsociado }}</strong>
+      </div>
+
+      <div>
+        <span>Documento</span>
+        <strong>{{ cuentaSeleccionada.documento }}</strong>
+      </div>
+
+      <div>
+        <span>Cuenta</span>
+        <strong>{{ cuentaSeleccionada.codigoCuenta }}</strong>
+      </div>
+
+      <div>
+        <span>Forma ahorro</span>
+        <strong>
+          {{ cuentaSeleccionada.codigoForma }} - {{ cuentaSeleccionada.nombreForma }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Estado</span>
+        <strong>{{ cuentaSeleccionada.estadoCuenta }}</strong>
+      </div>
+
+    </div>
+
+    <div class="saldo-resumen">
+
+      <div class="saldo-item saldo-principal">
+        <span>Saldo actual</span>
+        <strong>
+          {{ cuentaSeleccionada.saldoActual | number:'1.2-2' }}
+        </strong>
+      </div>
+
+      <div class="saldo-item">
+        <span>Valor en canje</span>
+        <strong>
+          {{ cuentaSeleccionada.valorCanje | number:'1.2-2' }}
+        </strong>
+      </div>
+
+      <div class="saldo-item saldo-disponible">
+        <span>Saldo disponible</span>
+        <strong>
+          {{ cuentaSeleccionada.saldoDisponible | number:'1.2-2' }}
+        </strong>
+      </div>
+
+    </div>
+
+  </section>
+
+  <section
+    class="card"
+    *ngIf="cuentaSeleccionada">
+
+    <h3>Datos del movimiento</h3>
+
+    <div class="movement-grid">
+
+      <div class="form-field">
+        <label>Fecha contable</label>
+
+        <input
+          type="date"
+          [ngModel]="provisionActiva?.fechaContable"
+          readonly>
+      </div>
+
+      <div class="form-field">
+        <label>Tipo de movimiento</label>
+
+        <select
+          name="tipoMovimiento"
+          [(ngModel)]="tipoMovimiento"
+          (change)="cambiarTipoMovimiento()">
+
+          <option value="001">
+            001 - Consignación cuenta de ahorro
+          </option>
+
+          <option value="551">
+            551 - Retiro cuenta de ahorro
+          </option>
+
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label>Desprendible / libreta / orden</label>
+
+        <input
+          type="text"
+          name="numeroComprobante"
+          [(ngModel)]="numeroComprobante"
+          autocomplete="off"
+          (blur)="generarPreview()">
+      </div>
+
+      <div class="form-field">
+        <label>Efectivo</label>
+
+        <input
+          type="text"
+          name="valorEfectivo"
+          numericFormat
+          class="input-number"
+          [(ngModel)]="valorEfectivo"
+          autocomplete="off"
+          (ngModelChange)="generarPreview()">
+      </div>
+
+      <div
+        class="form-field"
+        *ngIf="!esRetiro()">
+        <label>Cheques</label>
+        <input
+          type="text"
+          name="valorCheques"
+          numericFormat
+          class="input-number"
+          [(ngModel)]="valorCheques"
+          autocomplete="off"
+          [readonly]="esRetiro()"
+          (ngModelChange)="mostrarCheques = valorCheques > 0 && !esRetiro(); generarPreview()">
+      </div>
+
+      <div class="form-field">
+        <label>Total movimiento</label>
+
+        <input
+          type="text"
+          class="input-number"
+          [value]="totalMovimiento() | number:'1.2-2'"
+          readonly>
+      </div>
+
+    </div>
+
+    <div
+      class="cheques-box"
+      *ngIf="mostrarCheques && !esRetiro()">
+
+      <div class="cheques-header">
+
+        <div>
+          <h3>Cheques</h3>
+          <p>Capture el detalle de los cheques recibidos en caja.</p>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn--secondary btn-sm"
+          (click)="agregarCheque()">
+
+          + Agregar cheque
+
+        </button>
+
+      </div>
+
+      <div
+        class="cheque-row"
+        *ngFor="let cheque of cheques; let i = index">
+
+        <div class="form-field">
+          <label>Banco</label>
+
+          <input
+            type="text"
+            [(ngModel)]="cheque.codigoBanco"
+            name="codigoBanco{{ i }}"
+            autocomplete="off"
+            (blur)="previewData = null">
+        </div>
+
+        <div class="form-field">
+          <label>Número</label>
+
+          <input
+            type="text"
+            [(ngModel)]="cheque.numeroCheque"
+            name="numeroCheque{{ i }}"
+            autocomplete="off"
+            (blur)="previewData = null">
+        </div>
+
+        <div class="form-field">
+          <label>Valor</label>
+
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="cheque.valorCheque"
+            name="valorCheque{{ i }}"
+            autocomplete="off"
+            (ngModelChange)="sincronizarTotalCheques()">
+        </div>
+
+        <div class="cheque-actions">
+
+          <button
+            type="button"
+            class="btn btn--ghost-danger btn-sm"
+            (click)="eliminarCheque(i)"
+            [disabled]="cheques.length === 1">
+
+            Eliminar
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="saldo-resumen-preview">
+
+      <div class="saldo-item">
+        <span>Efectivo</span>
+        <strong>
+          {{ valorEfectivo || 0 | number:'1.2-2' }}
+        </strong>
+      </div>
+
+      <div class="saldo-item">
+        <span>Cheques</span>
+        <strong>
+          {{ valorCheques || 0 | number:'1.2-2' }}
+        </strong>
+      </div>
+
+      <div class="saldo-item saldo-final">
+        <span>Total movimiento</span>
+        <strong>
+          {{ totalMovimiento() | number:'1.2-2' }}
+        </strong>
+      </div>
+
+    </div>
+
+    <div class="form-actions end">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="limpiarMovimiento()"
+        [disabled]="consultando || aplicando">
+
+        Limpiar movimiento
+
+      </button>
+
+    </div>
+
+  </section>
+
+  <section
+    class="card preview-card"
+    *ngIf="previewData">
+
+    <div class="preview-header-inline">
+
+      <div class="preview-title">
+
+        <h3>Vista previa del movimiento</h3>
+
+        <span class="preview-subtitle">
+          Resultado estimado antes de aplicar el movimiento
+        </span>
+
+      </div>
+
+      <div
+        class="preview-badge"
+        [class.preview-badge--credito]="previewData.naturaleza === 'INGRESO'"
+        [class.preview-badge--debito]="previewData.naturaleza === 'EGRESO'">
+
+        {{ previewData.naturaleza }}
+
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="previewData.errores?.length"
+      class="preview-validation-error">
+
+      <strong>Validaciones pendientes</strong>
+
+      <ul>
+        <li *ngFor="let item of previewData.errores">
+          {{ item }}
+        </li>
+      </ul>
+
+    </div>
+
+    <div
+      *ngIf="previewData.sarlaft?.alerta"
+      class="sarlaft-alert">
+
+      <div class="sarlaft-alert-header">
+
+        <strong>
+          SARLAFT — {{ previewData.sarlaft?.alertas?.length || 0 }} alerta(s) detectada(s)
+        </strong>
+
+        <span>
+          {{ previewData.sarlaft?.severidad || 'VALIDACIÓN' }}
+        </span>
+
+      </div>
+
+      <div class="sarlaft-list">
+
+        <div
+          class="sarlaft-item"
+          *ngFor="let alerta of previewData.sarlaft?.alertas"
+          [class.sarlaft-item--critica]="alerta.nombreRegla === '001'">
+
+          <div class="sarlaft-item-title">
+            Regla {{ alerta.nombreRegla }}
+          </div>
+
+          <div class="sarlaft-item-desc">
+            {{ alerta.descripcion }}
+          </div>
+
+          <div
+            *ngIf="alerta.accionRecomendada"
+            class="sarlaft-item-action">
+
+            <strong>Acción recomendada:</strong>
+            {{ alerta.accionRecomendada }}
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="selected-grid">
+
+      <div>
+        <span>Agencia caja</span>
+        <strong>
+          {{ provisionActiva?.codigoAgencia }} - {{ provisionActiva?.nombreAgencia }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Agencia cuenta</span>
+        <strong>
+          {{ previewData.codigoAgenciaCuenta }} - {{ previewData.nombreAgenciaCuenta }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Cuenta</span>
+        <strong>
+          {{ previewData.codigoCuenta }}
+        </strong>
+      </div>
+
+    </div>
+
+    <div class="saldo-resumen-preview">
+
+      <div class="saldo-item saldo-principal">
+        <span>Saldo actual</span>
+        <strong>
+          {{ previewData.saldoAnterior | number:'1.2-2' }}
+        </strong>
+      </div>
+
+      <div class="saldo-item">
+        <span>Valor movimiento</span>
+        <strong>
+          {{ previewData.valorTotal | number:'1.2-2' }}
+        </strong>
+      </div>
+
+      <div class="saldo-item">
+        <span>Valor GMF</span>
+        <strong>
+          {{ 0 | number:'1.2-2' }}
+        </strong>
+      </div>
+
+      <div class="saldo-item saldo-final">
+        <span>Nuevo saldo</span>
+        <strong>
+          {{ previewData.saldoFinal | number:'1.2-2' }}
+        </strong>
+      </div>
+
+    </div>
+
+    <div class="form-actions end">
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="aplicar()"
+        [disabled]="
+          aplicando
+          || consultando
+          || !previewData.permiteAplicar
+          || !!previewData.sarlaft?.bloqueaOperacion">
+
+        Aplicar movimiento
+
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="limpiarTodo()"
+        [disabled]="aplicando || consultando">
+
+        Limpiar
+
+      </button>
+
+    </div>
+
+  </section>
+
+</div>

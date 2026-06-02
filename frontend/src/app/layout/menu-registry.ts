@@ -2,6 +2,7 @@ import { generalMenu } from '../features/general/general-menu';
 import { hojaVidaMenu } from '../features/hoja-vida/hoja-vida-menu';
 import { depositosMenu } from '../features/depositos/depositos-menu';
 import { cdatMenu } from '../features/cdat/cdat-menu';
+import { cajasMenu } from '../features/cajas/cajas.menu';
 import { sarlaftMenu } from '../features/sarlaft/sarlaft-menu';
 import { contabilidadMenu } from '../features/contabilidad/contabilidad-menu';
 
@@ -19,6 +20,8 @@ export const MENU_REGISTRY = [
   { ...depositosMenu, icon: 'depositos' },
 
   { ...cdatMenu, icon: 'cdat' },
+
+  { ...cajasMenu, icon: 'cajas' },
 
   { ...contabilidadMenu, icon: 'contabilidad' },
 

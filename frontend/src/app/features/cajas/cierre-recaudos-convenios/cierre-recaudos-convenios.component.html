@@ -1,0 +1,207 @@
+<div class="page">
+
+  <div class="page-header">
+    <div>
+      <h2>Caja — Cierre recaudos convenios</h2>
+      <p>Procesa recaudos recibidos y los traslada acumulados a la cuenta del convenio.</p>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert--error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="mensaje" class="alert alert--success">
+    {{ mensaje }}
+  </div>
+
+  <section
+    class="card provision-card"
+    *ngIf="provisionActiva">
+
+    <div class="provision-grid">
+
+      <div class="provision-item">
+        <span>Agencia</span>
+        <strong>
+          {{ provisionActiva.codigoAgencia }} - {{ provisionActiva.nombreAgencia }}
+        </strong>
+      </div>
+
+      <div class="provision-item">
+        <span>Caja</span>
+        <strong>
+          {{ provisionActiva.codigoCaja }} - {{ provisionActiva.descripcionCaja }}
+        </strong>
+      </div>
+
+      <div class="provision-item">
+        <span>Fecha provisión activa</span>
+        <strong>
+          {{ provisionActiva.fechaContable }}
+        </strong>
+      </div>
+
+    </div>
+
+  </section>
+
+  <section class="card">
+
+    <h3>Datos del cierre</h3>
+
+    <div class="filters-grid">
+
+      <div class="form-field">
+        <label>Fecha contable</label>
+        <input
+          type="date"
+          name="fechaContable"
+          [(ngModel)]="fechaContable">
+      </div>
+
+      <div class="form-field">
+        <label>Convenio</label>
+
+        <select
+          name="idConvenio"
+          [(ngModel)]="idConvenio">
+
+          <option [ngValue]="null">
+            Seleccione un convenio
+          </option>
+
+          <option
+            *ngFor="let convenio of convenios"
+            [ngValue]="convenio.idConvenio">
+
+            {{ convenio.codigoConvenio }} - {{ convenio.nombreConvenio }}
+
+          </option>
+
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label>Documento soporte cierre</label>
+        <input
+          type="text"
+          maxlength="7"
+          name="documentoSoporte"
+          autocomplete="off"
+          [(ngModel)]="documentoSoporte">
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="consultar()"
+          [disabled]="consultando || aplicando">
+
+          Consultar
+
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="aplicar()"
+          [disabled]="aplicando || !previewData?.permiteAplicar">
+
+          Aplicar cierre
+
+        </button>
+      </div>
+
+    </div>
+
+    <small class="hint">
+      El documento soporte debe ser numérico. El sistema lo guardará con 7 dígitos, completando ceros a la izquierda.
+    </small>
+
+  </section>
+
+  <section
+    class="card"
+    *ngIf="previewData">
+
+    <div class="section-title-row">
+
+      <div>
+        <h3>Vista previa del cierre</h3>
+        <p>
+          {{ previewData.codigoConvenio }} - {{ previewData.nombreConvenio }}
+        </p>
+      </div>
+
+      <div class="total-box">
+        <span>Total a trasladar</span>
+        <strong>
+          {{ totalPreview() | number:'1.2-2' }}
+        </strong>
+      </div>
+
+    </div>
+
+    <div class="preview-grid">
+
+      <div>
+        <span>Cuenta destino</span>
+        <strong>{{ previewData.codigoCuenta }}</strong>
+      </div>
+
+      <div>
+        <span>Titular</span>
+        <strong>
+          {{ previewData.documentoTitular }} - {{ previewData.nombreTitular }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Documento cierre</span>
+        <strong>{{ previewData.documentoSoporte }}</strong>
+      </div>
+
+      <div>
+        <span>Cantidad recaudos</span>
+        <strong>{{ previewData.cantidadRecaudos }}</strong>
+      </div>
+
+    </div>
+
+    <div
+      class="table-wrap"
+      *ngIf="previewData.items && previewData.items.length > 0">
+
+      <table class="data-table">
+
+        <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Documento soporte</th>
+          <th class="right">Valor</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let item of previewData.items">
+
+          <td>{{ item.fechaRecaudo }}</td>
+
+          <td>{{ item.documentoSoporte }}</td>
+
+          <td class="right">
+            {{ item.valorRecaudo | number:'1.2-2' }}
+          </td>
+
+        </tr>
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</div>

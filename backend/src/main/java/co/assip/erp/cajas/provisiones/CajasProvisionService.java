@@ -8,9 +8,13 @@ import co.assip.erp.seguridad.service.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import co.assip.erp.cajas.provisiones.dto.CajaDisponibleDTO;
+import co.assip.erp.cajas.provisiones.dto.CajaEstadoDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
+
+import co.assip.erp.cajas.provisiones.dto.CajaProvisionActivaDTO;
 
 @Service
 @RequiredArgsConstructor
@@ -97,5 +101,78 @@ public class CajasProvisionService {
         }
 
         return repository.listarCajasAbiertas(idAgencia, fecha);
+    }
+
+    @Transactional
+    public Long vincularUsuarioCaja(CajasProvisionSaveDTO dto) {
+
+        validar(dto);
+
+        Integer idUsuario = usuarioSesionService.idUsuario();
+
+        CajasProvisionFormDTO provision = repository
+                .obtenerPorCajaYFecha(dto.getIdCaja(), dto.getFechaContable())
+                .orElse(null);
+
+        if (provision == null) {
+            return repository.crear(dto, idUsuario);
+        }
+
+        if ("CERRADA".equalsIgnoreCase(provision.getEstado())) {
+            throw new RuntimeException("La caja ya fue cerrada para esta fecha.");
+        }
+
+        if (!"ABIERTA".equalsIgnoreCase(provision.getEstado())) {
+            throw new RuntimeException("La provisión de caja no está abierta.");
+        }
+
+        if (provision.getFkUsuarioApertura() != null
+                && !provision.getFkUsuarioApertura().equals(idUsuario)) {
+            throw new RuntimeException("Esta caja ya está vinculada a otro usuario.");
+        }
+
+        return provision.getIdProvision();
+    }
+
+    public List<CajaDisponibleDTO> listarCajasDisponibles(Integer idAgencia) {
+        if (idAgencia == null) {
+            throw new RuntimeException("La agencia es obligatoria.");
+        }
+
+        return repository.listarCajasDisponibles(idAgencia);
+    }
+
+    public List<CajaEstadoDTO> listarEstadoCajas(
+            Integer idAgencia,
+            java.time.LocalDate fechaContable
+    ) {
+
+        if (idAgencia == null) {
+            throw new RuntimeException("La agencia es obligatoria.");
+        }
+
+        if (fechaContable == null) {
+            throw new RuntimeException("La fecha contable es obligatoria.");
+        }
+
+        return repository.listarEstadoCajas(
+                idAgencia,
+                fechaContable
+        );
+
+    }
+
+    public CajaProvisionActivaDTO obtenerProvisionActivaUsuario() {
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        return repository
+                .obtenerProvisionActivaUsuario(idUsuario)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "El usuario no tiene una caja/provisión abierta."
+                        )
+                );
     }
 }
