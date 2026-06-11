@@ -18,6 +18,9 @@ export interface ReportMetadata {
 export interface ReportQueryRequest {
   schema: string;
   view: string;
+
+  scope?: 'USUARIO' | 'GLOBAL';
+
   columns?: string[];
   filters?: Record<string, any>;
   groupBy?: string[];

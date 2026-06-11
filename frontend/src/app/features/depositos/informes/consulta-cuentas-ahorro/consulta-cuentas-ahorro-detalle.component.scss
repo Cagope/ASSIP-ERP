@@ -145,3 +145,46 @@ h3 {
   font-size: 13px;
 }
 
+.saldo-resumen {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.saldo-item {
+  padding: 14px 16px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+
+  span {
+    display: block;
+    margin-bottom: 6px;
+    color: #6b7280;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  strong {
+    display: block;
+    text-align: right;
+    color: #111827;
+    font-size: 21px;
+    font-weight: 900;
+  }
+}
+
+.saldo-principal {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.saldo-disponible {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+
+  strong {
+    color: #047857;
+  }
+}

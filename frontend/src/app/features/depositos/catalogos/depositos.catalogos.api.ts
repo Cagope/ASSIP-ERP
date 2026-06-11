@@ -23,4 +23,15 @@ export class DepositosCatalogosApi {
   obtenerTiposGmf() {
     return this.http.get<any[]>(`${this.base}/tipo-gmf`);
   }
+
+  // ============================================================
+  // 3. ACCIONES CUENTAS CONJUNTAS
+  // ============================================================
+  obtenerAccionesCuentasConjuntas() {
+    return this.http.get<any[]>(
+      `${this.base}/acciones-cuentas-conjuntas`
+    );
+  }
+
 }
+

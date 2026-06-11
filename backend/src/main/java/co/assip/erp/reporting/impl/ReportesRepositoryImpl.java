@@ -145,17 +145,48 @@ public class ReportesRepositoryImpl {
             // 🔐 Filtro por agencias del usuario (solo DEPÓSITOS)
             // ==========================================================
             try {
-                boolean esDepositos = schema.equalsIgnoreCase("depositos");
 
-                if (esDepositos && (filters.get("id_agencia") == null || filters.get("id_agencia").toString().isBlank())) {
+                boolean esDepositos =
+                        schema.equalsIgnoreCase("depositos");
+
+                boolean consultaGlobal =
+                        "GLOBAL".equalsIgnoreCase(
+                                req.getScope()
+                        );
+
+                if (
+                        esDepositos
+                                && !consultaGlobal
+                                && (
+                                filters.get("id_agencia") == null
+                                        || filters.get("id_agencia").toString().isBlank()
+                        )
+                ) {
+
                     List<Integer> agenciasUsuario =
                             usuarioSesionService.agencias();
 
-                    if (agenciasUsuario != null && !agenciasUsuario.isEmpty()) {
-                        where.append((count++ > 0 ? " AND " : " WHERE "));
-                        where.append(" id_agencia = ANY(?) ");
-                        params.add(agenciasUsuario.toArray(new Integer[0]));
+                    if (
+                            agenciasUsuario != null
+                                    && !agenciasUsuario.isEmpty()
+                    ) {
+
+                        where.append(
+                                (count++ > 0 ? " AND " : " WHERE ")
+                        );
+
+                        where.append(
+                                " id_agencia = ANY(?) "
+                        );
+
+                        params.add(
+                                agenciasUsuario.toArray(
+                                        new Integer[0]
+                                )
+                        );
+
                     } else {
+
                         throw new SecurityException(
                                 "El usuario no tiene agencias permitidas para consultar depósitos."
                         );
@@ -163,6 +194,7 @@ public class ReportesRepositoryImpl {
                 }
 
             } catch (Exception e) {
+
                 throw new SecurityException(
                         "No fue posible validar las agencias permitidas del usuario."
                 );

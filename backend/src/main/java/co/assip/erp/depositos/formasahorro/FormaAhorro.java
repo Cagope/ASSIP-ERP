@@ -8,7 +8,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "formas_ahorro", schema = "depositos")
+@Table(
+        name = "formas_ahorro",
+        schema = "depositos"
+)
 public class FormaAhorro extends BaseAudit {
 
     @Id
@@ -16,7 +19,11 @@ public class FormaAhorro extends BaseAudit {
     @Column(name = "id_forma_ahorro")
     private Integer id;
 
-    @Column(name = "codigo_forma", length = 2, nullable = false, unique = true)
+    // ❌ Ya NO puede ser unique=true,
+    // porque el código se repite por agencia:
+    // Agencia 2 -> 01
+    // Agencia 3 -> 01
+    @Column(name = "codigo_forma", length = 2, nullable = false)
     private String codigoForma;
 
     @Column(name = "nombre_forma", length = 50, nullable = false)
@@ -66,4 +73,11 @@ public class FormaAhorro extends BaseAudit {
 
     @Column(name = "tasa_interes_forma")
     private Double tasaInteresForma;
+
+    // ✅ Campo que existe en la tabla y faltaba en la entidad
+    @Column(name = "id_agencia")
+    private Integer idAgencia;
+
+    @Column(name = "cuenta_retencion_fuente")
+    private Integer cuentaRetencionFuente;
 }

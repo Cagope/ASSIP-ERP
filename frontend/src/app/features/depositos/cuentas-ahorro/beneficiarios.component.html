@@ -1,75 +1,220 @@
-<div class="benef-box">
+<div class="benef-page">
 
-  <h3>Beneficiarios</h3>
+  <div class="benef-header">
+    <div class="benef-header__title">
+      <div>
+        <h3>Beneficiarios</h3>
+      </div>
+    </div>
+  </div>
 
-  <div class="form-grid">
+  <div class="benef-card">
 
-    <input
-      type="text"
-      placeholder="Documento"
-      [(ngModel)]="nuevo.documentoBeneficiario">
+    <h4>Agregar beneficiario</h4>
 
-    <input
-      type="text"
-      placeholder="Nombre completo"
-      [(ngModel)]="nuevo.nombreBeneficiario">
+    <div
+      *ngIf="editando"
+      class="alert alert--warning">
 
-    <input
-      type="text"
-      placeholder="Teléfono"
-      [(ngModel)]="nuevo.telefonoBeneficiario">
+      Editando beneficiario seleccionado.
 
-    <input
-      type="text"
-      placeholder="Celular"
-      [(ngModel)]="nuevo.celularBeneficiario">
+    </div>
 
-    <input
-      type="text"
-      placeholder="Parentesco"
-      [(ngModel)]="nuevo.tipoParentesco">
+    <div *ngIf="cargando" class="loading">
+      Cargando...
+    </div>
 
-    <button
-      type="button"
-      class="btn btn--primary"
-      (click)="agregar()">
-      Agregar
-    </button>
+    <div *ngIf="error" class="error">
+      {{ error }}
+    </div>
+
+    <div class="benef-form">
+
+      <div class="f-row">
+        <label>Documento *</label>
+
+        <input
+          type="text"
+          placeholder="Documento del beneficiario"
+          [(ngModel)]="nuevo.documentoBeneficiario"
+          (ngModelChange)="limpiarError('documento')"
+          [class.input-error]="errores.documento">
+
+        <small
+          class="field-error"
+          *ngIf="errores.documento">
+          {{ errores.documento }}
+        </small>
+      </div>
+
+      <div class="f-row">
+        <label>Nombre completo *</label>
+
+        <input
+          type="text"
+          placeholder="Nombre completo del beneficiario"
+          [(ngModel)]="nuevo.nombreBeneficiario"
+          (ngModelChange)="limpiarError('nombre')"
+          [class.input-error]="errores.nombre">
+
+        <small
+          class="field-error"
+          *ngIf="errores.nombre">
+          {{ errores.nombre }}
+        </small>
+      </div>
+
+      <div class="f-row">
+        <label>Teléfono</label>
+
+        <input
+          type="text"
+          maxlength="7"
+          placeholder="7 dígitos"
+          [(ngModel)]="nuevo.telefonoBeneficiario"
+          (ngModelChange)="limpiarError('telefono')"
+          [class.input-error]="errores.telefono">
+
+        <small
+          class="field-error"
+          *ngIf="errores.telefono">
+          {{ errores.telefono }}
+        </small>
+      </div>
+
+      <div class="f-row">
+        <label>Celular</label>
+
+        <input
+          type="text"
+          maxlength="10"
+          placeholder="10 dígitos"
+          [(ngModel)]="nuevo.celularBeneficiario"
+          (ngModelChange)="limpiarError('celular')"
+          [class.input-error]="errores.celular">
+
+        <small
+          class="field-error"
+          *ngIf="errores.celular">
+          {{ errores.celular }}
+        </small>
+      </div>
+
+      <div class="f-row full">
+        <label>Parentesco *</label>
+
+        <select
+          [(ngModel)]="nuevo.tipoParentesco"
+          (ngModelChange)="limpiarError('parentesco')"
+          [class.input-error]="errores.parentesco">
+
+          <option value="">Seleccione parentesco...</option>
+
+          <option
+            *ngFor="let p of parentescos"
+            [value]="codigoParentesco(p)">
+            {{ p.nombre ?? p.nombreParentesco }}
+          </option>
+
+        </select>
+
+        <small
+          class="field-error"
+          *ngIf="errores.parentesco">
+          {{ errores.parentesco }}
+        </small>
+      </div>
+
+    </div>
+
+    <div class="benef-actions">
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="agregar()">
+
+        {{ editando ? 'Actualizar' : 'Agregar' }}
+
+      </button>
+
+      <button
+        *ngIf="editando"
+        type="button"
+        class="btn btn--secondary"
+        (click)="cancelarEdicion()">
+
+        Cancelar
+
+      </button>
+
+    </div>
 
   </div>
 
-  <table class="benef-table" *ngIf="beneficiarios.length > 0">
-    <thead>
-    <tr>
-      <th>Documento</th>
-      <th>Nombre</th>
-      <th>Teléfono</th>
-      <th>Celular</th>
-      <th>Parentesco</th>
-      <th>Acción</th>
-    </tr>
-    </thead>
+  <div class="benef-card">
 
-    <tbody>
-    <tr *ngFor="let b of beneficiarios; let i = index">
-      <td>{{ b.documentoBeneficiario }}</td>
-      <td>{{ b.nombreBeneficiario }}</td>
-      <td>{{ b.telefonoBeneficiario }}</td>
-      <td>{{ b.celularBeneficiario }}</td>
-      <td>{{ b.tipoParentesco }}</td>
-      <td>
-        <div class="acciones">
+    <h4>Listado de beneficiarios</h4>
+
+    <table
+      class="data-table"
+      *ngIf="beneficiarios.length > 0">
+
+      <thead>
+      <tr>
+        <th>#</th>
+        <th>Documento</th>
+        <th>Nombre</th>
+        <th>Teléfono</th>
+        <th>Celular</th>
+        <th>Parentesco</th>
+        <th>Acciones</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr *ngFor="let b of beneficiarios; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ b.documentoBeneficiario }}</td>
+        <td>{{ b.nombreBeneficiario }}</td>
+        <td>{{ b.telefonoBeneficiario }}</td>
+        <td>{{ b.celularBeneficiario }}</td>
+        <td>{{ nombreParentesco(b.tipoParentesco) }}</td>
+        <td>
+
+          <button
+            class="btn-action-edit"
+            type="button"
+            (click)="editar(b)"
+            title="Editar">
+
+            ✏️
+
+          </button>
+
           <button
             class="btn-action-delete"
             type="button"
             (click)="eliminar(i)"
             title="Eliminar">
+
             🗑️
+
           </button>
-        </div>
-      </td>
-    </tr>
-    </tbody>
-  </table>
+
+        </td>
+      </tr>
+      </tbody>
+
+    </table>
+
+    <div
+      *ngIf="beneficiarios.length === 0"
+      class="empty">
+      <strong>No hay beneficiarios registrados.</strong>
+      <span>Agregue un beneficiario para que aparezca en la lista.</span>
+    </div>
+
+  </div>
 
 </div>

@@ -10,4 +10,5 @@ public class PoderDTO {
     private String nombrePoder;
     private String telefonoPoder;
     private String celularPoder;
+    private String correoPoder;
 }

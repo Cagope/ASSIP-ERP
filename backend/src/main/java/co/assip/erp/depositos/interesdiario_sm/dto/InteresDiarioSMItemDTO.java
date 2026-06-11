@@ -2,10 +2,11 @@ package co.assip.erp.depositos.interesdiario_sm.dto;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Data
-public class InteresDiarioSMItemDTO {
+public class InteresDiarioSMItemDTO implements Serializable {
 
     private Integer idCuentaAhorro;
     private String codigoCuenta;

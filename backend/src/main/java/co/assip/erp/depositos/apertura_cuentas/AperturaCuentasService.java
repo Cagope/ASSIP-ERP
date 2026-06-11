@@ -3,7 +3,6 @@ package co.assip.erp.depositos.apertura_cuentas;
 import co.assip.erp.depositos.apertura_cuentas.dto.AperturaCuentaItemDTO;
 import co.assip.erp.depositos.apertura_cuentas.dto.AperturaCuentasEntradaDTO;
 import co.assip.erp.depositos.apertura_cuentas.dto.AperturaCuentasRespuestaDTO;
-import co.assip.erp.depositos.apertura_cuentas.repository.AperturaCuentasRepository;
 
 import co.assip.erp.seguridad.service.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;

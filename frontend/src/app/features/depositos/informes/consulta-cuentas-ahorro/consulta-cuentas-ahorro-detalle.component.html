@@ -1,123 +1,240 @@
-<div class="detalle-container" *ngIf="cuenta">
-  <div class="acciones">
-    <button
-      type="button"
-      class="btn btn--secondary"
-      (click)="onCerrar()">
-      Regresar al listado
-    </button>
-  </div>
-
-  <h2>Detalle de la Cuenta de Ahorro</h2>
-
-  <!-- ALERTA SARLAFT -->
-  <div *ngIf="cuenta?.sarlaft"
-       class="sarlaft-alert"
-       [ngClass]="{
-         'alert-rojo': cuenta.sarlaft.severidad === 'ROJO',
-         'alert-amarillo': cuenta.sarlaft.severidad === 'AMARILLO',
-         'alert-verde': cuenta.sarlaft.severidad === 'VERDE'
-       }">
-
-    <div><strong>SARLAFT:</strong> {{ cuenta.sarlaft.descripcion }}</div>
-
-    <div *ngIf="cuenta.sarlaft.bloqueaOperacion"
-         class="accion">
-      <strong>Acción recomendada:</strong> {{ cuenta.sarlaft.accionRecomendada }}
+  <div class="detalle-container" *ngIf="cuenta">
+    <div class="acciones">
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="onCerrar()">
+        Regresar al listado
+      </button>
     </div>
 
-  </div>
+    <h2>Detalle de la Cuenta de Ahorro</h2>
 
-  <!-- Datos del Titular -->
-  <section class="bloque">
-    <h3>Titular</h3>
-    <div class="grid">
-      <div><strong>Documento:</strong> {{ cuenta.documento }}</div>
-      <div><strong>Nombre:</strong> {{ cuenta.nombres }} {{ cuenta.primer_apellido }} {{ cuenta.segundo_apellido }}</div>
-      <div><strong>Dirección:</strong> {{ cuenta.direccion ?? 'N/A' }}</div>
-      <div><strong>País:</strong> {{ cuenta.nombre_pais ?? 'N/A' }}</div>
-      <div><strong>Departamento:</strong> {{ cuenta.nombre_departamento ?? 'N/A' }}</div>
-      <div><strong>Ciudad:</strong> {{ cuenta.nombre_ciudad ?? 'N/A' }}</div>
-      <div><strong>Teléfono:</strong> {{ cuenta.telefono ?? 'N/A' }}</div>
-      <div><strong>Celular:</strong> {{ cuenta.celular ?? 'N/A' }}</div>
-      <div><strong>Zona:</strong> {{ cuenta.nombre_zona ?? 'N/A' }}</div>
-      <div><strong>Subzona:</strong> {{ cuenta.nombre_sub_zona ?? 'N/A' }}</div>
-      <div><strong>Fecha Actualización:</strong> {{ cuenta.fecha_actualizacion | date:'yyyy-MM-dd' }}</div>
-    </div>
-  </section>
+    <!-- ALERTA SARLAFT -->
+    <div
+      *ngIf="cuenta?.sarlaft"
+      class="sarlaft-alert"
+      [ngClass]="{
+    'alert-rojo': cuenta.sarlaft.severidad === 'ROJO',
+    'alert-amarillo': cuenta.sarlaft.severidad === 'AMARILLO',
+    'alert-verde': cuenta.sarlaft.severidad === 'VERDE'
+  }">
 
-  <!-- Información Financiera -->
-  <section class="bloque">
-    <h3>Información Financiera</h3>
-    <div class="grid">
-      <div><strong>Código de Cuenta:</strong> {{ cuenta.codigo_cuenta }}</div>
-      <div><strong>Forma de Ahorro:</strong> {{ cuenta.nombre_forma_ahorro }}</div>
-      <div><strong>Estado:</strong> {{ cuenta.nombre_estado ?? 'N/A' }}</div>
-      <div><strong>Plazo:</strong> {{ cuenta.plazo_cuenta ?? '0' }}</div>
-      <div><strong>Saldo Actual:</strong> {{ cuenta.saldo_actual_cuenta | number:'1.0-2' }}</div>
-      <div><strong>GMF:</strong> {{ cuenta.nombre_tipo_gmf }}</div>
-      <div><strong>Libranza:</strong> {{ cuenta.libranza_cuenta ? 'Sí' : 'No' }}</div>
-      <div><strong>Fecha Apertura:</strong> {{ cuenta.fecha_apertura_cuenta | date: 'yyyy-MM-dd' }}</div>
-    </div>
-  </section>
+      <div class="sarlaft-header">
+        <strong>
+          SARLAFT — {{ cuenta.sarlaft.alertas?.length || 0 }} alerta(s)
+        </strong>
 
-  <!-- Imágenes -->
-  <section class="bloque">
-    <h3>Imágenes</h3>
-    <div class="imagenes">
-      <div>
-        <img
-          [src]="getImagen(cuenta.foto, 'foto')"
-          alt="Foto titular"
-          (error)="onImageError($event, 'foto')"
-          (click)="abrirImagen(getImagen(cuenta.foto, 'foto'))"
-        />
-        <p>Foto</p>
+        <span>
+      {{ cuenta.sarlaft.severidad || 'VALIDACIÓN' }}
+    </span>
       </div>
 
-      <div>
-        <img
-          [src]="getImagen(cuenta.firma_uno, 'firma')"
-          alt="Firma principal"
-          (error)="onImageError($event, 'firma')"
-          (click)="abrirImagen(getImagen(cuenta.firma_uno, 'firma'))"
-        />
-        <p>Firma 1</p>
+      <div class="sarlaft-resumen">
+        {{ cuenta.sarlaft.descripcion || 'Evaluación SARLAFT realizada.' }}
       </div>
 
-      <div>
-        <img
-          [src]="getImagen(cuenta.firma_dos, 'firma')"
-          alt="Firma secundaria"
-          (error)="onImageError($event, 'firma')"
-          (click)="abrirImagen(getImagen(cuenta.firma_dos, 'firma'))"
-        />
-        <p>Firma 2</p>
+      <div
+        *ngIf="cuenta.sarlaft.bloqueaOperacion"
+        class="sarlaft-bloqueo">
+
+        <strong>Operación bloqueada</strong>
       </div>
+
+      <div
+        class="sarlaft-list"
+        *ngIf="cuenta.sarlaft.alertas?.length">
+
+        <div
+          class="sarlaft-item"
+          *ngFor="let alerta of cuenta.sarlaft.alertas">
+
+          <div class="sarlaft-item-title">
+            Regla {{ alerta.nombreRegla || 'N/A' }}
+          </div>
+
+          <div class="sarlaft-item-desc">
+            {{ alerta.descripcion }}
+          </div>
+
+          <div
+            *ngIf="alerta.accionRecomendada"
+            class="sarlaft-item-action">
+
+            <strong>Acción recomendada:</strong>
+            {{ alerta.accionRecomendada }}
+
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
-  </section>
 
-  <!-- Modal de imagen ampliada -->
-  <div class="modal-foto" *ngIf="imagenAmpliada" (click)="cerrarImagen()">
-    <img [src]="imagenAmpliada" alt="Imagen ampliada" />
+    <!-- Datos del Titular -->
+    <section class="bloque">
+      <h3>Titular</h3>
+
+      <div class="grid">
+
+        <div>
+          <strong>Documento:</strong>
+          {{ cuenta.documento }}
+        </div>
+
+        <div>
+          <strong>Nombre:</strong>
+          {{ cuenta.nombres }}
+          {{ cuenta.primer_apellido }}
+          {{ cuenta.segundo_apellido }}
+        </div>
+
+        <div>
+          <strong>Dirección:</strong>
+          {{ cuenta.direccion_residencia || cuenta.direccion || 'N/A' }}
+        </div>
+
+        <div>
+          <strong>País:</strong>
+          {{ cuenta.pais_residencia || cuenta.nombre_pais || 'N/A' }}
+        </div>
+
+        <div>
+          <strong>Departamento:</strong>
+          {{ cuenta.departamento_residencia || cuenta.nombre_departamento || 'N/A' }}
+        </div>
+
+        <div>
+          <strong>Ciudad:</strong>
+          {{ cuenta.ciudad_residencia || cuenta.nombre_ciudad || 'N/A' }}
+        </div>
+
+        <div>
+          <strong>Teléfono:</strong>
+          {{ cuenta.telefono || 'N/A' }}
+        </div>
+
+        <div>
+          <strong>Celular:</strong>
+          {{ cuenta.celular_uno || cuenta.celular || 'N/A' }}
+        </div>
+
+        <div>
+          <strong>Zona:</strong>
+          {{ cuenta.nombre_zona || 'N/A' }}
+        </div>
+
+        <div>
+          <strong>Subzona:</strong>
+          {{ cuenta.nombre_sub_zona || 'N/A' }}
+        </div>
+
+        <div>
+          <strong>Fecha Actualización:</strong>
+          {{ cuenta.fecha_actualizacion | date:'yyyy-MM-dd' }}
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Información Financiera -->
+    <section class="bloque">
+      <h3>Información Financiera</h3>
+
+      <div class="grid">
+        <div><strong>Agencia:</strong> {{ cuenta.codigo_agencia }} - {{ cuenta.nombre_agencia }}</div>
+        <div><strong>Código de Cuenta:</strong> {{ cuenta.codigo_cuenta }}</div>
+        <div><strong>Forma de Ahorro:</strong> {{ cuenta.codigo_forma }} - {{ cuenta.nombre_forma_ahorro }}</div>
+        <div><strong>Estado:</strong> {{ cuenta.nombre_estado || 'N/A' }}</div>
+        <div><strong>GMF:</strong> {{ cuenta.nombre_tipo_gmf || cuenta.gmf_cuenta_cuenta || 'N/A' }}</div>
+        <div><strong>Libranza:</strong> {{ cuenta.libranza_cuenta ? 'Sí' : 'No' }}</div>
+        <div><strong>Fecha Apertura:</strong> {{ cuenta.fecha_apertura_cuenta | date:'yyyy-MM-dd' }}</div>
+      </div>
+
+      <div class="saldo-resumen">
+        <div class="saldo-item saldo-principal">
+          <span>Saldo de la cuenta</span>
+          <strong>{{ cuenta.saldo_actual_cuenta || 0 | number:'1.2-2' }}</strong>
+        </div>
+
+        <div class="saldo-item">
+          <span>Valor en canje</span>
+          <strong>{{ cuenta.valor_en_canje || 0 | number:'1.2-2' }}</strong>
+        </div>
+
+        <div class="saldo-item">
+          <span>Valor GMF</span>
+          <strong>{{ 0 | number:'1.2-2' }}</strong>
+        </div>
+
+        <div class="saldo-item saldo-disponible">
+          <span>Valor disponible</span>
+          <strong>
+            {{ ((cuenta.saldo_actual_cuenta || 0) - (cuenta.valor_en_canje || 0)) | number:'1.2-2' }}
+          </strong>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Imágenes -->
+    <section class="bloque">
+      <h3>Imágenes</h3>
+      <div class="imagenes">
+        <div>
+          <img
+            [src]="getImagen(cuenta.foto, 'foto')"
+            alt="Foto titular"
+            (error)="onImageError($event, 'foto')"
+            (click)="abrirImagen(getImagen(cuenta.foto, 'foto'))"
+          />
+          <p>Foto</p>
+        </div>
+
+        <div>
+          <img
+            [src]="getImagen(cuenta.firma_uno, 'firma')"
+            alt="Firma principal"
+            (error)="onImageError($event, 'firma')"
+            (click)="abrirImagen(getImagen(cuenta.firma_uno, 'firma'))"
+          />
+          <p>Firma 1</p>
+        </div>
+
+        <div>
+          <img
+            [src]="getImagen(cuenta.firma_dos, 'firma')"
+            alt="Firma secundaria"
+            (error)="onImageError($event, 'firma')"
+            (click)="abrirImagen(getImagen(cuenta.firma_dos, 'firma'))"
+          />
+          <p>Firma 2</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modal de imagen ampliada -->
+    <div class="modal-foto" *ngIf="imagenAmpliada" (click)="cerrarImagen()">
+      <img [src]="imagenAmpliada" alt="Imagen ampliada" />
+    </div>
+
+    <!-- Auditoría -->
+    <section class="bloque">
+      <h3>Auditoría</h3>
+      <div class="grid">
+        <div><strong>Creado:</strong> {{ cuenta.fecha_creacion | date:'yyyy-MM-dd HH:mm' }}</div>
+        <div><strong>Editado:</strong> {{ cuenta.fecha_edicion | date:'yyyy-MM-dd HH:mm' }}</div>
+      </div>
+    </section>
+
+    <app-extracto-modal
+      *ngIf="mostrarModalExtracto"
+      [formaAhorro]="cuenta?.id_forma_ahorro"
+      [codigoCuenta]="cuenta?.codigo_cuenta"
+      [asociado]="cuenta"
+      [visible]="mostrarModalExtracto"
+      (cerrar)="cerrarExtracto()">
+    </app-extracto-modal>
+
   </div>
-
-  <!-- Auditoría -->
-  <section class="bloque">
-    <h3>Auditoría</h3>
-    <div class="grid">
-      <div><strong>Creado:</strong> {{ cuenta.fecha_creacion | date:'yyyy-MM-dd HH:mm' }}</div>
-      <div><strong>Editado:</strong> {{ cuenta.fecha_edicion | date:'yyyy-MM-dd HH:mm' }}</div>
-    </div>
-  </section>
-
-  <app-extracto-modal
-    *ngIf="mostrarModalExtracto"
-    [formaAhorro]="cuenta?.id_forma_ahorro"
-    [codigoCuenta]="cuenta?.codigo_cuenta"
-    [asociado]="cuenta"
-    [visible]="mostrarModalExtracto"
-    (cerrar)="cerrarExtracto()">
-  </app-extracto-modal>
-
-</div>

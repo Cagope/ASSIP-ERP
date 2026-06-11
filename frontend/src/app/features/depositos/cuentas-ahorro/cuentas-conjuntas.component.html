@@ -1,0 +1,155 @@
+<div class="cc-page">
+
+  <div class="cc-header">
+    <div class="cc-header__title">
+      <div>
+        <h3>Cuentas conjuntas</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="cc-card">
+
+    <h4>Agregar asociado conjunto</h4>
+
+    <div class="cc-form">
+
+      <div class="f-row full autocomplete">
+        <label>Asociado conjunto *</label>
+
+        <input
+          type="text"
+          [formControl]="asociadoCtrl"
+          placeholder="Buscar asociado por nombre o documento..."
+          [class.input-error]="errores.asociado">
+
+        <ul class="autocomplete-list" *ngIf="asociados.length > 0">
+          <li
+            *ngFor="let a of asociados"
+            (click)="seleccionarAsociado(a)">
+            <strong>{{ a.nombreCompleto }}</strong>
+            <small> — {{ a.documento }}</small>
+          </li>
+        </ul>
+
+        <small class="hint">
+          Escriba al menos 3 caracteres para buscar.
+        </small>
+
+        <small
+          class="field-error"
+          *ngIf="errores.asociado">
+          {{ errores.asociado }}
+        </small>
+      </div>
+
+      <div class="f-row">
+        <label>Documento</label>
+        <input
+          type="text"
+          [(ngModel)]="nuevo.documento"
+          placeholder="Documento del asociado"
+          disabled>
+      </div>
+
+      <div class="f-row">
+        <label>Nombre</label>
+        <input
+          type="text"
+          [(ngModel)]="nuevo.nombreCompleto"
+          placeholder="Nombre completo del asociado"
+          disabled>
+      </div>
+
+      <div class="f-row full">
+        <label>Acción conjunta *</label>
+
+        <select
+          [(ngModel)]="nuevo.codigoAccion"
+          (ngModelChange)="limpiarError('accion')"
+          [class.input-error]="errores.accion">
+
+          <option value="">Seleccione una acción conjunta...</option>
+
+          <option
+            *ngFor="let a of accionesConjunta"
+            [value]="a.codigoAccion">
+            {{ a.descripcionAccion }}
+          </option>
+
+        </select>
+
+        <small
+          class="field-error"
+          *ngIf="errores.accion">
+          {{ errores.accion }}
+        </small>
+      </div>
+
+    </div>
+
+    <div class="cc-actions">
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="agregar()">
+        Agregar
+      </button>
+    </div>
+
+  </div>
+
+  <div class="cc-card">
+
+    <h4>Listado de asociados conjuntos</h4>
+
+    <div *ngIf="cargando" class="loading">
+      Cargando...
+    </div>
+
+    <div *ngIf="error" class="error">
+      {{ error }}
+    </div>
+
+    <table
+      *ngIf="lista.length > 0"
+      class="data-table">
+
+      <thead>
+      <tr>
+        <th>#</th>
+        <th>Documento</th>
+        <th>Nombre</th>
+        <th>Acción conjunta</th>
+        <th>Acciones</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr *ngFor="let item of lista; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ item.documento }}</td>
+        <td>{{ item.nombreCompleto }}</td>
+        <td>{{ item.descripcionAccion }}</td>
+        <td>
+          <button
+            type="button"
+            class="btn-action-delete"
+            (click)="eliminar(item)">
+            🗑
+          </button>
+        </td>
+      </tr>
+      </tbody>
+
+    </table>
+
+    <div *ngIf="!cargando && lista.length === 0" class="empty">
+      <strong>No hay asociados conjuntos registrados.</strong>
+      <span>Agregue un asociado conjunto para que aparezca en la lista.</span>
+    </div>
+
+  </div>
+
+</div>

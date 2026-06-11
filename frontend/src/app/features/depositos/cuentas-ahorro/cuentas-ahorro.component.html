@@ -8,111 +8,145 @@
     [mostrarImprimir]="false">
   </app-header-actions>
 
-  <!-- ===================================================== -->
-  <!-- 🟦 PASO 1 — BUSCAR CUENTAS -->
-  <!-- ===================================================== -->
+  <!-- PASO 1 — BUSCAR CUENTAS -->
   <div *ngIf="paso === 1" class="list-container">
 
     <h3>Buscar Cuenta / Asociado</h3>
 
-    <!-- ⭐ INFO AGENCIA ACTIVA ⭐ -->
     <div class="info-agencia" *ngIf="agenciaActiva">
       <strong>Agencia activa:</strong>
       {{ agenciaActiva.nombre_agencia || agenciaActiva.nombreAgencia || ('Agencia ' + agenciaActiva.id_agencia) }}
     </div>
 
-    <!-- FILTROS -->
     <div class="filters">
 
-      <input type="text" placeholder="Documento"
-             [(ngModel)]="filtros.documento"
-             name="documento"
-             (keyup.enter)="buscar()">
+      <input
+        type="text"
+        placeholder="Documento"
+        [(ngModel)]="filtros.documento"
+        name="documento"
+        (keyup.enter)="buscar()">
 
-      <input type="text" placeholder="Nombres"
-             [(ngModel)]="filtros.nombres"
-             name="nombres"
-             (keyup.enter)="buscar()">
+      <input
+        type="text"
+        placeholder="Nombres"
+        [(ngModel)]="filtros.nombres"
+        name="nombres"
+        (keyup.enter)="buscar()">
 
-      <input type="text" placeholder="Primer Apellido"
-             [(ngModel)]="filtros.primer_apellido"
-             name="primer_apellido"
-             (keyup.enter)="buscar()">
+      <input
+        type="text"
+        placeholder="Primer Apellido"
+        [(ngModel)]="filtros.primer_apellido"
+        name="primer_apellido"
+        (keyup.enter)="buscar()">
 
-      <input type="text" placeholder="Segundo Apellido"
-             [(ngModel)]="filtros.segundo_apellido"
-             name="segundo_apellido"
-             (keyup.enter)="buscar()">
+      <input
+        type="text"
+        placeholder="Segundo Apellido"
+        [(ngModel)]="filtros.segundo_apellido"
+        name="segundo_apellido"
+        (keyup.enter)="buscar()">
 
-      <button
-        type="button"
-        class="btn btn--primary"
-        (click)="buscar()">
+      <button type="button" class="btn btn--primary" (click)="buscar()">
         Buscar
       </button>
 
-      <button
-        type="button"
-        class="btn btn--secondary"
-        (click)="limpiar()">
+      <button type="button" class="btn btn--secondary" (click)="limpiar()">
         Limpiar
       </button>
+
     </div>
 
-    <!-- ESTADO -->
     <div *ngIf="cargandoBusqueda" class="loading">Buscando cuentas...</div>
     <div *ngIf="errorBusqueda" class="error">{{ errorBusqueda }}</div>
 
-    <!-- ===================================================== -->
-    <!-- 🟩 TABLA DE RESULTADOS -->
-    <!-- ===================================================== -->
     <table *ngIf="!cargandoBusqueda && resultados.length > 0" class="data-table">
       <thead>
       <tr>
         <th>#</th>
-        <th>Código</th>
         <th>Documento</th>
         <th>Nombre del Ahorrador</th>
         <th>Tipo de Ahorro</th>
+        <th>Código</th>
         <th>Estado</th>
         <th class="right">Saldo Actual</th>
         <th>Acciones</th>
+        <th>Nueva cuenta</th>
       </tr>
       </thead>
 
       <tbody>
       <tr *ngFor="let c of resultados; let i = index">
+
         <td>{{ i + 1 }}</td>
-        <td>{{ c.codigo_cuenta }}</td>
         <td>{{ c.documento }}</td>
         <td>{{ c.nombre_completo }}</td>
         <td>{{ c.nombre_forma_ahorro }}</td>
+        <td>{{ c.codigo_cuenta }}</td>
         <td>{{ c.nombre_estado }}</td>
         <td class="right">{{ c.saldo_actual_cuenta | number:'1.0-0' }}</td>
 
-        <td>
+        <td class="acciones-cuenta">
+
           <button
             class="btn-action-edit"
             type="button"
             (click)="seleccionarPersona(c)"
-            title="Seleccionar">
+            title="Editar cuenta">
             ✏️
           </button>
+
+          <button
+            type="button"
+            class="btn btn--secondary btn-sm"
+            (click)="abrirDetalleCuenta(c, 'BENEFICIARIOS')">
+            Beneficiarios
+          </button>
+
+          <button
+            type="button"
+            class="btn btn--secondary btn-sm"
+            (click)="abrirDetalleCuenta(c, 'PODERES')">
+            Poderes
+          </button>
+
+          <button
+            type="button"
+            class="btn btn--secondary btn-sm"
+            (click)="abrirDetalleCuenta(c, 'CONJUNTAS')">
+            Cuentas conjuntas
+          </button>
+
         </td>
+
+        <td>
+          <button
+            *ngIf="esPrimeraFilaAsociado(c, i)"
+            type="button"
+            class="btn btn--success btn-nueva-cuenta"
+            (click)="abrirNuevaCuenta(asociadoDesdeFila(c))"
+            title="Abrir nueva cuenta">
+
+            <span class="icono">➕</span>
+            <span>Nueva cuenta</span>
+
+          </button>
+        </td>
+
       </tr>
       </tbody>
     </table>
 
-    <div *ngIf="!cargandoBusqueda && resultados.length === 0 && filtrosActivos()" class="empty">
+    <div
+      *ngIf="!cargandoBusqueda && resultados.length === 0 && filtrosActivos()"
+      class="empty">
       No se encontraron resultados.
     </div>
 
   </div>
 
-
-  <!-- ===================================================== -->
-  <!-- 🟦 PASO 2 — FORMULARIO DE CREACIÓN / EDICIÓN -->
-  <!-- ===================================================== -->
+  <!-- PASO 2 — FORMULARIO DE CREACIÓN / EDICIÓN -->
   <div *ngIf="paso === 2" class="list-container form-container">
 
     <h3>Datos del Asociado</h3>
@@ -121,107 +155,115 @@
       <p><strong>Nombre:</strong> {{ persona?.nombre_completo }}</p>
       <p><strong>Documento:</strong> {{ persona?.documento }}</p>
       <p><strong>Agencia:</strong> {{ persona?.agencia }}</p>
-      <p><strong>Forma de ahorro:</strong> {{ persona?.forma }}</p>
-      <p><strong>Código de la cuenta:</strong> {{ persona?.codigo }}</p>
-      <p><strong>Estado actual:</strong>
-        {{ detalleCuenta?.codigoEstado }} — {{ detalleCuenta?.nombreEstado }}
-      </p>
-
     </div>
 
     <hr>
 
-    <h3>Datos de la Cuenta</h3>
+    <h3>
+      {{ modoNuevaCuenta ? 'Datos de la Nueva Cuenta' : 'Datos de la Cuenta' }}
+    </h3>
 
     <form (ngSubmit)="validar()">
 
       <div class="grid grid-2 gap">
 
-        <!-- Fecha apertura -->
+        <div class="f-row">
+          <label>Forma de ahorro</label>
+          <select
+            [(ngModel)]="nuevo.idFormaAhorro"
+            name="idFormaAhorro"
+            (change)="aplicarReglasPorForma()"
+            [disabled]="!modoNuevaCuenta">
+
+            <option [ngValue]="0">Seleccione forma de ahorro...</option>
+
+            <option
+              *ngFor="let f of formasAhorro"
+              [ngValue]="obtenerIdForma(f)">
+              {{ f.codigoForma }} - {{ f.nombreForma }}
+            </option>
+
+          </select>
+        </div>
+
+        <div class="f-row">
+          <label>Próximo código de cuenta</label>
+          <input
+            type="text"
+            [value]="modoNuevaCuenta ? codigoCuentaSugerido : persona?.codigo"
+            disabled>
+        </div>
+
         <div class="f-row">
           <label>Fecha de Apertura</label>
-          <input type="text" [value]="detalleCuenta?.fechaAperturaCuenta" disabled>
+          <input
+            type="date"
+            [value]="detalleCuenta?.fechaAperturaCuenta || fechaAperturaSugerida"
+            disabled>
         </div>
 
-        <!-- Fecha final -->
-        <div class="f-row">
-          <label>Fecha Final</label>
-          <input type="text" [value]="fechaFinalCalculada" disabled>
-        </div>
+        <ng-container *ngIf="esForma07()">
 
-        <!-- GMF -->
+          <div class="f-row">
+            <label>Plazo (meses)</label>
+            <input
+              type="number"
+              [(ngModel)]="nuevo.plazoCuenta"
+              name="plazoCuenta"
+              (input)="calcularFechaFinal()">
+          </div>
+
+          <div class="f-row">
+            <label>Fecha Final</label>
+            <input
+              type="date"
+              [value]="fechaFinalCalculada"
+              disabled>
+          </div>
+
+          <div class="f-row">
+            <label>Cuota Mensual</label>
+            <input
+              type="number"
+              [(ngModel)]="nuevo.cuotaMensualCuenta"
+              name="cuotaMensualCuenta">
+          </div>
+
+          <div class="f-row">
+            <label>Tasa (%)</label>
+            <input
+              type="number"
+              [(ngModel)]="nuevo.tasa"
+              name="tasa">
+          </div>
+
+        </ng-container>
+
         <div class="f-row">
           <label>GMF</label>
-          <select [(ngModel)]="nuevo.gmfCuentaCuenta"
-                  name="gmfCuentaCuenta"
-                  [disabled]="nuevo.idFormaAhorro == 1">
+          <select
+            [(ngModel)]="nuevo.gmfCuentaCuenta"
+            name="gmfCuentaCuenta"
+            [disabled]="nuevo.idFormaAhorro == 1">
+
             <option *ngFor="let g of tiposGmf" [value]="g.codigoTipoGmf">
               {{ g.descripcionTiposGmf }}
             </option>
+
           </select>
         </div>
 
-        <!-- Retención -->
         <div class="f-row">
           <label>Retención en la Fuente</label>
-          <select [(ngModel)]="nuevo.retencionFuenteCuenta"
-                  name="retencionFuenteCuenta"
-                  [disabled]="nuevo.idFormaAhorro == 1">
+          <select
+            [(ngModel)]="nuevo.retencionFuenteCuenta"
+            name="retencionFuenteCuenta"
+            [disabled]="nuevo.idFormaAhorro == 1">
+
             <option [ngValue]="true">Sí</option>
             <option [ngValue]="false">No</option>
+
           </select>
-
-        </div>
-
-        <!-- Conjunta -->
-        <div class="f-row">
-          <label>Cuenta Conjunta</label>
-          <select [(ngModel)]="nuevo.cuentaConjunta" name="cuentaConjunta" (change)="onConjuntaChange()">
-            <option value="N">No</option>
-            <option value="Y">Todos deben firmar</option>
-            <option value="O">Cualquiera puede firmar</option>
-          </select>
-        </div>
-
-        <!-- Documento asociado -->
-        <div class="f-row">
-          <label>Documento del Asociado Relacionado</label>
-          <input type="text"
-                 [(ngModel)]="nuevo.documentoRelacionado"
-                 name="documentoRelacionado"
-                 placeholder="Documento asociado"
-                 [disabled]="nuevo.cuentaConjunta === 'N'">
-        </div>
-
-        <!-- Acción conjunta -->
-        <div class="f-row">
-          <label>Acción Conjunta</label>
-          <select [(ngModel)]="nuevo.accionConjunta"
-                  name="accionConjunta"
-                  [disabled]="nuevo.cuentaConjunta === 'N'">
-            <option value="N">No aplica</option>
-            <option *ngFor="let a of accionesConjunta" [value]="a.codigo">
-              {{ a.nombre }}
-            </option>
-          </select>
-        </div>
-
-        <!-- Cuota -->
-        <div class="f-row">
-          <label>Cuota Mensual</label>
-          <input type="number" [(ngModel)]="nuevo.cuotaMensualCuenta" name="cuotaMensualCuenta">
-        </div>
-
-        <!-- Tasa -->
-        <div class="f-row">
-          <label>Tasa (%)</label>
-          <input type="number" [(ngModel)]="nuevo.tasa" name="tasa">
-        </div>
-
-        <!-- Plazo -->
-        <div class="f-row">
-          <label>Plazo (meses)</label>
-          <input type="number" [(ngModel)]="nuevo.plazoCuenta" name="plazoCuenta" (input)="calcularFechaFinal()">
         </div>
 
       </div>
@@ -245,10 +287,11 @@
 
     </form>
 
-    <div *ngIf="validacion"
-         class="validacion-box"
-         [class.ok]="validacion.ok"
-         [class.err]="!validacion.ok">
+    <div
+      *ngIf="validacion"
+      class="validacion-box"
+      [class.ok]="validacion.ok"
+      [class.err]="!validacion.ok">
       {{ validacion.mensaje }}
     </div>
 
@@ -272,43 +315,49 @@
 
   </div>
 
-
-  <!-- ===================================================== -->
-  <!-- 🟦 PASO 3 — DETALLE -->
-  <!-- ===================================================== -->
+  <!-- PASO 3 — DETALLE / ACCIONES DE CUENTA -->
   <div *ngIf="paso === 3" class="list-container">
 
-    <div class="acciones">
+    <div class="acciones-superior">
       <button
         type="button"
         class="btn btn--secondary"
         (click)="regresar()">
-        Cancelar
+        Regresar
       </button>
     </div>
 
-    <h3>Cuenta Creada</h3>
+    <h3>Detalle de Cuenta</h3>
 
-    <p><strong>Cuenta:</strong> {{ detalleCuenta?.codigoCuenta }}</p>
-    <p><strong>Forma:</strong> {{ detalleCuenta?.nombreForma }}</p>
-    <p><strong>Agencia:</strong> {{ detalleCuenta?.nombreAgencia }}</p>
-    <p><strong>Estado:</strong> {{ detalleCuenta?.estadoCuenta }}</p>
+    <div class="persona-box">
+      <p><strong>Cuenta:</strong> {{ detalleCuenta?.codigoCuenta }}</p>
+      <p><strong>Forma:</strong> {{ detalleCuenta?.nombreForma }}</p>
+      <p><strong>Agencia:</strong> {{ detalleCuenta?.nombreAgencia }}</p>
+      <p><strong>Estado:</strong> {{ detalleCuenta?.nombreEstado || detalleCuenta?.estadoCuenta }}</p>
+    </div>
 
     <hr>
 
-    <h4>Beneficiarios</h4>
-    <ul>
-      <li *ngFor="let b of detalleCuenta?.beneficiarios">
-        {{ b.nombreBeneficiario }} — {{ b.tipoParentesco }}
-      </li>
-    </ul>
+    <app-cuentas-conjuntas
+      *ngIf="accionDetalle === 'CONJUNTAS'"
+      [idCuentaAhorro]="detalleCuenta?.idCuentaAhorro ?? null"
+      [accionesConjunta]="accionesConjunta"
+      (cerrar)="regresarDetalle()">
+    </app-cuentas-conjuntas>
 
-    <h4>Poderes</h4>
-    <ul>
-      <li *ngFor="let p of detalleCuenta?.poderes">
-        {{ p.nombrePoder }}
-      </li>
-    </ul>
+    <app-beneficiarios
+      *ngIf="accionDetalle === 'BENEFICIARIOS'"
+      [idCuentaAhorro]="detalleCuenta?.idCuentaAhorro ?? null"
+      [beneficiarios]="detalleCuenta?.beneficiarios ?? []"
+      (cerrar)="regresarDetalle()">
+    </app-beneficiarios>
+
+    <app-poderes
+      *ngIf="accionDetalle === 'PODERES'"
+      [idCuentaAhorro]="detalleCuenta?.idCuentaAhorro ?? null"
+      [poderes]="detalleCuenta?.poderes ?? []"
+      (cerrar)="regresarDetalle()">
+    </app-poderes>
 
   </div>
 

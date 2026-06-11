@@ -1,57 +1,176 @@
-<div class="poderes-box">
+<div class="poder-page">
 
-  <h3>Poderes</h3>
+  <div class="poder-header">
+    <div class="poder-header__title">
+      <div>
+        <h3>Poderes</h3>
+      </div>
+    </div>
+  </div>
 
-  <div class="form-grid">
+  <div class="poder-card">
 
-    <input
-      type="text"
-      placeholder="Documento"
-      [(ngModel)]="nuevo.documentoPoder">
+    <h4>{{ editando ? 'Editar apoderado' : 'Agregar apoderado' }}</h4>
 
-    <input
-      type="text"
-      placeholder="Nombre completo"
-      [(ngModel)]="nuevo.nombrePoder">
+    <div
+      *ngIf="editando"
+      class="alert alert--warning">
+      Editando apoderado seleccionado.
+    </div>
 
-    <input
-      type="text"
-      placeholder="Teléfono"
-      [(ngModel)]="nuevo.telefonoPoder">
+    <div *ngIf="cargando" class="loading">
+      Cargando...
+    </div>
 
-    <input
-      type="text"
-      placeholder="Celular"
-      [(ngModel)]="nuevo.celularPoder">
+    <div *ngIf="error" class="error">
+      {{ error }}
+    </div>
 
-    <button
-      type="button"
-      class="btn btn--primary"
-      (click)="agregar()">
-      Agregar
-    </button>
+    <div class="poder-form">
+
+      <div class="f-row">
+        <label>Documento *</label>
+        <input
+          type="text"
+          placeholder="Documento del apoderado"
+          [(ngModel)]="nuevo.documentoPoder"
+          (ngModelChange)="limpiarError('documento')"
+          [class.input-error]="errores.documento">
+
+        <small
+          class="field-error"
+          *ngIf="errores.documento">
+          {{ errores.documento }}
+        </small>
+      </div>
+
+      <div class="f-row">
+        <label>Nombre completo *</label>
+        <input
+          type="text"
+          placeholder="Nombre completo del apoderado"
+          [(ngModel)]="nuevo.nombrePoder"
+          (ngModelChange)="limpiarError('nombre')"
+          [class.input-error]="errores.nombre">
+
+        <small
+          class="field-error"
+          *ngIf="errores.nombre">
+          {{ errores.nombre }}
+        </small>
+      </div>
+
+      <div class="f-row">
+        <label>Teléfono</label>
+        <input
+          type="text"
+          maxlength="7"
+          placeholder="7 dígitos"
+          [(ngModel)]="nuevo.telefonoPoder"
+          (ngModelChange)="limpiarError('telefono')"
+          [class.input-error]="errores.telefono">
+
+        <small
+          class="field-error"
+          *ngIf="errores.telefono">
+          {{ errores.telefono }}
+        </small>
+      </div>
+
+      <div class="f-row">
+        <label>Celular</label>
+        <input
+          type="text"
+          maxlength="10"
+          placeholder="10 dígitos"
+          [(ngModel)]="nuevo.celularPoder"
+          (ngModelChange)="limpiarError('celular')"
+          [class.input-error]="errores.celular">
+
+        <small
+          class="field-error"
+          *ngIf="errores.celular">
+          {{ errores.celular }}
+        </small>
+      </div>
+
+      <div class="f-row full">
+        <label>Correo electrónico</label>
+        <input
+          type="email"
+          placeholder="correo@dominio.com"
+          [(ngModel)]="nuevo.correoPoder"
+          (ngModelChange)="limpiarError('correo')"
+          [class.input-error]="errores.correo">
+
+        <small
+          class="field-error"
+          *ngIf="errores.correo">
+          {{ errores.correo }}
+        </small>
+      </div>
+
+    </div>
+
+    <div class="poder-actions">
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="agregar()">
+        {{ editando ? 'Actualizar' : 'Agregar' }}
+      </button>
+
+      <button
+        *ngIf="editando"
+        type="button"
+        class="btn btn--secondary"
+        (click)="cancelarEdicion()">
+        Cancelar
+      </button>
+
+    </div>
 
   </div>
 
-  <table class="poderes-table" *ngIf="poderes.length > 0">
-    <thead>
-    <tr>
-      <th>Documento</th>
-      <th>Nombre</th>
-      <th>Teléfono</th>
-      <th>Celular</th>
-      <th>Acción</th>
-    </tr>
-    </thead>
+  <div class="poder-card">
 
-    <tbody>
-    <tr *ngFor="let p of poderes; let i = index">
-      <td>{{ p.documentoPoder }}</td>
-      <td>{{ p.nombrePoder }}</td>
-      <td>{{ p.telefonoPoder }}</td>
-      <td>{{ p.celularPoder }}</td>
-      <td>
-        <div class="acciones">
+    <h4>Listado de apoderados</h4>
+
+    <table
+      class="data-table"
+      *ngIf="poderes.length > 0">
+
+      <thead>
+      <tr>
+        <th>#</th>
+        <th>Documento</th>
+        <th>Nombre</th>
+        <th>Teléfono</th>
+        <th>Celular</th>
+        <th>Correo</th>
+        <th>Acciones</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr *ngFor="let p of poderes; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ p.documentoPoder }}</td>
+        <td>{{ p.nombrePoder }}</td>
+        <td>{{ p.telefonoPoder }}</td>
+        <td>{{ p.celularPoder }}</td>
+        <td>{{ p.correoPoder }}</td>
+        <td>
+
+          <button
+            class="btn-action-edit"
+            type="button"
+            (click)="editar(p)"
+            title="Editar">
+            ✏️
+          </button>
+
           <button
             class="btn-action-delete"
             type="button"
@@ -59,10 +178,20 @@
             title="Eliminar">
             🗑️
           </button>
-        </div>
-      </td>
-    </tr>
-    </tbody>
-  </table>
+
+        </td>
+      </tr>
+      </tbody>
+
+    </table>
+
+    <div
+      *ngIf="poderes.length === 0"
+      class="empty">
+      <strong>No hay apoderados registrados.</strong>
+      <span>Agregue un apoderado para que aparezca en la lista.</span>
+    </div>
+
+  </div>
 
 </div>

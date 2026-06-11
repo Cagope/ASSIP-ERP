@@ -5,4 +5,5 @@ export interface PoderDTO {
   nombrePoder: string;
   telefonoPoder?: string;
   celularPoder?: string;
+  correoPoder?: string;
 }

@@ -95,10 +95,11 @@
     <thead>
     <tr>
       <th>#</th>
-      <th>Código</th>
+      <th>Agencia</th>
       <th>Documento</th>
       <th>Nombre del Ahorrador</th>
       <th>Tipo de Ahorro</th>
+      <th>Código</th>
       <th class="right">Saldo Actual</th>
       <th>Acciones</th>
     </tr>
@@ -107,10 +108,13 @@
     <tbody>
     <tr *ngFor="let c of cuentas; let i = index">
       <td>{{ i + 1 }}</td>
-      <td>{{ c.codigo_cuenta }}</td>
+      <td>
+        {{ c.codigo_agencia }} - {{ c.nombre_agencia }}
+      </td>
       <td>{{ c.documento }}</td>
       <td>{{ c.nombres }} {{ c.primer_apellido }} {{ c.segundo_apellido }}</td>
       <td>{{ c.nombre_forma_ahorro }}</td>
+      <td>{{ c.codigo_cuenta }}</td>
       <td class="right">{{ c.saldo_actual_cuenta | number: '1.0-2' }}</td>
 
       <td class="actions-cell">

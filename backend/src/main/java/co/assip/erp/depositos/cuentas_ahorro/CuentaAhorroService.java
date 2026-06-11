@@ -81,6 +81,10 @@ public class CuentaAhorroService {
             dto.setPoderes(
                     repository.listarPoderes(id)
             );
+
+            dto.setCuentasConjuntas(
+                    repository.listarCuentasConjuntas(id)
+            );
         }
 
         return dto;
@@ -108,20 +112,22 @@ public class CuentaAhorroService {
 
         if (idForma != null) {
 
-            CuentaAhorroDetalleDTO existente =
-                    repository.buscarCuentaAportes(idPer);
+            String codigoForma =
+                    repository.obtenerCodigoForma(idForma);
 
-            if (
-                    existente != null
-                            && existente.getSaldoActualCuenta() != null
-                            && existente.getSaldoActualCuenta().compareTo(BigDecimal.ZERO) > 0
-            ) {
+            if ("01".equals(codigoForma)) {
 
-                return new CuentaAhorroGuardarRespuesta(
-                        false,
-                        "El asociado ya tiene cuenta de aportes con saldo > 0.",
-                        null
-                );
+                CuentaAhorroDetalleDTO existente =
+                        repository.buscarCuentaAportes(idPer);
+
+                if (existente != null) {
+
+                    return new CuentaAhorroGuardarRespuesta(
+                            false,
+                            "El asociado ya tiene cuenta de aportes sociales.",
+                            null
+                    );
+                }
             }
         }
 
@@ -180,7 +186,8 @@ public class CuentaAhorroService {
                 repository.guardarCuenta(
                         dto,
                         codigoCuenta,
-                        fechaFinal
+                        fechaFinal,
+                        idUsuario
                 );
 
         repository.actualizarConsecutivo(
@@ -202,6 +209,331 @@ public class CuentaAhorroService {
         return new CuentaAhorroGuardarRespuesta(
                 true,
                 "Cuenta creada exitosamente.",
+                idCuenta
+        );
+    }
+
+    public List<CuentaConjuntaDTO> listarCuentasConjuntas(Integer idCuenta) {
+
+        var agencias = usuarioSesionService.agencias();
+
+        if (!usuarioSesionService.tieneAccesoTotal() &&
+                !repository.cuentaPerteneceAgencias(idCuenta, agencias)) {
+
+            return List.of();
+        }
+
+        return repository.listarCuentasConjuntas(idCuenta);
+    }
+
+    public CuentaAhorroGuardarRespuesta agregarCuentaConjunta(
+            Integer idCuenta,
+            CuentaConjuntaDTO dto
+    ) {
+
+        var agencias = usuarioSesionService.agencias();
+
+        if (!usuarioSesionService.tieneAccesoTotal() &&
+                !repository.cuentaPerteneceAgencias(idCuenta, agencias)) {
+
+            return new CuentaAhorroGuardarRespuesta(
+                    false,
+                    "No tiene permiso para modificar esta cuenta.",
+                    null
+            );
+        }
+
+        if (dto.getIdDatosPersonal() == null || dto.getIdDatosPersonal() <= 0) {
+            return new CuentaAhorroGuardarRespuesta(
+                    false,
+                    "Seleccione el asociado conjunto.",
+                    null
+            );
+        }
+
+        if (dto.getCodigoAccion() == null || dto.getCodigoAccion().trim().isEmpty()) {
+            return new CuentaAhorroGuardarRespuesta(
+                    false,
+                    "Seleccione la acción conjunta.",
+                    null
+            );
+        }
+
+        Integer idUsuario = usuarioSesionService.idUsuario();
+
+        repository.agregarCuentaConjunta(
+                idCuenta,
+                dto,
+                idUsuario
+        );
+
+        repository.actualizarIndicadorCuentaConjunta(
+                idCuenta,
+                "S"
+        );
+
+        return new CuentaAhorroGuardarRespuesta(
+                true,
+                "Cuenta conjunta agregada correctamente.",
+                idCuenta
+        );
+    }
+
+    public CuentaAhorroGuardarRespuesta eliminarCuentaConjunta(
+            Integer idCuenta,
+            Integer idCuentaConjunta
+    ) {
+
+        var agencias = usuarioSesionService.agencias();
+
+        if (!usuarioSesionService.tieneAccesoTotal() &&
+                !repository.cuentaPerteneceAgencias(idCuenta, agencias)) {
+
+            return new CuentaAhorroGuardarRespuesta(
+                    false,
+                    "No tiene permiso para modificar esta cuenta.",
+                    null
+            );
+        }
+
+        repository.eliminarCuentaConjunta(
+                idCuenta,
+                idCuentaConjunta
+        );
+
+        int total = repository.contarCuentasConjuntas(idCuenta);
+
+        repository.actualizarIndicadorCuentaConjunta(
+                idCuenta,
+                total > 0 ? "S" : "N"
+        );
+
+        return new CuentaAhorroGuardarRespuesta(
+                true,
+                "Cuenta conjunta eliminada correctamente.",
+                idCuenta
+        );
+    }
+
+
+    // ============================================================
+    // 🟦 BENEFICIARIOS
+    // ============================================================
+    public List<BeneficiarioDTO> listarBeneficiarios(Integer idCuenta) {
+
+        var agencias = usuarioSesionService.agencias();
+
+        if (!usuarioSesionService.tieneAccesoTotal() &&
+                !repository.cuentaPerteneceAgencias(idCuenta, agencias)) {
+
+            return List.of();
+        }
+
+        return repository.listarBeneficiarios(idCuenta);
+    }
+
+    public CuentaAhorroGuardarRespuesta agregarBeneficiario(
+            Integer idCuenta,
+            BeneficiarioDTO dto
+    ) {
+
+        var agencias = usuarioSesionService.agencias();
+
+        if (!usuarioSesionService.tieneAccesoTotal() &&
+                !repository.cuentaPerteneceAgencias(idCuenta, agencias)) {
+
+            return new CuentaAhorroGuardarRespuesta(
+                    false,
+                    "No tiene permiso para modificar esta cuenta.",
+                    null
+            );
+        }
+
+        Integer idUsuario = usuarioSesionService.idUsuario();
+
+        repository.agregarBeneficiario(
+                idCuenta,
+                dto,
+                idUsuario
+        );
+
+        return new CuentaAhorroGuardarRespuesta(
+                true,
+                "Beneficiario agregado correctamente.",
+                idCuenta
+        );
+    }
+
+    public CuentaAhorroGuardarRespuesta actualizarBeneficiario(
+            Integer idCuenta,
+            Integer idBeneficiario,
+            BeneficiarioDTO dto
+    ) {
+
+        var agencias = usuarioSesionService.agencias();
+
+        if (!usuarioSesionService.tieneAccesoTotal() &&
+                !repository.cuentaPerteneceAgencias(idCuenta, agencias)) {
+
+            return new CuentaAhorroGuardarRespuesta(
+                    false,
+                    "No tiene permiso para modificar esta cuenta.",
+                    null
+            );
+        }
+
+        Integer idUsuario = usuarioSesionService.idUsuario();
+
+        repository.actualizarBeneficiario(
+                idCuenta,
+                idBeneficiario,
+                dto,
+                idUsuario
+        );
+
+        return new CuentaAhorroGuardarRespuesta(
+                true,
+                "Beneficiario actualizado correctamente.",
+                idCuenta
+        );
+    }
+
+    public CuentaAhorroGuardarRespuesta eliminarBeneficiario(
+            Integer idCuenta,
+            Integer idBeneficiario
+    ) {
+
+        var agencias = usuarioSesionService.agencias();
+
+        if (!usuarioSesionService.tieneAccesoTotal() &&
+                !repository.cuentaPerteneceAgencias(idCuenta, agencias)) {
+
+            return new CuentaAhorroGuardarRespuesta(
+                    false,
+                    "No tiene permiso para modificar esta cuenta.",
+                    null
+            );
+        }
+
+        repository.eliminarBeneficiario(
+                idCuenta,
+                idBeneficiario
+        );
+
+        return new CuentaAhorroGuardarRespuesta(
+                true,
+                "Beneficiario eliminado correctamente.",
+                idCuenta
+        );
+    }
+
+    // ============================================================
+    // 🟦 PODERES
+    // ============================================================
+    public List<PoderDTO> listarPoderes(Integer idCuenta) {
+
+        var agencias = usuarioSesionService.agencias();
+
+        if (!usuarioSesionService.tieneAccesoTotal() &&
+                !repository.cuentaPerteneceAgencias(idCuenta, agencias)) {
+
+            return List.of();
+        }
+
+        return repository.listarPoderes(idCuenta);
+    }
+
+    public CuentaAhorroGuardarRespuesta agregarPoder(
+            Integer idCuenta,
+            PoderDTO dto
+    ) {
+
+        var agencias = usuarioSesionService.agencias();
+
+        if (!usuarioSesionService.tieneAccesoTotal() &&
+                !repository.cuentaPerteneceAgencias(idCuenta, agencias)) {
+
+            return new CuentaAhorroGuardarRespuesta(
+                    false,
+                    "No tiene permiso para modificar esta cuenta.",
+                    null
+            );
+        }
+
+        Integer idUsuario = usuarioSesionService.idUsuario();
+
+        repository.agregarPoder(
+                idCuenta,
+                dto,
+                idUsuario
+        );
+
+        return new CuentaAhorroGuardarRespuesta(
+                true,
+                "Poder agregado correctamente.",
+                idCuenta
+        );
+    }
+
+    public CuentaAhorroGuardarRespuesta actualizarPoder(
+            Integer idCuenta,
+            Integer idPoder,
+            PoderDTO dto
+    ) {
+
+        var agencias = usuarioSesionService.agencias();
+
+        if (!usuarioSesionService.tieneAccesoTotal() &&
+                !repository.cuentaPerteneceAgencias(idCuenta, agencias)) {
+
+            return new CuentaAhorroGuardarRespuesta(
+                    false,
+                    "No tiene permiso para modificar esta cuenta.",
+                    null
+            );
+        }
+
+        Integer idUsuario = usuarioSesionService.idUsuario();
+
+        repository.actualizarPoder(
+                idCuenta,
+                idPoder,
+                dto,
+                idUsuario
+        );
+
+        return new CuentaAhorroGuardarRespuesta(
+                true,
+                "Poder actualizado correctamente.",
+                idCuenta
+        );
+    }
+
+    public CuentaAhorroGuardarRespuesta eliminarPoder(
+            Integer idCuenta,
+            Integer idPoder
+    ) {
+
+        var agencias = usuarioSesionService.agencias();
+
+        if (!usuarioSesionService.tieneAccesoTotal() &&
+                !repository.cuentaPerteneceAgencias(idCuenta, agencias)) {
+
+            return new CuentaAhorroGuardarRespuesta(
+                    false,
+                    "No tiene permiso para modificar esta cuenta.",
+                    null
+            );
+        }
+
+        repository.eliminarPoder(
+                idCuenta,
+                idPoder
+        );
+
+        return new CuentaAhorroGuardarRespuesta(
+                true,
+                "Poder eliminado correctamente.",
                 idCuenta
         );
     }

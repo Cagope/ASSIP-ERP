@@ -68,6 +68,7 @@ export class CuentasAhorroListComponent {
       const req: ReportQueryRequest = {
         schema: 'depositos',
         view: 'vw_depositos_cuentas_ahorro_total',
+        scope: 'GLOBAL',
         filters: this.filtros
       };
 
@@ -100,69 +101,82 @@ export class CuentasAhorroListComponent {
   }
 
   /** 🕵️ Ver detalle de una cuenta (con evaluación SARLAFT) */
-  verDetalle(cuenta: any): void {
-    console.log("==== CUENTA DESDE BACKEND ====");
-    console.log(JSON.stringify(cuenta, null, 2));
+  async verDetalle(cuenta: any): Promise<void> {
 
-    this.seleccionada = cuenta;
+    this.seleccionada = null;
+    this.error = '';
 
-    // ⭐ Construir request SARLAFT
-    // ⭐ Construir request SARLAFT (versión completa)
+    let cuentaCompleta = { ...cuenta };
+
+    try {
+
+      const reqHv: ReportQueryRequest = {
+        schema: 'reporting',
+        view: 'vw_hoja_vida_general_total_reciente',
+        scope: 'GLOBAL',
+        filters: {
+          id_datos_personal: cuenta.id_datos_personal
+        }
+      };
+
+      const resHv = await this.reporting.ejecutarReporte(reqHv);
+      const hv = resHv.data?.[0];
+
+      if (hv) {
+        cuentaCompleta = {
+          ...cuentaCompleta,
+          ...hv
+        };
+      }
+
+    } catch (error) {
+      console.error('Error cargando hoja de vida completa:', error);
+    }
+
+    this.seleccionada = cuentaCompleta;
+
     const req: EvaluacionSarlaftRequest = {
-      idDatosPersonal: cuenta.id_datos_personal,
-      idAgencia: cuenta.id_agencia,
-      codigoModulo: "02",
-      accion: "CONSULTA",
+      idDatosPersonal: cuentaCompleta.id_datos_personal,
+      idAgencia: cuentaCompleta.id_agencia,
+      codigoModulo: '02',
+      accion: 'CONSULTA',
       monto: 0,
 
-      fechaUltimaActualizacion: cuenta.fecha_actualizacion,
-      fechaNacimiento: cuenta.fecha_nacimiento,
-      tipoDocumento: cuenta.tipo_documento,
-      codigoFormaAhorro: cuenta.id_forma_ahorro,
+      fechaUltimaActualizacion: cuentaCompleta.fecha_actualizacion,
+      fechaNacimiento: cuentaCompleta.fecha_nacimiento,
+      tipoDocumento: cuentaCompleta.tipo_documento,
+      codigoFormaAhorro: cuentaCompleta.id_forma_ahorro,
 
-      // 🔹 INGRESOS MENSUALES (suma real)
       ingresosMensuales:
-        (cuenta.valor_salario ?? 0) +
-        (cuenta.valor_pension ?? 0) +
-        (cuenta.ingresos_arriendo ?? 0) +
-        (cuenta.ingresos_comisiones ?? 0) +
-        (cuenta.otros_ingresos ?? 0),
+        (cuentaCompleta.valor_salario ?? 0) +
+        (cuentaCompleta.valor_pension ?? 0) +
+        (cuentaCompleta.ingresos_arriendo ?? 0) +
+        (cuentaCompleta.ingresos_comisiones ?? 0) +
+        (cuentaCompleta.otros_ingresos ?? 0),
 
-      // 🔹 EGRESOS MENSUALES (suma real)
       egresosMensuales:
-        (cuenta.egresos_familiares ?? 0) +
-        (cuenta.egresos_arriendo ?? 0) +
-        (cuenta.egresos_credito ?? 0) +
-        (cuenta.otros_egresos ?? 0),
+        (cuentaCompleta.egresos_familiares ?? 0) +
+        (cuentaCompleta.egresos_arriendo ?? 0) +
+        (cuentaCompleta.egresos_credito ?? 0) +
+        (cuentaCompleta.otros_egresos ?? 0),
 
-      // 🔹 Total activos / pasivos (NO calcular)
-      totalActivos: cuenta.total_activos ?? 0,
-      totalPasivos: cuenta.total_pasivos ?? 0
+      totalActivos: cuentaCompleta.total_activos ?? 0,
+      totalPasivos: cuentaCompleta.total_pasivos ?? 0
     };
 
-
-    console.log("==== SARLAFT REQUEST ====");
-    console.log(req);
-
-    // ⭐ Evaluar SARLAFT
     this.sarlaft.evaluar(req).subscribe({
       next: (res: EvaluacionSarlaftResponse) => {
-        console.log("==== SARLAFT RESPONSE ====");
-        console.log(res);
-
-        // ⭐ Reasignación obligatoria para que el DETALLE reciba el cambio
         this.seleccionada = {
-          ...this.seleccionada,
+          ...cuentaCompleta,
           sarlaft: res
         };
       },
 
-      error: (err) => {
-        console.error("❌ Error SARLAFT:", err);
+      error: err => {
+        console.error('❌ Error SARLAFT:', err);
       }
     });
   }
-
 
   /** 🧾 Abre el modal de extracto */
   abrirExtracto(cuenta: any): void {

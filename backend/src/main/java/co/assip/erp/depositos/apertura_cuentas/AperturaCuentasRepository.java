@@ -1,4 +1,4 @@
-package co.assip.erp.depositos.apertura_cuentas.repository;
+package co.assip.erp.depositos.apertura_cuentas;
 
 import co.assip.erp.depositos.apertura_cuentas.dto.AperturaCuentaItemDTO;
 import lombok.RequiredArgsConstructor;

@@ -259,3 +259,26 @@ h3 {
   }
 
 }
+
+.acciones-superior {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
+}
+
+.btn-nueva-cuenta {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  .icono {
+    font-size: 14px;
+  }
+}

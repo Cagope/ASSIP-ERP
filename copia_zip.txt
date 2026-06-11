@@ -60,6 +60,8 @@ $excludeDirs = @(
     ".git",
     "dist",
     ".angular"
+    "archivos"
+
 )
 
 $excludeFiles = @(

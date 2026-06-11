@@ -47,4 +47,5 @@ public class CuentaAhorroDetalleDTO {
     // Relaciones 1:N
     private List<BeneficiarioDTO> beneficiarios;
     private List<PoderDTO> poderes;
+    private List<CuentaConjuntaDTO> cuentasConjuntas;
 }

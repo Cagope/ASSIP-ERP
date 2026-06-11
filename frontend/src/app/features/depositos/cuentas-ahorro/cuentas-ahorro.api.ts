@@ -37,6 +37,12 @@ export class CuentasAhorroApi {
     );
   }
 
+ listarFormasAhorro() {
+    return this.http.get(
+      `${environment.apiUrl}/depositos/formas-ahorro`
+    );
+ }
+
   // ============================================================
   // 🔹 REPORTING
   // ============================================================
@@ -63,4 +69,93 @@ export class CuentasAhorroApi {
       `${this.baseDepositos}/${idCuenta}`
     );
   }
+
+  // ============================================================
+  // 🔹 CUENTAS CONJUNTAS
+  // ============================================================
+  listarCuentasConjuntas(idCuenta: number) {
+    return this.http.get(
+      `${this.baseDepositos}/${idCuenta}/cuentas-conjuntas`
+    );
+  }
+
+  agregarCuentaConjunta(idCuenta: number, data: any) {
+    return this.http.post(
+      `${this.baseDepositos}/${idCuenta}/cuentas-conjuntas`,
+      data
+    );
+  }
+
+  eliminarCuentaConjunta(idCuenta: number, idCuentaConjunta: number) {
+    return this.http.delete(
+      `${this.baseDepositos}/${idCuenta}/cuentas-conjuntas/${idCuentaConjunta}`
+    );
+  }
+
+    // ============================================================
+    // 🔹 BENEFICIARIOS
+    // ============================================================
+    listarBeneficiarios(idCuenta: number) {
+      return this.http.get(
+        `${this.baseDepositos}/${idCuenta}/beneficiarios`
+      );
+    }
+
+    agregarBeneficiario(idCuenta: number, data: any) {
+      return this.http.post(
+        `${this.baseDepositos}/${idCuenta}/beneficiarios`,
+        data
+      );
+    }
+
+    actualizarBeneficiario(
+      idCuenta: number,
+      idBeneficiario: number,
+      data: any
+    ) {
+      return this.http.put(
+        `${this.baseDepositos}/${idCuenta}/beneficiarios/${idBeneficiario}`,
+        data
+      );
+    }
+
+    eliminarBeneficiario(idCuenta: number, idBeneficiario: number) {
+      return this.http.delete(
+        `${this.baseDepositos}/${idCuenta}/beneficiarios/${idBeneficiario}`
+      );
+    }
+
+    // ============================================================
+    // 🔹 PODERES
+    // ============================================================
+    listarPoderes(idCuenta: number) {
+      return this.http.get(
+        `${this.baseDepositos}/${idCuenta}/poderes`
+      );
+    }
+
+    agregarPoder(idCuenta: number, data: any) {
+      return this.http.post(
+        `${this.baseDepositos}/${idCuenta}/poderes`,
+        data
+      );
+    }
+
+    actualizarPoder(
+      idCuenta: number,
+      idPoder: number,
+      data: any
+    ) {
+      return this.http.put(
+        `${this.baseDepositos}/${idCuenta}/poderes/${idPoder}`,
+        data
+      );
+    }
+
+    eliminarPoder(idCuenta: number, idPoder: number) {
+      return this.http.delete(
+        `${this.baseDepositos}/${idCuenta}/poderes/${idPoder}`
+      );
+    }
+
 }

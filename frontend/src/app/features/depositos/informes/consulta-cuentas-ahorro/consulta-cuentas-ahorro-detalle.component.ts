@@ -1,53 +1,129 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ExtractoModalComponent } from './consulta-extracto-modal.component'; // ✅ Import del modal
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnChanges,
+  SimpleChanges,
+  inject
+} from '@angular/core';
 
-/**
- * 🧾 Detalle de Cuenta de Ahorro
- * ------------------------------------------------------------
- * Muestra la información detallada de la cuenta seleccionada:
- * titular, datos básicos, estado, saldos, fotos y firmas.
- */
+import { CommonModule } from '@angular/common';
+import { ExtractoModalComponent } from './consulta-extracto-modal.component';
+
+import { ReportingService } from '../../../../shared/reporting/reporting.service';
+import { ReportQueryRequest } from '../../../../shared/reporting/reporting.api';
+
 @Component({
   selector: 'app-cuentas-ahorro-detalle',
   standalone: true,
-  imports: [CommonModule, ExtractoModalComponent], // ✅ Incluir el modal aquí
+  imports: [
+    CommonModule,
+    ExtractoModalComponent
+  ],
   templateUrl: './consulta-cuentas-ahorro-detalle.component.html',
   styleUrls: ['./consulta-cuentas-ahorro-detalle.component.scss'],
 })
+export class CuentasAhorroDetalleComponent implements OnChanges {
 
-export class CuentasAhorroDetalleComponent {
   @Input() cuenta: any;
   @Output() cerrar = new EventEmitter<void>();
 
-  mostrarModalExtracto = false;
+  private readonly reporting = inject(ReportingService);
 
-  ngOnInit(): void {
-    console.log("🟡 Cuenta recibida en DETALLE:", this.cuenta);
-    console.log("🟠 SARLAFT en detalle:", this.cuenta?.sarlaft);
+  mostrarModalExtracto = false;
+  imagenAmpliada: string | null = null;
+
+  cargandoHojaVida = false;
+
+  private ultimoIdDatosPersonal?: number;
+
+  ngOnChanges(changes: SimpleChanges): void {
+
+    if (
+      changes['cuenta']
+      && this.cuenta?.id_datos_personal
+      && this.cuenta.id_datos_personal !== this.ultimoIdDatosPersonal
+    ) {
+
+      this.ultimoIdDatosPersonal =
+        this.cuenta.id_datos_personal;
+
+      this.cargarHojaVidaCompleta();
+    }
   }
 
-  /** 🔙 Cierra la vista de detalle */
+  async cargarHojaVidaCompleta(): Promise<void> {
+
+    if (!this.cuenta?.id_datos_personal) {
+      return;
+    }
+
+    this.cargandoHojaVida = true;
+
+    try {
+
+      const req: ReportQueryRequest = {
+        schema: 'reporting',
+        view: 'vw_hoja_vida_general_total_reciente',
+        scope: 'GLOBAL',
+        filters: {
+          id_datos_personal: this.cuenta.id_datos_personal
+        }
+      };
+
+      const res =
+        await this.reporting.ejecutarReporte(req);
+
+      const hv = res.data?.[0];
+
+      if (hv) {
+
+        const sarlaftActual =
+          this.cuenta?.sarlaft;
+
+        this.cuenta = {
+          ...this.cuenta,
+          ...hv,
+          sarlaft: sarlaftActual
+        };
+      }
+
+    } catch (error) {
+
+      console.error(
+        'Error cargando hoja de vida completa:',
+        error
+      );
+
+    } finally {
+
+      this.cargandoHojaVida = false;
+    }
+  }
+
   onCerrar(): void {
     this.cerrar.emit();
   }
 
-  /** 🧾 Abre el modal de extracto */
   abrirExtracto(): void {
     this.mostrarModalExtracto = true;
   }
 
-  /** 🧾 Cierra el modal de extracto */
   cerrarExtracto(): void {
     this.mostrarModalExtracto = false;
   }
 
-  /**
-   * 🖼️ Retorna la ruta completa del archivo, según el tipo.
-   * Si el campo está vacío, usa la imagen de muestra por defecto.
-   */
-  getImagen(nombreArchivo: string | null, tipo: 'foto' | 'firma'): string {
-    if (!nombreArchivo || nombreArchivo.trim() === '') {
+  getImagen(
+    nombreArchivo: string | null,
+    tipo: 'foto' | 'firma'
+  ): string {
+
+    if (
+      !nombreArchivo
+      || nombreArchivo.trim() === ''
+    ) {
+
       return tipo === 'foto'
         ? '/assets/fotos/foto_muestra.jpg'
         : '/assets/firmas/firma1_muestra.jpg';
@@ -59,21 +135,27 @@ export class CuentasAhorroDetalleComponent {
       .replace(/^ft/i, 'FT')
       .replace(/\.jpeg$/i, '.jpg');
 
-    const carpeta = tipo === 'foto' ? 'fotos' : 'firmas';
+    const carpeta =
+      tipo === 'foto'
+        ? 'fotos'
+        : 'firmas';
+
     return `/assets/${carpeta}/${nombreNormalizado}`;
   }
 
-  /** 🧩 Si el archivo no se encuentra, mostrar la imagen de muestra */
-  onImageError(event: Event, tipo: 'foto' | 'firma'): void {
-    const img = event.target as HTMLImageElement;
+  onImageError(
+    event: Event,
+    tipo: 'foto' | 'firma'
+  ): void {
+
+    const img =
+      event.target as HTMLImageElement;
+
     img.src =
       tipo === 'foto'
         ? '/assets/fotos/foto_muestra.jpg'
         : '/assets/firmas/firma1_muestra.jpg';
   }
-
-  /** 🌄 Control del modal de imagen ampliada */
-  imagenAmpliada: string | null = null;
 
   abrirImagen(src: string): void {
     this.imagenAmpliada = src;

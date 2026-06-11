@@ -22,6 +22,8 @@ export interface FormaAhorro {
   periodoGracia?: number | null;
   valorMinimo?: number | null;
   tasaInteresForma?: number | null;
+  idAgencia?: number | null;
+  cuentaRetencionFuente?: number | null;
 }
 
 @Injectable({ providedIn: 'root' })

@@ -152,11 +152,12 @@ public class CuentaAhorroRepository {
                 (rs, row) -> {
                     PoderDTO p = new PoderDTO();
                     p.setIdPoder(rs.getInt("id_poder"));
-                    p.setIdCuenta(rs.getInt("id_cuenta"));
+                    p.setIdCuenta(rs.getInt("id_cuenta_ahorro"));
                     p.setDocumentoPoder(rs.getString("documento_poder"));
                     p.setNombrePoder(rs.getString("nombre_poder"));
                     p.setTelefonoPoder(rs.getString("telefono_poder"));
                     p.setCelularPoder(rs.getString("celular_poder"));
+                    p.setCorreoPoder(rs.getString("correo_poder"));
                     return p;
                 });
     }
@@ -235,26 +236,31 @@ public class CuentaAhorroRepository {
     // ============================================================
     // 🟦 8. GUARDAR CUENTA
     // ============================================================
-    public Integer guardarCuenta(CuentaAhorroGuardarDTO dto, String codigoCuenta, String fechaFinal) {
+    public Integer guardarCuenta(
+            CuentaAhorroGuardarDTO dto,
+            String codigoCuenta,
+            String fechaFinal,
+            Integer idUsuario
+    ) {
 
         String sql = """
-            INSERT INTO depositos.cuentas_ahorro (
-                id_agencia, id_forma_ahorro, codigo_cuenta, id_datos_personal,
-                estado_cuenta_cuenta, gmf_cuenta_cuenta, libranza_cuenta,
-                libranzatiempo_pago, cuota_mensual_cuenta,
-                retencion_fuente_cuenta, plazo_cuenta, fecha_final_cuenta,
-                cuenta_activa, cuenta_conjunta, accion_conjunta, tasa,
-                fk_seguridad_creacion, fk_seguridad_edicion
-            ) VALUES (
-                :idAgencia, :idForma, :codigoCuenta, :idDatosPersonal,
-                'A', :gmf, false,
-                'M', :cuota,
-                :retencion, :plazo, :fechaFinal,
-                'A', :conjunta, :accion, :tasa,
-                :usuario, :usuario
-            )
-            RETURNING id_cuenta_ahorro
-        """;
+        INSERT INTO depositos.cuentas_ahorro (
+            id_agencia, id_forma_ahorro, codigo_cuenta, id_datos_personal,
+            estado_cuenta_cuenta, gmf_cuenta_cuenta, libranza_cuenta,
+            libranzatiempo_pago, cuota_mensual_cuenta,
+            retencion_fuente_cuenta, plazo_cuenta, fecha_final_cuenta,
+            cuenta_activa, cuenta_conjunta, accion_conjunta, tasa,
+            fk_seguridad_creacion, fk_seguridad_edicion
+        ) VALUES (
+            :idAgencia, :idForma, :codigoCuenta, :idDatosPersonal,
+            'A', :gmf, false,
+            'M', :cuota,
+            :retencion, :plazo, :fechaFinal,
+            'A', :conjunta, :accion, :tasa,
+            :usuario, :usuario
+        )
+        RETURNING id_cuenta_ahorro
+    """;
 
         var params = new MapSqlParameterSource()
                 .addValue("idAgencia", dto.getIdAgencia())
@@ -269,7 +275,7 @@ public class CuentaAhorroRepository {
                 .addValue("conjunta", dto.getCuentaConjunta())
                 .addValue("accion", dto.getAccionConjunta())
                 .addValue("tasa", dto.getTasa())
-                .addValue("usuario", dto.getUsuarioId());
+                .addValue("usuario", idUsuario);
 
         return jdbc.queryForObject(sql, params, Integer.class);
     }
@@ -325,7 +331,7 @@ public class CuentaAhorroRepository {
 
         String insert = """
             INSERT INTO depositos.poderes_cuentas_ahorro (
-                id_cuenta, documento_poder, nombre_poder,
+                id_cuenta_ahorro, documento_poder, nombre_poder,
                 telefono_poder, celular_poder,
                 fk_seguridad_creacion, fk_seguridad_edicion
             ) VALUES (
@@ -359,7 +365,7 @@ public class CuentaAhorroRepository {
 
         jdbc.update("""
             DELETE FROM depositos.poderes_cuentas_ahorro
-            WHERE id_cuenta = :id
+            WHERE id_cuenta_ahorro = :id
         """, new MapSqlParameterSource().addValue("id", idCuenta));
 
         jdbc.update("""
@@ -436,7 +442,6 @@ public class CuentaAhorroRepository {
     }
 
 
-
     // ============================================================
     // 🟦 13. BUSCAR CUENTA SOLO SI PERTENECE A LA AGENCIA  ⭐ NUEVO
     // ============================================================
@@ -499,5 +504,336 @@ public class CuentaAhorroRepository {
 
             return dto;
         });
+    }
+
+    public List<CuentaConjuntaDTO> listarCuentasConjuntas(Integer idCuenta) {
+
+        String sql = """
+        SELECT
+            id_cuenta_conjunta,
+            id_cuenta_ahorro,
+            id_datos_personal,
+            documento,
+            nombre_completo,
+            codigo_accion,
+            descripcion_accion
+        FROM depositos.vw_depositos_cuentas_conjuntas_detalle
+        WHERE id_cuenta_ahorro = :idCuenta
+        ORDER BY nombre_completo
+    """;
+
+        return jdbc.query(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idCuenta", idCuenta),
+                (rs, row) -> {
+                    CuentaConjuntaDTO dto = new CuentaConjuntaDTO();
+
+                    dto.setIdCuentaConjunta(rs.getInt("id_cuenta_conjunta"));
+                    dto.setIdCuentaAhorro(rs.getInt("id_cuenta_ahorro"));
+                    dto.setIdDatosPersonal(rs.getInt("id_datos_personal"));
+                    dto.setDocumento(rs.getString("documento"));
+                    dto.setNombreCompleto(rs.getString("nombre_completo"));
+                    dto.setCodigoAccion(rs.getString("codigo_accion"));
+                    dto.setDescripcionAccion(rs.getString("descripcion_accion"));
+
+                    return dto;
+                }
+        );
+    }
+
+    public void agregarCuentaConjunta(
+            Integer idCuenta,
+            CuentaConjuntaDTO dto,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+        INSERT INTO depositos.cuentas_ahorro_conjuntas (
+            id_cuenta_ahorro,
+            id_datos_personal,
+            codigo_accion,
+            fk_seguridad_creacion,
+            fk_seguridad_edicion
+        ) VALUES (
+            :idCuenta,
+            :idDatosPersonal,
+            :codigoAccion,
+            :idUsuario,
+            :idUsuario
+        )
+    """;
+
+        jdbc.update(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idCuenta", idCuenta)
+                        .addValue("idDatosPersonal", dto.getIdDatosPersonal())
+                        .addValue("codigoAccion", dto.getCodigoAccion())
+                        .addValue("idUsuario", idUsuario)
+        );
+    }
+
+    public void eliminarCuentaConjunta(
+            Integer idCuenta,
+            Integer idCuentaConjunta
+    ) {
+
+        String sql = """
+        DELETE FROM depositos.cuentas_ahorro_conjuntas
+        WHERE id_cuenta_ahorro = :idCuenta
+          AND id_cuenta_conjunta = :idCuentaConjunta
+    """;
+
+        jdbc.update(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idCuenta", idCuenta)
+                        .addValue("idCuentaConjunta", idCuentaConjunta)
+        );
+    }
+
+    public int contarCuentasConjuntas(Integer idCuenta) {
+
+        String sql = """
+        SELECT COUNT(*)
+        FROM depositos.cuentas_ahorro_conjuntas
+        WHERE id_cuenta_ahorro = :idCuenta
+    """;
+
+        Integer total = jdbc.queryForObject(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idCuenta", idCuenta),
+                Integer.class
+        );
+
+        return total == null ? 0 : total;
+    }
+
+    public void agregarPoder(
+            Integer idCuenta,
+            PoderDTO dto,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+        INSERT INTO depositos.poderes_cuentas_ahorro (
+            id_cuenta_ahorro,
+            documento_poder,
+            nombre_poder,
+            telefono_poder,
+            celular_poder,
+            correo_poder,
+            fk_seguridad_creacion,
+            fk_seguridad_edicion
+        )
+        VALUES (
+            :idCuenta,
+            :documento,
+            :nombre,
+            :telefono,
+            :celular,
+            :correo,
+            :usuario,
+            :usuario
+        )
+    """;
+
+        jdbc.update(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idCuenta", idCuenta)
+                        .addValue("documento", dto.getDocumentoPoder())
+                        .addValue("nombre", dto.getNombrePoder())
+                        .addValue("telefono", dto.getTelefonoPoder())
+                        .addValue("celular", dto.getCelularPoder())
+                        .addValue("correo", dto.getCorreoPoder())
+                        .addValue("usuario", idUsuario)
+        );
+    }
+
+    public void actualizarPoder(
+            Integer idCuenta,
+            Integer idPoder,
+            PoderDTO dto,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+        UPDATE depositos.poderes_cuentas_ahorro
+        SET documento_poder = :documento,
+            nombre_poder = :nombre,
+            telefono_poder = :telefono,
+            celular_poder = :celular,
+            correo_poder = :correo,
+            fk_seguridad_edicion = :usuario
+        WHERE id_cuenta_ahorro = :idCuenta
+          AND id_poder = :idPoder
+    """;
+
+        jdbc.update(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idCuenta", idCuenta)
+                        .addValue("idPoder", idPoder)
+                        .addValue("documento", dto.getDocumentoPoder())
+                        .addValue("nombre", dto.getNombrePoder())
+                        .addValue("telefono", dto.getTelefonoPoder())
+                        .addValue("celular", dto.getCelularPoder())
+                        .addValue("correo", dto.getCorreoPoder())
+                        .addValue("usuario", idUsuario)
+        );
+    }
+
+    public void eliminarPoder(
+            Integer idCuenta,
+            Integer idPoder
+    ) {
+
+        String sql = """
+        DELETE
+        FROM depositos.poderes_cuentas_ahorro
+        WHERE id_cuenta_ahorro = :idCuenta
+          AND id_poder = :idPoder
+    """;
+
+        jdbc.update(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idCuenta", idCuenta)
+                        .addValue("idPoder", idPoder)
+        );
+    }
+
+    public void actualizarIndicadorCuentaConjunta(
+            Integer idCuenta,
+            String valor
+    ) {
+
+        String sql = """
+        UPDATE depositos.cuentas_ahorro
+        SET cuenta_conjunta = :valor
+        WHERE id_cuenta_ahorro = :idCuenta
+    """;
+
+        jdbc.update(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idCuenta", idCuenta)
+                        .addValue("valor", valor)
+        );
+    }
+
+    public void agregarBeneficiario(
+            Integer idCuenta,
+            BeneficiarioDTO dto,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+        INSERT INTO depositos.beneficiarios_cuenta_ahorros (
+            id_cuenta_ahorro,
+            documento_beneficiario,
+            nombre_beneficiario,
+            telefono_beneficiario,
+            celular_beneficiario,
+            tipo_parentesco,
+            fk_seguridad_creacion,
+            fk_seguridad_edicion
+        )
+        VALUES (
+            :idCuenta,
+            :documento,
+            :nombre,
+            :telefono,
+            :celular,
+            :parentesco,
+            :usuario,
+            :usuario
+        )
+    """;
+
+        jdbc.update(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idCuenta", idCuenta)
+                        .addValue("documento", dto.getDocumentoBeneficiario())
+                        .addValue("nombre", dto.getNombreBeneficiario())
+                        .addValue("telefono", dto.getTelefonoBeneficiario())
+                        .addValue("celular", dto.getCelularBeneficiario())
+                        .addValue("parentesco", dto.getTipoParentesco())
+                        .addValue("usuario", idUsuario)
+        );
+    }
+
+    public void actualizarBeneficiario(
+            Integer idCuenta,
+            Integer idBeneficiario,
+            BeneficiarioDTO dto,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+        UPDATE depositos.beneficiarios_cuenta_ahorros
+        SET documento_beneficiario = :documento,
+            nombre_beneficiario = :nombre,
+            telefono_beneficiario = :telefono,
+            celular_beneficiario = :celular,
+            tipo_parentesco = :parentesco,
+            fk_seguridad_edicion = :usuario
+        WHERE id_cuenta_ahorro = :idCuenta
+          AND id_beneficiario = :idBeneficiario
+    """;
+
+        jdbc.update(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idCuenta", idCuenta)
+                        .addValue("idBeneficiario", idBeneficiario)
+                        .addValue("documento", dto.getDocumentoBeneficiario())
+                        .addValue("nombre", dto.getNombreBeneficiario())
+                        .addValue("telefono", dto.getTelefonoBeneficiario())
+                        .addValue("celular", dto.getCelularBeneficiario())
+                        .addValue("parentesco", dto.getTipoParentesco())
+                        .addValue("usuario", idUsuario)
+        );
+    }
+
+    public void eliminarBeneficiario(
+            Integer idCuenta,
+            Integer idBeneficiario
+    ) {
+
+        String sql = """
+        DELETE
+        FROM depositos.beneficiarios_cuenta_ahorros
+        WHERE id_cuenta_ahorro = :idCuenta
+          AND id_beneficiario = :idBeneficiario
+    """;
+
+        jdbc.update(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idCuenta", idCuenta)
+                        .addValue("idBeneficiario", idBeneficiario)
+        );
+    }
+
+    public String obtenerCodigoForma(Integer idForma) {
+
+        String sql = """
+        SELECT codigo_forma
+        FROM depositos.formas_ahorro
+        WHERE id_forma_ahorro = :idForma
+    """;
+
+        return jdbc.query(sql,
+                new MapSqlParameterSource()
+                        .addValue("idForma", idForma),
+                rs -> {
+                    if (!rs.next()) return null;
+                    return rs.getString("codigo_forma");
+                });
     }
 }

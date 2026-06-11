@@ -9,7 +9,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-
+//agregar anotaciones CORS
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/depositos/interes-diario-sm")
 @RequiredArgsConstructor

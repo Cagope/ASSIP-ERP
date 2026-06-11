@@ -22,12 +22,19 @@ public class ReportQueryRequest {
 
     private String schema;
     private String view;
+
+    /**
+     * USUARIO = aplica filtro de agencias permitidas
+     * GLOBAL  = consulta sin restricción automática de agencias
+     */
+    private String scope;
+
     private List<String> columns;
     private Map<String, Object> filters;
     private List<String> groupBy;
     private Map<String, String> aggregations;
 
-    // 🔹 NUEVO: definición de joins dinámicos opcionales
+    // 🔹 definición de joins dinámicos opcionales
     private List<JoinDefinition> joins;
 
     /**
@@ -40,6 +47,7 @@ public class ReportQueryRequest {
      */
     @Data
     public static class JoinDefinition {
+
         private String schema;
         private String view;
         private String alias;
