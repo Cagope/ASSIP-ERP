@@ -36,12 +36,19 @@ export interface DocumentosSoporteCuenta {
 
   cantidadSoporte: number;
 
+  numeroInicialDocumento: string | null;
+
+  numeroFinalDocumento: string | null;
+
+  fechaEntregaDocumento: string | null;
+
+  estadoDocumento: string | null;
+
   saldoActual: number;
 
   estadoCuenta: string;
 
   tieneDocumentoActivo: boolean;
-
 }
 
 export interface DocumentosSoporteActivo {

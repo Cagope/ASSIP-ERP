@@ -34,6 +34,7 @@
             <a
               [routerLink]="item.route"
               routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: true }"
               class="menu-item"
               (click)="closeMenu()">
               {{ item.label }}
@@ -66,6 +67,7 @@
                   <a
                     [routerLink]="child.route"
                     routerLinkActive="active"
+                    [routerLinkActiveOptions]="{ exact: true }"
                     class="menu-subitem"
                     (click)="closeMenu()">
                     {{ child.label }}
@@ -97,6 +99,7 @@
                         <a
                           [routerLink]="subchild.route"
                           routerLinkActive="active"
+                          [routerLinkActiveOptions]="{ exact: true }"
                           class="menu-sublevel-item"
                           (click)="closeMenu()">
                           {{ subchild.label }}

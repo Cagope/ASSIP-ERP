@@ -1,0 +1,527 @@
+// TABLAS CATALOGOS
+
+TABLE formas_pagos{
+  codigo_forma_pago char(2) [primary key]
+  descripcion_destino_economico varchar(50)
+}
+
+TABLE modificaciones_creditos{
+  codigo_modificacion_credito char(1) [primary key]
+  descripcion_modificacion_credito varchar(50)
+}
+
+TABLE estados_juridicos{
+  codigo_estado_juridico char(1) [primary key]
+  descripcion_estado_juridico char(50)
+}
+
+TABLE tipos_cuotas{
+  codigo_tipo_cuota char(1) [primary key]
+  descripcion_tipo_cuota varchar(50)
+
+}
+
+TABLE estados_cartera{
+  codigo_estado_cartera char(1) [primary key]
+  descripcion_estado_cartera varchar(50)
+  operativo_estado_cartera char(1) // Valores 'S' o 'N'
+}
+
+TABLE modalidades_intereses{
+  codigo_modalidad_interes char(2) [primary key]
+  descripcion_modalidad_interes varchar(50)
+  tipo_modalidad char(1) //Valores V o A
+  periodo_modalidad integer
+}
+
+TABLE garantias_creditos{
+  codigo_garantia_credito char(2) [primary key]
+  descripcion_garantia_credito varchar(150)
+  tipo_garantia varchar(1) // Valores 'B' 'V' 'O'
+}
+
+TABLE destinos_economicos{
+  codigo_destino_economico char(2) [primary key]
+  descripcion_destino_economico varchar(50)
+}
+
+TABLE clasificaciones_creditos{
+  codigo_clasificacion_credito char(1) [primary key]
+  descripcion_clasificacion_credito varchar(50)
+}
+
+
+// TABLAS OPERACION
+
+TABLE lineas_creditos{
+  id_linea_credito integer [primary key, increment]
+  codigo_linea_credito char(3)
+  nombre_linea_credito varchar(100)
+  acta_creacion varchar(10)
+  fecha_acta date
+  Activo boolean
+  fk_seguridad_creacion integer NOT NULL,
+  fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  fk_seguridad_edicion integer NOT NULL,
+  fecha_edicion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+
+}
+
+TABLE condiciones_iniciales{
+  id_condicion_inicial [primary key, increment]
+  fecha_inicial_periodo date
+  fecha_final_periodo date
+
+  codigo_clasificacion_credito [ref: < clasificaciones_creditos.codigo_clasificacion_credito]
+  codigo_garantia_credito char(2) [ref: < garantias_creditos.codigo_garantia_credito]
+  id_linea_credito integer [ref: < lineas_creditos.linea_credito]
+  codigo_forma_pago char(2) [ref: < formas_pagos.codigo_forma_pago]
+
+  plazo_minimo integer
+  plazo_maximo integer
+  cantidad_smmlv_minimo integer
+  cantidad_smmlv_maximo integer
+  reciprocidad_aportes integer
+
+  tasa_nominal_anual double
+  tasa_efectiva_anual double
+
+  fk_seguridad_creacion integer NOT NULL,
+  fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  fk_seguridad_edicion integer NOT NULL,
+  fecha_edicion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+}
+
+TABLE descuentos_iniciales{
+  id_descuento_incial integer [primary key, increment]
+  codigo_descuento_incial char(2)
+  id_linea_credito integer [ref: < lineas_creditos.id_linea_credito]
+  descripcion_descuento_inicial varchar(50)
+  tipo_descuento char(1) // Valores P o V
+  valor_descuento double
+  porcentaje_descuento double
+  id_catalogo_cuenta [ref: < catalogo_cuentas.id_catalogo_cuenta]
+  estado char(1) // Valores Activo o Inactivo
+  fk_seguridad_creacion integer NOT NULL,
+  fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  fk_seguridad_edicion integer NOT NULL,
+  fecha_edicion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+
+
+}
+
+TABLE carteras_creditos{
+  id_cartera_credito integer [primary key, increment]
+  id_agencia integer [ref: < agencias.id_agencia]
+  id_linea_credito integer [ref: < lineas_creditos.id_linea_credito]
+  id_datos_personal integer [ref: < hojas_vida.id_datos_personal]
+  pagare_cartera char(10)
+  id_cuenta_aportes integer [ref: < cuentas_ahorro.id_cuenta_ahorro]
+  tipo_comprobante char(2)
+  numero_comprobante char(10)
+  clasificacion_credito char(1) [ref: < clasificaciones_creditos.codigo_clasificacion_credito]
+  garantia_credito char(2) [ref:< garantias_creditos.codigo_garantia_credito]
+  destino_economico char(2) [ref: < destinos_economicos.codigo_destino_economico]
+  modalidad_interes char(2) [ref:< modalidades_intereses.codigo_modalidad_interes]
+  amortizacion_capital integer
+  estado_credito char(1) [ref: < estados_cartera.codigo_estado_cartera]
+  tipo_cuota char(1) [ref: < tipos_cuotas.codigo_tipo_cuota]
+  plazo integer 
+  tasa_nominal_anual double
+  tasa_efectiva_anual double
+  tasa_nominal_mensual double
+  tasa_efectiva_mensual double
+
+  saldo_inicial double
+  valor_cuota double
+  saldo_actual double
+  altura_cuota integer
+  abonos_pendientes double
+
+
+  fecha_inclusion date
+  fecha_contable date
+  fecha_entrega date
+  fecha_primera_cuota date
+  fecha_final date 
+
+  ultima_fecha_capital date
+  ultima_fecha_interes date
+  ultima_fecha_seguro date
+  ultima_fecha_mora date
+  ultima_fecha_fondo date
+
+  proxima_fecha_capital date
+  proxima_fecha_interes date
+  proxima_fecha_seguro date
+  proxima_fecha_fondo date
+  intereses_pagados_hasta date
+
+  codigo_forma_pago char(2) [ref: < formas_pagos.codigo_forma_pago]
+  documento_libranza char() [ref: < empresas_libranza.id_empresa_libranza]
+  
+  porcentaje_seguro double
+  tipo_seguro char(1) // Valores 'S' saldo, 'I' inicial
+  valor_seguro integer
+
+  ultima_fecha_cifin date
+  ultima_fecha_datacredito date
+  ultima_fecha_otra date
+
+  edad_de_mora char(1)
+  edad_de_riesgo char(1)
+  edad_de_pe char(1) // PE- perdida esperada
+  edad_de_homologacion char(1)
+  edad_contable char(1)
+  
+  credito_evaluado char(1) // Valores 'S' o 'N'
+  fecha_evaluacion date
+  comentario_evaluacion varchar(200)
+  edad_riesgo_inicial char(1)
+  credito_reestructurado char(1) //Valores 'S' o 'N'
+  fecha_reestructuracion date
+  edad_reestructurado char(1)
+  modificacion_credito char(1) [ref: < modificaciones_creditos.codigo_modificacion_credito]
+  numero_novaciones integer
+  estado_juridico char(1) [ref: < estados_juridicos.codigo_estado_juridico]
+
+  id_ente_aprobacion integer [ref: < entes_aprobacion.id_ente_aprobacion]
+
+  establecimiento varchar(250)
+
+  id_fondo_garantia integer [ref: < fondos_garantias.id_fondo_garantia]
+  porcentaje_fondo integer
+  forma_cuota_fondo char(1) // "T" Cobro total en desembilos o "C" por cuotas saldos inicial / cuotas
+
+  alivios_creditos char(1) // "S" o "N"
+   
+  fk_seguridad_creacion integer NOT NULL,
+  fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  fk_seguridad_edicion integer NOT NULL,
+  fecha_edicion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+
+}
+
+TABLE fondos_garantias{
+  id_fondo_garantia integer [primary key, increment]
+  codigo_fondo_garantia char(2)
+  id_datos_personal integer [ref: < hojas_vida.id_datos_personal]
+  id_catalogo_cuenta [ref: < catalogo_cuentas.id_catalogo_cuenta]
+  fk_seguridad_creacion integer NOT NULL,
+  fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  fk_seguridad_edicion integer NOT NULL,
+  fecha_edicion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+
+}
+
+TABLE entes_aprobacion{
+  id_ente_aprobacion integer [primary key, increment]
+  descripcion_ente_aprobador varchar(100)
+  valor_minimo double
+  valor_maximo double
+  provilegiado boolean // Si la solicitud la aprueba si es directivo a familiares : Privilegiados.
+
+  fk_seguridad_creacion integer NOT NULL,
+  fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  fk_seguridad_edicion integer NOT NULL,
+  fecha_edicion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+
+}
+
+TABLE codeudores_credito{
+  id_codeudor_credito integer [primary key, increment]
+  id_cartera_credito integer [ref: < carteras_creditos.id_cartera_credito]
+  id_datos_personal integer [ref: < hojas_vida.id_datos_personal]
+  id_bienes_inmuebles integer [ref: < bienes_inmuebles.id_bienes_inmuebles]
+  fk_seguridad_creacion integer NOT NULL,
+  fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  fk_seguridad_edicion integer NOT NULL,
+  fecha_edicion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+
+}
+
+TABLE extractos_cartera{
+  id_extracto_cartera integer [primary key, increment]
+  id_cartera_credito integer [ref: < carteras_creditos.id_cartera_credito]
+  fecha_pago date
+  hora datetime
+  tipo_comprobante char(2)
+  numero_comprobante char(10)
+  valor_capital double
+  valor_interes_causado double
+  valor_interes_ingreso double
+  valor_interes_anticipado double
+  valor_interes_mora double
+  valor_seguro double
+  valor_aportes double
+  valor_papeleria double
+  valor_fondo_garantia double
+  otros_valores double
+
+  pago_efectivo double
+  pago_cheques double
+  pago_notas double
+  id_cuenta_ahorro interger [ref: < cuentas_ahorro.id_cuenta_ahorro]
+  pago_consignacion double
+  pago_pse double
+  otro_pago double
+  observacion_pago varchar(200) //veremos
+
+  dias_capital_ingreso integer
+  dias_interes_ingreso integer
+  dias_mora integer
+
+  tarjeta char(1) //defecto valor 'N'
+  modulo char(2) [ref: < modulos.codigo_modulo]
+
+  altura_cuota integer
+  abonos_pendientes double
+ 
+  fecha_contable date
+  fecha_entrega date
+  fecha_primera_cuota date
+  fecha_final date 
+
+  ultima_fecha_capital date
+  ultima_fecha_interes date
+  ultima_fecha_seguro date
+  ultima_fecha_mora date
+
+  proxima_fecha_capital date
+  proxima_fecha_interes date
+  proxima_fecha_seguro date
+  intereses_pagados_hasta date
+
+  //LOGS
+  fk_seguridad_creacion integer NOT NULL,
+  fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  fk_seguridad_edicion integer NOT NULL,
+  fecha_edicion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+
+}
+
+TABLE causaciones_interes{
+  id_causacion_interes integer [primary key]
+  id_cartera_credito integer [ref: < carteras_creditos.id_cartera_credito]
+  saldo_causacion doublé
+  fk_seguridad_creacion integer NOT NULL,
+  fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  fk_seguridad_edicion integer NOT NULL,
+  fecha_edicion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+
+}
+
+TABLE extractos_causacion{
+  id_extracto_causacion integer [primary key,increment]
+  id_cartera_credito integer [ref: < carteras_creditos.id_cartera_credito]
+  fecha_movimiento date
+  hora_movimiento datetime
+  tipo_comprobante char(2)
+  numero_comprobante char(10)
+  valor_debito double
+  valor_credito double
+  tasa_causacion double
+  dias_causacion integer
+  saldo_capital doublé
+  fk_seguridad_creacion integer NOT NULL,
+  fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  fk_seguridad_edicion integer NOT NULL,
+  fecha_edicion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+
+}
+
+TABLE causaciones_seguros{
+  id_causacion_seguro integer [primary key]
+  id_cartera_credito integer [ref: < carteras_creditos.id_cartera_credito]
+  saldo_causacion double
+  fk_seguridad_creacion integer NOT NULL,
+  fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  fk_seguridad_edicion integer NOT NULL,
+  fecha_edicion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+
+}
+
+TABLE extractos_seguros{
+  id_extracto_seguro integer [primary key,increment]
+  id_cartera_credito integer [ref: < carteras_creditos.id_cartera_credito]
+  fecha_movimiento date
+  hora_movimiento datetime
+  tipo_comprobante char(2)
+  numero_comprobante char(10)
+  valor_debito double
+  valor_credito double
+  tasa_causacion double
+  dias_causacion integer
+  saldo_capital double
+  saldo_inicial doublé
+  fk_seguridad_creacion integer NOT NULL,
+  fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  fk_seguridad_edicion integer NOT NULL,
+  fecha_edicion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+
+}
+
+TABLE causaciones_fondos_garantia{
+  id_causacion_fondo_garantia integer [primary key]
+  id_cartera_credito integer [ref: < carteras_creditos.id_cartera_credito]
+  saldo_causacion double
+  fk_seguridad_creacion integer NOT NULL,
+  fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  fk_seguridad_edicion integer NOT NULL,
+  fecha_edicion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+
+}
+
+TABLE extractos_fondos_garantias{
+  id_extracto_fondo_garantia integer [primary key,increment]
+  id_cartera_credito integer [ref: < carteras_creditos.id_cartera_credito]
+  fecha_movimiento date
+  hora_movimiento datetime
+  tipo_comprobante char(2)
+  numero_comprobante char(10)
+  valor_debito double
+  valor_credito double
+  tasa_causacion double
+  dias_causacion integer
+  saldo_capital doublé
+  fk_seguridad_creacion integer NOT NULL,
+  fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  fk_seguridad_edicion integer NOT NULL,
+  fecha_edicion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+
+}
+
+TABLE causaciones_alivios{
+  id_causacion_alivio integer [primary key]
+  id_cartera_credito integer [ref: < carteras_creditos.id_cartera_credito]
+  saldo_causacion_alivios double
+  fk_seguridad_creacion integer NOT NULL,
+  fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  fk_seguridad_edicion integer NOT NULL,
+  fecha_edicion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+
+}
+
+TABLE extractos_alivios{
+  id_extracto_alivio integer [primary key,increment]
+  id_cartera_credito integer [ref: < carteras_creditos.id_cartera_credito]
+  fecha_movimiento date
+  hora_movimiento datetime
+  tipo_comprobante char(2)
+  numero_comprobante char(10)
+  valor_debito double
+  valor_credito double
+  tasa_causacion double
+  dias_causacion integer
+  saldo_capital doublé
+  fk_seguridad_creacion integer NOT NULL,
+  fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  fk_seguridad_edicion integer NOT NULL,
+  fecha_edicion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+
+}
+
+TABLE carteras_creditos_castigados{
+  id_cartera_credito_castigado integer [primary key, increment]
+  id_cartera_credito integer [ref: < carteras_creditos.id_cartera_credito]
+  estado_credito char(1) [ref: < estados_cartera.codigo_estado_cartera]
+
+  saldo_inicial double
+  valor_cuota double
+  saldo_actual double
+  altura_cuota integer
+  abonos_pendientes double
+  tipo_comprobante char(2)
+  numero_comprobante char(10)
+
+  fecha_creacion date
+  fecha_contable date
+  fecha_final date 
+
+  ultima_fecha_capital date
+  ultima_fecha_interes date
+  ultima_fecha_seguro date
+  ultima_fecha_mora date
+
+  proxima_fecha_capital date
+  proxima_fecha_interes date
+  proxima_fecha_seguro date
+  intereses_pagados_hasta date
+  fk_seguridad_creacion integer NOT NULL,
+  fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  fk_seguridad_edicion integer NOT NULL,
+  fecha_edicion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  
+}
+
+TABLE cupos_rotativos_carteras{
+  id_cupo_rotativo_cartera integer [primary key, increment]
+  id_agencia integer [ref: < agencias.id_agencia]
+  id_datos_personal integer [ref: < hojas_vida.id_datos_personal]
+  id_cuenta_aportes integer [ref: < cuentas_ahorro.id_cuenta_ahorro]
+  valor_cupo double
+  fecha_estudio date
+  fecha_aprobacion date
+  plazo_meses integer
+  fecha_final date
+  estado_cupo char(1)// Valor 'Activo' o 'Cancelado'
+  tipo_garantia char(2) [ref: < garantias_creditos.codigo_garantia_credito]
+  observacionese varchar(250)
+  fk_seguridad_creacion integer NOT NULL,
+  fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  fk_seguridad_edicion integer NOT NULL,
+  fecha_edicion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+
+}
+
+TABLE cupos_rotativos_tarjetas{
+  id_cupo_rotativo_cartera integer [primary key, increment]
+  id_agencia integer [ref: < agencias.id_agencia]
+  id_datos_personal integer [ref: < hojas_vida.id_datos_personal]
+  id_cuenta_aportes integer [ref: < cuentas_ahorro.id_cuenta_ahorro]
+  id_linea_credito integer [ref: < lineas_creditos.id_linea_credito] //Linea única para manejar los cupos
+  pagare_cartera char(10) // pagare madre donde se acumularán los avances de tarjetas
+
+  valor_cupo double
+  fecha_estudio date
+  fecha_aprobacion date
+  plazo_meses integer
+  fecha_final date
+  estado_cupo char(1)// Valor 'ACTIVO', 'INACTIVO' 'CANCELADO'
+  tipo_garantia char(2) [ref: < garantias_creditos.codigo_garantia_credito]
+  observacionese varchar(250)
+ 
+  // Campos para sincronizador
+  estado_sincro_cu char(1) "S" O "N"
+  fecha_sincro_cu Date // automaticos
+  hora_sincro_cu Time // Automaticos
+  estado_sincro_rta_cu // char(1) "S" O "N"
+  fecha_sincro_rta_cu // Date // automaticos
+  hora_sincro_rta_cu Time // Automaticos
+
+  fk_seguridad_creacion integer NOT NULL,
+  fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+  fk_seguridad_edicion integer NOT NULL,
+  fecha_edicion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+
+}
+
+
+TABLE cartera.lineas_creditos{
+    id_linea_credito integer NOT NULL GENERATED ALWAYS AS IDENTITY,
+
+    codigo_linea_credito character varying(3) NOT NULL,
+    nombre_linea_credito character varying(100) NOT NULL,
+
+    acta_creacion character varying(10),
+    fecha_acta date,
+
+    activo boolean NOT NULL DEFAULT true,
+
+    fk_seguridad_creacion integer NOT NULL,
+    fecha_creacion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+
+    fk_seguridad_edicion integer NOT NULL,
+    fecha_edicion timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+
+}

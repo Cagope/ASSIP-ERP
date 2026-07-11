@@ -1,5 +1,5 @@
 export const cajasMenu = {
-  title: 'Cajas',
+  title: 'Tesorería',
   icon: 'wallet',
 
   items: [

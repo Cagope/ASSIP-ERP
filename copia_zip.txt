@@ -36,7 +36,7 @@ Compress-Archive -Path $itemsToZip.FullName -DestinationPath $zipFile -Compressi
 Write-Host "`n✅ Backup creado correctamente:`n$zipFile`n"
 
 
-o este mejorado se copia y se pega en poer.
+o este mejorado se copia y se pega en power.
 
 
 # 🗓 Fecha y hora actual

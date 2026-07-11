@@ -1,0 +1,489 @@
+<div class="page bienes-vehiculos-upsert">
+
+  <app-header-actions
+    titulo="Gestión de Bienes Vehículos"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <button type="button" class="btn btn--secondary mb-3" (click)="volver()">
+    ← Volver
+  </button>
+
+  <div *ngIf="error" class="alert alert-warning">
+    {{ error }}
+  </div>
+
+  <div *ngIf="mensaje" class="alert alert-success">
+    {{ mensaje }}
+  </div>
+
+  <section class="card persona-box" *ngIf="asociado">
+    <h3>Asociado</h3>
+
+    <div class="persona-grid">
+      <p><strong>Documento:</strong> {{ asociado.tipoDocumento }} {{ asociado.documento }}</p>
+      <p><strong>Nombre completo:</strong> {{ nombreAsociado() }}</p>
+      <p><strong>Fecha actualización:</strong> {{ asociado.fechaActualizacion | date: 'dd/MM/yyyy' }}</p>
+    </div>
+  </section>
+
+  <section class="resumen-grid">
+    <div class="resumen-card">
+      <span>Cantidad vehículos</span>
+      <strong>{{ resumen.cantidad }}</strong>
+    </div>
+
+    <div class="resumen-card">
+      <span>Valor comercial</span>
+      <strong>{{ resumen.valorComercial | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+    </div>
+
+    <div class="resumen-card">
+      <span>Gravámenes</span>
+      <strong>{{ resumen.valorGravamen | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+    </div>
+
+    <div class="resumen-card">
+      <span>Patrimonio neto</span>
+      <strong>{{ resumen.patrimonioNeto | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+    </div>
+  </section>
+
+  <section class="card list-container">
+    <div class="section-header">
+      <div>
+        <h3>Vehículos registrados</h3>
+        <small>Relación de vehículos registrados en la hoja de vida del asociado.</small>
+      </div>
+
+      <button type="button" class="btn btn--primary" (click)="nuevo()">
+        + Nuevo vehículo
+      </button>
+    </div>
+
+    <div *ngIf="cargando" class="loading">
+      Cargando vehículos...
+    </div>
+
+    <div *ngIf="!cargando && bienes.length === 0" class="empty">
+      El asociado no tiene vehículos registrados.
+    </div>
+
+    <table *ngIf="!cargando && bienes.length > 0" class="data-table tabla-bienes">
+      <thead>
+      <tr>
+        <th>Tipo</th>
+        <th>Placa</th>
+        <th>Marca / Línea</th>
+        <th>Modelo</th>
+        <th>Color</th>
+        <th>Gravamen</th>
+        <th class="num">Valor comercial</th>
+        <th class="num">Valor gravamen</th>
+        <th class="num">Neto</th>
+        <th class="acciones">Acciones</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr *ngFor="let b of bienes">
+        <td>{{ b.nombreTipoVehiculo || 'Vehículo' }}</td>
+        <td><strong>{{ b.placa }}</strong></td>
+        <td>
+          <strong>{{ b.marca || '-' }}</strong><br>
+          <small>{{ b.linea || '-' }}</small>
+        </td>
+        <td>{{ b.modelo || '-' }}</td>
+        <td>{{ b.color || '-' }}</td>
+        <td>{{ b.nombreGravamen || '-' }}</td>
+        <td class="num">{{ b.valorComercial | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+        <td class="num">{{ b.valorGravamen | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+        <td class="num">{{ valorNeto(b) | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+
+        <td>
+          <div class="acciones">
+
+            <button class="btn-action-edit" type="button" (click)="editar(b)" title="Editar vehículo">
+              ✏️
+            </button>
+
+            <button class="btn-action-edit" type="button" (click)="abrirSeguros(b)" title="Seguros del vehículo">
+              🛡️
+            </button>
+
+            <button class="btn-action-delete" type="button" (click)="eliminar(b)" title="Eliminar vehículo">
+              🗑️
+            </button>
+
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- SEGUROS -->
+  <section class="card list-container" *ngIf="bienSeleccionadoSeguros as bienSeg">
+
+    <div class="section-header">
+      <div>
+        <h3>Seguros del vehículo</h3>
+        <small>
+          {{ bienSeg.nombreTipoVehiculo || 'Vehículo' }} —
+          {{ bienSeg.placa }} —
+          {{ bienSeg.marca || '' }} {{ bienSeg.linea || '' }}
+        </small>
+      </div>
+
+      <div class="acciones">
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="nuevoSeguro()">
+          + Nuevo seguro
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="cerrarSeguros()">
+          Cerrar
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="cargandoSeguros" class="loading">
+      Cargando seguros...
+    </div>
+
+    <div *ngIf="!cargandoSeguros && seguros.length === 0" class="empty">
+      Este vehículo no tiene seguros registrados.
+    </div>
+
+    <table *ngIf="!cargandoSeguros && seguros.length > 0" class="data-table">
+      <thead>
+      <tr>
+        <th>Aseguradora</th>
+        <th>Póliza</th>
+        <th class="num">Valor asegurado</th>
+        <th>Inicio</th>
+        <th>Vencimiento</th>
+        <th>Estado</th>
+        <th class="acciones">Acciones</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr *ngFor="let s of seguros">
+        <td>{{ s.aseguradora }}</td>
+        <td>{{ s.numeroPoliza }}</td>
+
+        <td class="num">
+          {{ s.valorAsegurado | currency:'COP':'symbol-narrow':'1.0-0' }}
+        </td>
+
+        <td>{{ s.fechaInicioSeguro | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ s.fechaVencimientoSeguro | date: 'dd/MM/yyyy' }}</td>
+
+        <td>
+          <span [ngClass]="{
+            'estado-activo': s.estadoSeguro === 'A',
+            'estado-inactivo': s.estadoSeguro === 'I',
+            'estado-vencido': s.estadoSeguro === 'V'
+          }">
+            {{
+              s.estadoSeguro === 'A'
+                ? 'Activo'
+                : s.estadoSeguro === 'I'
+                  ? 'Inactivo'
+                  : 'Vencido'
+            }}
+          </span>
+        </td>
+
+        <td>
+          <div class="acciones">
+            <button
+              class="btn-action-edit"
+              type="button"
+              (click)="editarSeguro(s)"
+              title="Editar seguro">
+              ✏️
+            </button>
+
+            <button
+              class="btn-action-delete"
+              type="button"
+              (click)="eliminarSeguro(s)"
+              title="Eliminar seguro">
+              🗑️
+            </button>
+          </div>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <form
+      *ngIf="seguroActual as seg"
+      class="form-container"
+      (ngSubmit)="guardarSeguro()">
+
+      <h4>
+        {{ modoSeguro === 'NUEVO' ? 'Nuevo seguro' : 'Editar seguro' }}
+      </h4>
+
+      <div class="form-grid">
+
+        <div class="f-row">
+          <label>Aseguradora</label>
+          <input
+            type="text"
+            maxlength="150"
+            [(ngModel)]="seg.aseguradora"
+            name="aseguradora">
+        </div>
+
+        <div class="f-row">
+          <label>Número póliza</label>
+          <input
+            type="text"
+            maxlength="50"
+            [(ngModel)]="seg.numeroPoliza"
+            name="numeroPoliza">
+        </div>
+
+        <div class="f-row">
+          <label>Valor asegurado *</label>
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="seg.valorAsegurado"
+            name="valorAsegurado"
+            required>
+        </div>
+
+        <div class="f-row">
+          <label>Fecha inicio</label>
+          <input
+            type="date"
+            [(ngModel)]="seg.fechaInicioSeguro"
+            name="fechaInicioSeguro">
+        </div>
+
+        <div class="f-row">
+          <label>Fecha vencimiento</label>
+          <input
+            type="date"
+            [(ngModel)]="seg.fechaVencimientoSeguro"
+            name="fechaVencimientoSeguro">
+        </div>
+
+        <div class="f-row">
+          <label>Estado *</label>
+          <select
+            [(ngModel)]="seg.estadoSeguro"
+            name="estadoSeguro"
+            required>
+            <option value="A">Activo</option>
+            <option value="I">Inactivo</option>
+            <option value="V">Vencido</option>
+          </select>
+        </div>
+
+        <div class="f-row span-3">
+          <label>Observaciones</label>
+          <textarea
+            rows="3"
+            maxlength="1000"
+            [(ngModel)]="seg.observaciones"
+            name="observaciones">
+          </textarea>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="guardandoSeguro">
+          {{ guardandoSeguro ? 'Guardando...' : 'Guardar seguro' }}
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="cancelarSeguro()">
+          Cancelar
+        </button>
+      </div>
+
+    </form>
+
+  </section>
+
+  <section class="card form-container formulario-card" *ngIf="bienActual as bien">
+    <div class="section-header">
+      <h3>{{ modoFormulario === 'NUEVO' ? 'Nuevo vehículo' : 'Editar vehículo' }}</h3>
+
+      <button type="button" class="btn btn--secondary" (click)="cancelar()">
+        Cancelar
+      </button>
+    </div>
+
+    <form (ngSubmit)="guardar()">
+
+      <h4>Información general</h4>
+
+      <div class="form-grid">
+        <div class="f-row">
+          <label>Tipo vehículo *</label>
+          <select [(ngModel)]="bien.idTipoVehiculo" name="idTipoVehiculo" required>
+            <option [ngValue]="0">Seleccione...</option>
+            <option *ngFor="let t of tiposVehiculos" [ngValue]="t.id">
+              {{ t.nombre }}
+            </option>
+          </select>
+        </div>
+
+        <div class="f-row span-2">
+          <label>Descripción general *</label>
+          <input
+            type="text"
+            maxlength="250"
+            [(ngModel)]="bien.descripcionGeneral"
+            name="descripcionGeneral"
+            required>
+        </div>
+
+        <div class="f-row">
+          <label>Placa *</label>
+          <input
+            type="text"
+            maxlength="20"
+            [(ngModel)]="bien.placa"
+            name="placa"
+            required>
+        </div>
+
+        <div class="f-row">
+          <label>Marca</label>
+          <input type="text" maxlength="100" [(ngModel)]="bien.marca" name="marca">
+        </div>
+
+        <div class="f-row">
+          <label>Línea</label>
+          <input type="text" maxlength="100" [(ngModel)]="bien.linea" name="linea">
+        </div>
+
+        <div class="f-row">
+          <label>Modelo</label>
+          <input type="number" [(ngModel)]="bien.modelo" name="modelo">
+        </div>
+
+        <div class="f-row">
+          <label>Color</label>
+          <input type="text" maxlength="50" [(ngModel)]="bien.color" name="color">
+        </div>
+      </div>
+
+      <h4>Valores</h4>
+
+      <div class="form-grid">
+        <div class="f-row">
+          <label>Valor comercial *</label>
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="bien.valorComercial"
+            name="valorComercial"
+            required>
+        </div>
+
+        <div class="f-row">
+          <label>Valor gravamen *</label>
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="bien.valorGravamen"
+            name="valorGravamen"
+            required>
+        </div>
+
+        <div class="f-row">
+          <label>Tipo gravamen *</label>
+          <select [(ngModel)]="bien.idTipoGravamen" name="idTipoGravamen" required>
+            <option [ngValue]="0">Seleccione...</option>
+            <option *ngFor="let g of tiposGravamenes" [ngValue]="g.id">
+              {{ g.nombre }}
+            </option>
+          </select>
+        </div>
+
+        <div class="f-row">
+          <label>% Propiedad *</label>
+          <input
+            type="number"
+            class="input-number"
+            min="0"
+            max="100"
+            step="0.0001"
+            [(ngModel)]="bien.porcentajePropiedad"
+            name="porcentajePropiedad"
+            required>
+        </div>
+      </div>
+
+      <h4>Identificación del vehículo</h4>
+
+      <div class="form-grid">
+        <div class="f-row">
+          <label>Número motor</label>
+          <input type="text" maxlength="100" [(ngModel)]="bien.numeroMotor" name="numeroMotor">
+        </div>
+
+        <div class="f-row">
+          <label>Número chasis</label>
+          <input type="text" maxlength="100" [(ngModel)]="bien.numeroChasis" name="numeroChasis">
+        </div>
+
+        <div class="f-row">
+          <label>Número serie</label>
+          <input type="text" maxlength="100" [(ngModel)]="bien.numeroSerie" name="numeroSerie">
+        </div>
+      </div>
+
+      <h4>Observaciones</h4>
+
+      <div class="form-grid">
+        <div class="f-row span-3">
+          <label>Observaciones</label>
+          <textarea
+            rows="3"
+            maxlength="1000"
+            [(ngModel)]="bien.observaciones"
+            name="observaciones">
+          </textarea>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn--primary" [disabled]="guardando">
+          {{ guardando ? 'Guardando...' : 'Guardar' }}
+        </button>
+
+        <button type="button" class="btn btn--secondary" (click)="cancelar()">
+          Cancelar
+        </button>
+      </div>
+
+    </form>
+  </section>
+
+</div>

@@ -1,7 +1,7 @@
 <div class="page">
 
   <app-header-actions
-    titulo="Documentos soporte"
+    titulo="Documentos Soporte"
     subtitle="Administración de libretas y órdenes"
     [mostrarNuevo]="false"
     [mostrarImprimir]="false"
@@ -10,7 +10,7 @@
 
   <div class="list-container">
 
-    <h3>Buscar cuenta / asociado</h3>
+    <h3>Buscar Cuenta / Asociado</h3>
 
     <div
       class="info-agencia"
@@ -44,14 +44,14 @@
 
       <input
         type="text"
-        placeholder="Primer apellido"
+        placeholder="Primer Apellido"
         [(ngModel)]="filtros.primerApellido"
         name="primerApellido"
         (keyup.enter)="buscar()">
 
       <input
         type="text"
-        placeholder="Segundo apellido"
+        placeholder="Segundo Apellido"
         [(ngModel)]="filtros.segundoApellido"
         name="segundoApellido"
         (keyup.enter)="buscar()">

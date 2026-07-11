@@ -5,49 +5,118 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d0577d07-00ee-4562-af4b-c1a4484e8934" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/cuentas_ahorro/dto/CuentaConjuntaDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/acciones_cuentas_conjuntas/AccionesCuentasConjuntasController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/acciones_cuentas_conjuntas/AccionesCuentasConjuntasRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/acciones_cuentas_conjuntas/AccionesCuentasConjuntasService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/acciones_cuentas_conjuntas/dto/AccionCuentaConjuntaDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-conjuntas.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-conjuntas.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-conjuntas.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/AssipErpApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/AssipErpApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/apertura_cuentas/AperturaCuentasService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/apertura_cuentas/AperturaCuentasService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/apertura_cuentas/repository/AperturaCuentasRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/apertura_cuentas/AperturaCuentasRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/cuentas_ahorro/CuentaAhorroController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/cuentas_ahorro/CuentaAhorroController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/cuentas_ahorro/CuentaAhorroRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/cuentas_ahorro/CuentaAhorroRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesinmuebles/BienInmueble.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesinmuebles/BienInmuebleAvaluo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesinmuebles/BienInmuebleAvaluoController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesinmuebles/BienInmuebleAvaluoRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesinmuebles/BienInmuebleAvaluoService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesinmuebles/BienInmuebleController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesinmuebles/BienInmuebleRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesinmuebles/BienInmuebleSeguro.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesinmuebles/BienInmuebleSeguroController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesinmuebles/BienInmuebleSeguroRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesinmuebles/BienInmuebleSeguroService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesinmuebles/BienInmuebleService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesinversiones/BienInversion.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesinversiones/BienInversionController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesinversiones/BienInversionRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesinversiones/BienInversionService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesmaquinaria/BienMaquinaria.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesmaquinaria/BienMaquinariaController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesmaquinaria/BienMaquinariaRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesmaquinaria/BienMaquinariaSeguro.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesmaquinaria/BienMaquinariaSeguroController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesmaquinaria/BienMaquinariaSeguroRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesmaquinaria/BienMaquinariaSeguroService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesmaquinaria/BienMaquinariaService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesvehiculos/BienVehiculo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesvehiculos/BienVehiculoController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesvehiculos/BienVehiculoRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesvehiculos/BienVehiculoSeguro.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesvehiculos/BienVehiculoSeguroController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesvehiculos/BienVehiculoSeguroRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesvehiculos/BienVehiculoSeguroService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/hojavida/bienesvehiculos/BienVehiculoService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inmuebles/bienes-inmuebles-avaluos.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inmuebles/bienes-inmuebles-avaluos.dto.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inmuebles/bienes-inmuebles-list.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inmuebles/bienes-inmuebles-list.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inmuebles/bienes-inmuebles-list.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inmuebles/bienes-inmuebles-seguros.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inmuebles/bienes-inmuebles-seguros.dto.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inmuebles/bienes-inmuebles-upsert.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inmuebles/bienes-inmuebles-upsert.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inmuebles/bienes-inmuebles-upsert.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inmuebles/bienes-inmuebles.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inmuebles/bienes-inmuebles.dto.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inmuebles/bienes-inmuebles.routes.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inversiones/bienes-inversiones-list.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inversiones/bienes-inversiones-list.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inversiones/bienes-inversiones-list.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inversiones/bienes-inversiones-upsert.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inversiones/bienes-inversiones-upsert.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inversiones/bienes-inversiones-upsert.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inversiones/bienes-inversiones.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inversiones/bienes-inversiones.dto.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-inversiones/bienes-inversiones.routes.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-maquinaria/bienes-maquinaria-list.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-maquinaria/bienes-maquinaria-list.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-maquinaria/bienes-maquinaria-list.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-maquinaria/bienes-maquinaria-seguros.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-maquinaria/bienes-maquinaria-seguros.dto.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-maquinaria/bienes-maquinaria-upsert.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-maquinaria/bienes-maquinaria-upsert.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-maquinaria/bienes-maquinaria-upsert.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-maquinaria/bienes-maquinaria.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-maquinaria/bienes-maquinaria.dto.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-maquinaria/bienes-maquinaria.routes.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-vehiculos/bienes-vehiculos-list.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-vehiculos/bienes-vehiculos-list.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-vehiculos/bienes-vehiculos-list.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-vehiculos/bienes-vehiculos-seguros.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-vehiculos/bienes-vehiculos-seguros.dto.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-vehiculos/bienes-vehiculos-upsert.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-vehiculos/bienes-vehiculos-upsert.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-vehiculos/bienes-vehiculos-upsert.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-vehiculos/bienes-vehiculos.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-vehiculos/bienes-vehiculos.dto.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/bienes-vehiculos/bienes-vehiculos.routes.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/cuentas_ahorro/CuentaAhorroService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/cuentas_ahorro/CuentaAhorroService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/cuentas_ahorro/dto/CuentaAhorroDetalleDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/cuentas_ahorro/dto/CuentaAhorroDetalleDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/cuentas_ahorro/dto/PoderDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/cuentas_ahorro/dto/PoderDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/formasahorro/FormaAhorro.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/formasahorro/FormaAhorro.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/interesdiario_sm/InteresDiarioSMController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/interesdiario_sm/InteresDiarioSMController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/interesdiario_sm/dto/InteresDiarioSMItemDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/interesdiario_sm/dto/InteresDiarioSMItemDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/reporting/api/ReportQueryRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/reporting/api/ReportQueryRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/reporting/impl/ReportesRepositoryImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/reporting/impl/ReportesRepositoryImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/parentesco/ParentescoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/parentesco/ParentescoController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/web/CatalogosController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/referencias/catalogos/web/CatalogosController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../copia_zip.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../copia_zip.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/catalogos/depositos.catalogos.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/catalogos/depositos.catalogos.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/beneficiarios.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/beneficiarios.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/beneficiarios.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/beneficiarios.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/beneficiarios.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/beneficiarios.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cajas/cajas.menu.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cajas/cajas.menu.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro.component.scss" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/cuentas-ahorro.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/poderes.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/poderes.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/poderes.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/poderes.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/poderes.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/cuentas-ahorro/poderes.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/formas-ahorro/formas-ahorro.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/formas-ahorro/formas-ahorro.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/informes/consulta-cuentas-ahorro/consulta-cuentas-ahorro-detalle.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/informes/consulta-cuentas-ahorro/consulta-cuentas-ahorro-detalle.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/informes/consulta-cuentas-ahorro/consulta-cuentas-ahorro-detalle.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/informes/consulta-cuentas-ahorro/consulta-cuentas-ahorro-detalle.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/informes/consulta-cuentas-ahorro/consulta-cuentas-ahorro-detalle.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/informes/consulta-cuentas-ahorro/consulta-cuentas-ahorro-detalle.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/informes/consulta-cuentas-ahorro/consulta-cuentas-ahorro-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/informes/consulta-cuentas-ahorro/consulta-cuentas-ahorro-list.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/informes/consulta-cuentas-ahorro/consulta-cuentas-ahorro-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/informes/consulta-cuentas-ahorro/consulta-cuentas-ahorro-list.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/shared/models/poder.model.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/shared/models/poder.model.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/shared/reporting/reporting.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/shared/reporting/reporting.api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/documentos-soporte/documentos-soporte.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/documentos-soporte/documentos-soporte.api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/documentos-soporte/documentos-soporte.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/documentos-soporte/documentos-soporte.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/apertura-cuentas/apertura-cuentas-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/apertura-cuentas/apertura-cuentas-list.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/apertura-cuentas/apertura-cuentas-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/apertura-cuentas/apertura-cuentas-list.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-familiares/datos-familiares-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-familiares/datos-familiares-list.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-familiares/datos-familiares-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-familiares/datos-familiares-list.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales-list.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales-list.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales-list.component.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/datos-personales/datos-personales-list.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/financieros/financieros-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/financieros/financieros-list.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/financieros/financieros-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/financieros/financieros-list.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/hoja-vida-menu.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/hoja-vida-menu.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/hoja-vida.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/hoja-vida.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/afiliacion-list/afiliacion-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/afiliacion-list/afiliacion-list.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/afiliacion-list/afiliacion-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/impresiones/afiliacion-list/afiliacion-list.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/laborales/laborales-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/laborales/laborales-list.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/laborales/laborales-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/laborales/laborales-list.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/permisos-especiales/permisos-especiales-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/permisos-especiales/permisos-especiales-list.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/permisos-especiales/permisos-especiales-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/permisos-especiales/permisos-especiales-list.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/referencias-personales/referencias-personales-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/referencias-personales/referencias-personales-list.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/referencias-personales/referencias-personales-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/referencias-personales/referencias-personales-list.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/sarlaft/sarlaft-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/sarlaft/sarlaft-list.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/sarlaft/sarlaft-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/sarlaft/sarlaft-list.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/ubicaciones/ubicaciones-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/ubicaciones/ubicaciones-list.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/hoja-vida/ubicaciones/ubicaciones-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/hoja-vida/ubicaciones/ubicaciones-list.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/layout/main-menu.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout/main-menu.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/layout/menu-registry.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout/menu-registry.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/shared/catalogos/catalogos.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/shared/catalogos/catalogos.api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../limpiar_esquemas.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../limpiar_esquemas.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -9,107 +9,250 @@
     (exportar)="exportar()">
   </app-header-actions>
 
-  <div class="filtro mb-3">
-    <input
-      type="text"
-      placeholder="Buscar por nombre o documento..."
-      [(ngModel)]="filtro"
-      (input)="filtrar()"
-      class="form-control"
-    />
-  </div>
+  <!-- FILTROS -->
+  <form
+    class="filtros-card no-print"
+    (ngSubmit)="buscar()">
 
-  <table *ngIf="!cargando && filtradas.length > 0" class="table table-striped table-hover">
-    <thead>
-    <tr>
-      <th>Documento</th>
-      <th>Nombre completo</th>
-      <th>Ingresos (Total)</th>
-      <th>Egresos (Total)</th>
-      <th>Patrimonio Neto</th>
-      <th>Fecha actualización</th>
-      <th>Acción</th>
-    </tr>
-    </thead>
+    <div class="filtros-grid">
 
-    <tbody>
-    <tr *ngFor="let p of paginadas">
-      <td>{{ p.tipoDocumento }} {{ p.documento }}</td>
-      <td>{{ p.nombres }} {{ p.primerApellido }} {{ p.segundoApellido }}</td>
+      <div class="f-row">
+        <label for="filtroDocumento">
+          Documento
+        </label>
 
-      <td>
-        {{
-        (p.financiero?.valorSalario ?? 0) +
-        (p.financiero?.valorPension ?? 0) +
-        (p.financiero?.ingresosArriendo ?? 0) +
-        (p.financiero?.ingresosComisiones ?? 0) +
-        (p.financiero?.otrosIngresos ?? 0)
-        | number: '1.0-0'
-        }}
-      </td>
+        <input
+          id="filtroDocumento"
+          type="text"
+          name="filtroDocumento"
+          [(ngModel)]="filtros.documento"
+          placeholder="Documento"
+          autocomplete="off">
+      </div>
 
-      <td>
-        {{
-        (p.financiero?.egresosFamiliares ?? 0) +
-        (p.financiero?.egresosArriendo ?? 0) +
-        (p.financiero?.egresosCredito ?? 0) +
-        (p.financiero?.otrosEgresos ?? 0)
-        | number: '1.0-0'
-        }}
-      </td>
+      <div class="f-row">
+        <label for="filtroNombres">
+          Nombres
+        </label>
 
-      <td>
-        {{
-        ((p.financiero?.totalActivos ?? 0) - (p.financiero?.totalPasivos ?? 0))
-        | number: '1.0-0'
-        }}
-      </td>
+        <input
+          id="filtroNombres"
+          type="text"
+          name="filtroNombres"
+          [(ngModel)]="filtros.nombres"
+          placeholder="Nombres"
+          autocomplete="off">
+      </div>
 
-      <td>{{ p.fechaActualizacion | date: 'dd/MM/yyyy' }}</td>
+      <div class="f-row">
+        <label for="filtroPrimerApellido">
+          Primer apellido
+        </label>
 
-      <td class="text-center">
+        <input
+          id="filtroPrimerApellido"
+          type="text"
+          name="filtroPrimerApellido"
+          [(ngModel)]="filtros.primerApellido"
+          placeholder="Primer apellido"
+          autocomplete="off">
+      </div>
+
+      <div class="f-row">
+        <label for="filtroSegundoApellido">
+          Segundo apellido
+        </label>
+
+        <input
+          id="filtroSegundoApellido"
+          type="text"
+          name="filtroSegundoApellido"
+          [(ngModel)]="filtros.segundoApellido"
+          placeholder="Segundo apellido"
+          autocomplete="off">
+      </div>
+
+      <div class="f-buttons">
+        <button
+          type="submit"
+          class="btn btn--primary">
+          Buscar
+        </button>
+
         <button
           type="button"
-          class="btn-action-edit btn-action-text"
-          (click)="gestionar(p, p.financiero)">
-          {{ p.financiero ? 'Gestionar' : 'Crear' }}
+          class="btn btn--cancel"
+          (click)="limpiar()">
+          Limpiar
         </button>
-      </td>
-    </tr>
-    </tbody>
-  </table>
+      </div>
 
-  <div class="pagination-controls" *ngIf="!cargando && filtradas.length > tamanoPagina">
+    </div>
 
-    <button
-      type="button"
-      class="btn btn--secondary"
-      (click)="cambiarPagina(pagina - 1)"
-      [disabled]="pagina === 1">
-      Anterior
-    </button>
+  </form>
 
-    <span>Página {{ pagina }} / {{ totalPaginas() }}</span>
+  <!-- ERROR -->
+  <div
+    *ngIf="error"
+    class="error">
+    <i class="bi bi-exclamation-triangle"></i>
+    {{ error }}
+  </div>
 
-    <button
-      type="button"
-      class="btn btn--secondary"
-      (click)="cambiarPagina(pagina + 1)"
-      [disabled]="pagina === totalPaginas()">
-      Siguiente
-    </button>
+  <!-- CARGANDO -->
+  <div
+    *ngIf="cargando"
+    class="loading">
+    <i class="bi bi-hourglass-split"></i>
+    Cargando datos financieros...
+  </div>
+
+  <!-- TABLA -->
+  <div
+    *ngIf="!cargando && filtradas.length > 0"
+    class="tabla-card">
+
+    <div class="tabla-responsive">
+
+      <table class="table table-striped table-hover">
+
+        <thead>
+        <tr>
+          <th>Documento</th>
+          <th>Nombre completo</th>
+          <th class="text-end">Ingresos totales</th>
+          <th class="text-end">Egresos totales</th>
+          <th class="text-end">Patrimonio neto</th>
+          <th>Fecha actualización</th>
+          <th class="col-acciones">Acción</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let persona of paginadas">
+
+          <td>
+            {{ persona.tipoDocumento }}
+            {{ persona.documento }}
+          </td>
+
+          <td>
+            {{ persona.nombres }}
+            {{ persona.primerApellido }}
+            {{ persona.segundoApellido || '' }}
+          </td>
+
+          <td class="text-end">
+            {{
+            (
+            (persona.financiero?.valorSalario ?? 0)
+            + (persona.financiero?.valorPension ?? 0)
+            + (persona.financiero?.ingresosArriendo ?? 0)
+            + (persona.financiero?.ingresosComisiones ?? 0)
+            + (persona.financiero?.otrosIngresos ?? 0)
+            )
+            | number:'1.0-0'
+            }}
+          </td>
+
+          <td class="text-end">
+            {{
+            (
+            (persona.financiero?.egresosFamiliares ?? 0)
+            + (persona.financiero?.egresosArriendo ?? 0)
+            + (persona.financiero?.egresosCredito ?? 0)
+            + (persona.financiero?.otrosEgresos ?? 0)
+            )
+            | number:'1.0-0'
+            }}
+          </td>
+
+          <td class="text-end">
+            {{
+            (
+            (persona.financiero?.totalActivos ?? 0)
+            - (persona.financiero?.totalPasivos ?? 0)
+            )
+            | number:'1.0-0'
+            }}
+          </td>
+
+          <td>
+            {{
+            persona.fechaActualizacion
+            | date:'dd/MM/yyyy'
+            }}
+          </td>
+
+          <td class="col-acciones">
+
+            <button
+              type="button"
+              class="btn-action-edit btn-gestionar"
+              (click)="
+                  gestionar(
+                    persona,
+                    persona.financiero
+                  )
+                "
+              [title]="
+                  persona.financiero
+                    ? 'Gestionar información financiera'
+                    : 'Crear información financiera'
+                ">
+              {{
+              persona.financiero
+              ? 'Gestionar'
+              : 'Crear'
+              }}
+            </button>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <!-- PAGINACIÓN -->
+    <div
+      class="pagination-controls no-print"
+      *ngIf="filtradas.length > tamanoPagina">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="cambiarPagina(pagina - 1)"
+        [disabled]="pagina === 1">
+        Anterior
+      </button>
+
+      <span class="pagination-info">
+        Página {{ pagina }} de {{ totalPaginas() }}
+      </span>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="cambiarPagina(pagina + 1)"
+        [disabled]="pagina >= totalPaginas()">
+        Siguiente
+      </button>
+
+    </div>
 
   </div>
 
-  <div *ngIf="cargando" class="loading">
-    <i class="bi bi-hourglass-split"></i> Cargando datos financieros...
+  <!-- SIN RESULTADOS -->
+  <div
+    *ngIf="!cargando && filtradas.length === 0 && !error"
+    class="empty">
+    <i class="bi bi-inbox"></i>
+    No se encontraron registros financieros.
   </div>
 
-  <div *ngIf="!cargando && filtradas.length === 0" class="empty">
-    <i class="bi bi-inbox"></i> No hay registros financieros para mostrar.
-  </div>
-
-  <div *ngIf="error" class="error">
-    <i class="bi bi-exclamation-triangle"></i> {{ error }}
-  </div>
 </div>

@@ -1,0 +1,134 @@
+cartera.carteras_creditos
+
+ID Y RELACIONES
+---------------
+id_cartera_credito
+id_agencia
+id_linea_credito
+pagare_cartera
+id_datos_personal
+id_cuenta_aportes
+
+IDENTIFICACIÓN
+--------------
+
+tipo_comprobante
+numero_comprobante
+
+CONDICIONES DEL CRÉDITO
+-----------------------
+codigo_clasificacion_credito
+codigo_garantia_credito
+codigo_destino_economico
+periodo_codigo_interes
+tipo_modalidad_interes
+amortizacion_capital
+codigo_tipo_cuota
+plazo
+codigo_forma_pago
+id_empresa_libranza
+id_ente_aprobacion
+
+ESTADOS
+--------
+codigo_estado_cartera
+codigo_estado_juridico
+fecha_estado_juridico
+
+VALORES
+--------
+valor_inicial_credito
+valor_desembolsado
+valor_cuota
+saldo_actual
+abonos_pendientes
+altura_cuota
+
+TASAS CONGELADAS
+----------------
+tasa_nominal_anual
+tasa_efectiva_anual
+
+FECHAS PRINCIPALES
+------------------
+fecha_inclusion_sistema
+fecha_contable
+fecha_desembolso
+fecha_primera_cuota
+fecha_final
+
+CONTROL OPERATIVO
+-----------------
+ultima_fecha_capital
+ultima_fecha_interes
+ultima_fecha_mora
+ultima_fecha_seguro
+ultima_fecha_fondo
+
+PROCESOS FUTUROS
+----------------
+proxima_fecha_capital
+proxima_fecha_interes
+proxima_fecha_seguro
+proxima_fecha_fondo
+intereses_pagados_hasta
+intereses_mora_hasta
+
+
+EVALUACION DE CARTERA. EL PROCESO DE EVALUACION DEBE GUARDAR HISTORICO DE LAS EVALUACIONES
+-------
+credito_evaluado
+fecha_evaluacion
+edad_de_riesgo
+edad_riesgo_inicial
+comentario_evaluacion
+
+
+PERDIDA ESPERADA.
+------
+edad_de_mora
+edad_de_pe
+edad_de_homologacion
+edad_contable
+codigo_modificacion_credito. No necesariamente es de reestrucuraciones
+numero_novaciones
+
+
+REESTRUCTURACIÓN
+----------------
+credito_reestructurado
+fecha_reestructuracion
+edad_reestructurado
+comentario_restructuracion
+
+
+PORCENTAJE_SEGURO
+TIPO_COBRO. SOBRE SALDO DEL CREDITO O SOBRE VALOR INICIAL DEL CREDITO
+
+
+ALIVIOS. OTRA TABLA
+----
+fecha_inicial
+meses_alivio
+fecha_final
+comentario_alivios
+
+
+CENTRALES DE RIESGO
+-------------------
+ultima_fecha_cifin
+ultima_fecha_datacredito
+ultima_fecha_otra
+
+OBSERVACIONES
+-------------
+establecimiento
+comentario_general
+
+AUDITORÍA
+----------
+fk_seguridad_creacion
+fecha_creacion
+
+fk_seguridad_edicion
+fecha_edicion

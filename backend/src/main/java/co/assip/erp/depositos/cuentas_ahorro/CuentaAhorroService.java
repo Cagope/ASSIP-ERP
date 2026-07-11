@@ -169,8 +169,16 @@ public class CuentaAhorroService {
                         dto.getIdFormaAhorro()
                 );
 
+        if (consecutivo == null || consecutivo <= 0) {
+            return new CuentaAhorroGuardarRespuesta(
+                    false,
+                    "No se pudo determinar el consecutivo de la forma de ahorro.",
+                    null
+            );
+        }
+
         String codigoCuenta =
-                consecutivo.toString();
+                String.format("%06d", consecutivo);
 
         String fechaFinal = null;
 

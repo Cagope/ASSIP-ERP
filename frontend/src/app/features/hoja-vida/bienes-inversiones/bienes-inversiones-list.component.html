@@ -1,0 +1,165 @@
+<div class="bienes-inversiones-list">
+
+  <app-header-actions
+    titulo="Bienes Inversiones"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <section class="filtros-card">
+
+    <div class="filtros-grid">
+
+      <div class="f-row">
+        <label>Documento</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtros.documento"
+          name="documento"
+          (keyup.enter)="buscar()">
+      </div>
+
+      <div class="f-row">
+        <label>Nombres</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtros.nombres"
+          name="nombres"
+          (keyup.enter)="buscar()">
+      </div>
+
+      <div class="f-row">
+        <label>Primer apellido</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtros.primerApellido"
+          name="primerApellido"
+          (keyup.enter)="buscar()">
+      </div>
+
+      <div class="f-row">
+        <label>Segundo apellido</label>
+
+        <input
+          type="text"
+          [(ngModel)]="filtros.segundoApellido"
+          name="segundoApellido"
+          (keyup.enter)="buscar()">
+      </div>
+
+      <div class="filtros-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()">
+          LIMPIAR
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="buscar()">
+          BUSCAR
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <div *ngIf="error" class="alert alert-warning">
+    {{ error }}
+  </div>
+
+  <div *ngIf="cargando" class="loading">
+    Cargando asociados...
+  </div>
+
+  <div
+    *ngIf="!cargando && filtradas.length === 0"
+    class="empty">
+    No hay registros para mostrar.
+  </div>
+
+  <div
+    class="tabla-card"
+    *ngIf="!cargando && filtradas.length > 0">
+
+    <table class="table table-striped table-hover align-middle">
+
+      <thead>
+      <tr>
+        <th>Documento</th>
+        <th>Nombre completo</th>
+        <th>Fecha actualización</th>
+        <th class="text-center">Acción</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr *ngFor="let p of paginadas">
+
+        <td>
+          {{ p.tipoDocumento }} {{ p.documento }}
+        </td>
+
+        <td>
+          {{ p.nombres }}
+          {{ p.primerApellido }}
+          {{ p.segundoApellido }}
+        </td>
+
+        <td>
+          {{ p.fechaActualizacion | date:'dd/MM/yyyy' }}
+        </td>
+
+        <td class="text-center">
+          <button
+            type="button"
+            class="btn-action-edit"
+            (click)="gestionar(p)"
+            title="Gestionar bienes inversiones">
+            Gestionar
+          </button>
+        </td>
+
+      </tr>
+      </tbody>
+
+    </table>
+
+    <div
+      class="pagination-controls"
+      *ngIf="filtradas.length > tamanoPagina">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="cambiarPagina(pagina - 1)"
+        [disabled]="pagina === 1">
+        Anterior
+      </button>
+
+      <span>
+        Página {{ pagina }} / {{ totalPaginas() }}
+      </span>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="cambiarPagina(pagina + 1)"
+        [disabled]="pagina === totalPaginas()">
+        Siguiente
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

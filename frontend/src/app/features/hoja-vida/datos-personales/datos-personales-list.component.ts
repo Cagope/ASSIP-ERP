@@ -4,32 +4,60 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
-import { DatosPersonalesApi, DatosPersonales } from './datos-personales.api';
-import { DatosPersonalesPrintService } from './datos-personales-print.service';
-import { DatosPersonalesExporterService } from './datos-personales-exporter.service'; // ✅ nuevo import
+
+import {
+  DatosPersonalesApi,
+  DatosPersonales
+} from './datos-personales.api';
+
+import {
+  DatosPersonalesPrintService
+} from './datos-personales-print.service';
+
+import {
+  DatosPersonalesExporterService
+} from './datos-personales-exporter.service';
 
 @Component({
   selector: 'app-datos-personales-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderActionsComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    HeaderActionsComponent
+  ],
   templateUrl: './datos-personales-list.component.html',
   styleUrls: ['./datos-personales-list.component.scss']
 })
 export class DatosPersonalesListComponent implements OnInit {
-  private readonly api = inject(DatosPersonalesApi);
-  private readonly router = inject(Router);
-  private readonly printService = inject(DatosPersonalesPrintService);
-  private readonly exporter = inject(DatosPersonalesExporterService); // ✅ nuevo servicio
 
-  datos: DatosPersonales[] = [];
-  filtrados: DatosPersonales[] = [];
+  private readonly api =
+    inject(DatosPersonalesApi);
+
+  private readonly router =
+    inject(Router);
+
+  private readonly printService =
+    inject(DatosPersonalesPrintService);
+
+  private readonly exporter =
+    inject(DatosPersonalesExporterService);
+
+  personas: DatosPersonales[] = [];
+  filtradas: DatosPersonales[] = [];
+
   cargando = false;
   error = '';
-  filtro = '';
 
-  // 🔹 Paginación local
+  filtros = {
+    documento: '',
+    nombres: '',
+    primerApellido: '',
+    segundoApellido: ''
+  };
+
   pagina = 1;
-  tamanoPagina = 20;
+  tamanoPagina = 10;
 
   ngOnInit(): void {
     this.cargar();
@@ -37,79 +65,206 @@ export class DatosPersonalesListComponent implements OnInit {
 
   cargar(): void {
     this.cargando = true;
+    this.error = '';
+
     this.api.listar().subscribe({
-      next: (data) => {
-        // ✅ Ordenar por fecha_actualizacion (desc)
-        this.datos = (data ?? []).sort((a, b) => {
-          const fa = a.fechaActualizacion ? new Date(a.fechaActualizacion).getTime() : 0;
-          const fb = b.fechaActualizacion ? new Date(b.fechaActualizacion).getTime() : 0;
-          return fb - fa;
+      next: lista => {
+        this.personas = (lista ?? []).sort((a, b) => {
+          const fechaA = a.fechaActualizacion
+            ? Date.parse(a.fechaActualizacion)
+            : 0;
+
+          const fechaB = b.fechaActualizacion
+            ? Date.parse(b.fechaActualizacion)
+            : 0;
+
+          return fechaB - fechaA;
         });
-        this.filtrar();
+
+        this.buscar();
       },
-      error: () => (this.error = 'Error al cargar datos personales'),
-      complete: () => (this.cargando = false)
+      error: err => {
+        console.error(
+          'Error cargando datos personales:',
+          err
+        );
+
+        this.error =
+          'No fue posible cargar los datos personales.';
+
+        this.personas = [];
+        this.filtradas = [];
+        this.pagina = 1;
+        this.cargando = false;
+      },
+      complete: () => {
+        this.cargando = false;
+      }
     });
   }
 
-  filtrar(): void {
-    const term = this.filtro.toLowerCase().trim();
-    this.filtrados = !term
-      ? this.datos
-      : this.datos.filter(d =>
-          `${d.documento} ${d.nombres} ${d.primerApellido} ${d.segundoApellido ?? ''}`
-            .toLowerCase()
-            .includes(term)
+  buscar(): void {
+    const documento =
+      this.normalizarTexto(this.filtros.documento);
+
+    const nombres =
+      this.normalizarTexto(this.filtros.nombres);
+
+    const primerApellido =
+      this.normalizarTexto(
+        this.filtros.primerApellido
+      );
+
+    const segundoApellido =
+      this.normalizarTexto(
+        this.filtros.segundoApellido
+      );
+
+    this.filtradas = this.personas.filter(persona => {
+      const documentoPersona =
+        this.normalizarTexto(persona.documento);
+
+      const nombresPersona =
+        this.normalizarTexto(persona.nombres);
+
+      const primerApellidoPersona =
+        this.normalizarTexto(
+          persona.primerApellido
         );
-    this.pagina = 1; // 🔹 Reiniciar a la primera página después de filtrar
+
+      const segundoApellidoPersona =
+        this.normalizarTexto(
+          persona.segundoApellido
+        );
+
+      return (
+        (
+          !documento
+          || documentoPersona.includes(documento)
+        )
+        &&
+        (
+          !nombres
+          || nombresPersona.includes(nombres)
+        )
+        &&
+        (
+          !primerApellido
+          || primerApellidoPersona.includes(
+            primerApellido
+          )
+        )
+        &&
+        (
+          !segundoApellido
+          || segundoApellidoPersona.includes(
+            segundoApellido
+          )
+        )
+      );
+    });
+
+    this.pagina = 1;
   }
 
-  // 🔹 Obtener registros de la página actual
-  get paginados(): DatosPersonales[] {
-    const inicio = (this.pagina - 1) * this.tamanoPagina;
-    return this.filtrados.slice(inicio, inicio + this.tamanoPagina);
+  limpiar(): void {
+    this.filtros = {
+      documento: '',
+      nombres: '',
+      primerApellido: '',
+      segundoApellido: ''
+    };
+
+    this.filtradas = [...this.personas];
+    this.pagina = 1;
+    this.error = '';
   }
 
-  // 🔹 Total de páginas
+  get paginadas(): DatosPersonales[] {
+    const inicio =
+      (this.pagina - 1) * this.tamanoPagina;
+
+    return this.filtradas.slice(
+      inicio,
+      inicio + this.tamanoPagina
+    );
+  }
+
   totalPaginas(): number {
-    return Math.ceil(this.filtrados.length / this.tamanoPagina);
+    return Math.max(
+      1,
+      Math.ceil(
+        this.filtradas.length / this.tamanoPagina
+      )
+    );
   }
 
-  // 🔹 Cambiar de página
-  cambiarPagina(p: number): void {
-    if (p < 1 || p > this.totalPaginas()) return;
-    this.pagina = p;
+  cambiarPagina(pagina: number): void {
+    if (
+      pagina < 1
+      || pagina > this.totalPaginas()
+    ) {
+      return;
+    }
+
+    this.pagina = pagina;
   }
 
   nuevo(): void {
-    this.router.navigate(['/hoja-vida/datos-personales/nuevo']);
+    this.error = '';
+
+    this.router.navigate([
+      '/hoja-vida/datos-personales/nuevo'
+    ]);
   }
 
-  editar(id: number): void {
-    this.router.navigate(['/hoja-vida/datos-personales', id, 'editar']);
-  }
+  gestionar(persona: DatosPersonales): void {
+    if (!persona.idDatosPersonal) {
+      this.error =
+        'Registro inválido: no tiene idDatosPersonal.';
 
-  eliminar(id: number): void {
-    if (!confirm('¿Eliminar este registro de datos personales?')) return;
-    this.api.eliminar(id).subscribe(() => this.cargar());
-  }
-
-  // ===========================================================
-  // 🖨️ Impresión y Exportación
-  // ===========================================================
-  imprimir(): void {
-    if (!this.filtrados || this.filtrados.length === 0) {
-      alert('⚠️ No hay registros para imprimir.');
       return;
     }
-    this.printService.imprimir(this.filtrados);
+
+    this.error = '';
+
+    this.router.navigate([
+      '/hoja-vida/datos-personales',
+      persona.idDatosPersonal,
+      'editar'
+    ]);
+  }
+
+  imprimir(): void {
+    if (this.filtradas.length === 0) {
+      alert('No hay registros para imprimir.');
+      return;
+    }
+
+    this.printService.imprimir(
+      this.filtradas
+    );
   }
 
   exportar(): void {
-    if (!this.filtrados || this.filtrados.length === 0) {
-      alert('⚠️ No hay registros para exportar.');
+    if (this.filtradas.length === 0) {
+      alert('No hay registros para exportar.');
       return;
     }
-    this.exporter.exportarExcel(this.filtrados); // ✅ conexión real al servicio
+
+    this.exporter.exportarExcel(
+      this.filtradas
+    );
+  }
+
+  private normalizarTexto(
+    valor: string | number | null | undefined
+  ): string {
+
+    return String(valor ?? '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
   }
 }

@@ -20,6 +20,13 @@ export interface Ciudad {
   idDepartamento: number;
 }
 
+export interface CatalogoIdCodigoNombre {
+  id: number;
+  codigo?: string | null;
+  nombre: string;
+  activo?: boolean;
+}
+
 /**
  * 📚 Servicio unificado de catálogos ASSIP-ERP
  * Usa los endpoints del backend /api/v1/catalogos/*
@@ -229,4 +236,87 @@ export class CatalogosApi {
       catchError(() => of([] as CodigoNombreDTO[]))
     );
   }
+
+  listarTiposBienesHojaVida() {
+    return this.http.get<any[]>(`${this.baseUrl}/hoja-vida/tipos-bienes`).pipe(
+      map(items => items.map(t => ({
+        id: t.id,
+        codigo: t.codigo,
+        nombre: t.nombre,
+        activo: t.activo
+      }))),
+      catchError(() => of([] as CatalogoIdCodigoNombre[]))
+    );
+  }
+
+  listarTiposInmueblesHojaVida() {
+    return this.http.get<any[]>(`${this.baseUrl}/hoja-vida/tipos-inmuebles`).pipe(
+      map(items => items.map(t => ({
+        id: t.id,
+        codigo: t.codigo,
+        nombre: t.nombre,
+        activo: t.activo
+      }))),
+      catchError(() => of([] as CatalogoIdCodigoNombre[]))
+    );
+  }
+
+  listarTiposGravamenesHojaVida() {
+    return this.http.get<any[]>(`${this.baseUrl}/hoja-vida/tipos-gravamenes`).pipe(
+      map(items => items.map(t => ({
+        id: t.id,
+        codigo: t.codigo,
+        nombre: t.nombre,
+        activo: t.activo
+      }))),
+      catchError(() => of([] as CatalogoIdCodigoNombre[]))
+    );
+  }
+
+  listarTiposVehiculosHojaVida() {
+    return this.http.get<any>(`${this.baseUrl}/hoja-vida/tipos-vehiculos`).pipe(
+      map(resp => {
+        const items = Array.isArray(resp)
+          ? resp
+          : (resp?.value ?? []);
+
+        return items.map((t: any) => ({
+          id: t.id,
+          codigo: t.codigo,
+          nombre: t.nombre,
+          activo: t.activo
+        }));
+      }),
+      catchError(() => of([] as CatalogoIdCodigoNombre[]))
+    );
+  }
+
+  listarTiposMaquinariaHojaVida() {
+    return this.http.get<any[]>(`${this.baseUrl}/hoja-vida/tipos-maquinaria`).pipe(
+      map(items => items.map(t => ({
+        id: t.id,
+        codigo: t.codigo,
+        nombre: t.nombre,
+        activo: t.activo
+      }))),
+      catchError(() => of([] as CatalogoIdCodigoNombre[]))
+    );
+  }
+
+  listarTiposInversionesHojaVida() {
+    return this.http
+      .get<any[]>(`${this.baseUrl}/hoja-vida/tipos-inversiones`)
+      .pipe(
+        map(items => items.map(t => ({
+          id: t.id,
+          codigo: t.codigo,
+          nombre: t.nombre,
+          activo: t.activo
+        }))),
+        catchError(() =>
+          of([] as CatalogoIdCodigoNombre[])
+        )
+      );
+  }
+
 }

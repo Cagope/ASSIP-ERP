@@ -23,16 +23,13 @@ export const MENU_REGISTRY = [
 
   { ...cajasMenu, icon: 'cajas' },
 
-  { ...contabilidadMenu, icon: 'contabilidad' },
-
   { ...activosFijosMenu, icon: 'activos' },
 
   { ...nominaMenu, icon: 'nomina' },
 
-  {
-    ...GERENCIA_MENU,
-    icon: 'gerencia'
-  },
+  { ...contabilidadMenu, icon: 'contabilidad' },
+
+  { ...GERENCIA_MENU, icon: 'gerencia' },
 
   { ...sarlaftMenu, icon: 'sarlaf' },
 

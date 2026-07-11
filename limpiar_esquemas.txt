@@ -22,6 +22,7 @@ nomina.empleado_contratos,
 nomina.empleados
 RESTART IDENTITY;
 
+Limpiar tablas de depositos
 
 TRUNCATE TABLE
 depositos.beneficiarios_cuenta_ahorros,
@@ -29,5 +30,36 @@ depositos.canjes_cuentas_ahorros,
 depositos.cuentas_ahorro_conjuntas,
 depositos.extractos_cuentas_ahorros,
 depositos.poderes_cuentas_ahorro,
+depositos.documentos_soporte,
 depositos.cuentas_ahorro
 RESTART IDENTITY;
+
+Limpiar tablas de contabilidad
+
+TRUNCATE TABLE
+contabilidad.anos_cerrados,
+contabilidad.controles_auxiliares,
+contabilidad.auxiliares_contables,
+contabilidad.cierres_anuales,
+contabilidad.conceptos_contables,
+contabilidad.meses_cerrados,
+contabilidad.saldos_terceros
+RESTART IDENTITY;
+
+
+Limpiar tablas de hoja_vida
+
+TRUNCATE TABLE
+hoja_vida.bienes_inmuebles,
+hoja_vida.datos_familiares,
+hoja_vida.datos_personales_salud,
+hoja_vida.financieros,
+hoja_vida.laborales,
+hoja_vida.permisos_especiales,
+hoja_vida.referencias_comerciales,
+hoja_vida.referencias_personales,
+hoja_vida.sarlaft,
+hoja_vida.ubicaciones
+RESTART IDENTITY;
+
+

@@ -1,0 +1,171 @@
+@use '../datos-personales/datos-personales-list.component' as *;
+
+.bienes-vehiculos-list {
+  padding: 1rem;
+}
+
+/* ==========================
+   FILTROS
+========================== */
+
+.filtros-card {
+  margin: 1rem 0;
+  padding: 1rem 1.25rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.filtros-grid {
+  display: grid;
+  grid-template-columns:
+    140px
+    minmax(220px, 1fr)
+    minmax(220px, 1fr)
+    minmax(220px, 1fr)
+    auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.f-row {
+  display: flex;
+  flex-direction: column;
+}
+
+.f-row label {
+  margin-bottom: 0.35rem;
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.f-row input {
+  width: 100%;
+}
+
+.filtros-actions {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+}
+
+/* ==========================
+   TABLA
+========================== */
+
+.tabla-card {
+  margin-top: 1rem;
+}
+
+.table {
+  width: 100%;
+  font-size: 0.9rem;
+}
+
+.table thead th {
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 700;
+  border-bottom: 1px solid #dbe2ea;
+}
+
+.table tbody td {
+  vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+  background: #f8fafc;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* ==========================
+   BOTÓN GESTIONAR
+========================== */
+
+.btn-action-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 92px;
+  height: 34px;
+  padding: 0 16px;
+
+  background: #ffffff;
+  color: #2563eb;
+
+  border: 1px solid #2563eb;
+  border-radius: 8px;
+
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-action-edit:hover {
+  background: #2563eb;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* ==========================
+   PAGINACIÓN
+========================== */
+
+.pagination-controls {
+  margin-top: 1rem;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+}
+
+/* ==========================
+   MENSAJES
+========================== */
+
+.loading,
+.empty,
+.error {
+  padding: 20px;
+  color: #64748b;
+  text-align: center;
+}
+
+/* ==========================
+   RESPONSIVE
+========================== */
+
+@media (max-width: 1200px) {
+  .filtros-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .filtros-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 768px) {
+  .filtros-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filtros-actions {
+    justify-content: stretch;
+  }
+
+  .filtros-actions .btn {
+    flex: 1;
+  }
+}

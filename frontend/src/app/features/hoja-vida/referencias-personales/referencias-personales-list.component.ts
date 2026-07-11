@@ -2,39 +2,88 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { finalize, forkJoin } from 'rxjs';
 
-import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
-import { DatosPersonalesApi, DatosPersonales } from '../datos-personales/datos-personales.api';
-import { ReferenciasPersonalesApi } from './referencias-personales.api';
-import { ReferenciasPersonalesPrintService } from './referencias-personales-print.service';
-import { ReferenciasPersonalesExporterService } from './referencias-personales-exporter.service';
-import { ReferenciaPersonal } from '../../../shared/models/referencia-personal.model';
+import {
+  HeaderActionsComponent
+} from '../../../shared/header-actions/header-actions.component';
+
+import {
+  DatosPersonalesApi,
+  DatosPersonales
+} from '../datos-personales/datos-personales.api';
+
+import {
+  ReferenciasPersonalesApi
+} from './referencias-personales.api';
+
+import {
+  ReferenciasPersonalesPrintService
+} from './referencias-personales-print.service';
+
+import {
+  ReferenciasPersonalesExporterService
+} from './referencias-personales-exporter.service';
+
+import {
+  ReferenciaPersonal
+} from '../../../shared/models/referencia-personal.model';
+
+type PersonaConReferencias =
+  DatosPersonales & {
+    referencias: ReferenciaPersonal[];
+  };
+
+type ReferenciaPersonalInforme =
+  ReferenciaPersonal & {
+    documento?: string;
+    nombrePersona?: string;
+  };
 
 @Component({
   selector: 'app-referencias-personales-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, HeaderActionsComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    HeaderActionsComponent
+  ],
   templateUrl: './referencias-personales-list.component.html',
   styleUrls: ['./referencias-personales-list.component.scss']
 })
-export class ReferenciasPersonalesListComponent implements OnInit {
+export class ReferenciasPersonalesListComponent
+  implements OnInit {
 
-  private readonly dpApi = inject(DatosPersonalesApi);
-  private readonly refApi = inject(ReferenciasPersonalesApi);
-  private readonly router = inject(Router);
-  private readonly printService = inject(ReferenciasPersonalesPrintService);
-  private readonly exporter = inject(ReferenciasPersonalesExporterService);
+  private readonly dpApi =
+    inject(DatosPersonalesApi);
 
-  personas: (DatosPersonales & { referencias?: ReferenciaPersonal[] | null })[] = [];
-  filtradas: (DatosPersonales & { referencias?: ReferenciaPersonal[] | null })[] = [];
+  private readonly refApi =
+    inject(ReferenciasPersonalesApi);
+
+  private readonly router =
+    inject(Router);
+
+  private readonly printService =
+    inject(ReferenciasPersonalesPrintService);
+
+  private readonly exporter =
+    inject(ReferenciasPersonalesExporterService);
+
+  personas: PersonaConReferencias[] = [];
+  filtradas: PersonaConReferencias[] = [];
 
   cargando = false;
-  filtro = '';
   error = '';
 
-  // 📄 Paginación
+  filtros = {
+    documento: '',
+    nombres: '',
+    primerApellido: '',
+    segundoApellido: ''
+  };
+
   pagina = 1;
-  tamanoPagina = 20;
+  tamanoPagina = 10;
 
   ngOnInit(): void {
     this.cargar();
@@ -44,105 +93,301 @@ export class ReferenciasPersonalesListComponent implements OnInit {
     this.cargando = true;
     this.error = '';
 
-    Promise.all([
-      this.dpApi.listar().toPromise(),
-      this.refApi.listar().toPromise()
-    ])
-      .then(([personas, referencias]) => {
-        const mapaReferencias = new Map<number, ReferenciaPersonal[]>();
-        (referencias ?? []).forEach(r => {
-          if (r.idDatosPersonal != null) {
-            const lista = mapaReferencias.get(r.idDatosPersonal) ?? [];
-            lista.push(r);
-            mapaReferencias.set(r.idDatosPersonal, lista);
-          }
-        });
+    forkJoin({
+      personas: this.dpApi.listar(),
+      referencias: this.refApi.listar()
+    })
+      .pipe(
+        finalize(() => {
+          this.cargando = false;
+        })
+      )
+      .subscribe({
+        next: resultado => {
+          const mapaReferencias =
+            new Map<number, ReferenciaPersonal[]>();
 
-        this.personas = (personas ?? [])
-          .sort((a, b) => {
-            const fa = a.fechaActualizacion ? new Date(a.fechaActualizacion).getTime() : 0;
-            const fb = b.fechaActualizacion ? new Date(b.fechaActualizacion).getTime() : 0;
-            return fb - fa;
-          })
-          .map(p => ({
-            ...p,
-            referencias: mapaReferencias.get(p.idDatosPersonal ?? 0) ?? []
-          }));
+          (resultado.referencias ?? []).forEach(
+            referencia => {
+              if (
+                referencia.idDatosPersonal == null
+              ) {
+                return;
+              }
 
-        this.filtrar();
-      })
-      .catch(err => {
-        console.error('❌ Error cargando datos:', err);
-        this.error = 'Error al cargar las referencias personales.';
-      })
-      .finally(() => (this.cargando = false));
+              const lista =
+                mapaReferencias.get(
+                  referencia.idDatosPersonal
+                ) ?? [];
+
+              lista.push(referencia);
+
+              mapaReferencias.set(
+                referencia.idDatosPersonal,
+                lista
+              );
+            }
+          );
+
+          this.personas = (resultado.personas ?? [])
+            .sort((a, b) => {
+              const fechaA = a.fechaActualizacion
+                ? Date.parse(a.fechaActualizacion)
+                : 0;
+
+              const fechaB = b.fechaActualizacion
+                ? Date.parse(b.fechaActualizacion)
+                : 0;
+
+              return fechaB - fechaA;
+            })
+            .map(persona => ({
+              ...persona,
+              referencias:
+                persona.idDatosPersonal != null
+                  ? mapaReferencias.get(
+                      persona.idDatosPersonal
+                    ) ?? []
+                  : []
+            }));
+
+          this.buscar();
+        },
+        error: err => {
+          console.error(
+            'Error cargando referencias personales:',
+            err
+          );
+
+          this.error =
+            'No fue posible cargar las referencias personales.';
+
+          this.personas = [];
+          this.filtradas = [];
+          this.pagina = 1;
+        }
+      });
   }
 
-  filtrar(): void {
-    const term = this.filtro.toLowerCase().trim();
-    this.filtradas = !term
-      ? this.personas
-      : this.personas.filter(p =>
-          `${p.documento} ${p.nombres} ${p.primerApellido} ${p.segundoApellido ?? ''}`
-            .toLowerCase()
-            .includes(term)
+  buscar(): void {
+    const documento =
+      this.normalizarTexto(
+        this.filtros.documento
+      );
+
+    const nombres =
+      this.normalizarTexto(
+        this.filtros.nombres
+      );
+
+    const primerApellido =
+      this.normalizarTexto(
+        this.filtros.primerApellido
+      );
+
+    const segundoApellido =
+      this.normalizarTexto(
+        this.filtros.segundoApellido
+      );
+
+    this.filtradas = this.personas.filter(
+      persona => {
+        const documentoPersona =
+          this.normalizarTexto(
+            persona.documento
+          );
+
+        const nombresPersona =
+          this.normalizarTexto(
+            persona.nombres
+          );
+
+        const primerApellidoPersona =
+          this.normalizarTexto(
+            persona.primerApellido
+          );
+
+        const segundoApellidoPersona =
+          this.normalizarTexto(
+            persona.segundoApellido
+          );
+
+        return (
+          (
+            !documento
+            || documentoPersona.includes(
+              documento
+            )
+          )
+          &&
+          (
+            !nombres
+            || nombresPersona.includes(
+              nombres
+            )
+          )
+          &&
+          (
+            !primerApellido
+            || primerApellidoPersona.includes(
+              primerApellido
+            )
+          )
+          &&
+          (
+            !segundoApellido
+            || segundoApellidoPersona.includes(
+              segundoApellido
+            )
+          )
         );
+      }
+    );
+
     this.pagina = 1;
+    this.error = '';
   }
 
-  get paginadas(): (DatosPersonales & { referencias?: ReferenciaPersonal[] | null })[] {
-    const inicio = (this.pagina - 1) * this.tamanoPagina;
-    return this.filtradas.slice(inicio, inicio + this.tamanoPagina);
+  limpiar(): void {
+    this.filtros = {
+      documento: '',
+      nombres: '',
+      primerApellido: '',
+      segundoApellido: ''
+    };
+
+    this.filtradas = [...this.personas];
+    this.pagina = 1;
+    this.error = '';
+  }
+
+  get paginadas(): PersonaConReferencias[] {
+    const inicio =
+      (this.pagina - 1) * this.tamanoPagina;
+
+    return this.filtradas.slice(
+      inicio,
+      inicio + this.tamanoPagina
+    );
   }
 
   totalPaginas(): number {
-    return Math.ceil(this.filtradas.length / this.tamanoPagina);
+    return Math.max(
+      1,
+      Math.ceil(
+        this.filtradas.length
+        / this.tamanoPagina
+      )
+    );
   }
 
-  cambiarPagina(p: number): void {
-    if (p < 1 || p > this.totalPaginas()) return;
-    this.pagina = p;
-  }
-
-  gestionar(persona: DatosPersonales, referencia?: ReferenciaPersonal | null): void {
-    if (referencia?.idReferenciaPersonal) {
-      this.router.navigate(['/hoja-vida/referencias-personales', referencia.idReferenciaPersonal, 'editar']);
-    } else {
-      this.router.navigate(['/hoja-vida/referencias-personales/nuevo'], {
-        queryParams: { idDatosPersonal: persona.idDatosPersonal }
-      });
+  cambiarPagina(pagina: number): void {
+    if (
+      pagina < 1
+      || pagina > this.totalPaginas()
+    ) {
+      return;
     }
+
+    this.pagina = pagina;
+  }
+
+  gestionar(
+    persona: DatosPersonales,
+    referencia?: ReferenciaPersonal | null
+  ): void {
+
+    this.error = '';
+
+    if (!persona.idDatosPersonal) {
+      this.error =
+        'Asociado inválido: no tiene idDatosPersonal.';
+
+      return;
+    }
+
+    if (referencia?.idReferenciaPersonal) {
+      this.router.navigate([
+        '/hoja-vida/referencias-personales',
+        referencia.idReferenciaPersonal,
+        'editar'
+      ]);
+
+      return;
+    }
+
+    this.router.navigate(
+      [
+        '/hoja-vida/referencias-personales/nuevo'
+      ],
+      {
+        queryParams: {
+          idDatosPersonal:
+            persona.idDatosPersonal
+        }
+      }
+    );
   }
 
   imprimir(): void {
-    const datos = this.personas.flatMap(p =>
-      (p.referencias ?? []).map(r => ({
-        ...r,
-        documento: p.documento,
-        nombrePersona: `${p.nombres} ${p.primerApellido} ${p.segundoApellido ?? ''}`
-      }))
-    );
+    const datos =
+      this.construirDatosInforme();
 
-    this.printService.imprimir(
-      datos.filter(r => !!r) as unknown as (
-        ReferenciaPersonal & { documento?: string; nombrePersona?: string }
-      )[]
-    );
+    if (datos.length === 0) {
+      alert(
+        'No hay referencias personales para imprimir.'
+      );
+
+      return;
+    }
+
+    this.printService.imprimir(datos);
   }
 
   exportar(): void {
-    const datos = this.personas.flatMap(p =>
-      (p.referencias ?? []).map(r => ({
-        ...r,
-        documento: p.documento,
-        nombrePersona: `${p.nombres} ${p.primerApellido} ${p.segundoApellido ?? ''}`
-      }))
-    );
+    const datos =
+      this.construirDatosInforme();
 
-    this.exporter.exportarExcel(
-      datos.filter(r => !!r) as unknown as (
-        ReferenciaPersonal & { documento?: string; nombrePersona?: string }
-      )[]
+    if (datos.length === 0) {
+      alert(
+        'No hay referencias personales para exportar.'
+      );
+
+      return;
+    }
+
+    this.exporter.exportarExcel(datos);
+  }
+
+  private construirDatosInforme():
+    ReferenciaPersonalInforme[] {
+
+    return this.filtradas.flatMap(
+      persona =>
+        persona.referencias.map(
+          referencia => ({
+            ...referencia,
+            documento: persona.documento,
+            nombrePersona: [
+              persona.nombres,
+              persona.primerApellido,
+              persona.segundoApellido
+            ]
+              .filter(Boolean)
+              .join(' ')
+          })
+        )
     );
+  }
+
+  private normalizarTexto(
+    valor: string | number | null | undefined
+  ): string {
+
+    return String(valor ?? '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
   }
 }

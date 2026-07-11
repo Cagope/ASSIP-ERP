@@ -291,4 +291,95 @@ public class CatalogosController {
         """;
         return jdbcTemplate.queryForList(sql);
     }
+
+    // ============================================================
+// 🔹 CATÁLOGOS HOJA DE VIDA — BIENES
+// ============================================================
+
+    @GetMapping("/hoja-vida/tipos-bienes")
+    public List<Map<String, Object>> listarTiposBienesHojaVida() {
+        String sql = """
+        SELECT id_tipo_bien AS id,
+               codigo_tipo_bien AS codigo,
+               nombre_tipo_bien AS nombre,
+               activo
+        FROM hoja_vida.tipos_bienes
+        WHERE activo = true
+        ORDER BY nombre_tipo_bien
+    """;
+        return jdbcTemplate.queryForList(sql);
+    }
+
+    @GetMapping("/hoja-vida/tipos-inmuebles")
+    public List<Map<String, Object>> listarTiposInmueblesHojaVida() {
+        String sql = """
+        SELECT id_tipo_inmueble AS id,
+               codigo_tipo_inmueble AS codigo,
+               nombre_tipo_inmueble AS nombre,
+               activo
+        FROM hoja_vida.tipos_inmuebles
+        WHERE activo = true
+        ORDER BY nombre_tipo_inmueble
+    """;
+        return jdbcTemplate.queryForList(sql);
+    }
+
+    @GetMapping("/hoja-vida/tipos-vehiculos")
+    public List<Map<String, Object>> listarTiposVehiculosHojaVida() {
+        String sql = """
+        SELECT id_tipo_vehiculo AS id,
+               id_tipo_vehiculo::text AS codigo,
+               nombre_tipo_vehiculo AS nombre,
+               activo
+        FROM hoja_vida.tipos_vehiculos
+        WHERE activo = true
+        ORDER BY nombre_tipo_vehiculo
+    """;
+        return jdbcTemplate.queryForList(sql);
+    }
+
+    @GetMapping("/hoja-vida/tipos-gravamenes")
+    public List<Map<String, Object>> listarTiposGravamenesHojaVida() {
+        String sql = """
+        SELECT id_tipo_gravamen AS id,
+               NULL AS codigo,
+               nombre_gravamen AS nombre,
+               activo
+        FROM hoja_vida.tipos_gravamenes
+        WHERE activo = true
+        ORDER BY nombre_gravamen
+    """;
+        return jdbcTemplate.queryForList(sql);
+    }
+
+    @GetMapping("/hoja-vida/tipos-maquinaria")
+    public List<Map<String, Object>> listarTiposMaquinariaHojaVida() {
+        String sql = """
+        SELECT id_tipo_maquinaria AS id,
+               id_tipo_maquinaria::text AS codigo,
+               nombre_tipo_maquinaria AS nombre,
+               activo
+        FROM hoja_vida.tipos_maquinaria
+        WHERE activo = true
+        ORDER BY nombre_tipo_maquinaria
+    """;
+
+        return jdbcTemplate.queryForList(sql);
+    }
+
+    @GetMapping("/hoja-vida/tipos-inversiones")
+    public List<Map<String, Object>> listarTiposInversionesHojaVida() {
+        String sql = """
+        SELECT id_tipo_inversion AS id,
+               id_tipo_inversion::text AS codigo,
+               nombre_tipo_inversion AS nombre,
+               activo
+        FROM hoja_vida.tipos_inversiones
+        WHERE activo = true
+        ORDER BY nombre_tipo_inversion
+    """;
+
+        return jdbcTemplate.queryForList(sql);
+    }
+
 }

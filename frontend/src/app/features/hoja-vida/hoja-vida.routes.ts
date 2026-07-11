@@ -15,7 +15,10 @@ import { FORMULARIO_INTEGRAL_ROUTES } from './formulario-integral/formulario-int
 
 /** 🧾 Nuevo módulo de impresiones */
 import { AFILIACION_ROUTES } from './impresiones/afiliacion.routes';
-
+import { BIENES_INMUEBLES_ROUTES } from './bienes-inmuebles/bienes-inmuebles.routes';
+import { BIENES_VEHICULOS_ROUTES } from './bienes-vehiculos/bienes-vehiculos.routes';
+import { BIENES_MAQUINARIA_ROUTES } from './bienes-maquinaria/bienes-maquinaria.routes';
+import { BIENES_INVERSIONES_ROUTES } from './bienes-inversiones/bienes-inversiones.routes';
 /**
  * 🧩 Rutas principales — Módulo Hoja de Vida
  * ------------------------------------------------------------
@@ -38,6 +41,10 @@ export const HOJA_VIDA_ROUTES: Routes = [
   { path: 'sarlaft', children: SARLAFT_ROUTES },
   { path: 'permisos-especiales', children: PERMISOS_ESPECIALES_ROUTES },
   { path: 'apertura-cuentas', children: APERTURA_CUENTAS_ROUTES },
+  { path: 'bienes-inmuebles', children: BIENES_INMUEBLES_ROUTES },
+  { path: 'bienes-vehiculos', children: BIENES_VEHICULOS_ROUTES },
+  { path: 'bienes-maquinaria', children: BIENES_MAQUINARIA_ROUTES },
+  { path: 'bienes-inversiones', children: BIENES_INVERSIONES_ROUTES },
 
   // 🧾 Nuevo módulo de impresiones
   { path: 'impresiones', children: AFILIACION_ROUTES },

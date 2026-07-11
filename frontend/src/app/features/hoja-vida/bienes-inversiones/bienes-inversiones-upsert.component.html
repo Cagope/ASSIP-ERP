@@ -1,0 +1,469 @@
+<div class="page bienes-inversiones-upsert">
+
+  <app-header-actions
+    titulo="Gestión de Bienes Inversiones"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <button
+    type="button"
+    class="btn btn--secondary mb-3"
+    (click)="volver()">
+    ← Volver
+  </button>
+
+  <div *ngIf="error" class="alert alert-warning">
+    {{ error }}
+  </div>
+
+  <div *ngIf="mensaje" class="alert alert-success">
+    {{ mensaje }}
+  </div>
+
+  <!-- ASOCIADO -->
+  <section class="card persona-box" *ngIf="asociado">
+    <h3>Asociado</h3>
+
+    <div class="persona-grid">
+
+      <p>
+        <strong>Documento:</strong>
+        {{ asociado.tipoDocumento }} {{ asociado.documento }}
+      </p>
+
+      <p>
+        <strong>Nombre completo:</strong>
+        {{ nombreAsociado() }}
+      </p>
+
+      <p>
+        <strong>Fecha actualización:</strong>
+        {{ asociado.fechaActualizacion | date:'dd/MM/yyyy' }}
+      </p>
+
+    </div>
+  </section>
+
+  <!-- RESUMEN -->
+  <section class="resumen-grid">
+
+    <div class="resumen-card">
+      <span>Cantidad inversiones</span>
+      <strong>{{ resumen.cantidad }}</strong>
+    </div>
+
+    <div class="resumen-card">
+      <span>Valor comercial</span>
+      <strong>
+        {{ resumen.valorComercial | currency:'COP':'symbol-narrow':'1.0-0' }}
+      </strong>
+    </div>
+
+    <div class="resumen-card">
+      <span>Gravámenes</span>
+      <strong>
+        {{ resumen.valorGravamen | currency:'COP':'symbol-narrow':'1.0-0' }}
+      </strong>
+    </div>
+
+    <div class="resumen-card">
+      <span>Patrimonio neto</span>
+      <strong>
+        {{ resumen.patrimonioNeto | currency:'COP':'symbol-narrow':'1.0-0' }}
+      </strong>
+    </div>
+
+  </section>
+
+  <!-- LISTADO -->
+  <section class="card list-container">
+
+    <div class="section-header">
+
+      <div>
+        <h3>Inversiones registradas</h3>
+
+        <small>
+          Relación de inversiones registradas en la hoja de vida del asociado.
+        </small>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="nuevo()">
+        + Nueva inversión
+      </button>
+
+    </div>
+
+    <div *ngIf="cargando" class="loading">
+      Cargando inversiones...
+    </div>
+
+    <div *ngIf="!cargando && bienes.length === 0" class="empty">
+      El asociado no tiene inversiones registradas.
+    </div>
+
+    <table
+      *ngIf="!cargando && bienes.length > 0"
+      class="data-table tabla-bienes">
+
+      <thead>
+      <tr>
+        <th>Tipo</th>
+        <th>Entidad</th>
+        <th>Número título</th>
+        <th>Fecha inversión</th>
+        <th>Vencimiento</th>
+        <th class="num">Valor nominal</th>
+        <th class="num">Valor actual</th>
+        <th class="num">Tasa</th>
+        <th>Gravamen</th>
+        <th class="num">Valor comercial</th>
+        <th class="num">Neto</th>
+        <th class="acciones">Acciones</th>
+      </tr>
+      </thead>
+
+      <tbody>
+      <tr *ngFor="let b of bienes">
+
+        <td>
+          {{ b.nombreTipoInversion || 'Inversión' }}
+        </td>
+
+        <td>
+          <strong>{{ b.entidad || '-' }}</strong>
+        </td>
+
+        <td>
+          {{ b.numeroTitulo || '-' }}
+        </td>
+
+        <td>
+          {{ b.fechaInversion | date:'dd/MM/yyyy' }}
+        </td>
+
+        <td>
+          {{ b.fechaVencimiento | date:'dd/MM/yyyy' }}
+        </td>
+
+        <td class="num">
+          {{ b.valorNominal | currency:'COP':'symbol-narrow':'1.0-0' }}
+        </td>
+
+        <td class="num">
+          {{ b.valorActual | currency:'COP':'symbol-narrow':'1.0-0' }}
+        </td>
+
+        <td class="num">
+          {{ b.tasaRendimiento !== null && b.tasaRendimiento !== undefined
+          ? (b.tasaRendimiento | number:'1.0-6') + ' %'
+          : '-' }}
+        </td>
+
+        <td>
+          {{ b.nombreGravamen || '-' }}
+        </td>
+
+        <td class="num">
+          {{ b.valorComercial | currency:'COP':'symbol-narrow':'1.0-0' }}
+        </td>
+
+        <td class="num">
+          {{ valorNeto(b) | currency:'COP':'symbol-narrow':'1.0-0' }}
+        </td>
+
+        <td>
+          <div class="acciones">
+
+            <button
+              class="btn-action-edit"
+              type="button"
+              (click)="editar(b)"
+              title="Editar inversión">
+              ✏️
+            </button>
+
+            <button
+              class="btn-action-delete"
+              type="button"
+              (click)="eliminar(b)"
+              title="Eliminar inversión">
+              🗑️
+            </button>
+
+          </div>
+        </td>
+
+      </tr>
+      </tbody>
+
+    </table>
+
+  </section>
+
+  <!-- FORMULARIO -->
+  <section
+    class="card form-container formulario-card"
+    *ngIf="bienActual as bien">
+
+    <div class="section-header">
+
+      <h3>
+        {{
+        modoFormulario === 'NUEVO'
+        ? 'Nueva inversión'
+        : 'Editar inversión'
+        }}
+      </h3>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="cancelar()">
+        Cancelar
+      </button>
+
+    </div>
+
+    <form (ngSubmit)="guardar()">
+
+      <h4>Información general</h4>
+
+      <div class="form-grid">
+
+        <div class="f-row">
+          <label>Tipo inversión *</label>
+
+          <select
+            [(ngModel)]="bien.idTipoInversion"
+            name="idTipoInversion"
+            required>
+
+            <option [ngValue]="0">
+              Seleccione...
+            </option>
+
+            <option
+              *ngFor="let t of tiposInversiones"
+              [ngValue]="t.id">
+              {{ t.nombre }}
+            </option>
+
+          </select>
+        </div>
+
+        <div class="f-row span-2">
+          <label>Descripción general *</label>
+
+          <input
+            type="text"
+            maxlength="250"
+            [(ngModel)]="bien.descripcionGeneral"
+            name="descripcionGeneral"
+            required>
+        </div>
+
+        <div class="f-row">
+          <label>Entidad</label>
+
+          <input
+            type="text"
+            maxlength="150"
+            [(ngModel)]="bien.entidad"
+            name="entidad">
+        </div>
+
+        <div class="f-row">
+          <label>Número título</label>
+
+          <input
+            type="text"
+            maxlength="100"
+            [(ngModel)]="bien.numeroTitulo"
+            name="numeroTitulo">
+        </div>
+
+      </div>
+
+      <h4>Fechas</h4>
+
+      <div class="form-grid">
+
+        <div class="f-row">
+          <label>Fecha inversión</label>
+
+          <input
+            type="date"
+            [(ngModel)]="bien.fechaInversion"
+            name="fechaInversion">
+        </div>
+
+        <div class="f-row">
+          <label>Fecha vencimiento</label>
+
+          <input
+            type="date"
+            [(ngModel)]="bien.fechaVencimiento"
+            name="fechaVencimiento">
+        </div>
+
+      </div>
+
+      <h4>Valores de la inversión</h4>
+
+      <div class="form-grid">
+
+        <div class="f-row">
+          <label>Valor nominal *</label>
+
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="bien.valorNominal"
+            name="valorNominal"
+            required>
+        </div>
+
+        <div class="f-row">
+          <label>Valor actual *</label>
+
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="bien.valorActual"
+            name="valorActual"
+            required>
+        </div>
+
+        <div class="f-row">
+          <label>Tasa rendimiento (%)</label>
+
+          <input
+            type="number"
+            class="input-number"
+            min="0"
+            step="0.000001"
+            [(ngModel)]="bien.tasaRendimiento"
+            name="tasaRendimiento">
+        </div>
+
+      </div>
+
+      <h4>Valores generales</h4>
+
+      <div class="form-grid">
+
+        <div class="f-row">
+          <label>Valor comercial *</label>
+
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="bien.valorComercial"
+            name="valorComercial"
+            required>
+        </div>
+
+        <div class="f-row">
+          <label>Valor gravamen *</label>
+
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="bien.valorGravamen"
+            name="valorGravamen"
+            required>
+        </div>
+
+        <div class="f-row">
+          <label>Tipo gravamen *</label>
+
+          <select
+            [(ngModel)]="bien.idTipoGravamen"
+            name="idTipoGravamen"
+            required>
+
+            <option [ngValue]="0">
+              Seleccione...
+            </option>
+
+            <option
+              *ngFor="let g of tiposGravamenes"
+              [ngValue]="g.id">
+              {{ g.nombre }}
+            </option>
+
+          </select>
+        </div>
+
+        <div class="f-row">
+          <label>% Propiedad *</label>
+
+          <input
+            type="number"
+            class="input-number"
+            min="0"
+            max="100"
+            step="0.0001"
+            [(ngModel)]="bien.porcentajePropiedad"
+            name="porcentajePropiedad"
+            required>
+        </div>
+
+      </div>
+
+      <h4>Observaciones</h4>
+
+      <div class="form-grid">
+
+        <div class="f-row span-3">
+          <label>Observaciones</label>
+
+          <textarea
+            rows="3"
+            maxlength="1000"
+            [(ngModel)]="bien.observaciones"
+            name="observaciones">
+          </textarea>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="guardando">
+
+          {{
+          guardando
+          ? 'Guardando...'
+          : 'Guardar'
+          }}
+
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="cancelar()">
+          Cancelar
+        </button>
+
+      </div>
+
+    </form>
+
+  </section>
+
+</div>

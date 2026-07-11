@@ -413,7 +413,9 @@ export class CuentasAhorroComponent {
       Number((forma as any).consecutivoForma ?? 0);
 
     this.codigoCuentaSugerido =
-      consecutivo > 0 ? String(consecutivo + 1) : '';
+      consecutivo >= 0
+        ? String(consecutivo + 1).padStart(6, '0')
+        : '';
 
     if (forma.codigoForma === '01') {
       this.nuevo.gmfCuentaCuenta = 'N';

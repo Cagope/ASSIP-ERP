@@ -1,0 +1,178 @@
+Formas de pago.
+
+INSERT INTO cartera.formas_pago
+VALUES
+('C','Pago directo o por caja',true),
+('L','Descuento por libranza o nómina',true);
+
+INSERT INTO cartera.modificaciones_creditos
+VALUES
+('2','Reestructurado',true),
+('3','Novado',true),
+('4','Ninguna',true),
+('5','Alivio',true),
+('6','Otras modificaciones',true);
+
+INSERT INTO cartera.estados_juridicos
+VALUES
+('0','Vigente',true),
+('1','Cobro Pre jurídico',true),
+('2','En cobro jurídico',true),
+('3','Deudor Insolvente',true);
+
+INSERT INTO cartera.tipos_cuotas
+VALUES
+('1','Fija',true),
+('2','Variable',true),
+('3','Otra (semifija o semivariable)',true);
+
+
+INSERT INTO cartera.estados_cartera
+VALUES
+('A','Activo','S',true),
+('C','Cancelado','N',true),
+('K','Castigado','N',true);
+
+
+INSERT INTO cartera.modalidades_intereses (codigo_modalidad_interes, descripcion_modalidad_interes, tipo_modalidad, periodo_modalidad, activo)
+VALUES
+('1','Anticipada','A',1,true),
+('2','Vencida','V',1,true);
+
+INSERT INTO cartera.garantias_creditos
+VALUES
+('1','Garantía no idónea','O',true),
+('2','Hipotecaria','B',true),
+('3','Prendaria (Vehículos y maquinaria)','B',true),
+('6','Contratos de Fiducia','B',true),
+('8','Pignoración de rentas','B',true),
+('9','Otras garantías idóneas','B',true),
+('10','Depósitos de dinero en garantía','B',true),
+('11','Garantía soberana de la nación','B',true),
+('12','Garantías fondos de garantías (FNG, FAG)','B',true),
+('13','Derechos de cobro','B',true),
+('14','Fiducia sobre inmuebles','B',true),
+('15','Sin garantía','O',true);
+
+INSERT INTO cartera.destinos_economicos
+VALUES
+('A','AGRICULTURA, GANADERÍA, CAZA, SILVICULTURA Y PESCA.',true),
+('B','EXPLOTACIÓN DE MINAS Y CANTERAS.',true),
+('C','INDUSTRIAS MANUFACTURERAS',true),
+('D','SUMINISTRO DE ELECTRICIDAD, GAS, VAPOR Y AIRE ACONDICIONADO.',true),
+('E','DISTRIBUCIÓN DE AGUA Y SANEAMIENTO AMBIENTAL.',true),
+('F','CONSTRUCCIÓN.',true),
+('G','COMERCIO AL POR MAYOR Y AL POR MENOR.',true),
+('H','TRANSPORTE Y ALMACENAMIENTO.',true),
+('I','ALOJAMIENTO Y SERVICIOS DE COMIDA.',true),
+('J','INFORMACIÓN Y COMUNICACIONES.',true),
+('K','ACTIVIDADES FINANCIERAS Y DE SEGUROS.',true),
+('L','ACTIVIDADES INMOBILIARIAS.',true),
+('M','ACTIVIDADES PROFESIONALES, CIENTÍFICAS Y TÉCNICAS.',true),
+('N','ACTIVIDADES DE SERVICIOS ADMINISTRATIVOS Y DE APOYO.',true),
+('O','ADMINISTRACIÓN PÚBLICA Y DEFENSA.',true),
+('P','EDUCACIÓN.',true),
+('Q','SALUD HUMANA Y ASISTENCIA SOCIAL.',true),
+('R','ACTIVIDADES ARTÍSTICAS Y RECREACIÓN.',true),
+('S','OTRAS ACTIVIDADES DE SERVICIOS.',true),
+('T','ACTIVIDADES DE LOS HOGARES INDIVIDUALES.',true),
+('U','ORGANIZACIONES Y ENTIDADES EXTRATERRITORIALES.',true);
+
+ 
+INSERT INTO cartera.clasificaciones_creditos
+VALUES
+('S','Consumo',true),
+('C','Comercial',true),
+('P','Productivo',true),
+('M','Microcrédito',true);
+
+
+INSERT INTO cartera.tipos_productos
+VALUES
+('1','No',true),
+('2','Cupo rotativo',true),
+('3','Tarjeta de crédito',true);
+
+
+INSERT INTO cartera.entidades_garantia
+VALUES
+('1','Bancoldex',true),
+('2','Finagro',true),
+('3','Findeter',true),
+('4','Fogacoop',true),
+('5','Establecimiento',true),
+('6','Otro',true),
+('7','Ninguno',true);
+
+
+INSERT INTO cartera.clases_vivienda_ses
+VALUES
+('1','Nueva',true),
+('2','Usada',true),
+('3','Mejoramiento',true),
+('4','Lote con servicios',true),
+('5','Construcción en sitio propio',true);
+
+
+INSERT INTO cartera.senales_subsidio
+VALUES
+('1','SI',true),
+('0','NO',true);
+
+INSERT INTO cartera.entidades_redescuento
+VALUES
+('0','Ninguna',true),
+('1','FINDETER',true);
+
+
+INSERT INTO cartera.sujetos_desembolso
+VALUES
+('1','Desembolso directo',true),
+('2','Desembolso a constructor',true),
+('3','Subrogación',true);
+
+
+INSERT INTO cartera.vivienda_vis
+VALUES
+('1','SI',true),
+('0','NO',true);
+
+INSERT INTO cartera.tipos_vis
+VALUES
+('1','1','Tipo 1: Menor o igual a 50 SMMLV','SMMLV',0,50,true),
+('1','2','Tipo 2: Mayor a 50 y menor o igual a 70 SMMLV','SMMLV',50,70,true),
+('1','3','Tipo 3: Mayor a 70 y menor o igual a 100 SMMLV','SMMLV',70,100,true),
+('1','4','Tipo 4: Mayor a 100 y menor o igual a 135 SMMLV','SMMLV',100,135,true);
+('0','1', 'Rango 1: Mayor a VIS y menor o igual a 643100 UVR', 'UVR', 0, 643100, true),
+('0','2', 'Rango 2: Mayor a 643100 UVR y menor o igual a 2411625 UVR', 'UVR', 643100, 2411625, true),
+('0','3', 'Rango 3: Mayor a 2411625 UVR', 'UVR', 2411625, NULL, true);
+
+
+INSERT INTO cartera.lineas_creditos
+(
+    codigo_linea_credito,
+    nombre_linea_credito,
+    acta_creacion,
+    fecha_acta,
+    activo,
+    fk_seguridad_creacion,
+    fk_seguridad_edicion
+)
+VALUES
+('001','ORDINARIA',NULL,NULL,true,1,1),
+('002','ESPECIAL',NULL,NULL,true,1,1),
+('003','CAMBIO DE CHEQUES',NULL,NULL,true,1,1),
+('004','ESTUDIOS',NULL,NULL,true,1,1),
+('005','LINEA CAFETERA',NULL,NULL,true,1,1),
+('006','APORTES SOCIALES',NULL,NULL,true,1,1),
+('007','BENEFICIO COMUNITARIO',NULL,NULL,true,1,1),
+('008','MEJORAMIENTO INFRAESTRUCTURA PANELERA',NULL,NULL,true,1,1),
+('009','COMERCIAL',NULL,NULL,true,1,1),
+('010','CUPO ROTATIVO',NULL,NULL,true,1,1),
+('011','ALIVIOS ACT. PANDEMIA',NULL,NULL,true,1,1),
+('012','COMPRA DE CARTERA',NULL,NULL,true,1,1),
+('013','LINEA AMIGO',NULL,NULL,true,1,1),
+('014','ORDINARIA - PREFERENCIAL',NULL,NULL,true,1,1),
+('015','CREDIAGIL',NULL,NULL,true,1,1);
+
+

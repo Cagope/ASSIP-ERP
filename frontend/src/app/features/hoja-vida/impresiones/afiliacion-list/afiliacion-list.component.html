@@ -3,80 +3,222 @@
   <div class="header">
     <h2>Afiliaciones registradas</h2>
 
-    <div class="actions">
-      <input
-        type="text"
-        [(ngModel)]="filtro"
-        (input)="filtrar()"
-        placeholder="Buscar por nombre o documento..."
-      />
+    <button
+      type="button"
+      class="btn btn--secondary no-print"
+      (click)="refrescar()">
+      Actualizar
+    </button>
+  </div>
+
+  <!-- FILTROS -->
+  <form
+    class="filtros-card no-print"
+    (ngSubmit)="buscar()">
+
+    <div class="filtros-grid">
+
+      <div class="f-row">
+        <label for="filtroDocumento">
+          Documento
+        </label>
+
+        <input
+          id="filtroDocumento"
+          type="text"
+          name="filtroDocumento"
+          [(ngModel)]="filtros.documento"
+          placeholder="Documento"
+          autocomplete="off">
+      </div>
+
+      <div class="f-row">
+        <label for="filtroNombres">
+          Nombres
+        </label>
+
+        <input
+          id="filtroNombres"
+          type="text"
+          name="filtroNombres"
+          [(ngModel)]="filtros.nombres"
+          placeholder="Nombres"
+          autocomplete="off">
+      </div>
+
+      <div class="f-row">
+        <label for="filtroPrimerApellido">
+          Primer apellido
+        </label>
+
+        <input
+          id="filtroPrimerApellido"
+          type="text"
+          name="filtroPrimerApellido"
+          [(ngModel)]="filtros.primerApellido"
+          placeholder="Primer apellido"
+          autocomplete="off">
+      </div>
+
+      <div class="f-row">
+        <label for="filtroSegundoApellido">
+          Segundo apellido
+        </label>
+
+        <input
+          id="filtroSegundoApellido"
+          type="text"
+          name="filtroSegundoApellido"
+          [(ngModel)]="filtros.segundoApellido"
+          placeholder="Segundo apellido"
+          autocomplete="off">
+      </div>
+
+      <div class="f-buttons">
+        <button
+          type="submit"
+          class="btn btn--primary">
+          Buscar
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--cancel"
+          (click)="limpiar()">
+          Limpiar
+        </button>
+      </div>
+
+    </div>
+
+  </form>
+
+  <!-- ESTADOS -->
+  <div
+    *ngIf="cargando"
+    class="msg info">
+    Cargando registros…
+  </div>
+
+  <div
+    *ngIf="error && !cargando"
+    class="msg err">
+    {{ error }}
+  </div>
+
+  <!-- TABLA -->
+  <div
+    *ngIf="!cargando && filtradas.length > 0"
+    class="tabla-card">
+
+    <div class="tabla-responsive">
+
+      <table class="data-table">
+
+        <thead>
+        <tr>
+          <th>#</th>
+          <th>Documento</th>
+          <th>Nombre completo</th>
+          <th>Fecha actualización</th>
+          <th class="col-acciones">Acción</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr
+          *ngFor="
+              let persona of paginadas;
+              let i = index
+            ">
+
+          <td>
+            {{
+            (pagina - 1)
+            * tamanoPagina
+            + i
+            + 1
+            }}
+          </td>
+
+          <td>
+            {{ persona.documento }}
+          </td>
+
+          <td>
+            {{ persona.nombres }}
+            {{ persona.primerApellido }}
+            {{ persona.segundoApellido || '' }}
+          </td>
+
+          <td>
+            {{
+            persona.fechaActualizacion
+            | date:'dd/MM/yyyy'
+            }}
+          </td>
+
+          <td class="col-acciones">
+
+            <button
+              type="button"
+              class="btn-action-print btn-gestionar"
+              (click)="abrirMenu($event, persona)"
+              title="Seleccionar formato de impresión">
+              Imprimir
+            </button>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <!-- PAGINACIÓN -->
+    <div
+      class="pagination-controls no-print"
+      *ngIf="filtradas.length > tamanoPagina">
 
       <button
         type="button"
         class="btn btn--secondary"
-        (click)="refrescar()">
-        Actualizar
+        (click)="cambiarPagina(pagina - 1)"
+        [disabled]="pagina === 1">
+        Anterior
       </button>
+
+      <span class="pagination-info">
+        Página {{ pagina }} de {{ totalPaginas() }}
+      </span>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="cambiarPagina(pagina + 1)"
+        [disabled]="pagina >= totalPaginas()">
+        Siguiente
+      </button>
+
     </div>
-  </div>
-
-  <div *ngIf="cargando" class="msg info">Cargando registros…</div>
-  <div *ngIf="error && !cargando" class="msg err">{{ error }}</div>
-
-  <table class="data-table" *ngIf="filtrados.length > 0; else vacio">
-    <thead>
-    <tr>
-      <th>#</th>
-      <th>Documento</th>
-      <th>Nombre completo</th>
-      <th>Fecha actualización</th>
-      <th class="text-center">Acciones</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    <tr *ngFor="let d of paginados; let i = index">
-      <td>{{ (pagina - 1) * tamanoPagina + i + 1 }}</td>
-      <td>{{ d.documento }}</td>
-      <td>{{ d.nombres }} {{ d.primerApellido }} {{ d.segundoApellido }}</td>
-      <td>{{ d.fechaActualizacion | date:'yyyy-MM-dd' }}</td>
-
-      <td class="text-center">
-        <button
-          type="button"
-          class="btn-action-print"
-          (click)="abrirMenu($event, d)">
-          Imprimir
-        </button>
-      </td>
-    </tr>
-    </tbody>
-  </table>
-
-  <div class="pagination-controls" *ngIf="totalPaginas() > 1">
-
-    <button
-      type="button"
-      class="btn btn--secondary"
-      (click)="cambiarPagina(pagina - 1)"
-      [disabled]="pagina === 1">
-      Anterior
-    </button>
-
-    <span>Página {{ pagina }} / {{ totalPaginas() }}</span>
-
-    <button
-      type="button"
-      class="btn btn--secondary"
-      (click)="cambiarPagina(pagina + 1)"
-      [disabled]="pagina === totalPaginas()">
-      Siguiente
-    </button>
 
   </div>
 
-  <ng-template #vacio>
-    <div class="empty">No hay afiliaciones registradas.</div>
-  </ng-template>
+  <!-- SIN RESULTADOS -->
+  <div
+    *ngIf="
+      !cargando
+      && filtradas.length === 0
+      && !error
+    "
+    class="empty">
+
+    No se encontraron afiliaciones registradas.
+
+  </div>
 
 </div>

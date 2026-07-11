@@ -7,88 +7,224 @@
     [mostrarExportar]="false">
   </app-header-actions>
 
-  <!-- 🔎 Buscar -->
-  <div class="filtro mb-3">
-    <input
-      type="text"
-      placeholder="Buscar por nombre o documento..."
-      [(ngModel)]="filtro"
-      (input)="filtrar()"
-      class="form-control"
-    />
-  </div>
+  <!-- FILTROS -->
+  <form
+    class="filtros-card no-print"
+    (ngSubmit)="buscar()">
 
-  <!--Tabla -->
-  <table *ngIf="!cargando && filtradas.length > 0" class="table table-striped table-hover align-middle">
-    <thead>
-    <tr>
-      <th>Documento</th>
-      <th>Nombre completo</th>
-      <th>Fecha actualización</th>
-      <th class="text-center">Acción</th>
-    </tr>
-    </thead>
+    <div class="filtros-grid">
 
-    <tbody>
-    <tr *ngFor="let p of paginadas">
+      <div class="f-row">
+        <label for="filtroDocumento">
+          Documento
+        </label>
 
-      <!-- Documento -->
-      <td>{{ p.tipoDocumento }} {{ p.documento }}</td>
+        <input
+          id="filtroDocumento"
+          type="text"
+          name="filtroDocumento"
+          [(ngModel)]="filtros.documento"
+          placeholder="Documento"
+          autocomplete="off">
+      </div>
 
-      <!-- Nombre -->
-      <td>{{ p.nombres }} {{ p.primerApellido }} {{ p.segundoApellido }}</td>
+      <div class="f-row">
+        <label for="filtroNombres">
+          Nombres
+        </label>
 
-      <!-- Fecha actualización -->
-      <td>{{ p.fechaActualizacion | date: 'dd/MM/yyyy' }}</td>
+        <input
+          id="filtroNombres"
+          type="text"
+          name="filtroNombres"
+          [(ngModel)]="filtros.nombres"
+          placeholder="Nombres"
+          autocomplete="off">
+      </div>
 
-      <!-- Acción -->
-      <td class="text-center">
+      <div class="f-row">
+        <label for="filtroPrimerApellido">
+          Primer apellido
+        </label>
+
+        <input
+          id="filtroPrimerApellido"
+          type="text"
+          name="filtroPrimerApellido"
+          [(ngModel)]="filtros.primerApellido"
+          placeholder="Primer apellido"
+          autocomplete="off">
+      </div>
+
+      <div class="f-row">
+        <label for="filtroSegundoApellido">
+          Segundo apellido
+        </label>
+
+        <input
+          id="filtroSegundoApellido"
+          type="text"
+          name="filtroSegundoApellido"
+          [(ngModel)]="filtros.segundoApellido"
+          placeholder="Segundo apellido"
+          autocomplete="off">
+      </div>
+
+      <div class="f-buttons">
+
+        <button
+          type="submit"
+          class="btn btn--primary">
+          Buscar
+        </button>
+
         <button
           type="button"
-          class="btn-action-edit"
-          (click)="gestionar(p)">
-          Gestionar
+          class="btn btn--cancel"
+          (click)="limpiar()">
+          Limpiar
         </button>
-      </td>
 
-    </tr>
-    </tbody>
-  </table>
+      </div>
 
-  <!--Paginación -->
-  <div class="pagination-controls" *ngIf="!cargando && filtradas.length > tamanoPagina">
-    <button
-      type="button"
-      class="btn btn--secondary"
-      (click)="cambiarPagina(pagina - 1)"
-      [disabled]="pagina === 1">
-      Anterior
-    </button>
+    </div>
 
-    <span>Página {{ pagina }} / {{ totalPaginas() }}</span>
+  </form>
 
-    <button
-      type="button"
-      class="btn btn--secondary"
-      (click)="cambiarPagina(pagina + 1)"
-      [disabled]="pagina === totalPaginas()">
-      Siguiente
-    </button>
-  </div>
+  <!-- ERROR -->
+  <div
+    *ngIf="error"
+    class="alert alert-warning d-flex align-items-start gap-2"
+    role="alert">
 
-  <!--Mensajes -->
-  <div *ngIf="cargando" class="loading">
-    <i class="bi bi-hourglass-split"></i> Cargando apertura de cuentas...
-  </div>
-
-  <div *ngIf="!cargando && filtradas.length === 0" class="empty">
-    <i class="bi bi-inbox"></i> No hay registros para mostrar.
-  </div>
-
-  <div *ngIf="error" class="alert alert-warning d-flex align-items-start gap-2" role="alert">
     <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-    <div>{{ error }}</div>
+
+    <div>
+      {{ error }}
+    </div>
+
   </div>
 
+  <!-- CARGANDO -->
+  <div
+    *ngIf="cargando"
+    class="loading">
+
+    <i class="bi bi-hourglass-split"></i>
+    Cargando apertura de cuentas...
+
+  </div>
+
+  <!-- TABLA -->
+  <div
+    *ngIf="!cargando && filtradas.length > 0"
+    class="tabla-card">
+
+    <div class="tabla-responsive">
+
+      <table
+        class="table table-striped table-hover align-middle">
+
+        <thead>
+        <tr>
+          <th>Documento</th>
+          <th>Nombre completo</th>
+          <th>Fecha actualización</th>
+          <th class="col-acciones">Acción</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let persona of paginadas">
+
+          <td>
+            {{ persona.tipoDocumento }}
+            {{ persona.documento }}
+          </td>
+
+          <td>
+            {{ persona.nombres }}
+            {{ persona.primerApellido }}
+            {{ persona.segundoApellido || '' }}
+          </td>
+
+          <td>
+            {{
+            persona.fechaActualizacion
+            | date:'dd/MM/yyyy'
+            }}
+          </td>
+
+          <td class="col-acciones">
+
+            <button
+              type="button"
+              class="btn-action-edit btn-gestionar"
+              (click)="gestionar(persona)"
+              [disabled]="validando"
+              title="Gestionar apertura de cuentas">
+              {{
+              validando
+              ? 'Validando...'
+              : 'Gestionar'
+              }}
+            </button>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <!-- PAGINACIÓN -->
+    <div
+      class="pagination-controls no-print"
+      *ngIf="filtradas.length > tamanoPagina">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="cambiarPagina(pagina - 1)"
+        [disabled]="pagina === 1 || validando">
+        Anterior
+      </button>
+
+      <span class="pagination-info">
+        Página {{ pagina }} de {{ totalPaginas() }}
+      </span>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="cambiarPagina(pagina + 1)"
+        [disabled]="
+          pagina >= totalPaginas()
+          || validando
+        ">
+        Siguiente
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- SIN RESULTADOS -->
+  <div
+    *ngIf="
+      !cargando
+      && filtradas.length === 0
+      && !error
+    "
+    class="empty">
+
+    <i class="bi bi-inbox"></i>
+    No se encontraron asociados.
+
+  </div>
 
 </div>
