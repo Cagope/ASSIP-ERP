@@ -1,0 +1,519 @@
+<section class="participacion-card">
+
+  <header class="participacion-header">
+
+    <div class="participacion-header__titulo">
+
+      <h3>
+        Participación institucional
+      </h3>
+
+      <p>
+        Cargos directivos, comités y relaciones institucionales
+        registradas para el asociado.
+      </p>
+
+    </div>
+
+    <span
+      class="contador"
+      *ngIf="tieneParticipaciones">
+
+      {{ listaOrdenada.length }}
+
+    </span>
+
+  </header>
+
+  <!-- =======================================================
+       SIN INFORMACIÓN
+       ======================================================= -->
+
+  <div
+    class="participacion-empty"
+    *ngIf="!tieneParticipaciones">
+
+    <div class="participacion-empty__icono">
+      ℹ️
+    </div>
+
+    <div>
+
+      <strong>
+        Sin participación institucional
+      </strong>
+
+      <p>
+        El asociado no registra cargos directivos, comités
+        ni relaciones privilegiadas.
+      </p>
+
+    </div>
+
+  </div>
+
+  <!-- =======================================================
+       LISTADO
+       ======================================================= -->
+
+  <div
+    class="participacion-lista"
+    *ngIf="tieneParticipaciones">
+
+    <article
+      class="participacion-item"
+      *ngFor="
+        let participacion of listaOrdenada;
+        trackBy: trackByParticipacion
+      ">
+
+      <!-- ===================================================
+           ENCABEZADO DEL REGISTRO
+           =================================================== -->
+
+      <div class="participacion-item__header">
+
+        <div class="participacion-item__titulo">
+
+          <span
+            class="tipo-badge"
+            [ngClass]="
+              obtenerClaseTipo(
+                participacion.tipoParticipacion
+              )
+            ">
+
+            {{
+              obtenerEtiquetaTipo(
+                participacion.tipoParticipacion
+              )
+            }}
+
+          </span>
+
+          <div class="participacion-item__nombre">
+
+            <h4>
+              {{ obtenerNombrePrincipal(participacion) }}
+            </h4>
+
+            <p
+              *ngIf="
+                obtenerDetallePrincipal(participacion)
+              ">
+
+              {{
+              obtenerDetallePrincipal(participacion)
+              }}
+
+            </p>
+
+          </div>
+
+        </div>
+
+        <div class="participacion-item__estados">
+
+          <span
+            class="estado-badge estado-activo"
+            *ngIf="mostrarEstadoActivo(participacion)">
+
+            {{
+              participacion.nombreEstadoDirectivo
+            }}
+
+          </span>
+
+          <span
+            class="estado-badge estado-inactivo"
+            *ngIf="mostrarEstadoInactivo(participacion)">
+
+            {{
+              participacion.nombreEstadoDirectivo
+            }}
+
+          </span>
+
+        </div>
+
+      </div>
+
+      <!-- ===================================================
+           DIRECTIVO
+           =================================================== -->
+
+      <div
+        class="detalle-grid"
+        *ngIf="
+          participacion.tipoParticipacion === 'DIRECTIVO'
+        ">
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.codigoTipoDirectivo">
+
+          <span>
+            Código del cargo
+          </span>
+
+          <strong>
+            {{ participacion.codigoTipoDirectivo }}
+          </strong>
+
+        </div>
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.nombreTipoDirectivo">
+
+          <span>
+            Tipo de directivo
+          </span>
+
+          <strong>
+            {{ participacion.nombreTipoDirectivo }}
+          </strong>
+
+        </div>
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.nombreCalidadDirectivo">
+
+          <span>
+            Calidad
+          </span>
+
+          <strong>
+            {{ participacion.nombreCalidadDirectivo }}
+          </strong>
+
+        </div>
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.actaAsamblea">
+
+          <span>
+            Acta de asamblea
+          </span>
+
+          <strong>
+            {{ participacion.actaAsamblea }}
+          </strong>
+
+        </div>
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.fechaAsamblea">
+
+          <span>
+            Fecha de asamblea
+          </span>
+
+          <strong>
+            {{
+            participacion.fechaAsamblea
+            | date:'dd/MM/yyyy'
+            }}
+          </strong>
+
+        </div>
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.resolucionSes">
+
+          <span>
+            Resolución SES
+          </span>
+
+          <strong>
+            {{ participacion.resolucionSes }}
+          </strong>
+
+        </div>
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.fechaResolucion">
+
+          <span>
+            Fecha de resolución
+          </span>
+
+          <strong>
+            {{
+            participacion.fechaResolucion
+            | date:'dd/MM/yyyy'
+            }}
+          </strong>
+
+        </div>
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.fechaRetiro">
+
+          <span>
+            Fecha de retiro
+          </span>
+
+          <strong>
+            {{
+            participacion.fechaRetiro
+            | date:'dd/MM/yyyy'
+            }}
+          </strong>
+
+        </div>
+
+      </div>
+
+      <!-- ===================================================
+           COMITÉ
+           =================================================== -->
+
+      <div
+        class="detalle-grid"
+        *ngIf="
+          participacion.tipoParticipacion === 'COMITE'
+        ">
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.nombreComite">
+
+          <span>
+            Comité
+          </span>
+
+          <strong>
+            {{ participacion.nombreComite }}
+          </strong>
+
+        </div>
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.codigoCargoComite">
+
+          <span>
+            Código del cargo
+          </span>
+
+          <strong>
+            {{ participacion.codigoCargoComite }}
+          </strong>
+
+        </div>
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.nombreCargoComite">
+
+          <span>
+            Cargo en el comité
+          </span>
+
+          <strong>
+            {{ participacion.nombreCargoComite }}
+          </strong>
+
+        </div>
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.numeroActa">
+
+          <span>
+            Número de acta
+          </span>
+
+          <strong>
+            {{ participacion.numeroActa }}
+          </strong>
+
+        </div>
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.fechaNombramiento">
+
+          <span>
+            Fecha de nombramiento
+          </span>
+
+          <strong>
+            {{
+            participacion.fechaNombramiento
+            | date:'dd/MM/yyyy'
+            }}
+          </strong>
+
+        </div>
+
+      </div>
+
+      <!-- ===================================================
+           PRIVILEGIADO
+           =================================================== -->
+
+      <div
+        class="detalle-grid"
+        *ngIf="
+          participacion.tipoParticipacion ===
+          'PRIVILEGIADO'
+        ">
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.nombreTipoDirectivo">
+
+          <span>
+            Directivo relacionado
+          </span>
+
+          <strong>
+            {{ participacion.nombreTipoDirectivo }}
+          </strong>
+
+        </div>
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.nombreParentesco">
+
+          <span>
+            Parentesco
+          </span>
+
+          <strong>
+            {{ participacion.nombreParentesco }}
+          </strong>
+
+        </div>
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.documentoRelacionado">
+
+          <span>
+            Documento relacionado
+          </span>
+
+          <strong>
+            {{ participacion.documentoRelacionado }}
+          </strong>
+
+        </div>
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.nombreRelacionado">
+
+          <span>
+            Persona relacionada
+          </span>
+
+          <strong>
+            {{ participacion.nombreRelacionado }}
+          </strong>
+
+        </div>
+
+      </div>
+
+      <!-- ===================================================
+           PERSONA RELACIONADA
+           =================================================== -->
+
+      <div
+        class="detalle-grid"
+        *ngIf="
+          participacion.tipoParticipacion ===
+          'PERSONA_RELACIONADA'
+        ">
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.documentoRelacionado">
+
+          <span>
+            Documento
+          </span>
+
+          <strong>
+            {{ participacion.documentoRelacionado }}
+          </strong>
+
+        </div>
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.nombreRelacionado">
+
+          <span>
+            Nombre
+          </span>
+
+          <strong>
+            {{ participacion.nombreRelacionado }}
+          </strong>
+
+        </div>
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.nombreParentesco">
+
+          <span>
+            Parentesco
+          </span>
+
+          <strong>
+            {{ participacion.nombreParentesco }}
+          </strong>
+
+        </div>
+
+        <div
+          class="detalle-campo"
+          *ngIf="participacion.nombreTipoDirectivo">
+
+          <span>
+            Directivo relacionado
+          </span>
+
+          <strong>
+            {{ participacion.nombreTipoDirectivo }}
+          </strong>
+
+        </div>
+
+      </div>
+
+      <!-- ===================================================
+           AVISO DE RELACIÓN PRIVILEGIADA
+           =================================================== -->
+
+      <div
+        class="privilegiado-alerta"
+        *ngIf="participacion.esPrivilegiado">
+
+        <span class="privilegiado-alerta__icono">
+          ⚠️
+        </span>
+
+        <span>
+          Registro identificado como relación privilegiada.
+        </span>
+
+      </div>
+
+    </article>
+
+  </div>
+
+</section>

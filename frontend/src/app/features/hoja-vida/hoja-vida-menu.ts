@@ -8,6 +8,7 @@
 export const hojaVidaMenu = {
   title: 'Hoja de Vida',
   items: [
+
     // 🟩 FORMULARIO INTEGRAL
     {
       label: 'Formulario Integral',
@@ -44,6 +45,14 @@ export const hojaVidaMenu = {
       route: '/hoja-vida/sarlaft'
     },
     {
+      label: 'Residencia Fiscal (FATCA / CRS)',
+      route: '/hoja-vida/residencia-fiscal'
+    },
+    {
+      label: 'Condiciones de Protección',
+      route: '/hoja-vida/condiciones-proteccion'
+    },
+    {
       label: 'Autorizaciones de Contacto',
       route: '/hoja-vida/permisos-especiales'
     },
@@ -76,11 +85,11 @@ export const hojaVidaMenu = {
       route: '/hoja-vida/apertura-cuentas'
     },
 
-
     // 🧾 IMPRESIONES
     {
       label: 'Impresión de Formatos',
       route: '/hoja-vida/impresiones/afiliacion-list'
     }
+
   ]
 };

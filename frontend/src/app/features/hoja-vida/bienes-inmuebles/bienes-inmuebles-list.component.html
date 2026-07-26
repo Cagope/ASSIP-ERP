@@ -7,44 +7,64 @@
     [mostrarExportar]="false">
   </app-header-actions>
 
+  <!-- ======================================================= -->
+  <!-- FILTROS -->
+  <!-- ======================================================= -->
+
   <section class="filtros-card">
 
     <div class="filtros-grid">
 
       <div class="f-row">
+
         <label>Documento</label>
+
         <input
           type="text"
           [(ngModel)]="filtros.documento"
           name="documento"
+          autocomplete="off"
           (keyup.enter)="buscar()">
+
       </div>
 
       <div class="f-row">
+
         <label>Nombres</label>
+
         <input
           type="text"
           [(ngModel)]="filtros.nombres"
           name="nombres"
+          autocomplete="off"
           (keyup.enter)="buscar()">
+
       </div>
 
       <div class="f-row">
+
         <label>Primer apellido</label>
+
         <input
           type="text"
           [(ngModel)]="filtros.primerApellido"
           name="primerApellido"
+          autocomplete="off"
           (keyup.enter)="buscar()">
+
       </div>
 
       <div class="f-row">
+
         <label>Segundo apellido</label>
+
         <input
           type="text"
           [(ngModel)]="filtros.segundoApellido"
           name="segundoApellido"
+          autocomplete="off"
           (keyup.enter)="buscar()">
+
       </div>
 
       <div class="filtros-actions">
@@ -69,11 +89,19 @@
 
   </section>
 
-  <div *ngIf="error" class="alert alert-warning">
+  <!-- ======================================================= -->
+  <!-- MENSAJES -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="error"
+    class="alert alert-warning">
     {{ error }}
   </div>
 
-  <div *ngIf="cargando" class="loading">
+  <div
+    *ngIf="cargando"
+    class="loading">
     Cargando asociados...
   </div>
 
@@ -83,52 +111,83 @@
     No hay registros para mostrar.
   </div>
 
-  <div
+  <!-- ======================================================= -->
+  <!-- LISTADO -->
+  <!-- ======================================================= -->
+
+  <section
     class="tabla-card"
     *ngIf="!cargando && filtradas.length > 0">
 
-    <table class="table table-striped table-hover align-middle">
+    <div class="tabla-header">
 
-      <thead>
-      <tr>
-        <th>Documento</th>
-        <th>Nombre completo</th>
-        <th>Fecha actualización</th>
-        <th class="text-center">Acción</th>
-      </tr>
-      </thead>
+      <span>
+        Registros encontrados:
+        <strong>{{ filtradas.length }}</strong>
+      </span>
 
-      <tbody>
-      <tr *ngFor="let p of paginadas">
+    </div>
 
-        <td>
-          {{ p.tipoDocumento }} {{ p.documento }}
-        </td>
+    <div class="table-responsive">
 
-        <td>
-          {{ p.nombres }}
-          {{ p.primerApellido }}
-          {{ p.segundoApellido }}
-        </td>
+      <table class="table table-striped table-hover align-middle">
 
-        <td>
-          {{ p.fechaActualizacion | date:'dd/MM/yyyy' }}
-        </td>
+        <thead>
 
-        <td class="text-center">
-          <button
-            type="button"
-            class="btn-action-edit"
-            (click)="gestionar(p)"
-            title="Gestionar bienes inmuebles">
-            Gestionar
-          </button>
-        </td>
+        <tr>
+          <th>Documento</th>
+          <th>Nombre completo</th>
+          <th>Fecha actualización</th>
+          <th class="text-center">Acción</th>
+        </tr>
 
-      </tr>
-      </tbody>
+        </thead>
 
-    </table>
+        <tbody>
+
+        <tr *ngFor="let p of paginadas">
+
+          <td>
+            {{ p.tipoDocumento }}
+            {{ p.documento }}
+          </td>
+
+          <td>
+            {{ p.nombres }}
+            {{ p.primerApellido }}
+            {{ p.segundoApellido }}
+          </td>
+
+          <td>
+            {{
+            p.fechaActualizacion
+            | date:'dd/MM/yyyy'
+            }}
+          </td>
+
+          <td class="text-center">
+
+            <button
+              type="button"
+              class="btn btn--primary btn-gestionar"
+              (click)="gestionar(p)"
+              title="Gestionar bienes inmuebles">
+              Gestionar
+            </button>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- PAGINACIÓN -->
+    <!-- ===================================================== -->
 
     <div
       class="pagination-controls"
@@ -143,7 +202,7 @@
       </button>
 
       <span>
-        Página {{ pagina }} / {{ totalPaginas() }}
+        Página {{ pagina }} de {{ totalPaginas() }}
       </span>
 
       <button
@@ -156,6 +215,6 @@
 
     </div>
 
-  </div>
+  </section>
 
 </div>

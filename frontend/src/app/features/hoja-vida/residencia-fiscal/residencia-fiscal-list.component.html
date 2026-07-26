@@ -1,0 +1,341 @@
+<div class="residencia-fiscal-list">
+
+  <app-header-actions
+    titulo="Residencia Fiscal (FATCA / CRS)"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="true"
+    [mostrarExportar]="true"
+    (imprimir)="imprimir()"
+    (exportar)="exportar()">
+  </app-header-actions>
+
+  <!-- FILTROS -->
+  <form
+    class="filtros-card no-print"
+    (ngSubmit)="buscar()">
+
+    <div class="filtros-grid">
+
+      <div class="f-row">
+        <label for="filtroDocumento">
+          Documento
+        </label>
+
+        <input
+          id="filtroDocumento"
+          type="text"
+          name="filtroDocumento"
+          [(ngModel)]="filtros.documento"
+          placeholder="Documento"
+          autocomplete="off">
+      </div>
+
+      <div class="f-row">
+        <label for="filtroNombres">
+          Nombres
+        </label>
+
+        <input
+          id="filtroNombres"
+          type="text"
+          name="filtroNombres"
+          [(ngModel)]="filtros.nombres"
+          placeholder="Nombres"
+          autocomplete="off">
+      </div>
+
+      <div class="f-row">
+        <label for="filtroPrimerApellido">
+          Primer apellido
+        </label>
+
+        <input
+          id="filtroPrimerApellido"
+          type="text"
+          name="filtroPrimerApellido"
+          [(ngModel)]="filtros.primerApellido"
+          placeholder="Primer apellido"
+          autocomplete="off">
+      </div>
+
+      <div class="f-row">
+        <label for="filtroSegundoApellido">
+          Segundo apellido
+        </label>
+
+        <input
+          id="filtroSegundoApellido"
+          type="text"
+          name="filtroSegundoApellido"
+          [(ngModel)]="filtros.segundoApellido"
+          placeholder="Segundo apellido"
+          autocomplete="off">
+      </div>
+
+      <div class="f-buttons">
+
+        <button
+          type="submit"
+          class="btn btn--primary">
+          Buscar
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--cancel"
+          (click)="limpiar()">
+          Limpiar
+        </button>
+
+      </div>
+
+    </div>
+
+  </form>
+
+  <!-- ERROR -->
+  <div
+    *ngIf="error"
+    class="error">
+
+    <i class="bi bi-exclamation-triangle"></i>
+    {{ error }}
+
+  </div>
+
+  <!-- CARGANDO -->
+  <div
+    *ngIf="cargando"
+    class="loading">
+
+    <i class="bi bi-hourglass-split"></i>
+    Cargando información de residencia fiscal...
+
+  </div>
+
+  <!-- TABLA -->
+  <div
+    *ngIf="!cargando && filtradas.length > 0"
+    class="tabla-card">
+
+    <div class="tabla-responsive">
+
+      <table
+        class="table table-striped table-hover align-middle">
+
+        <thead>
+        <tr>
+
+          <th>Documento</th>
+
+          <th>Nombre completo</th>
+
+          <th class="text-center">
+            Ciudadano EE.UU.
+          </th>
+
+          <th class="text-center">
+            Residente fiscal EE.UU.
+          </th>
+
+          <th class="text-center">
+            Residente fiscal exterior
+          </th>
+
+          <th>
+            País residencia fiscal
+          </th>
+
+          <th>
+            Fecha actualización
+          </th>
+
+          <th class="col-acciones">
+            Acción
+          </th>
+
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let persona of paginadas">
+
+          <td>
+            {{ persona.tipoDocumento }}
+            {{ persona.documento }}
+          </td>
+
+          <td>
+            {{ persona.nombres }}
+            {{ persona.primerApellido }}
+            {{ persona.segundoApellido || '' }}
+          </td>
+
+          <!-- Ciudadano EE.UU. -->
+          <td class="text-center">
+
+            <span
+              *ngIf="
+                persona.residenciaFiscal?.ciudadanoEstadosUnidos;
+                else noCiudadano
+              "
+              class="text-success">
+              Sí
+            </span>
+
+            <ng-template #noCiudadano>
+              <span class="text-danger">
+                No
+              </span>
+            </ng-template>
+
+          </td>
+
+          <!-- Residente fiscal EE.UU. -->
+          <td class="text-center">
+
+            <span
+              *ngIf="
+                persona.residenciaFiscal?.residenteFiscalEstadosUnidos;
+                else noRfUsa
+              "
+              class="text-success">
+              Sí
+            </span>
+
+            <ng-template #noRfUsa>
+              <span class="text-danger">
+                No
+              </span>
+            </ng-template>
+
+          </td>
+
+          <!-- Residente fiscal exterior -->
+          <td class="text-center">
+
+            <span
+              *ngIf="
+                persona.residenciaFiscal?.residenteFiscalExterior;
+                else noExterior
+              "
+              class="text-success">
+              Sí
+            </span>
+
+            <ng-template #noExterior>
+              <span class="text-danger">
+                No
+              </span>
+            </ng-template>
+
+          </td>
+
+          <td>
+
+            {{
+            persona.residenciaFiscal?.paisResidenciaFiscal
+            || '-'
+            }}
+
+          </td>
+
+          <td>
+
+            {{
+            persona.fechaActualizacion
+            | date:'dd/MM/yyyy'
+            }}
+
+          </td>
+
+          <td class="col-acciones">
+
+            <button
+              type="button"
+              class="btn-action-edit btn-gestionar"
+              (click)="
+                gestionar(
+                  persona,
+                  persona.residenciaFiscal
+                )
+              "
+              [title]="
+                persona.residenciaFiscal
+                  ? 'Gestionar residencia fiscal'
+                  : 'Crear residencia fiscal'
+              ">
+
+              {{
+              persona.residenciaFiscal
+              ? 'Gestionar'
+              : 'Crear'
+              }}
+
+            </button>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <!-- PAGINACIÓN -->
+
+    <div
+      class="pagination-controls no-print"
+      *ngIf="filtradas.length > tamanoPagina">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="cambiarPagina(pagina - 1)"
+        [disabled]="pagina === 1">
+
+        Anterior
+
+      </button>
+
+      <span class="pagination-info">
+
+        Página {{ pagina }}
+        de {{ totalPaginas() }}
+
+      </span>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="cambiarPagina(pagina + 1)"
+        [disabled]="pagina >= totalPaginas()">
+
+        Siguiente
+
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- SIN RESULTADOS -->
+
+  <div
+    *ngIf="
+      !cargando &&
+      filtradas.length === 0 &&
+      !error
+    "
+    class="empty">
+
+    <i class="bi bi-inbox"></i>
+
+    No se encontró información de residencia fiscal.
+
+  </div>
+
+</div>

@@ -338,6 +338,22 @@ public class CatalogosController {
         return jdbcTemplate.queryForList(sql);
     }
 
+    @GetMapping("/hoja-vida/tipos-zonas-inmuebles")
+    public List<Map<String, Object>> listarTiposZonasInmueblesHojaVida() {
+
+        String sql = """
+        SELECT id_tipo_zona_inmueble AS id,
+               codigo_tipo_zona_inmueble AS codigo,
+               nombre_tipo_zona_inmueble AS nombre,
+               activo
+        FROM hoja_vida.tipos_zonas_inmuebles
+        WHERE activo = true
+        ORDER BY nombre_tipo_zona_inmueble
+        """;
+
+        return jdbcTemplate.queryForList(sql);
+    }
+
     @GetMapping("/hoja-vida/tipos-gravamenes")
     public List<Map<String, Object>> listarTiposGravamenesHojaVida() {
         String sql = """

@@ -1,0 +1,361 @@
+<section
+  *ngIf="indicadores; else sinIndicadores"
+  class="indicadores">
+
+  <div class="indicadores-encabezado">
+
+    <div>
+      <span class="indicadores-subtitulo">
+        Consolidado financiero
+      </span>
+
+      <h2>
+        Indicadores del asociado
+      </h2>
+    </div>
+
+    <div class="indicadores-estados">
+
+      <span
+        class="estado-general"
+        [ngClass]="claseEstadoGeneral">
+
+        {{ estadoGeneralPresentacion }}
+
+      </span>
+
+      <span
+        class="riesgo"
+        [ngClass]="claseRiesgo">
+
+        Riesgo {{ nivelRiesgo }}
+
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- INDICADORES FINANCIEROS                                -->
+  <!-- ===================================================== -->
+
+  <div class="indicadores-grid">
+
+    <article class="indicador-card">
+
+      <div class="indicador-card__superior">
+
+        <span class="indicador-card__titulo">
+          Aportes
+        </span>
+
+        <span class="indicador-card__icono">
+          AP
+        </span>
+
+      </div>
+
+      <strong class="indicador-card__valor">
+        {{ totalAportes |
+        currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+        }}
+      </strong>
+
+      <span class="indicador-card__detalle">
+        Aportes sociales
+      </span>
+
+    </article>
+
+
+    <article class="indicador-card">
+
+      <div class="indicador-card__superior">
+
+        <span class="indicador-card__titulo">
+          Ahorros
+        </span>
+
+        <span class="indicador-card__icono">
+          AH
+        </span>
+
+      </div>
+
+      <strong class="indicador-card__valor">
+        {{ totalAhorros |
+        currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+        }}
+      </strong>
+
+      <span class="indicador-card__detalle">
+        {{ cantidadCuentasAhorro }}
+        {{ cantidadCuentasAhorro === 1
+          ? 'cuenta de ahorro'
+          : 'cuentas de ahorro'
+        }}
+      </span>
+
+    </article>
+
+
+    <article class="indicador-card">
+
+      <div class="indicador-card__superior">
+
+        <span class="indicador-card__titulo">
+          CDAT
+        </span>
+
+        <span class="indicador-card__icono">
+          CD
+        </span>
+
+      </div>
+
+      <strong class="indicador-card__valor">
+        {{ totalCdats |
+        currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+        }}
+      </strong>
+
+      <span class="indicador-card__detalle">
+        {{ cantidadCdats }}
+        {{ cantidadCdats === 1
+          ? 'certificado'
+          : 'certificados'
+        }}
+      </span>
+
+    </article>
+
+
+    <article
+      class="indicador-card"
+      [class.indicador-card--advertencia]="
+        creditosEnMora > 0
+      ">
+
+      <div class="indicador-card__superior">
+
+        <span class="indicador-card__titulo">
+          Cartera
+        </span>
+
+        <span class="indicador-card__icono">
+          CR
+        </span>
+
+      </div>
+
+      <strong class="indicador-card__valor">
+        {{ saldoTotalCredito |
+        currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+        }}
+      </strong>
+
+      <span class="indicador-card__detalle">
+
+        {{ cantidadCreditos }}
+        {{ cantidadCreditos === 1
+          ? 'crédito'
+          : 'créditos'
+        }}
+
+        <ng-container *ngIf="creditosEnMora > 0">
+          · {{ creditosEnMora }} en mora
+          · {{ diasMayorMora }} días
+        </ng-container>
+
+      </span>
+
+    </article>
+
+
+    <article class="indicador-card">
+
+      <div class="indicador-card__superior">
+
+        <span class="indicador-card__titulo">
+          Bienes
+        </span>
+
+        <span class="indicador-card__icono">
+          BI
+        </span>
+
+      </div>
+
+      <strong class="indicador-card__valor">
+        {{ totalBienes |
+        currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+        }}
+      </strong>
+
+      <span class="indicador-card__detalle">
+        {{ cantidadBienes }}
+        {{ cantidadBienes === 1
+          ? 'bien registrado'
+          : 'bienes registrados'
+        }}
+      </span>
+
+    </article>
+
+
+    <article class="indicador-card indicador-card--principal">
+
+      <div class="indicador-card__superior">
+
+        <span class="indicador-card__titulo">
+          Patrimonio neto
+        </span>
+
+        <span class="indicador-card__icono">
+          PN
+        </span>
+
+      </div>
+
+      <strong class="indicador-card__valor">
+        {{ patrimonioNeto |
+        currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+        }}
+      </strong>
+
+      <span class="indicador-card__detalle">
+        Patrimonio consolidado menos obligaciones
+      </span>
+
+    </article>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- ESTADO DE INFORMACIÓN                                  -->
+  <!-- ===================================================== -->
+
+  <div class="estado-informacion">
+
+    <div class="estado-informacion__encabezado">
+
+      <div>
+        <span class="estado-informacion__titulo">
+          Estado de la información
+        </span>
+
+        <p>
+          {{ resumenEjecutivo }}
+        </p>
+      </div>
+
+      <div
+        *ngIf="cantidadAlertas > 0"
+        class="alertas-resumen">
+
+        <strong>
+          {{ cantidadAlertas }}
+        </strong>
+
+        <span>
+          {{ cantidadAlertas === 1
+            ? 'alerta'
+            : 'alertas'
+          }}
+        </span>
+
+      </div>
+
+    </div>
+
+    <div class="validaciones-grid">
+
+      <div
+        class="validacion"
+        [class.validacion--correcta]="sarlaftVigente"
+        [class.validacion--pendiente]="!sarlaftVigente">
+
+        <span class="validacion__estado">
+          {{ sarlaftVigente ? '✓' : '!' }}
+        </span>
+
+        <span>
+          SARLAFT vigente
+        </span>
+
+      </div>
+
+      <div
+        class="validacion"
+        [class.validacion--correcta]="contactoCompleto"
+        [class.validacion--pendiente]="!contactoCompleto">
+
+        <span class="validacion__estado">
+          {{ contactoCompleto ? '✓' : '!' }}
+        </span>
+
+        <span>
+          Contacto completo
+        </span>
+
+      </div>
+
+      <div
+        class="validacion"
+        [class.validacion--correcta]="
+          informacionFinancieraCompleta
+        "
+        [class.validacion--pendiente]="
+          !informacionFinancieraCompleta
+        ">
+
+        <span class="validacion__estado">
+          {{ informacionFinancieraCompleta ? '✓' : '!' }}
+        </span>
+
+        <span>
+          Información financiera
+        </span>
+
+      </div>
+
+      <div
+        class="validacion"
+        [class.validacion--correcta]="documentacionCompleta"
+        [class.validacion--pendiente]="!documentacionCompleta">
+
+        <span class="validacion__estado">
+          {{ documentacionCompleta ? '✓' : '!' }}
+        </span>
+
+        <span>
+          Documentación completa
+        </span>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<ng-template #sinIndicadores>
+
+  <section class="indicadores-vacios">
+
+    <strong>
+      Indicadores no disponibles
+    </strong>
+
+    <span>
+      No fue posible calcular el consolidado ejecutivo del asociado.
+    </span>
+
+  </section>
+
+</ng-template>

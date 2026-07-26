@@ -1,6 +1,11 @@
 package co.assip.erp.hojavida.bienesinmueblesavaluos;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,8 +16,15 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "bienes_inmuebles_avaluos", schema = "hoja_vida")
+@Table(
+        name = "bienes_inmuebles_avaluos",
+        schema = "hoja_vida"
+)
 public class BienInmuebleAvaluo {
+
+    // =========================================================
+    // Identificación
+    // =========================================================
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,6 +33,10 @@ public class BienInmuebleAvaluo {
 
     @Column(name = "id_bien", nullable = false)
     private Long idBien;
+
+    // =========================================================
+    // Fechas y vigencia del avalúo
+    // =========================================================
 
     @Column(name = "fecha_avaluo", nullable = false)
     private LocalDate fechaAvaluo;
@@ -31,11 +47,65 @@ public class BienInmuebleAvaluo {
     @Column(name = "fecha_vencimiento_avaluo")
     private LocalDate fechaVencimientoAvaluo;
 
-    @Column(name = "valor_avaluo_comercial", nullable = false, precision = 30, scale = 2)
+    // =========================================================
+    // Valores generales del avalúo
+    // =========================================================
+
+    @Column(
+            name = "valor_avaluo_comercial",
+            nullable = false,
+            precision = 30,
+            scale = 2
+    )
     private BigDecimal valorAvaluoComercial;
 
-    @Column(name = "valor_avaluo_catastral", nullable = false, precision = 30, scale = 2)
+    @Column(
+            name = "valor_avaluo_catastral",
+            nullable = false,
+            precision = 30,
+            scale = 2
+    )
     private BigDecimal valorAvaluoCatastral;
+
+    // =========================================================
+    // Componentes del avalúo
+    // =========================================================
+
+    @Column(
+            name = "valor_terreno",
+            nullable = false,
+            precision = 30,
+            scale = 2
+    )
+    private BigDecimal valorTerreno;
+
+    @Column(
+            name = "valor_construccion",
+            nullable = false,
+            precision = 30,
+            scale = 2
+    )
+    private BigDecimal valorConstruccion;
+
+    @Column(
+            name = "valor_cultivos",
+            nullable = false,
+            precision = 30,
+            scale = 2
+    )
+    private BigDecimal valorCultivos;
+
+    @Column(
+            name = "valor_otros",
+            nullable = false,
+            precision = 30,
+            scale = 2
+    )
+    private BigDecimal valorOtros;
+
+    // =========================================================
+    // Información del informe
+    // =========================================================
 
     @Column(name = "entidad_avaluadora", length = 150)
     private String entidadAvaluadora;
@@ -43,8 +113,12 @@ public class BienInmuebleAvaluo {
     @Column(name = "numero_informe", length = 50)
     private String numeroInforme;
 
-    @Column(name = "observaciones", length = 1000)
+    @Column(name = "observaciones", length = 300)
     private String observaciones;
+
+    // =========================================================
+    // Auditoría
+    // =========================================================
 
     @Column(name = "fk_seguridad_creacion", nullable = false)
     private Integer fkSeguridadCreacion;

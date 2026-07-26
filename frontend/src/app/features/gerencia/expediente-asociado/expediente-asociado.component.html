@@ -1,0 +1,369 @@
+<div class="expediente-page">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO DEL EXPEDIENTE                              -->
+  <!-- ===================================================== -->
+
+  <app-expediente-encabezado
+    [expediente]="expediente"
+    [cargando]="cargando"
+    (recargar)="consultar()"
+    (volverBuscador)="volverABuscador()">
+  </app-expediente-encabezado>
+
+  <!-- ===================================================== -->
+  <!-- ERROR DE CONSULTA                                      -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="error"
+    class="alert alert--danger">
+
+    <div class="alert-contenido">
+
+      <strong>
+        No fue posible cargar el expediente
+      </strong>
+
+      <span>
+        {{ error }}
+      </span>
+
+    </div>
+
+    <button
+      *ngIf="idDatosPersonal > 0"
+      type="button"
+      class="btn btn--secondary"
+      [disabled]="cargando"
+      (click)="consultar()">
+
+      Reintentar
+
+    </button>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CARGANDO                                               -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="cargando && !expediente"
+    class="loading">
+
+    <span class="spinner"></span>
+
+    <span>
+    Consultando expediente del asociado...
+  </span>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- CONTENIDO DEL EXPEDIENTE                               -->
+  <!-- ===================================================== -->
+
+  <ng-container *ngIf="expediente && !error">
+
+    <!-- =================================================== -->
+    <!-- INDICADORES                                          -->
+    <!-- =================================================== -->
+
+    <app-expediente-indicadores
+      [indicadores]="expediente.indicadores"
+      [cuentasAhorro]="expediente.cuentasAhorro">
+    </app-expediente-indicadores>
+
+
+    <!-- =================================================== -->
+    <!-- NAVEGACIÓN                                           -->
+    <!-- =================================================== -->
+
+    <section class="expediente-navegacion">
+
+      <button
+        type="button"
+        class="navegacion-item"
+        [class.navegacion-item--activo]="
+          esSeccionActiva('RESUMEN')
+        "
+        (click)="seleccionarSeccion('RESUMEN')">
+
+        Resumen
+
+      </button>
+
+
+      <button
+        type="button"
+        class="navegacion-item"
+        [class.navegacion-item--activo]="
+          esSeccionActiva('AFILIACION')
+        "
+        (click)="seleccionarSeccion('AFILIACION')">
+
+        Afiliación
+
+      </button>
+
+
+      <button
+        type="button"
+        class="navegacion-item"
+        [class.navegacion-item--activo]="
+          esSeccionActiva('CONTACTO')
+        "
+        (click)="seleccionarSeccion('CONTACTO')">
+
+        Contacto
+
+      </button>
+
+
+      <button
+        type="button"
+        class="navegacion-item"
+        [class.navegacion-item--activo]="
+          esSeccionActiva('FINANCIERO')
+        "
+        (click)="seleccionarSeccion('FINANCIERO')">
+
+        Financiero
+
+      </button>
+
+
+      <button
+        type="button"
+        class="navegacion-item"
+        [class.navegacion-item--activo]="
+          esSeccionActiva('SARLAFT')
+        "
+        (click)="seleccionarSeccion('SARLAFT')">
+
+        SARLAFT
+
+      </button>
+
+
+      <button
+        type="button"
+        class="navegacion-item"
+        [class.navegacion-item--activo]="
+          esSeccionActiva('AHORROS')
+        "
+        (click)="seleccionarSeccion('AHORROS')">
+
+        Ahorros
+
+      </button>
+
+
+      <button
+        type="button"
+        class="navegacion-item"
+        [class.navegacion-item--activo]="
+          esSeccionActiva('CDATS')
+        "
+        (click)="seleccionarSeccion('CDATS')">
+
+        CDAT
+
+      </button>
+
+
+      <button
+        type="button"
+        class="navegacion-item"
+        [class.navegacion-item--activo]="
+          esSeccionActiva('CREDITOS')
+        "
+        (click)="seleccionarSeccion('CREDITOS')">
+
+        Créditos
+
+      </button>
+
+
+      <button
+        type="button"
+        class="navegacion-item"
+        [class.navegacion-item--activo]="
+          esSeccionActiva('BIENES')
+        "
+        (click)="seleccionarSeccion('BIENES')">
+
+        Bienes
+
+      </button>
+
+
+      <button
+        type="button"
+        class="navegacion-item"
+        [class.navegacion-item--activo]="
+          esSeccionActiva('GARANTIAS')
+        "
+        (click)="seleccionarSeccion('GARANTIAS')">
+
+        Garantías
+
+      </button>
+
+
+      <button
+        type="button"
+        class="navegacion-item navegacion-item--alertas"
+        [class.navegacion-item--activo]="
+          esSeccionActiva('ALERTAS')
+        "
+        (click)="seleccionarSeccion('ALERTAS')">
+
+        Alertas
+
+        <span
+          *ngIf="expediente.cantidadAlertas > 0"
+          class="navegacion-contador">
+
+          {{ expediente.cantidadAlertas }}
+
+        </span>
+
+      </button>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- ÁREA DE BLOQUES                                      -->
+    <!-- =================================================== -->
+
+    <main class="expediente-contenido">
+
+      <!-- ================================================= -->
+      <!-- RESUMEN                                           -->
+      <!-- ================================================= -->
+
+      <app-expediente-resumen
+        *ngIf="esSeccionActiva('RESUMEN')"
+        [resumen]="expediente.resumenGeneral ?? null"
+        (regresarBusqueda)="volverABuscador()">
+      </app-expediente-resumen>
+
+
+      <!-- ================================================= -->
+      <!-- AFILIACIÓN                                        -->
+      <!-- ================================================= -->
+
+      <app-expediente-afiliacion
+        *ngIf="esSeccionActiva('AFILIACION')"
+        [afiliacion]="expediente.afiliacion ?? null"
+        [participacionInstitucional]="
+          expediente.participacionInstitucional
+        ">
+      </app-expediente-afiliacion>
+
+
+      <!-- ================================================= -->
+      <!-- CONTACTO                                          -->
+      <!-- ================================================= -->
+
+      <app-expediente-contacto
+        *ngIf="esSeccionActiva('CONTACTO')"
+        [contacto]="expediente.contacto ?? null">
+      </app-expediente-contacto>
+
+
+      <!-- ================================================= -->
+      <!-- INFORMACIÓN FINANCIERA                            -->
+      <!-- ================================================= -->
+
+      <app-expediente-financiero
+        *ngIf="esSeccionActiva('FINANCIERO')"
+        [informacion]="
+          expediente.informacionFinanciera ?? null
+        ">
+      </app-expediente-financiero>
+
+
+      <!-- ================================================= -->
+      <!-- SARLAFT                                           -->
+      <!-- ================================================= -->
+
+      <app-expediente-sarlaft
+        *ngIf="esSeccionActiva('SARLAFT')"
+        [sarlaft]="expediente.sarlaft ?? null">
+      </app-expediente-sarlaft>
+
+
+      <!-- ================================================= -->
+      <!-- CUENTAS DE AHORRO                                 -->
+      <!-- ================================================= -->
+
+      <app-expediente-ahorros
+        *ngIf="esSeccionActiva('AHORROS')"
+        [cuentas]="expediente.cuentasAhorro">
+      </app-expediente-ahorros>
+
+
+      <!-- ================================================= -->
+      <!-- CDAT                                              -->
+      <!-- ================================================= -->
+
+      <app-expediente-cdats
+        *ngIf="esSeccionActiva('CDATS')"
+        [cdats]="expediente.cdats">
+      </app-expediente-cdats>
+
+
+      <!-- ================================================= -->
+      <!-- CRÉDITOS                                          -->
+      <!-- ================================================= -->
+
+      <app-expediente-creditos
+        *ngIf="esSeccionActiva('CREDITOS')"
+        [creditos]="expediente.creditos">
+      </app-expediente-creditos>
+
+
+      <!-- ================================================= -->
+      <!-- BIENES                                            -->
+      <!-- ================================================= -->
+
+      <app-expediente-bienes
+        *ngIf="esSeccionActiva('BIENES')"
+        [bienesInmuebles]="expediente.bienesInmuebles"
+        [bienesVehiculos]="expediente.bienesVehiculos"
+        [bienesMaquinaria]="expediente.bienesMaquinaria"
+        [bienesInversiones]="expediente.bienesInversiones">
+      </app-expediente-bienes>
+
+
+      <!-- ================================================= -->
+      <!-- GARANTÍAS                                         -->
+      <!-- ================================================= -->
+
+      <app-expediente-garantias
+        *ngIf="esSeccionActiva('GARANTIAS')"
+        [garantias]="expediente.garantias">
+      </app-expediente-garantias>
+
+
+      <!-- ================================================= -->
+      <!-- ALERTAS                                           -->
+      <!-- ================================================= -->
+
+      <app-expediente-alertas
+        *ngIf="esSeccionActiva('ALERTAS')"
+        [alertas]="expediente.alertas"
+        [expediente]="expediente">
+      </app-expediente-alertas>
+
+    </main>
+
+  </ng-container>
+
+</div>

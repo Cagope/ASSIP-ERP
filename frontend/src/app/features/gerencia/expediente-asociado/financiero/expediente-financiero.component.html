@@ -1,0 +1,808 @@
+<section
+  *ngIf="informacion; else sinInformacion"
+  class="financiero">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO                                             -->
+  <!-- ===================================================== -->
+
+  <header class="financiero-encabezado">
+
+    <div>
+
+      <span class="financiero-subtitulo">
+        Capacidad económica
+      </span>
+
+      <h2>
+        Información financiera
+      </h2>
+
+    </div>
+
+    <div class="encabezado-estados">
+
+      <span
+        class="capacidad"
+        [ngClass]="claseCapacidadPago">
+
+        Capacidad {{ nivelCapacidadPago }}
+
+      </span>
+
+      <div
+        class="completitud"
+        [ngClass]="claseCompletitud">
+
+        <strong>
+          {{ porcentajeCompletitud }} %
+        </strong>
+
+        <span>
+          completitud
+        </span>
+
+      </div>
+
+    </div>
+
+  </header>
+
+
+  <!-- ===================================================== -->
+  <!-- IDENTIFICACIÓN                                         -->
+  <!-- ===================================================== -->
+
+  <section class="financiero-bloque">
+
+    <h3>
+      Identificación
+    </h3>
+
+    <div class="datos-grid datos-grid--tres">
+
+      <div class="dato dato--doble">
+
+        <span class="dato-label">
+          Nombre completo
+        </span>
+
+        <strong class="dato-valor">
+          {{ nombreCompleto }}
+        </strong>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Documento
+        </span>
+
+        <span class="dato-valor">
+          {{ documentoCompleto }}
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- ACTIVIDAD ECONÓMICA                                    -->
+  <!-- ===================================================== -->
+
+  <section class="financiero-bloque">
+
+    <h3>
+      Actividad económica
+    </h3>
+
+    <div class="datos-grid datos-grid--cuatro">
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Actividad económica
+        </span>
+
+        <span class="dato-valor">
+          {{ actividadEconomica }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Sector económico
+        </span>
+
+        <span class="dato-valor">
+          {{ sectorEconomico }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Ocupación
+        </span>
+
+        <span class="dato-valor">
+          {{ ocupacion }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Empresa y cargo
+        </span>
+
+        <span class="dato-valor">
+          {{ empresa }} · {{ cargo }}
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- INGRESOS                                               -->
+  <!-- ===================================================== -->
+
+  <section class="financiero-bloque">
+
+    <div class="bloque-encabezado">
+
+      <div>
+
+        <h3>
+          Ingresos mensuales
+        </h3>
+
+        <span class="bloque-descripcion">
+          Recursos ordinarios y adicionales declarados
+        </span>
+
+      </div>
+
+      <strong class="bloque-total bloque-total--positivo">
+        {{
+        totalIngresos |
+        currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+        }}
+      </strong>
+
+    </div>
+
+    <div class="movimientos-grid">
+
+      <article class="movimiento-card">
+
+        <span>
+          Ingresos laborales
+        </span>
+
+        <strong>
+          {{
+          ingresosLaborales |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+      <article class="movimiento-card">
+
+        <span>
+          Comisiones
+        </span>
+
+        <strong>
+          {{
+          ingresosComisiones |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+      <article class="movimiento-card">
+
+        <span>
+          Otros ingresos
+        </span>
+
+        <strong>
+          {{
+          otrosIngresos |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+        <small>
+          {{ conceptoOtrosIngresos }}
+        </small>
+
+      </article>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- EGRESOS                                                -->
+  <!-- ===================================================== -->
+
+  <section class="financiero-bloque">
+
+    <div class="bloque-encabezado">
+
+      <div>
+
+        <h3>
+          Egresos mensuales
+        </h3>
+
+        <span class="bloque-descripcion">
+          Compromisos y gastos periódicos declarados
+        </span>
+
+      </div>
+
+      <strong class="bloque-total bloque-total--negativo">
+        {{
+        totalEgresos |
+        currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+        }}
+      </strong>
+
+    </div>
+
+    <div class="movimientos-grid movimientos-grid--cuatro">
+
+      <article class="movimiento-card">
+
+        <span>
+          Gastos familiares
+        </span>
+
+        <strong>
+          {{
+          egresosFamiliares |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+      <article class="movimiento-card">
+
+        <span>
+          Arriendo
+        </span>
+
+        <strong>
+          {{
+          egresosArriendo |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+      <article class="movimiento-card">
+
+        <span>
+          Cuotas de crédito
+        </span>
+
+        <strong>
+          {{
+          egresosCredito |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+      <article class="movimiento-card">
+
+        <span>
+          Otros egresos
+        </span>
+
+        <strong>
+          {{
+          otrosEgresos |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- CAPACIDAD MENSUAL                                      -->
+  <!-- ===================================================== -->
+
+  <section class="financiero-bloque">
+
+    <h3>
+      Capacidad mensual
+    </h3>
+
+    <div class="capacidad-grid">
+
+      <article class="capacidad-card">
+
+        <span>
+          Total ingresos
+        </span>
+
+        <strong>
+          {{
+          totalIngresos |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+      <article class="capacidad-card">
+
+        <span>
+          Total egresos
+        </span>
+
+        <strong>
+          {{
+          totalEgresos |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+      <article
+        class="capacidad-card capacidad-card--principal"
+        [class.capacidad-card--critica]="
+          disponibleMensual < 0
+        ">
+
+        <span>
+          Disponible mensual
+        </span>
+
+        <strong>
+          {{
+          disponibleMensual |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+      <article
+        class="capacidad-card"
+        [class.capacidad-card--critica]="
+          capacidadPago < 0
+        ">
+
+        <span>
+          Capacidad de pago
+        </span>
+
+        <strong>
+          {{
+          capacidadPago |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- PATRIMONIO                                             -->
+  <!-- ===================================================== -->
+
+  <section class="financiero-bloque">
+
+    <h3>
+      Situación patrimonial
+    </h3>
+
+    <div class="patrimonio-grid">
+
+      <article class="patrimonio-card">
+
+        <span>
+          Total activos
+        </span>
+
+        <strong>
+          {{
+          totalActivos |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+      <article class="patrimonio-card">
+
+        <span>
+          Total pasivos
+        </span>
+
+        <strong>
+          {{
+          totalPasivos |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+      <article
+        class="patrimonio-card patrimonio-card--principal"
+        [class.patrimonio-card--negativo]="
+          patrimonio < 0
+        ">
+
+        <span>
+          Patrimonio
+        </span>
+
+        <strong>
+          {{
+          patrimonio |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- INDICADORES                                            -->
+  <!-- ===================================================== -->
+
+  <section class="financiero-bloque">
+
+    <h3>
+      Indicadores financieros
+    </h3>
+
+    <div class="indicadores-grid">
+
+      <article class="indicador">
+
+        <span class="indicador-label">
+          Endeudamiento
+        </span>
+
+        <strong>
+          {{
+          porcentajeEndeudamiento !== null
+          ? (
+          porcentajeEndeudamiento |
+          number:'1.0-2'
+          ) + ' %'
+          : 'Sin calcular'
+          }}
+        </strong>
+
+        <small>
+          Pasivos frente a activos
+        </small>
+
+      </article>
+
+      <article class="indicador">
+
+        <span class="indicador-label">
+          Compromiso de ingresos
+        </span>
+
+        <strong>
+          {{
+          porcentajeCompromisoIngresos !== null
+          ? (
+          porcentajeCompromisoIngresos |
+          number:'1.0-2'
+          ) + ' %'
+          : 'Sin calcular'
+          }}
+        </strong>
+
+        <small>
+          Egresos frente a ingresos
+        </small>
+
+      </article>
+
+      <article
+        class="indicador"
+        [ngClass]="claseCapacidadPago">
+
+        <span class="indicador-label">
+          Nivel de capacidad
+        </span>
+
+        <strong>
+          {{ nivelCapacidadPago }}
+        </strong>
+
+        <small>
+          Resultado financiero consolidado
+        </small>
+
+      </article>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- CALIDAD DE INFORMACIÓN                                 -->
+  <!-- ===================================================== -->
+
+  <section class="financiero-bloque">
+
+    <div class="bloque-encabezado">
+
+      <div>
+
+        <h3>
+          Calidad de la información
+        </h3>
+
+        <span class="bloque-descripcion">
+          Evaluación de los datos financieros registrados
+        </span>
+
+      </div>
+
+      <span
+        class="porcentaje"
+        [ngClass]="claseCompletitud">
+
+        {{ porcentajeCompletitud }} %
+
+      </span>
+
+    </div>
+
+    <div class="barra-completitud">
+
+      <div
+        class="barra-completitud__avance"
+        [style.width.%]="porcentajeCompletitud">
+      </div>
+
+    </div>
+
+    <div class="validaciones-grid">
+
+      <div
+        class="validacion"
+        [class.validacion--correcta]="
+          totalIngresos > 0
+        "
+        [class.validacion--pendiente]="
+          totalIngresos <= 0
+        ">
+
+        <span>
+          {{ totalIngresos > 0 ? '✓' : '!' }}
+        </span>
+
+        Ingresos registrados
+
+      </div>
+
+      <div
+        class="validacion"
+        [class.validacion--correcta]="
+          totalEgresos >= 0
+        "
+        [class.validacion--pendiente]="
+          totalEgresos < 0
+        ">
+
+        <span>
+          {{ totalEgresos >= 0 ? '✓' : '!' }}
+        </span>
+
+        Egresos registrados
+
+      </div>
+
+      <div
+        class="validacion"
+        [class.validacion--correcta]="
+          totalActivos > 0
+        "
+        [class.validacion--pendiente]="
+          totalActivos <= 0
+        ">
+
+        <span>
+          {{ totalActivos > 0 ? '✓' : '!' }}
+        </span>
+
+        Activos registrados
+
+      </div>
+
+      <div
+        class="validacion"
+        [class.validacion--correcta]="
+          actividadEconomica !== 'Sin actividad económica'
+        "
+        [class.validacion--pendiente]="
+          actividadEconomica === 'Sin actividad económica'
+        ">
+
+        <span>
+          {{
+            actividadEconomica !== 'Sin actividad económica'
+              ? '✓'
+              : '!'
+          }}
+        </span>
+
+        Actividad económica
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- NOVEDADES                                              -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="
+      presentaNovedades ||
+      observaciones
+    "
+    class="financiero-bloque">
+
+    <h3>
+      Observaciones y novedades
+    </h3>
+
+    <div class="observaciones-grid">
+
+      <div
+        *ngIf="presentaNovedades"
+        class="novedad">
+
+        <strong>
+          {{ cantidadNovedades }}
+          {{
+          cantidadNovedades === 1
+          ? 'novedad'
+          : 'novedades'
+          }}
+        </strong>
+
+        <span>
+          {{ resumenNovedades }}
+        </span>
+
+      </div>
+
+      <div
+        *ngIf="observaciones"
+        class="observacion">
+
+        <strong>
+          Observaciones
+        </strong>
+
+        <p>
+          {{ observaciones }}
+        </p>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- ACTUALIZACIÓN                                          -->
+  <!-- ===================================================== -->
+
+  <footer class="financiero-pie">
+
+    <div
+      class="actualizacion"
+      [ngClass]="claseActualizacion">
+
+      <strong>
+        {{ textoActualizacion }}
+      </strong>
+
+      <span>
+
+        <ng-container
+          *ngIf="
+            fechaActualizacion;
+            else sinFechaActualizacion
+          ">
+
+          Última actualización:
+          {{
+            fechaActualizacion |
+            date:'dd/MM/yyyy'
+          }}
+
+          · {{ diasSinActualizar }} días
+
+        </ng-container>
+
+        <ng-template #sinFechaActualizacion>
+          No existe una fecha de actualización registrada.
+        </ng-template>
+
+      </span>
+
+    </div>
+
+  </footer>
+
+</section>
+
+
+<ng-template #sinInformacion>
+
+  <section class="financiero-vacio">
+
+    <div class="financiero-vacio__icono">
+      $
+    </div>
+
+    <strong>
+      Información financiera no disponible
+    </strong>
+
+    <span>
+      El asociado no tiene información financiera registrada
+      en el expediente.
+    </span>
+
+  </section>
+
+</ng-template>

@@ -1,0 +1,798 @@
+.ahorros {
+  overflow: hidden;
+
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+// =========================================================
+// ENCABEZADO
+// =========================================================
+
+.ahorros-encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  padding: 1rem 1.15rem;
+
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.ahorros-subtitulo {
+  display: block;
+  margin-bottom: .15rem;
+
+  color: #6b7280;
+  font-size: .74rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.ahorros-encabezado h2 {
+  margin: 0;
+
+  color: #111827;
+  font-size: 1.08rem;
+  font-weight: 700;
+}
+
+.cantidad-cuentas {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 29px;
+  padding: .28rem .70rem;
+
+  background: #e0f2fe;
+  border-radius: 999px;
+
+  color: #075985;
+  font-size: .73rem;
+  font-weight: 700;
+}
+
+// =========================================================
+// BLOQUES GENERALES
+// =========================================================
+
+.ahorros-bloque {
+  padding: 1rem 1.15rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.ahorros-bloque:last-child {
+  border-bottom: 0;
+}
+
+.ahorros-bloque h3 {
+  margin: 0 0 .85rem;
+
+  color: #374151;
+  font-size: .88rem;
+  font-weight: 700;
+}
+
+.bloque-encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+
+  margin-bottom: .85rem;
+}
+
+.bloque-encabezado h3 {
+  margin-bottom: .12rem;
+}
+
+.bloque-descripcion {
+  color: #6b7280;
+  font-size: .72rem;
+}
+
+// =========================================================
+// RESUMEN GENERAL
+// =========================================================
+
+.resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(170px, 1fr));
+  gap: .70rem;
+}
+
+.resumen-card {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+
+  min-width: 0;
+  padding: .85rem;
+
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.resumen-card span {
+  color: #6b7280;
+  font-size: .72rem;
+  font-weight: 600;
+}
+
+.resumen-card strong {
+  overflow: hidden;
+
+  color: #111827;
+  font-size: .98rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.resumen-card--principal {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.resumen-card--principal strong {
+  color: #166534;
+}
+
+// =========================================================
+// ESTADOS
+// =========================================================
+
+.estados-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(125px, 1fr));
+  gap: .65rem;
+}
+
+.estado-resumen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .16rem;
+
+  padding: .72rem;
+
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  color: #4b5563;
+}
+
+.estado-resumen strong {
+  font-size: 1rem;
+}
+
+.estado-resumen span {
+  font-size: .68rem;
+  text-align: center;
+}
+
+.estado-resumen--activo {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.estado-resumen--alerta {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.estado-resumen--critico {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+// =========================================================
+// MOVIMIENTO CONSOLIDADO
+// =========================================================
+
+.movimientos-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(150px, 1fr));
+  gap: .65rem;
+}
+
+.movimientos-grid article {
+  display: flex;
+  flex-direction: column;
+  gap: .20rem;
+
+  min-width: 0;
+  padding: .78rem;
+
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.movimientos-grid span {
+  color: #6b7280;
+  font-size: .70rem;
+  font-weight: 600;
+}
+
+.movimientos-grid strong {
+  overflow: hidden;
+
+  color: #111827;
+  font-size: .88rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.movimientos-grid small {
+  overflow: hidden;
+
+  color: #6b7280;
+  font-size: .66rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// =========================================================
+// LISTA DE CUENTAS
+// =========================================================
+
+.cuentas-lista {
+  display: flex;
+  flex-direction: column;
+  gap: .80rem;
+}
+
+.cuenta-card {
+  overflow: hidden;
+
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+}
+
+.cuenta-card--atencion {
+  border-color: #f59e0b;
+}
+
+// =========================================================
+// ENCABEZADO DE CUENTA
+// =========================================================
+
+.cuenta-card__encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+
+  padding: .85rem .95rem;
+
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cuenta-identificacion {
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+
+  min-width: 0;
+}
+
+.cuenta-forma {
+  color: #6b7280;
+  font-size: .70rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.cuenta-tipo {
+  color: #6b7280;
+  font-size: .67rem;
+}
+
+.cuenta-identificacion strong {
+  overflow: hidden;
+
+  color: #111827;
+  font-size: .87rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cuenta-identificacion small {
+  color: #6b7280;
+  font-size: .67rem;
+}
+
+.cuenta-estados {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: .38rem;
+}
+
+.estado-cuenta,
+.nivel-alerta {
+  display: inline-flex;
+  align-items: center;
+
+  min-height: 25px;
+  padding: .22rem .58rem;
+
+  border: 1px solid transparent;
+  border-radius: 999px;
+
+  font-size: .67rem;
+  font-weight: 700;
+}
+
+.estado--activa {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.estado--cancelada,
+.estado--neutral {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.estado--bloqueada {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.estado--embargada {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.alerta--normal {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.alerta--informativa {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.alerta--advertencia {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.alerta--critica {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+// =========================================================
+// SALDOS DE LA CUENTA
+// =========================================================
+
+.cuenta-saldos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(150px, 1fr));
+  gap: .65rem;
+
+  padding: .85rem .95rem;
+}
+
+.cuenta-saldos > div {
+  display: flex;
+  flex-direction: column;
+  gap: .18rem;
+
+  min-width: 0;
+  padding: .68rem .72rem;
+
+  background: #f9fafb;
+  border: 1px solid transparent;
+  border-radius: 7px;
+}
+
+.cuenta-saldos span,
+.cuenta-datos span {
+  color: #6b7280;
+  font-size: .68rem;
+  font-weight: 600;
+}
+
+.cuenta-saldos strong {
+  overflow: hidden;
+
+  color: #111827;
+  font-size: .84rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cuenta-saldos__principal {
+  background: #f0fdf4 !important;
+  border-color: #bbf7d0 !important;
+}
+
+.cuenta-saldos__principal strong {
+  color: #166534;
+}
+
+// =========================================================
+// INFORMACIÓN GENERAL DE LA CUENTA
+// =========================================================
+
+.cuenta-datos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(150px, 1fr));
+  gap: .70rem;
+
+  padding: 0 .95rem .85rem;
+}
+
+.cuenta-datos > div {
+  display: flex;
+  flex-direction: column;
+  gap: .16rem;
+
+  min-width: 0;
+  padding: .58rem .65rem;
+
+  background: #fff;
+  border: 1px solid #f3f4f6;
+  border-radius: 7px;
+}
+
+.cuenta-datos strong {
+  overflow: hidden;
+
+  color: #374151;
+  font-size: .73rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// =========================================================
+// MOVIMIENTO DEL MES POR CUENTA
+// =========================================================
+
+.cuenta-movimientos-mes {
+  padding: .85rem .95rem;
+
+  background: #fcfcfd;
+  border-top: 1px solid #f3f4f6;
+}
+
+.cuenta-movimientos-mes__titulo {
+  display: flex;
+  flex-direction: column;
+  gap: .10rem;
+
+  margin-bottom: .65rem;
+}
+
+.cuenta-movimientos-mes__titulo strong {
+  color: #374151;
+  font-size: .76rem;
+  font-weight: 700;
+}
+
+.cuenta-movimientos-mes__titulo span {
+  color: #6b7280;
+  font-size: .67rem;
+}
+
+.cuenta-movimientos-mes__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(170px, 1fr));
+  gap: .65rem;
+}
+
+.movimiento-mes {
+  display: flex;
+  flex-direction: column;
+  gap: .20rem;
+
+  min-width: 0;
+  padding: .72rem .78rem;
+
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.movimiento-mes__etiqueta {
+  color: #6b7280;
+  font-size: .68rem;
+  font-weight: 600;
+}
+
+.movimiento-mes__valor {
+  overflow: hidden;
+
+  color: #111827;
+  font-size: .88rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.movimiento-mes__cantidad {
+  color: #6b7280;
+  font-size: .66rem;
+}
+
+.movimiento-mes--entrada {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.movimiento-mes--entrada .movimiento-mes__etiqueta,
+.movimiento-mes--entrada .movimiento-mes__cantidad {
+  color: #15803d;
+}
+
+.movimiento-mes--entrada .movimiento-mes__valor {
+  color: #166534;
+}
+
+.movimiento-mes--salida {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.movimiento-mes--salida .movimiento-mes__etiqueta,
+.movimiento-mes--salida .movimiento-mes__cantidad {
+  color: #c2410c;
+}
+
+.movimiento-mes--salida .movimiento-mes__valor {
+  color: #9a3412;
+}
+
+.movimiento-mes--total {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.movimiento-mes--total .movimiento-mes__etiqueta,
+.movimiento-mes--total .movimiento-mes__cantidad {
+  color: #1d4ed8;
+}
+
+.movimiento-mes--total .movimiento-mes__valor {
+  color: #1e40af;
+}
+
+// =========================================================
+// CONDICIONES Y ALERTAS
+// =========================================================
+
+.condiciones-cuenta,
+.alertas-cuenta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .42rem;
+
+  padding: .70rem .95rem;
+
+  border-top: 1px solid #f3f4f6;
+}
+
+.condicion,
+.alerta-cuenta {
+  display: inline-flex;
+  align-items: center;
+
+  padding: .22rem .52rem;
+
+  border-radius: 999px;
+
+  font-size: .66rem;
+  font-weight: 700;
+}
+
+.condicion {
+  background: #eff6ff;
+  color: #1e40af;
+}
+
+.condicion--positiva {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.alerta-cuenta--advertencia {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.alerta-cuenta--critica {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+// =========================================================
+// OBSERVACIONES
+// =========================================================
+
+.cuenta-observaciones {
+  display: flex;
+  flex-direction: column;
+  gap: .18rem;
+
+  padding: .70rem .95rem;
+
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+}
+
+.cuenta-observaciones strong {
+  color: #374151;
+  font-size: .72rem;
+}
+
+.cuenta-observaciones span {
+  color: #6b7280;
+  font-size: .70rem;
+  line-height: 1.4;
+}
+
+// =========================================================
+// RELACIONES ESPECIALES
+// =========================================================
+
+.relaciones-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(140px, 1fr));
+  gap: .65rem;
+}
+
+.relaciones-grid article {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .15rem;
+
+  padding: .72rem;
+
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  color: #4b5563;
+}
+
+.relaciones-grid strong {
+  font-size: .95rem;
+}
+
+.relaciones-grid span {
+  font-size: .67rem;
+  text-align: center;
+}
+
+.relacion--alerta {
+  background: #fffbeb !important;
+  border-color: #fde68a !important;
+  color: #92400e !important;
+}
+
+// =========================================================
+// ESTADO VACÍO
+// =========================================================
+
+.ahorros-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .35rem;
+
+  min-height: 190px;
+  padding: 1.25rem;
+
+  color: #6b7280;
+  text-align: center;
+}
+
+.ahorros-vacio__icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;
+  height: 42px;
+
+  background: #f3f4f6;
+  border-radius: 50%;
+
+  color: #4b5563;
+  font-weight: 800;
+}
+
+.ahorros-vacio strong {
+  color: #374151;
+  font-size: .92rem;
+}
+
+.ahorros-vacio span {
+  font-size: .82rem;
+}
+
+// =========================================================
+// RESPONSIVE
+// =========================================================
+
+@media (max-width: 1200px) {
+
+  .resumen-grid,
+  .cuenta-saldos,
+  .cuenta-datos,
+  .cuenta-movimientos-mes__grid {
+    grid-template-columns: repeat(2, minmax(170px, 1fr));
+  }
+
+  .estados-grid {
+    grid-template-columns: repeat(3, minmax(130px, 1fr));
+  }
+
+  .movimientos-grid,
+  .relaciones-grid {
+    grid-template-columns: repeat(3, minmax(150px, 1fr));
+  }
+
+}
+
+@media (max-width: 750px) {
+
+  .ahorros-encabezado,
+  .cuenta-card__encabezado {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .cuenta-estados {
+    justify-content: flex-start;
+  }
+
+  .resumen-grid,
+  .estados-grid,
+  .movimientos-grid,
+  .cuenta-saldos,
+  .cuenta-datos,
+  .cuenta-movimientos-mes__grid,
+  .relaciones-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ahorros-bloque {
+    padding: .90rem;
+  }
+
+  .cuenta-card__encabezado,
+  .cuenta-saldos,
+  .cuenta-movimientos-mes,
+  .condiciones-cuenta,
+  .alertas-cuenta,
+  .cuenta-observaciones {
+    padding-right: .80rem;
+    padding-left: .80rem;
+  }
+
+  .cuenta-datos {
+    padding-right: .80rem;
+    padding-left: .80rem;
+  }
+
+}

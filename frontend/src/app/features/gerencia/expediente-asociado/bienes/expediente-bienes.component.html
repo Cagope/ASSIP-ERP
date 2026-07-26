@@ -1,0 +1,884 @@
+<section class="bienes">
+
+  <header class="bienes-encabezado">
+
+    <div>
+
+      <span class="bienes-subtitulo">
+        Patrimonio declarado
+      </span>
+
+      <h2>
+        Bienes del asociado
+      </h2>
+
+    </div>
+
+    <span class="cantidad-bienes">
+
+      {{ cantidadBienes }}
+      {{ cantidadBienes === 1 ? 'bien' : 'bienes' }}
+
+    </span>
+
+  </header>
+
+
+  <ng-container *ngIf="tieneBienes; else sinBienes">
+
+    <!-- =================================================== -->
+    <!-- RESUMEN FINANCIERO                                   -->
+    <!-- =================================================== -->
+
+    <section class="bienes-bloque">
+
+      <h3>
+        Resumen patrimonial
+      </h3>
+
+      <div class="resumen-grid">
+
+        <article class="resumen-card">
+
+          <span>
+            Valor comercial
+          </span>
+
+          <strong>
+            {{
+            valorComercialTotal |
+            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+        <article class="resumen-card resumen-card--principal">
+
+          <span>
+            Participación del asociado
+          </span>
+
+          <strong>
+            {{
+            valorParticipacionTotal |
+            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+        <article class="resumen-card resumen-card--gravamen">
+
+          <span>
+            Gravámenes
+          </span>
+
+          <strong>
+            {{
+            valorGravamenTotal |
+            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+        <article class="resumen-card resumen-card--neto">
+
+          <span>
+            Valor neto
+          </span>
+
+          <strong>
+            {{
+            valorNetoTotal |
+            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- CANTIDADES                                           -->
+    <!-- =================================================== -->
+
+    <section class="bienes-bloque">
+
+      <h3>
+        Composición patrimonial
+      </h3>
+
+      <div class="tipos-grid">
+
+        <article class="tipo-resumen tipo-resumen--inmueble">
+
+          <strong>
+            {{ cantidadInmuebles }}
+          </strong>
+
+          <span>
+            Inmuebles
+          </span>
+
+        </article>
+
+        <article class="tipo-resumen tipo-resumen--vehiculo">
+
+          <strong>
+            {{ cantidadVehiculos }}
+          </strong>
+
+          <span>
+            Vehículos
+          </span>
+
+        </article>
+
+        <article class="tipo-resumen tipo-resumen--maquinaria">
+
+          <strong>
+            {{ cantidadMaquinaria }}
+          </strong>
+
+          <span>
+            Maquinaria
+          </span>
+
+        </article>
+
+        <article class="tipo-resumen tipo-resumen--inversion">
+
+          <strong>
+            {{ cantidadInversiones }}
+          </strong>
+
+          <span>
+            Inversiones
+          </span>
+
+        </article>
+
+        <article
+          class="tipo-resumen"
+          [class.tipo-resumen--alerta]="
+            cantidadConGravamen > 0
+          ">
+
+          <strong>
+            {{ cantidadConGravamen }}
+          </strong>
+
+          <span>
+            Con gravamen
+          </span>
+
+        </article>
+
+        <article>
+
+          <strong>
+            {{ cantidadCompartidos }}
+          </strong>
+
+          <span>
+            Propiedad compartida
+          </span>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- SEGUROS Y AVALÚOS                                    -->
+    <!-- =================================================== -->
+
+    <section class="bienes-bloque">
+
+      <h3>
+        Seguros y avalúos
+      </h3>
+
+      <div class="control-grid">
+
+        <article>
+
+          <span>
+            Bienes asegurados
+          </span>
+
+          <strong>
+            {{ cantidadConSeguro }}
+          </strong>
+
+        </article>
+
+        <article>
+
+          <span>
+            Valor asegurado
+          </span>
+
+          <strong>
+            {{
+            valorAseguradoTotal |
+            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+        <article>
+
+          <span>
+            Avalúos registrados
+          </span>
+
+          <strong>
+            {{
+            valorAvaluosTotal |
+            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+        <article
+          [class.control--critico]="
+            cantidadSegurosVencidos > 0
+          ">
+
+          <span>
+            Seguros vencidos
+          </span>
+
+          <strong>
+            {{ cantidadSegurosVencidos }}
+          </strong>
+
+        </article>
+
+        <article
+          [class.control--critico]="
+            cantidadAvaluosVencidos > 0
+          ">
+
+          <span>
+            Avalúos vencidos
+          </span>
+
+          <strong>
+            {{ cantidadAvaluosVencidos }}
+          </strong>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- DETALLE                                              -->
+    <!-- =================================================== -->
+
+    <section class="bienes-bloque">
+
+      <div class="bloque-encabezado">
+
+        <div>
+
+          <h3>
+            Detalle de bienes
+          </h3>
+
+          <span class="bloque-descripcion">
+            Información patrimonial registrada en la hoja de vida
+          </span>
+
+        </div>
+
+      </div>
+
+      <div class="bienes-lista">
+
+        <article
+          *ngFor="let bien of lista"
+          class="bien-card"
+          [class.bien-card--atencion]="
+            requiereAtencion(bien)
+          ">
+
+          <!-- ============================================= -->
+          <!-- ENCABEZADO                                    -->
+          <!-- ============================================= -->
+
+          <header class="bien-card__encabezado">
+
+            <div class="bien-identificacion">
+
+              <span
+                class="bien-tipo"
+                [ngClass]="claseTipo(bien)">
+
+                {{ bien.nombreTipo }}
+
+              </span>
+
+              <strong>
+                {{ bien.nombreSubtipo }}
+              </strong>
+
+              <small>
+                {{ bien.identificadorPrincipal }}
+
+                <ng-container
+                  *ngIf="bien.identificadorSecundario">
+
+                  · {{ bien.identificadorSecundario }}
+
+                </ng-container>
+
+              </small>
+
+            </div>
+
+            <div class="bien-estados">
+
+              <span
+                *ngIf="bien.titularPrincipal"
+                class="estado estado--principal">
+
+                Titular principal
+
+              </span>
+
+              <span
+                *ngIf="bien.propiedadCompartida"
+                class="estado estado--compartido">
+
+                {{ bien.cantidadPropietarios }}
+                propietarios
+
+              </span>
+
+              <span
+                class="nivel-alerta"
+                [ngClass]="claseAlerta(bien)">
+
+                {{ bien.nivelAlerta }}
+
+              </span>
+
+            </div>
+
+          </header>
+
+
+          <!-- ============================================= -->
+          <!-- DESCRIPCIÓN Y UBICACIÓN                        -->
+          <!-- ============================================= -->
+
+          <div class="bien-descripcion">
+
+            <div>
+
+              <span>
+                Descripción
+              </span>
+
+              <strong>
+                {{ bien.descripcion }}
+              </strong>
+
+            </div>
+
+            <div *ngIf="bien.ubicacion">
+
+              <span>
+                Ubicación
+              </span>
+
+              <strong>
+                {{ bien.ubicacion }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- VALORES                                        -->
+          <!-- ============================================= -->
+
+          <div class="bien-valores">
+
+            <div>
+
+              <span>
+                Valor comercial
+              </span>
+
+              <strong>
+                {{
+                bien.valorComercial |
+                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+              </strong>
+
+            </div>
+
+            <div class="bien-valores__participacion">
+
+              <span>
+                Participación
+              </span>
+
+              <strong>
+                {{ bien.porcentajePropiedad | number:'1.0-4' }} %
+              </strong>
+
+              <small>
+                {{
+                bien.valorParticipacion |
+                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+              </small>
+
+            </div>
+
+            <div
+              [class.valor-gravamen--activo]="
+                bien.tieneGravamen
+              ">
+
+              <span>
+                Gravamen
+              </span>
+
+              <strong>
+                {{
+                bien.valorGravamen |
+                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+              </strong>
+
+              <small>
+                {{ bien.nombreGravamen }}
+              </small>
+
+            </div>
+
+            <div class="bien-valores__neto">
+
+              <span>
+                Valor neto
+              </span>
+
+              <strong>
+                {{
+                bien.valorNeto |
+                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- DATOS GENERALES                               -->
+          <!-- ============================================= -->
+
+          <div class="bien-datos">
+
+            <div>
+
+              <span>
+                {{ bien.nombreReferencia }}
+              </span>
+
+              <strong>
+                {{
+                bien.fechaReferencia
+                ? (
+                bien.fechaReferencia |
+                date:'dd/MM/yyyy'
+                )
+                : 'Sin información'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Tipo de propiedad
+              </span>
+
+              <strong>
+                {{
+                bien.propiedadCompartida
+                ? 'Compartida'
+                : 'Individual'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Número de propietarios
+              </span>
+
+              <strong>
+                {{ bien.cantidadPropietarios }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- AVALÚO                                        -->
+          <!-- ============================================= -->
+
+          <div class="control-panel">
+
+            <div class="control-panel__titulo">
+
+              <span>
+                Avalúo
+              </span>
+
+              <strong>
+                {{ textoAvaluo(bien) }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Valor del avalúo
+              </span>
+
+              <strong>
+                {{
+                bien.valorAvaluo |
+                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Fecha
+              </span>
+
+              <strong>
+                {{
+                bien.fechaAvaluo
+                ? (
+                bien.fechaAvaluo |
+                date:'dd/MM/yyyy'
+                )
+                : 'Sin información'
+                }}
+              </strong>
+
+            </div>
+
+            <span
+              class="control-estado"
+              [class.control-estado--vigente]="
+                bien.avaluoVigente
+              "
+              [class.control-estado--critico]="
+                bien.avaluoVencido
+              ">
+
+              {{ textoAvaluo(bien) }}
+
+            </span>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- SEGURO                                        -->
+          <!-- ============================================= -->
+
+          <div class="control-panel control-panel--seguro">
+
+            <div class="control-panel__titulo">
+
+              <span>
+                Seguro
+              </span>
+
+              <strong>
+                {{ bien.aseguradora }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Póliza
+              </span>
+
+              <strong>
+                {{ bien.numeroPoliza || 'Sin información' }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Valor asegurado
+              </span>
+
+              <strong>
+                {{
+                bien.valorAsegurado |
+                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Vencimiento
+              </span>
+
+              <strong>
+                {{
+                bien.fechaVencimientoSeguro
+                ? (
+                bien.fechaVencimientoSeguro |
+                date:'dd/MM/yyyy'
+                )
+                : 'Sin información'
+                }}
+              </strong>
+
+            </div>
+
+            <span
+              class="control-estado"
+              [class.control-estado--vigente]="
+                bien.seguroVigente
+              "
+              [class.control-estado--critico]="
+                bien.seguroVencido
+              ">
+
+              {{ textoSeguro(bien) }}
+
+            </span>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- ALERTAS                                        -->
+          <!-- ============================================= -->
+
+          <div
+            *ngIf="requiereAtencion(bien)"
+            class="alertas-bien">
+
+            <span
+              *ngIf="bien.avaluoVencido"
+              class="alerta-bien alerta-bien--critica">
+
+              Avalúo vencido
+
+            </span>
+
+            <span
+              *ngIf="bien.avaluoProximoVencer"
+              class="alerta-bien alerta-bien--advertencia">
+
+              Avalúo próximo a vencer
+
+            </span>
+
+            <span
+              *ngIf="bien.seguroVencido"
+              class="alerta-bien alerta-bien--critica">
+
+              Seguro vencido
+
+            </span>
+
+            <span
+              *ngIf="bien.seguroProximoVencer"
+              class="alerta-bien alerta-bien--advertencia">
+
+              Seguro próximo a vencer
+
+            </span>
+
+            <span
+              *ngIf="bien.requiereRevision"
+              class="alerta-bien alerta-bien--advertencia">
+
+              Requiere revisión
+
+            </span>
+
+            <span
+              *ngIf="bien.cantidadAlertas > 0"
+              class="alerta-bien alerta-bien--advertencia">
+
+              {{ bien.cantidadAlertas }}
+              alertas
+
+            </span>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- OBSERVACIONES                                  -->
+          <!-- ============================================= -->
+
+          <div
+            *ngIf="bien.observaciones"
+            class="bien-observaciones">
+
+            <strong>
+              Observaciones
+            </strong>
+
+            <span>
+              {{ bien.observaciones }}
+            </span>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- CONTROL CONSOLIDADO                                  -->
+    <!-- =================================================== -->
+
+    <section class="bienes-bloque">
+
+      <h3>
+        Estado documental
+      </h3>
+
+      <div class="estado-documental-grid">
+
+        <article
+          [class.estado-documental--alerta]="
+            cantidadConRevision > 0
+          ">
+
+          <strong>
+            {{ cantidadConRevision }}
+          </strong>
+
+          <span>
+            Requieren revisión
+          </span>
+
+        </article>
+
+        <article
+          [class.estado-documental--critico]="
+            cantidadSegurosVencidos > 0
+          ">
+
+          <strong>
+            {{ cantidadSegurosVencidos }}
+          </strong>
+
+          <span>
+            Seguros vencidos
+          </span>
+
+        </article>
+
+        <article
+          [class.estado-documental--critico]="
+            cantidadAvaluosVencidos > 0
+          ">
+
+          <strong>
+            {{ cantidadAvaluosVencidos }}
+          </strong>
+
+          <span>
+            Avalúos vencidos
+          </span>
+
+        </article>
+
+        <article>
+
+          <strong>
+            {{ cantidadConGravamen }}
+          </strong>
+
+          <span>
+            Bienes con gravamen
+          </span>
+
+        </article>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</section>
+
+
+<ng-template #sinBienes>
+
+  <section class="bienes-vacio">
+
+    <div class="bienes-vacio__icono">
+      B
+    </div>
+
+    <strong>
+      El asociado no tiene bienes registrados
+    </strong>
+
+    <span>
+      No se encontraron inmuebles, vehículos, maquinaria
+      o inversiones vinculadas al expediente.
+    </span>
+
+  </section>
+
+</ng-template>

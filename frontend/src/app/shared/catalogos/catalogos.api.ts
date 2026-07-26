@@ -319,4 +319,10 @@ export class CatalogosApi {
       );
   }
 
+  listarTiposZonasInmueblesHojaVida() {
+    return this.http.get<CatalogoIdCodigoNombre[]>(
+      `${this.baseUrl}/hoja-vida/tipos-zonas-inmuebles`
+    );
+  }
+
 }

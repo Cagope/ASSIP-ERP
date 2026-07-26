@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +13,8 @@ import java.util.Optional;
 @Service
 @Transactional
 public class BienInmuebleAvaluoService {
+
+    private static final int VIGENCIA_MAXIMA_ANIOS = 30;
 
     private final BienInmuebleAvaluoRepository repository;
     private final UsuarioSesionService usuarioSesionService;
@@ -24,25 +27,40 @@ public class BienInmuebleAvaluoService {
         this.usuarioSesionService = usuarioSesionService;
     }
 
+    @Transactional(readOnly = true)
     public List<BienInmuebleAvaluo> listarPorBien(Long idBien) {
         validarIdBien(idBien);
-        return repository.findByIdBienOrderByFechaAvaluoDescFechaCreacionDesc(idBien);
+
+        return repository
+                .findByIdBienOrderByFechaAvaluoDescFechaCreacionDesc(idBien);
     }
 
+    @Transactional(readOnly = true)
     public Optional<BienInmuebleAvaluo> buscarPorId(Long id) {
         validarIdAvaluo(id);
+
         return repository.findById(id);
     }
 
     public BienInmuebleAvaluo crear(BienInmuebleAvaluo dto) {
+        validarDtoNoNulo(dto);
+
         normalizar(dto);
         validar(dto);
         calcularFechaVencimiento(dto);
 
         Integer idUsuario = usuarioSesionService.idUsuario();
+        LocalDateTime ahora = LocalDateTime.now();
 
-        dto.setFechaCreacion(LocalDateTime.now());
-        dto.setFechaEdicion(LocalDateTime.now());
+        /*
+         * Garantiza que siempre se cree un registro nuevo,
+         * aunque el frontend envíe un identificador.
+         */
+        dto.setIdBienInmuebleAvaluo(null);
+
+        dto.setFechaCreacion(ahora);
+        dto.setFechaEdicion(ahora);
+
         dto.setFkSeguridadCreacion(idUsuario);
         dto.setFkSeguridadEdicion(idUsuario);
 
@@ -54,22 +72,52 @@ public class BienInmuebleAvaluoService {
             BienInmuebleAvaluo dto
     ) {
         validarIdAvaluo(id);
+        validarDtoNoNulo(dto);
+
+        Optional<BienInmuebleAvaluo> registro =
+                repository.findById(id);
+
+        if (registro.isEmpty()) {
+            return Optional.empty();
+        }
+
+        BienInmuebleAvaluo existente =
+                registro.get();
+
+        /*
+         * El avalúo conserva el bien al cual pertenece.
+         * No se permite cambiar idBien durante la edición.
+         */
+        dto.setIdBien(existente.getIdBien());
+
         normalizar(dto);
         validar(dto);
         calcularFechaVencimiento(dto);
 
-        return repository.findById(id).map(existente -> {
-            Integer idUsuario = usuarioSesionService.idUsuario();
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
 
-            dto.setIdBienInmuebleAvaluo(id);
-            dto.setFechaCreacion(existente.getFechaCreacion());
-            dto.setFkSeguridadCreacion(existente.getFkSeguridadCreacion());
+        dto.setIdBienInmuebleAvaluo(id);
 
-            dto.setFechaEdicion(LocalDateTime.now());
-            dto.setFkSeguridadEdicion(idUsuario);
+        dto.setFechaCreacion(
+                existente.getFechaCreacion()
+        );
 
-            return repository.save(dto);
-        });
+        dto.setFkSeguridadCreacion(
+                existente.getFkSeguridadCreacion()
+        );
+
+        dto.setFechaEdicion(
+                LocalDateTime.now()
+        );
+
+        dto.setFkSeguridadEdicion(
+                idUsuario
+        );
+
+        return Optional.of(
+                repository.save(dto)
+        );
     }
 
     public boolean eliminar(Long id) {
@@ -80,64 +128,117 @@ public class BienInmuebleAvaluoService {
         }
 
         repository.deleteById(id);
+
         return true;
+    }
+
+    private void validarDtoNoNulo(
+            BienInmuebleAvaluo dto
+    ) {
+        if (dto == null) {
+            throw new IllegalArgumentException(
+                    "La información del avalúo es obligatoria."
+            );
+        }
     }
 
     private void validarIdBien(Long idBien) {
         if (idBien == null || idBien <= 0) {
-            throw new IllegalArgumentException("El bien es obligatorio.");
+            throw new IllegalArgumentException(
+                    "El bien es obligatorio."
+            );
         }
     }
 
     private void validarIdAvaluo(Long id) {
         if (id == null || id <= 0) {
-            throw new IllegalArgumentException("El avalúo es obligatorio.");
+            throw new IllegalArgumentException(
+                    "El avalúo es obligatorio."
+            );
         }
     }
 
     private void validar(BienInmuebleAvaluo dto) {
-        if (dto == null) {
-            throw new IllegalArgumentException("La información del avalúo es obligatoria.");
-        }
-
+        validarDtoNoNulo(dto);
         validarIdBien(dto.getIdBien());
 
         if (dto.getFechaAvaluo() == null) {
-            throw new IllegalArgumentException("La fecha del avalúo es obligatoria.");
+            throw new IllegalArgumentException(
+                    "La fecha del avalúo es obligatoria."
+            );
         }
 
-        if (dto.getVigenciaAnios() == null || dto.getVigenciaAnios() <= 0) {
-            throw new IllegalArgumentException("La vigencia del avalúo debe ser mayor que cero.");
+        if (dto.getFechaAvaluo().isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException(
+                    "La fecha del avalúo no puede ser posterior a la fecha actual."
+            );
         }
 
-        if (dto.getVigenciaAnios() > 30) {
-            throw new IllegalArgumentException("La vigencia del avalúo no puede superar 30 años.");
+        if (dto.getVigenciaAnios() == null
+                || dto.getVigenciaAnios() <= 0) {
+
+            throw new IllegalArgumentException(
+                    "La vigencia del avalúo debe ser mayor que cero."
+            );
         }
 
-        if (dto.getValorAvaluoComercial() == null) {
-            throw new IllegalArgumentException("El valor del avalúo comercial es obligatorio.");
+        if (dto.getVigenciaAnios() > VIGENCIA_MAXIMA_ANIOS) {
+            throw new IllegalArgumentException(
+                    "La vigencia del avalúo no puede superar "
+                            + VIGENCIA_MAXIMA_ANIOS
+                            + " años."
+            );
         }
 
-        if (dto.getValorAvaluoComercial().compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("El valor del avalúo comercial no puede ser negativo.");
-        }
+        validarValorObligatorioNoNegativo(
+                dto.getValorAvaluoComercial(),
+                "El valor del avalúo comercial es obligatorio.",
+                "El valor del avalúo comercial no puede ser negativo."
+        );
 
-        if (dto.getValorAvaluoCatastral() == null) {
-            throw new IllegalArgumentException("El valor del avalúo catastral es obligatorio.");
-        }
+        validarValorObligatorioNoNegativo(
+                dto.getValorAvaluoCatastral(),
+                "El valor del avalúo catastral es obligatorio.",
+                "El valor del avalúo catastral no puede ser negativo."
+        );
 
-        if (dto.getValorAvaluoCatastral().compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("El valor del avalúo catastral no puede ser negativo.");
-        }
+        validarValorNoNegativo(
+                dto.getValorTerreno(),
+                "El valor del terreno no puede ser negativo."
+        );
 
-        validarLongitud(dto.getEntidadAvaluadora(), 150,
-                "La entidad avaluadora no puede superar 150 caracteres.");
+        validarValorNoNegativo(
+                dto.getValorConstruccion(),
+                "El valor de la construcción no puede ser negativo."
+        );
 
-        validarLongitud(dto.getNumeroInforme(), 50,
-                "El número de informe no puede superar 50 caracteres.");
+        validarValorNoNegativo(
+                dto.getValorCultivos(),
+                "El valor de los cultivos no puede ser negativo."
+        );
 
-        validarLongitud(dto.getObservaciones(), 1000,
-                "Las observaciones no pueden superar 1000 caracteres.");
+        validarValorNoNegativo(
+                dto.getValorOtros(),
+                "El valor de otros componentes no puede ser negativo."
+        );
+
+        validarLongitud(
+                dto.getEntidadAvaluadora(),
+                150,
+                "La entidad avaluadora no puede superar 150 caracteres."
+        );
+
+        validarLongitud(
+                dto.getNumeroInforme(),
+                50,
+                "El número de informe no puede superar 50 caracteres."
+        );
+
+        validarLongitud(
+                dto.getObservaciones(),
+                300,
+                "Las observaciones no pueden superar 300 caracteres."
+        );
     }
 
     private void normalizar(BienInmuebleAvaluo dto) {
@@ -145,27 +246,60 @@ public class BienInmuebleAvaluoService {
             return;
         }
 
-        if (dto.getVigenciaAnios() == null || dto.getVigenciaAnios() <= 0) {
-            dto.setVigenciaAnios(3);
-        }
+        /*
+         * Estos campos son obligatorios y no se completan
+         * automáticamente:
+         *
+         * - fechaAvaluo
+         * - vigenciaAnios
+         * - valorAvaluoComercial
+         * - valorAvaluoCatastral
+         */
 
-        if (dto.getValorAvaluoComercial() == null) {
-            dto.setValorAvaluoComercial(BigDecimal.ZERO);
-        }
+        dto.setValorTerreno(
+                valorOZero(dto.getValorTerreno())
+        );
 
-        if (dto.getValorAvaluoCatastral() == null) {
-            dto.setValorAvaluoCatastral(BigDecimal.ZERO);
-        }
+        dto.setValorConstruccion(
+                valorOZero(dto.getValorConstruccion())
+        );
 
-        dto.setEntidadAvaluadora(limpiar(dto.getEntidadAvaluadora()));
-        dto.setNumeroInforme(limpiar(dto.getNumeroInforme()));
-        dto.setObservaciones(limpiar(dto.getObservaciones()));
+        dto.setValorCultivos(
+                valorOZero(dto.getValorCultivos())
+        );
+
+        dto.setValorOtros(
+                valorOZero(dto.getValorOtros())
+        );
+
+        dto.setEntidadAvaluadora(
+                limpiar(dto.getEntidadAvaluadora())
+        );
+
+        dto.setNumeroInforme(
+                limpiar(dto.getNumeroInforme())
+        );
+
+        dto.setObservaciones(
+                limpiar(dto.getObservaciones())
+        );
     }
 
-    private void calcularFechaVencimiento(BienInmuebleAvaluo dto) {
+    private void calcularFechaVencimiento(
+            BienInmuebleAvaluo dto
+    ) {
         dto.setFechaVencimientoAvaluo(
-                dto.getFechaAvaluo().plusYears(dto.getVigenciaAnios())
+                dto.getFechaAvaluo()
+                        .plusYears(dto.getVigenciaAnios())
         );
+    }
+
+    private BigDecimal valorOZero(
+            BigDecimal valor
+    ) {
+        return valor == null
+                ? BigDecimal.ZERO
+                : valor;
     }
 
     private String limpiar(String valor) {
@@ -175,7 +309,9 @@ public class BienInmuebleAvaluoService {
 
         String limpio = valor.trim();
 
-        return limpio.isEmpty() ? null : limpio;
+        return limpio.isEmpty()
+                ? null
+                : limpio;
     }
 
     private void validarLongitud(
@@ -184,6 +320,34 @@ public class BienInmuebleAvaluoService {
             String mensaje
     ) {
         if (valor != null && valor.length() > maximo) {
+            throw new IllegalArgumentException(mensaje);
+        }
+    }
+
+    private void validarValorObligatorioNoNegativo(
+            BigDecimal valor,
+            String mensajeObligatorio,
+            String mensajeNegativo
+    ) {
+        if (valor == null) {
+            throw new IllegalArgumentException(
+                    mensajeObligatorio
+            );
+        }
+
+        validarValorNoNegativo(
+                valor,
+                mensajeNegativo
+        );
+    }
+
+    private void validarValorNoNegativo(
+            BigDecimal valor,
+            String mensaje
+    ) {
+        if (valor != null
+                && valor.compareTo(BigDecimal.ZERO) < 0) {
+
             throw new IllegalArgumentException(mensaje);
         }
     }

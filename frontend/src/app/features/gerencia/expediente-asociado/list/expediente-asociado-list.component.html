@@ -1,0 +1,292 @@
+<div class="page">
+
+  <app-header-actions
+    titulo="Expediente Integral del Asociado"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+
+  <!-- ===================================================== -->
+  <!-- FILTROS                                                -->
+  <!-- ===================================================== -->
+
+  <form
+    class="filtros"
+    (ngSubmit)="buscar()">
+
+    <div class="f-row">
+
+      <label for="documento">
+        Documento
+      </label>
+
+      <input
+        id="documento"
+        type="text"
+        name="documento"
+        [(ngModel)]="filtros.documento"
+        autocomplete="off"
+        [disabled]="cargando">
+
+    </div>
+
+
+    <div class="f-row">
+
+      <label for="nombres">
+        Nombres
+      </label>
+
+      <input
+        id="nombres"
+        type="text"
+        name="nombres"
+        [(ngModel)]="filtros.nombres"
+        autocomplete="off"
+        [disabled]="cargando">
+
+    </div>
+
+
+    <div class="f-row">
+
+      <label for="primerApellido">
+        Primer apellido
+      </label>
+
+      <input
+        id="primerApellido"
+        type="text"
+        name="primerApellido"
+        [(ngModel)]="filtros.primerApellido"
+        autocomplete="off"
+        [disabled]="cargando">
+
+    </div>
+
+
+    <div class="f-row">
+
+      <label for="segundoApellido">
+        Segundo apellido
+      </label>
+
+      <input
+        id="segundoApellido"
+        type="text"
+        name="segundoApellido"
+        [(ngModel)]="filtros.segundoApellido"
+        autocomplete="off"
+        [disabled]="cargando">
+
+    </div>
+
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn btn--cancel"
+        [disabled]="cargando"
+        (click)="limpiar()">
+
+        Limpiar
+
+      </button>
+
+      <button
+        type="submit"
+        class="btn btn--primary"
+        [disabled]="cargando">
+
+        Buscar
+
+      </button>
+
+    </div>
+
+  </form>
+
+
+  <!-- ===================================================== -->
+  <!-- ERROR                                                  -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="error"
+    class="error">
+
+    {{ error }}
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CARGANDO                                               -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="cargando"
+    class="loading">
+
+    Cargando asociados...
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- TABLA DE RESULTADOS                                    -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="!cargando && paginadas.length > 0"
+    class="table-responsive">
+
+    <table class="table table-hover table-sm">
+
+      <thead>
+
+      <tr>
+
+        <th>
+          Documento
+        </th>
+
+        <th>
+          Nombres
+        </th>
+
+        <th>
+          Primer apellido
+        </th>
+
+        <th>
+          Segundo apellido
+        </th>
+
+        <th>
+          Tipo de persona
+        </th>
+
+        <th class="text-center">
+          Acción
+        </th>
+
+      </tr>
+
+      </thead>
+
+      <tbody>
+
+      <tr
+        *ngFor="
+            let persona of paginadas;
+            trackBy: trackByPersona
+          ">
+
+        <td>
+          {{ persona.documento }}
+        </td>
+
+        <td>
+          {{ persona.nombres }}
+        </td>
+
+        <td>
+          {{ persona.primerApellido }}
+        </td>
+
+        <td>
+          {{ persona.segundoApellido || '—' }}
+        </td>
+
+        <td>
+          {{ descripcionTipoPersona(persona.tipoPersona) }}
+        </td>
+
+        <td class="text-center">
+
+          <button
+            type="button"
+            class="btn btn--primary btn-sm btn-gestionar"
+            (click)="gestionar(persona)">
+
+            Gestionar
+
+          </button>
+
+        </td>
+
+      </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- SIN REGISTROS                                          -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="
+      !cargando &&
+      paginadas.length === 0
+    "
+    class="empty">
+
+    No se encontraron asociados.
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- PAGINACIÓN                                             -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="
+      !cargando &&
+      filtradas.length > 0
+    "
+    class="pagination">
+
+    <button
+      type="button"
+      class="btn btn-sm"
+      [disabled]="pagina <= 1"
+      (click)="cambiarPagina(pagina - 1)">
+
+      Anterior
+
+    </button>
+
+    <span class="pagination-info">
+
+      Página {{ pagina }}
+      de {{ totalPaginas() }}
+
+      ·
+
+      {{ filtradas.length }}
+      registro{{ filtradas.length === 1 ? '' : 's' }}
+
+    </span>
+
+    <button
+      type="button"
+      class="btn btn-sm"
+      [disabled]="pagina >= totalPaginas()"
+      (click)="cambiarPagina(pagina + 1)">
+
+      Siguiente
+
+    </button>
+
+  </div>
+
+</div>

@@ -1,0 +1,747 @@
+<section class="ahorros">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO                                             -->
+  <!-- ===================================================== -->
+
+  <header class="ahorros-encabezado">
+
+    <div>
+
+      <span class="ahorros-subtitulo">
+        Productos de depósito
+      </span>
+
+      <h2>
+        Cuentas de ahorro
+      </h2>
+
+    </div>
+
+    <span class="cantidad-cuentas">
+      {{ cantidadCuentas }}
+      {{ cantidadCuentas === 1 ? 'cuenta' : 'cuentas' }}
+    </span>
+
+  </header>
+
+
+  <ng-container *ngIf="tieneCuentas; else sinCuentas">
+
+    <!-- =================================================== -->
+    <!-- RESUMEN GENERAL                                      -->
+    <!-- =================================================== -->
+
+    <section class="ahorros-bloque">
+
+      <h3>
+        Resumen de cuentas de ahorro
+      </h3>
+
+      <div class="resumen-grid">
+
+        <article class="resumen-card resumen-card--principal">
+
+          <span>
+            Saldo total
+          </span>
+
+          <strong>
+            {{
+            saldoTotal
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+        <article class="resumen-card">
+
+          <span>
+            Saldo disponible
+          </span>
+
+          <strong>
+            {{
+            saldoDisponibleTotal
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+        <article class="resumen-card">
+
+          <span>
+            Saldo en canje
+          </span>
+
+          <strong>
+            {{
+            saldoCanjeTotal
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- ESTADOS                                              -->
+    <!-- =================================================== -->
+
+    <section class="ahorros-bloque">
+
+      <h3>
+        Estado de las cuentas
+      </h3>
+
+      <div class="estados-grid">
+
+        <article class="estado-resumen estado-resumen--activo">
+
+          <strong>
+            {{ cantidadActivas }}
+          </strong>
+
+          <span>
+            Activas
+          </span>
+
+        </article>
+
+        <article class="estado-resumen">
+
+          <strong>
+            {{ cantidadCanceladas }}
+          </strong>
+
+          <span>
+            Canceladas
+          </span>
+
+        </article>
+
+        <article
+          class="estado-resumen"
+          [class.estado-resumen--alerta]="cantidadBloqueadas > 0">
+
+          <strong>
+            {{ cantidadBloqueadas }}
+          </strong>
+
+          <span>
+            Bloqueadas
+          </span>
+
+        </article>
+
+        <article
+          class="estado-resumen"
+          [class.estado-resumen--critico]="cantidadEmbargadas > 0">
+
+          <strong>
+            {{ cantidadEmbargadas }}
+          </strong>
+
+          <span>
+            Embargadas
+          </span>
+
+        </article>
+
+        <article
+          class="estado-resumen"
+          [class.estado-resumen--alerta]="cantidadInactivas > 0">
+
+          <strong>
+            {{ cantidadInactivas }}
+          </strong>
+
+          <span>
+            Inactivas
+          </span>
+
+        </article>
+
+        <article
+          class="estado-resumen"
+          [class.estado-resumen--alerta]="cantidadConRevision > 0">
+
+          <strong>
+            {{ cantidadConRevision }}
+          </strong>
+
+          <span>
+            Requieren revisión
+          </span>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- MOVIMIENTO CONSOLIDADO                               -->
+    <!-- =================================================== -->
+
+    <section class="ahorros-bloque">
+
+      <h3>
+        Movimiento consolidado
+      </h3>
+
+      <div class="movimientos-grid">
+
+        <article>
+
+          <span>
+            Consignaciones
+          </span>
+
+          <strong>
+            {{
+            totalConsignaciones
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+        <article>
+
+          <span>
+            Retiros
+          </span>
+
+          <strong>
+            {{
+            totalRetiros
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+        <article>
+
+          <span>
+            Intereses
+          </span>
+
+          <strong>
+            {{
+            totalIntereses
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+        <article>
+
+          <span>
+            Movimientos del mes
+          </span>
+
+          <strong>
+            {{ cantidadMovimientosMes }}
+          </strong>
+
+          <small>
+            {{
+            valorMovimientosMes
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </small>
+
+        </article>
+
+        <article>
+
+          <span>
+            Cheques en canje
+          </span>
+
+          <strong>
+            {{ cantidadChequesCanje }}
+          </strong>
+
+          <small>
+            {{
+            valorChequesCanje
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </small>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- CUENTAS                                              -->
+    <!-- =================================================== -->
+
+    <section class="ahorros-bloque">
+
+      <div class="bloque-encabezado">
+
+        <div>
+
+          <h3>
+            Detalle de cuentas
+          </h3>
+
+          <span class="bloque-descripcion">
+            Productos de ahorro vinculados al asociado
+          </span>
+
+        </div>
+
+      </div>
+
+      <div class="cuentas-lista">
+
+        <article
+          *ngFor="let cuenta of lista"
+          class="cuenta-card"
+          [class.cuenta-card--atencion]="requiereAtencion(cuenta)">
+
+          <!-- ============================================= -->
+          <!-- ENCABEZADO CUENTA                             -->
+          <!-- ============================================= -->
+
+          <header class="cuenta-card__encabezado">
+
+            <div class="cuenta-identificacion">
+
+              <span class="cuenta-forma">
+                {{ nombreForma(cuenta) }}
+              </span>
+
+              <small class="cuenta-tipo">
+                {{ tipoCaptacion(cuenta) }}
+              </small>
+
+              <strong>
+                Cuenta {{ numeroCuenta(cuenta) }}
+              </strong>
+
+              <small *ngIf="cuenta.numeroLibreta">
+                Libreta {{ cuenta.numeroLibreta }}
+              </small>
+
+            </div>
+
+            <div class="cuenta-estados">
+
+              <span
+                class="estado-cuenta"
+                [ngClass]="claseEstado(cuenta)">
+
+                {{ estadoCuenta(cuenta) }}
+
+              </span>
+
+              <span
+                class="nivel-alerta"
+                [ngClass]="claseAlerta(cuenta)">
+
+                {{
+                  textoValor(
+                    cuenta.nivelAlerta,
+                    'NORMAL'
+                  )
+                }}
+
+              </span>
+
+            </div>
+
+          </header>
+
+
+          <!-- ============================================= -->
+          <!-- SALDOS                                        -->
+          <!-- ============================================= -->
+
+          <div class="cuenta-saldos">
+
+            <div>
+
+              <span>
+                Saldo disponible
+              </span>
+
+              <strong>
+                {{
+                valor(cuenta.saldoDisponible)
+                | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Saldo en canje
+              </span>
+
+              <strong>
+                {{
+                valor(cuenta.saldoCanje)
+                | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+              </strong>
+
+            </div>
+
+            <div class="cuenta-saldos__principal">
+
+              <span>
+                Saldo total
+              </span>
+
+              <strong>
+                {{
+                valor(cuenta.saldoTotal)
+                | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- INFORMACIÓN GENERAL                           -->
+          <!-- ============================================= -->
+
+          <div class="cuenta-datos">
+
+            <div>
+
+              <span>
+                Fecha de apertura
+              </span>
+
+              <strong>
+                {{
+                cuenta.fechaApertura
+                ? (
+                cuenta.fechaApertura
+                | date:'dd/MM/yyyy'
+                )
+                : 'Sin información'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Último movimiento
+              </span>
+
+              <strong>
+                {{
+                cuenta.fechaUltimoMovimiento
+                ? (
+                cuenta.fechaUltimoMovimiento
+                | date:'dd/MM/yyyy'
+                )
+                : 'Sin información'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Días sin movimiento
+              </span>
+
+              <strong>
+                {{
+                cuenta.diasSinMovimiento !== null
+                && cuenta.diasSinMovimiento !== undefined
+                ? cuenta.diasSinMovimiento
+                : 'Sin calcular'
+                }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- MOVIMIENTO DEL MES                            -->
+          <!-- ============================================= -->
+
+          <div class="cuenta-movimientos-mes">
+
+            <div class="cuenta-movimientos-mes__titulo">
+
+              <strong>
+                Movimiento del mes
+              </strong>
+
+              <span>
+                Resumen de entradas y salidas de la cuenta
+              </span>
+
+            </div>
+
+            <div class="cuenta-movimientos-mes__grid">
+
+              <article class="movimiento-mes movimiento-mes--entrada">
+
+                <span class="movimiento-mes__etiqueta">
+                  Entradas del mes
+                </span>
+
+                <strong class="movimiento-mes__valor">
+                  {{
+                  valor(cuenta.valorEntradasMes)
+                  | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                  }}
+                </strong>
+
+                <small class="movimiento-mes__cantidad">
+                  {{ valor(cuenta.cantidadEntradasMes) }}
+                  {{
+                  valor(cuenta.cantidadEntradasMes) === 1
+                  ? 'movimiento'
+                  : 'movimientos'
+                  }}
+                </small>
+
+              </article>
+
+              <article class="movimiento-mes movimiento-mes--salida">
+
+                <span class="movimiento-mes__etiqueta">
+                  Salidas del mes
+                </span>
+
+                <strong class="movimiento-mes__valor">
+                  {{
+                  valor(cuenta.valorSalidasMes)
+                  | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                  }}
+                </strong>
+
+                <small class="movimiento-mes__cantidad">
+                  {{ valor(cuenta.cantidadSalidasMes) }}
+                  {{
+                  valor(cuenta.cantidadSalidasMes) === 1
+                  ? 'movimiento'
+                  : 'movimientos'
+                  }}
+                </small>
+
+              </article>
+
+              <article class="movimiento-mes movimiento-mes--total">
+
+                <span class="movimiento-mes__etiqueta">
+                  Total movimientos
+                </span>
+
+                <strong class="movimiento-mes__valor">
+                  {{
+                  valor(cuenta.valorMovimientosMes)
+                  | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                  }}
+                </strong>
+
+                <small class="movimiento-mes__cantidad">
+                  {{ valor(cuenta.cantidadMovimientosMes) }}
+                  {{
+                  valor(cuenta.cantidadMovimientosMes) === 1
+                  ? 'movimiento'
+                  : 'movimientos'
+                  }}
+                </small>
+
+              </article>
+
+            </div>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- CONDICIONES                                    -->
+          <!-- ============================================= -->
+
+          <div
+            *ngIf="tieneCondicionesEspeciales(cuenta)"
+            class="condiciones-cuenta">
+
+            <span
+              *ngIf="cuenta.generaIntereses"
+              class="condicion condicion--positiva">
+
+              Genera intereses
+
+            </span>
+
+            <span
+              *ngIf="cuenta.exentaGMF"
+              class="condicion condicion--positiva">
+
+              Exenta GMF
+
+            </span>
+
+            <span
+              *ngIf="cuenta.cuentaConjunta"
+              class="condicion">
+
+              Cuenta conjunta
+
+            </span>
+
+            <span
+              *ngIf="cuenta.tieneBeneficiarios"
+              class="condicion">
+
+              Tiene beneficiarios
+
+            </span>
+
+            <span
+              *ngIf="cuenta.tieneApoderados"
+              class="condicion">
+
+              Tiene apoderados
+
+            </span>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- ALERTAS                                        -->
+          <!-- ============================================= -->
+
+          <div
+            *ngIf="requiereAtencion(cuenta)"
+            class="alertas-cuenta">
+
+            <span
+              *ngIf="cuenta.requiereRevision"
+              class="alerta-cuenta alerta-cuenta--advertencia">
+
+              Requiere revisión
+
+            </span>
+
+            <span
+              *ngIf="cuenta.movimientosInusuales"
+              class="alerta-cuenta alerta-cuenta--advertencia">
+
+              Movimientos inusuales
+
+            </span>
+
+            <span
+              *ngIf="cuenta.saldoNegativo"
+              class="alerta-cuenta alerta-cuenta--critica">
+
+              Saldo negativo
+
+            </span>
+
+            <span
+              *ngIf="cuenta.bloqueada"
+              class="alerta-cuenta alerta-cuenta--critica">
+
+              Cuenta bloqueada
+
+            </span>
+
+            <span
+              *ngIf="cuenta.embargada"
+              class="alerta-cuenta alerta-cuenta--critica">
+
+              Cuenta embargada
+
+            </span>
+
+            <span
+              *ngIf="valor(cuenta.cantidadAlertas) > 0"
+              class="alerta-cuenta alerta-cuenta--advertencia">
+
+              {{ valor(cuenta.cantidadAlertas) }}
+              alertas
+
+            </span>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- OBSERVACIONES                                  -->
+          <!-- ============================================= -->
+
+          <div
+            *ngIf="cuenta.observaciones"
+            class="cuenta-observaciones">
+
+            <strong>
+              Observaciones
+            </strong>
+
+            <span>
+              {{ cuenta.observaciones }}
+            </span>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</section>
+
+
+<ng-template #sinCuentas>
+
+  <section class="ahorros-vacio">
+
+    <div class="ahorros-vacio__icono">
+      $
+    </div>
+
+    <strong>
+      El asociado no tiene cuentas de ahorro
+    </strong>
+
+    <span>
+      No se encontraron productos de depósito vinculados
+      al expediente.
+    </span>
+
+  </section>
+
+</ng-template>

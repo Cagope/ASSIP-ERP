@@ -1,14 +1,9 @@
 import { Injectable } from '@angular/core';
-
 import { HttpClient } from '@angular/common/http';
-
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-
-import {
-  BienInmuebleSeguro
-} from './bienes-inmuebles-seguros.dto';
+import { BienInmuebleSeguro } from './bienes-inmuebles-seguros.dto';
 
 @Injectable({
   providedIn: 'root'
@@ -19,9 +14,8 @@ export class BienesInmueblesSegurosApi {
     `${environment.apiUrl}/hoja-vida/bienes-inmuebles-seguros`;
 
   constructor(
-    private http: HttpClient
-  ) {
-  }
+    private readonly http: HttpClient
+  ) {}
 
   listarPorBien(
     idBien: number
@@ -30,7 +24,6 @@ export class BienesInmueblesSegurosApi {
     return this.http.get<BienInmuebleSeguro[]>(
       `${this.baseUrl}/bien/${idBien}`
     );
-
   }
 
   buscarPorId(
@@ -40,7 +33,6 @@ export class BienesInmueblesSegurosApi {
     return this.http.get<BienInmuebleSeguro>(
       `${this.baseUrl}/${idSeguro}`
     );
-
   }
 
   crear(
@@ -51,7 +43,6 @@ export class BienesInmueblesSegurosApi {
       this.baseUrl,
       dto
     );
-
   }
 
   actualizar(
@@ -63,7 +54,6 @@ export class BienesInmueblesSegurosApi {
       `${this.baseUrl}/${idSeguro}`,
       dto
     );
-
   }
 
   eliminar(
@@ -73,7 +63,5 @@ export class BienesInmueblesSegurosApi {
     return this.http.delete<void>(
       `${this.baseUrl}/${idSeguro}`
     );
-
   }
-
 }

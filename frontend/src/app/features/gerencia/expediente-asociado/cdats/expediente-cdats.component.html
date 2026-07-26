@@ -1,0 +1,845 @@
+<section class="cdats">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO                                             -->
+  <!-- ===================================================== -->
+
+  <header class="cdats-encabezado">
+
+    <div>
+
+      <span class="cdats-subtitulo">
+        Inversiones a término
+      </span>
+
+      <h2>
+        Certificados de Depósito — CDAT
+      </h2>
+
+    </div>
+
+    <span class="cantidad-cdats">
+
+      {{ cantidadCdats }}
+      {{ cantidadCdats === 1 ? 'certificado' : 'certificados' }}
+
+    </span>
+
+  </header>
+
+
+  <ng-container *ngIf="tieneCdats; else sinCdats">
+
+    <!-- =================================================== -->
+    <!-- RESUMEN FINANCIERO                                   -->
+    <!-- =================================================== -->
+
+    <section class="cdats-bloque">
+
+      <h3>
+        Resumen financiero
+      </h3>
+
+      <div class="resumen-grid">
+
+        <article class="resumen-card">
+
+          <span>
+            Capital histórico invertido
+          </span>
+
+          <strong>
+            {{
+            capitalHistoricoInvertidoTotal |
+            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+        <article class="resumen-card resumen-card--principal">
+
+          <span>
+            Capital vigente
+          </span>
+
+          <strong>
+            {{
+            capitalVigenteTotal |
+            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+        <article class="resumen-card">
+
+          <span>
+            Intereses liquidados
+          </span>
+
+          <strong>
+            {{
+            interesesLiquidadosTotal |
+            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+        <article class="resumen-card">
+
+          <span>
+            Rendimiento histórico
+          </span>
+
+          <strong>
+            {{
+            rendimientoHistoricoTotal |
+            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- ESTADOS                                              -->
+    <!-- =================================================== -->
+
+    <section class="cdats-bloque">
+
+      <h3>
+        Estado de los certificados
+      </h3>
+
+      <div class="estados-grid">
+
+        <article class="estado-resumen estado-resumen--activo">
+
+          <strong>
+            {{ cantidadActivos }}
+          </strong>
+
+          <span>
+            Activos
+          </span>
+
+        </article>
+
+        <article class="estado-resumen">
+
+          <strong>
+            {{ cantidadCancelados }}
+          </strong>
+
+          <span>
+            Cancelados
+          </span>
+
+        </article>
+
+        <article
+          class="estado-resumen"
+          [class.estado-resumen--critico]="
+            cantidadVencidos > 0
+          ">
+
+          <strong>
+            {{ cantidadVencidos }}
+          </strong>
+
+          <span>
+            Vencidos
+          </span>
+
+        </article>
+
+        <article
+          class="estado-resumen"
+          [class.estado-resumen--alerta]="
+            cantidadProximosVencer > 0
+          ">
+
+          <strong>
+            {{ cantidadProximosVencer }}
+          </strong>
+
+          <span>
+            Próximos a vencer
+          </span>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- RENDIMIENTO HISTÓRICO                                -->
+    <!-- =================================================== -->
+
+    <section class="cdats-bloque">
+
+      <h3>
+        Rendimiento histórico
+      </h3>
+
+      <div class="movimientos-grid">
+
+        <article>
+
+          <span>
+            Intereses liquidados
+          </span>
+
+          <strong>
+            {{
+            interesesLiquidadosTotal |
+            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+        <article>
+
+          <span>
+            Retención en la fuente
+          </span>
+
+          <strong>
+            {{
+            retencionFuenteTotal |
+            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+        <article class="movimiento--principal">
+
+          <span>
+            Rendimiento neto histórico
+          </span>
+
+          <strong>
+            {{
+            rendimientoHistoricoTotal |
+            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+        <article>
+
+          <span>
+            Pagos de intereses
+          </span>
+
+          <strong>
+            {{ cantidadPagosInteresesTotal }}
+          </strong>
+
+        </article>
+
+        <article>
+
+          <span>
+            Movimientos registrados
+          </span>
+
+          <strong>
+            {{ cantidadMovimientosTotal }}
+          </strong>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- DETALLE DE CDAT                                      -->
+    <!-- =================================================== -->
+
+    <section class="cdats-bloque">
+
+      <div class="bloque-encabezado">
+
+        <div>
+
+          <h3>
+            Detalle de certificados
+          </h3>
+
+          <span class="bloque-descripcion">
+            Información consolidada de cada inversión
+          </span>
+
+        </div>
+
+      </div>
+
+      <div class="cdats-lista">
+
+        <article
+          *ngFor="
+            let cdat of lista;
+            trackBy: trackByCdat
+          "
+          class="cdat-card"
+          [class.cdat-card--atencion]="
+            requiereAtencion(cdat)
+          ">
+
+          <!-- ============================================= -->
+          <!-- ENCABEZADO                                    -->
+          <!-- ============================================= -->
+
+          <header class="cdat-card__encabezado">
+
+            <div class="cdat-identificacion">
+
+              <span class="cdat-tipo">
+                Certificado de depósito
+              </span>
+
+              <strong>
+                CDAT {{ numeroCdat(cdat) }}
+              </strong>
+
+              <small>
+                Plazo:
+                {{ valor(cdat.plazoDias) }}
+                días
+              </small>
+
+            </div>
+
+            <div class="cdat-estados">
+
+              <span
+                class="estado-cdat"
+                [ngClass]="claseEstado(cdat)">
+
+                {{ estadoCdat(cdat) }}
+
+              </span>
+
+              <span
+                *ngIf="valor(cdat.cantidadAlertas) > 0"
+                class="nivel-alerta"
+                [ngClass]="claseAlerta(cdat)">
+
+                {{
+                  textoValor(
+                    cdat.nivelAlerta,
+                    'ALERTA'
+                  )
+                }}
+
+              </span>
+
+            </div>
+
+          </header>
+
+
+          <!-- ============================================= -->
+          <!-- CAPITAL                                       -->
+          <!-- ============================================= -->
+
+          <div class="cdat-capital">
+
+            <div>
+
+              <span>
+                Capital inicial
+              </span>
+
+              <strong>
+                {{
+                valor(cdat.capitalInicial) |
+                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Capital histórico invertido
+              </span>
+
+              <strong>
+                {{
+                valor(cdat.capitalHistoricoInvertido) |
+                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+              </strong>
+
+            </div>
+
+            <div class="cdat-capital__principal">
+
+              <span>
+                Capital vigente
+              </span>
+
+              <strong>
+                {{
+                valor(cdat.capitalVigente) |
+                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- FECHAS                                        -->
+          <!-- ============================================= -->
+
+          <div class="cdat-datos">
+
+            <div>
+
+              <span>
+                Constitución
+              </span>
+
+              <strong>
+                {{
+                cdat.fechaConstitucion
+                ? (
+                cdat.fechaConstitucion |
+                date:'dd/MM/yyyy'
+                )
+                : 'Sin información'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Vencimiento
+              </span>
+
+              <strong>
+                {{
+                cdat.fechaVencimiento
+                ? (
+                cdat.fechaVencimiento |
+                date:'dd/MM/yyyy'
+                )
+                : 'Sin información'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Cancelación
+              </span>
+
+              <strong>
+                {{
+                cdat.fechaCancelacion
+                ? (
+                cdat.fechaCancelacion |
+                date:'dd/MM/yyyy'
+                )
+                : 'No cancelado'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Último movimiento
+              </span>
+
+              <strong>
+                {{
+                cdat.fechaUltimoMovimiento
+                ? (
+                cdat.fechaUltimoMovimiento |
+                date:'dd/MM/yyyy'
+                )
+                : 'Sin movimientos'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Último pago de intereses
+              </span>
+
+              <strong>
+                {{
+                cdat.fechaUltimoPagoIntereses
+                ? (
+                cdat.fechaUltimoPagoIntereses |
+                date:'dd/MM/yyyy'
+                )
+                : 'Sin pagos'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Días transcurridos
+              </span>
+
+              <strong>
+                {{ valor(cdat.diasTranscurridos) }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Estado de vencimiento
+              </span>
+
+              <strong
+                class="vencimiento"
+                [ngClass]="claseDiasVencimiento(cdat)">
+
+                {{ diasVencimientoTexto(cdat) }}
+
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- TASAS Y RENDIMIENTO                           -->
+          <!-- ============================================= -->
+
+          <div class="tasas-grid">
+
+            <div>
+
+              <span>
+                Tasa E.A.
+              </span>
+
+              <strong>
+                {{
+                valor(cdat.tasaEA) |
+                number:'1.0-6'
+                }}
+                %
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Tasa nominal
+              </span>
+
+              <strong>
+                {{
+                valor(cdat.tasaNominal) |
+                number:'1.0-6'
+                }}
+                %
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Intereses liquidados
+              </span>
+
+              <strong>
+                {{
+                valor(cdat.interesesLiquidados) |
+                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Retención en la fuente
+              </span>
+
+              <strong>
+                {{
+                valor(cdat.retencionFuente) |
+                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+              </strong>
+
+            </div>
+
+            <div class="tasa--principal">
+
+              <span>
+                Rendimiento histórico
+              </span>
+
+              <strong>
+                {{
+                valor(cdat.rendimientoHistorico) |
+                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Pagos de intereses
+              </span>
+
+              <strong>
+                {{ valor(cdat.cantidadPagosIntereses) }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Movimientos
+              </span>
+
+              <strong>
+                {{ valor(cdat.cantidadMovimientos) }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- TITULARIDAD                                   -->
+          <!-- ============================================= -->
+
+          <div
+            *ngIf="tieneTitularidadConjunta(cdat)"
+            class="condiciones-cdat">
+
+            <span class="condicion">
+
+              CDAT conjunto ·
+              {{ valor(cdat.numeroTitulares) }}
+              {{
+                valor(cdat.numeroTitulares) === 1
+                  ? 'titular'
+                  : 'titulares'
+              }}
+
+            </span>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- HISTÓRICO                                     -->
+          <!-- ============================================= -->
+
+          <div
+            *ngIf="!tieneInformacionHistorica(cdat)"
+            class="historico-vacio">
+
+            No se encontraron movimientos históricos
+            para este certificado.
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- ALERTAS                                       -->
+          <!-- ============================================= -->
+
+          <div
+            *ngIf="requiereAtencion(cdat)"
+            class="alertas-cdat">
+
+            <span
+              *ngIf="cdat.vencido"
+              class="alerta-cdat alerta-cdat--critica">
+
+              Certificado vencido
+
+            </span>
+
+            <span
+              *ngIf="cdat.proximoVencer"
+              class="alerta-cdat alerta-cdat--advertencia">
+
+              Próximo a vencer
+
+            </span>
+
+            <span
+              *ngIf="valor(cdat.cantidadAlertas) > 0"
+              class="alerta-cdat alerta-cdat--advertencia">
+
+              {{ valor(cdat.cantidadAlertas) }}
+              {{
+                valor(cdat.cantidadAlertas) === 1
+                  ? 'alerta'
+                  : 'alertas'
+              }}
+
+            </span>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- OBSERVACIONES                                 -->
+          <!-- ============================================= -->
+
+          <div
+            *ngIf="cdat.observaciones"
+            class="cdat-observaciones">
+
+            <strong>
+              Observaciones
+            </strong>
+
+            <span>
+              {{ cdat.observaciones }}
+            </span>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- INFORMACIÓN COMPLEMENTARIA                           -->
+    <!-- =================================================== -->
+
+    <section class="cdats-bloque">
+
+      <h3>
+        Información complementaria
+      </h3>
+
+      <div class="relaciones-grid">
+
+        <article>
+
+          <strong>
+            {{ cantidadConjuntos }}
+          </strong>
+
+          <span>
+            Certificados conjuntos
+          </span>
+
+        </article>
+
+        <article
+          [class.relacion--alerta]="
+            cantidadConAlertas > 0
+          ">
+
+          <strong>
+            {{ cantidadConAlertas }}
+          </strong>
+
+          <span>
+            Certificados con alertas
+          </span>
+
+        </article>
+
+        <article>
+
+          <strong>
+            {{ cantidadPagosInteresesTotal }}
+          </strong>
+
+          <span>
+            Pagos de intereses
+          </span>
+
+        </article>
+
+        <article>
+
+          <strong>
+            {{ cantidadMovimientosTotal }}
+          </strong>
+
+          <span>
+            Movimientos históricos
+          </span>
+
+        </article>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</section>
+
+
+<ng-template #sinCdats>
+
+  <section class="cdats-vacio">
+
+    <div class="cdats-vacio__icono">
+      $
+    </div>
+
+    <strong>
+      El asociado no tiene certificados CDAT
+    </strong>
+
+    <span>
+      No se encontraron inversiones a término vinculadas
+      al expediente.
+    </span>
+
+  </section>
+
+</ng-template>

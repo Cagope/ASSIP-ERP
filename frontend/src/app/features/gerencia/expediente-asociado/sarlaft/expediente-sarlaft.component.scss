@@ -1,0 +1,538 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+// =========================================================
+// CONTENEDOR PRINCIPAL
+// =========================================================
+
+.sarlaft {
+  width: 100%;
+  overflow: hidden;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+// =========================================================
+// ENCABEZADO
+// =========================================================
+
+.sarlaft-encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  padding: 1rem 1.15rem;
+
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.sarlaft-encabezado__titulo {
+  min-width: 0;
+}
+
+.sarlaft-subtitulo {
+  display: block;
+  margin-bottom: 0.15rem;
+
+  color: #6b7280;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sarlaft-encabezado h2 {
+  margin: 0;
+
+  color: #111827;
+  font-size: 1.08rem;
+  font-weight: 700;
+}
+
+.sarlaft-encabezado p {
+  max-width: 760px;
+  margin: 0.28rem 0 0;
+
+  color: #6b7280;
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.encabezado-estados {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.estado-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+
+  min-height: 30px;
+  padding: 0.3rem 0.72rem;
+
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 999px;
+
+  color: #047857;
+  font-size: 0.73rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.estado-chip strong {
+  font-weight: 700;
+}
+
+// =========================================================
+// BLOQUES
+// =========================================================
+
+.sarlaft-bloque {
+  padding: 1rem 1.15rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.sarlaft-bloque:last-of-type {
+  border-bottom: 0;
+}
+
+.sarlaft-bloque--secundario {
+  background: #fcfcfd;
+}
+
+.sarlaft-bloque h3 {
+  margin: 0;
+
+  color: #374151;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.bloque-encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+
+  margin-bottom: 0.85rem;
+}
+
+.bloque-encabezado > div {
+  min-width: 0;
+}
+
+.bloque-descripcion {
+  display: block;
+  margin-top: 0.14rem;
+
+  color: #6b7280;
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+// =========================================================
+// GRILLAS DE DATOS
+// =========================================================
+
+.datos-grid {
+  display: grid;
+  gap: 0.85rem 1rem;
+}
+
+.datos-grid--cuatro {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.dato {
+  min-width: 0;
+}
+
+.dato--doble {
+  grid-column: span 2;
+}
+
+.dato--completo {
+  grid-column: 1 / -1;
+}
+
+.dato-label {
+  display: block;
+  margin-bottom: 0.22rem;
+
+  color: #6b7280;
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.dato-valor {
+  display: block;
+  overflow-wrap: anywhere;
+
+  color: #111827;
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+strong.dato-valor {
+  font-weight: 700;
+}
+
+// =========================================================
+// ESTADOS BINARIOS
+// =========================================================
+
+.estado-binario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  min-height: 29px;
+  padding: 0.28rem 0.7rem;
+
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+
+  color: #4b5563;
+  font-size: 0.73rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.estado-binario--activo {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #047857;
+}
+
+// =========================================================
+// CONDICIONES
+// =========================================================
+
+.condiciones-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(150px, 1fr));
+  gap: 0.65rem;
+}
+
+.condicion {
+  display: flex;
+  align-items: center;
+  gap: 0.48rem;
+
+  min-width: 0;
+  padding: 0.65rem 0.7rem;
+
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  color: #6b7280;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.condicion > span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+
+  width: 22px;
+  height: 22px;
+
+  background: #e5e7eb;
+  border-radius: 50%;
+
+  color: #6b7280;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.condicion--activa {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #047857;
+}
+
+.condicion--activa > span {
+  background: #d1fae5;
+  color: #047857;
+}
+
+// =========================================================
+// PANELES DE DETALLE
+// =========================================================
+
+.detalle-panel {
+  margin-top: 0.85rem;
+  padding: 0.85rem;
+
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.detalle-panel__titulo {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.55rem;
+
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.detalle-panel__titulo strong {
+  color: #374151;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+// =========================================================
+// MENSAJES NEUTRALES
+// =========================================================
+
+.mensaje-neutral {
+  margin-top: 0.75rem;
+  padding: 0.8rem 0.9rem;
+
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  color: #6b7280;
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+// =========================================================
+// PIE
+// =========================================================
+
+.sarlaft-pie {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+
+  padding: 1rem 1.15rem;
+
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+}
+
+.sarlaft-pie__informacion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  min-width: 0;
+}
+
+.sarlaft-pie__informacion strong {
+  color: #374151;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.sarlaft-pie__informacion span {
+  color: #6b7280;
+  font-size: 0.72rem;
+}
+
+.sarlaft-pie__estados {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.estado-resumen {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+
+  min-height: 29px;
+  padding: 0.3rem 0.65rem;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+
+  color: #6b7280;
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+.estado-resumen strong {
+  color: #4b5563;
+  font-weight: 700;
+}
+
+.estado-resumen--activo {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #047857;
+}
+
+.estado-resumen--activo strong {
+  color: #047857;
+}
+
+// =========================================================
+// ESTADO SIN INFORMACIÓN
+// =========================================================
+
+.sarlaft-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+
+  min-height: 190px;
+  padding: 1.25rem;
+
+  background: #ffffff;
+  border: 1px dashed #d1d5db;
+  border-radius: 10px;
+
+  color: #6b7280;
+  text-align: center;
+}
+
+.sarlaft-vacio__icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;
+  height: 42px;
+
+  background: #fef3c7;
+  border-radius: 50%;
+
+  color: #92400e;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.sarlaft-vacio strong {
+  color: #374151;
+  font-size: 0.92rem;
+}
+
+.sarlaft-vacio span {
+  max-width: 430px;
+
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+// =========================================================
+// RESPONSIVE
+// =========================================================
+
+@media (max-width: 1200px) {
+
+  .datos-grid--cuatro {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .condiciones-grid {
+    grid-template-columns: repeat(3, minmax(150px, 1fr));
+  }
+
+}
+
+@media (max-width: 900px) {
+
+  .condiciones-grid {
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+  }
+
+  .sarlaft-pie {
+    grid-template-columns: 1fr;
+  }
+
+  .sarlaft-pie__estados {
+    justify-content: flex-start;
+  }
+
+}
+
+@media (max-width: 700px) {
+
+  .sarlaft-encabezado,
+  .bloque-encabezado {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .encabezado-estados {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .estado-chip {
+    white-space: normal;
+  }
+
+  .datos-grid--cuatro,
+  .condiciones-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dato--doble,
+  .dato--completo {
+    grid-column: auto;
+  }
+
+  .estado-binario {
+    align-self: flex-start;
+  }
+
+  .sarlaft-pie__estados {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .estado-resumen {
+    justify-content: space-between;
+    width: 100%;
+    white-space: normal;
+  }
+
+}
+
+@media (max-width: 480px) {
+
+  .sarlaft-encabezado,
+  .sarlaft-bloque,
+  .sarlaft-pie {
+    padding-right: 0.85rem;
+    padding-left: 0.85rem;
+  }
+
+  .detalle-panel {
+    padding: 0.72rem;
+  }
+
+  .condicion {
+    padding: 0.62rem;
+  }
+
+}

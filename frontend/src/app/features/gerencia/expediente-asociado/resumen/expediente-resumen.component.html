@@ -1,0 +1,759 @@
+<section
+  *ngIf="resumen; else sinResumen"
+  class="resumen">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO                                             -->
+  <!-- ===================================================== -->
+
+  <header class="resumen-encabezado">
+
+    <div>
+
+      <span class="resumen-subtitulo">
+        Vista ejecutiva
+      </span>
+
+      <h2>
+        Resumen general
+      </h2>
+
+    </div>
+
+  </header>
+
+
+  <!-- ===================================================== -->
+  <!-- IDENTIFICACIÓN                                         -->
+  <!-- ===================================================== -->
+
+  <section class="resumen-bloque">
+
+    <div class="bloque-titulo">
+
+      <h3>
+        Identificación
+      </h3>
+
+    </div>
+
+    <div class="datos-grid datos-grid--cuatro">
+
+      <div class="dato dato--amplio">
+
+        <span class="dato-label">
+          Nombre completo
+        </span>
+
+        <strong class="dato-valor">
+          {{ nombreCompleto }}
+        </strong>
+
+      </div>
+
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Documento
+        </span>
+
+        <span class="dato-valor">
+          {{ documentoCompleto }}
+        </span>
+
+      </div>
+
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Tipo de persona
+        </span>
+
+        <span class="dato-valor">
+          {{ tipoPersona }}
+        </span>
+
+      </div>
+
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Fecha de nacimiento
+        </span>
+
+        <span class="dato-valor">
+
+          {{
+            resumen.fechaNacimiento
+              ? (resumen.fechaNacimiento | date:'dd/MM/yyyy')
+              : 'Sin información'
+          }}
+
+        </span>
+
+      </div>
+
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Edad
+        </span>
+
+        <span class="dato-valor">
+
+          {{
+            resumen.edad !== null &&
+            resumen.edad !== undefined
+              ? resumen.edad + ' años'
+              : 'Sin información'
+          }}
+
+        </span>
+
+      </div>
+
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Género
+        </span>
+
+        <span class="dato-valor">
+          {{ resumen.genero || 'Sin información' }}
+        </span>
+
+      </div>
+
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Estado civil
+        </span>
+
+        <span class="dato-valor">
+          {{ resumen.estadoCivil || 'Sin información' }}
+        </span>
+
+      </div>
+
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Nivel de escolaridad
+        </span>
+
+        <span class="dato-valor">
+          {{ escolaridad }}
+        </span>
+
+      </div>
+
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Ocupación
+        </span>
+
+        <span class="dato-valor">
+          {{ ocupacion }}
+        </span>
+
+      </div>
+
+
+      <div class="dato dato--doble">
+
+        <span class="dato-label">
+          Lugar de nacimiento
+        </span>
+
+        <span class="dato-valor">
+          {{ lugarNacimiento }}
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- INFORMACIÓN FAMILIAR Y VIVIENDA                        -->
+  <!-- ===================================================== -->
+
+  <section class="resumen-bloque">
+
+    <div class="bloque-titulo">
+
+      <h3>
+        Información familiar y vivienda
+      </h3>
+
+    </div>
+
+    <div class="datos-grid datos-grid--cuatro">
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Cabeza de familia
+        </span>
+
+        <span class="dato-valor">
+          {{ cabezaFamilia }}
+        </span>
+
+      </div>
+
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Número de hijos
+        </span>
+
+        <span class="dato-valor">
+          {{ numeroHijos }}
+        </span>
+
+      </div>
+
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Estrato social
+        </span>
+
+        <span class="dato-valor">
+          {{ estratoSocial }}
+        </span>
+
+      </div>
+
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Tipo de vivienda
+        </span>
+
+        <span class="dato-valor">
+          {{ tipoVivienda }}
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- PERFIL ECONÓMICO Y LABORAL                             -->
+  <!-- ===================================================== -->
+
+  <section class="resumen-bloque">
+
+    <div class="bloque-titulo">
+
+      <h3>
+        Perfil económico y laboral
+      </h3>
+
+    </div>
+
+    <div class="datos-grid datos-grid--tres">
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Sector económico
+        </span>
+
+        <span class="dato-valor">
+          {{ sectorEconomico }}
+        </span>
+
+      </div>
+
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Actividad económica SES
+        </span>
+
+        <span class="dato-valor">
+          {{ actividadSes }}
+        </span>
+
+      </div>
+
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Actividad económica DIAN
+        </span>
+
+        <span class="dato-valor">
+          {{ actividadDian }}
+        </span>
+
+      </div>
+
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Ocupación
+        </span>
+
+        <span class="dato-valor">
+          {{ actividadLaboral }}
+        </span>
+
+      </div>
+
+
+      <div class="dato dato--doble">
+
+        <span class="dato-label">
+          Empresa
+        </span>
+
+        <span class="dato-valor">
+          {{ empresa }}
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- CONTACTO Y UBICACIÓN                                   -->
+  <!-- ===================================================== -->
+
+  <section class="resumen-bloque">
+
+    <div class="bloque-titulo">
+
+      <h3>
+        Contacto y ubicación
+      </h3>
+
+    </div>
+
+    <div class="datos-grid datos-grid--tres">
+
+      <div class="dato dato--doble">
+
+        <span class="dato-label">
+          Dirección
+        </span>
+
+        <span class="dato-valor">
+          {{ ubicacionCompleta }}
+        </span>
+
+      </div>
+
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Teléfono
+        </span>
+
+        <span class="dato-valor">
+          {{ telefonoPrincipal }}
+        </span>
+
+      </div>
+
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Correo electrónico
+        </span>
+
+        <span class="dato-valor dato-valor--correo">
+          {{ correoElectronico }}
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- INFORMACIÓN FINANCIERA                                 -->
+  <!-- ===================================================== -->
+
+  <section class="resumen-bloque">
+
+    <div class="bloque-titulo">
+
+      <h3>
+        Información financiera
+      </h3>
+
+    </div>
+
+    <div class="financiero-grid">
+
+      <article class="financiero-card">
+
+        <span class="financiero-label">
+          Ingresos mensuales
+        </span>
+
+        <strong>
+          {{
+          ingresosMensuales |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article class="financiero-card">
+
+        <span class="financiero-label">
+          Egresos mensuales
+        </span>
+
+        <strong>
+          {{
+          egresosMensuales |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article
+        class="financiero-card"
+        [class.financiero-card--negativo]="
+          disponibleMensual < 0
+        ">
+
+        <span class="financiero-label">
+          Disponible mensual
+        </span>
+
+        <strong>
+          {{
+          disponibleMensual |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article class="financiero-card">
+
+        <span class="financiero-label">
+          Activos declarados
+        </span>
+
+        <strong>
+          {{
+          activos |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article class="financiero-card">
+
+        <span class="financiero-label">
+          Pasivos declarados
+        </span>
+
+        <strong>
+          {{
+          pasivos |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article class="financiero-card financiero-card--principal">
+
+        <span class="financiero-label">
+          Patrimonio estimado
+        </span>
+
+        <strong>
+          {{
+          patrimonioEstimado |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+        <small>
+          Patrimonio declarado:
+          {{
+          patrimonio |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </small>
+
+      </article>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- PRODUCTOS Y BIENES                                     -->
+  <!-- ===================================================== -->
+
+  <section class="resumen-bloque">
+
+    <div class="bloque-titulo">
+
+      <h3>
+        Productos y bienes
+      </h3>
+
+    </div>
+
+    <div class="productos-tabla">
+
+      <div class="producto-fila">
+
+        <div class="producto-nombre">
+          Aportes sociales
+        </div>
+
+        <div class="producto-cantidad">
+          —
+        </div>
+
+        <strong class="producto-valor">
+          {{
+          saldoAportes |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </div>
+
+
+      <div class="producto-fila">
+
+        <div class="producto-nombre">
+          Cuentas de ahorro
+        </div>
+
+        <div class="producto-cantidad">
+          {{ numeroCuentasAhorro }}
+        </div>
+
+        <strong class="producto-valor">
+          {{
+          saldoAhorros |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </div>
+
+
+      <div class="producto-fila">
+
+        <div class="producto-nombre">
+          CDAT
+        </div>
+
+        <div class="producto-cantidad">
+          {{ numeroCdats }}
+        </div>
+
+        <strong class="producto-valor">
+          {{
+          saldoCdats |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </div>
+
+
+      <div class="producto-fila">
+
+        <div class="producto-nombre">
+          Créditos
+        </div>
+
+        <div class="producto-cantidad">
+          {{ numeroCreditos }}
+        </div>
+
+        <strong class="producto-valor">
+          {{
+          saldoCartera |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </div>
+
+
+      <div class="producto-fila">
+
+        <div class="producto-nombre">
+          Bienes registrados
+        </div>
+
+        <div class="producto-cantidad">
+          {{ numeroBienes }}
+        </div>
+
+        <strong class="producto-valor">
+          {{
+          valorBienes |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </div>
+
+
+      <div class="producto-fila">
+
+        <div class="producto-nombre">
+          Garantías
+        </div>
+
+        <div class="producto-cantidad">
+          —
+        </div>
+
+        <strong class="producto-valor">
+          {{
+          valorGarantias |
+          currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- ACTUALIZACIÓN Y SEÑALES                                -->
+  <!-- ===================================================== -->
+
+  <section class="resumen-pie">
+
+    <div
+      class="actualizacion"
+      [ngClass]="claseActualizacion">
+
+      <span class="actualizacion-titulo">
+        {{ estadoActualizacion }}
+      </span>
+
+      <span class="actualizacion-detalle">
+
+        <ng-container
+          *ngIf="
+            resumen.fechaActualizacionHojaVida;
+            else sinFechaActualizacion
+          ">
+
+          Última actualización:
+          {{
+            resumen.fechaActualizacionHojaVida |
+            date:'dd/MM/yyyy'
+          }}
+
+          · {{ diasSinActualizar }} días
+
+        </ng-container>
+
+        <ng-template #sinFechaActualizacion>
+          No existe una fecha de actualización registrada.
+        </ng-template>
+
+      </span>
+
+    </div>
+
+
+    <div
+      *ngIf="tieneAlertaEspecial"
+      class="alerta-especial">
+
+      <strong>
+        Señales especiales
+      </strong>
+
+      <span *ngIf="resumen.pep">
+        PEP
+      </span>
+
+      <span *ngIf="resumen.familiarPep">
+        Familiar PEP
+      </span>
+
+      <span *ngIf="resumen.monedaExtranjera">
+        Operaciones en moneda extranjera
+      </span>
+
+      <span *ngIf="resumen.cuentaExterior">
+        Cuenta en el exterior
+      </span>
+
+    </div>
+
+  </section>
+
+</section>
+
+
+<ng-template #sinResumen>
+
+  <section class="resumen-vacio">
+
+    <strong>
+      Resumen no disponible
+    </strong>
+
+    <span>
+      No se encontró información general consolidada del asociado.
+    </span>
+
+  </section>
+
+</ng-template>

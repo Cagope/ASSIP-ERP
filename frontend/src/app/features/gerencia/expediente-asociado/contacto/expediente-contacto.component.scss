@@ -1,0 +1,337 @@
+.contacto {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+/* ========================================================= */
+/* ENCABEZADO                                                 */
+/* ========================================================= */
+
+.contacto-encabezado {
+  padding: 1rem 1.25rem;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.contacto-subtitulo {
+  display: block;
+  margin-bottom: .15rem;
+  color: #6b7280;
+  font-size: .74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.contacto-encabezado h2 {
+  margin: .15rem 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.contacto-encabezado p {
+  margin: 0;
+  color: #6b7280;
+  font-size: .80rem;
+}
+
+/* ========================================================= */
+/* BLOQUES                                                    */
+/* ========================================================= */
+
+.contacto-bloque {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.bloque-encabezado {
+  margin-bottom: .9rem;
+}
+
+.bloque-encabezado h3 {
+  margin: 0;
+  font-size: .92rem;
+  color: #374151;
+}
+
+.bloque-descripcion {
+  display: block;
+  margin-top: .15rem;
+  color: #6b7280;
+  font-size: .74rem;
+}
+
+/* ========================================================= */
+/* GRID                                                       */
+/* ========================================================= */
+
+.datos-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.datos-grid--cuatro {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.datos-grid--tres {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.dato--doble {
+  grid-column: span 2;
+}
+
+.datos-grid--separado {
+  margin-top: 1rem;
+}
+
+.dato-label {
+  display: block;
+  margin-bottom: .25rem;
+  color: #6b7280;
+  font-size: .74rem;
+  font-weight: 600;
+}
+
+.dato-valor {
+  color: #111827;
+  font-size: .85rem;
+  word-break: break-word;
+}
+
+.dato-valor--correo {
+  text-transform: lowercase;
+}
+
+/* ========================================================= */
+/* DIRECCIÓN                                                  */
+/* ========================================================= */
+
+.estado-direccion {
+  display: inline-flex;
+  align-items: center;
+  padding: .30rem .70rem;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #4b5563;
+  font-size: .72rem;
+  font-weight: 700;
+}
+
+.estado-direccion--activa {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.direccion-principal {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.direccion-principal__label {
+  display: block;
+  margin-bottom: .20rem;
+  color: #6b7280;
+  font-size: .72rem;
+  font-weight: 600;
+}
+
+.direccion-principal strong {
+  display: block;
+  margin-bottom: .25rem;
+  font-size: .92rem;
+}
+
+.direccion-principal span:last-child {
+  color: #6b7280;
+  font-size: .78rem;
+}
+
+/* ========================================================= */
+/* TELÉFONOS                                                  */
+/* ========================================================= */
+
+.canales-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: .8rem;
+}
+
+.canal-card {
+  padding: .9rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.canal-card--principal {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.canal-card__tipo {
+  display: block;
+  margin-bottom: .35rem;
+  color: #6b7280;
+  font-size: .72rem;
+}
+
+.canal-card strong {
+  display: block;
+  margin-bottom: .25rem;
+  font-size: .90rem;
+}
+
+.canal-card__detalle,
+.canal-validacion {
+  font-size: .72rem;
+  color: #6b7280;
+}
+
+.canal-validacion--correcta {
+  color: #166534;
+}
+
+/* ========================================================= */
+/* CORREO                                                     */
+/* ========================================================= */
+
+.correo-principal {
+  padding: 1rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+/* ========================================================= */
+/* AUTORIZACIONES                                             */
+/* ========================================================= */
+
+.autorizaciones-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .75rem;
+}
+
+.autorizacion {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .80rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+}
+
+.autorizacion-icono {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.autorizacion strong {
+  display: block;
+  font-size: .78rem;
+}
+
+.autorizacion span:not(.autorizacion-icono) {
+  font-size: .72rem;
+}
+
+.autorizacion--permitida {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.autorizacion--permitida .autorizacion-icono {
+  background: #dcfce7;
+}
+
+.autorizacion--denegada {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.autorizacion--denegada .autorizacion-icono {
+  background: #fee2e2;
+}
+
+.autorizacion--neutral {
+  background: #f9fafb;
+  border-color: #e5e7eb;
+  color: #6b7280;
+}
+
+.autorizacion--neutral .autorizacion-icono {
+  background: #e5e7eb;
+}
+
+/* ========================================================= */
+/* SIN INFORMACIÓN                                            */
+/* ========================================================= */
+
+.contacto-vacio {
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: .4rem;
+  text-align: center;
+  background: #fff;
+  border: 1px dashed #d1d5db;
+  border-radius: 10px;
+}
+
+.contacto-vacio strong {
+  color: #374151;
+}
+
+.contacto-vacio span {
+  color: #6b7280;
+  font-size: .82rem;
+}
+
+/* ========================================================= */
+/* RESPONSIVE                                                 */
+/* ========================================================= */
+
+@media (max-width: 1100px) {
+
+  .datos-grid--cuatro,
+  .autorizaciones-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .canales-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+@media (max-width: 768px) {
+
+  .datos-grid--cuatro,
+  .datos-grid--tres,
+  .canales-grid,
+  .autorizaciones-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dato--doble {
+    grid-column: auto;
+  }
+
+}

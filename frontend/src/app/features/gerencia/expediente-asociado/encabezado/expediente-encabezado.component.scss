@@ -1,0 +1,253 @@
+.expediente-encabezado {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.encabezado-principal {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.identificacion {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+}
+
+.identificacion-titulo {
+  font-size: .82rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.nombre-asociado {
+  margin: 0;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.documento-asociado {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem;
+  font-size: .95rem;
+  color: #374151;
+}
+
+.documento-asociado strong {
+  font-size: 1rem;
+  color: #111827;
+}
+
+.encabezado-acciones {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .75rem;
+
+  flex-wrap: wrap;
+}
+
+.encabezado-acciones .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .35rem;
+
+  min-height: 36px;
+  padding: .45rem .90rem;
+
+  border-radius: 7px;
+
+  font-size: .78rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+
+  transition:
+    background-color .15s ease,
+    border-color .15s ease,
+    box-shadow .15s ease,
+    transform .15s ease;
+}
+
+.encabezado-acciones .btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgb(15 23 42 / 10%);
+}
+
+.encabezado-acciones .btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.encabezado-acciones .btn:disabled {
+  cursor: not-allowed;
+  opacity: .65;
+}
+
+.encabezado-acciones .btn--secondary {
+  min-width: 170px;
+
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+
+  color: #334155;
+}
+
+.encabezado-acciones .btn--secondary:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+}
+
+.encabezado-acciones .btn--primary {
+  min-width: 112px;
+
+  background: #047857;
+  border: 1px solid #047857;
+
+  color: #ffffff;
+}
+
+.encabezado-acciones .btn--primary:hover:not(:disabled) {
+  background: #065f46;
+  border-color: #065f46;
+}
+
+.encabezado-detalle {
+  margin-top: 1.5rem;
+
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.detalle-item {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+}
+
+.detalle-label {
+  font-size: .78rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.detalle-valor {
+  font-size: .95rem;
+  color: #111827;
+  font-weight: 500;
+}
+
+.estado {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+
+  padding: .25rem .70rem;
+
+  border-radius: 999px;
+
+  font-size: .80rem;
+  font-weight: 700;
+}
+
+.estado--activo {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.estado--inactivo {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.estado--retirado {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.estado--neutral {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.encabezado-cargando {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .75rem;
+
+  min-height: 110px;
+
+  color: #6b7280;
+  font-size: .95rem;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+
+  border: 3px solid #e5e7eb;
+  border-top-color: #047857;
+  border-radius: 50%;
+
+  animation: girar .8s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1000px) {
+
+  .encabezado-principal {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .encabezado-acciones {
+    justify-content: flex-start;
+  }
+
+  .encabezado-detalle {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+
+}
+
+@media (max-width: 640px) {
+
+  .expediente-encabezado {
+    padding: 1rem;
+  }
+
+  .nombre-asociado {
+    font-size: 1.25rem;
+  }
+
+  .encabezado-detalle {
+    grid-template-columns: 1fr;
+  }
+
+  .documento-asociado {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+}

@@ -20,6 +20,13 @@ export const GERENCIA_ROUTES: Routes = [
     loadChildren: () =>
       import('./dashboards/dashboard-depositos/dashboard-depositos.routes')
         .then(m => m.dashboardDepositosRoutes)
+  },
+
+  {
+    path: 'expediente-asociado',
+    loadChildren: () =>
+      import('./expediente-asociado/expediente-asociado.routes')
+        .then(m => m.EXPEDIENTE_ASOCIADO_ROUTES)
   }
 
 ];

@@ -1,0 +1,561 @@
+<section
+  *ngIf="contacto; else sinContacto"
+  class="contacto">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO                                             -->
+  <!-- ===================================================== -->
+
+  <header class="contacto-encabezado">
+
+    <div class="contacto-encabezado__titulo">
+
+      <span class="contacto-subtitulo">
+        Ubicación y comunicaciones
+      </span>
+
+      <h2>
+        Información de contacto
+      </h2>
+
+      <p>
+        Dirección, teléfonos, correo electrónico y autorizaciones
+        de contacto del asociado.
+      </p>
+
+    </div>
+
+  </header>
+
+  <!-- ===================================================== -->
+  <!-- IDENTIFICACIÓN                                         -->
+  <!-- ===================================================== -->
+
+  <section class="contacto-bloque">
+
+    <div class="bloque-encabezado">
+
+      <div>
+
+        <h3>
+          Identificación
+        </h3>
+
+        <span class="bloque-descripcion">
+          Datos básicos del asociado consultado
+        </span>
+
+      </div>
+
+    </div>
+
+    <div class="datos-grid datos-grid--tres">
+
+      <div class="dato dato--doble">
+
+        <span class="dato-label">
+          Nombre completo
+        </span>
+
+        <strong class="dato-valor">
+          {{ nombreCompleto }}
+        </strong>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Documento
+        </span>
+
+        <span class="dato-valor">
+          {{ documentoCompleto }}
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- DIRECCIÓN PRINCIPAL                                    -->
+  <!-- ===================================================== -->
+
+  <section class="contacto-bloque">
+
+    <div class="bloque-encabezado">
+
+      <div>
+
+        <h3>
+          Dirección principal
+        </h3>
+
+        <span class="bloque-descripcion">
+          Domicilio registrado para el asociado
+        </span>
+
+      </div>
+
+      <span
+        class="estado-direccion"
+        [class.estado-direccion--activa]="
+          contacto.direccionPrincipalActiva
+        ">
+
+        {{
+          contacto.direccionPrincipalActiva
+            ? 'Dirección activa'
+            : 'Dirección inactiva'
+        }}
+
+      </span>
+
+    </div>
+
+    <div class="direccion-principal">
+
+      <div class="direccion-principal__contenido">
+
+        <span class="direccion-principal__label">
+          Dirección
+        </span>
+
+        <strong>
+          {{ direccionPrincipal }}
+        </strong>
+
+        <span>
+          {{ ubicacionPrincipal }}
+        </span>
+
+      </div>
+
+    </div>
+
+    <div class="datos-grid datos-grid--cuatro datos-grid--separado">
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Barrio o vereda
+        </span>
+
+        <span class="dato-valor">
+          {{ valorTexto(contacto.barrioVereda) }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Ciudad
+        </span>
+
+        <span class="dato-valor">
+          {{ valorTexto(contacto.nombreCiudad) }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Departamento
+        </span>
+
+        <span class="dato-valor">
+          {{ valorTexto(contacto.nombreDepartamento) }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          País
+        </span>
+
+        <span class="dato-valor">
+          {{ valorTexto(contacto.nombrePais) }}
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- TELÉFONOS                                              -->
+  <!-- ===================================================== -->
+
+  <section class="contacto-bloque">
+
+    <div class="bloque-encabezado">
+
+      <div>
+
+        <h3>
+          Teléfonos
+        </h3>
+
+        <span class="bloque-descripcion">
+          Números principales registrados para contactar al asociado
+        </span>
+
+      </div>
+
+    </div>
+
+    <div class="canales-grid canales-grid--tres">
+
+      <!-- CELULAR PRINCIPAL -->
+
+      <article class="canal-card canal-card--principal">
+
+        <span class="canal-card__tipo">
+          Celular principal
+        </span>
+
+        <strong>
+          {{ valorTexto(contacto.celularPrincipal) }}
+        </strong>
+
+        <span
+          class="canal-validacion"
+          [class.canal-validacion--correcta]="
+            contacto.celularValido
+          ">
+
+          {{
+            contacto.celularValido
+              ? 'Número validado'
+              : 'Pendiente de validar'
+          }}
+
+        </span>
+
+      </article>
+
+      <!-- TELÉFONO DE RESIDENCIA -->
+
+      <article class="canal-card">
+
+        <span class="canal-card__tipo">
+          Teléfono de residencia
+        </span>
+
+        <strong>
+          {{ valorTexto(contacto.telefonoResidencia) }}
+        </strong>
+
+        <span
+          class="canal-validacion"
+          [class.canal-validacion--correcta]="
+            contacto.telefonoValido
+          ">
+
+          {{
+            contacto.telefonoValido
+              ? 'Número validado'
+              : 'Pendiente de validar'
+          }}
+
+        </span>
+
+      </article>
+
+      <!-- TELÉFONO DE TRABAJO -->
+
+      <article class="canal-card">
+
+        <span class="canal-card__tipo">
+          Teléfono de trabajo
+        </span>
+
+        <strong>
+          {{ valorTexto(contacto.telefonoTrabajo) }}
+        </strong>
+
+        <span class="canal-card__detalle">
+          Contacto laboral
+        </span>
+
+      </article>
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- CORREO ELECTRÓNICO                                     -->
+  <!-- ===================================================== -->
+
+  <section class="contacto-bloque">
+
+    <div class="bloque-encabezado">
+
+      <div>
+
+        <h3>
+          Correo electrónico
+        </h3>
+
+        <span class="bloque-descripcion">
+          Dirección electrónica principal registrada
+        </span>
+
+      </div>
+
+    </div>
+
+    <div class="correo-principal">
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Correo principal
+        </span>
+
+        <strong class="dato-valor dato-valor--correo">
+          {{ correoPrincipal }}
+        </strong>
+
+      </div>
+
+      <span
+        class="canal-validacion"
+        [class.canal-validacion--correcta]="
+          contacto.correoValido
+        ">
+
+        {{
+          contacto.correoValido
+            ? 'Correo validado'
+            : 'Pendiente de validar'
+        }}
+
+      </span>
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- AUTORIZACIONES                                         -->
+  <!-- ===================================================== -->
+
+  <section class="contacto-bloque">
+
+    <div class="bloque-encabezado">
+
+      <div>
+
+        <h3>
+          Autorizaciones de contacto
+        </h3>
+
+        <span class="bloque-descripcion">
+          Canales autorizados por el asociado para recibir comunicaciones
+        </span>
+
+      </div>
+
+    </div>
+
+    <div class="autorizaciones-grid">
+
+      <!-- CORREO ELECTRÓNICO -->
+
+      <div
+        class="autorizacion"
+        [ngClass]="
+          autorizacionClase(
+            contacto.autorizaCorreoElectronico
+          )
+        ">
+
+        <span class="autorizacion-icono">
+
+          {{
+            contacto.autorizaCorreoElectronico === true
+              ? '✓'
+              : contacto.autorizaCorreoElectronico === false
+                ? '×'
+                : '?'
+          }}
+
+        </span>
+
+        <div>
+
+          <strong>
+            Correo electrónico
+          </strong>
+
+          <span>
+            {{
+              autorizacionTexto(
+                contacto.autorizaCorreoElectronico
+              )
+            }}
+          </span>
+
+        </div>
+
+      </div>
+
+      <!-- MENSAJES DE TEXTO -->
+
+      <div
+        class="autorizacion"
+        [ngClass]="
+          autorizacionClase(
+            contacto.autorizaMensajesTexto
+          )
+        ">
+
+        <span class="autorizacion-icono">
+
+          {{
+            contacto.autorizaMensajesTexto === true
+              ? '✓'
+              : contacto.autorizaMensajesTexto === false
+                ? '×'
+                : '?'
+          }}
+
+        </span>
+
+        <div>
+
+          <strong>
+            Mensajes de texto
+          </strong>
+
+          <span>
+            {{
+              autorizacionTexto(
+                contacto.autorizaMensajesTexto
+              )
+            }}
+          </span>
+
+        </div>
+
+      </div>
+
+      <!-- WHATSAPP -->
+
+      <div
+        class="autorizacion"
+        [ngClass]="
+          autorizacionClase(
+            contacto.autorizaWhatsapp
+          )
+        ">
+
+        <span class="autorizacion-icono">
+
+          {{
+            contacto.autorizaWhatsapp === true
+              ? '✓'
+              : contacto.autorizaWhatsapp === false
+                ? '×'
+                : '?'
+          }}
+
+        </span>
+
+        <div>
+
+          <strong>
+            WhatsApp
+          </strong>
+
+          <span>
+            {{
+              autorizacionTexto(
+                contacto.autorizaWhatsapp
+              )
+            }}
+          </span>
+
+        </div>
+
+      </div>
+
+      <!-- LLAMADAS TELEFÓNICAS -->
+
+      <div
+        class="autorizacion"
+        [ngClass]="
+          autorizacionClase(
+            contacto.autorizaLlamadasTelefonicas
+          )
+        ">
+
+        <span class="autorizacion-icono">
+
+          {{
+            contacto.autorizaLlamadasTelefonicas === true
+              ? '✓'
+              : contacto.autorizaLlamadasTelefonicas === false
+                ? '×'
+                : '?'
+          }}
+
+        </span>
+
+        <div>
+
+          <strong>
+            Llamadas telefónicas
+          </strong>
+
+          <span>
+            {{
+              autorizacionTexto(
+                contacto.autorizaLlamadasTelefonicas
+              )
+            }}
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</section>
+
+<!-- ======================================================= -->
+<!-- SIN INFORMACIÓN DE CONTACTO                              -->
+<!-- ======================================================= -->
+
+<ng-template #sinContacto>
+
+  <section class="contacto-vacio">
+
+    <div class="contacto-vacio__icono">
+      !
+    </div>
+
+    <strong>
+      Información de contacto no disponible
+    </strong>
+
+    <span>
+      No se encontraron datos de ubicación o comunicación
+      para el asociado.
+    </span>
+
+  </section>
+
+</ng-template>

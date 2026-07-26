@@ -25,17 +25,31 @@ public class BienInmueble {
     private Long idTipoBien;
     private String codigoTipoBien;
     private String nombreTipoBien;
+
     private String descripcionGeneral;
     private BigDecimal valorComercial;
     private BigDecimal valorGravamen;
+
+    private LocalDate fechaAdquisicion;
+
+    private String estadoBien;
+    private String nombreEstadoBien;
+
+    private LocalDate fechaEstado;
+    private String observacionesBien;
 
     // =========================================================
     // Inmueble: hoja_vida.bienes_inmuebles
     // =========================================================
     private Long idBienInmueble;
+
     private Long idTipoInmueble;
     private String codigoTipoInmueble;
     private String nombreTipoInmueble;
+
+    private Long idTipoZonaInmueble;
+    private String codigoTipoZonaInmueble;
+    private String nombreTipoZonaInmueble;
 
     private String numeroMatriculaInmobiliaria;
     private String cedulaCatastral;
@@ -58,6 +72,9 @@ public class BienInmueble {
     private String numeroEscritura;
     private LocalDate fechaEscritura;
     private String notaria;
+
+    private LocalDate fechaRegistroEscritura;
+    private String oficinaRegistro;
 
     private Long idPaisNotaria;
     private String nombrePaisNotaria;
@@ -86,21 +103,38 @@ public class BienInmueble {
     // =========================================================
     private Long idBienInmuebleAvaluo;
     private LocalDate fechaAvaluo;
+
     private BigDecimal valorAvaluoComercial;
     private BigDecimal valorAvaluoCatastral;
+
+    private BigDecimal valorTerreno;
+    private BigDecimal valorConstruccion;
+    private BigDecimal valorCultivos;
+    private BigDecimal valorOtros;
+
     private String entidadAvaluadora;
     private String numeroInforme;
     private String observacionesAvaluo;
+
+    private Integer vigenciaAnios;
+    private LocalDate fechaVencimientoAvaluo;
+    private String nombreEstadoAvaluo;
+
+    private BigDecimal valorComponentesAvaluo;
+    private BigDecimal valorAvaluoPropiedadAsociado;
 
     // =========================================================
     // Seguro vigente o más reciente desde vista
     // =========================================================
     private Long idBienInmuebleSeguro;
+
     private String aseguradora;
     private String numeroPoliza;
     private BigDecimal valorAsegurado;
+
     private LocalDate fechaInicioSeguro;
     private LocalDate fechaVencimientoSeguro;
+
     private String estadoSeguro;
     private String nombreEstadoSeguro;
     private String observacionesSeguro;
@@ -118,6 +152,7 @@ public class BienInmueble {
     // =========================================================
     private Integer fkSeguridadCreacion;
     private LocalDateTime fechaCreacion;
+
     private Integer fkSeguridadEdicion;
     private LocalDateTime fechaEdicion;
 }

@@ -1,6 +1,11 @@
 package co.assip.erp.hojavida.bienesinmueblesseguros;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +16,10 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "bienes_inmuebles_seguros", schema = "hoja_vida")
+@Table(
+        name = "bienes_inmuebles_seguros",
+        schema = "hoja_vida"
+)
 public class BienInmuebleSeguro {
 
     @Id
@@ -19,16 +27,30 @@ public class BienInmuebleSeguro {
     @Column(name = "id_bien_inmueble_seguro")
     private Long idBienInmuebleSeguro;
 
-    @Column(name = "id_bien", nullable = false)
+    @Column(
+            name = "id_bien",
+            nullable = false
+    )
     private Long idBien;
 
-    @Column(name = "aseguradora", length = 150)
+    @Column(
+            name = "aseguradora",
+            length = 150
+    )
     private String aseguradora;
 
-    @Column(name = "numero_poliza", length = 50)
+    @Column(
+            name = "numero_poliza",
+            length = 50
+    )
     private String numeroPoliza;
 
-    @Column(name = "valor_asegurado", nullable = false, precision = 30, scale = 2)
+    @Column(
+            name = "valor_asegurado",
+            nullable = false,
+            precision = 30,
+            scale = 2
+    )
     private BigDecimal valorAsegurado;
 
     @Column(name = "fecha_inicio_seguro")
@@ -37,13 +59,23 @@ public class BienInmuebleSeguro {
     @Column(name = "fecha_vencimiento_seguro")
     private LocalDate fechaVencimientoSeguro;
 
-    @Column(name = "estado_seguro", nullable = false, length = 1)
+    @Column(
+            name = "estado_seguro",
+            nullable = false,
+            length = 1
+    )
     private String estadoSeguro;
 
-    @Column(name = "observaciones", length = 1000)
+    @Column(
+            name = "observaciones",
+            length = 300
+    )
     private String observaciones;
 
-    @Column(name = "fk_seguridad_creacion", nullable = false)
+    @Column(
+            name = "fk_seguridad_creacion",
+            nullable = false
+    )
     private Integer fkSeguridadCreacion;
 
     @Column(name = "fecha_creacion")

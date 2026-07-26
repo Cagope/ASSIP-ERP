@@ -1,0 +1,1385 @@
+<section
+  *ngIf="sarlaft; else sinSarlaft"
+  class="sarlaft">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO                                             -->
+  <!-- ===================================================== -->
+
+  <header class="sarlaft-encabezado">
+
+    <div class="sarlaft-encabezado__titulo">
+
+      <span class="sarlaft-subtitulo">
+        Información declarada por el asociado
+      </span>
+
+      <h2>
+        Información SARLAFT
+      </h2>
+
+      <p>
+        Conocimiento del asociado, operaciones internacionales,
+        residencia fiscal y condiciones especiales.
+      </p>
+
+    </div>
+
+    <div class="encabezado-estados">
+
+      <span class="estado-chip">
+        Última actualización:
+        <strong>{{ fechaActualizacion }}</strong>
+      </span>
+
+    </div>
+
+  </header>
+
+  <!-- ===================================================== -->
+  <!-- IDENTIFICACIÓN                                         -->
+  <!-- ===================================================== -->
+
+  <section class="sarlaft-bloque">
+
+    <div class="bloque-encabezado">
+
+      <div>
+
+        <h3>
+          Identificación
+        </h3>
+
+        <span class="bloque-descripcion">
+          Datos básicos del asociado consultado
+        </span>
+
+      </div>
+
+    </div>
+
+    <div class="datos-grid datos-grid--cuatro">
+
+      <div class="dato dato--doble">
+
+        <span class="dato-label">
+          Nombre completo
+        </span>
+
+        <strong class="dato-valor">
+          {{ nombreCompleto }}
+        </strong>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Documento
+        </span>
+
+        <span class="dato-valor">
+          {{ documentoCompleto }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Tipo de persona
+        </span>
+
+        <span class="dato-valor">
+          {{ tipoPersona }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Fecha de nacimiento
+        </span>
+
+        <span class="dato-valor">
+          {{
+            sarlaft.fechaNacimiento
+              ? formatearFecha(sarlaft.fechaNacimiento)
+              : 'Sin información'
+          }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Fecha de actualización
+        </span>
+
+        <span class="dato-valor">
+          {{ fechaActualizacion }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Fecha de creación
+        </span>
+
+        <span class="dato-valor">
+          {{ fechaCreacionDatos }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Fecha de edición
+        </span>
+
+        <span class="dato-valor">
+          {{ fechaEdicionDatos }}
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- INFORMACIÓN ECONÓMICA                                  -->
+  <!-- ===================================================== -->
+
+  <section class="sarlaft-bloque">
+
+    <div class="bloque-encabezado">
+
+      <div>
+
+        <h3>
+          Información económica
+        </h3>
+
+        <span class="bloque-descripcion">
+          Ocupación, sector, actividades económicas y origen de fondos
+        </span>
+
+      </div>
+
+    </div>
+
+    <div class="datos-grid datos-grid--cuatro">
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Ocupación
+        </span>
+
+        <span class="dato-valor">
+          {{ ocupacion }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Código de ocupación
+        </span>
+
+        <span class="dato-valor">
+          {{ valorTexto(sarlaft.codigoOcupacion) }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Sector económico
+        </span>
+
+        <span class="dato-valor">
+          {{ sectorEconomico }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Código sector económico
+        </span>
+
+        <span class="dato-valor">
+          {{ valorTexto(sarlaft.codigoSectorEconomico) }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Actividad SES
+        </span>
+
+        <span class="dato-valor">
+          {{ actividadSes }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Código actividad SES
+        </span>
+
+        <span class="dato-valor">
+          {{ valorTexto(sarlaft.codigoActividadSes) }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Actividad DIAN
+        </span>
+
+        <span class="dato-valor">
+          {{ actividadDian }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Código actividad DIAN
+        </span>
+
+        <span class="dato-valor">
+          {{ valorTexto(sarlaft.codigoActividadDian) }}
+        </span>
+
+      </div>
+
+      <div class="dato dato--completo">
+
+        <span class="dato-label">
+          Origen de fondos
+        </span>
+
+        <strong class="dato-valor">
+          {{ origenFondos }}
+        </strong>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- PEP                                                    -->
+  <!-- ===================================================== -->
+
+  <section class="sarlaft-bloque">
+
+    <div class="bloque-encabezado">
+
+      <div>
+
+        <h3>
+          Persona Expuesta Políticamente — PEP
+        </h3>
+
+        <span class="bloque-descripcion">
+          Declaración del asociado y sus relaciones familiares PEP
+        </span>
+
+      </div>
+
+      <span
+        class="estado-binario"
+        [class.estado-binario--activo]="esPep">
+
+        {{ esPep ? 'Asociado PEP' : 'No es PEP' }}
+
+      </span>
+
+    </div>
+
+    <div class="condiciones-grid">
+
+      <div
+        class="condicion"
+        [class.condicion--activa]="esPep">
+
+        <span>
+          {{ esPep ? '✓' : '—' }}
+        </span>
+
+        Asociado PEP
+
+      </div>
+
+      <div
+        class="condicion"
+        [class.condicion--activa]="tieneFamiliarPep">
+
+        <span>
+          {{ tieneFamiliarPep ? '✓' : '—' }}
+        </span>
+
+        Familiar PEP
+
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="esPep"
+      class="detalle-panel">
+
+      <div class="datos-grid datos-grid--cuatro">
+
+        <div class="dato">
+
+          <span class="dato-label">
+            Tipo PEP
+          </span>
+
+          <span class="dato-valor">
+            {{
+              valorTexto(
+                sarlaft.nombreTipoPeps
+                ?? sarlaft.tipoPeps
+              )
+            }}
+          </span>
+
+        </div>
+
+        <div class="dato">
+
+          <span class="dato-label">
+            Fecha inicial
+          </span>
+
+          <span class="dato-valor">
+            {{
+              sarlaft.fechaInicialPeps
+                ? formatearFecha(sarlaft.fechaInicialPeps)
+                : 'Sin información'
+            }}
+          </span>
+
+        </div>
+
+        <div class="dato">
+
+          <span class="dato-label">
+            Fecha final
+          </span>
+
+          <span class="dato-valor">
+            {{
+              sarlaft.fechaFinalPeps
+                ? formatearFecha(sarlaft.fechaFinalPeps)
+                : 'Sin información'
+            }}
+          </span>
+
+        </div>
+
+        <div class="dato">
+
+          <span class="dato-label">
+            Periodo PEP
+          </span>
+
+          <span class="dato-valor">
+            {{ periodoPep }}
+          </span>
+
+        </div>
+
+        <div class="dato dato--completo">
+
+          <span class="dato-label">
+            Observaciones
+          </span>
+
+          <span class="dato-valor">
+            {{ valorTexto(sarlaft.observacionesPeps) }}
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="tieneFamiliarPep"
+      class="detalle-panel">
+
+      <div class="detalle-panel__titulo">
+
+        <strong>
+          Información del familiar PEP
+        </strong>
+
+      </div>
+
+      <div class="datos-grid datos-grid--cuatro">
+
+        <div class="dato">
+
+          <span class="dato-label">
+            Nombre
+          </span>
+
+          <span class="dato-valor">
+            {{ valorTexto(sarlaft.nombreFamiliaPeps) }}
+          </span>
+
+        </div>
+
+        <div class="dato">
+
+          <span class="dato-label">
+            Documento
+          </span>
+
+          <span class="dato-valor">
+            {{ valorTexto(sarlaft.cedulaFamiliaPeps) }}
+          </span>
+
+        </div>
+
+        <div class="dato">
+
+          <span class="dato-label">
+            Parentesco
+          </span>
+
+          <span class="dato-valor">
+            {{ valorTexto(sarlaft.nombreParentesco) }}
+          </span>
+
+        </div>
+
+        <div class="dato">
+
+          <span class="dato-label">
+            Código parentesco
+          </span>
+
+          <span class="dato-valor">
+            {{ valorTexto(sarlaft.codigoParentesco) }}
+          </span>
+
+        </div>
+
+        <div class="dato dato--completo">
+
+          <span class="dato-label">
+            Tipo de relación PEP
+          </span>
+
+          <span class="dato-valor">
+            {{ valorTexto(sarlaft.tipoFamiliaPeps) }}
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="!esPep && !tieneFamiliarPep"
+      class="mensaje-neutral">
+
+      No se registran condiciones PEP para el asociado ni para sus familiares.
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- MONEDA EXTRANJERA                                      -->
+  <!-- ===================================================== -->
+
+  <section class="sarlaft-bloque">
+
+    <div class="bloque-encabezado">
+
+      <div>
+
+        <h3>
+          Operaciones en moneda extranjera
+        </h3>
+
+        <span class="bloque-descripcion">
+          Declaración de operaciones internacionales
+        </span>
+
+      </div>
+
+      <span
+        class="estado-binario"
+        [class.estado-binario--activo]="realizaMonedaExtranjera">
+
+        {{
+          realizaMonedaExtranjera
+            ? 'Sí realiza'
+            : 'No realiza'
+        }}
+
+      </span>
+
+    </div>
+
+    <div
+      *ngIf="realizaMonedaExtranjera"
+      class="datos-grid datos-grid--cuatro">
+
+      <div class="dato dato--completo">
+
+        <span class="dato-label">
+          Observación
+        </span>
+
+        <span class="dato-valor">
+          {{
+            valorTexto(
+              sarlaft.observacionMonedaExtranjera
+            )
+          }}
+        </span>
+
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="!realizaMonedaExtranjera"
+      class="mensaje-neutral">
+
+      El asociado declara que no realiza operaciones en moneda extranjera.
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- CUENTA EN EL EXTERIOR                                  -->
+  <!-- ===================================================== -->
+
+  <section class="sarlaft-bloque">
+
+    <div class="bloque-encabezado">
+
+      <div>
+
+        <h3>
+          Cuenta en el exterior
+        </h3>
+
+        <span class="bloque-descripcion">
+          Productos financieros registrados fuera de Colombia
+        </span>
+
+      </div>
+
+      <span
+        class="estado-binario"
+        [class.estado-binario--activo]="poseeCuentaExterior">
+
+        {{
+          poseeCuentaExterior
+            ? 'Sí posee'
+            : 'No posee'
+        }}
+
+      </span>
+
+    </div>
+
+    <div
+      *ngIf="poseeCuentaExterior"
+      class="datos-grid datos-grid--cuatro">
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Banco
+        </span>
+
+        <span class="dato-valor">
+          {{ valorTexto(sarlaft.nombreBancoExtranjero) }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Número de cuenta
+        </span>
+
+        <span class="dato-valor">
+          {{ valorTexto(sarlaft.numeroCuentaExtranjero) }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Moneda
+        </span>
+
+        <span class="dato-valor">
+          {{ valorTexto(sarlaft.tipoMonedaExtranjera) }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Ciudad
+        </span>
+
+        <span class="dato-valor">
+          {{ valorTexto(sarlaft.ciudadCuentaExtranjero) }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          País
+        </span>
+
+        <span class="dato-valor">
+          {{ valorTexto(sarlaft.paisCuentaExtranjero) }}
+        </span>
+
+      </div>
+
+      <div class="dato dato--doble">
+
+        <span class="dato-label">
+          Resumen de la cuenta
+        </span>
+
+        <strong class="dato-valor">
+          {{ cuentaExterior }}
+        </strong>
+
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="!poseeCuentaExterior"
+      class="mensaje-neutral">
+
+      El asociado declara que no posee cuentas en el exterior.
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- RESIDENCIA FISCAL                                      -->
+  <!-- ===================================================== -->
+
+  <section class="sarlaft-bloque">
+
+    <div class="bloque-encabezado">
+
+      <div>
+
+        <h3>
+          Residencia fiscal — FATCA / CRS
+        </h3>
+
+        <span class="bloque-descripcion">
+          Ciudadanía, residencia fiscal e identificación tributaria
+          en el exterior
+        </span>
+
+      </div>
+
+      <span
+        class="estado-binario"
+        [class.estado-binario--activo]="tieneResidenciaFiscal">
+
+        {{
+          tieneResidenciaFiscal
+            ? 'Información registrada'
+            : 'Sin condición reportada'
+        }}
+
+      </span>
+
+    </div>
+
+    <div class="condiciones-grid">
+
+      <div
+        class="condicion"
+        [class.condicion--activa]="
+          sarlaft.ciudadanoEstadosUnidos
+        ">
+
+        <span>
+          {{
+            sarlaft.ciudadanoEstadosUnidos
+              ? '✓'
+              : '—'
+          }}
+        </span>
+
+        Ciudadano de Estados Unidos
+
+      </div>
+
+      <div
+        class="condicion"
+        [class.condicion--activa]="
+          sarlaft.residenteFiscalEstadosUnidos
+        ">
+
+        <span>
+          {{
+            sarlaft.residenteFiscalEstadosUnidos
+              ? '✓'
+              : '—'
+          }}
+        </span>
+
+        Residente fiscal de Estados Unidos
+
+      </div>
+
+      <div
+        class="condicion"
+        [class.condicion--activa]="
+          sarlaft.residenteFiscalExterior
+        ">
+
+        <span>
+          {{
+            sarlaft.residenteFiscalExterior
+              ? '✓'
+              : '—'
+          }}
+        </span>
+
+        Residente fiscal en el exterior
+
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="tieneResidenciaFiscal"
+      class="detalle-panel">
+
+      <div class="datos-grid datos-grid--cuatro">
+
+        <div class="dato">
+
+          <span class="dato-label">
+            País de residencia fiscal
+          </span>
+
+          <span class="dato-valor">
+            {{ valorTexto(sarlaft.paisResidenciaFiscal) }}
+          </span>
+
+        </div>
+
+        <div class="dato">
+
+          <span class="dato-label">
+            Ciudad
+          </span>
+
+          <span class="dato-valor">
+            {{ valorTexto(sarlaft.ciudadResidenciaFiscal) }}
+          </span>
+
+        </div>
+
+        <div class="dato">
+
+          <span class="dato-label">
+            Tipo de identificación fiscal
+          </span>
+
+          <span class="dato-valor">
+            {{
+              valorTexto(
+                sarlaft.tipoIdentificacionFiscal
+              )
+            }}
+          </span>
+
+        </div>
+
+        <div class="dato">
+
+          <span class="dato-label">
+            Número de identificación fiscal
+          </span>
+
+          <span class="dato-valor">
+            {{
+              valorTexto(
+                sarlaft.numeroIdentificacionFiscal
+              )
+            }}
+          </span>
+
+        </div>
+
+        <div class="dato dato--doble">
+
+          <span class="dato-label">
+            Dirección
+          </span>
+
+          <span class="dato-valor">
+            {{
+              valorTexto(
+                sarlaft.direccionResidenciaFiscal
+              )
+            }}
+          </span>
+
+        </div>
+
+        <div class="dato dato--doble">
+
+          <span class="dato-label">
+            Resumen de residencia fiscal
+          </span>
+
+          <strong class="dato-valor">
+            {{ residenciaFiscal }}
+          </strong>
+
+        </div>
+
+        <div class="dato dato--doble">
+
+          <span class="dato-label">
+            Identificación fiscal
+          </span>
+
+          <strong class="dato-valor">
+            {{ identificacionFiscal }}
+          </strong>
+
+        </div>
+
+        <div class="dato dato--completo">
+
+          <span class="dato-label">
+            Observaciones
+          </span>
+
+          <span class="dato-valor">
+            {{
+              valorTexto(
+                sarlaft.observacionesResidenciaFiscal
+              )
+            }}
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="!tieneResidenciaFiscal"
+      class="mensaje-neutral">
+
+      No se registran condiciones de residencia fiscal en Estados Unidos
+      ni en otros países.
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- CONDICIONES DE PROTECCIÓN                              -->
+  <!-- ===================================================== -->
+
+  <section class="sarlaft-bloque">
+
+    <div class="bloque-encabezado">
+
+      <div>
+
+        <h3>
+          Condiciones especiales de protección
+        </h3>
+
+        <span class="bloque-descripcion">
+          Condiciones declaradas para atención diferencial
+          y protección constitucional
+        </span>
+
+      </div>
+
+      <span
+        class="estado-binario"
+        [class.estado-binario--activo]="
+          tieneCondicionesProteccion
+        ">
+
+        {{
+          tieneCondicionesProteccion
+            ? 'Presenta condiciones'
+            : 'Sin condiciones'
+        }}
+
+      </span>
+
+    </div>
+
+    <div class="condiciones-grid">
+
+      <div
+        class="condicion"
+        [class.condicion--activa]="
+          sarlaft.administraRecursosPublicos
+        ">
+
+        <span>
+          {{
+            sarlaft.administraRecursosPublicos
+              ? '✓'
+              : '—'
+          }}
+        </span>
+
+        Administra recursos públicos
+
+      </div>
+
+      <div
+        class="condicion"
+        [class.condicion--activa]="
+          sarlaft.grupoProteccionEspecialConstitucional
+        ">
+
+        <span>
+          {{
+            sarlaft.grupoProteccionEspecialConstitucional
+              ? '✓'
+              : '—'
+          }}
+        </span>
+
+        Grupo de protección especial constitucional
+
+      </div>
+
+      <div
+        class="condicion"
+        [class.condicion--activa]="
+          sarlaft.personaMayor60Anos
+        ">
+
+        <span>
+          {{
+            sarlaft.personaMayor60Anos
+              ? '✓'
+              : '—'
+          }}
+        </span>
+
+        Persona mayor de 60 años
+
+      </div>
+
+      <div
+        class="condicion"
+        [class.condicion--activa]="
+          sarlaft.discapacidadFisica
+        ">
+
+        <span>
+          {{
+            sarlaft.discapacidadFisica
+              ? '✓'
+              : '—'
+          }}
+        </span>
+
+        Discapacidad física
+
+      </div>
+
+      <div
+        class="condicion"
+        [class.condicion--activa]="
+          sarlaft.victimaConflictoArmado
+        ">
+
+        <span>
+          {{
+            sarlaft.victimaConflictoArmado
+              ? '✓'
+              : '—'
+          }}
+        </span>
+
+        Víctima del conflicto armado
+
+      </div>
+
+      <div
+        class="condicion"
+        [class.condicion--activa]="
+          sarlaft.pobrezaExtrema
+        ">
+
+        <span>
+          {{
+            sarlaft.pobrezaExtrema
+              ? '✓'
+              : '—'
+          }}
+        </span>
+
+        Pobreza extrema
+
+      </div>
+
+      <div
+        class="condicion"
+        [class.condicion--activa]="
+          sarlaft.poblacionIndigena
+        ">
+
+        <span>
+          {{
+            sarlaft.poblacionIndigena
+              ? '✓'
+              : '—'
+          }}
+        </span>
+
+        Población indígena
+
+      </div>
+
+      <div
+        class="condicion"
+        [class.condicion--activa]="
+          sarlaft.poblacionAfrodescendiente
+        ">
+
+        <span>
+          {{
+            sarlaft.poblacionAfrodescendiente
+              ? '✓'
+              : '—'
+          }}
+        </span>
+
+        Población afrodescendiente
+
+      </div>
+
+      <div
+        class="condicion"
+        [class.condicion--activa]="
+          sarlaft.poblacionLgbtiqMas
+        ">
+
+        <span>
+          {{
+            sarlaft.poblacionLgbtiqMas
+              ? '✓'
+              : '—'
+          }}
+        </span>
+
+        Población LGBTIQ+
+
+      </div>
+
+      <div
+        class="condicion"
+        [class.condicion--activa]="
+          sarlaft.perteneceGrupoProteccionConstitucional
+        ">
+
+        <span>
+          {{
+            sarlaft.perteneceGrupoProteccionConstitucional
+              ? '✓'
+              : '—'
+          }}
+        </span>
+
+        Pertenece a grupo de protección constitucional
+
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="sarlaft.observacionesCondicionesProteccion"
+      class="detalle-panel">
+
+      <div class="dato dato--completo">
+
+        <span class="dato-label">
+          Observaciones
+        </span>
+
+        <span class="dato-valor">
+          {{
+            valorTexto(
+              sarlaft.observacionesCondicionesProteccion
+            )
+          }}
+        </span>
+
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="!tieneCondicionesProteccion"
+      class="mensaje-neutral">
+
+      No se registran condiciones especiales de protección.
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- AUDITORÍA COMPLEMENTARIA                               -->
+  <!-- ===================================================== -->
+
+  <section class="sarlaft-bloque sarlaft-bloque--secundario">
+
+    <div class="bloque-encabezado">
+
+      <div>
+
+        <h3>
+          Información de registro
+        </h3>
+
+        <span class="bloque-descripcion">
+          Fechas de creación y edición de la información complementaria
+        </span>
+
+      </div>
+
+    </div>
+
+    <div class="datos-grid datos-grid--cuatro">
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Creación residencia fiscal
+        </span>
+
+        <span class="dato-valor">
+          {{
+            sarlaft.fechaCreacionResidenciaFiscal
+              ? formatearFecha(
+                  sarlaft.fechaCreacionResidenciaFiscal
+                )
+              : 'Sin información'
+          }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Edición residencia fiscal
+        </span>
+
+        <span class="dato-valor">
+          {{
+            sarlaft.fechaEdicionResidenciaFiscal
+              ? formatearFecha(
+                  sarlaft.fechaEdicionResidenciaFiscal
+                )
+              : 'Sin información'
+          }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Creación condiciones de protección
+        </span>
+
+        <span class="dato-valor">
+          {{
+            sarlaft.fechaCreacionCondicionesProteccion
+              ? formatearFecha(
+                  sarlaft.fechaCreacionCondicionesProteccion
+                )
+              : 'Sin información'
+          }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Edición condiciones de protección
+        </span>
+
+        <span class="dato-valor">
+          {{
+            sarlaft.fechaEdicionCondicionesProteccion
+              ? formatearFecha(
+                  sarlaft.fechaEdicionCondicionesProteccion
+                )
+              : 'Sin información'
+          }}
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- PIE                                                    -->
+  <!-- ===================================================== -->
+
+  <footer class="sarlaft-pie">
+
+    <div class="sarlaft-pie__informacion">
+
+      <strong>
+        Información SARLAFT declarada
+      </strong>
+
+      <span>
+        Última actualización:
+        {{ fechaActualizacion }}
+      </span>
+
+    </div>
+
+    <div class="sarlaft-pie__estados">
+
+      <span
+        class="estado-resumen"
+        [class.estado-resumen--activo]="esPep">
+
+        PEP:
+        <strong>{{ siNo(sarlaft.asociadoPeps) }}</strong>
+
+      </span>
+
+      <span
+        class="estado-resumen"
+        [class.estado-resumen--activo]="
+          realizaMonedaExtranjera
+        ">
+
+        Moneda extranjera:
+        <strong>{{ siNo(sarlaft.monedaExtranjera) }}</strong>
+
+      </span>
+
+      <span
+        class="estado-resumen"
+        [class.estado-resumen--activo]="
+          poseeCuentaExterior
+        ">
+
+        Cuenta exterior:
+        <strong>{{ siNo(sarlaft.cuentaExtranjero) }}</strong>
+
+      </span>
+
+      <span
+        class="estado-resumen"
+        [class.estado-resumen--activo]="
+          tieneResidenciaFiscal
+        ">
+
+        Residencia fiscal:
+        <strong>
+          {{
+            tieneResidenciaFiscal
+              ? 'Registrada'
+              : 'No registrada'
+          }}
+        </strong>
+
+      </span>
+
+    </div>
+
+  </footer>
+
+</section>
+
+<!-- ======================================================= -->
+<!-- SIN INFORMACIÓN SARLAFT                                  -->
+<!-- ======================================================= -->
+
+<ng-template #sinSarlaft>
+
+  <section class="sarlaft-vacio">
+
+    <div class="sarlaft-vacio__icono">
+      !
+    </div>
+
+    <strong>
+      Información SARLAFT no disponible
+    </strong>
+
+    <span>
+      No se encontró información SARLAFT consolidada
+      para el asociado.
+    </span>
+
+  </section>
+
+</ng-template>

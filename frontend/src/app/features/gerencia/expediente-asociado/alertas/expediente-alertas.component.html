@@ -1,0 +1,627 @@
+<section class="alertas">
+
+  <header class="alertas-encabezado">
+
+    <div>
+
+      <span class="alertas-subtitulo">
+        Seguimiento integral
+      </span>
+
+      <h2>
+        Centro de alertas
+      </h2>
+
+    </div>
+
+    <span
+      class="riesgo-general"
+      [ngClass]="claseRiesgoGeneral()">
+
+      Riesgo {{ nivelGeneral }}
+
+    </span>
+
+  </header>
+
+
+  <ng-container *ngIf="tieneAlertas; else sinAlertas">
+
+    <!-- =================================================== -->
+    <!-- RESUMEN                                              -->
+    <!-- =================================================== -->
+
+    <section class="alertas-bloque">
+
+      <div class="resumen-grid">
+
+        <article class="resumen-card resumen-card--critico">
+
+          <span>
+            Críticas
+          </span>
+
+          <strong>
+            {{ cantidadCriticas }}
+          </strong>
+
+        </article>
+
+        <article class="resumen-card resumen-card--advertencia">
+
+          <span>
+            Advertencias
+          </span>
+
+          <strong>
+            {{ cantidadAdvertencias }}
+          </strong>
+
+        </article>
+
+        <article class="resumen-card resumen-card--informativo">
+
+          <span>
+            Informativas
+          </span>
+
+          <strong>
+            {{ cantidadInformativas }}
+          </strong>
+
+        </article>
+
+        <article class="resumen-card resumen-card--resuelta">
+
+          <span>
+            Resueltas
+          </span>
+
+          <strong>
+            {{ cantidadResueltas }}
+          </strong>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- NIVEL GENERAL                                        -->
+    <!-- =================================================== -->
+
+    <section class="alertas-bloque">
+
+      <div
+        class="panel-riesgo"
+        [ngClass]="claseRiesgoGeneral()">
+
+        <div>
+
+          <span>
+            Estado general del expediente
+          </span>
+
+          <strong>
+            {{ nivelGeneral }}
+          </strong>
+
+          <p>
+            {{ mensajeGeneral }}
+          </p>
+
+        </div>
+
+        <div class="panel-riesgo__metricas">
+
+          <div>
+
+            <strong>
+              {{ cantidadBloqueantes }}
+            </strong>
+
+            <span>
+              Bloqueantes
+            </span>
+
+          </div>
+
+          <div>
+
+            <strong>
+              {{ cantidadEnGestion }}
+            </strong>
+
+            <span>
+              En gestión
+            </span>
+
+          </div>
+
+          <div>
+
+            <strong>
+              {{ cantidadVencidas }}
+            </strong>
+
+            <span>
+              Vencidas
+            </span>
+
+          </div>
+
+          <div>
+
+            <strong>
+              {{ cantidadReincidentes }}
+            </strong>
+
+            <span>
+              Reincidentes
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- FILTROS                                              -->
+    <!-- =================================================== -->
+
+    <section class="alertas-bloque">
+
+      <div class="filtros-alertas">
+
+        <button
+          type="button"
+          [class.activo]="esFiltroActivo('TODAS')"
+          (click)="cambiarFiltro('TODAS')">
+
+          Todas
+          <span>{{ cantidadTotal }}</span>
+
+        </button>
+
+        <button
+          type="button"
+          class="filtro-critico"
+          [class.activo]="esFiltroActivo('CRITICA')"
+          (click)="cambiarFiltro('CRITICA')">
+
+          Críticas
+          <span>{{ cantidadCriticas }}</span>
+
+        </button>
+
+        <button
+          type="button"
+          class="filtro-advertencia"
+          [class.activo]="esFiltroActivo('ADVERTENCIA')"
+          (click)="cambiarFiltro('ADVERTENCIA')">
+
+          Advertencias
+          <span>{{ cantidadAdvertencias }}</span>
+
+        </button>
+
+        <button
+          type="button"
+          class="filtro-informativo"
+          [class.activo]="esFiltroActivo('INFORMATIVA')"
+          (click)="cambiarFiltro('INFORMATIVA')">
+
+          Informativas
+          <span>{{ cantidadInformativas }}</span>
+
+        </button>
+
+        <button
+          type="button"
+          class="filtro-resuelta"
+          [class.activo]="esFiltroActivo('RESUELTA')"
+          (click)="cambiarFiltro('RESUELTA')">
+
+          Resueltas
+          <span>{{ cantidadResueltas }}</span>
+
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- LISTA                                                -->
+    <!-- =================================================== -->
+
+    <section class="alertas-bloque">
+
+      <div class="bloque-encabezado">
+
+        <div>
+
+          <h3>
+            Alertas del expediente
+          </h3>
+
+          <span>
+            Ordenadas por prioridad y estado
+          </span>
+
+        </div>
+
+        <strong>
+          {{ listaFiltrada.length }}
+          resultados
+        </strong>
+
+      </div>
+
+      <div
+        *ngIf="listaFiltrada.length > 0; else filtroVacio"
+        class="alertas-lista">
+
+        <article
+          *ngFor="
+            let alerta of listaFiltrada;
+            trackBy: trackByAlerta
+          "
+          class="alerta-card"
+          [ngClass]="claseNivel(alerta)"
+          [class.alerta-card--resuelta]="alerta.resuelta"
+          [class.alerta-card--bloqueante]="alerta.bloqueante">
+
+          <!-- ============================================= -->
+          <!-- ICONO                                         -->
+          <!-- ============================================= -->
+
+          <div class="alerta-card__icono">
+
+            {{ iconoNivel(alerta) }}
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- CONTENIDO                                      -->
+          <!-- ============================================= -->
+
+          <div class="alerta-card__contenido">
+
+            <header class="alerta-card__cabecera">
+
+              <div>
+
+                <span class="alerta-modulo">
+                  {{ textoModulo(alerta) }}
+                </span>
+
+                <h4>
+                  {{ alerta.titulo }}
+                </h4>
+
+              </div>
+
+              <div class="alerta-etiquetas">
+
+                <span
+                  *ngIf="alerta.bloqueante"
+                  class="etiqueta etiqueta--bloqueante">
+
+                  Bloqueante
+
+                </span>
+
+                <span
+                  class="etiqueta"
+                  [ngClass]="claseEstado(alerta)">
+
+                  {{ textoEstado(alerta) }}
+
+                </span>
+
+                <span
+                  *ngIf="alerta.origenCalculado"
+                  class="etiqueta etiqueta--calculada">
+
+                  Calculada
+
+                </span>
+
+              </div>
+
+            </header>
+
+
+            <p class="alerta-descripcion">
+
+              {{ alerta.descripcion }}
+
+            </p>
+
+
+            <!-- ACCIÓN REQUERIDA -->
+
+            <div
+              *ngIf="alerta.accionRequerida"
+              class="accion-requerida">
+
+              <span>
+                Acción requerida
+              </span>
+
+              <strong>
+                {{ alerta.accionRequerida }}
+              </strong>
+
+            </div>
+
+
+            <!-- DATOS -->
+
+            <div class="alerta-datos">
+
+              <div>
+
+                <span>
+                  Código
+                </span>
+
+                <strong>
+                  {{ alerta.codigoAlerta }}
+                </strong>
+
+              </div>
+
+              <div>
+
+                <span>
+                  Tipo
+                </span>
+
+                <strong>
+                  {{ alerta.tipoAlerta }}
+                </strong>
+
+              </div>
+
+              <div>
+
+                <span>
+                  Generación
+                </span>
+
+                <strong>
+                  {{
+                  alerta.fechaGeneracion
+                  ? (
+                  alerta.fechaGeneracion |
+                  date:'dd/MM/yyyy HH:mm'
+                  )
+                  : 'Calculada en consulta'
+                  }}
+                </strong>
+
+              </div>
+
+              <div>
+
+                <span>
+                  Días abierta
+                </span>
+
+                <strong>
+                  {{
+                  alerta.cantidadDiasAbierta ||
+                  alerta.diasDesdeDeteccion
+                  }}
+                </strong>
+
+              </div>
+
+              <div *ngIf="alerta.fechaVencimiento">
+
+                <span>
+                  Vencimiento
+                </span>
+
+                <strong>
+                  {{
+                  alerta.fechaVencimiento |
+                  date:'dd/MM/yyyy'
+                  }}
+                </strong>
+
+              </div>
+
+              <div *ngIf="alerta.nombreUsuarioResponsable">
+
+                <span>
+                  Responsable
+                </span>
+
+                <strong>
+                  {{ alerta.nombreUsuarioResponsable }}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <!-- INDICADORES -->
+
+            <div
+              *ngIf="
+                alerta.requiereGestion ||
+                alerta.requiereSeguimiento ||
+                alerta.requiereEscalamiento ||
+                alerta.reincidente
+              "
+              class="indicadores-alerta">
+
+              <span
+                *ngIf="alerta.requiereGestion">
+
+                Requiere gestión
+
+              </span>
+
+              <span
+                *ngIf="alerta.requiereSeguimiento">
+
+                Requiere seguimiento
+
+              </span>
+
+              <span
+                *ngIf="alerta.requiereEscalamiento"
+                class="indicador--critico">
+
+                Requiere escalamiento
+
+              </span>
+
+              <span
+                *ngIf="alerta.reincidente"
+                class="indicador--advertencia">
+
+                Reincidente:
+                {{ alerta.cantidadReincidencias }}
+
+              </span>
+
+            </div>
+
+
+            <!-- GESTIÓN -->
+
+            <div
+              *ngIf="
+                alerta.gestionRealizada ||
+                alerta.resultadoGestion ||
+                alerta.observacionesGestion
+              "
+              class="gestion-panel">
+
+              <div *ngIf="alerta.gestionRealizada">
+
+                <span>
+                  Gestión realizada
+                </span>
+
+                <strong>
+                  {{ alerta.gestionRealizada }}
+                </strong>
+
+              </div>
+
+              <div *ngIf="alerta.resultadoGestion">
+
+                <span>
+                  Resultado
+                </span>
+
+                <strong>
+                  {{ alerta.resultadoGestion }}
+                </strong>
+
+              </div>
+
+              <div *ngIf="alerta.observacionesGestion">
+
+                <span>
+                  Observaciones
+                </span>
+
+                <strong>
+                  {{ alerta.observacionesGestion }}
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <!-- PERMISOS DISPONIBLES -->
+
+            <footer
+              *ngIf="
+                alerta.permiteGestionar ||
+                alerta.permiteDescartar ||
+                alerta.permiteCerrar
+              "
+              class="alerta-card__pie">
+
+              <span *ngIf="alerta.permiteGestionar">
+                Gestionable
+              </span>
+
+              <span *ngIf="alerta.permiteDescartar">
+                Permite descartar
+              </span>
+
+              <span *ngIf="alerta.permiteCerrar">
+                Permite cerrar
+              </span>
+
+            </footer>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</section>
+
+
+<ng-template #sinAlertas>
+
+  <section class="alertas-vacio">
+
+    <div class="alertas-vacio__icono">
+      ✓
+    </div>
+
+    <strong>
+      El expediente no presenta alertas
+    </strong>
+
+    <span>
+      La información disponible se encuentra vigente
+      y no requiere gestión inmediata.
+    </span>
+
+  </section>
+
+</ng-template>
+
+
+<ng-template #filtroVacio>
+
+  <section class="filtro-vacio">
+
+    <strong>
+      No hay alertas para el filtro seleccionado
+    </strong>
+
+    <span>
+      Seleccione otra categoría para consultar las novedades.
+    </span>
+
+  </section>
+
+</ng-template>

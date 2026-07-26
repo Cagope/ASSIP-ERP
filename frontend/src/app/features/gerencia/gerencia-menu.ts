@@ -31,6 +31,18 @@ export const GERENCIA_MENU = {
     },
 
     {
+      label: 'Expediente del Asociado',
+      children: [
+
+        {
+          label: 'Consulta Integral',
+          route: '/gerencia/expediente-asociado'
+        }
+
+      ]
+    },
+
+    {
       label: 'Indicadores',
       children: [
 

@@ -13,21 +13,32 @@ export class BienesInmueblesAvaluosApi {
   private readonly baseUrl =
     `${environment.apiUrl}/hoja-vida/bienes-inmuebles-avaluos`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient
+  ) {}
 
-  listarPorBien(idBien: number): Observable<BienInmuebleAvaluo[]> {
+  listarPorBien(
+    idBien: number
+  ): Observable<BienInmuebleAvaluo[]> {
+
     return this.http.get<BienInmuebleAvaluo[]>(
       `${this.baseUrl}/bien/${idBien}`
     );
   }
 
-  buscarPorId(idAvaluo: number): Observable<BienInmuebleAvaluo> {
+  buscarPorId(
+    idAvaluo: number
+  ): Observable<BienInmuebleAvaluo> {
+
     return this.http.get<BienInmuebleAvaluo>(
       `${this.baseUrl}/${idAvaluo}`
     );
   }
 
-  crear(dto: BienInmuebleAvaluo): Observable<BienInmuebleAvaluo> {
+  crear(
+    dto: BienInmuebleAvaluo
+  ): Observable<BienInmuebleAvaluo> {
+
     return this.http.post<BienInmuebleAvaluo>(
       this.baseUrl,
       dto
@@ -38,13 +49,17 @@ export class BienesInmueblesAvaluosApi {
     idAvaluo: number,
     dto: BienInmuebleAvaluo
   ): Observable<BienInmuebleAvaluo> {
+
     return this.http.put<BienInmuebleAvaluo>(
       `${this.baseUrl}/${idAvaluo}`,
       dto
     );
   }
 
-  eliminar(idAvaluo: number): Observable<void> {
+  eliminar(
+    idAvaluo: number
+  ): Observable<void> {
+
     return this.http.delete<void>(
       `${this.baseUrl}/${idAvaluo}`
     );

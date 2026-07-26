@@ -23,8 +23,11 @@ import {
 })
 export class BienesInmueblesListComponent implements OnInit {
 
-  private readonly dpApi = inject(DatosPersonalesApi);
-  private readonly router = inject(Router);
+  private readonly dpApi =
+    inject(DatosPersonalesApi);
+
+  private readonly router =
+    inject(Router);
 
   personas: DatosPersonales[] = [];
   filtradas: DatosPersonales[] = [];
@@ -40,41 +43,56 @@ export class BienesInmueblesListComponent implements OnInit {
   };
 
   pagina = 1;
-  tamanoPagina = 10;
+  tamanoPagina = 20;
 
   ngOnInit(): void {
     this.cargar();
   }
 
   cargar(): void {
+
     this.cargando = true;
     this.error = '';
 
     this.dpApi.listar().subscribe({
+
       next: lista => {
-        this.personas = (lista ?? []).sort((a, b) => {
-          const fechaA = a.fechaActualizacion
-            ? Date.parse(a.fechaActualizacion)
-            : 0;
 
-          const fechaB = b.fechaActualizacion
-            ? Date.parse(b.fechaActualizacion)
-            : 0;
+        this.personas = [...(lista ?? [])]
+          .sort((a, b) => {
 
-          return fechaB - fechaA;
-        });
+            const fechaA =
+              a.fechaActualizacion
+                ? Date.parse(a.fechaActualizacion)
+                : 0;
+
+            const fechaB =
+              b.fechaActualizacion
+                ? Date.parse(b.fechaActualizacion)
+                : 0;
+
+            return fechaB - fechaA;
+          });
 
         this.buscar();
       },
+
       error: err => {
+
         console.error(
           'Error cargando datos personales:',
           err
         );
 
+        this.personas = [];
+        this.filtradas = [];
+
         this.error =
           'No fue posible cargar los asociados.';
+
+        this.cargando = false;
       },
+
       complete: () => {
         this.cargando = false;
       }
@@ -82,50 +100,84 @@ export class BienesInmueblesListComponent implements OnInit {
   }
 
   buscar(): void {
+
+    this.error = '';
+
     const documento =
-      this.normalizarTexto(this.filtros.documento);
+      this.normalizarTexto(
+        this.filtros.documento
+      );
 
     const nombres =
-      this.normalizarTexto(this.filtros.nombres);
+      this.normalizarTexto(
+        this.filtros.nombres
+      );
 
     const primerApellido =
-      this.normalizarTexto(this.filtros.primerApellido);
+      this.normalizarTexto(
+        this.filtros.primerApellido
+      );
 
     const segundoApellido =
-      this.normalizarTexto(this.filtros.segundoApellido);
-
-    this.filtradas = this.personas.filter(persona => {
-      const documentoPersona =
-        this.normalizarTexto(persona.documento);
-
-      const nombresPersona =
-        this.normalizarTexto(persona.nombres);
-
-      const primerApellidoPersona =
-        this.normalizarTexto(persona.primerApellido);
-
-      const segundoApellidoPersona =
-        this.normalizarTexto(persona.segundoApellido);
-
-      return (
-        (!documento
-          || documentoPersona.includes(documento))
-        &&
-        (!nombres
-          || nombresPersona.includes(nombres))
-        &&
-        (!primerApellido
-          || primerApellidoPersona.includes(primerApellido))
-        &&
-        (!segundoApellido
-          || segundoApellidoPersona.includes(segundoApellido))
+      this.normalizarTexto(
+        this.filtros.segundoApellido
       );
-    });
+
+    this.filtradas =
+      this.personas.filter(persona => {
+
+        const documentoPersona =
+          this.normalizarTexto(
+            persona.documento
+          );
+
+        const nombresPersona =
+          this.normalizarTexto(
+            persona.nombres
+          );
+
+        const primerApellidoPersona =
+          this.normalizarTexto(
+            persona.primerApellido
+          );
+
+        const segundoApellidoPersona =
+          this.normalizarTexto(
+            persona.segundoApellido
+          );
+
+        return (
+          (
+            !documento ||
+            documentoPersona.includes(documento)
+          )
+          &&
+          (
+            !nombres ||
+            nombresPersona.includes(nombres)
+          )
+          &&
+          (
+            !primerApellido ||
+            primerApellidoPersona.includes(
+              primerApellido
+            )
+          )
+          &&
+          (
+            !segundoApellido ||
+            segundoApellidoPersona.includes(
+              segundoApellido
+            )
+          )
+        );
+      });
 
     this.pagina = 1;
   }
 
   limpiar(): void {
+
     this.filtros = {
       documento: '',
       nombres: '',
@@ -133,14 +185,18 @@ export class BienesInmueblesListComponent implements OnInit {
       segundoApellido: ''
     };
 
-    this.filtradas = [...this.personas];
+    this.filtradas =
+      [...this.personas];
+
     this.pagina = 1;
     this.error = '';
   }
 
   get paginadas(): DatosPersonales[] {
+
     const inicio =
-      (this.pagina - 1) * this.tamanoPagina;
+      (this.pagina - 1) *
+      this.tamanoPagina;
 
     return this.filtradas.slice(
       inicio,
@@ -149,18 +205,23 @@ export class BienesInmueblesListComponent implements OnInit {
   }
 
   totalPaginas(): number {
+
     return Math.max(
       1,
       Math.ceil(
-        this.filtradas.length / this.tamanoPagina
+        this.filtradas.length /
+        this.tamanoPagina
       )
     );
   }
 
-  cambiarPagina(pagina: number): void {
+  cambiarPagina(
+    pagina: number
+  ): void {
+
     if (
-      pagina < 1
-      || pagina > this.totalPaginas()
+      pagina < 1 ||
+      pagina > this.totalPaginas()
     ) {
       return;
     }
@@ -168,8 +229,12 @@ export class BienesInmueblesListComponent implements OnInit {
     this.pagina = pagina;
   }
 
-  gestionar(persona: DatosPersonales): void {
+  gestionar(
+    persona: DatosPersonales
+  ): void {
+
     if (!persona.idDatosPersonal) {
+
       this.error =
         'Asociado inválido: no tiene idDatosPersonal.';
 

@@ -1,0 +1,68 @@
+@use '../datos-personales/datos-personales-upsert.component' as *;
+
+.form-container {
+  display: block;
+}
+
+.form-row {
+  margin-bottom: 0.75rem;
+}
+
+.form-group.full {
+  grid-column: 1 / -1;
+}
+
+.form-group.sm {
+  min-width: 160px;
+}
+
+/* === RADIO GROUP === */
+
+.radio-group {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+
+  margin-top: 0.25rem;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+
+    font-weight: 400;
+  }
+
+  input[type='radio'] {
+    accent-color: #007bff;
+  }
+}
+
+/* === OBSERVACIONES === */
+
+textarea {
+  width: 100%;
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* === RESPONSIVE === */
+
+@media (max-width: 768px) {
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .radio-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+}

@@ -1,0 +1,390 @@
+<div class="form-container">
+
+  <h3>
+    {{
+    editando
+    ? 'Editar Condiciones de Protección'
+    : 'Nuevas Condiciones de Protección'
+    }}
+  </h3>
+
+  <form
+    [formGroup]="form"
+    (ngSubmit)="guardar()"
+    autocomplete="off">
+
+    <!-- ===================================================== -->
+    <!-- CONDICIONES DE PROTECCIÓN -->
+    <!-- ===================================================== -->
+
+    <fieldset>
+
+      <legend>
+        Condiciones Especiales de Protección
+      </legend>
+
+      <!-- Recursos públicos -->
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label>
+            ¿Administra recursos públicos?
+          </label>
+
+          <div class="radio-group">
+            <label>
+              <input
+                type="radio"
+                formControlName="administraRecursosPublicos"
+                [value]="true">
+              Sí
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                formControlName="administraRecursosPublicos"
+                [value]="false">
+              No
+            </label>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Grupo protección especial -->
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label>
+            ¿Pertenece a un grupo de protección especial constitucional?
+          </label>
+
+          <div class="radio-group">
+            <label>
+              <input
+                type="radio"
+                formControlName="grupoProteccionEspecialConstitucional"
+                [value]="true">
+              Sí
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                formControlName="grupoProteccionEspecialConstitucional"
+                [value]="false">
+              No
+            </label>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Mayor de 60 -->
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label>
+            ¿Es una persona mayor de 60 años?
+          </label>
+
+          <div class="radio-group">
+            <label>
+              <input
+                type="radio"
+                formControlName="personaMayor60Anos"
+                [value]="true">
+              Sí
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                formControlName="personaMayor60Anos"
+                [value]="false">
+              No
+            </label>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Discapacidad -->
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label>
+            ¿Presenta discapacidad física?
+          </label>
+
+          <div class="radio-group">
+            <label>
+              <input
+                type="radio"
+                formControlName="discapacidadFisica"
+                [value]="true">
+              Sí
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                formControlName="discapacidadFisica"
+                [value]="false">
+              No
+            </label>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Conflicto -->
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label>
+            ¿Es víctima del conflicto armado?
+          </label>
+
+          <div class="radio-group">
+            <label>
+              <input
+                type="radio"
+                formControlName="victimaConflictoArmado"
+                [value]="true">
+              Sí
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                formControlName="victimaConflictoArmado"
+                [value]="false">
+              No
+            </label>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Pobreza -->
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label>
+            ¿Se encuentra en condición de pobreza extrema?
+          </label>
+
+          <div class="radio-group">
+            <label>
+              <input
+                type="radio"
+                formControlName="pobrezaExtrema"
+                [value]="true">
+              Sí
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                formControlName="pobrezaExtrema"
+                [value]="false">
+              No
+            </label>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Indígena -->
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label>
+            ¿Pertenece a población indígena?
+          </label>
+
+          <div class="radio-group">
+            <label>
+              <input
+                type="radio"
+                formControlName="poblacionIndigena"
+                [value]="true">
+              Sí
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                formControlName="poblacionIndigena"
+                [value]="false">
+              No
+            </label>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Afro -->
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label>
+            ¿Pertenece a población afrodescendiente?
+          </label>
+
+          <div class="radio-group">
+            <label>
+              <input
+                type="radio"
+                formControlName="poblacionAfrodescendiente"
+                [value]="true">
+              Sí
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                formControlName="poblacionAfrodescendiente"
+                [value]="false">
+              No
+            </label>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- LGBTIQ -->
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label>
+            ¿Pertenece a la población LGBTIQ+?
+          </label>
+
+          <div class="radio-group">
+            <label>
+              <input
+                type="radio"
+                formControlName="poblacionLgbtiqMas"
+                [value]="true">
+              Sí
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                formControlName="poblacionLgbtiqMas"
+                [value]="false">
+              No
+            </label>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Protección constitucional -->
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label>
+            ¿Pertenece al grupo de protección constitucional?
+          </label>
+
+          <div class="radio-group">
+            <label>
+              <input
+                type="radio"
+                formControlName="perteneceGrupoProteccionConstitucional"
+                [value]="true">
+              Sí
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                formControlName="perteneceGrupoProteccionConstitucional"
+                [value]="false">
+              No
+            </label>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Observaciones -->
+      <div class="form-row">
+
+        <div class="form-group full">
+
+          <label>
+            Observaciones
+          </label>
+
+          <textarea
+            rows="4"
+            maxlength="500"
+            formControlName="observaciones"
+            placeholder="Observaciones generales (opcional)">
+          </textarea>
+
+        </div>
+
+      </div>
+
+    </fieldset>
+
+    <!-- ===================================================== -->
+    <!-- ACCIONES -->
+    <!-- ===================================================== -->
+
+    <div class="form-actions full">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="volver()">
+
+        Cancelar
+
+      </button>
+
+      <button
+        type="submit"
+        class="btn btn--primary"
+        [disabled]="!puedeGuardar()">
+
+        {{
+        editando
+        ? 'Actualizar'
+        : 'Guardar'
+        }}
+
+      </button>
+
+    </div>
+
+  </form>
+
+</div>

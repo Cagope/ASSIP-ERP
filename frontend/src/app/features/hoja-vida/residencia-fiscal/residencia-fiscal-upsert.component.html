@@ -1,0 +1,319 @@
+<div class="form-container">
+
+  <h3>
+    {{
+    editando
+    ? 'Editar Residencia Fiscal'
+    : 'Nueva Residencia Fiscal'
+    }}
+  </h3>
+
+  <form
+    [formGroup]="form"
+    (ngSubmit)="guardar()"
+    autocomplete="off">
+
+    <!-- ===================================================== -->
+    <!-- DECLARACIONES FATCA / CRS                             -->
+    <!-- ===================================================== -->
+
+    <fieldset>
+
+      <legend>
+        Declaraciones FATCA / CRS
+      </legend>
+
+      <!-- Ciudadano de Estados Unidos -->
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label>
+            ¿Es ciudadano de Estados Unidos?
+          </label>
+
+          <div class="radio-group">
+
+            <label>
+              <input
+                type="radio"
+                formControlName="ciudadanoEstadosUnidos"
+                [value]="true">
+              Sí
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                formControlName="ciudadanoEstadosUnidos"
+                [value]="false">
+              No
+            </label>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Residente fiscal de Estados Unidos -->
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label>
+            ¿Es residente fiscal de Estados Unidos?
+          </label>
+
+          <div class="radio-group">
+
+            <label>
+              <input
+                type="radio"
+                formControlName="residenteFiscalEstadosUnidos"
+                [value]="true">
+              Sí
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                formControlName="residenteFiscalEstadosUnidos"
+                [value]="false">
+              No
+            </label>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Identificación fiscal en Estados Unidos -->
+      <div
+        class="form-row"
+        *ngIf="form.get('residenteFiscalEstadosUnidos')?.value">
+
+        <div class="form-group">
+
+          <label for="tipoIdentificacionFiscal">
+            Tipo de identificación fiscal
+            <span class="required">*</span>
+          </label>
+
+          <input
+            id="tipoIdentificacionFiscal"
+            type="text"
+            formControlName="tipoIdentificacionFiscal"
+            maxlength="50"
+            placeholder="Ej. SSN, ITIN o EIN">
+
+          <small
+            class="error-text"
+            *ngIf="
+              form.get('tipoIdentificacionFiscal')?.touched
+              &&
+              form.get('tipoIdentificacionFiscal')?.hasError('required')
+            ">
+            El tipo de identificación fiscal es obligatorio.
+          </small>
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="numeroIdentificacionFiscal">
+            Número de identificación fiscal
+            <span class="required">*</span>
+          </label>
+
+          <input
+            id="numeroIdentificacionFiscal"
+            type="text"
+            formControlName="numeroIdentificacionFiscal"
+            maxlength="100"
+            placeholder="Número de identificación fiscal">
+
+          <small
+            class="error-text"
+            *ngIf="
+              form.get('numeroIdentificacionFiscal')?.touched
+              &&
+              form.get('numeroIdentificacionFiscal')?.hasError('required')
+            ">
+            El número de identificación fiscal es obligatorio.
+          </small>
+
+        </div>
+
+      </div>
+
+      <!-- Residente fiscal en otro país -->
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label>
+            ¿Es residente fiscal en un país diferente de Colombia?
+          </label>
+
+          <div class="radio-group">
+
+            <label>
+              <input
+                type="radio"
+                formControlName="residenteFiscalExterior"
+                [value]="true">
+              Sí
+            </label>
+
+            <label>
+              <input
+                type="radio"
+                formControlName="residenteFiscalExterior"
+                [value]="false">
+              No
+            </label>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </fieldset>
+
+    <!-- ===================================================== -->
+    <!-- RESIDENCIA FISCAL EN EL EXTERIOR                      -->
+    <!-- ===================================================== -->
+
+    <fieldset
+      *ngIf="form.get('residenteFiscalExterior')?.value">
+
+      <legend>
+        Residencia Fiscal en el Exterior
+      </legend>
+
+      <div class="form-row">
+
+        <div class="form-group">
+
+          <label for="paisResidenciaFiscal">
+            País de residencia fiscal
+            <span class="required">*</span>
+          </label>
+
+          <input
+            id="paisResidenciaFiscal"
+            type="text"
+            formControlName="paisResidenciaFiscal"
+            maxlength="100"
+            placeholder="País de residencia fiscal">
+
+          <small
+            class="error-text"
+            *ngIf="
+              form.get('paisResidenciaFiscal')?.touched
+              &&
+              form.get('paisResidenciaFiscal')?.hasError('required')
+            ">
+            El país de residencia fiscal es obligatorio.
+          </small>
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="ciudadResidenciaFiscal">
+            Ciudad de residencia fiscal
+          </label>
+
+          <input
+            id="ciudadResidenciaFiscal"
+            type="text"
+            formControlName="ciudadResidenciaFiscal"
+            maxlength="100"
+            placeholder="Ciudad de residencia fiscal">
+
+        </div>
+
+      </div>
+
+      <div class="form-row">
+
+        <div class="form-group full">
+
+          <label for="direccionResidenciaFiscal">
+            Dirección de residencia fiscal
+          </label>
+
+          <input
+            id="direccionResidenciaFiscal"
+            type="text"
+            formControlName="direccionResidenciaFiscal"
+            maxlength="200"
+            placeholder="Dirección de residencia fiscal">
+
+        </div>
+
+      </div>
+
+    </fieldset>
+
+    <!-- ===================================================== -->
+    <!-- OBSERVACIONES                                         -->
+    <!-- ===================================================== -->
+
+    <fieldset>
+
+      <legend>
+        Observaciones
+      </legend>
+
+      <div class="form-row">
+
+        <div class="form-group full">
+
+          <label for="observaciones">
+            Observaciones
+          </label>
+
+          <textarea
+            id="observaciones"
+            formControlName="observaciones"
+            rows="4"
+            maxlength="500"
+            placeholder="Información adicional sobre la residencia fiscal">
+          </textarea>
+
+        </div>
+
+      </div>
+
+    </fieldset>
+
+    <!-- ===================================================== -->
+    <!-- ACCIONES                                              -->
+    <!-- ===================================================== -->
+
+    <div class="form-actions full">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="volver()">
+        Cancelar
+      </button>
+
+      <button
+        type="submit"
+        class="btn btn--primary"
+        [disabled]="form.invalid">
+        {{ editando ? 'Actualizar' : 'Guardar' }}
+      </button>
+
+    </div>
+
+  </form>
+
+</div>

@@ -7,7 +7,10 @@
     [mostrarExportar]="false">
   </app-header-actions>
 
-  <button type="button" class="btn btn--secondary mb-3" (click)="volver()">
+  <button
+    type="button"
+    class="btn btn--secondary mb-3"
+    (click)="volver()">
     ← Volver
   </button>
 
@@ -19,11 +22,16 @@
     {{ mensaje }}
   </div>
 
+  <!-- ========================================================= -->
   <!-- ASOCIADO -->
+  <!-- ========================================================= -->
+
   <section class="card persona-box" *ngIf="asociado">
+
     <h3>Asociado</h3>
 
     <div class="persona-grid">
+
       <p>
         <strong>Documento:</strong>
         {{ asociado.tipoDocumento }} {{ asociado.documento }}
@@ -38,10 +46,15 @@
         <strong>Fecha actualización:</strong>
         {{ asociado.fechaActualizacion | date: 'dd/MM/yyyy' }}
       </p>
+
     </div>
+
   </section>
 
+  <!-- ========================================================= -->
   <!-- RESUMEN -->
+  <!-- ========================================================= -->
+
   <section class="resumen-grid">
 
     <div class="resumen-card">
@@ -51,25 +64,35 @@
 
     <div class="resumen-card">
       <span>Valor comercial</span>
-      <strong>{{ resumen.valorComercial | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+      <strong>
+        {{ resumen.valorComercial | currency:'COP':'symbol-narrow':'1.0-0' }}
+      </strong>
     </div>
 
     <div class="resumen-card">
       <span>Gravámenes</span>
-      <strong>{{ resumen.valorGravamen | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+      <strong>
+        {{ resumen.valorGravamen | currency:'COP':'symbol-narrow':'1.0-0' }}
+      </strong>
     </div>
 
     <div class="resumen-card">
       <span>Patrimonio neto</span>
-      <strong>{{ resumen.patrimonioNeto | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+      <strong>
+        {{ resumen.patrimonioNeto | currency:'COP':'symbol-narrow':'1.0-0' }}
+      </strong>
     </div>
 
   </section>
 
+  <!-- ========================================================= -->
   <!-- LISTADO DE BIENES -->
+  <!-- ========================================================= -->
+
   <section class="card list-container">
 
     <div class="section-header">
+
       <h3>Bienes registrados</h3>
 
       <button
@@ -78,105 +101,167 @@
         (click)="nuevo()">
         + Nuevo inmueble
       </button>
+
     </div>
 
     <div *ngIf="cargando" class="loading">
       Cargando bienes inmuebles...
     </div>
 
-    <div *ngIf="!cargando && bienes.length === 0" class="empty">
+    <div
+      *ngIf="!cargando && bienes.length === 0"
+      class="empty">
       El asociado no tiene bienes inmuebles registrados.
     </div>
 
-    <table *ngIf="!cargando && bienes.length > 0" class="data-table tabla-bienes">
-      <thead>
-      <tr>
-        <th>Tipo</th>
-        <th>Descripción</th>
-        <th>Dirección</th>
-        <th>Ciudad</th>
-        <th class="num">Valor comercial</th>
-        <th class="num">Gravamen</th>
-        <th class="num">Neto</th>
-        <th class="acciones">Acciones</th>
-      </tr>
-      </thead>
+    <div
+      *ngIf="!cargando && bienes.length > 0"
+      class="table-responsive">
 
-      <tbody>
-      <tr *ngFor="let b of bienes">
-        <td>{{ b.nombreTipoInmueble }}</td>
-        <td>{{ b.descripcionGeneral }}</td>
-        <td>{{ b.direccion }}</td>
-        <td>{{ b.nombreCiudad }}</td>
+      <table class="data-table tabla-bienes">
 
-        <td class="num">
-          {{ b.valorComercial | currency:'COP':'symbol-narrow':'1.0-0' }}
-        </td>
+        <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Descripción</th>
+          <th>Zona</th>
+          <th>Dirección</th>
+          <th>Ciudad</th>
+          <th>Estado</th>
+          <th class="num">Valor comercial</th>
+          <th class="num">Gravamen</th>
+          <th class="num">Neto</th>
+          <th class="acciones">Acciones</th>
+        </tr>
+        </thead>
 
-        <td class="num">
-          {{ b.valorGravamen | currency:'COP':'symbol-narrow':'1.0-0' }}
-        </td>
+        <tbody>
 
-        <td class="num">
-          {{ valorNeto(b) | currency:'COP':'symbol-narrow':'1.0-0' }}
-        </td>
+        <tr *ngFor="let b of bienes">
 
-        <td>
-          <div class="acciones">
+          <td>{{ b.nombreTipoInmueble || '—' }}</td>
 
-            <button
-              class="btn-action-edit"
-              type="button"
-              (click)="editar(b)"
-              title="Editar inmueble">
-              ✏️
-            </button>
+          <td>{{ b.descripcionGeneral || '—' }}</td>
 
-            <button
-              class="btn-action-edit"
-              type="button"
-              (click)="abrirAvaluos(b)"
-              title="Avalúos del inmueble">
-              📋
-            </button>
+          <td>{{ b.nombreTipoZonaInmueble || '—' }}</td>
 
-            <button
-              class="btn-action-edit"
-              type="button"
-              (click)="abrirSeguros(b)"
-              title="Seguros del inmueble">
-              🛡️
-            </button>
+          <td>{{ b.direccion || '—' }}</td>
 
-            <button
-              class="btn-action-delete"
-              type="button"
-              (click)="eliminar(b)"
-              title="Eliminar inmueble">
-              🗑️
-            </button>
+          <td>{{ b.nombreCiudad || '—' }}</td>
 
-          </div>
-        </td>
-      </tr>
-      </tbody>
-    </table>
+          <td>
+              <span
+                [ngClass]="{
+                  'estado-activo': b.estadoBien === 'A',
+                  'estado-inactivo': b.estadoBien === 'I'
+                }">
+
+                {{
+                  b.nombreEstadoBien ||
+                  (b.estadoBien === 'A'
+                    ? 'Activo'
+                    : b.estadoBien === 'I'
+                      ? 'Inactivo'
+                      : b.estadoBien)
+                }}
+
+              </span>
+          </td>
+
+          <td class="num">
+            {{
+            b.valorComercial
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </td>
+
+          <td class="num">
+            {{
+            b.valorGravamen
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </td>
+
+          <td class="num">
+            {{
+            valorNeto(b)
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </td>
+
+          <td>
+
+            <div class="acciones">
+
+              <button
+                class="btn-action-edit"
+                type="button"
+                (click)="editar(b)"
+                title="Editar inmueble">
+                ✏️
+              </button>
+
+              <button
+                class="btn-action-edit"
+                type="button"
+                (click)="abrirAvaluos(b)"
+                title="Avalúos del inmueble">
+                📋
+              </button>
+
+              <button
+                class="btn-action-edit"
+                type="button"
+                (click)="abrirSeguros(b)"
+                title="Seguros del inmueble">
+                🛡️
+              </button>
+
+              <button
+                class="btn-action-delete"
+                type="button"
+                (click)="eliminar(b)"
+                title="Eliminar inmueble">
+                🗑️
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
 
   </section>
 
+  <!-- ========================================================= -->
   <!-- AVALÚOS -->
-  <section class="card list-container" *ngIf="bienSeleccionadoAvaluos as bienAval">
+  <!-- ========================================================= -->
+
+  <section
+    class="card list-container"
+    *ngIf="bienSeleccionadoAvaluos as bienAval">
 
     <div class="section-header">
+
       <div>
+
         <h3>Avalúos del inmueble</h3>
+
         <small>
           {{ bienAval.nombreTipoInmueble }} —
           {{ bienAval.descripcionGeneral }}
         </small>
+
       </div>
 
       <div class="acciones">
+
         <button
           type="button"
           class="btn btn--primary"
@@ -190,119 +275,269 @@
           (click)="cerrarAvaluos()">
           Cerrar
         </button>
+
       </div>
+
     </div>
 
     <div *ngIf="cargandoAvaluos" class="loading">
       Cargando avalúos...
     </div>
 
-    <div *ngIf="!cargandoAvaluos && avaluos.length === 0" class="empty">
+    <div
+      *ngIf="!cargandoAvaluos && avaluos.length === 0"
+      class="empty">
       Este inmueble no tiene avalúos registrados.
     </div>
 
-    <table *ngIf="!cargandoAvaluos && avaluos.length > 0" class="data-table">
-      <thead>
-      <tr>
-        <th>Fecha</th>
-        <th class="num">Avalúo comercial</th>
-        <th class="num">Avalúo catastral</th>
-        <th>Entidad</th>
-        <th>Número informe</th>
-        <th>Vigencia</th>
-        <th>Vence</th>
-        <th class="acciones">Acciones</th>
-      </tr>
-      </thead>
+    <div
+      *ngIf="!cargandoAvaluos && avaluos.length > 0"
+      class="table-responsive">
 
-      <tbody>
-      <tr *ngFor="let a of avaluos">
-        <td>{{ a.fechaAvaluo | date: 'dd/MM/yyyy' }}</td>
+      <table class="data-table tabla-avaluos">
 
-        <td class="num">
-          {{ a.valorAvaluoComercial | currency:'COP':'symbol-narrow':'1.0-0' }}
-        </td>
+        <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Estado</th>
+          <th class="num">Componentes</th>
+          <th class="num">Avalúo comercial</th>
+          <th class="num">Avalúo catastral</th>
+          <th>Entidad</th>
+          <th>Número informe</th>
+          <th>Vigencia</th>
+          <th>Vence</th>
+          <th class="acciones">Acciones</th>
+        </tr>
+        </thead>
 
-        <td class="num">
-          {{ a.valorAvaluoCatastral | currency:'COP':'symbol-narrow':'1.0-0' }}
-        </td>
+        <tbody>
 
-        <td>{{ a.entidadAvaluadora }}</td>
-        <td>{{ a.numeroInforme }}</td>
-        <td>{{ a.vigenciaAnios }} años</td>
-        <td>{{ a.fechaVencimientoAvaluo | date: 'dd/MM/yyyy' }}</td>
+        <tr *ngFor="let a of avaluos">
 
-        <td>
-          <div class="acciones">
+          <td>
+            {{ a.fechaAvaluo | date: 'dd/MM/yyyy' }}
+          </td>
 
-            <button
-              class="btn-action-edit"
-              type="button"
-              (click)="editarAvaluo(a)"
-              title="Editar avalúo">
-              ✏️
-            </button>
+          <td>
+              <span
+                [ngClass]="{
+                  'estado-activo':
+                    a.nombreEstadoAvaluo === 'VIGENTE',
+                  'estado-vencido':
+                    a.nombreEstadoAvaluo === 'VENCIDO'
+                }">
+                {{ a.nombreEstadoAvaluo || '—' }}
+              </span>
+          </td>
 
-            <button
-              class="btn-action-delete"
-              type="button"
-              (click)="eliminarAvaluo(a)"
-              title="Eliminar avalúo">
-              🗑️
-            </button>
+          <td class="num">
+            {{
+            a.valorComponentesAvaluo
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </td>
 
-          </div>
-        </td>
-      </tr>
-      </tbody>
-    </table>
+          <td class="num">
+            {{
+            a.valorAvaluoComercial
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </td>
 
+          <td class="num">
+            {{
+            a.valorAvaluoCatastral
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </td>
+
+          <td>{{ a.entidadAvaluadora || '—' }}</td>
+
+          <td>{{ a.numeroInforme || '—' }}</td>
+
+          <td>{{ a.vigenciaAnios }} años</td>
+
+          <td>
+            {{
+            a.fechaVencimientoAvaluo
+            | date: 'dd/MM/yyyy'
+            }}
+          </td>
+
+          <td>
+
+            <div class="acciones">
+
+              <button
+                class="btn-action-edit"
+                type="button"
+                (click)="editarAvaluo(a)"
+                title="Editar avalúo">
+                ✏️
+              </button>
+
+              <button
+                class="btn-action-delete"
+                type="button"
+                (click)="eliminarAvaluo(a)"
+                title="Eliminar avalúo">
+                🗑️
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <!-- ======================================================= -->
     <!-- FORMULARIO AVALÚO -->
+    <!-- ======================================================= -->
+
     <form
       *ngIf="avaluoActual as av"
       class="form-container"
       (ngSubmit)="guardarAvaluo()">
 
       <h4>
-        {{ modoAvaluo === 'NUEVO' ? 'Nuevo avalúo' : 'Editar avalúo' }}
+        {{
+        modoAvaluo === 'NUEVO'
+        ? 'Nuevo avalúo'
+        : 'Editar avalúo'
+        }}
       </h4>
 
       <div class="form-grid">
 
         <div class="f-row">
+
           <label>Fecha avalúo *</label>
+
           <input
             type="date"
             [(ngModel)]="av.fechaAvaluo"
             name="fechaAvaluo"
             required
             (change)="calcularVencimientoAvaluo()">
+
         </div>
 
         <div class="f-row">
-          <label>Vigencia años *</label>
+
+          <label>Vigencia en años *</label>
+
           <input
             type="number"
             min="1"
             max="30"
+            step="1"
             class="input-number"
             [(ngModel)]="av.vigenciaAnios"
             name="vigenciaAnios"
             required
             (input)="calcularVencimientoAvaluo()">
+
         </div>
 
         <div class="f-row">
+
           <label>Fecha vencimiento</label>
+
           <input
             type="date"
             [ngModel]="av.fechaVencimientoAvaluo"
             name="fechaVencimientoAvaluo"
             disabled>
+
+        </div>
+
+      </div>
+
+      <h4>Componentes del avalúo</h4>
+
+      <div class="form-grid">
+
+        <div class="f-row">
+
+          <label>Valor terreno</label>
+
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="av.valorTerreno"
+            name="valorTerreno">
+
         </div>
 
         <div class="f-row">
+
+          <label>Valor construcción</label>
+
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="av.valorConstruccion"
+            name="valorConstruccion">
+
+        </div>
+
+        <div class="f-row">
+
+          <label>Valor cultivos</label>
+
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="av.valorCultivos"
+            name="valorCultivos">
+
+        </div>
+
+        <div class="f-row">
+
+          <label>Valor otros</label>
+
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="av.valorOtros"
+            name="valorOtros">
+
+        </div>
+
+        <div class="f-row">
+
+          <label>Total componentes</label>
+
+          <input
+            type="text"
+            class="input-number"
+            [value]="calcularTotalComponentesAvaluo(av) | number:'1.0-0'"
+            readonly>
+
+        </div>
+
+      </div>
+
+      <h4>Valores generales</h4>
+
+      <div class="form-grid">
+
+        <div class="f-row">
+
           <label>Valor avalúo comercial *</label>
+
           <input
             type="text"
             numericFormat
@@ -310,10 +545,13 @@
             [(ngModel)]="av.valorAvaluoComercial"
             name="valorAvaluoComercial"
             required>
+
         </div>
 
         <div class="f-row">
+
           <label>Valor avalúo catastral *</label>
+
           <input
             type="text"
             numericFormat
@@ -321,44 +559,61 @@
             [(ngModel)]="av.valorAvaluoCatastral"
             name="valorAvaluoCatastral"
             required>
+
         </div>
 
         <div class="f-row">
+
           <label>Entidad avaluadora</label>
+
           <input
             type="text"
             maxlength="150"
             [(ngModel)]="av.entidadAvaluadora"
             name="entidadAvaluadora">
+
         </div>
 
         <div class="f-row">
+
           <label>Número informe</label>
+
           <input
             type="text"
             maxlength="50"
             [(ngModel)]="av.numeroInforme"
             name="numeroInforme">
+
         </div>
 
-        <div class="f-row span-3">
+        <div class="f-row span-4">
+
           <label>Observaciones</label>
+
           <textarea
             rows="3"
-            maxlength="1000"
+            maxlength="300"
             [(ngModel)]="av.observaciones"
             name="observaciones">
           </textarea>
+
         </div>
 
       </div>
 
       <div class="form-actions">
+
         <button
           type="submit"
           class="btn btn--primary"
           [disabled]="guardandoAvaluo">
-          {{ guardandoAvaluo ? 'Guardando...' : 'Guardar avalúo' }}
+
+          {{
+          guardandoAvaluo
+          ? 'Guardando...'
+          : 'Guardar avalúo'
+          }}
+
         </button>
 
         <button
@@ -367,25 +622,36 @@
           (click)="cancelarAvaluo()">
           Cancelar
         </button>
+
       </div>
 
     </form>
 
   </section>
 
+  <!-- ========================================================= -->
   <!-- SEGUROS -->
-  <section class="card list-container" *ngIf="bienSeleccionadoSeguros as bienSeg">
+  <!-- ========================================================= -->
+
+  <section
+    class="card list-container"
+    *ngIf="bienSeleccionadoSeguros as bienSeg">
 
     <div class="section-header">
+
       <div>
+
         <h3>Seguros del inmueble</h3>
+
         <small>
           {{ bienSeg.nombreTipoInmueble }} —
           {{ bienSeg.descripcionGeneral }}
         </small>
+
       </div>
 
       <div class="acciones">
+
         <button
           type="button"
           class="btn btn--primary"
@@ -399,113 +665,171 @@
           (click)="cerrarSeguros()">
           Cerrar
         </button>
+
       </div>
+
     </div>
 
     <div *ngIf="cargandoSeguros" class="loading">
       Cargando seguros...
     </div>
 
-    <div *ngIf="!cargandoSeguros && seguros.length === 0" class="empty">
+    <div
+      *ngIf="!cargandoSeguros && seguros.length === 0"
+      class="empty">
       Este inmueble no tiene seguros registrados.
     </div>
 
-    <table *ngIf="!cargandoSeguros && seguros.length > 0" class="data-table">
-      <thead>
-      <tr>
-        <th>Aseguradora</th>
-        <th>Póliza</th>
-        <th class="num">Valor asegurado</th>
-        <th>Inicio</th>
-        <th>Vencimiento</th>
-        <th>Estado</th>
-        <th class="acciones">Acciones</th>
-      </tr>
-      </thead>
+    <div
+      *ngIf="!cargandoSeguros && seguros.length > 0"
+      class="table-responsive">
 
-      <tbody>
-      <tr *ngFor="let s of seguros">
-        <td>{{ s.aseguradora }}</td>
-        <td>{{ s.numeroPoliza }}</td>
+      <table class="data-table tabla-seguros">
 
-        <td class="num">
-          {{ s.valorAsegurado | currency:'COP':'symbol-narrow':'1.0-0' }}
-        </td>
+        <thead>
+        <tr>
+          <th>Aseguradora</th>
+          <th>Póliza</th>
+          <th class="num">Valor asegurado</th>
+          <th>Inicio</th>
+          <th>Vencimiento</th>
+          <th>Estado</th>
+          <th class="acciones">Acciones</th>
+        </tr>
+        </thead>
 
-        <td>{{ s.fechaInicioSeguro | date: 'dd/MM/yyyy' }}</td>
-        <td>{{ s.fechaVencimientoSeguro | date: 'dd/MM/yyyy' }}</td>
+        <tbody>
 
-        <td>
-          <span [ngClass]="{
-            'estado-activo': s.estadoSeguro === 'A',
-            'estado-inactivo': s.estadoSeguro === 'I',
-            'estado-vencido': s.estadoSeguro === 'V'
-          }">
+        <tr *ngFor="let s of seguros">
+
+          <td>{{ s.aseguradora || '—' }}</td>
+
+          <td>{{ s.numeroPoliza || '—' }}</td>
+
+          <td class="num">
             {{
-              s.estadoSeguro === 'A'
-                ? 'Activo'
-                : s.estadoSeguro === 'I'
-                  ? 'Inactivo'
-                  : 'Vencido'
+            s.valorAsegurado
+            | currency:'COP':'symbol-narrow':'1.0-0'
             }}
-          </span>
-        </td>
+          </td>
 
-        <td>
-          <div class="acciones">
-            <button
-              class="btn-action-edit"
-              type="button"
-              (click)="editarSeguro(s)"
-              title="Editar seguro">
-              ✏️
-            </button>
+          <td>
+            {{
+            s.fechaInicioSeguro
+            | date: 'dd/MM/yyyy'
+            }}
+          </td>
 
-            <button
-              class="btn-action-delete"
-              type="button"
-              (click)="eliminarSeguro(s)"
-              title="Eliminar seguro">
-              🗑️
-            </button>
-          </div>
-        </td>
-      </tr>
-      </tbody>
-    </table>
+          <td>
+            {{
+            s.fechaVencimientoSeguro
+            | date: 'dd/MM/yyyy'
+            }}
+          </td>
 
+          <td>
+
+              <span
+                [ngClass]="{
+                  'estado-activo': s.estadoSeguro === 'A',
+                  'estado-inactivo': s.estadoSeguro === 'I',
+                  'estado-vencido': s.estadoSeguro === 'V'
+                }">
+
+                {{
+                  s.nombreEstadoSeguro ||
+                  (
+                    s.estadoSeguro === 'A'
+                      ? 'Activo'
+                      : s.estadoSeguro === 'I'
+                        ? 'Inactivo'
+                        : 'Vencido'
+                  )
+                }}
+
+              </span>
+
+          </td>
+
+          <td>
+
+            <div class="acciones">
+
+              <button
+                class="btn-action-edit"
+                type="button"
+                (click)="editarSeguro(s)"
+                title="Editar seguro">
+                ✏️
+              </button>
+
+              <button
+                class="btn-action-delete"
+                type="button"
+                (click)="eliminarSeguro(s)"
+                title="Eliminar seguro">
+                🗑️
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <!-- ======================================================= -->
     <!-- FORMULARIO SEGURO -->
+    <!-- ======================================================= -->
+
     <form
       *ngIf="seguroActual as seg"
       class="form-container"
       (ngSubmit)="guardarSeguro()">
 
       <h4>
-        {{ modoSeguro === 'NUEVO' ? 'Nuevo seguro' : 'Editar seguro' }}
+        {{
+        modoSeguro === 'NUEVO'
+        ? 'Nuevo seguro'
+        : 'Editar seguro'
+        }}
       </h4>
 
       <div class="form-grid">
 
         <div class="f-row">
+
           <label>Aseguradora</label>
+
           <input
             type="text"
             maxlength="150"
             [(ngModel)]="seg.aseguradora"
             name="aseguradora">
+
         </div>
 
         <div class="f-row">
+
           <label>Número póliza</label>
+
           <input
             type="text"
             maxlength="50"
             [(ngModel)]="seg.numeroPoliza"
             name="numeroPoliza">
+
         </div>
 
         <div class="f-row">
+
           <label>Valor asegurado *</label>
+
           <input
             type="text"
             numericFormat
@@ -513,54 +837,76 @@
             [(ngModel)]="seg.valorAsegurado"
             name="valorAsegurado"
             required>
+
         </div>
 
         <div class="f-row">
+
           <label>Fecha inicio</label>
+
           <input
             type="date"
             [(ngModel)]="seg.fechaInicioSeguro"
             name="fechaInicioSeguro">
+
         </div>
 
         <div class="f-row">
+
           <label>Fecha vencimiento</label>
+
           <input
             type="date"
             [(ngModel)]="seg.fechaVencimientoSeguro"
             name="fechaVencimientoSeguro">
+
         </div>
 
         <div class="f-row">
+
           <label>Estado *</label>
+
           <select
             [(ngModel)]="seg.estadoSeguro"
             name="estadoSeguro"
             required>
+
             <option value="A">Activo</option>
             <option value="I">Inactivo</option>
             <option value="V">Vencido</option>
+
           </select>
+
         </div>
 
-        <div class="f-row span-3">
+        <div class="f-row span-4">
+
           <label>Observaciones</label>
+
           <textarea
             rows="3"
-            maxlength="1000"
+            maxlength="300"
             [(ngModel)]="seg.observaciones"
             name="observaciones">
-        </textarea>
+          </textarea>
+
         </div>
 
       </div>
 
       <div class="form-actions">
+
         <button
           type="submit"
           class="btn btn--primary"
           [disabled]="guardandoSeguro">
-          {{ guardandoSeguro ? 'Guardando...' : 'Guardar seguro' }}
+
+          {{
+          guardandoSeguro
+          ? 'Guardando...'
+          : 'Guardar seguro'
+          }}
+
         </button>
 
         <button
@@ -569,18 +915,29 @@
           (click)="cancelarSeguro()">
           Cancelar
         </button>
+
       </div>
 
     </form>
 
   </section>
 
+  <!-- ========================================================= -->
   <!-- FORMULARIO INMUEBLE -->
-  <section class="card form-container formulario-card" *ngIf="bienActual as bien">
+  <!-- ========================================================= -->
+
+  <section
+    class="card form-container formulario-card"
+    *ngIf="bienActual as bien">
 
     <div class="section-header">
+
       <h3>
-        {{ modoFormulario === 'NUEVO' ? 'Nuevo inmueble' : 'Editar inmueble' }}
+        {{
+        modoFormulario === 'NUEVO'
+        ? 'Nuevo inmueble'
+        : 'Editar inmueble'
+        }}
       </h3>
 
       <button
@@ -589,39 +946,99 @@
         (click)="cancelar()">
         Cancelar
       </button>
+
     </div>
 
     <form (ngSubmit)="guardar()">
+
+      <!-- ===================================================== -->
+      <!-- INFORMACIÓN GENERAL -->
+      <!-- ===================================================== -->
 
       <h4>Información general</h4>
 
       <div class="form-grid">
 
         <div class="f-row">
+
           <label>Tipo inmueble *</label>
+
           <select
             [(ngModel)]="bien.idTipoInmueble"
             name="idTipoInmueble"
             required>
-            <option [ngValue]="0">Seleccione...</option>
-            <option *ngFor="let t of tiposInmuebles" [ngValue]="t.id">
+
+            <option [ngValue]="0">
+              Seleccione...
+            </option>
+
+            <option
+              *ngFor="let t of tiposInmuebles"
+              [ngValue]="t.id">
               {{ t.nombre }}
             </option>
+
           </select>
+
+        </div>
+
+        <div class="f-row">
+
+          <label>Fecha adquisición *</label>
+
+          <input
+            type="date"
+            [(ngModel)]="bien.fechaAdquisicion"
+            name="fechaAdquisicion"
+            required>
+
+        </div>
+
+        <div class="f-row">
+
+          <label>Estado del bien *</label>
+
+          <select
+            [(ngModel)]="bien.estadoBien"
+            name="estadoBien"
+            required>
+
+            <option value="A">Activo</option>
+            <option value="I">Inactivo</option>
+
+          </select>
+
+        </div>
+
+        <div class="f-row">
+
+          <label>Fecha estado *</label>
+
+          <input
+            type="date"
+            [(ngModel)]="bien.fechaEstado"
+            name="fechaEstado"
+            required>
+
         </div>
 
         <div class="f-row span-2">
+
           <label>Descripción general *</label>
+
           <input
             type="text"
             maxlength="250"
             [(ngModel)]="bien.descripcionGeneral"
             name="descripcionGeneral"
             required>
+
         </div>
 
         <div class="f-row">
+
           <label>Valor comercial *</label>
+
           <input
             type="text"
             numericFormat
@@ -629,10 +1046,13 @@
             [(ngModel)]="bien.valorComercial"
             name="valorComercial"
             required>
+
         </div>
 
         <div class="f-row">
+
           <label>Valor gravamen *</label>
+
           <input
             type="text"
             numericFormat
@@ -640,236 +1060,422 @@
             [(ngModel)]="bien.valorGravamen"
             name="valorGravamen"
             required>
+
         </div>
 
         <div class="f-row">
+
           <label>% propiedad *</label>
+
           <input
             type="number"
-            min="0"
+            min="0.0001"
             max="100"
             step="0.0001"
             class="input-number"
             [(ngModel)]="bien.porcentajePropiedad"
             name="porcentajePropiedad"
             required>
+
+        </div>
+
+        <div class="f-row span-3">
+
+          <label>Observaciones generales del bien</label>
+
+          <textarea
+            rows="3"
+            maxlength="500"
+            [(ngModel)]="bien.observacionesBien"
+            name="observacionesBien">
+          </textarea>
+
         </div>
 
       </div>
+
+      <!-- ===================================================== -->
+      <!-- UBICACIÓN -->
+      <!-- ===================================================== -->
 
       <h4>Ubicación</h4>
 
       <div class="form-grid">
 
         <div class="f-row">
+
+          <label>Tipo de zona *</label>
+
+          <select
+            [(ngModel)]="bien.idTipoZonaInmueble"
+            name="idTipoZonaInmueble"
+            required>
+
+            <option [ngValue]="0">
+              Seleccione...
+            </option>
+
+            <option
+              *ngFor="let z of tiposZonasInmuebles"
+              [ngValue]="z.id">
+              {{ z.nombre }}
+            </option>
+
+          </select>
+
+        </div>
+
+        <div class="f-row">
+
           <label>País *</label>
+
           <select
             [(ngModel)]="bien.idPais"
             name="idPais"
             required>
-            <option [ngValue]="0">Seleccione...</option>
-            <option *ngFor="let p of paises" [ngValue]="p.codigo">
+
+            <option [ngValue]="0">
+              Seleccione...
+            </option>
+
+            <option
+              *ngFor="let p of paises"
+              [ngValue]="p.codigo">
               {{ p.nombre }}
             </option>
+
           </select>
+
         </div>
 
         <div class="f-row">
+
           <label>Departamento *</label>
+
           <select
             [(ngModel)]="bien.idDepartamento"
             name="idDepartamento"
             required
             (change)="onDepartamentoChange()">
-            <option [ngValue]="0">Seleccione...</option>
-            <option *ngFor="let d of departamentos" [ngValue]="d.idDepartamento">
+
+            <option [ngValue]="0">
+              Seleccione...
+            </option>
+
+            <option
+              *ngFor="let d of departamentos"
+              [ngValue]="d.idDepartamento">
               {{ d.nombreDepartamento }}
             </option>
+
           </select>
+
         </div>
 
         <div class="f-row">
+
           <label>Ciudad *</label>
+
           <select
             [(ngModel)]="bien.idCiudad"
             name="idCiudad"
             required>
-            <option [ngValue]="0">Seleccione...</option>
-            <option *ngFor="let c of ciudades" [ngValue]="c.idCiudad">
+
+            <option [ngValue]="0">
+              Seleccione...
+            </option>
+
+            <option
+              *ngFor="let c of ciudades"
+              [ngValue]="c.idCiudad">
               {{ c.nombreCiudad }}
             </option>
+
           </select>
+
         </div>
 
         <div class="f-row span-2">
+
           <label>Dirección *</label>
+
           <input
             type="text"
-            maxlength="250"
+            maxlength="150"
             [(ngModel)]="bien.direccion"
             name="direccion"
             required>
+
         </div>
 
-        <div class="f-row">
+        <div class="f-row span-2">
+
           <label>Barrio / Vereda</label>
+
           <input
             type="text"
             maxlength="100"
             [(ngModel)]="bien.barrioVereda"
             name="barrioVereda">
+
         </div>
 
       </div>
+
+      <!-- ===================================================== -->
+      <!-- CARACTERÍSTICAS -->
+      <!-- ===================================================== -->
 
       <h4>Características</h4>
 
       <div class="form-grid">
 
         <div class="f-row">
+
           <label>Área terreno</label>
+
           <input
             type="text"
             numericFormat
             class="input-number"
             [(ngModel)]="bien.areaTerreno"
             name="areaTerreno">
+
         </div>
 
         <div class="f-row">
+
           <label>Área construida</label>
+
           <input
             type="text"
             numericFormat
             class="input-number"
             [(ngModel)]="bien.areaConstruida"
             name="areaConstruida">
+
         </div>
 
         <div class="f-row">
+
           <label>Matrícula inmobiliaria</label>
+
           <input
             type="text"
             maxlength="50"
             [(ngModel)]="bien.numeroMatriculaInmobiliaria"
             name="numeroMatriculaInmobiliaria">
+
         </div>
 
         <div class="f-row">
+
           <label>Cédula catastral</label>
+
           <input
             type="text"
             maxlength="50"
             [(ngModel)]="bien.cedulaCatastral"
             name="cedulaCatastral">
+
         </div>
 
       </div>
 
-      <h4>Escritura</h4>
+      <!-- ===================================================== -->
+      <!-- ESCRITURA Y REGISTRO -->
+      <!-- ===================================================== -->
+
+      <h4>Escritura y registro</h4>
 
       <div class="form-grid">
 
         <div class="f-row">
+
           <label>Número escritura</label>
+
           <input
             type="text"
             maxlength="50"
             [(ngModel)]="bien.numeroEscritura"
             name="numeroEscritura">
+
         </div>
 
         <div class="f-row">
+
           <label>Fecha escritura</label>
+
           <input
             type="date"
             [(ngModel)]="bien.fechaEscritura"
             name="fechaEscritura">
+
         </div>
 
         <div class="f-row">
+
           <label>Notaría</label>
+
           <input
             type="text"
             maxlength="100"
             [(ngModel)]="bien.notaria"
             name="notaria">
+
         </div>
 
         <div class="f-row">
+
+          <label>Fecha registro escritura</label>
+
+          <input
+            type="date"
+            [(ngModel)]="bien.fechaRegistroEscritura"
+            name="fechaRegistroEscritura">
+
+        </div>
+
+        <div class="f-row span-2">
+
+          <label>Oficina de registro</label>
+
+          <input
+            type="text"
+            maxlength="150"
+            [(ngModel)]="bien.oficinaRegistro"
+            name="oficinaRegistro">
+
+        </div>
+
+        <div class="f-row">
+
           <label>País notaría</label>
+
           <select
             [(ngModel)]="bien.idPaisNotaria"
             name="idPaisNotaria">
-            <option [ngValue]="null">Seleccione...</option>
-            <option *ngFor="let p of paises" [ngValue]="p.codigo">
+
+            <option [ngValue]="null">
+              Seleccione...
+            </option>
+
+            <option
+              *ngFor="let p of paises"
+              [ngValue]="p.codigo">
               {{ p.nombre }}
             </option>
+
           </select>
+
         </div>
 
         <div class="f-row">
+
           <label>Departamento notaría</label>
+
           <select
             [(ngModel)]="bien.idDepartamentoNotaria"
             name="idDepartamentoNotaria"
             (change)="onDepartamentoNotariaChange()">
-            <option [ngValue]="null">Seleccione...</option>
-            <option *ngFor="let d of departamentos" [ngValue]="d.idDepartamento">
+
+            <option [ngValue]="null">
+              Seleccione...
+            </option>
+
+            <option
+              *ngFor="let d of departamentos"
+              [ngValue]="d.idDepartamento">
               {{ d.nombreDepartamento }}
             </option>
+
           </select>
+
         </div>
 
         <div class="f-row">
+
           <label>Ciudad notaría</label>
+
           <select
             [(ngModel)]="bien.idCiudadNotaria"
             name="idCiudadNotaria">
-            <option [ngValue]="null">Seleccione...</option>
-            <option *ngFor="let c of ciudadesNotaria" [ngValue]="c.idCiudad">
+
+            <option [ngValue]="null">
+              Seleccione...
+            </option>
+
+            <option
+              *ngFor="let c of ciudadesNotaria"
+              [ngValue]="c.idCiudad">
               {{ c.nombreCiudad }}
             </option>
+
           </select>
+
         </div>
 
       </div>
 
-      <h4>Gravamen y observaciones</h4>
+      <!-- ===================================================== -->
+      <!-- GRAVAMEN -->
+      <!-- ===================================================== -->
+
+      <h4>Gravamen y observaciones del inmueble</h4>
 
       <div class="form-grid">
 
         <div class="f-row">
+
           <label>Tipo gravamen *</label>
+
           <select
             [(ngModel)]="bien.idTipoGravamen"
             name="idTipoGravamen"
             required>
-            <option [ngValue]="0">Seleccione...</option>
-            <option *ngFor="let g of tiposGravamenes" [ngValue]="g.id">
+
+            <option [ngValue]="0">
+              Seleccione...
+            </option>
+
+            <option
+              *ngFor="let g of tiposGravamenes"
+              [ngValue]="g.id">
               {{ g.nombre }}
             </option>
+
           </select>
+
         </div>
 
         <div class="f-row span-3">
-          <label>Observaciones</label>
+
+          <label>Observaciones específicas del inmueble</label>
+
           <textarea
             rows="3"
-            maxlength="1000"
+            maxlength="500"
             [(ngModel)]="bien.observaciones"
             name="observaciones">
           </textarea>
+
         </div>
 
       </div>
 
       <div class="form-actions">
+
         <button
           type="submit"
           class="btn btn--primary"
           [disabled]="guardando">
-          {{ guardando ? 'Guardando...' : 'Guardar' }}
+
+          {{
+          guardando
+          ? 'Guardando...'
+          : 'Guardar'
+          }}
+
         </button>
 
         <button
@@ -878,6 +1484,7 @@
           (click)="cancelar()">
           Cancelar
         </button>
+
       </div>
 
     </form>

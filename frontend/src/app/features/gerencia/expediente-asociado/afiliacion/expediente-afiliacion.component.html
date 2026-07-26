@@ -1,0 +1,786 @@
+<section
+  *ngIf="afiliacion; else sinAfiliacion"
+  class="afiliacion">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO                                            -->
+  <!-- ===================================================== -->
+
+  <header class="afiliacion-encabezado">
+
+    <div>
+
+      <span class="afiliacion-subtitulo">
+        Vinculación institucional
+      </span>
+
+      <h2>
+        Información de afiliación
+      </h2>
+
+    </div>
+
+    <span
+      class="estado"
+      [ngClass]="claseEstadoAfiliacion">
+
+      {{ estadoAfiliacion }}
+
+    </span>
+
+  </header>
+
+  <!-- ===================================================== -->
+  <!-- INFORMACIÓN DE AFILIACIÓN                              -->
+  <!-- ===================================================== -->
+
+  <section class="afiliacion-bloque">
+
+    <h3>
+      Información de afiliación
+    </h3>
+
+    <div class="datos-grid datos-grid--cuatro">
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Código de aportes
+        </span>
+
+        <strong class="dato-valor">
+          {{ codigoAportes }}
+        </strong>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Estado del asociado
+        </span>
+
+        <span class="dato-valor">
+          {{ estadoAfiliacion }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Fecha de afiliación
+        </span>
+
+        <span class="dato-valor">
+          {{
+            fechaAfiliacion
+              ? (fechaAfiliacion | date:'dd/MM/yyyy')
+              : 'Sin información'
+          }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Antigüedad
+        </span>
+
+        <strong class="dato-valor">
+          {{ antiguedadTexto }}
+        </strong>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- CUENTA DE APORTES                                     -->
+  <!-- ===================================================== -->
+
+  <section class="afiliacion-bloque">
+
+    <div class="bloque-encabezado">
+
+      <div>
+
+        <h3>
+          Cuenta de aportes
+        </h3>
+
+        <span class="bloque-descripcion">
+          Información operativa y financiera de los aportes sociales.
+        </span>
+
+      </div>
+
+      <span
+        class="cuenta-estado"
+        [ngClass]="claseEstadoCuentaAportes">
+
+        {{ estadoCuentaAportes }}
+
+      </span>
+
+    </div>
+
+    <div class="datos-grid datos-grid--cuatro">
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Cuenta
+        </span>
+
+        <strong class="dato-valor">
+          {{ codigoCuentaAportes }}
+        </strong>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Forma de aportes
+        </span>
+
+        <span class="dato-valor">
+          {{ nombreFormaAportes }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Estado de la cuenta
+        </span>
+
+        <span class="dato-valor">
+          {{ estadoCuentaAportes }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Fecha de apertura
+        </span>
+
+        <span class="dato-valor">
+          {{
+            fechaAperturaAportes
+              ? (fechaAperturaAportes | date:'dd/MM/yyyy')
+              : 'Sin información'
+          }}
+        </span>
+
+      </div>
+
+      <div class="dato">
+
+        <span class="dato-label">
+          Último movimiento
+        </span>
+
+        <span class="dato-valor">
+          {{
+            fechaUltimoMovimientoAportes
+              ? (
+                  fechaUltimoMovimientoAportes
+                    | date:'dd/MM/yyyy'
+                )
+              : 'Sin información'
+          }}
+        </span>
+
+      </div>
+
+    </div>
+
+    <div class="aportes-grid">
+
+      <article class="aporte-card">
+
+        <span>
+          Saldo de aportes
+        </span>
+
+        <strong>
+          {{
+          saldoAportes
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+      <article class="aporte-card">
+
+        <span>
+          Saldo disponible
+        </span>
+
+        <strong>
+          {{
+          saldoDisponibleAportes
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+      <article class="aporte-card">
+
+        <span>
+          Cuota periódica
+        </span>
+
+        <strong>
+          {{
+          cuotaAportes
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- PARTICIPACIÓN INSTITUCIONAL                            -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="tieneParticipacionInstitucional"
+    class="afiliacion-bloque participacion">
+
+    <div class="bloque-encabezado">
+
+      <div>
+
+        <h3>
+          Participación institucional
+        </h3>
+
+        <span class="bloque-descripcion">
+          Cargos directivos y comités vigentes del asociado.
+        </span>
+
+      </div>
+
+      <div class="participacion-resumen">
+
+        <span *ngIf="cantidadDirectivos > 0">
+          {{ cantidadDirectivos }}
+          {{ cantidadDirectivos === 1 ? 'cargo directivo' : 'cargos directivos' }}
+        </span>
+
+        <span *ngIf="cantidadComites > 0">
+          {{ cantidadComites }}
+          {{ cantidadComites === 1 ? 'comité' : 'comités' }}
+        </span>
+
+        <span *ngIf="cantidadPersonasRelacionadas > 0">
+          {{ cantidadPersonasRelacionadas }}
+          {{
+            cantidadPersonasRelacionadas === 1
+              ? 'persona relacionada'
+              : 'personas relacionadas'
+          }}
+        </span>
+
+      </div>
+
+    </div>
+
+    <!-- =================================================== -->
+    <!-- CARGOS DIRECTIVOS                                   -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="directivos.length > 0"
+      class="participacion-seccion">
+
+      <h4>
+        Cargos directivos
+      </h4>
+
+      <div class="participacion-grid">
+
+        <article
+          *ngFor="
+            let directivo of directivos;
+            trackBy: trackByDirectivo
+          "
+          class="participacion-card participacion-card--directivo">
+
+          <header class="participacion-card-encabezado">
+
+            <div>
+
+              <span class="participacion-tipo">
+                Cargo directivo
+              </span>
+
+              <strong>
+                {{ nombreDirectivo(directivo) }}
+              </strong>
+
+            </div>
+
+            <span
+              class="participacion-estado"
+              [ngClass]="claseEstadoDirectivo(directivo)">
+
+              {{ estadoDirectivo(directivo) }}
+
+            </span>
+
+          </header>
+
+          <div class="participacion-datos">
+
+            <div class="dato">
+
+              <span class="dato-label">
+                Calidad
+              </span>
+
+              <strong class="dato-valor">
+                {{ calidadDirectivo(directivo) }}
+              </strong>
+
+            </div>
+
+            <div class="dato">
+
+              <span class="dato-label">
+                Acta de asamblea
+              </span>
+
+              <span class="dato-valor">
+                {{ directivo.actaAsamblea || 'Sin información' }}
+              </span>
+
+            </div>
+
+            <div class="dato">
+
+              <span class="dato-label">
+                Fecha de asamblea
+              </span>
+
+              <span class="dato-valor">
+                {{
+                  directivo.fechaAsamblea
+                    ? (directivo.fechaAsamblea | date:'dd/MM/yyyy')
+                    : 'Sin información'
+                }}
+              </span>
+
+            </div>
+
+            <div class="dato">
+
+              <span class="dato-label">
+                Resolución SES
+              </span>
+
+              <span class="dato-valor">
+                {{ directivo.resolucionSes || 'Sin información' }}
+              </span>
+
+            </div>
+
+            <div class="dato">
+
+              <span class="dato-label">
+                Fecha de resolución
+              </span>
+
+              <span class="dato-valor">
+                {{
+                  directivo.fechaResolucion
+                    ? (directivo.fechaResolucion | date:'dd/MM/yyyy')
+                    : 'Sin información'
+                }}
+              </span>
+
+            </div>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </div>
+
+    <!-- =================================================== -->
+    <!-- COMITÉS                                             -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="comites.length > 0"
+      class="participacion-seccion">
+
+      <h4>
+        Comités
+      </h4>
+
+      <div class="tabla-contenedor">
+
+        <table class="tabla-participacion">
+
+          <thead>
+
+          <tr>
+
+            <th>
+              Comité
+            </th>
+
+            <th>
+              Cargo
+            </th>
+
+            <th>
+              Acta
+            </th>
+
+            <th>
+              Fecha de nombramiento
+            </th>
+
+          </tr>
+
+          </thead>
+
+          <tbody>
+
+          <tr
+            *ngFor="
+                let comite of comites;
+                trackBy: trackByComite
+              ">
+
+            <td>
+
+              <strong>
+                {{ nombreComite(comite) }}
+              </strong>
+
+            </td>
+
+            <td>
+              {{ cargoComite(comite) }}
+            </td>
+
+            <td>
+              {{ comite.numeroActa || 'Sin información' }}
+            </td>
+
+            <td>
+              {{
+              comite.fechaNombramiento
+              ? (comite.fechaNombramiento | date:'dd/MM/yyyy')
+              : 'Sin información'
+              }}
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- PERSONAS RELACIONADAS CON DIRECTIVOS                -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="personasRelacionadas.length > 0"
+      class="participacion-seccion">
+
+      <h4>
+        Personas relacionadas con directivos
+      </h4>
+
+      <div class="tabla-contenedor">
+
+        <table class="tabla-participacion">
+
+          <thead>
+
+          <tr>
+
+            <th>
+              Directivo
+            </th>
+
+            <th>
+              Documento
+            </th>
+
+            <th>
+              Cargo
+            </th>
+
+            <th>
+              Parentesco
+            </th>
+
+            <th>
+              Estado
+            </th>
+
+          </tr>
+
+          </thead>
+
+          <tbody>
+
+          <tr
+            *ngFor="
+            let persona of personasRelacionadas;
+            trackBy: trackByPersonaRelacionada
+          ">
+
+            <td>
+
+              <strong>
+                {{ nombrePersonaRelacionada(persona) }}
+              </strong>
+
+            </td>
+
+            <td>
+
+              {{ documentoPersonaRelacionada(persona) }}
+
+            </td>
+
+            <td>
+
+              {{ cargoDirectivoRelacionado(persona) }}
+
+            </td>
+
+            <td>
+
+              {{ parentescoPersonaRelacionada(persona) }}
+
+            </td>
+
+            <td>
+
+            <span
+              class="participacion-estado"
+              [ngClass]="claseEstadoDirectivo(persona)">
+
+              {{ estadoDirectivo(persona) }}
+
+            </span>
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- RETIRO                                                -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="afiliacion.retirado"
+    class="afiliacion-bloque">
+
+    <div class="retiro">
+
+      <div class="retiro-encabezado">
+
+        <strong>
+          Asociado retirado
+        </strong>
+
+        <span>
+          {{ nombreMotivoRetiro }}
+        </span>
+
+      </div>
+
+      <div class="datos-grid datos-grid--tres">
+
+        <div class="dato">
+
+          <span class="dato-label">
+            Solicitud de retiro
+          </span>
+
+          <span class="dato-valor">
+            {{
+              afiliacion.fechaSolicitudRetiro
+                ? (
+                    afiliacion.fechaSolicitudRetiro
+                      | date:'dd/MM/yyyy'
+                  )
+                : 'Sin información'
+            }}
+          </span>
+
+        </div>
+
+        <div class="dato">
+
+          <span class="dato-label">
+            Fecha de retiro
+          </span>
+
+          <span class="dato-valor">
+            {{
+              afiliacion.fechaRetiro
+                ? (
+                    afiliacion.fechaRetiro
+                      | date:'dd/MM/yyyy'
+                  )
+                : 'Sin información'
+            }}
+          </span>
+
+        </div>
+
+        <div class="dato">
+
+          <span class="dato-label">
+            Fecha de liquidación
+          </span>
+
+          <span class="dato-valor">
+            {{
+              afiliacion.fechaLiquidacionRetiro
+                ? (
+                    afiliacion.fechaLiquidacionRetiro
+                      | date:'dd/MM/yyyy'
+                  )
+                : 'Sin información'
+            }}
+          </span>
+
+        </div>
+
+      </div>
+
+      <p *ngIf="afiliacion.observacionRetiro">
+        {{ afiliacion.observacionRetiro }}
+      </p>
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- ACTUALIZACIÓN                                         -->
+  <!-- ===================================================== -->
+
+  <footer class="afiliacion-pie">
+
+    <div
+      class="actualizacion"
+      [ngClass]="claseActualizacion">
+
+      <strong>
+        {{ textoActualizacion }}
+      </strong>
+
+      <span>
+
+        <ng-container
+          *ngIf="
+            afiliacion.fechaUltimaActualizacion;
+            else sinFechaActualizacion
+          ">
+
+          Última actualización:
+          {{
+            afiliacion.fechaUltimaActualizacion
+              | date:'dd/MM/yyyy'
+          }}
+
+          · {{ diasSinActualizar }}
+          {{ diasSinActualizar === 1 ? 'día' : 'días' }}
+
+        </ng-container>
+
+        <ng-template #sinFechaActualizacion>
+          No existe una fecha de actualización registrada.
+        </ng-template>
+
+      </span>
+
+    </div>
+
+    <div
+      *ngIf="afiliacion.presentaNovedades"
+      class="novedades">
+
+      <strong>
+        {{ afiliacion.cantidadNovedades || 0 }}
+        novedades
+      </strong>
+
+      <span>
+        {{
+          afiliacion.resumenNovedades
+            || afiliacion.nivelNovedad
+            || 'Existen novedades pendientes de revisión.'
+        }}
+      </span>
+
+    </div>
+
+  </footer>
+
+</section>
+
+<!-- ======================================================= -->
+<!-- SIN INFORMACIÓN                                         -->
+<!-- ======================================================= -->
+
+<ng-template #sinAfiliacion>
+
+  <section class="afiliacion-vacia">
+
+    <strong>
+      Información de afiliación no disponible
+    </strong>
+
+    <span>
+      No se encontraron datos de vinculación para el asociado.
+    </span>
+
+  </section>
+
+</ng-template>

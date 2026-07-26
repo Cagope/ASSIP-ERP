@@ -1,0 +1,86 @@
+@use '../datos-personales/datos-personales-list.component' as *;
+
+/* ==========================================================
+   Estados
+   ========================================================== */
+
+.text-success {
+  color: #16a34a;
+  font-weight: 500;
+}
+
+.text-danger {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+.text-muted {
+  color: #6b7280;
+}
+
+/* ==========================================================
+   Condiciones registradas
+   ========================================================== */
+
+.badge-condiciones {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 34px;
+  height: 26px;
+
+  padding: 0 10px;
+
+  border-radius: 999px;
+
+  background: #dbeafe;
+  color: #1d4ed8;
+
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+/* ==========================================================
+   Tabla
+   ========================================================== */
+
+.table {
+
+  th:nth-child(3),
+  th:nth-child(4),
+  th:nth-child(5),
+  td:nth-child(3),
+  td:nth-child(4),
+  td:nth-child(5) {
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  th:last-child,
+  td:last-child {
+    white-space: nowrap;
+  }
+}
+
+/* ==========================================================
+   Responsive
+   ========================================================== */
+
+@media (max-width: 1200px) {
+
+  .table {
+    font-size: 0.85rem;
+  }
+
+}
+
+@media (max-width: 992px) {
+
+  .badge-condiciones {
+    min-width: 30px;
+    height: 24px;
+    font-size: 0.78rem;
+  }
+
+}

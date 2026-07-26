@@ -1,0 +1,125 @@
+<section
+  *ngIf="expediente"
+  class="expediente-encabezado">
+
+  <div class="encabezado-principal">
+
+    <div class="identificacion">
+
+      <div class="identificacion-titulo">
+        Expediente integral del asociado
+      </div>
+
+      <h2 class="nombre-asociado">
+        {{ nombreCompleto || 'Nombre no disponible' }}
+      </h2>
+
+      <div class="documento-asociado">
+
+        <span *ngIf="tipoDocumento">
+          {{ tipoDocumento }}
+        </span>
+
+        <strong>
+          {{ documento || 'Sin documento' }}
+        </strong>
+
+      </div>
+
+    </div>
+
+    <div class="encabezado-acciones">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="solicitarVolverBuscador()">
+
+        ← Buscar otro asociado
+
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        [disabled]="cargando"
+        (click)="solicitarRecarga()">
+
+    <span *ngIf="!cargando">
+      ↻ Actualizar
+    </span>
+
+        <span *ngIf="cargando">
+      Consultando...
+    </span>
+
+      </button>
+
+    </div>
+
+  </div>
+
+  <div class="encabezado-detalle">
+
+    <div class="detalle-item">
+
+      <span class="detalle-label">
+        Estado
+      </span>
+
+      <span
+        class="estado"
+        [ngClass]="claseEstado">
+
+        {{ nombreEstado }}
+
+      </span>
+
+    </div>
+
+    <div class="detalle-item">
+
+      <span class="detalle-label">
+        Agencia
+      </span>
+
+      <span class="detalle-valor">
+        {{ nombreAgencia }}
+      </span>
+
+    </div>
+
+    <div class="detalle-item">
+
+      <span class="detalle-label">
+        Fecha de afiliación
+      </span>
+
+      <span class="detalle-valor">
+        {{ fechaAfiliacion
+          ? (fechaAfiliacion | date: 'dd/MM/yyyy')
+          : 'Sin información'
+        }}
+      </span>
+
+    </div>
+
+    <div class="detalle-item">
+
+      <span class="detalle-label">
+        Última actualización
+      </span>
+
+      <span class="detalle-valor">
+        {{ fechaActualizacion
+          ? (fechaActualizacion | date: 'dd/MM/yyyy')
+          : 'Sin información'
+        }}
+      </span>
+
+    </div>
+
+  </div>
+
+</section>
+

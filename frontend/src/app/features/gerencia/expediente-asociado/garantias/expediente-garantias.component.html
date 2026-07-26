@@ -1,0 +1,804 @@
+<section class="garantias">
+
+  <header class="garantias-encabezado">
+
+    <div>
+
+      <span class="garantias-subtitulo">
+        Respaldo de obligaciones
+      </span>
+
+      <h2>
+        Garantías
+      </h2>
+
+    </div>
+
+    <span class="cantidad-garantias">
+
+      {{ cantidadGarantias }}
+      {{ cantidadGarantias === 1 ? 'garantía' : 'garantías' }}
+
+    </span>
+
+  </header>
+
+
+  <ng-container *ngIf="tieneGarantias; else sinGarantias">
+
+    <!-- RESUMEN -->
+
+    <section class="garantias-bloque">
+
+      <h3>
+        Resumen de cobertura
+      </h3>
+
+      <div class="resumen-grid">
+
+        <article class="resumen-card">
+
+          <span>
+            Valor de garantías
+          </span>
+
+          <strong>
+            {{
+            valorGarantiasTotal |
+            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+        <article class="resumen-card">
+
+          <span>
+            Saldo respaldado
+          </span>
+
+          <strong>
+            {{
+            saldoCreditosTotal |
+            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+        <article class="resumen-card resumen-card--principal">
+
+          <span>
+            Cobertura global
+          </span>
+
+          <strong>
+            {{ coberturaGlobal | number:'1.0-2' }} %
+          </strong>
+
+        </article>
+
+        <article class="resumen-card">
+
+          <span>
+            Valor asegurado
+          </span>
+
+          <strong>
+            {{
+            valorAseguradoTotal |
+            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- ESTADOS -->
+
+    <section class="garantias-bloque">
+
+      <h3>
+        Estado de las garantías
+      </h3>
+
+      <div class="estados-grid">
+
+        <article class="estado-resumen estado-resumen--activo">
+
+          <strong>
+            {{ cantidadActivas }}
+          </strong>
+
+          <span>
+            Activas
+          </span>
+
+        </article>
+
+        <article class="estado-resumen">
+
+          <strong>
+            {{ cantidadCanceladas }}
+          </strong>
+
+          <span>
+            Canceladas
+          </span>
+
+        </article>
+
+        <article class="estado-resumen estado-resumen--activo">
+
+          <strong>
+            {{ cantidadSuficientes }}
+          </strong>
+
+          <span>
+            Suficientes
+          </span>
+
+        </article>
+
+        <article
+          class="estado-resumen"
+          [class.estado-resumen--alerta]="
+            cantidadInsuficientes > 0
+          ">
+
+          <strong>
+            {{ cantidadInsuficientes }}
+          </strong>
+
+          <span>
+            Insuficientes
+          </span>
+
+        </article>
+
+        <article>
+
+          <strong>
+            {{ cantidadCompartidas }}
+          </strong>
+
+          <span>
+            Compartidas
+          </span>
+
+        </article>
+
+        <article
+          class="estado-resumen"
+          [class.estado-resumen--alerta]="
+            cantidadConRevision > 0
+          ">
+
+          <strong>
+            {{ cantidadConRevision }}
+          </strong>
+
+          <span>
+            Requieren revisión
+          </span>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- DETALLE -->
+
+    <section class="garantias-bloque">
+
+      <div class="bloque-encabezado">
+
+        <div>
+
+          <h3>
+            Detalle de garantías
+          </h3>
+
+          <span class="bloque-descripcion">
+            Relación entre obligaciones y bienes de respaldo
+          </span>
+
+        </div>
+
+      </div>
+
+      <div class="garantias-lista">
+
+        <article
+          *ngFor="let garantia of lista"
+          class="garantia-card"
+          [class.garantia-card--atencion]="
+            requiereAtencion(garantia)
+          ">
+
+          <header class="garantia-card__encabezado">
+
+            <div class="garantia-identificacion">
+
+              <span class="garantia-tipo">
+                {{ garantia.nombreTipoGarantia }}
+              </span>
+
+              <strong>
+                {{
+                garantia.codigoGarantia ||
+                garantia.numeroDocumentoGarantia ||
+                'Garantía registrada'
+                }}
+              </strong>
+
+              <small>
+                Crédito: {{ garantia.numeroCredito }}
+              </small>
+
+            </div>
+
+            <div class="garantia-estados">
+
+              <span
+                class="estado-garantia"
+                [ngClass]="claseEstado(garantia)">
+
+                {{ garantia.estado }}
+
+              </span>
+
+              <span
+                class="cobertura-garantia"
+                [ngClass]="claseCobertura(garantia)">
+
+                {{
+                  garantia.garantiaSuficiente
+                    ? 'Cobertura suficiente'
+                    : 'Cobertura insuficiente'
+                }}
+
+              </span>
+
+              <span
+                class="nivel-alerta"
+                [ngClass]="claseAlerta(garantia)">
+
+                {{ garantia.nivelAlerta }}
+
+              </span>
+
+            </div>
+
+          </header>
+
+
+          <div class="garantia-descripcion">
+
+            <span>
+              Descripción
+            </span>
+
+            <strong>
+              {{ garantia.descripcion }}
+            </strong>
+
+          </div>
+
+
+          <!-- VALORES -->
+
+          <div class="garantia-valores">
+
+            <div>
+
+              <span>
+                Valor de garantía
+              </span>
+
+              <strong>
+                {{
+                garantia.valorGarantia |
+                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Valor del avalúo
+              </span>
+
+              <strong>
+                {{
+                garantia.valorAvaluo |
+                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Saldo del crédito
+              </span>
+
+              <strong>
+                {{
+                garantia.saldoCredito |
+                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+              </strong>
+
+            </div>
+
+            <div
+              class="garantia-valores__cobertura"
+              [ngClass]="claseCobertura(garantia)">
+
+              <span>
+                Cobertura
+              </span>
+
+              <strong>
+                {{
+                garantia.porcentajeCobertura |
+                number:'1.0-2'
+                }}
+                %
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- DATOS -->
+
+          <div class="garantia-datos">
+
+            <div>
+
+              <span>
+                Constitución
+              </span>
+
+              <strong>
+                {{
+                garantia.fechaConstitucion
+                ? (
+                garantia.fechaConstitucion |
+                date:'dd/MM/yyyy'
+                )
+                : 'Sin información'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Vencimiento
+              </span>
+
+              <strong>
+                {{
+                garantia.fechaVencimiento
+                ? (
+                garantia.fechaVencimiento |
+                date:'dd/MM/yyyy'
+                )
+                : 'Sin información'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Entidad
+              </span>
+
+              <strong>
+                {{
+                garantia.entidadGarantia ||
+                'Sin información'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Documento
+              </span>
+
+              <strong>
+                {{
+                garantia.numeroDocumentoGarantia ||
+                'Sin información'
+                }}
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- PROPIETARIO -->
+
+          <div class="propietario-panel">
+
+            <div>
+
+              <span>
+                Propietario
+              </span>
+
+              <strong>
+                {{ garantia.nombrePropietario }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Documento
+              </span>
+
+              <strong>
+                {{
+                garantia.documentoPropietario ||
+                'Sin información'
+                }}
+              </strong>
+
+            </div>
+
+            <span
+              *ngIf="garantia.garantiaCompartida"
+              class="etiqueta-compartida">
+
+              Garantía compartida
+
+            </span>
+
+          </div>
+
+
+          <!-- AVALÚO -->
+
+          <div class="control-panel">
+
+            <div>
+
+              <span>
+                Estado del avalúo
+              </span>
+
+              <strong>
+                {{ textoAvaluo(garantia) }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Fecha del avalúo
+              </span>
+
+              <strong>
+                {{
+                garantia.fechaAvaluo
+                ? (
+                garantia.fechaAvaluo |
+                date:'dd/MM/yyyy'
+                )
+                : 'Sin información'
+                }}
+              </strong>
+
+            </div>
+
+            <span
+              class="control-estado"
+              [class.control-estado--vigente]="
+                garantia.avaluoVigente
+              "
+              [class.control-estado--critico]="
+                garantia.avaluoVencido
+              ">
+
+              {{ textoAvaluo(garantia) }}
+
+            </span>
+
+          </div>
+
+
+          <!-- SEGURO -->
+
+          <div class="control-panel control-panel--seguro">
+
+            <div>
+
+              <span>
+                Aseguradora
+              </span>
+
+              <strong>
+                {{ garantia.aseguradora }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Póliza
+              </span>
+
+              <strong>
+                {{
+                garantia.numeroPoliza ||
+                'Sin información'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Valor asegurado
+              </span>
+
+              <strong>
+                {{
+                garantia.valorAsegurado |
+                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Vencimiento
+              </span>
+
+              <strong>
+                {{
+                garantia.fechaVencimientoSeguro
+                ? (
+                garantia.fechaVencimientoSeguro |
+                date:'dd/MM/yyyy'
+                )
+                : 'Sin información'
+                }}
+              </strong>
+
+            </div>
+
+            <span
+              class="control-estado"
+              [class.control-estado--vigente]="
+                garantia.seguroVigente
+              "
+              [class.control-estado--critico]="
+                garantia.seguroVencido
+              ">
+
+              {{ textoSeguro(garantia) }}
+
+            </span>
+
+          </div>
+
+
+          <!-- ALERTAS -->
+
+          <div
+            *ngIf="requiereAtencion(garantia)"
+            class="alertas-garantia">
+
+            <span
+              *ngIf="
+                garantia.activa &&
+                !garantia.garantiaSuficiente
+              "
+              class="alerta-garantia alerta-garantia--advertencia">
+
+              Cobertura insuficiente
+
+            </span>
+
+            <span
+              *ngIf="garantia.avaluoVencido"
+              class="alerta-garantia alerta-garantia--critica">
+
+              Avalúo vencido
+
+            </span>
+
+            <span
+              *ngIf="garantia.avaluoProximoVencer"
+              class="alerta-garantia alerta-garantia--advertencia">
+
+              Avalúo próximo a vencer
+
+            </span>
+
+            <span
+              *ngIf="garantia.seguroVencido"
+              class="alerta-garantia alerta-garantia--critica">
+
+              Seguro vencido
+
+            </span>
+
+            <span
+              *ngIf="garantia.seguroProximoVencer"
+              class="alerta-garantia alerta-garantia--advertencia">
+
+              Seguro próximo a vencer
+
+            </span>
+
+            <span
+              *ngIf="garantia.requiereRevision"
+              class="alerta-garantia alerta-garantia--advertencia">
+
+              Requiere revisión
+
+            </span>
+
+            <span
+              *ngIf="garantia.cantidadAlertas > 0"
+              class="alerta-garantia alerta-garantia--advertencia">
+
+              {{ garantia.cantidadAlertas }}
+              alertas
+
+            </span>
+
+          </div>
+
+
+          <!-- OBSERVACIONES -->
+
+          <div
+            *ngIf="garantia.observaciones"
+            class="garantia-observaciones">
+
+            <strong>
+              Observaciones
+            </strong>
+
+            <span>
+              {{ garantia.observaciones }}
+            </span>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- CONTROL DOCUMENTAL -->
+
+    <section class="garantias-bloque">
+
+      <h3>
+        Control documental
+      </h3>
+
+      <div class="control-resumen-grid">
+
+        <article
+          [class.control-resumen--critico]="
+            cantidadAvaluosVencidos > 0
+          ">
+
+          <strong>
+            {{ cantidadAvaluosVencidos }}
+          </strong>
+
+          <span>
+            Avalúos vencidos
+          </span>
+
+        </article>
+
+        <article
+          [class.control-resumen--critico]="
+            cantidadSegurosVencidos > 0
+          ">
+
+          <strong>
+            {{ cantidadSegurosVencidos }}
+          </strong>
+
+          <span>
+            Seguros vencidos
+          </span>
+
+        </article>
+
+        <article
+          [class.control-resumen--alerta]="
+            cantidadConRevision > 0
+          ">
+
+          <strong>
+            {{ cantidadConRevision }}
+          </strong>
+
+          <span>
+            Requieren revisión
+          </span>
+
+        </article>
+
+        <article
+          [class.control-resumen--alerta]="
+            cantidadConAlertas > 0
+          ">
+
+          <strong>
+            {{ cantidadConAlertas }}
+          </strong>
+
+          <span>
+            Con alertas
+          </span>
+
+        </article>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</section>
+
+
+<ng-template #sinGarantias>
+
+  <section class="garantias-vacio">
+
+    <div class="garantias-vacio__icono">
+      G
+    </div>
+
+    <strong>
+      El asociado no tiene garantías registradas
+    </strong>
+
+    <span>
+      No se encontraron garantías asociadas a sus
+      obligaciones de cartera.
+    </span>
+
+  </section>
+
+</ng-template>

@@ -1,0 +1,580 @@
+.resumen {
+  overflow: hidden;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+
+/* =========================================================
+   ENCABEZADO
+   ========================================================= */
+
+.resumen-encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  padding: 1rem 1.15rem;
+
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.resumen-subtitulo {
+  display: block;
+  margin-bottom: 0.15rem;
+
+  color: #6b7280;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.resumen-encabezado h2 {
+  margin: 0;
+
+  color: #111827;
+  font-size: 1.08rem;
+  font-weight: 700;
+}
+
+.resumen-acciones {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+
+/* =========================================================
+   ESTADO DEL ASOCIADO
+   ========================================================= */
+
+.estado {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 28px;
+  padding: 0.28rem 0.75rem;
+
+  border-radius: 999px;
+
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.estado--activo {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.estado--inactivo {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.estado--retirado {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.estado--neutral {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+
+/* =========================================================
+   BLOQUES GENERALES
+   ========================================================= */
+
+.resumen-bloque {
+  padding: 0.95rem 1.15rem;
+
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.resumen-bloque:last-of-type {
+  border-bottom: 0;
+}
+
+.bloque-titulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.45rem;
+
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.bloque-titulo h3 {
+  margin: 0;
+
+  color: #374151;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   DATOS
+   ========================================================= */
+
+.datos-grid {
+  display: grid;
+  gap: 0.75rem 1rem;
+}
+
+.datos-grid--cuatro {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.datos-grid--tres {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.datos-grid--dos {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dato {
+  min-width: 0;
+  padding: 0.15rem 0;
+}
+
+.dato--amplio,
+.dato--doble {
+  grid-column: span 2;
+}
+
+.dato-label {
+  display: block;
+  margin-bottom: 0.2rem;
+
+  color: #6b7280;
+  font-size: 0.73rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.dato-valor {
+  display: block;
+  min-width: 0;
+
+  overflow-wrap: anywhere;
+
+  color: #111827;
+  font-size: 0.84rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+strong.dato-valor {
+  font-weight: 700;
+}
+
+.dato-valor--correo {
+  text-transform: lowercase;
+}
+
+
+/* =========================================================
+   INFORMACIÓN FINANCIERA
+   ========================================================= */
+
+.financiero-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 0.7rem;
+}
+
+.financiero-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.28rem;
+
+  min-width: 0;
+  min-height: 82px;
+  padding: 0.8rem;
+
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+}
+
+.financiero-card:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 2px 6px rgb(15 23 42 / 7%);
+  transform: translateY(-1px);
+}
+
+.financiero-label {
+  color: #6b7280;
+  font-size: 0.73rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.financiero-card strong {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+
+  color: #111827;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.financiero-card small {
+  color: #6b7280;
+  font-size: 0.68rem;
+  line-height: 1.3;
+}
+
+.financiero-card--principal {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.financiero-card--principal strong {
+  color: #166534;
+}
+
+.financiero-card--negativo {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.financiero-card--negativo strong {
+  color: #991b1b;
+}
+
+
+/* =========================================================
+   PRODUCTOS Y BIENES
+   ========================================================= */
+
+.productos-tabla {
+  overflow: hidden;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.producto-fila {
+  display: grid;
+  grid-template-columns:
+    minmax(180px, 1fr)
+    100px
+    minmax(150px, auto);
+  align-items: center;
+  gap: 1rem;
+
+  min-height: 42px;
+  padding: 0.62rem 0.85rem;
+
+  background: #ffffff;
+  border-bottom: 1px solid #f3f4f6;
+
+  transition: background-color 0.15s ease;
+}
+
+.producto-fila:last-child {
+  border-bottom: 0;
+}
+
+.producto-fila:hover {
+  background: #f9fafb;
+}
+
+.producto-nombre {
+  min-width: 0;
+
+  color: #374151;
+  font-size: 0.81rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.producto-cantidad {
+  color: #6b7280;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.producto-valor {
+  color: #111827;
+  font-size: 0.83rem;
+  font-weight: 700;
+  text-align: right;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   PIE DEL RESUMEN
+   ========================================================= */
+
+.resumen-pie {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+
+  padding: 1rem 1.15rem;
+
+  background: #fafafa;
+  border-top: 1px solid #f3f4f6;
+}
+
+
+/* =========================================================
+   ACTUALIZACIÓN
+   ========================================================= */
+
+.actualizacion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  min-width: 0;
+  padding: 0.75rem 0.85rem;
+
+  border: 1px solid transparent;
+  border-radius: 8px;
+}
+
+.actualizacion-titulo {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.actualizacion-detalle {
+  font-size: 0.74rem;
+  line-height: 1.4;
+}
+
+.actualizacion--vigente {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.actualizacion--advertencia {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.actualizacion--critica {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+
+/* =========================================================
+   SEÑALES ESPECIALES
+   ========================================================= */
+
+.alerta-especial {
+  display: flex;
+  align-items: center;
+  align-content: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+
+  max-width: 420px;
+  padding: 0.75rem 0.85rem;
+
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 8px;
+
+  color: #9a3412;
+  font-size: 0.73rem;
+}
+
+.alerta-especial strong {
+  margin-right: 0.2rem;
+}
+
+.alerta-especial span {
+  padding: 0.18rem 0.42rem;
+
+  background: #ffedd5;
+  border-radius: 999px;
+
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+
+/* =========================================================
+   ESTADO VACÍO
+   ========================================================= */
+
+.resumen-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+
+  min-height: 180px;
+  padding: 1rem;
+
+  background: #ffffff;
+  border: 1px dashed #d1d5db;
+  border-radius: 10px;
+
+  color: #6b7280;
+  text-align: center;
+}
+
+.resumen-vacio strong {
+  color: #374151;
+  font-size: 0.92rem;
+}
+
+.resumen-vacio span {
+  font-size: 0.82rem;
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+  .datos-grid--cuatro {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .financiero-grid {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+
+  .resumen-pie {
+    grid-template-columns: 1fr;
+  }
+
+  .alerta-especial {
+    max-width: none;
+  }
+
+}
+
+
+/* =========================================================
+   MÓVIL
+   ========================================================= */
+
+@media (max-width: 750px) {
+
+  .resumen {
+    border-radius: 8px;
+  }
+
+  .resumen-encabezado {
+    align-items: stretch;
+    flex-direction: column;
+
+    padding: 0.9rem;
+  }
+
+  .resumen-acciones {
+    justify-content: flex-start;
+  }
+
+  .resumen-acciones .btn {
+    width: 100%;
+  }
+
+  .resumen-bloque {
+    padding: 0.9rem;
+  }
+
+  .datos-grid--cuatro,
+  .datos-grid--tres,
+  .datos-grid--dos,
+  .financiero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dato--amplio,
+  .dato--doble {
+    grid-column: auto;
+  }
+
+  .financiero-card {
+    min-height: 76px;
+  }
+
+  .producto-fila {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.3rem 0.75rem;
+
+    padding: 0.7rem 0.75rem;
+  }
+
+  .producto-cantidad {
+    text-align: right;
+  }
+
+  .producto-valor {
+    grid-column: 1 / -1;
+
+    text-align: left;
+  }
+
+  .resumen-pie {
+    grid-template-columns: 1fr;
+
+    padding: 0.9rem;
+  }
+
+}
+
+
+/* =========================================================
+   MÓVIL PEQUEÑO
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .resumen-encabezado h2 {
+    font-size: 1rem;
+  }
+
+  .bloque-titulo h3 {
+    font-size: 0.84rem;
+  }
+
+  .financiero-card strong {
+    font-size: 0.94rem;
+  }
+
+  .actualizacion,
+  .alerta-especial {
+    padding: 0.68rem 0.72rem;
+  }
+
+}

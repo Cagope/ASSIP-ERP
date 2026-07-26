@@ -9,7 +9,10 @@ import java.util.List;
 public interface BienInmuebleAvaluoRepository
         extends JpaRepository<BienInmuebleAvaluo, Long> {
 
-    List<BienInmuebleAvaluo> findByIdBienOrderByFechaAvaluoDescFechaCreacionDesc(Long idBien);
+    List<BienInmuebleAvaluo>
+    findByIdBienOrderByFechaAvaluoDescFechaCreacionDesc(
+            Long idBien
+    );
 
     boolean existsByIdBien(Long idBien);
 }
