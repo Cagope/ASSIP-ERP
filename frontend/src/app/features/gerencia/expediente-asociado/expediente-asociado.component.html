@@ -200,20 +200,6 @@
 
       </button>
 
-
-      <button
-        type="button"
-        class="navegacion-item"
-        [class.navegacion-item--activo]="
-          esSeccionActiva('GARANTIAS')
-        "
-        (click)="seleccionarSeccion('GARANTIAS')">
-
-        Garantías
-
-      </button>
-
-
       <button
         type="button"
         class="navegacion-item navegacion-item--alertas"
@@ -340,17 +326,6 @@
         [bienesMaquinaria]="expediente.bienesMaquinaria"
         [bienesInversiones]="expediente.bienesInversiones">
       </app-expediente-bienes>
-
-
-      <!-- ================================================= -->
-      <!-- GARANTÍAS                                         -->
-      <!-- ================================================= -->
-
-      <app-expediente-garantias
-        *ngIf="esSeccionActiva('GARANTIAS')"
-        [garantias]="expediente.garantias">
-      </app-expediente-garantias>
-
 
       <!-- ================================================= -->
       <!-- ALERTAS                                           -->

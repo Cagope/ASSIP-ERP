@@ -1,0 +1,320 @@
+<section class="consulta-bloque">
+
+  <!-- ======================================================= -->
+  <!-- ENCABEZADO                                              -->
+  <!-- ======================================================= -->
+
+  <div class="bloque-encabezado">
+
+    <div>
+
+      <h2>
+        Buscar asociado
+      </h2>
+
+      <span>
+        Consulte por documento, nombres o apellidos.
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- FILTROS                                                 -->
+  <!-- ======================================================= -->
+
+  <div class="filtros-grid">
+
+    <div class="f-row">
+
+      <label for="documento">
+        Documento
+      </label>
+
+      <input
+        id="documento"
+        type="text"
+        [(ngModel)]="filtros.documento"
+        name="documento"
+        placeholder="Documento"
+        autocomplete="off"
+        [disabled]="cargando || bloqueado">
+
+    </div>
+
+
+    <div class="f-row">
+
+      <label for="nombres">
+        Nombres
+      </label>
+
+      <input
+        id="nombres"
+        type="text"
+        [(ngModel)]="filtros.nombres"
+        name="nombres"
+        placeholder="Nombres"
+        autocomplete="off"
+        [disabled]="cargando || bloqueado">
+
+    </div>
+
+
+    <div class="f-row">
+
+      <label for="primerApellido">
+        Primer apellido
+      </label>
+
+      <input
+        id="primerApellido"
+        type="text"
+        [(ngModel)]="filtros.primerApellido"
+        name="primerApellido"
+        placeholder="Primer apellido"
+        autocomplete="off"
+        [disabled]="cargando || bloqueado">
+
+    </div>
+
+
+    <div class="f-row">
+
+      <label for="segundoApellido">
+        Segundo apellido
+      </label>
+
+      <input
+        id="segundoApellido"
+        type="text"
+        [(ngModel)]="filtros.segundoApellido"
+        name="segundoApellido"
+        placeholder="Segundo apellido"
+        autocomplete="off"
+        [disabled]="cargando || bloqueado">
+
+    </div>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- ACCIONES                                                -->
+  <!-- ======================================================= -->
+
+  <div class="filtros-acciones">
+
+    <button
+      type="button"
+      class="btn btn--cancel"
+      [disabled]="cargando || bloqueado"
+      (click)="limpiar()">
+
+      Limpiar
+
+    </button>
+
+    <button
+      type="button"
+      class="btn btn--primary"
+      [disabled]="
+        cargando
+        || bloqueado
+        || !tieneCriterios
+      "
+      (click)="buscar()">
+
+      {{
+      cargando
+      ? 'Consultando...'
+      : 'Buscar'
+      }}
+
+    </button>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- ERROR                                                   -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="error"
+    class="busqueda-error">
+
+    {{ error }}
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- CARGANDO                                                -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="cargando"
+    class="busqueda-loading">
+
+    Consultando asociados con créditos registrados...
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- RESULTADOS                                              -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="!cargando && tieneResultados"
+    class="resultados-wrapper">
+
+    <div class="resultados-header">
+
+      <div>
+
+        <h3>
+          Asociados encontrados
+        </h3>
+
+        <small>
+          Total registros: {{ resultados.length }}
+        </small>
+
+      </div>
+
+    </div>
+
+
+    <div class="resultados-table-container">
+
+      <table class="resultados-table">
+
+        <thead>
+
+        <tr>
+
+          <th>
+            Documento
+          </th>
+
+          <th>
+            Nombre completo
+          </th>
+
+          <th>
+            Tipo de documento
+          </th>
+
+          <th class="center">
+            Créditos registrados
+          </th>
+
+          <th class="center">
+            Acción
+          </th>
+
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        <tr
+          *ngFor="
+              let asociado of resultados;
+              trackBy: trackByAsociado
+            "
+          [class.fila-seleccionada]="
+              esSeleccionado(asociado)
+            ">
+
+          <td>
+
+            <strong>
+              {{ asociado.documento }}
+            </strong>
+
+          </td>
+
+
+          <td>
+
+            {{ asociado.nombreCompleto }}
+
+          </td>
+
+
+          <td>
+
+            {{
+            asociado.nombreTipoDocumento
+            || asociado.tipoDocumento
+            || ''
+            }}
+
+          </td>
+
+
+          <td class="center">
+
+              <span class="cantidad-creditos">
+
+                {{ asociado.cantidadCreditos }}
+
+              </span>
+
+          </td>
+
+
+          <td class="center">
+
+            <button
+              type="button"
+              class="btn-table btn-view"
+              [disabled]="cargando || bloqueado"
+              (click)="seleccionar(asociado)">
+
+              {{
+              esSeleccionado(asociado)
+              ? 'Seleccionado'
+              : 'Seleccionar'
+              }}
+
+            </button>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- SIN RESULTADOS                                          -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="
+      !cargando
+      && busquedaRealizada
+      && !tieneResultados
+      && !error
+    "
+    class="sin-resultados">
+
+    No se encontraron asociados con créditos registrados.
+
+  </div>
+
+</section>

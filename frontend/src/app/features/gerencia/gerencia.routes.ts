@@ -16,6 +16,13 @@ export const GERENCIA_ROUTES: Routes = [
   },
 
   {
+    path: 'dashboard-cartera',
+    loadComponent: () =>
+      import('./dashboards/dashboard-cartera/dashboard-cartera.component')
+        .then(m => m.DashboardCarteraComponent)
+  },
+
+  {
     path: 'dashboard-depositos',
     loadChildren: () =>
       import('./dashboards/dashboard-depositos/dashboard-depositos.routes')

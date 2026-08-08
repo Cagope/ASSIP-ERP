@@ -13,7 +13,8 @@ import {
   LockKeyhole,
   PiggyBank,
   Gauge,
-  Wallet
+  Wallet,
+  HandCoins
 } from 'lucide-angular';
 
 import {
@@ -59,6 +60,7 @@ export class MainMenuComponent implements OnInit {
   icons: Record<string, any> = {
     hojaVida: UserRound,
     depositos: Landmark,
+    cartera: HandCoins,
     contabilidad: Calculator,
     activos: Building2,
     nomina: Users,

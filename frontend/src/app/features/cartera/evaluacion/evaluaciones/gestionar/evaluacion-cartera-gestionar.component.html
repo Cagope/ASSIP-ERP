@@ -1,0 +1,596 @@
+<div class="page evaluacion-cartera-gestionar">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <app-header-actions
+    titulo="Gestionar Evaluación de Cartera"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+
+  <!-- ===================================================== -->
+  <!-- CARGANDO -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="cargando"
+    class="estado-pantalla">
+
+    Cargando evaluación de cartera...
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- ERROR -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="error"
+    class="alert alert--error">
+
+    {{ error }}
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJE -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="mensaje"
+    class="alert alert--success">
+
+    {{ mensaje }}
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- EVALUACIÓN -->
+  <!-- ===================================================== -->
+
+  <ng-container
+    *ngIf="!cargando && evaluacion as e">
+
+
+    <!-- =================================================== -->
+    <!-- IDENTIFICACIÓN -->
+    <!-- =================================================== -->
+
+    <section class="card evaluacion-cabecera">
+
+      <div class="evaluacion-cabecera__principal">
+
+        <div>
+
+          <span class="seccion-etiqueta">
+            Evaluación de cartera
+          </span>
+
+          <h2>
+            Corte
+            {{ e.fechaCorte | date:'dd/MM/yyyy' }}
+          </h2>
+
+        </div>
+
+
+        <div class="estado-contenedor">
+
+          <span>
+            Estado
+          </span>
+
+          <strong
+            class="estado"
+            [class.estado--proceso]="e.estado === 'P'"
+            [class.estado--definitiva]="e.estado === 'D'">
+
+            {{ descripcionEstado(e.estado) }}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="datos-generales-grid">
+
+        <div>
+
+          <span>
+            Fecha de corte
+          </span>
+
+          <strong>
+            {{ e.fechaCorte | date:'dd/MM/yyyy' }}
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            Fecha de ejecución
+          </span>
+
+          <strong>
+
+            <ng-container
+              *ngIf="e.fechaEjecucion; else sinEjecucion">
+
+              {{
+              e.fechaEjecucion
+              | date:'dd/MM/yyyy HH:mm'
+              }}
+
+            </ng-container>
+
+            <ng-template #sinEjecucion>
+              Sin ejecutar
+            </ng-template>
+
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            Versión de metodología
+          </span>
+
+          <strong>
+            {{ e.versionMetodologia || 'No definida' }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- RESUMEN GENERAL -->
+    <!-- =================================================== -->
+
+    <section class="card">
+
+      <div class="seccion-titulo">
+
+        <div>
+
+          <h3>
+            Resumen de la evaluación
+          </h3>
+
+          <span>
+            Información consolidada del proceso ejecutado.
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="resumen-general-grid">
+
+        <article>
+
+          <span>
+            Créditos evaluados
+          </span>
+
+          <strong>
+            {{
+            e.cantidadCreditos
+            | number:'1.0-0'
+            }}
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            Asociados
+          </span>
+
+          <strong>
+            {{
+            e.cantidadAsociados
+            | number:'1.0-0'
+            }}
+          </strong>
+
+        </article>
+
+
+        <article class="resumen-saldo">
+
+          <span>
+            Saldo total evaluado
+          </span>
+
+          <strong>
+            {{
+            e.saldoTotalEvaluado
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- RESULTADOS / RECOMENDACIONES -->
+    <!-- =================================================== -->
+
+    <section class="card">
+
+      <div class="seccion-titulo">
+
+        <div>
+
+          <h3>
+            Recomendaciones de la evaluación
+          </h3>
+
+          <span>
+            Resultado informativo sugerido por el motor de evaluación.
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="resultados-grid">
+
+        <!-- RECLASIFICAR -->
+
+        <article class="resultado-card resultado-card--reclasificar">
+
+          <span class="resultado-card__titulo">
+            Reclasificar
+          </span>
+
+          <strong>
+            {{
+            e.cantidadRecalificados
+            | number:'1.0-0'
+            }}
+          </strong>
+
+          <small>
+            Créditos cuya edad de riesgo sugerida es superior
+            a la edad vigente.
+          </small>
+
+        </article>
+
+
+        <!-- HABILITAR -->
+
+        <article class="resultado-card resultado-card--habilitar">
+
+          <span class="resultado-card__titulo">
+            Habilitar
+          </span>
+
+          <strong>
+            {{
+            e.cantidadHabilitados
+            | number:'1.0-0'
+            }}
+          </strong>
+
+          <small>
+            Créditos cuya edad de riesgo sugerida es inferior
+            a la edad vigente.
+          </small>
+
+        </article>
+
+
+        <!-- MANTENER -->
+
+        <article class="resultado-card resultado-card--mantener">
+
+          <span class="resultado-card__titulo">
+            Mantener
+          </span>
+
+          <strong>
+            {{
+            e.cantidadMantenidos
+            | number:'1.0-0'
+            }}
+          </strong>
+
+          <small>
+            Créditos para los cuales se recomienda mantener
+            la edad de riesgo vigente.
+          </small>
+
+        </article>
+
+      </div>
+
+
+      <div class="nota-informativa">
+
+        <strong>
+          Importante:
+        </strong>
+
+        esta evaluación es informativa y genera recomendaciones.
+        No modifica directamente la edad de riesgo de los créditos.
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- COMITÉ DE RIESGOS Y CONSEJO -->
+    <!-- =================================================== -->
+
+    <section class="card">
+
+      <div class="seccion-titulo">
+
+        <div>
+
+          <h3>
+            Aprobaciones y actas
+          </h3>
+
+          <span>
+            Información asociada al seguimiento de la evaluación.
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="actas-grid">
+
+        <!-- COMITÉ -->
+
+        <div class="acta-bloque">
+
+          <h4>
+            Comité de Riesgos
+          </h4>
+
+          <div class="datos-generales-grid">
+
+            <div>
+
+              <span>
+                Fecha
+              </span>
+
+              <strong>
+                {{
+                e.fechaComiteRiesgos
+                ? (e.fechaComiteRiesgos | date:'dd/MM/yyyy')
+                : 'Sin registrar'
+                }}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Número de acta
+              </span>
+
+              <strong>
+                {{
+                e.numeroActaRiesgos
+                || 'Sin registrar'
+                }}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- CONSEJO -->
+
+        <div class="acta-bloque">
+
+          <h4>
+            Consejo
+          </h4>
+
+          <div class="datos-generales-grid">
+
+            <div>
+
+              <span>
+                Fecha
+              </span>
+
+              <strong>
+                {{
+                e.fechaConsejo
+                ? (e.fechaConsejo | date:'dd/MM/yyyy')
+                : 'Sin registrar'
+                }}
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Número de acta
+              </span>
+
+              <strong>
+                {{
+                e.numeroActaConsejo
+                || 'Sin registrar'
+                }}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- OBSERVACIONES -->
+    <!-- =================================================== -->
+
+    <section
+      *ngIf="e.observaciones"
+      class="card">
+
+      <div class="seccion-titulo">
+
+        <div>
+
+          <h3>
+            Observaciones
+          </h3>
+
+        </div>
+
+      </div>
+
+      <div class="observaciones">
+        {{ e.observaciones }}
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- ACCIONES -->
+    <!-- =================================================== -->
+
+    <section class="card acciones-card">
+
+      <div class="acciones-principales">
+
+        <!-- VOLVER -->
+
+        <button
+          type="button"
+          class="btn btn--cancel"
+          [disabled]="procesando"
+          (click)="volver()">
+
+          Volver
+
+        </button>
+
+
+        <!-- EJECUTAR -->
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          *ngIf="estaEnProceso"
+          [disabled]="procesando"
+          (click)="ejecutarEvaluacion()">
+
+          {{
+          ejecutando
+          ? 'Ejecutando...'
+          : (
+          tieneResultados
+          ? 'Volver a ejecutar'
+          : 'Ejecutar evaluación'
+          )
+          }}
+
+        </button>
+
+
+        <!-- VER RESULTADOS -->
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          [disabled]="
+            procesando
+            || !tieneResultados
+          "
+          (click)="verResultados()">
+
+          Ver resultados
+
+        </button>
+
+
+        <!-- MARCAR DEFINITIVA -->
+
+        <button
+          type="button"
+          class="btn btn--success"
+          *ngIf="estaEnProceso"
+          [disabled]="
+            procesando
+            || !tieneResultados
+          "
+          (click)="marcarDefinitiva()">
+
+          {{
+          marcandoDefinitiva
+          ? 'Marcando definitiva...'
+          : 'Marcar definitiva'
+          }}
+
+        </button>
+
+
+        <!-- YA DEFINITIVA -->
+
+        <span
+          *ngIf="esDefinitiva"
+          class="definitiva-mensaje">
+
+          Evaluación definitiva
+
+        </span>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</div>

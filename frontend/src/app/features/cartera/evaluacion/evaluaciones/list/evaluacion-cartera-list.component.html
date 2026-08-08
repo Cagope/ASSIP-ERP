@@ -1,0 +1,414 @@
+<div class="page evaluacion-cartera-list">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <app-header-actions
+    titulo="Evaluación de Cartera"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+
+  <!-- ===================================================== -->
+  <!-- FILTROS -->
+  <!-- ===================================================== -->
+
+  <form
+    class="filtros-card"
+    (ngSubmit)="buscar()">
+
+    <div class="filtros-grid">
+
+      <!-- FECHA DE CORTE -->
+
+      <div class="f-row">
+        <label for="filtroFechaCorte">
+          Fecha de corte
+        </label>
+
+        <input
+          id="filtroFechaCorte"
+          type="date"
+          name="filtroFechaCorte"
+          [(ngModel)]="filtroFechaCorte">
+      </div>
+
+
+      <!-- ESTADO -->
+
+      <div class="f-row">
+        <label for="filtroEstado">
+          Estado
+        </label>
+
+        <select
+          id="filtroEstado"
+          name="filtroEstado"
+          [(ngModel)]="filtroEstado">
+
+          <option value="">
+            Todos
+          </option>
+
+          <option value="P">
+            En proceso
+          </option>
+
+          <option value="D">
+            Definitiva
+          </option>
+
+        </select>
+      </div>
+
+
+      <!-- ACCIONES -->
+
+      <div class="f-buttons">
+
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="cargando">
+          🔍 Buscar
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--cancel"
+          [disabled]="cargando"
+          (click)="limpiar()">
+          Limpiar
+        </button>
+
+      </div>
+
+    </div>
+
+  </form>
+
+
+  <!-- ===================================================== -->
+  <!-- CARGANDO -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="cargando"
+    class="loading">
+
+    Cargando evaluaciones de cartera...
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- ERROR -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="!cargando && error"
+    class="alert alert--error">
+
+    {{ error }}
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CONTENIDO -->
+  <!-- ===================================================== -->
+
+  <ng-container
+    *ngIf="!cargando && !error">
+
+
+    <!-- =================================================== -->
+    <!-- RESUMEN DEL LISTADO -->
+    <!-- =================================================== -->
+
+    <div class="listado-resumen">
+
+      <span>
+        Evaluaciones encontradas:
+        <strong>{{ totalRegistros }}</strong>
+      </span>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- TABLA -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="evaluacionesPagina.length > 0"
+      class="table-responsive">
+
+      <table class="table table-hover">
+
+        <thead>
+
+        <tr>
+
+          <th>
+            Fecha de corte
+          </th>
+
+          <th>
+            Fecha de ejecución
+          </th>
+
+          <th>
+            Estado
+          </th>
+
+          <th class="text-end">
+            Créditos
+          </th>
+
+          <th class="text-end">
+            Asociados
+          </th>
+
+          <th class="text-end">
+            Saldo evaluado
+          </th>
+
+          <th class="text-end">
+            Reclasificar
+          </th>
+
+          <th class="text-end">
+            Habilitar
+          </th>
+
+          <th class="text-end">
+            Mantener
+          </th>
+
+          <th class="acciones-col">
+            Acción
+          </th>
+
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        <tr
+          *ngFor="let evaluacion of evaluacionesPagina">
+
+          <!-- FECHA CORTE -->
+
+          <td>
+            {{ evaluacion.fechaCorte | date:'dd/MM/yyyy' }}
+          </td>
+
+
+          <!-- FECHA EJECUCIÓN -->
+
+          <td>
+
+            <ng-container
+              *ngIf="evaluacion.fechaEjecucion; else sinEjecucion">
+
+              {{ evaluacion.fechaEjecucion | date:'dd/MM/yyyy HH:mm' }}
+
+            </ng-container>
+
+            <ng-template #sinEjecucion>
+                <span class="sin-dato">
+                  Sin ejecutar
+                </span>
+            </ng-template>
+
+          </td>
+
+
+          <!-- ESTADO -->
+
+          <td>
+
+              <span
+                class="estado"
+                [class.estado--proceso]="evaluacion.estado === 'P'"
+                [class.estado--definitiva]="evaluacion.estado === 'D'">
+
+                {{ descripcionEstado(evaluacion.estado) }}
+
+              </span>
+
+          </td>
+
+
+          <!-- CRÉDITOS -->
+
+          <td class="text-end">
+            {{ evaluacion.cantidadCreditos | number:'1.0-0' }}
+          </td>
+
+
+          <!-- ASOCIADOS -->
+
+          <td class="text-end">
+            {{ evaluacion.cantidadAsociados | number:'1.0-0' }}
+          </td>
+
+
+          <!-- SALDO -->
+
+          <td class="text-end saldo">
+            {{
+            evaluacion.saldoTotalEvaluado
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </td>
+
+
+          <!-- RECLASIFICAR -->
+
+          <td class="text-end">
+
+              <span
+                class="resultado resultado--reclasificar">
+
+                {{
+                  evaluacion.cantidadRecalificados
+                    | number:'1.0-0'
+                }}
+
+              </span>
+
+          </td>
+
+
+          <!-- HABILITAR -->
+
+          <td class="text-end">
+
+              <span
+                class="resultado resultado--habilitar">
+
+                {{
+                  evaluacion.cantidadHabilitados
+                    | number:'1.0-0'
+                }}
+
+              </span>
+
+          </td>
+
+
+          <!-- MANTENER -->
+
+          <td class="text-end">
+
+              <span
+                class="resultado resultado--mantener">
+
+                {{
+                  evaluacion.cantidadMantenidos
+                    | number:'1.0-0'
+                }}
+
+              </span>
+
+          </td>
+
+
+          <!-- ACCIÓN -->
+
+          <td class="acciones-col">
+
+            <button
+              type="button"
+              class="btn btn--primary btn-gestionar"
+              (click)="gestionar(evaluacion)">
+
+              Gestionar
+
+            </button>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- SIN REGISTROS -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="evaluacionesPagina.length === 0"
+      class="empty">
+
+      No se encontraron evaluaciones de cartera.
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- PAGINACIÓN -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="totalRegistros > 0"
+      class="paginacion">
+
+      <div class="paginacion-info">
+
+        Página
+        <strong>{{ paginaActual }}</strong>
+        de
+        <strong>{{ totalPaginas }}</strong>
+
+        <span class="paginacion-separador">
+          —
+        </span>
+
+        {{ totalRegistros | number:'1.0-0' }}
+        evaluaciones
+
+      </div>
+
+
+      <div class="paginacion-acciones">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          [disabled]="paginaActual <= 1"
+          (click)="paginaAnterior()">
+
+          Anterior
+
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          [disabled]="paginaActual >= totalPaginas"
+          (click)="paginaSiguiente()">
+
+          Siguiente
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </ng-container>
+
+</div>

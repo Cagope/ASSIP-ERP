@@ -1,6 +1,7 @@
 import { generalMenu } from '../features/general/general-menu';
 import { hojaVidaMenu } from '../features/hoja-vida/hoja-vida-menu';
 import { depositosMenu } from '../features/depositos/depositos-menu';
+import { carteraMenu } from '../features/cartera/cartera-menu';
 import { cdatMenu } from '../features/cdat/cdat-menu';
 import { cajasMenu } from '../features/cajas/cajas.menu';
 import { sarlaftMenu } from '../features/sarlaft/sarlaft-menu';
@@ -18,6 +19,8 @@ export const MENU_REGISTRY = [
   { ...hojaVidaMenu, icon: 'hojaVida' },
 
   { ...depositosMenu, icon: 'depositos' },
+
+  { ...carteraMenu, icon: 'cartera' },
 
   { ...cdatMenu, icon: 'cdat' },
 

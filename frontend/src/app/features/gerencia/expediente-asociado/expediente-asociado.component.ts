@@ -60,10 +60,6 @@ import {
 } from './bienes/expediente-bienes.component';
 
 import {
-  ExpedienteGarantiasComponent
-} from './garantias/expediente-garantias.component';
-
-import {
   ExpedienteAlertasComponent
 } from './alertas/expediente-alertas.component';
 
@@ -97,7 +93,6 @@ type SeccionExpediente =
     ExpedienteCdatsComponent,
     ExpedienteCreditosComponent,
     ExpedienteBienesComponent,
-    ExpedienteGarantiasComponent,
     ExpedienteAlertasComponent
   ],
   templateUrl: './expediente-asociado.component.html',

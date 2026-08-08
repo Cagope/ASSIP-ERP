@@ -89,14 +89,14 @@ public class ExpedienteCreditoDTO {
     private LocalDate fechaDesembolso;
 
     private LocalDate fechaPrimerVencimiento;
-    private LocalDate fechaUltimoVencimiento;
-    private LocalDate fechaProximaCuota;
+    private LocalDate fechaVencimiento;
+    private LocalDate fechaProximoPago;
 
     private LocalDate fechaUltimoPago;
     private LocalDate fechaCancelacion;
 
     private Integer diasDesdeDesembolso;
-    private Integer diasParaProximaCuota;
+    private Integer diasParaProximoPago;
 
     // =========================================================
     // Condiciones iniciales
@@ -106,7 +106,7 @@ public class ExpedienteCreditoDTO {
     private BigDecimal valorDesembolsado;
 
     private Integer plazoInicial;
-    private Integer plazoActual;
+    private Integer plazo;
 
     private Integer numeroCuotasInicial;
     private Integer numeroCuotasPagadas;
@@ -127,7 +127,7 @@ public class ExpedienteCreditoDTO {
     private String periodicidadPago;
 
     private BigDecimal valorCuotaInicial;
-    private BigDecimal valorCuotaActual;
+    private BigDecimal valorCuota;
 
     // =========================================================
     // Modalidad y tasas
@@ -146,7 +146,7 @@ public class ExpedienteCreditoDTO {
     // =========================================================
     // Saldos
     // =========================================================
-    private BigDecimal saldoCapital;
+    private BigDecimal saldoActual;
 
     private BigDecimal saldoInteresCorriente;
     private BigDecimal saldoInteresMora;
@@ -190,7 +190,7 @@ public class ExpedienteCreditoDTO {
     // Edad y clasificación de riesgo
     // =========================================================
     private String edadRiesgoInicial;
-    private String edadRiesgoActual;
+    private String edadRiesgo;
 
     private String edadRiesgoEvaluada;
     private String edadRiesgoFinal;
@@ -234,8 +234,8 @@ public class ExpedienteCreditoDTO {
     // =========================================================
     private Long idTipoGarantiaCredito;
 
-    private String codigoTipoGarantiaCredito;
-    private String nombreTipoGarantiaCredito;
+    private String codigoGarantia;
+    private String nombreGarantia;
 
     private Boolean garantiaIdonea;
     private Boolean tieneGarantiaReal;
@@ -482,14 +482,14 @@ public class ExpedienteCreditoDTO {
         this.refinanciado = Boolean.FALSE;
 
         this.diasDesdeDesembolso = 0;
-        this.diasParaProximaCuota = 0;
+        this.diasParaProximoPago = 0;
 
         this.valorSolicitado = BigDecimal.ZERO;
         this.valorAprobado = BigDecimal.ZERO;
         this.valorDesembolsado = BigDecimal.ZERO;
 
         this.plazoInicial = 0;
-        this.plazoActual = 0;
+        this.plazo = 0;
 
         this.numeroCuotasInicial = 0;
         this.numeroCuotasPagadas = 0;
@@ -497,7 +497,7 @@ public class ExpedienteCreditoDTO {
         this.numeroCuotasVencidas = 0;
 
         this.valorCuotaInicial = BigDecimal.ZERO;
-        this.valorCuotaActual = BigDecimal.ZERO;
+        this.valorCuota = BigDecimal.ZERO;
 
         this.tasaNominal = BigDecimal.ZERO;
         this.tasaEfectivaAnual = BigDecimal.ZERO;
@@ -506,7 +506,7 @@ public class ExpedienteCreditoDTO {
         this.tasaRedescuento = BigDecimal.ZERO;
         this.margenRedescuento = BigDecimal.ZERO;
 
-        this.saldoCapital = BigDecimal.ZERO;
+        this.saldoActual = BigDecimal.ZERO;
         this.saldoInteresCorriente = BigDecimal.ZERO;
         this.saldoInteresMora = BigDecimal.ZERO;
         this.saldoSeguro = BigDecimal.ZERO;
@@ -660,7 +660,7 @@ public class ExpedienteCreditoDTO {
     public BigDecimal calcularSaldoTotal() {
 
         this.saldoTotal =
-                valorSeguro(saldoCapital)
+                valorSeguro(saldoActual)
                         .add(valorSeguro(saldoInteresCorriente))
                         .add(valorSeguro(saldoInteresMora))
                         .add(valorSeguro(saldoSeguro))
@@ -721,15 +721,15 @@ public class ExpedienteCreditoDTO {
                     convertirEnteroSeguro(dias);
         }
 
-        if (fechaProximaCuota != null) {
+        if (fechaProximoPago != null) {
 
             long dias =
                     ChronoUnit.DAYS.between(
                             hoy,
-                            fechaProximaCuota
+                            fechaProximoPago
                     );
 
-            this.diasParaProximaCuota =
+            this.diasParaProximoPago =
                     convertirEnteroSeguro(dias);
         }
 
@@ -1053,7 +1053,7 @@ public class ExpedienteCreditoDTO {
                 valorSeguro(totalPagadoCapital);
 
         BigDecimal capitalPendiente =
-                valorSeguro(saldoCapital);
+                valorSeguro(saldoActual);
 
         if (desembolsado.compareTo(BigDecimal.ZERO) > 0) {
 
@@ -1109,14 +1109,14 @@ public class ExpedienteCreditoDTO {
         }
 
         if (fechaDesembolso != null
-                && fechaUltimoVencimiento != null
-                && fechaUltimoVencimiento.isAfter(
+                && fechaVencimiento != null
+                && fechaVencimiento.isAfter(
                 fechaDesembolso)) {
 
             long plazoTotal =
                     ChronoUnit.DAYS.between(
                             fechaDesembolso,
-                            fechaUltimoVencimiento
+                            fechaVencimiento
                     );
 
             long plazoTranscurrido =
@@ -1188,9 +1188,9 @@ public class ExpedienteCreditoDTO {
 
         this.informacionFinancieraCompleta =
                 valorDesembolsado != null
-                        && saldoCapital != null
+                        && saldoActual != null
                         && saldoTotal != null
-                        && valorCuotaActual != null;
+                        && valorCuota != null;
 
         this.informacionPagosCompleta =
                 numeroCuotasInicial != null
@@ -1205,7 +1205,7 @@ public class ExpedienteCreditoDTO {
                 );
 
         this.informacionRiesgoCompleta =
-                tieneTexto(edadRiesgoActual)
+                tieneTexto(edadRiesgo)
                         && diasMora != null;
 
         int totalValidaciones = 5;

@@ -18,8 +18,8 @@ export const GERENCIA_MENU = {
         },
 
         {
-          label: 'Dashboard Créditos',
-          route: '/gerencia/dashboard-creditos'
+          label: 'Dashboard Cartera',
+          route: '/gerencia/dashboard-cartera'
         },
 
         {

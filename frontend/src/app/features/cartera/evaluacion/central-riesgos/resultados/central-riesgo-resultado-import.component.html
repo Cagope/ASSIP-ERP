@@ -1,0 +1,336 @@
+<div class="page">
+
+  <app-header-actions
+    titulo="Importación de Resultados de Central de Riesgos"
+    [mostrarNuevo]="false"
+    [mostrarExportar]="false"
+    [mostrarImprimir]="false">
+  </app-header-actions>
+
+  <!-- ===================================================== -->
+  <!-- FORMULARIO DE IMPORTACIÓN -->
+  <!-- ===================================================== -->
+
+  <section class="card importacion-card">
+
+    <div class="card-header">
+      <h2>Datos de la importación</h2>
+      <p>
+        Cargue el archivo CSV devuelto por la Central de Riesgos.
+      </p>
+    </div>
+
+    <div class="form-grid">
+
+      <div class="f-row">
+        <label for="idCentralRiesgo">
+          Central de Riesgos
+        </label>
+
+        <input
+          id="idCentralRiesgo"
+          type="number"
+          min="1"
+          [(ngModel)]="idCentralRiesgo"
+          name="idCentralRiesgo"
+          placeholder="Id de la central"
+          [disabled]="importando">
+      </div>
+
+      <div class="f-row">
+        <label for="fechaCorte">
+          Fecha de corte
+        </label>
+
+        <input
+          id="fechaCorte"
+          type="date"
+          [(ngModel)]="fechaCorte"
+          name="fechaCorte"
+          [disabled]="importando">
+      </div>
+
+      <div class="f-row archivo-row">
+        <label for="archivoCsv">
+          Archivo CSV
+        </label>
+
+        <input
+          #inputArchivo
+          id="archivoCsv"
+          type="file"
+          accept=".csv,text/csv"
+          (change)="seleccionarArchivo($event)"
+          [disabled]="importando">
+      </div>
+
+      <div class="f-row archivo-seleccionado">
+        <label>
+          Archivo seleccionado
+        </label>
+
+        <div class="archivo-nombre">
+          {{ nombreArchivoSeleccionado || 'Ningún archivo seleccionado' }}
+        </div>
+      </div>
+
+    </div>
+
+    <div class="acciones">
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="importar()"
+        [disabled]="!puedeImportar">
+
+        <span *ngIf="!importando">
+          Importar
+        </span>
+
+        <span *ngIf="importando">
+          Importando...
+        </span>
+
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--cancel"
+        (click)="limpiar(inputArchivo)"
+        [disabled]="importando">
+
+        Limpiar
+
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- MENSAJES -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="mensajeExito"
+    class="alert alert-success">
+
+    {{ mensajeExito }}
+
+  </div>
+
+  <div
+    *ngIf="mensajeError"
+    class="alert alert-error">
+
+    {{ mensajeError }}
+
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- RESULTADO DE LA IMPORTACIÓN -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="tieneResultado"
+    class="card resumen-card">
+
+    <div class="card-header">
+      <h2>Resumen de la importación</h2>
+    </div>
+
+    <div class="resumen-grid">
+
+      <div class="resumen-item">
+        <span class="resumen-label">
+          Central
+        </span>
+
+        <strong>
+          {{ resultadoImportacion?.codigoCentral }}
+          -
+          {{ resultadoImportacion?.nombreCentral }}
+        </strong>
+      </div>
+
+      <div class="resumen-item">
+        <span class="resumen-label">
+          Fecha de corte
+        </span>
+
+        <strong>
+          {{ resultadoImportacion?.fechaCorte }}
+        </strong>
+      </div>
+
+      <div class="resumen-item">
+        <span class="resumen-label">
+          Archivo
+        </span>
+
+        <strong>
+          {{ resultadoImportacion?.nombreArchivo }}
+        </strong>
+      </div>
+
+      <div class="resumen-item">
+        <span class="resumen-label">
+          Fecha de importación
+        </span>
+
+        <strong>
+          {{ resultadoImportacion?.fechaImportacion | date:'dd/MM/yyyy HH:mm' }}
+        </strong>
+      </div>
+
+      <div class="resumen-item">
+        <span class="resumen-label">
+          Registros leídos
+        </span>
+
+        <strong class="resumen-valor">
+          {{ resultadoImportacion?.cantidadRegistrosLeidos | number:'1.0-0' }}
+        </strong>
+      </div>
+
+      <div class="resumen-item">
+        <span class="resumen-label">
+          Registros importados
+        </span>
+
+        <strong class="resumen-valor">
+          {{ resultadoImportacion?.cantidadRegistrosImportados | number:'1.0-0' }}
+        </strong>
+      </div>
+
+      <div class="resumen-item">
+        <span class="resumen-label">
+          Registros rechazados
+        </span>
+
+        <strong class="resumen-valor">
+          {{ resultadoImportacion?.cantidadRegistrosRechazados | number:'1.0-0' }}
+        </strong>
+      </div>
+
+      <div class="resumen-item">
+        <span class="resumen-label">
+          Tamaño
+        </span>
+
+        <strong class="resumen-valor">
+          {{ resultadoImportacion?.tamanoArchivo | number:'1.0-0' }}
+          bytes
+        </strong>
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="resultadoImportacion?.observaciones"
+      class="observaciones-box">
+
+      <strong>Observaciones</strong>
+
+      <p>
+        {{ resultadoImportacion?.observaciones }}
+      </p>
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- DATOS IMPORTADOS -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="tieneResultado"
+    class="card datos-card">
+
+    <div class="card-header tabla-header">
+      <div>
+        <h2>Datos importados</h2>
+        <p>
+          Registros almacenados desde el archivo cargado.
+        </p>
+      </div>
+
+      <div class="contador">
+        {{ datosImportados.length | number:'1.0-0' }} registros
+      </div>
+    </div>
+
+    <div
+      *ngIf="cargandoDatos"
+      class="estado-tabla">
+
+      Cargando datos importados...
+
+    </div>
+
+    <div
+      *ngIf="!cargandoDatos && !tieneDatos"
+      class="estado-tabla">
+
+      No existen registros importados para mostrar.
+
+    </div>
+
+    <div
+      *ngIf="!cargandoDatos && tieneDatos"
+      class="table-responsive">
+
+      <table class="table table-hover">
+
+        <thead>
+        <tr>
+          <th>Fila</th>
+          <th>Documento</th>
+          <th>Clasificación</th>
+          <th>Calificación guía final</th>
+          <th class="text-right">Alertas totales</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr
+          *ngFor="let dato of datosImportados">
+
+          <td>
+            {{ dato.numeroFila }}
+          </td>
+
+          <td>
+            {{ dato.documento }}
+          </td>
+
+          <td>
+            {{ dato.clasificacionCartera }}
+          </td>
+
+          <td>
+            {{ dato.calificacionGuiaFinal || 'SIN INFORMACIÓN' }}
+          </td>
+
+          <td class="text-right">
+            {{
+            dato.alertasTotales === null
+            ? 'SIN INFORMACIÓN'
+            : dato.alertasTotales
+            }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</div>

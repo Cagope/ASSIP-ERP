@@ -1,10 +1,14 @@
 .creditos {
   overflow: hidden;
 
-  background: #fff;
+  background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
 }
+
+// =========================================================
+// Encabezado principal
+// =========================================================
 
 .creditos-encabezado {
   display: flex;
@@ -18,14 +22,19 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
+.creditos-encabezado__titulo {
+  min-width: 0;
+}
+
 .creditos-subtitulo {
   display: block;
-  margin-bottom: .15rem;
+  margin-bottom: 0.15rem;
 
   color: #6b7280;
-  font-size: .74rem;
+
+  font-size: 0.74rem;
   font-weight: 600;
-  letter-spacing: .04em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
@@ -33,6 +42,7 @@
   margin: 0;
 
   color: #111827;
+
   font-size: 1.08rem;
   font-weight: 700;
 }
@@ -42,16 +52,24 @@
   align-items: center;
   justify-content: center;
 
+  flex: 0 0 auto;
+
   min-height: 29px;
-  padding: .28rem .70rem;
+  padding: 0.28rem 0.7rem;
 
   background: #dbeafe;
   border-radius: 999px;
 
   color: #1d4ed8;
-  font-size: .73rem;
+
+  font-size: 0.73rem;
   font-weight: 700;
+  white-space: nowrap;
 }
+
+// =========================================================
+// Bloques
+// =========================================================
 
 .creditos-bloque {
   padding: 1rem 1.15rem;
@@ -63,39 +81,45 @@
 }
 
 .creditos-bloque h3 {
-  margin: 0 0 .85rem;
+  margin: 0 0 0.85rem;
 
   color: #374151;
-  font-size: .88rem;
+
+  font-size: 0.88rem;
   font-weight: 700;
 }
 
 .bloque-encabezado {
-  margin-bottom: .85rem;
+  margin-bottom: 0.85rem;
 }
 
 .bloque-encabezado h3 {
-  margin-bottom: .12rem;
+  margin-bottom: 0.12rem;
 }
 
 .bloque-descripcion {
   color: #6b7280;
-  font-size: .72rem;
+  font-size: 0.72rem;
 }
+
+// =========================================================
+// Resumen de obligaciones
+// =========================================================
 
 .resumen-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(170px, 1fr));
-  gap: .70rem;
+  gap: 0.7rem;
 }
 
 .resumen-card {
   display: flex;
   flex-direction: column;
-  gap: .25rem;
+  gap: 0.25rem;
 
   min-width: 0;
-  padding: .85rem;
+  min-height: 78px;
+  padding: 0.85rem;
 
   background: #f9fafb;
   border: 1px solid #e5e7eb;
@@ -104,7 +128,8 @@
 
 .resumen-card span {
   color: #6b7280;
-  font-size: .72rem;
+
+  font-size: 0.72rem;
   font-weight: 600;
 }
 
@@ -112,9 +137,17 @@
   overflow: hidden;
 
   color: #111827;
-  font-size: .98rem;
+
+  font-size: 0.98rem;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.resumen-card small {
+  color: #166534;
+
+  font-size: 0.68rem;
+  font-weight: 600;
 }
 
 .resumen-card--principal {
@@ -126,6 +159,15 @@
   color: #1d4ed8;
 }
 
+.resumen-card--alerta {
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.resumen-card--alerta strong {
+  color: #92400e;
+}
+
 .resumen-card--total {
   background: #f0fdf4;
   border-color: #bbf7d0;
@@ -135,19 +177,28 @@
   color: #166534;
 }
 
+// =========================================================
+// Seguimiento de cartera
+// =========================================================
+
 .estados-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(125px, 1fr));
-  gap: .65rem;
+  gap: 0.65rem;
+}
+
+.estados-grid--seguimiento {
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
 }
 
 .estado-resumen {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: .16rem;
+  justify-content: center;
+  gap: 0.16rem;
 
-  padding: .72rem;
+  min-height: 58px;
+  padding: 0.72rem;
 
   background: #f9fafb;
   border: 1px solid #e5e7eb;
@@ -161,14 +212,8 @@
 }
 
 .estado-resumen span {
-  font-size: .68rem;
+  font-size: 0.68rem;
   text-align: center;
-}
-
-.estado-resumen--activo {
-  background: #f0fdf4;
-  border-color: #bbf7d0;
-  color: #166534;
 }
 
 .estado-resumen--alerta {
@@ -183,66 +228,43 @@
   color: #991b1b;
 }
 
-.riesgo-resumen-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(160px, 1fr));
-  gap: .65rem;
-}
-
-.riesgo-resumen-grid article {
-  display: flex;
-  flex-direction: column;
-  gap: .20rem;
-
-  min-width: 0;
-  padding: .78rem;
-
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-}
-
-.riesgo-resumen-grid span {
-  color: #6b7280;
-  font-size: .70rem;
-  font-weight: 600;
-}
-
-.riesgo-resumen-grid strong {
-  overflow: hidden;
-
-  color: #111827;
-  font-size: .88rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.resumen-alerta {
-  background: #fffbeb !important;
-  border-color: #fde68a !important;
-}
-
-.resumen-alerta strong {
-  color: #92400e !important;
-}
+// =========================================================
+// Lista de créditos
+// =========================================================
 
 .creditos-lista {
   display: flex;
   flex-direction: column;
-  gap: .80rem;
+  gap: 0.8rem;
 }
 
 .credito-card {
   overflow: hidden;
 
-  background: #fff;
+  background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 9px;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.credito-card:hover {
+  border-color: #cbd5e1;
+
+  box-shadow:
+    0 3px 10px
+    rgba(15, 23, 42, 0.06);
 }
 
 .credito-card--atencion {
   border-color: #f59e0b;
 }
+
+// =========================================================
+// Encabezado de cada crédito
+// =========================================================
 
 .credito-card__encabezado {
   display: flex;
@@ -250,7 +272,7 @@
   justify-content: space-between;
   gap: 1rem;
 
-  padding: .85rem .95rem;
+  padding: 0.85rem 0.95rem;
 
   background: #f9fafb;
   border-bottom: 1px solid #e5e7eb;
@@ -259,14 +281,15 @@
 .credito-identificacion {
   display: flex;
   flex-direction: column;
-  gap: .15rem;
+  gap: 0.15rem;
 
   min-width: 0;
 }
 
 .credito-linea {
   color: #6b7280;
-  font-size: .70rem;
+
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
 }
@@ -275,14 +298,15 @@
   overflow: hidden;
 
   color: #111827;
-  font-size: .87rem;
+
+  font-size: 0.87rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .credito-identificacion small {
   color: #6b7280;
-  font-size: .67rem;
+  font-size: 0.67rem;
 }
 
 .credito-estados {
@@ -290,22 +314,26 @@
   align-items: center;
   justify-content: flex-end;
   flex-wrap: wrap;
-  gap: .38rem;
+  gap: 0.38rem;
 }
+
+// =========================================================
+// Etiquetas de estado y riesgo
+// =========================================================
 
 .estado-credito,
 .riesgo-credito,
-.nivel-alerta,
 .riesgo-valor {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
 
   min-height: 25px;
-  padding: .22rem .58rem;
+  padding: 0.22rem 0.58rem;
 
   border-radius: 999px;
 
-  font-size: .67rem;
+  font-size: 0.67rem;
   font-weight: 700;
 }
 
@@ -314,10 +342,9 @@
   color: #166534;
 }
 
-.estado--cancelado,
-.estado--neutral {
-  background: #f3f4f6;
-  color: #4b5563;
+.estado--vencido {
+  background: #fee2e2;
+  color: #991b1b;
 }
 
 .estado--mora {
@@ -325,10 +352,9 @@
   color: #92400e;
 }
 
-.estado--juridico,
-.estado--castigado {
-  background: #fee2e2;
-  color: #991b1b;
+.estado--neutral {
+  background: #f3f4f6;
+  color: #4b5563;
 }
 
 .riesgo--bajo {
@@ -351,52 +377,36 @@
   color: #4b5563;
 }
 
-.alerta--normal {
-  background: #f0fdf4;
-  color: #166534;
-}
-
-.alerta--informativa {
-  background: #e0f2fe;
-  color: #075985;
-}
-
-.alerta--advertencia {
-  background: #fef3c7;
-  color: #92400e;
-}
-
-.alerta--critica {
-  background: #fee2e2;
-  color: #991b1b;
-}
+// =========================================================
+// Saldos del crédito
+// =========================================================
 
 .credito-saldos {
   display: grid;
-  grid-template-columns: repeat(5, minmax(145px, 1fr));
-  gap: .65rem;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 0.65rem;
 
-  padding: .85rem .95rem;
+  padding: 0.85rem 0.95rem;
 }
 
 .credito-saldos > div {
   display: flex;
   flex-direction: column;
-  gap: .18rem;
+  gap: 0.18rem;
 
   min-width: 0;
-  padding: .68rem .72rem;
+  padding: 0.68rem 0.72rem;
 
   background: #f9fafb;
+  border: 1px solid transparent;
   border-radius: 7px;
 }
 
 .credito-saldos span,
-.credito-datos span,
-.riesgo-grid span,
-.garantia-panel span {
+.credito-datos span {
   color: #6b7280;
-  font-size: .68rem;
+
+  font-size: 0.68rem;
   font-weight: 600;
 }
 
@@ -404,13 +414,15 @@
   overflow: hidden;
 
   color: #111827;
-  font-size: .84rem;
+
+  font-size: 0.84rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .credito-saldos__principal {
   background: #eff6ff !important;
+  border-color: #bfdbfe !important;
 }
 
 .credito-saldos__principal strong {
@@ -419,150 +431,59 @@
 
 .credito-saldos__total {
   background: #f0fdf4 !important;
+  border-color: #bbf7d0 !important;
 }
 
 .credito-saldos__total strong {
   color: #166534;
 }
 
-.saldo-mora--activo {
-  background: #fef2f2 !important;
-}
-
-.saldo-mora--activo strong {
-  color: #991b1b;
-}
+// =========================================================
+// Datos generales del crédito
+// =========================================================
 
 .credito-datos {
   display: grid;
-  grid-template-columns: repeat(6, minmax(120px, 1fr));
-  gap: .70rem;
+  grid-template-columns: repeat(4, minmax(130px, 1fr));
+  gap: 0.7rem;
 
-  padding: 0 .95rem .85rem;
+  padding: 0 0.95rem 0.85rem;
 }
 
-.credito-datos > div,
-.riesgo-grid > div,
-.garantia-panel > div {
+.credito-datos > div {
   display: flex;
   flex-direction: column;
-  gap: .16rem;
+  gap: 0.16rem;
 
   min-width: 0;
 }
 
-.credito-datos strong,
-.riesgo-grid strong,
-.garantia-panel strong {
+.credito-datos strong {
   overflow: hidden;
 
   color: #374151;
-  font-size: .73rem;
+
+  font-size: 0.73rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.dato-alerta strong,
-.texto-alerta {
+.dato-alerta strong {
   color: #991b1b !important;
 }
 
-.avance-cuotas {
-  padding: .80rem .95rem;
-
-  background: #fafafa;
-  border-top: 1px solid #f3f4f6;
-}
-
-.avance-cuotas__encabezado,
-.avance-cuotas__detalle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: .75rem;
-}
-
-.avance-cuotas__encabezado {
-  margin-bottom: .45rem;
-}
-
-.avance-cuotas__encabezado span,
-.avance-cuotas__detalle span {
-  color: #6b7280;
-  font-size: .68rem;
-}
-
-.avance-cuotas__encabezado strong {
-  color: #374151;
-  font-size: .72rem;
-}
-
-.avance-cuotas__barra {
-  height: 7px;
-  margin-bottom: .42rem;
-  overflow: hidden;
-
-  background: #e5e7eb;
-  border-radius: 999px;
-}
-
-.avance-cuotas__progreso {
-  height: 100%;
-
-  background: #2563eb;
-  border-radius: 999px;
-}
-
-.riesgo-grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(130px, 1fr));
-  gap: .70rem;
-
-  padding: .80rem .95rem;
-
-  border-top: 1px solid #f3f4f6;
-}
-
-.garantia-panel {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr auto;
-  align-items: center;
-  gap: .70rem;
-
-  padding: .80rem .95rem;
-
-  background: #f8fafc;
-  border-top: 1px solid #e5e7eb;
-}
-
-.garantia-estado {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: .25rem .58rem;
-
-  background: #fef3c7;
-  border-radius: 999px;
-
-  color: #92400e;
-  font-size: .66rem;
-  font-weight: 700;
-}
-
-.garantia-estado--suficiente {
-  background: #dcfce7;
-  color: #166534;
-}
+// =========================================================
+// Condiciones y alertas
+// =========================================================
 
 .condiciones-credito,
 .alertas-credito {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: .42rem;
+  gap: 0.42rem;
 
-  padding: .70rem .95rem;
+  padding: 0.7rem 0.95rem;
 
   border-top: 1px solid #f3f4f6;
 }
@@ -571,12 +492,13 @@
 .alerta-credito {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
 
-  padding: .22rem .52rem;
+  padding: 0.22rem 0.52rem;
 
   border-radius: 999px;
 
-  font-size: .66rem;
+  font-size: 0.66rem;
   font-weight: 700;
 }
 
@@ -596,76 +518,16 @@
   color: #92400e;
 }
 
-.credito-observaciones {
-  display: flex;
-  flex-direction: column;
-  gap: .18rem;
-
-  padding: .70rem .95rem;
-
-  background: #f9fafb;
-  border-top: 1px solid #e5e7eb;
-}
-
-.credito-observaciones strong {
-  color: #374151;
-  font-size: .72rem;
-}
-
-.credito-observaciones span {
-  color: #6b7280;
-  font-size: .70rem;
-  line-height: 1.4;
-}
-
-.novedades-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(150px, 1fr));
-  gap: .65rem;
-}
-
-.novedades-grid article {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: .15rem;
-
-  padding: .72rem;
-
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-
-  color: #4b5563;
-}
-
-.novedades-grid strong {
-  font-size: .95rem;
-}
-
-.novedades-grid span {
-  font-size: .67rem;
-  text-align: center;
-}
-
-.novedad--alerta {
-  background: #fffbeb !important;
-  border-color: #fde68a !important;
-  color: #92400e !important;
-}
-
-.novedad--critica {
-  background: #fef2f2 !important;
-  border-color: #fecaca !important;
-  color: #991b1b !important;
-}
+// =========================================================
+// Sin obligaciones con saldo
+// =========================================================
 
 .creditos-vacio {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: .35rem;
+  gap: 0.35rem;
 
   min-height: 190px;
   padding: 1.25rem;
@@ -691,31 +553,29 @@
 
 .creditos-vacio strong {
   color: #374151;
-  font-size: .92rem;
+  font-size: 0.92rem;
 }
 
 .creditos-vacio span {
-  font-size: .82rem;
+  font-size: 0.82rem;
 }
+
+// =========================================================
+// Responsive
+// =========================================================
 
 @media (max-width: 1200px) {
 
-  .resumen-grid,
-  .riesgo-resumen-grid {
+  .resumen-grid {
     grid-template-columns: repeat(2, minmax(170px, 1fr));
   }
 
-  .estados-grid,
-  .credito-datos,
-  .riesgo-grid {
-    grid-template-columns: repeat(3, minmax(130px, 1fr));
+  .estados-grid--seguimiento {
+    grid-template-columns: repeat(3, minmax(150px, 1fr));
   }
 
-  .credito-saldos {
-    grid-template-columns: repeat(2, minmax(170px, 1fr));
-  }
-
-  .garantia-panel {
+  .credito-saldos,
+  .credito-datos {
     grid-template-columns: repeat(2, minmax(160px, 1fr));
   }
 
@@ -729,26 +589,42 @@
     flex-direction: column;
   }
 
+  .cantidad-creditos {
+    white-space: normal;
+  }
+
   .credito-estados {
     justify-content: flex-start;
   }
 
   .resumen-grid,
-  .estados-grid,
-  .riesgo-resumen-grid,
+  .estados-grid--seguimiento,
   .credito-saldos,
-  .credito-datos,
-  .riesgo-grid,
-  .garantia-panel,
-  .novedades-grid {
+  .credito-datos {
     grid-template-columns: 1fr;
   }
 
-  .avance-cuotas__encabezado,
-  .avance-cuotas__detalle {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: .25rem;
+  .credito-identificacion strong {
+    white-space: normal;
+  }
+
+}
+
+@media (max-width: 480px) {
+
+  .creditos-bloque,
+  .creditos-encabezado {
+    padding-right: 0.85rem;
+    padding-left: 0.85rem;
+  }
+
+  .credito-card__encabezado,
+  .credito-saldos,
+  .credito-datos,
+  .condiciones-credito,
+  .alertas-credito {
+    padding-right: 0.75rem;
+    padding-left: 0.75rem;
   }
 
 }

@@ -1,0 +1,779 @@
+<div class="page evaluacion-cartera-resultados">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <app-header-actions
+    titulo="Resultados de Evaluación de Cartera"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+
+  <!-- ===================================================== -->
+  <!-- CARGANDO -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="cargando"
+    class="estado-pantalla">
+
+    Cargando resultados de la evaluación...
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- ERROR -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="error"
+    class="alert alert--error">
+
+    {{ error }}
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CONTENIDO -->
+  <!-- ===================================================== -->
+
+  <ng-container
+    *ngIf="!cargando && !error">
+
+
+    <!-- =================================================== -->
+    <!-- CABECERA DE LA EVALUACIÓN -->
+    <!-- =================================================== -->
+
+    <section
+      *ngIf="evaluacion as e"
+      class="card evaluacion-resumen">
+
+      <div class="evaluacion-resumen__principal">
+
+        <div>
+
+          <span class="seccion-etiqueta">
+            Evaluación de cartera
+          </span>
+
+          <h2>
+            Corte {{ e.fechaCorte | date:'dd/MM/yyyy' }}
+          </h2>
+
+        </div>
+
+
+        <div class="evaluacion-resumen__estado">
+
+          <span>
+            Estado
+          </span>
+
+          <strong>
+            {{
+            e.estado === 'D'
+            ? 'Definitiva'
+            : 'En proceso'
+            }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="resumen-totales-grid">
+
+        <article>
+
+          <span>
+            Créditos evaluados
+          </span>
+
+          <strong>
+            {{ e.cantidadCreditos | number:'1.0-0' }}
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            Reclasificar
+          </span>
+
+          <strong class="texto-reclasificar">
+            {{ e.cantidadRecalificados | number:'1.0-0' }}
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            Habilitar
+          </span>
+
+          <strong class="texto-habilitar">
+            {{ e.cantidadHabilitados | number:'1.0-0' }}
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            Mantener
+          </span>
+
+          <strong>
+            {{ e.cantidadMantenidos | number:'1.0-0' }}
+          </strong>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- FILTROS -->
+    <!-- =================================================== -->
+
+    <form
+      class="filtros-card"
+      (ngSubmit)="buscar()">
+
+      <div class="filtros-grid">
+
+        <!-- DOCUMENTO -->
+
+        <div class="f-row">
+
+          <label for="filtroDocumento">
+            Documento
+          </label>
+
+          <input
+            id="filtroDocumento"
+            type="text"
+            name="filtroDocumento"
+            [(ngModel)]="filtroDocumento"
+            autocomplete="off">
+
+        </div>
+
+
+        <!-- NOMBRE -->
+
+        <div class="f-row">
+
+          <label for="filtroNombre">
+            Nombre
+          </label>
+
+          <input
+            id="filtroNombre"
+            type="text"
+            name="filtroNombre"
+            [(ngModel)]="filtroNombre"
+            autocomplete="off">
+
+        </div>
+
+
+        <!-- PAGARÉ -->
+
+        <div class="f-row">
+
+          <label for="filtroPagare">
+            Pagaré
+          </label>
+
+          <input
+            id="filtroPagare"
+            type="text"
+            name="filtroPagare"
+            [(ngModel)]="filtroPagare"
+            autocomplete="off">
+
+        </div>
+
+
+        <!-- CLASIFICACIÓN -->
+
+        <div class="f-row">
+
+          <label for="filtroClasificacion">
+            Clasificación
+          </label>
+
+          <select
+            id="filtroClasificacion"
+            name="filtroClasificacion"
+            [(ngModel)]="filtroClasificacion">
+
+            <option value="">
+              Todas
+            </option>
+
+            <option value="S">
+              S
+            </option>
+
+            <option value="C">
+              C
+            </option>
+
+            <option value="M">
+              M
+            </option>
+
+            <option value="P">
+              P
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- ACCIÓN -->
+
+        <div class="f-row">
+
+          <label for="filtroAccion">
+            Acción sugerida
+          </label>
+
+          <select
+            id="filtroAccion"
+            name="filtroAccion"
+            [(ngModel)]="filtroAccion">
+
+            <option value="">
+              Todas
+            </option>
+
+            <option value="R">
+              Reclasificar
+            </option>
+
+            <option value="H">
+              Habilitar
+            </option>
+
+            <option value="M">
+              Mantener
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- BOTONES -->
+
+        <div class="f-buttons">
+
+          <button
+            type="submit"
+            class="btn btn--primary">
+
+            Buscar
+
+          </button>
+
+
+          <button
+            type="button"
+            class="btn btn--cancel"
+            (click)="limpiar()">
+
+            Limpiar
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </form>
+
+
+    <!-- =================================================== -->
+    <!-- RESUMEN DE LOS RESULTADOS -->
+    <!-- =================================================== -->
+
+    <section class="resultados-indicadores">
+
+      <article>
+
+        <span>
+          Resultados
+        </span>
+
+        <strong>
+          {{ totalResultados | number:'1.0-0' }}
+        </strong>
+
+      </article>
+
+
+      <article class="indicador--reclasificar">
+
+        <span>
+          Reclasificar
+        </span>
+
+        <strong>
+          {{ totalReclasificar | number:'1.0-0' }}
+        </strong>
+
+      </article>
+
+
+      <article class="indicador--habilitar">
+
+        <span>
+          Habilitar
+        </span>
+
+        <strong>
+          {{ totalHabilitar | number:'1.0-0' }}
+        </strong>
+
+      </article>
+
+
+      <article class="indicador--mantener">
+
+        <span>
+          Mantener
+        </span>
+
+        <strong>
+          {{ totalMantener | number:'1.0-0' }}
+        </strong>
+
+      </article>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- ACCIONES GENERALES -->
+    <!-- =================================================== -->
+
+    <div class="acciones-superiores">
+
+      <button
+        type="button"
+        class="btn btn--cancel"
+        [disabled]="imprimiendo"
+        (click)="volver()">
+
+        Volver
+
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        [disabled]="
+          resultados.length === 0
+          || imprimiendo
+        "
+        (click)="exportarExcel()">
+
+        Exportar resultados a Excel
+
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        [disabled]="
+          totalReclasificar === 0
+          || imprimiendo
+        "
+        (click)="imprimirPorAccion('R')">
+
+        Imprimir Reclasificar
+        ({{ totalReclasificar | number:'1.0-0' }})
+
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        [disabled]="
+          totalHabilitar === 0
+          || imprimiendo
+        "
+        (click)="imprimirPorAccion('H')">
+
+        Imprimir Habilitar
+        ({{ totalHabilitar | number:'1.0-0' }})
+
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        [disabled]="
+          totalMantener === 0
+          || imprimiendo
+        "
+        (click)="imprimirPorAccion('M')">
+
+        Imprimir Mantener
+        ({{ totalMantener | number:'1.0-0' }})
+
+      </button>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- ESTADO DE IMPRESIÓN -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="imprimiendo"
+      class="estado-pantalla estado-pantalla--compacto">
+
+      Preparando formatos para impresión...
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- TABLA -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="resultadosPagina.length > 0"
+      class="table-responsive">
+
+      <table class="table table-hover">
+
+        <thead>
+
+        <tr>
+
+          <th>
+            Documento
+          </th>
+
+          <th>
+            Asociado
+          </th>
+
+          <th>
+            Pagaré
+          </th>
+
+          <th>
+            Clasificación
+          </th>
+
+          <th class="text-end">
+            Saldo
+          </th>
+
+          <th class="text-end">
+            Puntaje
+          </th>
+
+          <th class="text-center">
+            Riesgo actual
+          </th>
+
+          <th class="text-center">
+            Riesgo sugerido
+          </th>
+
+          <th>
+            Acción sugerida
+          </th>
+
+          <th class="acciones-col">
+            Acción
+          </th>
+
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        <tr
+          *ngFor="
+              let resultado of resultadosPagina;
+              trackBy: trackByResultado
+            ">
+
+          <!-- DOCUMENTO -->
+
+          <td>
+
+            {{ resultado.documento }}
+
+          </td>
+
+
+          <!-- ASOCIADO -->
+
+          <td class="nombre-asociado">
+
+            {{
+            resultado.nombreCompleto
+            || resultado.nombres
+            || ''
+            }}
+
+          </td>
+
+
+          <!-- PAGARÉ -->
+
+          <td>
+
+            {{ resultado.pagareCartera }}
+
+          </td>
+
+
+          <!-- CLASIFICACIÓN -->
+
+          <td>
+
+              <span class="clasificacion-badge">
+
+                {{
+                  resultado.codigoClasificacionCredito
+                    || ''
+                }}
+
+              </span>
+
+          </td>
+
+
+          <!-- SALDO -->
+
+          <td class="text-end">
+
+            {{
+            resultado.saldoActual
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+
+          </td>
+
+
+          <!-- PUNTAJE -->
+
+          <td class="text-end puntaje">
+
+            {{
+            resultado.puntajeTotal
+            | number:'1.0-2'
+            }}
+
+          </td>
+
+
+          <!-- RIESGO ACTUAL -->
+
+          <td class="text-center">
+
+              <span class="riesgo-badge">
+
+                {{
+                  resultado.edadRiesgoAnterior
+                    || ''
+                }}
+
+              </span>
+
+          </td>
+
+
+          <!-- RIESGO SUGERIDO -->
+
+          <td class="text-center">
+
+              <span
+                class="riesgo-badge"
+                [class.riesgo-badge--reclasificar]="
+                  resultado.accionEvaluacion === 'R'
+                "
+                [class.riesgo-badge--habilitar]="
+                  resultado.accionEvaluacion === 'H'
+                ">
+
+                {{
+                  resultado.edadRiesgoFinal
+                    || ''
+                }}
+
+              </span>
+
+          </td>
+
+
+          <!-- ACCIÓN SUGERIDA -->
+
+          <td>
+
+              <span
+                class="accion-badge"
+                [class.accion-badge--reclasificar]="
+                  resultado.accionEvaluacion === 'R'
+                "
+                [class.accion-badge--habilitar]="
+                  resultado.accionEvaluacion === 'H'
+                "
+                [class.accion-badge--mantener]="
+                  resultado.accionEvaluacion === 'M'
+                ">
+
+                {{
+                  resultado.descripcionAccion
+                    || descripcionAccion(
+                         resultado.accionEvaluacion
+                       )
+                }}
+
+              </span>
+
+          </td>
+
+
+          <!-- ACCIÓN -->
+
+          <td class="acciones-col">
+
+            <button
+              type="button"
+              class="btn btn--primary btn-sm"
+              [disabled]="imprimiendo"
+              (click)="verDetalle(resultado)">
+
+              Ver detalle
+
+            </button>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- SIN RESULTADOS -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="resultadosPagina.length === 0"
+      class="estado-vacio">
+
+      No se encontraron resultados para los filtros seleccionados.
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- PAGINACIÓN -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="totalResultados > 0"
+      class="paginacion">
+
+      <div class="paginacion-info">
+
+        Página
+
+        <strong>
+          {{ paginaActual }}
+        </strong>
+
+        de
+
+        <strong>
+          {{ totalPaginas }}
+        </strong>
+
+        <span>
+          —
+        </span>
+
+        {{
+        totalResultados
+        | number:'1.0-0'
+        }}
+
+        resultados
+
+      </div>
+
+
+      <div class="paginacion-acciones">
+
+        <button
+          type="button"
+          class="btn btn--cancel btn-sm"
+          [disabled]="
+            paginaActual <= 1
+            || imprimiendo
+          "
+          (click)="paginaAnterior()">
+
+          Anterior
+
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn--primary btn-sm"
+          [disabled]="
+            paginaActual >= totalPaginas
+            || imprimiendo
+          "
+          (click)="paginaSiguiente()">
+
+          Siguiente
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </ng-container>
+
+</div>

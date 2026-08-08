@@ -1,8 +1,12 @@
 <section class="creditos">
 
+  <!-- ========================================================= -->
+  <!-- ENCABEZADO                                                -->
+  <!-- ========================================================= -->
+
   <header class="creditos-encabezado">
 
-    <div>
+    <div class="creditos-encabezado__titulo">
 
       <span class="creditos-subtitulo">
         Obligaciones del asociado
@@ -17,7 +21,12 @@
     <span class="cantidad-creditos">
 
       {{ cantidadCreditos }}
-      {{ cantidadCreditos === 1 ? 'crédito' : 'créditos' }}
+
+      {{
+        cantidadCreditos === 1
+          ? 'obligación con saldo'
+          : 'obligaciones con saldo'
+      }}
 
     </span>
 
@@ -26,9 +35,9 @@
 
   <ng-container *ngIf="tieneCreditos; else sinCreditos">
 
-    <!-- =================================================== -->
-    <!-- RESUMEN FINANCIERO                                   -->
-    <!-- =================================================== -->
+    <!-- ======================================================= -->
+    <!-- RESUMEN DE OBLIGACIONES                                 -->
+    <!-- ======================================================= -->
 
     <section class="creditos-bloque">
 
@@ -38,62 +47,80 @@
 
       <div class="resumen-grid">
 
+        <!-- OBLIGACIONES CON SALDO -->
+
         <article class="resumen-card">
 
           <span>
-            Total desembolsado
+            Obligaciones con saldo
           </span>
 
           <strong>
-            {{
-            totalDesembolsado |
-            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
-            }}
+            {{ cantidadCreditos }}
           </strong>
 
         </article>
+
+
+        <!-- SALDO ACTUAL -->
 
         <article class="resumen-card resumen-card--principal">
 
           <span>
-            Saldo de capital
+            Saldo actual
           </span>
 
           <strong>
             {{
-            saldoCapitalTotal |
-            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            saldoActualTotal
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
             }}
           </strong>
 
         </article>
 
-        <article class="resumen-card">
+
+        <!-- CRÉDITOS EN MORA -->
+
+        <article
+          class="resumen-card"
+          [class.resumen-card--alerta]="cantidadEnMora > 0">
 
           <span>
-            Intereses y mora
+            Créditos en mora
           </span>
 
           <strong>
-            {{
-            saldoInteresesTotal + saldoMoraTotal |
-            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
-            }}
+            {{ cantidadEnMora }}
           </strong>
+
+          <small *ngIf="cantidadEnMora === 0">
+            Sin mora
+          </small>
 
         </article>
 
-        <article class="resumen-card resumen-card--total">
+
+        <!-- MORA MÁXIMA -->
+
+        <article
+          class="resumen-card resumen-card--total"
+          [class.resumen-card--alerta]="moraMaxima > 0">
 
           <span>
-            Saldo total
+            Mora máxima
           </span>
 
           <strong>
+
+            {{ moraMaxima }}
+
             {{
-            saldoTotalCreditos |
-            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            moraMaxima === 1
+            ? 'día'
+            : 'días'
             }}
+
           </strong>
 
         </article>
@@ -103,102 +130,62 @@
     </section>
 
 
-    <!-- =================================================== -->
-    <!-- ESTADOS                                              -->
-    <!-- =================================================== -->
+    <!-- ======================================================= -->
+    <!-- SEGUIMIENTO DE CARTERA                                  -->
+    <!-- ======================================================= -->
 
     <section class="creditos-bloque">
 
       <h3>
-        Estado de la cartera
+        Seguimiento de cartera
       </h3>
 
-      <div class="estados-grid">
+      <div class="estados-grid estados-grid--seguimiento">
+
+        <!-- VIGENTES -->
 
         <article class="estado-resumen estado-resumen--activo">
 
           <strong>
-            {{ cantidadActivos }}
+            {{ cantidadVigentes }}
           </strong>
 
           <span>
-            Activos
+            Créditos vigentes
           </span>
 
         </article>
 
-        <article class="estado-resumen">
 
-          <strong>
-            {{ cantidadCancelados }}
-          </strong>
-
-          <span>
-            Cancelados
-          </span>
-
-        </article>
+        <!-- EN MORA -->
 
         <article
           class="estado-resumen"
-          [class.estado-resumen--alerta]="
-            cantidadEnMora > 0
-          ">
+          [class.estado-resumen--alerta]="cantidadEnMora > 0">
 
           <strong>
             {{ cantidadEnMora }}
           </strong>
 
           <span>
-            En mora
+            Créditos en mora
           </span>
 
         </article>
 
+
+        <!-- JURÍDICOS -->
+
         <article
           class="estado-resumen"
-          [class.estado-resumen--critico]="
-            cantidadJuridicos > 0
-          ">
+          [class.estado-resumen--critico]="cantidadJuridicos > 0">
 
           <strong>
             {{ cantidadJuridicos }}
           </strong>
 
           <span>
-            En jurídico
-          </span>
-
-        </article>
-
-        <article
-          class="estado-resumen"
-          [class.estado-resumen--critico]="
-            cantidadCastigados > 0
-          ">
-
-          <strong>
-            {{ cantidadCastigados }}
-          </strong>
-
-          <span>
-            Castigados
-          </span>
-
-        </article>
-
-        <article
-          class="estado-resumen"
-          [class.estado-resumen--alerta]="
-            cantidadConRevision > 0
-          ">
-
-          <strong>
-            {{ cantidadConRevision }}
-          </strong>
-
-          <span>
-            Requieren revisión
+            En cobro jurídico
           </span>
 
         </article>
@@ -208,83 +195,9 @@
     </section>
 
 
-    <!-- =================================================== -->
-    <!-- RIESGO Y COBERTURA                                   -->
-    <!-- =================================================== -->
-
-    <section class="creditos-bloque">
-
-      <h3>
-        Riesgo y cobertura
-      </h3>
-
-      <div class="riesgo-resumen-grid">
-
-        <article>
-
-          <span>
-            Mayor edad de riesgo
-          </span>
-
-          <strong>
-            {{ mayorEdadRiesgo }}
-          </strong>
-
-        </article>
-
-        <article
-          [class.resumen-alerta]="
-            mayorDiasMora > 0
-          ">
-
-          <span>
-            Mayor mora
-          </span>
-
-          <strong>
-            {{ mayorDiasMora }} días
-          </strong>
-
-        </article>
-
-        <article>
-
-          <span>
-            Provisión total
-          </span>
-
-          <strong>
-            {{
-            provisionTotal |
-            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
-            }}
-          </strong>
-
-        </article>
-
-        <article>
-
-          <span>
-            Valor de garantías
-          </span>
-
-          <strong>
-            {{
-            valorGarantiasTotal |
-            currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
-            }}
-          </strong>
-
-        </article>
-
-      </div>
-
-    </section>
-
-
-    <!-- =================================================== -->
-    <!-- DETALLE                                              -->
-    <!-- =================================================== -->
+    <!-- ======================================================= -->
+    <!-- DETALLE DE CRÉDITOS                                     -->
+    <!-- ======================================================= -->
 
     <section class="creditos-bloque">
 
@@ -297,51 +210,50 @@
           </h3>
 
           <span class="bloque-descripcion">
-            Información consolidada de cada obligación
+            Obligaciones que actualmente presentan saldo de capital
           </span>
 
         </div>
 
       </div>
 
+
       <div class="creditos-lista">
 
         <article
-          *ngFor="let credito of lista"
+          *ngFor="
+            let credito of lista;
+            trackBy: trackByCredito
+          "
           class="credito-card"
           [class.credito-card--atencion]="
-            requiereAtencion(credito)
+            credito.enMora ||
+            credito.juridico ||
+            credito.castigado
           ">
 
-          <!-- ============================================= -->
-          <!-- ENCABEZADO                                    -->
-          <!-- ============================================= -->
+          <!-- ================================================= -->
+          <!-- ENCABEZADO DEL CRÉDITO                            -->
+          <!-- ================================================= -->
 
           <header class="credito-card__encabezado">
 
             <div class="credito-identificacion">
 
               <span class="credito-linea">
-                {{ credito.nombreLinea }}
+                {{ textoLinea(credito) }}
               </span>
 
               <strong>
-                Crédito {{ credito.numeroCredito }}
+                Crédito {{ textoNumeroCredito(credito) }}
               </strong>
 
-              <small>
-
-                <ng-container *ngIf="credito.codigoLinea">
-                  Línea {{ credito.codigoLinea }}
-                </ng-container>
-
-                <ng-container *ngIf="credito.nombreProducto">
-                  · {{ credito.nombreProducto }}
-                </ng-container>
-
+              <small *ngIf="credito.codigoLineaCredito">
+                Línea {{ credito.codigoLineaCredito }}
               </small>
 
             </div>
+
 
             <div class="credito-estados">
 
@@ -349,7 +261,7 @@
                 class="estado-credito"
                 [ngClass]="claseEstado(credito)">
 
-                {{ credito.nombreEstado }}
+                {{ textoEstado(credito) }}
 
               </span>
 
@@ -357,20 +269,7 @@
                 class="riesgo-credito"
                 [ngClass]="claseRiesgo(credito)">
 
-                Riesgo:
-                {{
-                  credito.edadRiesgo ||
-                  credito.nivelRiesgo ||
-                  'Sin clasificar'
-                }}
-
-              </span>
-
-              <span
-                class="nivel-alerta"
-                [ngClass]="claseAlerta(credito)">
-
-                {{ credito.nivelAlerta }}
+                Riesgo: {{ textoEdadRiesgo(credito) }}
 
               </span>
 
@@ -379,11 +278,13 @@
           </header>
 
 
-          <!-- ============================================= -->
-          <!-- SALDOS                                        -->
-          <!-- ============================================= -->
+          <!-- ================================================= -->
+          <!-- VALORES PRINCIPALES                               -->
+          <!-- ================================================= -->
 
           <div class="credito-saldos">
+
+            <!-- VALOR DESEMBOLSADO -->
 
             <div>
 
@@ -393,71 +294,63 @@
 
               <strong>
                 {{
-                credito.valorDesembolso |
-                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                credito.valorDesembolsado
+                | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
                 }}
               </strong>
 
             </div>
+
+
+            <!-- SALDO ACTUAL -->
 
             <div class="credito-saldos__principal">
 
               <span>
-                Saldo de capital
+                Saldo actual
               </span>
 
               <strong>
                 {{
-                credito.saldoCapital |
-                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                credito.saldoActual
+                | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
                 }}
               </strong>
 
             </div>
+
+
+            <!-- VALOR CUOTA -->
 
             <div>
 
               <span>
-                Intereses
+                Valor cuota
               </span>
 
               <strong>
                 {{
-                credito.saldoIntereses |
-                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                credito.valorCuota
+                | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
                 }}
               </strong>
 
             </div>
 
-            <div
-              [class.saldo-mora--activo]="
-                credito.saldoMora > 0
-              ">
 
-              <span>
-                Mora
-              </span>
-
-              <strong>
-                {{
-                credito.saldoMora |
-                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
-                }}
-              </strong>
-
-            </div>
+            <!-- GARANTÍA -->
 
             <div class="credito-saldos__total">
 
               <span>
-                Saldo total
+                Garantía
               </span>
 
               <strong>
                 {{
-                credito.saldoTotal |
-                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                credito.nombreGarantia
+                || credito.codigoGarantia
+                || 'No registrada'
                 }}
               </strong>
 
@@ -466,49 +359,31 @@
           </div>
 
 
-          <!-- ============================================= -->
-          <!-- INFORMACIÓN DEL CRÉDITO                        -->
-          <!-- ============================================= -->
+          <!-- ================================================= -->
+          <!-- CONDICIONES DEL CRÉDITO                            -->
+          <!-- ================================================= -->
 
-          <div class="credito-datos">
+          <div class="credito-datos credito-datos--condiciones">
+
+            <!-- FECHA DE DESEMBOLSO -->
 
             <div>
 
               <span>
-                Desembolso
+                Fecha de desembolso
               </span>
 
               <strong>
                 {{
                 credito.fechaDesembolso
-                ? (
-                credito.fechaDesembolso |
-                date:'dd/MM/yyyy'
-                )
-                : 'Sin información'
+                | date:'dd/MM/yyyy'
                 }}
               </strong>
 
             </div>
 
-            <div>
 
-              <span>
-                Vencimiento
-              </span>
-
-              <strong>
-                {{
-                credito.fechaVencimiento
-                ? (
-                credito.fechaVencimiento |
-                date:'dd/MM/yyyy'
-                )
-                : 'Sin información'
-                }}
-              </strong>
-
-            </div>
+            <!-- PLAZO -->
 
             <div>
 
@@ -517,49 +392,49 @@
               </span>
 
               <strong>
-                {{ credito.plazoMeses }} meses
+                {{ credito.plazo }} meses
               </strong>
 
             </div>
 
+
+            <!-- FECHA DE VENCIMIENTO -->
+
             <div>
 
               <span>
-                Valor de cuota
+                Fecha de vencimiento
               </span>
 
               <strong>
                 {{
-                credito.valorCuota |
-                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                credito.fechaVencimiento
+                | date:'dd/MM/yyyy'
                 }}
               </strong>
 
             </div>
 
-            <div>
 
-              <span>
-                Tasa
-              </span>
-
-              <strong>
-                {{ credito.tasaInteres | number:'1.0-6' }} %
-              </strong>
-
-            </div>
+            <!-- DÍAS DE MORA -->
 
             <div
-              [class.dato-alerta]="
-                credito.diasMora > 0
-              ">
+              [class.dato-alerta]="credito.diasMora > 0">
 
               <span>
                 Días de mora
               </span>
 
               <strong>
+
                 {{ credito.diasMora }}
+
+                {{
+                credito.diasMora === 1
+                ? 'día'
+                : 'días'
+                }}
+
               </strong>
 
             </div>
@@ -567,214 +442,62 @@
           </div>
 
 
-          <!-- ============================================= -->
-          <!-- AVANCE                                         -->
-          <!-- ============================================= -->
+          <!-- ================================================= -->
+          <!-- SEGUIMIENTO DE PAGOS                              -->
+          <!-- ================================================= -->
 
-          <div class="avance-cuotas">
+          <div class="credito-datos credito-datos--pagos">
 
-            <div class="avance-cuotas__encabezado">
-
-              <span>
-                Avance del crédito
-              </span>
-
-              <strong>
-                {{ credito.cuotasPagadas }}
-                de
-                {{ credito.numeroCuotas }}
-                cuotas
-              </strong>
-
-            </div>
-
-            <div class="avance-cuotas__barra">
-
-              <div
-                class="avance-cuotas__progreso"
-                [style.width.%]="porcentajePagado(credito)">
-              </div>
-
-            </div>
-
-            <div class="avance-cuotas__detalle">
-
-              <span>
-                Pagadas: {{ credito.cuotasPagadas }}
-              </span>
-
-              <span>
-                Pendientes: {{ credito.cuotasPendientes }}
-              </span>
-
-              <span
-                [class.texto-alerta]="
-                  credito.cuotasVencidas > 0
-                ">
-
-                Vencidas: {{ credito.cuotasVencidas }}
-
-              </span>
-
-            </div>
-
-          </div>
-
-
-          <!-- ============================================= -->
-          <!-- RIESGO Y PROVISIÓN                             -->
-          <!-- ============================================= -->
-
-          <div class="riesgo-grid">
+            <!-- ÚLTIMO PAGO -->
 
             <div>
 
               <span>
-                Edad de riesgo
-              </span>
-
-              <strong
-                class="riesgo-valor"
-                [ngClass]="claseRiesgo(credito)">
-
-                {{ credito.edadRiesgo || 'Sin clasificar' }}
-
-              </strong>
-
-            </div>
-
-            <div>
-
-              <span>
-                Clasificación
+                Fecha del último pago
               </span>
 
               <strong>
                 {{
-                credito.nombreClasificacion ||
-                credito.nivelRiesgo ||
-                'Sin información'
+                credito.fechaUltimoPago
+                | date:'dd/MM/yyyy'
                 }}
               </strong>
 
             </div>
 
-            <div>
 
-              <span>
-                Provisión de capital
-              </span>
+            <!-- PRÓXIMO PAGO -->
 
-              <strong>
-                {{
-                credito.provisionCapital |
-                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
-                }}
-              </strong>
-
-            </div>
-
-            <div>
-
-              <span>
-                Provisión de intereses
-              </span>
-
-              <strong>
-                {{
-                credito.provisionIntereses |
-                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
-                }}
-              </strong>
-
-            </div>
-
-            <div>
-
-              <span>
-                Provisión total
-              </span>
-
-              <strong>
-                {{
-                credito.provisionTotal |
-                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
-                }}
-              </strong>
-
-            </div>
-
-          </div>
-
-
-          <!-- ============================================= -->
-          <!-- GARANTÍA                                      -->
-          <!-- ============================================= -->
-
-          <div class="garantia-panel">
-
-            <div class="garantia-panel__nombre">
-
-              <span>
-                Garantía
-              </span>
-
-              <strong>
-                {{ credito.nombreGarantia }}
-              </strong>
-
-            </div>
-
-            <div>
-
-              <span>
-                Valor
-              </span>
-
-              <strong>
-                {{
-                credito.valorGarantia |
-                currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
-                }}
-              </strong>
-
-            </div>
-
-            <div>
-
-              <span>
-                Cobertura
-              </span>
-
-              <strong>
-                {{ credito.coberturaGarantia | number:'1.0-2' }} %
-              </strong>
-
-            </div>
-
-            <span
-              class="garantia-estado"
-              [class.garantia-estado--suficiente]="
-                credito.garantiaSuficiente
+            <div
+              [class.dato-alerta]="
+                credito.diasParaProximoPago < 0
               ">
 
-              {{
-                credito.garantiaSuficiente
-                  ? 'Garantía suficiente'
-                  : 'Garantía por validar'
-              }}
+              <span>
+                Fecha del próximo pago
+              </span>
 
-            </span>
+              <strong>
+                {{
+                credito.fechaProximoPago
+                | date:'dd/MM/yyyy'
+                }}
+              </strong>
+
+            </div>
 
           </div>
 
 
-          <!-- ============================================= -->
-          <!-- CONDICIONES ESPECIALES                         -->
-          <!-- ============================================= -->
+          <!-- ================================================= -->
+          <!-- CONDICIONES ESPECIALES                            -->
+          <!-- ================================================= -->
 
           <div
             *ngIf="
+              credito.cancelado ||
+              credito.castigado ||
+              credito.enMora ||
               credito.reestructurado ||
               credito.novado ||
               credito.juridico
@@ -782,8 +505,24 @@
             class="condiciones-credito">
 
             <span
+              *ngIf="credito.cancelado"
+              class="condicion condicion--neutral">
+
+              Cancelado
+
+            </span>
+
+            <span
+              *ngIf="credito.enMora"
+              class="condicion condicion--advertencia">
+
+              En mora
+
+            </span>
+
+            <span
               *ngIf="credito.reestructurado"
-              class="condicion">
+              class="condicion condicion--advertencia">
 
               Reestructurado
 
@@ -791,7 +530,7 @@
 
             <span
               *ngIf="credito.novado"
-              class="condicion">
+              class="condicion condicion--advertencia">
 
               Novado
 
@@ -805,15 +544,28 @@
 
             </span>
 
+            <span
+              *ngIf="credito.castigado"
+              class="condicion condicion--critica">
+
+              Castigado
+
+            </span>
+
           </div>
 
 
-          <!-- ============================================= -->
-          <!-- ALERTAS                                        -->
-          <!-- ============================================= -->
+          <!-- ================================================= -->
+          <!-- ALERTAS REALES                                    -->
+          <!-- ================================================= -->
 
           <div
-            *ngIf="requiereAtencion(credito)"
+            *ngIf="
+              credito.enMora ||
+              credito.diasMora > 0 ||
+              credito.juridico ||
+              credito.castigado
+            "
             class="alertas-credito">
 
             <span
@@ -828,7 +580,13 @@
               *ngIf="credito.diasMora > 0"
               class="alerta-credito alerta-credito--advertencia">
 
-              {{ credito.diasMora }} días de mora
+              {{ credito.diasMora }}
+
+              {{
+                credito.diasMora === 1
+                  ? 'día de mora'
+                  : 'días de mora'
+              }}
 
             </span>
 
@@ -848,29 +606,12 @@
 
             </span>
 
-            <span
-              *ngIf="credito.requiereRevision"
-              class="alerta-credito alerta-credito--advertencia">
-
-              Requiere revisión
-
-            </span>
-
-            <span
-              *ngIf="credito.cantidadAlertas > 0"
-              class="alerta-credito alerta-credito--advertencia">
-
-              {{ credito.cantidadAlertas }}
-              alertas
-
-            </span>
-
           </div>
 
 
-          <!-- ============================================= -->
-          <!-- OBSERVACIONES                                  -->
-          <!-- ============================================= -->
+          <!-- ================================================= -->
+          <!-- OBSERVACIONES                                     -->
+          <!-- ================================================= -->
 
           <div
             *ngIf="credito.observaciones"
@@ -892,84 +633,14 @@
 
     </section>
 
-
-    <!-- =================================================== -->
-    <!-- NOVEDADES CONSOLIDADAS                               -->
-    <!-- =================================================== -->
-
-    <section class="creditos-bloque">
-
-      <h3>
-        Novedades de cartera
-      </h3>
-
-      <div class="novedades-grid">
-
-        <article>
-
-          <strong>
-            {{ cantidadReestructurados }}
-          </strong>
-
-          <span>
-            Reestructurados
-          </span>
-
-        </article>
-
-        <article
-          [class.novedad--alerta]="
-            cantidadEnMora > 0
-          ">
-
-          <strong>
-            {{ cantidadEnMora }}
-          </strong>
-
-          <span>
-            Créditos en mora
-          </span>
-
-        </article>
-
-        <article
-          [class.novedad--critica]="
-            cantidadJuridicos > 0
-          ">
-
-          <strong>
-            {{ cantidadJuridicos }}
-          </strong>
-
-          <span>
-            En jurídico
-          </span>
-
-        </article>
-
-        <article
-          [class.novedad--alerta]="
-            cantidadConAlertas > 0
-          ">
-
-          <strong>
-            {{ cantidadConAlertas }}
-          </strong>
-
-          <span>
-            Créditos con alertas
-          </span>
-
-        </article>
-
-      </div>
-
-    </section>
-
   </ng-container>
 
 </section>
 
+
+<!-- =========================================================== -->
+<!-- SIN CRÉDITOS CON SALDO                                      -->
+<!-- =========================================================== -->
 
 <ng-template #sinCreditos>
 
@@ -980,12 +651,11 @@
     </div>
 
     <strong>
-      El asociado no tiene créditos
+      El asociado no tiene obligaciones con saldo
     </strong>
 
     <span>
-      No se encontraron obligaciones de cartera vinculadas
-      al expediente.
+      No se encontraron créditos con saldo pendiente.
     </span>
 
   </section>

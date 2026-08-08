@@ -1,0 +1,434 @@
+<section class="consulta-bloque seguros-detalle">
+
+  <!-- ======================================================= -->
+  <!-- ENCABEZADO                                              -->
+  <!-- ======================================================= -->
+
+  <div class="bloque-encabezado">
+
+    <div>
+
+      <h2>
+        Seguros del crédito
+      </h2>
+
+      <span>
+        Configuraciones de seguro registradas para el pagaré
+        {{ credito.pagareCartera || 'sin número' }}.
+      </span>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn btn--cancel btn-sm"
+      (click)="cerrarDetalle()">
+
+      Cerrar seguros
+
+    </button>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- RESUMEN                                                 -->
+  <!-- ======================================================= -->
+
+  <div class="seguros-resumen">
+
+    <article>
+
+      <span>
+        Configuraciones
+      </span>
+
+      <strong>
+        {{ cantidadSeguros }}
+      </strong>
+
+    </article>
+
+
+    <article class="resumen-activo">
+
+      <span>
+        Activas
+      </span>
+
+      <strong>
+        {{ cantidadSegurosActivos }}
+      </strong>
+
+    </article>
+
+
+    <article>
+
+      <span>
+        Inactivas
+      </span>
+
+      <strong>
+        {{ cantidadSegurosInactivos }}
+      </strong>
+
+    </article>
+
+
+    <article>
+
+      <span>
+        Porcentaje activo
+      </span>
+
+      <strong>
+        {{ porcentajeTotalActivo | number:'1.2-4' }} %
+      </strong>
+
+    </article>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- SIN REGISTROS                                           -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="!tieneSeguros"
+    class="estado-vacio">
+
+    <strong>
+      El crédito no tiene configuraciones de seguro
+    </strong>
+
+    <span>
+      No existen seguros registrados para esta obligación.
+    </span>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- TABLA DE SEGUROS                                        -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="tieneSeguros"
+    class="tabla-contenedor">
+
+    <table class="tabla-seguros">
+
+      <thead>
+
+      <tr>
+
+        <th>
+          Configuración
+        </th>
+
+        <th>
+          Tipo de cobro
+        </th>
+
+        <th class="columna-numero">
+          Porcentaje
+        </th>
+
+        <th>
+          Última fecha
+        </th>
+
+        <th>
+          Próxima fecha
+        </th>
+
+        <th>
+          Vencimiento
+        </th>
+
+        <th>
+          Estado
+        </th>
+
+        <th class="columna-numero">
+          Sobre desembolso
+        </th>
+
+        <th class="columna-numero">
+          Sobre saldo
+        </th>
+
+        <th class="columna-numero">
+          Sobre cuota
+        </th>
+
+        <th>
+          Alerta
+        </th>
+
+      </tr>
+
+      </thead>
+
+
+      <tbody>
+
+      <tr
+        *ngFor="
+            let seguro of seguros;
+            trackBy: trackBySeguro
+          "
+        [class.fila-inactiva]="!esSeguroActivo(seguro)"
+        [class.fila-vencida]="esSeguroVencido(seguro)">
+
+        <td>
+
+          <div class="configuracion-seguro">
+
+            <strong>
+              {{
+              seguro.numeroConfiguracionSeguro
+              ?? seguro.idCreditoSeguro
+              ?? ''
+              }}
+            </strong>
+
+            <span
+              *ngIf="esConfiguracionPrincipal(seguro)"
+              class="badge badge--principal">
+
+                Principal
+
+              </span>
+
+          </div>
+
+        </td>
+
+
+        <td>
+
+          {{
+          descripcionTipoCobro(seguro)
+          || 'Sin definir'
+          }}
+
+        </td>
+
+
+        <td class="columna-numero">
+
+          {{
+          seguro.porcentajeSeguro
+          ?? 0
+          | number:'1.2-4'
+          }} %
+
+        </td>
+
+
+        <td>
+
+          {{
+          seguro.ultimaFechaSeguro
+          ? (
+          seguro.ultimaFechaSeguro
+          | date:'dd/MM/yyyy'
+          )
+          : ''
+          }}
+
+        </td>
+
+
+        <td>
+
+          {{
+          seguro.proximaFechaSeguro
+          ? (
+          seguro.proximaFechaSeguro
+          | date:'dd/MM/yyyy'
+          )
+          : ''
+          }}
+
+        </td>
+
+
+        <td>
+
+            <span
+              class="badge"
+              [class.badge--vigente]="
+                !esSeguroVencido(seguro)
+              "
+              [class.badge--vencido]="
+                esSeguroVencido(seguro)
+              ">
+
+              {{ descripcionVencimiento(seguro) }}
+
+            </span>
+
+        </td>
+
+
+        <td>
+
+            <span
+              class="badge"
+              [class.badge--activo]="
+                esSeguroActivo(seguro)
+              "
+              [class.badge--inactivo]="
+                !esSeguroActivo(seguro)
+              ">
+
+              {{ descripcionEstado(seguro) }}
+
+            </span>
+
+        </td>
+
+
+        <td class="columna-numero">
+
+          {{
+          seguro.valorSeguroSobreDesembolsoEstimado
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+
+        </td>
+
+
+        <td class="columna-numero">
+
+          {{
+          seguro.valorSeguroSobreSaldoEstimado
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+
+        </td>
+
+
+        <td class="columna-numero">
+
+          {{
+          seguro.valorSeguroSobreCuotaEstimado
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+
+        </td>
+
+
+        <td>
+
+          <div class="alerta-seguro">
+
+            <strong
+              *ngIf="seguro.nivelAlertaSeguro">
+
+              {{ seguro.nivelAlertaSeguro }}
+
+            </strong>
+
+            <span>
+                {{
+                  seguro.motivoAlertaSeguro
+                  || 'Sin novedades'
+                }}
+              </span>
+
+          </div>
+
+        </td>
+
+      </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- VALIDACIONES                                            -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="tieneSeguros"
+    class="validaciones-seguros">
+
+    <article>
+
+      <span>
+        Seguro activo válido
+      </span>
+
+      <strong>
+        {{
+        seguros[0]?.tieneSeguroActivoValido
+        ? 'Sí'
+        : 'No'
+        }}
+      </strong>
+
+    </article>
+
+
+    <article>
+
+      <span>
+        Configuración completa
+      </span>
+
+      <strong>
+        {{
+        seguros[0]?.configuracionSeguroCompleta
+        ? 'Sí'
+        : 'No'
+        }}
+      </strong>
+
+    </article>
+
+
+    <article>
+
+      <span>
+        Porcentaje inconsistente
+      </span>
+
+      <strong>
+        {{
+        seguros[0]?.tienePorcentajeInconsistente
+        ? 'Sí'
+        : 'No'
+        }}
+      </strong>
+
+    </article>
+
+
+    <article>
+
+      <span>
+        Múltiples seguros activos
+      </span>
+
+      <strong>
+        {{
+        seguros[0]?.tieneMultiplesSegurosActivos
+        ? 'Sí'
+        : 'No'
+        }}
+      </strong>
+
+    </article>
+
+  </div>
+
+</section>

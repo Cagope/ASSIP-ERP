@@ -1,0 +1,1491 @@
+<div class="consulta-creditos-page">
+
+  <!-- ======================================================= -->
+  <!-- ENCABEZADO                                              -->
+  <!-- ======================================================= -->
+
+  <app-header-actions
+    titulo="Consulta de Créditos"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+
+  <!-- ======================================================= -->
+  <!-- BUSCADOR DEL ASOCIADO                                   -->
+  <!-- ======================================================= -->
+
+  <app-consulta-creditos-buscador
+    [bloqueado]="cargando || cargandoDetalle"
+    (asociadoSeleccionado)="seleccionarAsociado($event)"
+    (busquedaLimpiada)="limpiarBusqueda()">
+  </app-consulta-creditos-buscador>
+
+
+  <!-- ======================================================= -->
+  <!-- ASOCIADO SELECCIONADO                                   -->
+  <!-- ======================================================= -->
+
+  <section
+    *ngIf="asociadoSeleccionado as asociado"
+    class="consulta-bloque asociado-seleccionado">
+
+    <div class="bloque-encabezado">
+
+      <div>
+
+        <span class="bloque-etiqueta">
+          Asociado seleccionado
+        </span>
+
+        <h2>
+          {{ asociado.nombreCompleto }}
+        </h2>
+
+        <span>
+          Documento: {{ asociado.documento }}
+        </span>
+
+      </div>
+
+      <div class="asociado-datos">
+
+        <span *ngIf="asociado.nombreTipoDocumento || asociado.tipoDocumento">
+          {{
+            asociado.nombreTipoDocumento
+              || asociado.tipoDocumento
+          }}
+        </span>
+
+        <span>
+          Créditos registrados:
+          {{ asociado.cantidadCreditos }}
+        </span>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ======================================================= -->
+  <!-- MENSAJE DE ERROR                                        -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="error"
+    class="alert alert--danger">
+
+    <strong>
+      No fue posible completar la consulta
+    </strong>
+
+    <span>
+      {{ error }}
+    </span>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- CARGANDO CRÉDITOS                                       -->
+  <!-- ======================================================= -->
+
+  <section
+    *ngIf="cargando"
+    class="estado-consulta">
+
+    <span class="spinner"></span>
+
+    <span>
+      Consultando los créditos del asociado...
+    </span>
+
+  </section>
+
+
+  <!-- ======================================================= -->
+  <!-- LISTA DE CRÉDITOS                                       -->
+  <!-- ======================================================= -->
+
+  <section
+    *ngIf="
+      !cargando
+      && tieneAsociadoSeleccionado
+      && tieneCreditos
+    "
+    class="consulta-bloque">
+
+    <div class="bloque-encabezado">
+
+      <div>
+
+        <h2>
+          Créditos del asociado
+        </h2>
+
+        <span>
+          Seleccione una obligación vigente, saldada o cancelada.
+        </span>
+
+      </div>
+
+      <span class="contador-registros">
+        {{ cantidadCreditos }}
+        {{
+          cantidadCreditos === 1
+            ? 'crédito'
+            : 'créditos'
+        }}
+      </span>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- INDICADORES DE LA LISTA                               -->
+    <!-- ===================================================== -->
+
+    <div class="resumen-creditos-grid">
+
+      <article class="resumen-credito resumen-credito--total">
+
+        <span>
+          Total
+        </span>
+
+        <strong>
+          {{ cantidadCreditos }}
+        </strong>
+
+      </article>
+
+
+      <article class="resumen-credito resumen-credito--saldo">
+
+        <span>
+          Con saldo
+        </span>
+
+        <strong>
+          {{ cantidadCreditosConSaldo }}
+        </strong>
+
+      </article>
+
+
+      <article class="resumen-credito resumen-credito--saldados">
+
+        <span>
+          Saldados
+        </span>
+
+        <strong>
+          {{ cantidadCreditosSaldados }}
+        </strong>
+
+      </article>
+
+
+      <article
+        class="resumen-credito resumen-credito--mora"
+        [class.resumen-credito--alerta]="cantidadCreditosEnMora > 0">
+
+        <span>
+          En mora
+        </span>
+
+        <strong>
+          {{ cantidadCreditosEnMora }}
+        </strong>
+
+      </article>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- TABLA DE CRÉDITOS                                     -->
+    <!-- ===================================================== -->
+
+    <div class="tabla-contenedor">
+
+      <table class="tabla-creditos">
+
+        <thead>
+
+        <tr>
+
+          <th>
+            Crédito
+          </th>
+
+          <th>
+            Línea
+          </th>
+
+          <th>
+            Desembolso
+          </th>
+
+          <th>
+            Vencimiento
+          </th>
+
+          <th class="columna-numero">
+            Valor desembolsado
+          </th>
+
+          <th class="columna-numero">
+            Saldo actual
+          </th>
+
+          <th>
+            Estado
+          </th>
+
+          <th>
+            Riesgo
+          </th>
+
+          <th class="columna-accion">
+            Acción
+          </th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr
+          *ngFor="
+              let credito of creditosPaginados;
+              trackBy: trackByCredito
+            "
+          [class.fila-seleccionada]="
+              esCreditoSeleccionado(credito)
+            "
+          [class.fila-saldada]="
+              credito.creditoSaldado
+              || (credito.saldoActual ?? 0) <= 0
+            ">
+
+          <td>
+
+            <strong>
+              {{ credito.pagareCartera || 'Sin número' }}
+            </strong>
+
+          </td>
+
+
+          <td>
+
+            {{
+            credito.descripcionLineaCredito
+            || credito.codigoLineaCredito
+            || 'Sin línea'
+            }}
+
+          </td>
+
+
+          <td>
+
+            {{
+            credito.fechaDesembolso
+            ? (
+            credito.fechaDesembolso
+            | date:'dd/MM/yyyy'
+            )
+            : ''
+            }}
+
+          </td>
+
+
+          <td>
+
+            {{
+            credito.fechaFinal
+            ? (
+            credito.fechaFinal
+            | date:'dd/MM/yyyy'
+            )
+            : ''
+            }}
+
+          </td>
+
+
+          <td class="columna-numero">
+
+            {{
+            credito.valorDesembolsado
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+
+          </td>
+
+
+          <td class="columna-numero">
+
+            {{
+            credito.saldoActual
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+
+          </td>
+
+
+          <td>
+
+              <span
+                class="estado-badge"
+                [class.estado-badge--activo]="
+                  !credito.creditoSaldado
+                  && (credito.saldoActual ?? 0) > 0
+                  && !credito.creditoEnMora
+                "
+                [class.estado-badge--saldado]="
+                  credito.creditoSaldado
+                  || (credito.saldoActual ?? 0) <= 0
+                "
+                [class.estado-badge--mora]="
+                  credito.creditoEnMora
+                ">
+
+                {{
+                  credito.descripcionEstadoCartera
+                    || (
+                      credito.creditoSaldado
+                      || (credito.saldoActual ?? 0) <= 0
+                        ? 'Saldado'
+                        : 'Sin estado'
+                    )
+                }}
+
+              </span>
+
+          </td>
+
+
+          <td>
+
+              <span
+                class="riesgo-badge"
+                [class.riesgo-badge--alto]="credito.riesgoAlto">
+
+                {{
+                  credito.edadDeRiesgo
+                    || 'Sin clasificar'
+                }}
+
+              </span>
+
+          </td>
+
+
+          <td class="columna-accion">
+
+            <button
+              type="button"
+              class="btn btn--primary btn-sm"
+              [disabled]="
+                  cargandoDetalle
+                  || !credito.idCarteraCredito
+                "
+              (click)="seleccionarCredito(credito)">
+
+              {{
+              esCreditoSeleccionado(credito)
+              ? 'Seleccionado'
+              : 'Seleccionar'
+              }}
+
+            </button>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+      <div
+        *ngIf="totalPaginas > 1"
+        class="paginacion">
+
+        <button
+          type="button"
+          class="btn btn--cancel btn-sm"
+          [disabled]="pagina <= 1"
+          (click)="cambiarPagina(pagina - 1)">
+
+          Anterior
+
+        </button>
+
+        <span>
+          Página {{ pagina }} de {{ totalPaginas }}
+        </span>
+
+        <button
+          type="button"
+          class="btn btn--primary btn-sm"
+          [disabled]="pagina >= totalPaginas"
+          (click)="cambiarPagina(pagina + 1)">
+
+          Siguiente
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ======================================================= -->
+  <!-- SIN CRÉDITOS                                            -->
+  <!-- ======================================================= -->
+
+  <section
+    *ngIf="
+      !cargando
+      && tieneAsociadoSeleccionado
+      && !tieneCreditos
+      && !error
+    "
+    class="estado-vacio">
+
+    <strong>
+      El asociado no tiene créditos registrados
+    </strong>
+
+    <span>
+      No se encontraron obligaciones vigentes, saldadas ni canceladas.
+    </span>
+
+  </section>
+
+
+  <!-- ======================================================= -->
+  <!-- CARGANDO DETALLE                                        -->
+  <!-- ======================================================= -->
+
+  <section
+    *ngIf="cargandoDetalle"
+    class="estado-consulta">
+
+    <span class="spinner"></span>
+
+    <span>
+      Consultando la información integral del crédito...
+    </span>
+
+  </section>
+
+
+  <!-- ======================================================= -->
+  <!-- CRÉDITO SELECCIONADO                                    -->
+  <!-- ======================================================= -->
+
+  <ng-container
+    *ngIf="
+      !cargandoDetalle
+      && tieneDetalle
+      && creditoSeleccionado.credito as credito
+    ">
+
+    <section class="consulta-bloque detalle-principal">
+
+      <!-- =================================================== -->
+      <!-- ENCABEZADO DEL CRÉDITO                              -->
+      <!-- =================================================== -->
+
+      <div class="detalle-encabezado detalle-encabezado--credito">
+
+        <div class="detalle-identificacion">
+
+        <span class="detalle-subtitulo">
+          Crédito seleccionado
+        </span>
+
+          <div class="detalle-titulo-fila">
+
+            <h2>
+              Pagaré : {{ credito.pagareCartera || 'Sin número' }}
+            </h2>
+
+            <h2 class="detalle-linea-badge">
+              Línea :
+              {{
+              credito.codigoLineaCredito
+              }}
+              -
+              {{
+              credito.nombreLineaCredito
+              || credito.codigoLineaCredito
+              || 'No registrada'
+              }}
+            </h2>
+
+          </div>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="btn btn--cancel btn-sm detalle-cerrar"
+          (click)="limpiarCreditoSeleccionado()">
+
+          Cerrar detalle
+
+        </button>
+
+      </div>
+
+
+      <!-- =================================================== -->
+      <!-- RESUMEN FINANCIERO                                  -->
+      <!-- =================================================== -->
+
+      <div class="detalle-seccion">
+
+        <div class="detalle-seccion__titulo">
+          Resumen financiero
+        </div>
+
+        <div class="valores-principales valores-principales--cuatro">
+
+          <article>
+
+            <span>
+              Valor desembolsado
+            </span>
+
+            <strong>
+              {{
+              credito.valorDesembolsado
+              | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+              }}
+            </strong>
+
+          </article>
+
+          <article class="valor-principal">
+
+            <span>
+              Saldo actual
+            </span>
+
+            <strong>
+              {{
+              credito.saldoActual
+              | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+              }}
+            </strong>
+
+          </article>
+
+          <article>
+
+            <span>
+              Valor cuota
+            </span>
+
+            <strong>
+              {{
+              credito.valorCuota
+              | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+              }}
+            </strong>
+
+          </article>
+
+          <article>
+
+            <span>
+              Cuotas canceladas
+            </span>
+
+            <strong>
+
+              {{ credito.alturaCuota ?? 0 }}
+
+              de
+
+              {{ cuotasPactadas(credito) }}
+
+            </strong>
+
+            <small>
+
+              Plazo:
+              {{ credito.plazo ?? 0 }}
+              meses
+
+              ·
+
+              Capital cada
+              {{ credito.amortizacionCapital ?? 0 }}
+              mes(es)
+
+            </small>
+
+          </article>
+
+          <article class="avance-cuotas">
+
+            <div class="avance-cuotas__encabezado">
+
+            <span>
+              Avance por capital
+            </span>
+
+              <strong>
+
+                {{
+                credito.porcentajeCapitalAmortizado ?? 0
+                | number:'1.0-2'
+                }} %
+
+              </strong>
+
+            </div>
+
+            <div class="avance-cuotas__barra">
+
+              <div
+                class="avance-cuotas__progreso"
+                [style.width.%]="
+                credito.porcentajeCapitalAmortizado ?? 0
+                ">
+              </div>
+
+            </div>
+
+            <small>
+
+              {{
+              credito.capitalAmortizadoEstimado
+              | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+              }}
+
+              de
+
+              {{
+
+              credito.valorDesembolsado
+              | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+
+              }}
+
+            </small>
+
+          </article>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================== -->
+      <!-- ESTADO DEL CRÉDITO                                  -->
+      <!-- =================================================== -->
+
+      <div class="detalle-seccion">
+
+        <div class="detalle-seccion__titulo">
+          Estado del crédito
+        </div>
+
+        <div class="datos-grid">
+
+          <div>
+            <span>Estado</span>
+            <strong>
+              {{
+              credito.descripcionEstadoCartera
+              || credito.codigoEstadoCartera
+              || ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Edad de riesgo</span>
+            <strong>
+              {{
+              credito.edadDeRiesgo
+              || ''
+              }}
+              {{
+              credito.descripcionEdadDeRiesgo
+              ? ' - ' + credito.descripcionEdadDeRiesgo
+              : ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Edad de mora</span>
+            <strong>
+              {{
+              credito.edadDeMora
+              || 'Al día'
+              }}
+              {{
+              credito.descripcionEdadDeMora
+              ? ' - ' + credito.descripcionEdadDeMora
+              : ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Estado jurídico</span>
+            <strong>
+              {{
+              credito.descripcionEstadoJuridico
+              || credito.codigoEstadoJuridico
+              || 'Sin gestión jurídica'
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Garantía</span>
+            <strong>
+              {{
+              credito.descripcionGarantiaCredito
+              || credito.codigoGarantiaCredito
+              || ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Reestructurado</span>
+            <strong>
+              {{ credito.creditoReestructurado ? 'Sí' : 'No' }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Novado</span>
+            <strong>
+              {{ credito.creditoNovado ? 'Sí' : 'No' }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Número de novaciones</span>
+            <strong>
+              {{ credito.numeroNovaciones ?? 0 }}
+            </strong>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================== -->
+      <!-- CONDICIONES DEL CRÉDITO                             -->
+      <!-- =================================================== -->
+
+      <div class="detalle-seccion">
+
+        <div class="detalle-seccion__titulo">
+          Condiciones del crédito
+        </div>
+
+        <div class="datos-grid">
+
+          <div>
+            <span>Línea de crédito</span>
+            <strong>
+              {{
+              credito.nombreLineaCredito
+              || credito.codigoLineaCredito
+              || ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Clasificación</span>
+            <strong>
+              {{
+              credito.descripcionClasificacionCredito
+              || credito.codigoClasificacionCredito
+              || ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Destino económico</span>
+            <strong>
+              {{
+              credito.descripcionDestinoEconomico
+              || credito.codigoDestinoEconomico
+              || ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Forma de pago</span>
+            <strong>
+              {{
+              credito.descripcionFormaPago
+              || credito.codigoFormaPago
+              || ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Tipo de cuota</span>
+            <strong>
+              {{
+              credito.descripcionTipoCuota
+              || credito.codigoTipoCuota
+              || ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Amortización de capital</span>
+            <strong>
+              {{
+              credito.amortizacionCapital !== null
+              ? credito.amortizacionCapital
+              : ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Amortización de intereses</span>
+            <strong>
+              {{
+              credito.descripcionModalidadInteres
+              || credito.tipoModalidadInteres
+              || ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Periodo de intereses</span>
+            <strong>
+              {{
+              credito.periodoInteresMeses !== null
+              ? credito.periodoInteresMeses + ' meses'
+              : credito.periodoCodigoInteres || ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Plazo</span>
+            <strong>
+              {{
+              credito.plazo
+              ? credito.plazo + ' meses'
+              : ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Meses de gracia a capital</span>
+            <strong>
+              {{ credito.mesesGraciaCapital ?? 0 }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Tasa nominal anual</span>
+            <strong>
+              {{
+              credito.tasaNominalAnual !== null
+              ? (
+              credito.tasaNominalAnual
+              | number:'1.2-4'
+              ) + ' %'
+              : ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Tasa efectiva anual</span>
+            <strong>
+              {{
+              credito.tasaEfectivaAnual !== null
+              ? (
+              credito.tasaEfectivaAnual
+              | number:'1.2-4'
+              ) + ' %'
+              : ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Ente de aprobación</span>
+            <strong>
+              {{ credito.nombreEnteAprobacion || '' }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Agencia</span>
+            <strong>
+              {{
+              credito.nombreAgencia
+              || credito.codigoAgencia
+              || ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Comprobante</span>
+            <strong>
+              {{
+              (credito.tipoComprobante || '')
+              + (
+              credito.numeroComprobante
+              ? ' ' + credito.numeroComprobante
+              : ''
+              )
+              }}
+            </strong>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================== -->
+      <!-- FECHAS PRINCIPALES                                  -->
+      <!-- =================================================== -->
+
+      <div class="detalle-seccion">
+
+        <div class="detalle-seccion__titulo">
+          Fechas principales
+        </div>
+
+        <div class="datos-grid">
+
+          <div>
+            <span>Fecha de desembolso</span>
+            <strong>
+              {{
+              credito.fechaDesembolso
+              ? (credito.fechaDesembolso | date:'dd/MM/yyyy')
+              : ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Primera cuota de capital</span>
+            <strong>
+              {{
+              credito.fechaPrimeraCuotaCapital
+              ? (credito.fechaPrimeraCuotaCapital | date:'dd/MM/yyyy')
+              : ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Primera cuota de intereses</span>
+            <strong>
+              {{
+              credito.fechaPrimeraCuotaInteres
+              ? (credito.fechaPrimeraCuotaInteres | date:'dd/MM/yyyy')
+              : ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Fecha de vencimiento</span>
+            <strong>
+              {{
+              credito.fechaFinal
+              ? (credito.fechaFinal | date:'dd/MM/yyyy')
+              : ''
+              }}
+            </strong>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================== -->
+      <!-- ÚLTIMOS PAGOS                                       -->
+      <!-- =================================================== -->
+
+      <div class="detalle-seccion">
+
+        <div class="detalle-seccion__titulo">
+          Últimos pagos
+        </div>
+
+        <div class="datos-grid datos-grid--fechas">
+
+          <div>
+            <span>Último pago a capital</span>
+            <strong>
+              {{
+              credito.ultimaFechaCapital
+              ? (credito.ultimaFechaCapital | date:'dd/MM/yyyy')
+              : ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Último pago de intereses</span>
+            <strong>
+              {{
+              credito.ultimaFechaInteres
+              ? (credito.ultimaFechaInteres | date:'dd/MM/yyyy')
+              : ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Último pago de mora</span>
+            <strong>
+              {{
+              credito.ultimaFechaMora
+              ? (credito.ultimaFechaMora | date:'dd/MM/yyyy')
+              : ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Último pago de seguro</span>
+            <strong>
+              {{
+              credito.ultimaFechaSeguro
+              ? (credito.ultimaFechaSeguro | date:'dd/MM/yyyy')
+              : ''
+              }}
+            </strong>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================== -->
+      <!-- PRÓXIMOS PAGOS                                      -->
+      <!-- =================================================== -->
+
+      <div class="detalle-seccion">
+
+        <div class="detalle-seccion__titulo">
+          Próximos pagos
+        </div>
+
+        <div class="datos-grid datos-grid--fechas">
+
+          <div>
+            <span>Próximo pago de capital</span>
+            <strong>
+              {{
+              credito.proximaFechaCapital
+              ? (credito.proximaFechaCapital | date:'dd/MM/yyyy')
+              : ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Próximo pago de intereses</span>
+            <strong>
+              {{
+              credito.proximaFechaInteres
+              ? (credito.proximaFechaInteres | date:'dd/MM/yyyy')
+              : ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Próximo pago de seguro</span>
+            <strong>
+              {{
+              credito.proximaFechaSeguro
+              ? (credito.proximaFechaSeguro | date:'dd/MM/yyyy')
+              : ''
+              }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Próximo pago de fondo</span>
+            <strong>
+              {{
+              credito.proximaFechaFondo
+              ? (credito.proximaFechaFondo | date:'dd/MM/yyyy')
+              : ''
+              }}
+            </strong>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================== -->
+    <!-- INFORMACIÓN RELACIONADA                               -->
+    <!-- ===================================================== -->
+
+    <section class="consulta-bloque">
+
+      <div class="bloque-encabezado">
+
+        <div>
+
+          <h2>
+            Información relacionada
+          </h2>
+
+          <span>
+            Registros disponibles para el crédito seleccionado.
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="modulos-grid">
+
+        <!-- =================================================== -->
+        <!-- EXTRACTO -->
+        <!-- =================================================== -->
+
+        <article
+          class="modulo-card modulo-card--accion"
+          [class.modulo-card--activo]="
+      moduloRelacionadoAbierto('extracto')
+    ">
+
+          <strong>
+            {{ creditoSeleccionado.extracto.length }}
+          </strong>
+
+          <span>
+      Movimientos del extracto
+    </span>
+
+          <button
+            type="button"
+            class="btn btn--primary btn-sm modulo-card__accion"
+            (click)="abrirModuloRelacionado('extracto')">
+
+            {{
+            moduloRelacionadoAbierto('extracto')
+            ? 'Cerrar extracto'
+            : 'Ver extracto'
+            }}
+
+          </button>
+
+        </article>
+
+
+        <!-- =================================================== -->
+        <!-- SEGUROS -->
+        <!-- =================================================== -->
+
+        <article
+          class="modulo-card modulo-card--accion"
+          [class.modulo-card--activo]="
+      moduloRelacionadoAbierto('seguros')
+    ">
+
+          <strong>
+            {{ creditoSeleccionado.seguros.length }}
+          </strong>
+
+          <span>
+      Configuraciones de seguro
+    </span>
+
+          <button
+            type="button"
+            class="btn btn--primary btn-sm modulo-card__accion"
+            (click)="abrirModuloRelacionado('seguros')">
+
+            {{
+            moduloRelacionadoAbierto('seguros')
+            ? 'Cerrar seguros'
+            : 'Ver seguros'
+            }}
+
+          </button>
+
+        </article>
+
+
+        <!-- =================================================== -->
+        <!-- ALIVIOS -->
+        <!-- =================================================== -->
+
+        <article>
+
+          <strong>
+            {{ creditoSeleccionado.alivios.length }}
+          </strong>
+
+          <span>
+      Registros de alivios
+    </span>
+
+        </article>
+
+
+        <!-- =================================================== -->
+        <!-- INTERESES CAUSADOS -->
+        <!-- =================================================== -->
+
+        <article>
+
+          <strong>
+            {{ creditoSeleccionado.interesesCausados.length }}
+          </strong>
+
+          <span>
+      Causaciones de intereses
+    </span>
+
+        </article>
+
+
+        <!-- =================================================== -->
+        <!-- EVALUACIONES -->
+        <!-- =================================================== -->
+
+        <article>
+
+          <strong>
+            {{ creditoSeleccionado.evaluaciones.length }}
+          </strong>
+
+          <span>
+      Evaluaciones de cartera
+    </span>
+
+        </article>
+
+
+        <!-- =================================================== -->
+        <!-- PRÓRROGAS -->
+        <!-- =================================================== -->
+
+        <article>
+
+          <strong>
+            {{ creditoSeleccionado.prorrogas.length }}
+          </strong>
+
+          <span>
+      Prórrogas del crédito
+    </span>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================== -->
+    <!-- EXTRACTO DEL CRÉDITO                                  -->
+    <!-- ===================================================== -->
+
+    <app-consulta-creditos-extracto
+      *ngIf="moduloRelacionadoAbierto('extracto')"
+      [credito]="credito"
+      [movimientos]="creditoSeleccionado.extracto"
+      [interesesCausados]="creditoSeleccionado.interesesCausados"
+      (cerrar)="cerrarModuloRelacionado()">
+    </app-consulta-creditos-extracto>
+
+
+    <!-- ===================================================== -->
+    <!-- SEGUROS DEL CRÉDITO                                   -->
+    <!-- ===================================================== -->
+
+    <app-consulta-creditos-seguros
+      *ngIf="moduloRelacionadoAbierto('seguros')"
+      [credito]="credito"
+      [seguros]="creditoSeleccionado.seguros"
+      (cerrar)="cerrarModuloRelacionado()">
+    </app-consulta-creditos-seguros>
+
+
+    <!-- ===================================================== -->
+    <!-- ÚLTIMA EVALUACIÓN                                     -->
+    <!-- ===================================================== -->
+
+    <section
+      *ngIf="creditoSeleccionado.ultimaEvaluacion as evaluacion"
+      class="consulta-bloque">
+
+      <div class="bloque-encabezado">
+
+        <div>
+
+          <h2>
+            Última evaluación de cartera
+          </h2>
+
+          <span>
+            Estado más reciente de la evaluación del crédito.
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="datos-grid">
+
+        <div>
+
+          <span>
+            Fecha de evaluación
+          </span>
+
+          <strong>
+            {{
+            evaluacion.fechaEvaluacion
+            ? (
+            evaluacion.fechaEvaluacion
+            | date:'dd/MM/yyyy'
+            )
+            : ''
+            }}
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            Riesgo anterior
+          </span>
+
+          <strong>
+            {{ evaluacion.edadRiesgoAnterior || '' }}
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            Riesgo inicial
+          </span>
+
+          <strong>
+            {{ evaluacion.edadRiesgoInicial || '' }}
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            Edad de mora
+          </span>
+
+          <strong>
+            {{ evaluacion.edadMora || '' }}
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            Riesgo nuevo
+          </span>
+
+          <strong>
+            {{ evaluacion.edadRiesgoNueva || '' }}
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            Acción
+          </span>
+
+          <strong>
+            {{ evaluacion.accionEvaluacion || '' }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div
+        *ngIf="evaluacion.comentarioEvaluacion"
+        class="detalle-observacion">
+
+        <strong>
+          Comentario
+        </strong>
+
+        <span>
+          {{ evaluacion.comentarioEvaluacion }}
+        </span>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</div>

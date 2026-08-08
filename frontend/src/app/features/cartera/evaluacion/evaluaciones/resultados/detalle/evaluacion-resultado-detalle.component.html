@@ -1,0 +1,660 @@
+<div class="page evaluacion-resultado-detalle">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <app-header-actions
+    titulo="Detalle de Evaluación de Cartera"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+
+  <!-- ===================================================== -->
+  <!-- CARGANDO -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="cargando"
+    class="estado-pantalla">
+
+    Cargando resultado de la evaluación...
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- ERROR -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="error"
+    class="alert alert--error">
+
+    {{ error }}
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CONTENIDO -->
+  <!-- ===================================================== -->
+
+  <ng-container
+    *ngIf="
+      !cargando
+      && !error
+      && resultado as r
+    ">
+
+
+    <!-- =================================================== -->
+    <!-- IDENTIFICACIÓN -->
+    <!-- =================================================== -->
+
+    <section class="card identificacion-card">
+
+      <div class="identificacion-principal">
+
+        <div>
+
+          <span class="seccion-etiqueta">
+            Asociado
+          </span>
+
+          <h2>
+            {{ r.nombreCompleto }}
+          </h2>
+
+
+          <div class="identificacion-linea">
+
+            <span>
+
+              Documento:
+
+              <strong>
+                {{ r.documento }}
+              </strong>
+
+            </span>
+
+
+            <span>
+
+              Pagaré:
+
+              <strong>
+                {{ r.pagareCartera }}
+              </strong>
+
+            </span>
+
+
+            <span>
+
+              Clasificación:
+
+              <strong>
+                {{ r.codigoClasificacionCredito }}
+              </strong>
+
+            </span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- DATOS DEL CRÉDITO -->
+      <!-- ================================================= -->
+
+      <div class="identificacion-grid">
+
+        <div>
+
+          <span>
+            Valor inicial
+          </span>
+
+          <strong>
+
+            {{
+            r.valorInicialCredito
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            Saldo actual
+          </span>
+
+          <strong>
+
+            {{
+            r.saldoActual
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            Id. crédito
+          </span>
+
+          <strong>
+            {{ r.idCarteraCredito }}
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            Resultado
+          </span>
+
+          <strong>
+
+            {{
+            r.descripcionAccion
+            || descripcionAccion(
+            r.accionEvaluacion
+            )
+            }}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- RESULTADO PRINCIPAL -->
+    <!-- =================================================== -->
+
+    <section class="card resultado-card-principal">
+
+      <div class="seccion-titulo">
+
+        <div>
+
+          <h3>
+            Resultado de la evaluación
+          </h3>
+
+          <span>
+            Recomendación informativa generada por el motor
+            de evaluación de cartera.
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="resultado-principal-grid">
+
+
+        <!-- RIESGO ACTUAL -->
+
+        <article>
+
+          <span>
+            Edad de riesgo actual
+          </span>
+
+          <strong class="riesgo-valor">
+            {{ r.edadRiesgoAnterior || '' }}
+          </strong>
+
+        </article>
+
+
+        <!-- EDAD DE MORA -->
+
+        <article>
+
+          <span>
+            Edad de mora
+          </span>
+
+          <strong class="riesgo-valor">
+            {{ r.edadMora || '' }}
+          </strong>
+
+        </article>
+
+
+        <!-- RIESGO SUGERIDO -->
+
+        <article
+          [class.resultado--reclasificar]="
+            r.accionEvaluacion === 'R'
+          "
+          [class.resultado--habilitar]="
+            r.accionEvaluacion === 'H'
+          "
+          [class.resultado--mantener]="
+            r.accionEvaluacion === 'M'
+          ">
+
+          <span>
+            Edad de riesgo sugerida
+          </span>
+
+          <strong class="riesgo-valor">
+            {{ r.edadRiesgoFinal || '' }}
+          </strong>
+
+        </article>
+
+
+        <!-- PUNTAJE -->
+
+        <article>
+
+          <span>
+            Puntaje total
+          </span>
+
+          <strong class="puntaje-valor">
+
+            {{
+            r.puntajeTotal
+            | number:'1.0-2'
+            }}
+
+          </strong>
+
+        </article>
+
+
+        <!-- ACCIÓN -->
+
+        <article
+          class="resultado-accion"
+          [class.resultado--reclasificar]="
+            r.accionEvaluacion === 'R'
+          "
+          [class.resultado--habilitar]="
+            r.accionEvaluacion === 'H'
+          "
+          [class.resultado--mantener]="
+            r.accionEvaluacion === 'M'
+          ">
+
+          <span>
+            Acción sugerida
+          </span>
+
+          <strong>
+
+            {{
+            r.descripcionAccion
+            || descripcionAccion(
+            r.accionEvaluacion
+            )
+            }}
+
+          </strong>
+
+        </article>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- COMENTARIO -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="r.comentarioEvaluacion"
+        class="comentario-evaluacion">
+
+        <strong>
+          Comentario de la evaluación
+        </strong>
+
+        <p>
+          {{ r.comentarioEvaluacion }}
+        </p>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- ACLARACIÓN -->
+      <!-- ================================================= -->
+
+      <div class="nota-informativa">
+
+        <strong>
+          Importante:
+        </strong>
+
+        el resultado presentado corresponde a una recomendación
+        informativa del proceso de evaluación y no modifica
+        directamente la edad de riesgo del crédito.
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- CRITERIOS -->
+    <!-- =================================================== -->
+
+    <section class="card criterios-card">
+
+      <div class="seccion-titulo">
+
+        <div>
+
+          <h3>
+            Detalle de criterios
+          </h3>
+
+          <span>
+            Variables y reglas aplicadas durante la evaluación.
+          </span>
+
+        </div>
+
+
+        <div class="criterios-contador">
+
+          {{ criterios.length }}
+          criterios
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- TABLA -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="criterios.length > 0"
+        class="table-responsive">
+
+        <table class="table criterios-table">
+
+          <thead>
+
+          <tr>
+
+            <th class="col-orden">
+              #
+            </th>
+
+            <th>
+              Código
+            </th>
+
+            <th>
+              Criterio
+            </th>
+
+            <th>
+              Resultado
+            </th>
+
+            <th>
+              Regla aplicada
+            </th>
+
+            <th class="text-end">
+              Puntaje
+            </th>
+
+            <th class="text-end">
+              Máximo
+            </th>
+
+            <th>
+              Observaciones
+            </th>
+
+          </tr>
+
+          </thead>
+
+
+          <tbody>
+
+          <tr
+            *ngFor="
+                let criterio of criterios;
+                trackBy: trackByCriterio
+              ">
+
+            <!-- ORDEN -->
+
+            <td class="col-orden">
+
+              {{ criterio.ordenEvaluacion }}
+
+            </td>
+
+
+            <!-- CÓDIGO -->
+
+            <td class="criterio-codigo-col">
+
+              {{ criterio.codigoCriterio }}
+
+            </td>
+
+
+            <!-- CRITERIO -->
+
+            <td class="criterio-nombre">
+
+              <strong>
+                {{ criterio.nombreCriterio }}
+              </strong>
+
+            </td>
+
+
+            <!-- RESULTADO -->
+
+            <td class="resultado-descripcion">
+
+              <strong>
+                {{ criterio.descripcionResultado }}
+              </strong>
+
+              <small
+                *ngIf="criterio.codigoResultado">
+
+                Código:
+                {{ criterio.codigoResultado }}
+
+              </small>
+
+            </td>
+
+
+            <!-- REGLA -->
+
+            <td class="regla-aplicada">
+
+              <strong>
+                {{ criterio.codigoRegla }}
+              </strong>
+
+              <small>
+                {{ criterio.nombreRegla }}
+              </small>
+
+            </td>
+
+
+            <!-- PUNTAJE -->
+
+            <td class="text-end puntaje">
+
+              {{
+              criterio.puntajeObtenido
+              | number:'1.0-2'
+              }}
+
+            </td>
+
+
+            <!-- MÁXIMO -->
+
+            <td class="text-end">
+
+              {{
+              criterio.puntajeMaximo
+              | number:'1.0-2'
+              }}
+
+            </td>
+
+
+            <!-- OBSERVACIONES -->
+
+            <td class="observaciones">
+
+              {{ criterio.observaciones || '' }}
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+
+          <!-- ================================================= -->
+          <!-- TOTAL -->
+          <!-- ================================================= -->
+
+          <tfoot>
+
+          <tr>
+
+            <td colspan="5">
+
+              <strong>
+                Total
+              </strong>
+
+            </td>
+
+
+            <td class="text-end">
+
+              <strong>
+
+                {{
+                puntajeDetalle
+                | number:'1.0-2'
+                }}
+
+              </strong>
+
+            </td>
+
+
+            <td class="text-end">
+
+              <strong>
+
+                {{
+                puntajeMaximo
+                | number:'1.0-2'
+                }}
+
+              </strong>
+
+            </td>
+
+
+            <td></td>
+
+          </tr>
+
+          </tfoot>
+
+        </table>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- SIN CRITERIOS -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="criterios.length === 0"
+        class="estado-vacio">
+
+        El crédito no tiene criterios de evaluación registrados.
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- ACCIONES -->
+    <!-- =================================================== -->
+
+    <section class="card acciones-card">
+
+      <div class="acciones">
+
+        <button
+          type="button"
+          class="btn btn--cancel"
+          (click)="volver()">
+
+          Volver
+
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          [disabled]="criterios.length === 0"
+          (click)="imprimirFormato()">
+
+          Imprimir formato
+
+        </button>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</div>

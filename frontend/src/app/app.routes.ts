@@ -41,6 +41,14 @@ export const routes: Routes = [
             .then(m => m.DEPOSITOS_ROUTES),
       },
 
+      // === CARTERA ===
+      {
+        path: 'cartera',
+        loadChildren: () =>
+          import('./features/cartera/cartera.routes')
+            .then(m => m.CARTERA_ROUTES),
+      },
+
       // === CDAT ===
       {
         path: 'cdat',

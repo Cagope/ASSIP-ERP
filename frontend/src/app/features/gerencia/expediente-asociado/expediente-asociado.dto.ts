@@ -1310,35 +1310,295 @@ export interface ExpedienteCdat {
 }
 
 export interface ExpedienteCredito {
-  idCredito: number;
-  idDatosPersonal: number;
+
+  // =========================================================
+  // Identificación del asociado
+  // =========================================================
+
+  idDatosPersonal: number | null;
+
+  tipoDocumento: string | null;
+  nombreTipoDocumento: string | null;
   documento: string | null;
+
+  nombres: string | null;
+  primerApellido: string | null;
+  segundoApellido: string | null;
   nombreCompleto: string | null;
 
+  // =========================================================
+  // Identificación del crédito
+  // =========================================================
+
+  idCredito: number | null;
+
   numeroCredito: string | null;
+  numeroSolicitud: string | null;
+
+  referenciaCredito: string | null;
+  descripcionCredito: string | null;
+
+  // =========================================================
+  // Fábrica u origen
+  // =========================================================
+
+  idFabricaCredito: number | null;
+
+  codigoFabricaCredito: string | null;
+  nombreFabricaCredito: string | null;
+
+  origenCredito: string | null;
+
+  // =========================================================
+  // Línea y producto
+  // =========================================================
+
+  idLineaCredito: number | null;
+
   codigoLineaCredito: string | null;
   nombreLineaCredito: string | null;
 
-  codigoEstadoCredito: string | null;
-  nombreEstadoCredito: string | null;
+  idTipoProducto: number | null;
+  codigoTipoProducto: string | null;
+  nombreTipoProducto: string | null;
 
+  idClasificacionCredito: number | null;
+  codigoClasificacionCredito: string | null;
+  nombreClasificacionCredito: string | null;
+
+  // =========================================================
+  // Estado del crédito
+  // =========================================================
+
+  idEstadoCartera: number | null;
+
+  codigoEstadoCartera: string | null;
+  nombreEstadoCartera: string | null;
+
+  vigente: boolean;
+  cancelado: boolean;
+  castigado: boolean;
+  enMora: boolean;
+
+  reestructurado: boolean;
+  novado: boolean;
+  alivio: boolean;
+  refinanciado: boolean;
+
+  // =========================================================
+  // Fechas principales
+  // =========================================================
+
+  fechaSolicitud: string | null;
+  fechaAprobacion: string | null;
   fechaDesembolso: string | null;
-  fechaVencimiento: string | null;
 
-  valorDesembolso: number;
-  saldoCapital: number;
-  saldoIntereses: number;
+  fechaPrimerVencimiento: string | null;
+  fechaVencimiento: string | null;
+  fechaProximoPago: string | null;
+
+  fechaUltimoPago: string | null;
+  fechaCancelacion: string | null;
+
+  diasDesdeDesembolso: number;
+  diasParaProximoPago: number;
+
+  // =========================================================
+  // Condiciones iniciales
+  // =========================================================
+
+  valorSolicitado: number;
+  valorAprobado: number;
+  valorDesembolsado: number;
+
+  plazoInicial: number;
+  plazo: number;
+
+  numeroCuotasInicial: number;
+  numeroCuotasPagadas: number;
+  numeroCuotasPendientes: number;
+  numeroCuotasVencidas: number;
+
+  // =========================================================
+  // Tipo de cuota y forma de pago
+  // =========================================================
+
+  idTipoCuota: number | null;
+  codigoTipoCuota: string | null;
+  nombreTipoCuota: string | null;
+
+  idFormaPago: number | null;
+  codigoFormaPago: string | null;
+  nombreFormaPago: string | null;
+
+  periodicidadPago: string | null;
+
+  valorCuotaInicial: number;
+  valorCuota: number;
+
+  // =========================================================
+  // Modalidad y tasas
+  // =========================================================
+
+  idModalidadInteres: number | null;
+
+  codigoModalidadInteres: string | null;
+  nombreModalidadInteres: string | null;
+
+  tasaNominal: number;
+  tasaEfectivaAnual: number;
+  tasaMora: number;
+
+  tasaRedescuento: number;
+  margenRedescuento: number;
+
+  // =========================================================
+  // Saldos
+  // =========================================================
+
+  saldoActual: number;
+
+  saldoInteresCorriente: number;
+  saldoInteresMora: number;
+
+  saldoSeguro: number;
+  saldoOtrosConceptos: number;
+
   saldoTotal: number;
 
+  capitalVencido: number;
+  interesesVencidos: number;
+  valorVencidoTotal: number;
+
+  // =========================================================
+  // Pagos
+  // =========================================================
+
+  totalPagadoCapital: number;
+  totalPagadoIntereses: number;
+  totalPagadoMora: number;
+  totalPagadoSeguros: number;
+  totalPagadoOtros: number;
+
+  totalPagado: number;
+  ultimoValorPagado: number;
+
+  // =========================================================
+  // Mora
+  // =========================================================
+
   diasMora: number;
+  edadMora: number;
+
+  rangoMora: string | null;
+
+  moraLeve: boolean;
+  moraModerada: boolean;
+  moraGrave: boolean;
+
+  // =========================================================
+  // Riesgo
+  // =========================================================
+
+  edadRiesgoInicial: string | null;
   edadRiesgo: string | null;
 
-  activo: boolean;
-  vencido: boolean;
-  enMora: boolean;
-  requiereRevision: boolean;
+  edadRiesgoEvaluada: string | null;
+  edadRiesgoFinal: string | null;
 
-  [campo: string]: unknown;
+  codigoCalificacion: string | null;
+  nombreCalificacion: string | null;
+
+  resultadoEvaluacion: string | null;
+  accionEvaluacion: string | null;
+
+  fechaUltimaEvaluacion: string | null;
+  fechaProximaEvaluacion: string | null;
+
+  requiereEvaluacion: boolean;
+  evaluacionVencida: boolean;
+
+  // =========================================================
+  // Garantía principal
+  // =========================================================
+
+  idTipoGarantiaCredito: number | null;
+
+  codigoGarantia: string | null;
+  nombreGarantia: string | null;
+
+  garantiaIdonea: boolean;
+  tieneGarantiaReal: boolean;
+
+  cantidadGarantias: number;
+
+  valorGarantias: number;
+  valorGarantiasAdmisible: number;
+
+  porcentajeCoberturaGarantias: number;
+
+  excesoGarantia: number;
+  faltanteGarantia: number;
+
+  garantiaSuficiente: boolean;
+  garantiaInsuficiente: boolean;
+
+  // =========================================================
+  // Estado jurídico
+  // =========================================================
+
+  idEstadoJuridico: number | null;
+
+  codigoEstadoJuridico: string | null;
+  nombreEstadoJuridico: string | null;
+
+  enCobranza: boolean;
+  prejuridico: boolean;
+  juridico: boolean;
+  insolvente: boolean;
+
+  fechaInicioCobranza: string | null;
+  fechaInicioJuridico: string | null;
+
+  abogadoResponsable: string | null;
+  numeroProcesoJuridico: string | null;
+
+  // =========================================================
+  // Seguimiento
+  // =========================================================
+
+  requiereRevision: boolean;
+  requiereGestionCobranza: boolean;
+  requiereActualizacionGarantias: boolean;
+
+  cantidadAlertas: number;
+
+  alertasCriticas: number;
+  alertasAdvertencia: number;
+  alertasInformativas: number;
+
+  nivelAlerta: string | null;
+  resumenAlertas: string | null;
+  motivoRevision: string | null;
+
+  // =========================================================
+  // Agencia y responsable
+  // =========================================================
+
+  idAgencia: number | null;
+
+  codigoAgencia: string | null;
+  nombreAgencia: string | null;
+
+  idAsesor: number | null;
+  nombreAsesor: string | null;
+
+  // =========================================================
+  // Observaciones
+  // =========================================================
+
+  observaciones: string | null;
+
 }
 
 export interface ExpedienteBienInmueble {

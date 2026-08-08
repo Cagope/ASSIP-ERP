@@ -1,0 +1,233 @@
+<div class="card chart-card">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <div class="section-header">
+
+    <div class="chart-title">
+
+      <h3>
+        {{ titulo }}
+      </h3>
+
+      <small>
+        {{ subtitulo }}
+      </small>
+
+    </div>
+
+    <div
+      *ngIf="items.length"
+      class="chart-summary">
+
+      <div class="summary-item">
+
+        <span>
+          Cartera
+        </span>
+
+        <strong>
+          {{ formatoMoneda(totalSaldoCartera) }}
+        </strong>
+
+      </div>
+
+      <div class="summary-item">
+
+        <span>
+          Saldo en mora
+        </span>
+
+        <strong class="danger">
+          {{ formatoMoneda(totalSaldoCreditosMora) }}
+        </strong>
+
+      </div>
+
+      <div class="summary-item">
+
+        <span>
+          Índice de mora
+        </span>
+
+        <strong
+          class="summary-index"
+          [class.indice-low]="indiceMoraGeneral < 8"
+          [class.indice-medium]="
+            indiceMoraGeneral >= 8
+            && indiceMoraGeneral < 15
+          "
+          [class.indice-high]="indiceMoraGeneral >= 15">
+
+          {{ formatoPorcentaje(indiceMoraGeneral) }}%
+
+        </strong>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- LEYENDA -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="items.length"
+    class="chart-legend">
+
+    <div class="legend-item">
+
+      <span class="legend-color legend-color--saldo">
+      </span>
+
+      <span>
+        Saldo de cartera
+      </span>
+
+    </div>
+
+    <div class="legend-item">
+
+      <span class="legend-color legend-color--mora">
+      </span>
+
+      <span>
+        Saldo de créditos en mora
+      </span>
+
+    </div>
+
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- GRÁFICA -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="items.length"
+    class="chart-content">
+
+    <div
+      *ngFor="
+        let item of items;
+        trackBy: trackByLinea
+      "
+      class="bar-item">
+
+      <!-- Información de la línea -->
+
+      <div class="bar-header">
+
+        <div class="line-info">
+
+          <span class="line-code">
+            {{ item.codigo }}
+          </span>
+
+          <span
+            class="line-description"
+            [title]="item.descripcion">
+
+            {{ item.descripcion }}
+
+          </span>
+
+        </div>
+
+        <div class="line-index">
+
+          <span>
+            Índice de mora
+          </span>
+
+          <strong
+            [class.indice-low]="item.indiceMora < 8"
+            [class.indice-medium]="
+              item.indiceMora >= 8
+              && item.indiceMora < 15
+            "
+            [class.indice-high]="item.indiceMora >= 15">
+
+            {{ formatoPorcentaje(item.indiceMora) }}%
+
+          </strong>
+
+        </div>
+
+      </div>
+
+      <!-- Barra de saldo de cartera -->
+
+      <div class="bar-row">
+
+        <div class="bar-row-header">
+
+          <span class="bar-label">
+            Cartera
+          </span>
+
+          <strong class="bar-value">
+            {{ formatoMoneda(item.saldoCartera) }}
+          </strong>
+
+        </div>
+
+        <div class="bar-track">
+
+          <div
+            class="bar-fill bar-fill--saldo"
+            [style.width.%]="item.porcentajeSaldo">
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Barra de saldo en mora -->
+
+      <div class="bar-row">
+
+        <div class="bar-row-header">
+
+          <span class="bar-label">
+            Mora
+          </span>
+
+          <strong class="bar-value bar-value--danger">
+            {{ formatoMoneda(item.saldoCreditosMora) }}
+          </strong>
+
+        </div>
+
+        <div class="bar-track">
+
+          <div
+            class="bar-fill bar-fill--mora"
+            [style.width.%]="item.porcentajeMora">
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- SIN INFORMACIÓN -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="!items.length"
+    class="empty-chart">
+
+    No hay información por línea de crédito para mostrar.
+
+  </div>
+
+</div>

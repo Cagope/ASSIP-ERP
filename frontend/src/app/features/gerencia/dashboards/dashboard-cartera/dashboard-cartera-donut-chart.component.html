@@ -1,0 +1,141 @@
+<div class="chart-card">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <div class="chart-header">
+
+    <div>
+
+      <h3>
+        {{ titulo }}
+      </h3>
+
+      <small>
+        {{ subtitulo }}
+      </small>
+
+    </div>
+
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- CONTENIDO -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="tieneInformacion"
+    class="donut-layout">
+
+    <!-- =================================================== -->
+    <!-- DONUT -->
+    <!-- =================================================== -->
+
+    <div class="donut-container">
+
+      <div
+        class="donut-chart"
+        [style.background]="fondoDonut">
+
+        <div class="donut-center">
+
+          <span class="donut-center-label">
+            Saldo cartera
+          </span>
+
+          <strong class="donut-center-value">
+            {{ formatoMonedaCompacta(totalSaldoCartera) }}
+          </strong>
+
+          <span class="donut-center-credits">
+            {{ totalCreditos | number:'1.0-0' }}
+            créditos
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- =================================================== -->
+    <!-- LEYENDA -->
+    <!-- =================================================== -->
+
+    <div class="legend">
+
+      <div
+        *ngFor="
+          let item of segmentos;
+          trackBy: trackBySegmento
+        "
+        class="legend-row">
+
+        <div class="legend-main">
+
+          <div class="legend-identification">
+
+            <span
+              class="legend-color"
+              [style.background]="item.color">
+            </span>
+
+            <span class="legend-code">
+              {{ item.codigo }}
+            </span>
+
+            <span class="legend-label">
+              {{ item.descripcion }}
+            </span>
+
+          </div>
+
+          <strong class="legend-percentage">
+            {{ formatoPorcentaje(item.porcentajeCalculado) }}%
+          </strong>
+
+        </div>
+
+        <div class="legend-data">
+
+          <span>
+            {{ item.cantidadCreditos | number:'1.0-0' }}
+            créditos
+          </span>
+
+          <strong>
+            {{ formatoMonedaCompacta(item.saldoCartera) }}
+          </strong>
+
+        </div>
+
+        <div class="legend-progress">
+
+          <div
+            class="legend-progress-value"
+            [style.width.%]="item.porcentajeCalculado"
+            [style.background]="item.color">
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- SIN INFORMACIÓN -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="!tieneInformacion"
+    class="empty-chart">
+
+    No hay información disponible para mostrar.
+
+  </div>
+
+</div>

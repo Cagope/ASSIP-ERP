@@ -1,0 +1,1367 @@
+<div class="page">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <div class="page-header">
+
+    <div>
+      <h2>Dashboard Ejecutivo de Cartera</h2>
+
+      <small>
+        Indicadores gerenciales, calidad, riesgo, mora y composición
+        de la cartera de créditos.
+      </small>
+    </div>
+
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- FILTROS -->
+  <!-- ===================================================== -->
+
+  <div class="card">
+
+    <div class="section-header">
+
+      <div>
+        <h3>Filtros</h3>
+
+        <small>
+          Consulte la cartera vigente y los recaudos registrados
+          para el período seleccionado.
+        </small>
+      </div>
+
+    </div>
+
+    <div class="filters-grid">
+
+      <!-- ===================================================== -->
+      <!-- FECHA DE CORTE -->
+      <!-- ===================================================== -->
+
+      <div class="f-row">
+
+        <label for="fechaCorte">
+          Fecha de corte
+        </label>
+
+        <input
+          id="fechaCorte"
+          name="fechaCorte"
+          type="date"
+          [(ngModel)]="filtro.fechaCorte"
+          [disabled]="cargando">
+
+      </div>
+
+      <!-- ===================================================== -->
+      <!-- RECAUDOS DESDE -->
+      <!-- ===================================================== -->
+
+      <div class="f-row">
+
+        <label for="fechaDesde">
+          Recaudos desde
+        </label>
+
+        <input
+          id="fechaDesde"
+          name="fechaDesde"
+          type="date"
+          [(ngModel)]="filtro.fechaDesde"
+          [disabled]="cargando">
+
+      </div>
+
+      <!-- ===================================================== -->
+      <!-- RECAUDOS HASTA -->
+      <!-- ===================================================== -->
+
+      <div class="f-row">
+
+        <label for="fechaHasta">
+          Recaudos hasta
+        </label>
+
+        <input
+          id="fechaHasta"
+          name="fechaHasta"
+          type="date"
+          [(ngModel)]="filtro.fechaHasta"
+          [disabled]="cargando">
+
+      </div>
+
+      <!-- ===================================================== -->
+      <!-- AGENCIA -->
+      <!-- ===================================================== -->
+
+      <div class="f-row">
+
+        <label for="idAgencia">
+          Agencia
+        </label>
+
+        <select
+          id="idAgencia"
+          name="idAgencia"
+          [(ngModel)]="filtro.idAgencia"
+          (change)="onChangeAgencia()"
+          [disabled]="cargando || cargandoAgencias">
+
+          <option [ngValue]="null">
+            Todas las agencias
+          </option>
+
+          <option
+            *ngFor="let agencia of agenciasFiltro"
+            [ngValue]="agencia.idAgencia">
+
+            {{ agencia.codigoAgencia }}
+            -
+            {{ agencia.nombreAgencia }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+      <!-- ===================================================== -->
+      <!-- LÍNEA DE CRÉDITO -->
+      <!-- ===================================================== -->
+
+      <div class="f-row">
+
+        <label for="idLineaCredito">
+          Línea de crédito
+        </label>
+
+        <select
+          id="idLineaCredito"
+          name="idLineaCredito"
+          [(ngModel)]="filtro.idLineaCredito"
+          [disabled]="cargando || cargandoCatalogosCartera">
+
+          <option [ngValue]="null">
+            Todas las líneas
+          </option>
+
+          <option
+            *ngFor="let linea of lineasCreditoFiltro"
+            [ngValue]="linea.id">
+
+            {{ linea.codigo }}
+            -
+            {{ linea.nombre }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+      <!-- ===================================================== -->
+      <!-- EDAD DE RIESGO -->
+      <!-- ===================================================== -->
+
+      <div class="f-row">
+
+        <label for="edadRiesgo">
+          Edad de riesgo
+        </label>
+
+        <select
+          id="edadRiesgo"
+          name="edadRiesgo"
+          [(ngModel)]="filtro.edadRiesgo"
+          [disabled]="cargando || cargandoCatalogosCartera">
+
+          <option [ngValue]="null">
+            Todas
+          </option>
+
+          <option
+            *ngFor="let edad of edadesRiesgoFiltro"
+            [ngValue]="edad.codigo">
+
+            {{ edad.codigo }}
+            -
+            {{ edad.nombre }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+      <!-- ===================================================== -->
+      <!-- EDAD DE MORA -->
+      <!-- ===================================================== -->
+
+      <div class="f-row">
+
+        <label for="edadMora">
+          Edad de mora
+        </label>
+
+        <select
+          id="edadMora"
+          name="edadMora"
+          [(ngModel)]="filtro.edadMora"
+          [disabled]="cargando || cargandoCatalogosCartera">
+
+          <option [ngValue]="null">
+            Todas
+          </option>
+
+          <option
+            *ngFor="let edad of edadesRiesgoFiltro"
+            [ngValue]="edad.codigo">
+
+            {{ edad.codigo }}
+            -
+            {{ edad.nombre }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+      <!-- ===================================================== -->
+      <!-- ESTADO DE CARTERA -->
+      <!-- ===================================================== -->
+
+      <div class="f-row">
+
+        <label for="codigoEstadoCartera">
+          Estado de cartera
+        </label>
+
+        <select
+          id="codigoEstadoCartera"
+          name="codigoEstadoCartera"
+          [(ngModel)]="filtro.codigoEstadoCartera"
+          [disabled]="cargando || cargandoCatalogosCartera">
+
+          <option [ngValue]="null">
+            Todos
+          </option>
+
+          <option
+            *ngFor="let estado of estadosCarteraFiltro"
+            [ngValue]="estado.codigo">
+
+            {{ estado.codigo }}
+            -
+            {{ estado.nombre }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+      <!-- ===================================================== -->
+      <!-- ESTADO JURÍDICO -->
+      <!-- ===================================================== -->
+
+      <div class="f-row">
+
+        <label for="codigoEstadoJuridico">
+          Estado jurídico
+        </label>
+
+        <select
+          id="codigoEstadoJuridico"
+          name="codigoEstadoJuridico"
+          [(ngModel)]="filtro.codigoEstadoJuridico"
+          [disabled]="cargando || cargandoCatalogosCartera">
+
+          <option [ngValue]="null">
+            Todos
+          </option>
+
+          <option
+            *ngFor="let estado of estadosJuridicosFiltro"
+            [ngValue]="estado.codigo">
+
+            {{ estado.codigo }}
+            -
+            {{ estado.nombre }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+      <!-- ===================================================== -->
+      <!-- CLASIFICACIÓN DEL CRÉDITO -->
+      <!-- ===================================================== -->
+
+      <div class="f-row">
+
+        <label for="codigoClasificacionCredito">
+          Clasificación
+        </label>
+
+        <select
+          id="codigoClasificacionCredito"
+          name="codigoClasificacionCredito"
+          [(ngModel)]="filtro.codigoClasificacionCredito"
+          [disabled]="cargando || cargandoCatalogosCartera">
+
+          <option [ngValue]="null">
+            Todas
+          </option>
+
+          <option
+            *ngFor="let clasificacion of clasificacionesCreditoFiltro"
+            [ngValue]="clasificacion.codigo">
+
+            {{ clasificacion.codigo }}
+            -
+            {{ clasificacion.nombre }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+      <!-- ===================================================== -->
+      <!-- GARANTÍA DEL CRÉDITO -->
+      <!-- ===================================================== -->
+
+      <div class="f-row">
+
+        <label for="codigoGarantiaCredito">
+          Garantía
+        </label>
+
+        <select
+          id="codigoGarantiaCredito"
+          name="codigoGarantiaCredito"
+          [(ngModel)]="filtro.codigoGarantiaCredito"
+          [disabled]="cargando || cargandoCatalogosCartera">
+
+          <option [ngValue]="null">
+            Todas
+          </option>
+
+          <option
+            *ngFor="let garantia of garantiasCreditoFiltro"
+            [ngValue]="garantia.codigo">
+
+            {{ garantia.codigo }}
+            -
+            {{ garantia.nombre }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="limpiar()"
+        [disabled]="cargando">
+
+        Limpiar
+
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="consultar()"
+        [disabled]="cargando">
+
+        Consultar
+
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- ERROR DE CATÁLOGOS -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="errorCatalogos"
+    class="alert alert-error">
+
+    {{ errorCatalogos }}
+
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- ERROR DEL DASHBOARD -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="error"
+    class="alert alert-error">
+
+    {{ error }}
+
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- CARGANDO -->
+  <!-- ===================================================== -->
+  <div
+    *ngIf="cargando"
+    class="loading-box">
+
+    Consultando dashboard ejecutivo de cartera...
+
+  </div>
+
+  <ng-container *ngIf="!cargando">
+
+    <!-- =================================================== -->
+    <!-- RESUMEN EJECUTIVO -->
+    <!-- =================================================== -->
+
+    <div class="card">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Resumen ejecutivo</h3>
+
+          <small>
+            Indicadores principales de saldo, mora, asociados,
+            créditos y recaudos.
+          </small>
+        </div>
+
+        <div class="periodo-consultado">
+
+          <span>
+            Corte:
+            <strong>
+              {{ dashboard.fechaCorte }}
+            </strong>
+          </span>
+
+          <span>
+            Recaudos:
+            <strong>
+              {{ dashboard.fechaDesde }}
+              a
+              {{ dashboard.fechaHasta }}
+            </strong>
+          </span>
+
+        </div>
+
+      </div>
+
+      <div class="cards-grid">
+
+        <div class="stat-card stat-card--primary">
+
+          <span class="stat-label">
+            Saldo de cartera
+          </span>
+
+          <span class="stat-value">
+            $ {{ resumen.saldoCartera | number:'1.0-0' }}
+          </span>
+
+          <span class="stat-detail">
+            Saldo total vigente a la fecha de corte
+          </span>
+
+        </div>
+
+        <div class="stat-card stat-card--danger">
+
+          <span class="stat-label">
+            Saldo de créditos en mora
+          </span>
+
+          <span class="stat-value">
+            $ {{ resumen.saldoCreditosMora | number:'1.0-0' }}
+          </span>
+
+          <span class="stat-detail">
+            Exposición total de créditos con mora
+          </span>
+
+        </div>
+
+        <div class="stat-card stat-card--warning">
+
+          <span class="stat-label">
+            Índice de mora
+          </span>
+
+          <span class="stat-value">
+            {{ resumen.indiceMora | number:'1.2-2' }}%
+          </span>
+
+          <span class="stat-detail">
+            Saldo en mora sobre saldo de cartera
+          </span>
+
+        </div>
+
+        <div class="stat-card">
+
+          <span class="stat-label">
+            Créditos con saldo
+          </span>
+
+          <span class="stat-value">
+            {{ resumen.cantidadCreditosConSaldo | number:'1.0-0' }}
+          </span>
+
+          <span class="stat-detail">
+            Operaciones activas con saldo pendiente
+          </span>
+
+        </div>
+
+        <div class="stat-card">
+
+          <span class="stat-label">
+            Asociados con cartera
+          </span>
+
+          <span class="stat-value">
+            {{ resumen.cantidadAsociados | number:'1.0-0' }}
+          </span>
+
+          <span class="stat-detail">
+            Asociados únicos con obligaciones vigentes
+          </span>
+
+        </div>
+
+        <div class="stat-card stat-card--danger-soft">
+
+          <span class="stat-label">
+            Créditos en mora
+          </span>
+
+          <span class="stat-value">
+            {{ resumen.cantidadCreditosMora | number:'1.0-0' }}
+          </span>
+
+          <span class="stat-detail">
+            Operaciones identificadas con mora
+          </span>
+
+        </div>
+
+        <div class="stat-card stat-card--danger-soft">
+
+          <span class="stat-label">
+            Créditos críticos
+          </span>
+
+          <span class="stat-value">
+            {{ resumen.cantidadCreditosCriticos | number:'1.0-0' }}
+          </span>
+
+          <span class="stat-detail">
+            Riesgo alto o mora alta
+          </span>
+
+        </div>
+
+        <div class="stat-card">
+
+          <span class="stat-label">
+            Saldo neto pendiente
+          </span>
+
+          <span class="stat-value">
+            $ {{ resumen.saldoNetoPendiente | number:'1.0-0' }}
+          </span>
+
+          <span class="stat-detail">
+            Saldo neto consolidado pendiente
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- =================================================== -->
+    <!-- GRÁFICAS -->
+    <!-- =================================================== -->
+
+    <div class="charts-grid">
+
+      <app-dashboard-cartera-bar-chart
+        titulo="Cartera por línea de crédito"
+        subtitulo="Saldo de cartera y saldo de créditos en mora"
+        [data]="lineas">
+      </app-dashboard-cartera-bar-chart>
+
+      <!-- =================================================== -->
+      <!-- DISTRIBUCIÓN DE RIESGO Y MORA -->
+      <!-- =================================================== -->
+
+      <div class="donuts-grid">
+
+        <app-dashboard-cartera-donut-chart
+          titulo="Distribución por edad de riesgo"
+          subtitulo="Participación del saldo de cartera según clasificación de riesgo."
+          [data]="riesgos">
+        </app-dashboard-cartera-donut-chart>
+
+        <app-dashboard-cartera-donut-chart
+          titulo="Distribución por edad de mora"
+          subtitulo="Participación del saldo de cartera según clasificación de mora."
+          [data]="moras">
+        </app-dashboard-cartera-donut-chart>
+
+      </div>
+
+    </div>
+
+    <!-- =================================================== -->
+    <!-- INDICADORES DE GESTIÓN -->
+    <!-- =================================================== -->
+
+    <div class="card">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Indicadores de gestión y seguimiento</h3>
+
+          <small>
+            Estado de deterioro, mejora, gestión jurídica
+            y modificaciones de cartera.
+          </small>
+        </div>
+
+      </div>
+
+      <div class="cards-grid cards-grid--compact">
+
+        <div class="stat-card">
+
+          <span class="stat-label">
+            Deteriorados
+          </span>
+
+          <span class="stat-value">
+            {{ resumen.cantidadDeteriorados | number:'1.0-0' }}
+          </span>
+
+        </div>
+
+        <div class="stat-card stat-card--success">
+
+          <span class="stat-label">
+            Mejorados
+          </span>
+
+          <span class="stat-value">
+            {{ resumen.cantidadMejorados | number:'1.0-0' }}
+          </span>
+
+        </div>
+
+        <div class="stat-card stat-card--warning">
+
+          <span class="stat-label">
+            Reestructurados
+          </span>
+
+          <span class="stat-value">
+            {{ resumen.cantidadReestructurados | number:'1.0-0' }}
+          </span>
+
+        </div>
+
+        <div class="stat-card stat-card--danger-soft">
+
+          <span class="stat-label">
+            Gestión jurídica
+          </span>
+
+          <span class="stat-value">
+            {{ resumen.cantidadJuridicos | number:'1.0-0' }}
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- =================================================== -->
+    <!-- DISTRIBUCIÓN POR RIESGO Y MORA -->
+    <!-- =================================================== -->
+
+    <div class="double-grid">
+
+      <!-- RIESGO -->
+
+      <div class="card">
+
+        <div class="section-header">
+
+          <div>
+            <h3>Distribución por edad de riesgo</h3>
+
+            <small>
+              Calidad de cartera según la clasificación de riesgo.
+            </small>
+          </div>
+
+        </div>
+
+        <div class="table-container">
+
+          <table class="data-table">
+
+            <thead>
+
+            <tr>
+              <th>Clasificación</th>
+              <th class="right">Créditos</th>
+              <th class="right">Saldo cartera</th>
+              <th class="right">Participación</th>
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            <tr *ngFor="let r of riesgos">
+
+              <td>
+
+                <div class="classification-cell">
+
+                    <span
+                      class="classification-badge"
+                      [attr.data-code]="r.codigo">
+
+                      {{ r.codigo }}
+
+                    </span>
+
+                  <span>
+                      {{ r.descripcion }}
+                    </span>
+
+                </div>
+
+              </td>
+
+              <td class="right">
+                {{ r.cantidadCreditos | number:'1.0-0' }}
+              </td>
+
+              <td class="right">
+                $ {{ r.saldoCartera | number:'1.0-0' }}
+              </td>
+
+              <td class="right">
+                {{ r.porcentajeParticipacion | number:'1.2-2' }}%
+              </td>
+
+            </tr>
+
+            <tr *ngIf="!riesgos.length">
+
+              <td
+                colspan="4"
+                class="empty-row">
+
+                No hay información de riesgo para mostrar.
+
+              </td>
+
+            </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+      <!-- MORA -->
+
+      <div class="card">
+
+        <div class="section-header">
+
+          <div>
+            <h3>Distribución por edad de mora</h3>
+
+            <small>
+              Participación de cartera según la edad de mora.
+            </small>
+          </div>
+
+        </div>
+
+        <div class="table-container">
+
+          <table class="data-table">
+
+            <thead>
+
+            <tr>
+              <th>Clasificación</th>
+              <th class="right">Créditos</th>
+              <th class="right">Saldo cartera</th>
+              <th class="right">Participación</th>
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            <tr *ngFor="let m of moras">
+
+              <td>
+
+                <div class="classification-cell">
+
+                    <span
+                      class="classification-badge"
+                      [attr.data-code]="m.codigo">
+
+                      {{ m.codigo }}
+
+                    </span>
+
+                  <span>
+                      {{ m.descripcion }}
+                    </span>
+
+                </div>
+
+              </td>
+
+              <td class="right">
+                {{ m.cantidadCreditos | number:'1.0-0' }}
+              </td>
+
+              <td class="right">
+                $ {{ m.saldoCartera | number:'1.0-0' }}
+              </td>
+
+              <td class="right">
+                {{ m.porcentajeParticipacion | number:'1.2-2' }}%
+              </td>
+
+            </tr>
+
+            <tr *ngIf="!moras.length">
+
+              <td
+                colspan="4"
+                class="empty-row">
+
+                No hay información de mora para mostrar.
+
+              </td>
+
+            </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- =================================================== -->
+    <!-- CARTERA POR LÍNEA -->
+    <!-- =================================================== -->
+
+    <div class="card">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Cartera por línea de crédito</h3>
+
+          <small>
+            Participación, saldo e índice de mora por producto.
+          </small>
+        </div>
+
+      </div>
+
+      <div class="table-container">
+
+        <table class="data-table">
+
+          <thead>
+
+          <tr>
+            <th>Código</th>
+            <th>Línea de crédito</th>
+            <th class="right">Créditos</th>
+            <th class="right">Asociados</th>
+            <th class="right">Valor desembolsado</th>
+            <th class="right">Saldo cartera</th>
+            <th class="right">Saldo en mora</th>
+            <th class="right">Índice mora</th>
+            <th class="right">Participación</th>
+          </tr>
+
+          </thead>
+
+          <tbody>
+
+          <tr *ngFor="let linea of lineas">
+
+            <td>
+              {{ linea.codigoLineaCredito }}
+            </td>
+
+            <td>
+              {{ linea.nombreLineaCredito }}
+            </td>
+
+            <td class="right">
+              {{ linea.cantidadCreditos | number:'1.0-0' }}
+            </td>
+
+            <td class="right">
+              {{ linea.cantidadAsociados | number:'1.0-0' }}
+            </td>
+
+            <td class="right">
+              $ {{ linea.valorDesembolsado | number:'1.0-0' }}
+            </td>
+
+            <td class="right">
+              $ {{ linea.saldoCartera | number:'1.0-0' }}
+            </td>
+
+            <td class="right">
+              $ {{ linea.saldoCreditosMora | number:'1.0-0' }}
+            </td>
+
+            <td class="right">
+
+                <span
+                  class="mora-indicator"
+                  [class.mora-indicator--high]="linea.indiceMora >= 15"
+                  [class.mora-indicator--medium]="
+                    linea.indiceMora >= 8
+                    && linea.indiceMora < 15
+                  "
+                  [class.mora-indicator--low]="linea.indiceMora < 8">
+
+                  {{ linea.indiceMora | number:'1.2-2' }}%
+
+                </span>
+
+            </td>
+
+            <td class="right">
+              {{ linea.porcentajeParticipacion | number:'1.2-2' }}%
+            </td>
+
+          </tr>
+
+          <tr *ngIf="!lineas.length">
+
+            <td
+              colspan="9"
+              class="empty-row">
+
+              No hay información por línea de crédito.
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+    <!-- =================================================== -->
+    <!-- CARTERA POR AGENCIA -->
+    <!-- =================================================== -->
+
+    <div class="card">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Cartera por agencias</h3>
+
+          <small>
+            Participación, recaudo e índice de mora por agencia.
+          </small>
+        </div>
+
+      </div>
+
+      <div class="table-container">
+
+        <table class="data-table">
+
+          <thead>
+
+          <tr>
+            <th>Código</th>
+            <th>Agencia</th>
+            <th class="right">Créditos</th>
+            <th class="right">Asociados</th>
+            <th class="right">Saldo cartera</th>
+            <th class="right">Saldo en mora</th>
+            <th class="right">Recaudo período</th>
+            <th class="right">Índice mora</th>
+            <th class="right">Participación</th>
+          </tr>
+
+          </thead>
+
+          <tbody>
+
+          <tr *ngFor="let agencia of agencias">
+
+            <td>
+              {{ agencia.codigoAgencia }}
+            </td>
+
+            <td>
+              {{ agencia.nombreAgencia }}
+            </td>
+
+            <td class="right">
+              {{ agencia.cantidadCreditos | number:'1.0-0' }}
+            </td>
+
+            <td class="right">
+              {{ agencia.cantidadAsociados | number:'1.0-0' }}
+            </td>
+
+            <td class="right">
+              $ {{ agencia.saldoCartera | number:'1.0-0' }}
+            </td>
+
+            <td class="right">
+              $ {{ agencia.saldoCreditosMora | number:'1.0-0' }}
+            </td>
+
+            <td class="right">
+              $ {{ agencia.recaudoPeriodo | number:'1.0-0' }}
+            </td>
+
+            <td class="right">
+
+                <span
+                  class="mora-indicator"
+                  [class.mora-indicator--high]="agencia.indiceMora >= 15"
+                  [class.mora-indicator--medium]="
+                    agencia.indiceMora >= 8
+                    && agencia.indiceMora < 15
+                  "
+                  [class.mora-indicator--low]="agencia.indiceMora < 8">
+
+                  {{ agencia.indiceMora | number:'1.2-2' }}%
+
+                </span>
+
+            </td>
+
+            <td class="right">
+              {{ agencia.porcentajeParticipacion | number:'1.2-2' }}%
+            </td>
+
+          </tr>
+
+          <tr *ngIf="!agencias.length">
+
+            <td
+              colspan="9"
+              class="empty-row">
+
+              No hay información por agencia.
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+    <!-- =================================================== -->
+    <!-- RECAUDOS -->
+    <!-- =================================================== -->
+
+    <div class="card">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Composición del recaudo</h3>
+
+          <small>
+            Distribución de los pagos registrados durante
+            el período consultado.
+          </small>
+        </div>
+
+      </div>
+
+      <div class="recaudo-summary">
+
+        <div class="recaudo-total">
+
+          <span>
+            Recaudo total del período
+          </span>
+
+          <strong>
+            $ {{ resumen.recaudoPeriodo | number:'1.0-0' }}
+          </strong>
+
+        </div>
+
+        <div class="recaudo-detail">
+
+          <span>
+            Capital
+          </span>
+
+          <strong>
+            $ {{ resumen.capitalRecaudado | number:'1.0-0' }}
+          </strong>
+
+        </div>
+
+        <div class="recaudo-detail">
+
+          <span>
+            Intereses corrientes
+          </span>
+
+          <strong>
+            $ {{ resumen.interesesRecaudados | number:'1.0-0' }}
+          </strong>
+
+        </div>
+
+        <div class="recaudo-detail">
+
+          <span>
+            Intereses de mora
+          </span>
+
+          <strong>
+            $ {{ resumen.interesesMoraRecaudados | number:'1.0-0' }}
+          </strong>
+
+        </div>
+
+      </div>
+
+      <div class="table-container">
+
+        <table class="data-table">
+
+          <thead>
+
+          <tr>
+            <th>Concepto</th>
+            <th class="right">Movimientos</th>
+            <th class="right">Valor recaudado</th>
+            <th class="right">Participación</th>
+          </tr>
+
+          </thead>
+
+          <tbody>
+
+          <tr *ngFor="let recaudo of recaudos">
+
+            <td>
+              {{ recaudo.descripcion }}
+            </td>
+
+            <td class="right">
+              {{ recaudo.cantidadMovimientos | number:'1.0-0' }}
+            </td>
+
+            <td class="right">
+              $ {{ recaudo.valorRecaudado | number:'1.0-0' }}
+            </td>
+
+            <td class="right">
+              {{ recaudo.porcentajeParticipacion | number:'1.2-2' }}%
+            </td>
+
+          </tr>
+
+          <tr *ngIf="!recaudos.length">
+
+            <td
+              colspan="4"
+              class="empty-row">
+
+              No existen recaudos activos para el período consultado.
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+    <!-- =================================================== -->
+    <!-- ALERTAS GERENCIALES -->
+    <!-- =================================================== -->
+
+    <div class="card">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Alertas gerenciales</h3>
+
+          <small>
+            Situaciones que requieren seguimiento y gestión.
+          </small>
+        </div>
+
+      </div>
+
+      <div class="alerts-grid">
+
+        <div
+          *ngFor="let alerta of alertas"
+          class="alert-card"
+          [class.alert-card--critical]="alerta.nivel === 'CRITICO'"
+          [class.alert-card--warning]="alerta.nivel === 'ADVERTENCIA'"
+          [class.alert-card--info]="alerta.nivel === 'INFORMACION'">
+
+          <div class="alert-card-header">
+
+            <span class="alert-level">
+              {{ alerta.nivel }}
+            </span>
+
+            <span class="alert-code">
+              {{ alerta.codigo }}
+            </span>
+
+          </div>
+
+          <h4>
+            {{ alerta.descripcion }}
+          </h4>
+
+          <div class="alert-values">
+
+            <div>
+
+              <span>
+                Créditos
+              </span>
+
+              <strong>
+                {{ alerta.cantidadCreditos | number:'1.0-0' }}
+              </strong>
+
+            </div>
+
+            <div>
+
+              <span>
+                Asociados
+              </span>
+
+              <strong>
+                {{ alerta.cantidadAsociados | number:'1.0-0' }}
+              </strong>
+
+            </div>
+
+          </div>
+
+          <div class="alert-amount">
+
+            <span>
+              Saldo de cartera
+            </span>
+
+            <strong>
+              $ {{ alerta.saldoCartera | number:'1.0-0' }}
+            </strong>
+
+          </div>
+
+          <div class="alert-amount">
+
+            <span>
+              Saldo en mora
+            </span>
+
+            <strong>
+              $ {{ alerta.saldoCreditosMora | number:'1.0-0' }}
+            </strong>
+
+          </div>
+
+        </div>
+
+        <div
+          *ngIf="!alertas.length"
+          class="empty-alerts">
+
+          No existen alertas gerenciales para mostrar.
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </ng-container>
+
+</div>

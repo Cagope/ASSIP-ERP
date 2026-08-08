@@ -574,7 +574,7 @@ public class ExpedienteAsociadoService {
         BigDecimal saldoCapital =
                 expediente.getCreditos()
                         .stream()
-                        .map(ExpedienteCreditoDTO::getSaldoCapital)
+                        .map(ExpedienteCreditoDTO::getSaldoActual)
                         .map(this::valorSeguro)
                         .reduce(CERO, BigDecimal::add);
 

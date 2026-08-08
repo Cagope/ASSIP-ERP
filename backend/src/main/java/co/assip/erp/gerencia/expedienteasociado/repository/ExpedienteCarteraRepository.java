@@ -46,12 +46,14 @@ public class ExpedienteCarteraRepository {
     private static <T> BeanPropertyRowMapper<T> mapper(
             Class<T> tipo
     ) {
+
         BeanPropertyRowMapper<T> mapper =
                 BeanPropertyRowMapper.newInstance(tipo);
 
         /*
          * Permite que el DTO tenga más propiedades que las columnas
-         * seleccionadas. Los atributos no disponibles quedan en null.
+         * seleccionadas. Los atributos no disponibles quedan en null
+         * o conservan el valor inicial asignado por el constructor.
          */
         mapper.setCheckFullyPopulated(false);
 
@@ -103,32 +105,55 @@ public class ExpedienteCarteraRepository {
                     AS referencia_credito,
 
                 c.id_linea_credito,
+
                 c.codigo_linea_credito,
+
                 c.nombre_linea_credito,
 
                 c.codigo_clasificacion_credito,
+
                 c.descripcion_clasificacion_credito
                     AS nombre_clasificacion_credito,
 
                 c.codigo_estado_cartera,
+
                 c.descripcion_estado_cartera
                     AS nombre_estado_cartera,
 
                 (
-                    COALESCE(c.saldo_neto_pendiente, 0) > 0
-                    AND COALESCE(c.credito_saldado, false) = false
-                ) AS vigente,
+                    COALESCE(
+                        c.saldo_neto_pendiente,
+                        0
+                    ) > 0
+                    AND COALESCE(
+                        c.credito_saldado,
+                        false
+                    ) = false
+                )
+                    AS vigente,
 
-                COALESCE(c.credito_saldado, false)
+                COALESCE(
+                    c.credito_saldado,
+                    false
+                )
                     AS cancelado,
 
-                COALESCE(c.credito_en_mora, false)
+                COALESCE(
+                    c.credito_en_mora,
+                    false
+                )
                     AS en_mora,
 
-                COALESCE(c.credito_reestructurado, false)
+                COALESCE(
+                    c.credito_reestructurado,
+                    false
+                )
                     AS reestructurado,
 
-                COALESCE(c.credito_novado, false)
+                COALESCE(
+                    c.credito_novado,
+                    false
+                )
                     AS novado,
 
                 c.fecha_desembolso,
@@ -137,15 +162,28 @@ public class ExpedienteCarteraRepository {
                     AS fecha_primer_vencimiento,
 
                 c.fecha_final
-                    AS fecha_ultimo_vencimiento,
+                    AS fecha_vencimiento,
+
+                (
+                    SELECT MAX(f.fecha)
+                    FROM (
+                        VALUES
+                            (c.ultima_fecha_capital),
+                            (c.ultima_fecha_interes),
+                            (c.ultima_fecha_mora),
+                            (c.ultima_fecha_seguro),
+                            (c.ultima_fecha_fondo)
+                    ) AS f(fecha)
+                )
+                    AS fecha_ultimo_pago,
 
                 c.proxima_fecha_capital
-                    AS fecha_proxima_cuota,
+                    AS fecha_proximo_pago,
 
                 c.dias_desde_desembolso,
 
                 c.dias_para_proximo_capital
-                    AS dias_para_proxima_cuota,
+                    AS dias_para_proximo_pago,
 
                 c.valor_inicial_credito
                     AS valor_aprobado,
@@ -156,7 +194,7 @@ public class ExpedienteCarteraRepository {
                     AS plazo_inicial,
 
                 c.plazo
-                    AS plazo_actual,
+                    AS plazo,
 
                 c.altura_cuota
                     AS numero_cuotas_pagadas,
@@ -178,7 +216,7 @@ public class ExpedienteCarteraRepository {
                     AS valor_cuota_inicial,
 
                 c.valor_cuota
-                    AS valor_cuota_actual,
+                    AS valor_cuota,
 
                 c.tipo_modalidad_interes
                     AS codigo_modalidad_interes,
@@ -192,7 +230,7 @@ public class ExpedienteCarteraRepository {
                 c.tasa_efectiva_anual,
 
                 c.saldo_actual
-                    AS saldo_capital,
+                    AS saldo_actual,
 
                 c.saldo_neto_pendiente
                     AS saldo_total,
@@ -200,7 +238,7 @@ public class ExpedienteCarteraRepository {
                 c.edad_riesgo_inicial,
 
                 c.edad_de_riesgo
-                    AS edad_riesgo_actual,
+                    AS edad_riesgo,
 
                 c.edad_de_mora
                     AS edad_riesgo_evaluada,
@@ -215,15 +253,18 @@ public class ExpedienteCarteraRepository {
                     AS fecha_ultima_evaluacion,
 
                 c.codigo_garantia_credito
-                    AS codigo_tipo_garantia_credito,
+                    AS codigo_garantia,
 
                 c.descripcion_garantia_credito
-                    AS nombre_tipo_garantia_credito,
+                    AS nombre_garantia,
 
                 (
                     c.tipo_garantia IS NOT NULL
-                    AND upper(trim(c.tipo_garantia)) <> 'P'
-                ) AS tiene_garantia_real,
+                    AND UPPER(
+                        TRIM(c.tipo_garantia)
+                    ) <> 'P'
+                )
+                    AS tiene_garantia_real,
 
                 c.patrimonio_respaldable_erp
                     AS valor_garantias,
@@ -236,14 +277,16 @@ public class ExpedienteCarteraRepository {
                         c.patrimonio_porcentaje_cobertura_credito,
                         0
                     ) >= 100
-                ) AS garantia_suficiente,
+                )
+                    AS garantia_suficiente,
 
                 (
                     COALESCE(
                         c.patrimonio_porcentaje_cobertura_credito,
                         0
                     ) < 100
-                ) AS garantia_insuficiente,
+                )
+                    AS garantia_insuficiente,
 
                 c.patrimonio_saldo_ahorros_activos
                     AS valor_ahorros_respaldo,
@@ -270,7 +313,10 @@ public class ExpedienteCarteraRepository {
                 c.descripcion_estado_juridico
                     AS nombre_estado_juridico,
 
-                c.en_cobro_juridico
+                COALESCE(
+                    c.en_cobro_juridico,
+                    false
+                )
                     AS juridico,
 
                 c.financiero_ingresos_totales
@@ -280,19 +326,10 @@ public class ExpedienteCarteraRepository {
                     AS egresos_mensuales,
 
                 c.financiero_disponibilidad_mensual
-                    AS capacidad_pago_mensual,
-
-                c.financiero_patrimonio_neto
-                    AS patrimonio_neto,
+                    AS capacidad_pago_disponible,
 
                 c.financiero_porcentaje_cuotas_ingresos
-                    AS porcentaje_cuota_ingresos,
-
-                c.financiero_capacidad_pago
-                    AS calificacion_capacidad_pago,
-
-                c.patrimonio_nivel_respaldo
-                    AS nivel_cobertura_patrimonial,
+                    AS porcentaje_compromiso_ingresos,
 
                 c.patrimonio_nivel_alerta
                     AS nivel_alerta,
@@ -300,18 +337,31 @@ public class ExpedienteCarteraRepository {
                 c.patrimonio_motivo_alerta
                     AS resumen_alertas,
 
-                c.requiere_revision,
+                COALESCE(
+                    c.requiere_revision,
+                    false
+                )
+                    AS requiere_revision,
 
                 c.fk_seguridad_creacion,
-                c.fecha_creacion::date AS fecha_creacion,
+
+                c.fecha_creacion
+                    AS fecha_creacion,
+
                 c.fk_seguridad_edicion,
-                c.fecha_edicion::date AS fecha_edicion
+
+                c.fecha_edicion
+                    AS fecha_edicion
 
             FROM reporting.vw_cartera_creditos_patrimonio c
+
             WHERE c.id_datos_personal = :idDatosPersonal
 
             ORDER BY
-                COALESCE(c.credito_saldado, false),
+                COALESCE(
+                    c.credito_saldado,
+                    false
+                ),
                 c.fecha_desembolso DESC NULLS LAST,
                 c.id_cartera_credito DESC
             """;
@@ -323,11 +373,16 @@ public class ExpedienteCarteraRepository {
     public List<ExpedienteCreditoDTO> listarCreditos(
             Long idDatosPersonal
     ) {
-        validarIdDatosPersonal(idDatosPersonal);
+
+        validarIdDatosPersonal(
+                idDatosPersonal
+        );
 
         return jdbc.query(
                 SQL_CREDITOS,
-                parametros(idDatosPersonal),
+                parametros(
+                        idDatosPersonal
+                ),
                 CREDITO_MAPPER
         );
     }
@@ -347,7 +402,10 @@ public class ExpedienteCarteraRepository {
     public List<ExpedienteGarantiaDTO> listarGarantias(
             Long idDatosPersonal
     ) {
-        validarIdDatosPersonal(idDatosPersonal);
+
+        validarIdDatosPersonal(
+                idDatosPersonal
+        );
 
         return List.of();
     }
@@ -359,6 +417,7 @@ public class ExpedienteCarteraRepository {
     private MapSqlParameterSource parametros(
             Long idDatosPersonal
     ) {
+
         return new MapSqlParameterSource()
                 .addValue(
                         PARAM_ID_DATOS_PERSONAL,
@@ -369,7 +428,11 @@ public class ExpedienteCarteraRepository {
     private void validarIdDatosPersonal(
             Long idDatosPersonal
     ) {
-        if (idDatosPersonal == null || idDatosPersonal <= 0) {
+
+        if (
+                idDatosPersonal == null
+                        || idDatosPersonal <= 0
+        ) {
             throw new IllegalArgumentException(
                     "El idDatosPersonal debe ser mayor que cero."
             );

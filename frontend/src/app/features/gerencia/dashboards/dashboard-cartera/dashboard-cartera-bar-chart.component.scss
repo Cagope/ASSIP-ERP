@@ -1,0 +1,476 @@
+.card {
+  width: 100%;
+  min-width: 0;
+
+  margin-bottom: 1rem;
+  padding: 1rem 1.2rem;
+
+  background: #ffffff;
+  border: 1px solid #dbe3ec;
+  border-radius: 12px;
+
+  box-shadow:
+    0 2px 8px
+    rgba(15, 23, 42, 0.06);
+
+  box-sizing: border-box;
+}
+
+.chart-card {
+  min-width: 0;
+}
+
+// =========================================================
+// Encabezado
+// =========================================================
+
+.section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+
+  margin-bottom: 1rem;
+}
+
+.chart-title {
+  min-width: 0;
+
+  h3 {
+    margin: 0;
+
+    color: #0f172a;
+
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  small {
+    display: block;
+
+    margin-top: 0.3rem;
+
+    color: #64748b;
+
+    font-size: 0.82rem;
+    line-height: 1.35;
+  }
+}
+
+// =========================================================
+// Resumen
+// =========================================================
+
+.chart-summary {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.45rem;
+
+  width: 100%;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  min-width: 0;
+  padding: 0.45rem 0.65rem;
+
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+
+  span {
+    flex: 0 0 auto;
+
+    color: #64748b;
+
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+
+  strong {
+    min-width: 0;
+
+    overflow: hidden;
+
+    color: #0f172a;
+
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .danger {
+    color: #b91c1c;
+  }
+}
+
+.summary-index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 68px;
+  padding: 0.2rem 0.45rem;
+
+  border-radius: 999px;
+}
+
+// =========================================================
+// Leyenda
+// =========================================================
+
+.chart-legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+
+  margin-bottom: 1rem;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  color: #475569;
+
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.legend-color {
+  display: inline-block;
+  flex: 0 0 auto;
+
+  width: 18px;
+  height: 8px;
+
+  border-radius: 999px;
+}
+
+.legend-color--saldo {
+  background: #047857;
+}
+
+.legend-color--mora {
+  background: #dc2626;
+}
+
+// =========================================================
+// Contenido
+// =========================================================
+
+.chart-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+
+  min-width: 0;
+}
+
+.bar-item {
+  min-width: 0;
+  padding: 0.9rem;
+
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.15s ease;
+
+  &:hover {
+    border-color: #cbd5e1;
+
+    box-shadow:
+      0 3px 10px
+      rgba(15, 23, 42, 0.07);
+
+    transform: translateY(-1px);
+  }
+}
+
+// =========================================================
+// Encabezado de cada línea
+// =========================================================
+
+.bar-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+
+  min-width: 0;
+  margin-bottom: 0.75rem;
+}
+
+.line-info {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.line-code {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 42px;
+  height: 26px;
+  padding: 0 0.45rem;
+
+  flex: 0 0 auto;
+
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 999px;
+
+  color: #047857;
+
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.line-description {
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: #0f172a;
+
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1.25;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.line-index {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  flex: 0 0 auto;
+
+  span {
+    color: #64748b;
+
+    font-size: 0.68rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  strong {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 64px;
+    padding: 0.2rem 0.42rem;
+
+    border-radius: 999px;
+
+    font-size: 0.7rem;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+}
+
+// =========================================================
+// Barras
+// =========================================================
+
+.bar-row {
+  min-width: 0;
+  margin-top: 0.65rem;
+}
+
+.bar-row-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+
+  min-width: 0;
+  margin-bottom: 0.28rem;
+}
+
+.bar-label {
+  flex: 0 0 auto;
+
+  color: #64748b;
+
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.bar-value {
+  min-width: 0;
+
+  overflow: hidden;
+
+  color: #0f172a;
+
+  font-size: 0.73rem;
+  font-weight: 800;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bar-value--danger {
+  color: #b91c1c;
+}
+
+.bar-track {
+  position: relative;
+
+  width: 100%;
+  min-width: 0;
+  height: 18px;
+
+  overflow: hidden;
+
+  background: #e2e8f0;
+  border-radius: 999px;
+}
+
+.bar-fill {
+  height: 100%;
+  min-width: 0;
+
+  border-radius: 999px;
+
+  transition: width 0.35s ease;
+}
+
+.bar-fill--saldo {
+  background:
+    linear-gradient(
+      90deg,
+      #059669 0%,
+      #047857 100%
+    );
+}
+
+.bar-fill--mora {
+  background:
+    linear-gradient(
+      90deg,
+      #ef4444 0%,
+      #b91c1c 100%
+    );
+}
+
+// =========================================================
+// Semáforo del índice de mora
+// =========================================================
+
+.indice-low {
+  background: #dcfce7;
+  color: #166534 !important;
+}
+
+.indice-medium {
+  background: #fef3c7;
+  color: #92400e !important;
+}
+
+.indice-high {
+  background: #fee2e2;
+  color: #991b1b !important;
+}
+
+// =========================================================
+// Sin información
+// =========================================================
+
+.empty-chart {
+  padding: 1.2rem;
+
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+
+  color: #64748b;
+
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+// =========================================================
+// Responsive
+// =========================================================
+
+@media (max-width: 768px) {
+  .card {
+    padding: 0.9rem;
+  }
+
+  .bar-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .line-description {
+    white-space: normal;
+  }
+
+  .line-index {
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 0.8rem;
+  }
+
+  .bar-item {
+    padding: 0.75rem;
+  }
+
+  .chart-legend {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+
+  .summary-item {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.2rem;
+
+    strong {
+      width: 100%;
+      text-align: left;
+    }
+  }
+
+  .line-info {
+    align-items: flex-start;
+  }
+
+  .line-description {
+    font-size: 0.76rem;
+  }
+
+  .bar-track {
+    height: 16px;
+  }
+}

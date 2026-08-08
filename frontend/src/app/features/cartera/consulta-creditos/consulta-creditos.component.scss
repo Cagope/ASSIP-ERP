@@ -1,0 +1,829 @@
+.consulta-creditos-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+
+// =========================================================
+// BLOQUES GENERALES
+// =========================================================
+
+.consulta-bloque {
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.bloque-encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+  }
+
+  span {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.82rem;
+    color: #6b7280;
+  }
+}
+
+
+// =========================================================
+// ASOCIADO SELECCIONADO
+// =========================================================
+
+.asociado-seleccionado {
+  border-left: 4px solid #047857;
+}
+
+.bloque-etiqueta {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #047857;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.asociado-datos {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  span {
+    margin: 0;
+    padding: 0.3rem 0.6rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    color: #475569;
+  }
+}
+
+
+// =========================================================
+// BUSCADOR
+// =========================================================
+
+.busqueda-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 360px) auto;
+  align-items: end;
+  gap: 1rem;
+}
+
+.f-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  input {
+    width: 100%;
+    height: 36px;
+    padding: 0 0.7rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #ffffff;
+    font-size: 0.9rem;
+    color: #111827;
+    outline: none;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+
+    &:focus {
+      border-color: #047857;
+      box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.12);
+    }
+
+    &:disabled {
+      background: #f3f4f6;
+      color: #9ca3af;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.busqueda-acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+
+// =========================================================
+// BOTONES
+// =========================================================
+
+.btn {
+  min-height: 34px;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.btn--primary {
+  background: #047857;
+  border-color: #047857;
+  color: #ffffff;
+
+  &:hover:not(:disabled) {
+    background: #065f46;
+    border-color: #065f46;
+  }
+}
+
+.btn--cancel {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #374151;
+
+  &:hover:not(:disabled) {
+    background: #f3f4f6;
+  }
+}
+
+.btn-sm {
+  min-height: 30px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.78rem;
+}
+
+
+// =========================================================
+// ALERTAS Y ESTADOS DE CARGA
+// =========================================================
+
+.alert {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+
+  strong {
+    font-size: 0.88rem;
+  }
+
+  span {
+    font-size: 0.82rem;
+  }
+}
+
+.alert--danger {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.estado-consulta,
+.estado-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 120px;
+  padding: 1.5rem;
+  background: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  text-align: center;
+  color: #475569;
+
+  strong {
+    color: #1f2937;
+    font-size: 0.95rem;
+  }
+
+  span {
+    font-size: 0.84rem;
+  }
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #d1d5db;
+  border-top-color: #047857;
+  border-radius: 50%;
+  animation: consulta-creditos-spin 0.8s linear infinite;
+}
+
+@keyframes consulta-creditos-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+// =========================================================
+// CONTADOR
+// =========================================================
+
+.contador-registros {
+  flex-shrink: 0;
+  padding: 0.35rem 0.7rem;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #047857;
+}
+
+
+// =========================================================
+// RESUMEN DE CRÉDITOS
+// =========================================================
+
+.resumen-creditos-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(130px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.resumen-credito {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  min-height: 62px;
+  padding: 0.75rem 0.9rem;
+  overflow: hidden;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #64748b;
+  border-radius: 8px;
+
+  span {
+    color: #64748b;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  strong {
+    flex-shrink: 0;
+    color: #0f172a;
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+}
+
+.resumen-credito--total {
+  background: #f8fafc;
+  border-left-color: #475569;
+}
+
+.resumen-credito--saldo {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  border-left-color: #16a34a;
+
+  strong {
+    color: #166534;
+  }
+}
+
+.resumen-credito--saldados {
+  background: #f8fafc;
+  border-left-color: #64748b;
+
+  strong {
+    color: #475569;
+  }
+}
+
+.resumen-credito--mora {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  border-left-color: #f97316;
+
+  strong {
+    color: #c2410c;
+  }
+}
+
+.resumen-credito--alerta {
+  background: #fef2f2;
+  border-color: #fecaca;
+  border-left-color: #dc2626;
+
+  strong {
+    color: #b91c1c;
+  }
+}
+
+
+// =========================================================
+// TABLA DE CRÉDITOS
+// =========================================================
+
+.tabla-contenedor {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.tabla-creditos {
+  width: 100%;
+  min-width: 1100px;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+
+  th,
+  td {
+    padding: 0.65rem 0.7rem;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  thead th {
+    background: #f8fafc;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #374151;
+  }
+
+  tbody tr {
+    background: #ffffff;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background: #f8fafc;
+    }
+
+    &:last-child td {
+      border-bottom: 0;
+    }
+  }
+
+  tbody td {
+    color: #334155;
+  }
+
+  tbody td strong {
+    color: #111827;
+  }
+}
+
+.columna-numero {
+  text-align: right !important;
+}
+
+.columna-accion {
+  width: 100px;
+  text-align: center !important;
+}
+
+.fila-seleccionada {
+  background: #ecfdf5 !important;
+
+  td {
+    border-bottom-color: #a7f3d0;
+  }
+}
+
+.fila-saldada {
+  background: #f8fafc;
+
+  td {
+    color: #64748b;
+  }
+}
+
+
+// =========================================================
+// PAGINACIÓN
+// =========================================================
+
+.paginacion {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 0.8rem;
+  background: #f8fafc;
+  border-top: 1px solid #e5e7eb;
+
+  span {
+    min-width: 130px;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+  }
+}
+
+
+// =========================================================
+// BADGES DE ESTADO
+// =========================================================
+
+.estado-badge,
+.riesgo-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.estado-badge {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.estado-badge--activo {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.estado-badge--saldado {
+  background: #e5e7eb;
+  color: #4b5563;
+}
+
+.estado-badge--mora {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.riesgo-badge {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.riesgo-badge--alto {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+
+// =========================================================
+// DETALLE PRINCIPAL
+// =========================================================
+
+.detalle-principal {
+  border-top: 4px solid #047857;
+}
+
+.detalle-encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+
+  h2 {
+    margin: 0.15rem 0;
+    font-size: 1.2rem;
+    color: #111827;
+  }
+
+  > div:first-child > span:last-child {
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+}
+
+.detalle-subtitulo {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #047857;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.detalle-estados {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+
+// =========================================================
+// VALORES PRINCIPALES
+// =========================================================
+
+.valores-principales {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(150px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+
+  article {
+    min-width: 0;
+    padding: 0.8rem;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+
+    span {
+      display: block;
+      margin-bottom: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    strong {
+      display: block;
+      overflow: hidden;
+      font-size: 0.96rem;
+      color: #111827;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .valor-principal {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+
+    strong {
+      color: #047857;
+    }
+  }
+}
+
+
+// =========================================================
+// DATOS GENERALES
+// =========================================================
+
+.datos-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: 0.7rem;
+  margin-top: 1rem;
+
+  > div {
+    min-width: 0;
+    padding: 0.7rem;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 7px;
+
+    span {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    strong {
+      display: block;
+      overflow: hidden;
+      font-size: 0.84rem;
+      color: #1f2937;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}
+
+
+// =========================================================
+// RESUMEN DE MÓDULOS
+// =========================================================
+
+.modulos-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(150px, 1fr));
+  gap: 0.75rem;
+
+  article {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-height: 90px;
+    padding: 0.8rem;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+
+    strong {
+      font-size: 1.35rem;
+      color: #047857;
+    }
+
+    span {
+      font-size: 0.78rem;
+      color: #475569;
+    }
+  }
+}
+
+
+// =========================================================
+// OBSERVACIONES
+// =========================================================
+
+.detalle-observacion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-top: 1rem;
+  padding: 0.8rem;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+
+  strong {
+    font-size: 0.8rem;
+    color: #92400e;
+  }
+
+  span {
+    font-size: 0.82rem;
+    color: #78350f;
+  }
+}
+
+
+// =========================================================
+// RESPONSIVE
+// =========================================================
+
+@media (max-width: 1300px) {
+
+  .valores-principales {
+    grid-template-columns: repeat(3, minmax(160px, 1fr));
+  }
+
+  .datos-grid {
+    grid-template-columns: repeat(3, minmax(160px, 1fr));
+  }
+
+  .modulos-grid {
+    grid-template-columns: repeat(3, minmax(160px, 1fr));
+  }
+
+}
+
+@media (max-width: 900px) {
+
+  .consulta-creditos-page {
+    padding: 0.75rem;
+  }
+
+  .busqueda-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .busqueda-acciones {
+    justify-content: flex-start;
+  }
+
+  .resumen-creditos-grid {
+    grid-template-columns: repeat(2, minmax(130px, 1fr));
+  }
+
+  .detalle-encabezado {
+    flex-direction: column;
+  }
+
+  .detalle-estados {
+    justify-content: flex-start;
+  }
+
+  .valores-principales,
+  .datos-grid,
+  .modulos-grid {
+    grid-template-columns: repeat(2, minmax(150px, 1fr));
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .consulta-creditos-page {
+    padding: 0.5rem;
+  }
+
+  .consulta-bloque {
+    padding: 0.75rem;
+  }
+
+  .bloque-encabezado {
+    flex-direction: column;
+  }
+
+  .asociado-datos {
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .busqueda-acciones {
+    width: 100%;
+
+    .btn {
+      flex: 1;
+    }
+  }
+
+  .resumen-creditos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .paginacion {
+    justify-content: center;
+    flex-wrap: wrap;
+
+    span {
+      order: -1;
+      width: 100%;
+    }
+  }
+
+  .valores-principales,
+  .datos-grid,
+  .modulos-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+.modulo-card {
+
+  cursor: pointer;
+
+  transition:
+    transform .15s ease,
+    border-color .15s ease,
+    box-shadow .15s ease;
+
+  &:hover {
+
+    border-color: #047857;
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 4px 10px rgba(0,0,0,.08);
+
+  }
+
+}
+
+.modulo-card--activo {
+
+  background: #ecfdf5 !important;
+
+  border-color: #16a34a !important;
+
+  strong {
+    color: #166534 !important;
+  }
+
+}
+

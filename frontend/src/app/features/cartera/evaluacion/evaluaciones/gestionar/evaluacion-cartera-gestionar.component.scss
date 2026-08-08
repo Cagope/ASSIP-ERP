@@ -1,0 +1,517 @@
+@use '../../../../../../styles/informes-base';
+
+.evaluacion-cartera-gestionar {
+  padding: 1rem;
+}
+
+
+// =========================================================
+// TARJETAS GENERALES
+// =========================================================
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+
+// =========================================================
+// CABECERA DE LA EVALUACIÓN
+// =========================================================
+
+.evaluacion-cabecera {
+  padding: 1.1rem 1.2rem;
+}
+
+.evaluacion-cabecera__principal {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 1.5rem;
+
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  h2 {
+    margin: 0.2rem 0 0;
+
+    font-size: 1.2rem;
+    font-weight: 700;
+
+    color: #111827;
+  }
+}
+
+.seccion-etiqueta {
+  display: block;
+
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  color: #6b7280;
+}
+
+
+// =========================================================
+// ESTADO
+// =========================================================
+
+.estado-contenedor {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+
+  gap: 0.35rem;
+
+  > span {
+    font-size: 0.76rem;
+    font-weight: 600;
+
+    color: #6b7280;
+  }
+}
+
+.estado {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 95px;
+
+  padding: 0.3rem 0.65rem;
+
+  font-size: 0.78rem;
+  font-weight: 700;
+
+  border-radius: 999px;
+}
+
+.estado--proceso {
+  color: #92400e;
+  background: #fef3c7;
+}
+
+.estado--definitiva {
+  color: #065f46;
+  background: #d1fae5;
+}
+
+
+// =========================================================
+// DATOS GENERALES
+// =========================================================
+
+.datos-generales-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 1rem;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+
+    gap: 0.25rem;
+
+    min-width: 0;
+
+    span {
+      font-size: 0.76rem;
+      font-weight: 600;
+
+      color: #6b7280;
+    }
+
+    strong {
+      font-size: 0.88rem;
+      font-weight: 600;
+
+      color: #1f2937;
+    }
+  }
+}
+
+
+// =========================================================
+// TÍTULOS DE SECCIÓN
+// =========================================================
+
+.seccion-titulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  margin-bottom: 1rem;
+
+  h3 {
+    margin: 0;
+
+    font-size: 1rem;
+    font-weight: 700;
+
+    color: #111827;
+  }
+
+  span {
+    display: block;
+
+    margin-top: 0.2rem;
+
+    font-size: 0.78rem;
+
+    color: #6b7280;
+  }
+}
+
+
+// =========================================================
+// RESUMEN GENERAL
+// =========================================================
+
+.resumen-general-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 1rem;
+
+  article {
+    display: flex;
+    flex-direction: column;
+
+    gap: 0.35rem;
+
+    min-height: 88px;
+    padding: 0.85rem 1rem;
+
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 7px;
+
+    span {
+      font-size: 0.78rem;
+      font-weight: 600;
+
+      color: #6b7280;
+    }
+
+    strong {
+      font-size: 1.35rem;
+      font-weight: 700;
+
+      color: #111827;
+    }
+  }
+}
+
+.resumen-saldo {
+
+  strong {
+    font-size: 1.15rem !important;
+  }
+}
+
+
+// =========================================================
+// RESULTADOS DE LA EVALUACIÓN
+// =========================================================
+
+.resultados-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 1rem;
+}
+
+.resultado-card {
+  display: flex;
+  flex-direction: column;
+
+  gap: 0.35rem;
+
+  min-height: 125px;
+  padding: 1rem;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  .resultado-card__titulo {
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  strong {
+    font-size: 1.8rem;
+    line-height: 1.1;
+  }
+
+  small {
+    margin-top: 0.25rem;
+
+    font-size: 0.75rem;
+    line-height: 1.4;
+
+    color: #6b7280;
+  }
+}
+
+.resultado-card--reclasificar {
+  background: #fef2f2;
+  border-color: #fecaca;
+
+  .resultado-card__titulo,
+  strong {
+    color: #991b1b;
+  }
+}
+
+.resultado-card--habilitar {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+
+  .resultado-card__titulo,
+  strong {
+    color: #065f46;
+  }
+}
+
+.resultado-card--mantener {
+  background: #f9fafb;
+  border-color: #e5e7eb;
+
+  .resultado-card__titulo,
+  strong {
+    color: #374151;
+  }
+}
+
+
+// =========================================================
+// NOTA INFORMATIVA
+// =========================================================
+
+.nota-informativa {
+  margin-top: 1rem;
+  padding: 0.75rem 0.9rem;
+
+  font-size: 0.8rem;
+  line-height: 1.45;
+
+  color: #374151;
+
+  background: #f9fafb;
+  border-left: 4px solid #6b7280;
+  border-radius: 4px;
+
+  strong {
+    color: #111827;
+  }
+}
+
+
+// =========================================================
+// ACTAS
+// =========================================================
+
+.actas-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 1rem;
+}
+
+.acta-bloque {
+  padding: 0.9rem;
+
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 7px;
+
+  h4 {
+    margin: 0 0 0.85rem;
+
+    font-size: 0.88rem;
+    font-weight: 700;
+
+    color: #374151;
+  }
+
+  .datos-generales-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+
+// =========================================================
+// OBSERVACIONES
+// =========================================================
+
+.observaciones {
+  padding: 0.85rem;
+
+  font-size: 0.84rem;
+  line-height: 1.5;
+
+  color: #374151;
+
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+
+  white-space: pre-line;
+}
+
+
+// =========================================================
+// ACCIONES
+// =========================================================
+
+.acciones-card {
+  margin-bottom: 0;
+}
+
+.acciones-principales {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  flex-wrap: wrap;
+
+  gap: 0.6rem;
+}
+
+.definitiva-mensaje {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 34px;
+
+  padding: 0.4rem 0.8rem;
+
+  font-size: 0.8rem;
+  font-weight: 700;
+
+  color: #065f46;
+  background: #d1fae5;
+
+  border: 1px solid #a7f3d0;
+  border-radius: 6px;
+}
+
+
+// =========================================================
+// MENSAJES
+// =========================================================
+
+.estado-pantalla {
+  padding: 2rem 1rem;
+
+  text-align: center;
+
+  font-size: 0.88rem;
+
+  color: #4b5563;
+}
+
+.alert {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+
+  font-size: 0.84rem;
+
+  border-radius: 6px;
+}
+
+.alert--error {
+  color: #991b1b;
+
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.alert--success {
+  color: #065f46;
+
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+}
+
+
+// =========================================================
+// BOTONES DESHABILITADOS
+// =========================================================
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+
+// =========================================================
+// RESPONSIVE
+// =========================================================
+
+@media (max-width: 1100px) {
+
+  .datos-generales-grid,
+  .resumen-general-grid,
+  .resultados-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .actas-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+@media (max-width: 700px) {
+
+  .evaluacion-cartera-gestionar {
+    padding: 0.75rem;
+  }
+
+  .evaluacion-cabecera__principal {
+    flex-direction: column;
+  }
+
+  .estado-contenedor {
+    align-items: flex-start;
+  }
+
+  .datos-generales-grid,
+  .resumen-general-grid,
+  .resultados-grid,
+  .acta-bloque .datos-generales-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .acciones-principales {
+    flex-direction: column;
+    align-items: stretch;
+
+    .btn {
+      width: 100%;
+    }
+  }
+
+  .definitiva-mensaje {
+    width: 100%;
+  }
+}

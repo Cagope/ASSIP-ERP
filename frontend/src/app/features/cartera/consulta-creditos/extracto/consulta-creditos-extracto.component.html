@@ -1,0 +1,626 @@
+<section class="consulta-bloque extracto-detalle">
+
+  <!-- ======================================================= -->
+  <!-- ENCABEZADO                                              -->
+  <!-- ======================================================= -->
+
+  <div class="bloque-encabezado">
+
+    <div>
+
+      <h2>
+        Extracto del crédito
+      </h2>
+
+      <span>
+        Movimientos registrados para el pagaré
+        {{ credito.pagareCartera || 'sin número' }}.
+      </span>
+
+    </div>
+
+    <div class="extracto-acciones">
+
+      <button
+        type="button"
+        class="btn btn--primary btn-sm"
+        [disabled]="generandoPdf"
+        (click)="generarPdf()">
+
+        {{
+        generandoPdf
+        ? 'Generando PDF...'
+        : 'Generar PDF'
+        }}
+
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--cancel btn-sm"
+        [disabled]="generandoPdf"
+        (click)="cerrarDetalle()">
+
+        Cerrar extracto
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- ERROR PDF                                               -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="errorPdf"
+    class="alert alert--danger">
+
+    <strong>
+      No fue posible generar el PDF
+    </strong>
+
+    <span>
+      {{ errorPdf }}
+    </span>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- RESUMEN ACUMULADO                                       -->
+  <!-- ======================================================= -->
+
+  <div class="extracto-seccion">
+
+    <div class="extracto-seccion__titulo">
+      Resumen de movimientos
+    </div>
+
+    <div class="extracto-resumen">
+
+      <article>
+
+        <span>
+          Movimientos
+        </span>
+
+        <strong>
+          {{ cantidadMovimientos }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Capital abonado
+        </span>
+
+        <strong>
+          {{
+          totalCapital
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Intereses
+        </span>
+
+        <strong>
+          {{
+          totalIntereses
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article
+        [class.resumen-alerta]="
+          totalMora > 0
+        ">
+
+        <span>
+          Mora
+        </span>
+
+        <strong>
+          {{
+          totalMora
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Seguro
+        </span>
+
+        <strong>
+          {{
+          totalSeguro
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Fondo garantía
+        </span>
+
+        <strong>
+          {{
+          totalFondoGarantia
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Otros conceptos
+        </span>
+
+        <strong>
+          {{
+          totalOtrosConceptos
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article class="extracto-resumen--total">
+
+        <span>
+          Total aplicado
+        </span>
+
+        <strong>
+          {{
+          totalAplicado
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+    </div>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- SALDOS ACTUALES                                         -->
+  <!-- ======================================================= -->
+
+  <div class="extracto-seccion">
+
+    <div class="extracto-seccion__encabezado">
+
+      <div>
+
+        <div class="extracto-seccion__titulo">
+          Saldos actuales del crédito
+        </div>
+
+        <span>
+          {{
+            tieneSaldosCausados
+              ? 'Saldos obtenidos de la última causación registrada.'
+              : 'No existen causaciones registradas; el capital corresponde al saldo actual del crédito.'
+          }}
+        </span>
+
+      </div>
+
+      <span
+        *ngIf="ultimaCausacion?.fechaProceso"
+        class="fecha-corte">
+
+        Corte:
+        {{
+          ultimaCausacion?.fechaProceso
+          | date:'dd/MM/yyyy'
+        }}
+
+      </span>
+
+    </div>
+
+
+    <div class="saldos-actuales">
+
+      <article class="saldo-capital">
+
+        <span>
+          Capital
+        </span>
+
+        <strong>
+          {{
+          saldoCapitalActual
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Intereses corrientes
+        </span>
+
+        <strong>
+          {{
+          saldoInteresActual
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article
+        [class.saldo-alerta]="
+          saldoMoraActual > 0
+        ">
+
+        <span>
+          Intereses de mora
+        </span>
+
+        <strong>
+          {{
+          saldoMoraActual
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Seguro
+        </span>
+
+        <strong>
+          {{
+          saldoSeguroActual
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Fondo de garantía
+        </span>
+
+        <strong>
+          {{
+          saldoFondoActual
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Otros conceptos
+        </span>
+
+        <strong>
+          {{
+          saldoOtrosActual
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article class="saldo-total">
+
+        <span>
+          Total adeudado
+        </span>
+
+        <strong>
+          {{
+          saldoTotalActual
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+    </div>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- SIN MOVIMIENTOS                                         -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="!tieneMovimientos"
+    class="estado-vacio">
+
+    <strong>
+      El crédito no tiene movimientos registrados
+    </strong>
+
+    <span>
+      Cuando se registren pagos o aplicaciones al crédito,
+      aparecerán en este extracto.
+    </span>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- TABLA                                                   -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="tieneMovimientos"
+    class="extracto-seccion">
+
+    <div class="extracto-seccion__titulo">
+      Detalle de movimientos
+    </div>
+
+    <div class="tabla-contenedor">
+
+      <table class="tabla-extracto">
+
+        <thead>
+
+        <tr>
+
+          <th>
+            Fecha
+          </th>
+
+          <th>
+            Comprobante
+          </th>
+
+          <th>
+            Medio pago
+          </th>
+
+          <th class="columna-numero">
+            Capital
+          </th>
+
+          <th class="columna-numero">
+            Intereses
+          </th>
+
+          <th class="columna-numero">
+            Mora
+          </th>
+
+          <th class="columna-numero">
+            Seguro
+          </th>
+
+          <th class="columna-numero">
+            Fondo
+          </th>
+
+          <th class="columna-numero">
+            Otros
+          </th>
+
+          <th class="columna-numero">
+            Total
+          </th>
+
+          <th class="center">
+            Días mora
+          </th>
+
+          <th>
+            Estado
+          </th>
+
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        <tr
+          *ngFor="
+            let movimiento of movimientos;
+            trackBy: trackByMovimiento
+          "
+          [class.fila-inactiva]="
+            esMovimientoInactivo(movimiento)
+          "
+          [class.fila-con-mora]="
+            tieneMora(movimiento)
+          ">
+
+          <td>
+
+            {{
+            movimiento.fechaPago
+            ? (
+            movimiento.fechaPago
+            | date:'dd/MM/yyyy'
+            )
+            : ''
+            }}
+
+          </td>
+
+
+          <td>
+
+            {{ comprobante(movimiento) }}
+
+          </td>
+
+
+          <td>
+
+            {{
+            movimiento.medioPagoPrincipal
+            || ''
+            }}
+
+          </td>
+
+
+          <td class="columna-numero">
+
+            {{
+            movimiento.valorCapital
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+
+          </td>
+
+
+          <td class="columna-numero">
+
+            {{
+            movimiento.totalInteresesRegistrados
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+
+          </td>
+
+
+          <td
+            class="columna-numero"
+            [class.valor-alerta]="
+              tieneMora(movimiento)
+            ">
+
+            {{
+            movimiento.valorInteresMora
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+
+          </td>
+
+
+          <td class="columna-numero">
+
+            {{
+            movimiento.valorSeguro
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+
+          </td>
+
+
+          <td class="columna-numero">
+
+            {{
+            movimiento.valorFondoGarantia
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+
+          </td>
+
+
+          <td class="columna-numero">
+
+            {{
+            movimiento.totalOtrosConceptos
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+
+          </td>
+
+
+          <td class="columna-numero columna-total">
+
+            {{
+            movimiento.totalComponentesRegistrados
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+
+          </td>
+
+
+          <td
+            class="center"
+            [class.valor-alerta]="
+              tieneMora(movimiento)
+            ">
+
+            {{ movimiento.diasMora ?? 0 }}
+
+          </td>
+
+
+          <td>
+
+            <span
+              class="estado-badge"
+              [class.estado-badge--activo]="
+                esMovimientoActivo(movimiento)
+              "
+              [class.estado-badge--saldado]="
+                esMovimientoInactivo(movimiento)
+              ">
+
+              {{ estadoMovimiento(movimiento) }}
+
+            </span>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</section>
