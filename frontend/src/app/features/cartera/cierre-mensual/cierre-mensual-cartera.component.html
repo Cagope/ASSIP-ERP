@@ -1,0 +1,699 @@
+<div class="cierre-mensual-cartera">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <div class="page-header">
+
+    <div>
+
+      <h2>
+        Cierre Mensual de Cartera
+      </h2>
+
+      <p>
+        Generación de la fotografía mensual general de cartera.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- PROCESO -->
+  <!-- ===================================================== -->
+
+  <div class="card proceso-card">
+
+    <div class="section-header">
+
+      <div>
+
+        <h3>
+          Generar fotografía mensual
+        </h3>
+
+        <small>
+          El proceso toma todos los créditos vigentes de la entidad
+          y conserva la agencia correspondiente en cada registro.
+        </small>
+
+      </div>
+
+    </div>
+
+
+    <div class="form-grid">
+
+      <!-- FECHA CORTE -->
+
+      <div class="form-field">
+
+        <label for="fechaCorte">
+          Fecha de corte
+        </label>
+
+        <input
+          id="fechaCorte"
+          name="fechaCorte"
+          type="date"
+          [(ngModel)]="fechaCorte"
+          [disabled]="ejecutando || regenerando">
+
+      </div>
+
+
+      <!-- ESTADO FECHA -->
+
+      <div
+        class="form-field estado-fecha"
+        *ngIf="fechaCorte">
+
+        <label>
+          Estado
+        </label>
+
+        <div
+          class="estado-fecha-box"
+          [class.estado-existe]="existeCierreFecha()"
+          [class.estado-nuevo]="!existeCierreFecha()">
+
+          <ng-container
+            *ngIf="existeCierreFecha(); else fechaNueva">
+
+            <ng-container
+              *ngIf="obtenerCierreFecha() as cierreFecha">
+
+              Cierre existente -
+              {{ descripcionEstado(cierreFecha.estadoCierre) }}.
+
+            </ng-container>
+
+          </ng-container>
+
+          <ng-template #fechaNueva>
+
+            Fecha disponible para generar fotografía.
+
+          </ng-template>
+
+        </div>
+
+      </div>
+
+
+      <!-- ACCIONES -->
+
+      <div class="form-actions">
+
+        <!-- GENERAR NUEVA FOTO -->
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="ejecutarCierre()"
+          [disabled]="
+            ejecutando
+            || regenerando
+            || cargando
+            || !fechaCorte
+            || existeCierreFecha()
+          ">
+
+          <span *ngIf="!ejecutando">
+            Generar foto
+          </span>
+
+          <span *ngIf="ejecutando">
+            Generando...
+          </span>
+
+        </button>
+
+
+        <!-- REGENERAR FOTO EXISTENTE -->
+
+        <button
+          *ngIf="
+            obtenerCierreFecha() as cierreFecha
+          "
+          type="button"
+          class="btn btn--warning"
+          (click)="regenerarFoto(cierreFecha)"
+          [disabled]="
+            ejecutando
+            || regenerando
+            || cargando
+            || !puedeRegenerar(cierreFecha)
+          ">
+
+          <span *ngIf="!regenerando">
+            Regenerar foto
+          </span>
+
+          <span *ngIf="regenerando">
+            Regenerando...
+          </span>
+
+        </button>
+
+
+        <!-- LIMPIAR -->
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()"
+          [disabled]="ejecutando || regenerando">
+
+          Limpiar
+
+        </button>
+
+
+        <!-- ACTUALIZAR -->
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="refrescar()"
+          [disabled]="
+            ejecutando
+            || regenerando
+            || cargando
+          ">
+
+          Actualizar
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJES -->
+  <!-- ===================================================== -->
+
+  <div
+    class="mensaje mensaje--ok"
+    *ngIf="mensaje">
+
+    {{ mensaje }}
+
+  </div>
+
+
+  <div
+    class="mensaje mensaje--error"
+    *ngIf="error">
+
+    {{ error }}
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- RESULTADO / CIERRE SELECCIONADO -->
+  <!-- ===================================================== -->
+
+  <div
+    class="card resumen-card"
+    *ngIf="cierreSeleccionado as cierre">
+
+    <div class="section-header">
+
+      <div>
+
+        <h3>
+          Resumen del cierre -
+          {{ nombreMesCierre(cierre.fechaCorte) }}
+        </h3>
+
+        <small>
+          Información general de la fotografía seleccionada.
+        </small>
+
+      </div>
+
+
+      <!-- REGENERAR DESDE RESUMEN -->
+
+      <div
+        class="section-actions"
+        *ngIf="puedeRegenerar(cierre)">
+
+        <button
+          type="button"
+          class="btn btn--warning btn-sm"
+          (click)="regenerarFoto(cierre)"
+          [disabled]="
+            ejecutando
+            || regenerando
+            || cargando
+          ">
+
+          <span *ngIf="!regenerando">
+            Regenerar foto
+          </span>
+
+          <span *ngIf="regenerando">
+            Regenerando...
+          </span>
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div class="resumen-grid">
+
+      <!-- FECHA -->
+
+      <div class="resumen-item">
+
+        <span class="resumen-label">
+          Fecha de corte
+        </span>
+
+        <strong>
+          {{ formatearFecha(cierre.fechaCorte) }}
+        </strong>
+
+      </div>
+
+
+      <!-- ESTADO -->
+
+      <div class="resumen-item">
+
+        <span class="resumen-label">
+          Estado
+        </span>
+
+        <strong>
+          {{ descripcionEstado(cierre.estadoCierre) }}
+        </strong>
+
+      </div>
+
+
+      <!-- CANTIDAD CREDITOS -->
+
+      <div class="resumen-item">
+
+        <span class="resumen-label">
+          Créditos fotografiados
+        </span>
+
+        <strong>
+          {{ formatearEntero(cierre.cantidadCreditos) }}
+        </strong>
+
+      </div>
+
+
+      <!-- FECHA FOTO -->
+
+      <div class="resumen-item">
+
+        <span class="resumen-label">
+          Fecha de fotografía
+        </span>
+
+        <strong>
+          {{
+          cierre.fechaFotografia
+          ? formatearFechaHora(cierre.fechaFotografia)
+          : 'Pendiente'
+          }}
+        </strong>
+
+      </div>
+
+
+      <!-- SALDO MAESTRO -->
+
+      <div class="resumen-item">
+
+        <span class="resumen-label">
+          Saldo cartera maestro
+        </span>
+
+        <strong>
+          $
+          {{
+          formatearMoneda(
+          cierre.saldoCarteraMaestro
+          )
+          }}
+        </strong>
+
+      </div>
+
+
+      <!-- SALDO CONTABLE -->
+
+      <div class="resumen-item">
+
+        <span class="resumen-label">
+          Saldo cartera contable
+        </span>
+
+        <strong>
+          $
+          {{
+          formatearMoneda(
+          cierre.saldoCarteraContable
+          )
+          }}
+        </strong>
+
+      </div>
+
+
+      <!-- DIFERENCIA -->
+
+      <div class="resumen-item">
+
+        <span class="resumen-label">
+          Diferencia de cuadre
+        </span>
+
+        <strong>
+          $
+          {{
+          formatearMoneda(
+          cierre.diferenciaCuadre
+          )
+          }}
+        </strong>
+
+      </div>
+
+
+      <!-- FECHA INICIO -->
+
+      <div class="resumen-item">
+
+        <span class="resumen-label">
+          Inicio del proceso
+        </span>
+
+        <strong>
+          {{
+          cierre.fechaInicio
+          ? formatearFechaHora(cierre.fechaInicio)
+          : ''
+          }}
+        </strong>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- HISTÓRICO DE CIERRES -->
+  <!-- ===================================================== -->
+
+  <div class="card historico-card">
+
+    <div class="section-header">
+
+      <div>
+
+        <h3>
+          Cierres mensuales
+        </h3>
+
+        <small>
+          Histórico de fotografías de cartera generadas.
+        </small>
+
+      </div>
+
+    </div>
+
+
+    <!-- CARGANDO -->
+
+    <div
+      class="loading"
+      *ngIf="cargando">
+
+      Consultando cierres...
+
+    </div>
+
+
+    <!-- SIN REGISTROS -->
+
+    <div
+      class="empty"
+      *ngIf="!cargando && cierres.length === 0">
+
+      No existen cierres mensuales registrados.
+
+    </div>
+
+
+    <!-- TABLA -->
+
+    <div
+      class="table-wrapper"
+      *ngIf="!cargando && cierres.length > 0">
+
+      <table class="data-table">
+
+        <thead>
+
+        <tr>
+
+          <th>
+            Fecha corte
+          </th>
+
+          <th class="center">
+            Estado
+          </th>
+
+          <th class="right">
+            Créditos
+          </th>
+
+          <th>
+            Fotografía
+          </th>
+
+          <th class="right">
+            Saldo maestro
+          </th>
+
+          <th class="right">
+            Saldo contable
+          </th>
+
+          <th class="right">
+            Diferencia
+          </th>
+
+          <th class="center">
+            Acción
+          </th>
+
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        <tr
+          *ngFor="
+            let cierre of cierres;
+            trackBy: trackByCierre
+          "
+          [class.row-selected]="
+            cierreSeleccionado?.idCierreCartera
+              === cierre.idCierreCartera
+          ">
+
+          <!-- FECHA -->
+
+          <td>
+
+            {{ formatearFecha(cierre.fechaCorte) }}
+
+          </td>
+
+
+          <!-- ESTADO -->
+
+          <td class="center">
+
+            <span
+              class="badge"
+              [class.badge--proceso]="
+                cierre.estadoCierre === 'P'
+              "
+              [class.badge--cerrado]="
+                cierre.estadoCierre === 'C'
+              ">
+
+              {{ descripcionEstado(cierre.estadoCierre) }}
+
+            </span>
+
+          </td>
+
+
+          <!-- CREDITOS -->
+
+          <td class="right">
+
+            {{
+            formatearEntero(
+            cierre.cantidadCreditos
+            )
+            }}
+
+          </td>
+
+
+          <!-- FOTO -->
+
+          <td>
+
+            <ng-container
+              *ngIf="tieneFoto(cierre); else sinFoto">
+
+              {{
+              formatearFechaHora(
+              cierre.fechaFotografia
+              )
+              }}
+
+            </ng-container>
+
+            <ng-template #sinFoto>
+
+              Pendiente
+
+            </ng-template>
+
+          </td>
+
+
+          <!-- SALDO MAESTRO -->
+
+          <td class="right">
+
+            $
+            {{
+            formatearMoneda(
+            cierre.saldoCarteraMaestro
+            )
+            }}
+
+          </td>
+
+
+          <!-- SALDO CONTABLE -->
+
+          <td class="right">
+
+            $
+            {{
+            formatearMoneda(
+            cierre.saldoCarteraContable
+            )
+            }}
+
+          </td>
+
+
+          <!-- DIFERENCIA -->
+
+          <td class="right">
+
+            $
+            {{
+            formatearMoneda(
+            cierre.diferenciaCuadre
+            )
+            }}
+
+          </td>
+
+
+          <!-- ACCIONES -->
+
+          <td class="center">
+
+            <div class="table-actions">
+
+              <button
+                type="button"
+                class="btn btn--secondary btn-sm"
+                (click)="seleccionarCierre(cierre)"
+                [disabled]="ejecutando || regenerando">
+
+                Ver
+
+              </button>
+
+
+              <button
+                *ngIf="puedeRegenerar(cierre)"
+                type="button"
+                class="btn btn--warning btn-sm"
+                (click)="regenerarFoto(cierre)"
+                [disabled]="
+                  ejecutando
+                  || regenerando
+                  || cargando
+                ">
+
+                <span *ngIf="
+                  !regenerando
+                  || cierreSeleccionado?.idCierreCartera
+                     !== cierre.idCierreCartera
+                ">
+                  Regenerar
+                </span>
+
+                <span *ngIf="
+                  regenerando
+                  && cierreSeleccionado?.idCierreCartera
+                     === cierre.idCierreCartera
+                ">
+                  Procesando...
+                </span>
+
+              </button>
+
+            </div>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>

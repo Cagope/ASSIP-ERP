@@ -92,7 +92,7 @@ public class CierreMensualDepositosRepository {
             CASE
                 WHEN COALESCE(m.cantidad_movimientos, 0) = 0
                     THEN COALESCE(ca.saldo_actual_cuenta, 0)
-                ELSE COALESCE(m.total_debitos, 0) - COALESCE(m.total_creditos, 0)
+                ELSE COALESCE(m.total_creditos, 0) - COALESCE(m.total_debitos, 0)
             END AS saldo_cierre,
 
             COALESCE(m.total_debitos, 0) AS total_debitos,
@@ -140,7 +140,7 @@ public class CierreMensualDepositosRepository {
              CASE
                  WHEN COALESCE(m.cantidad_movimientos, 0) = 0
                      THEN COALESCE(ca.saldo_actual_cuenta, 0)
-                 ELSE COALESCE(m.total_debitos, 0) - COALESCE(m.total_creditos, 0)
+                 ELSE COALESCE(m.total_creditos, 0) - COALESCE(m.total_debitos, 0)
              END
          ) <> 0
 

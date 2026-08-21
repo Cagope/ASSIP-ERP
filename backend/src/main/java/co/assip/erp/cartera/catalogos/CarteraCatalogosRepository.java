@@ -24,16 +24,17 @@ public class CarteraCatalogosRepository {
     public List<CarteraCatalogoDTO> listarLineasCredito() {
 
         String sql = """
-                SELECT
-                    id_linea_credito::bigint AS id,
-                    codigo_linea_credito     AS codigo,
-                    nombre_linea_credito     AS nombre,
-                    activo
-                FROM cartera.lineas_creditos
-                ORDER BY
-                    codigo_linea_credito,
-                    nombre_linea_credito
-                """;
+            SELECT
+                id_linea_credito::bigint        AS id,
+                codigo_linea_credito            AS codigo,
+                nombre_linea_credito            AS nombre,
+                es_utilizacion_cupo_tarjeta     AS "esUtilizacionCupoTarjeta",
+                activo
+            FROM cartera.lineas_creditos
+            ORDER BY
+                codigo_linea_credito,
+                nombre_linea_credito
+            """;
 
         return jdbc
                 .sql(sql)

@@ -25,6 +25,14 @@ export const carteraMenu = {
       children: [
 
         // =============================
+        // CIERRE MENSUAL
+        // =============================
+        {
+          label: 'Cierre Mensual',
+          route: '/cartera/cierre-mensual'
+        },
+
+        // =============================
         // EVALUACIÓN DE CARTERA
         // =============================
         {

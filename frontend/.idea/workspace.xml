@@ -5,172 +5,42 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d0577d07-00ee-4562-af4b-c1a4484e8934" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/buscadorasociados/CarteraAsociadoBusquedaController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/buscadorasociados/CarteraAsociadoBusquedaDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/buscadorasociados/CarteraAsociadoBusquedaRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/buscadorasociados/CarteraAsociadoBusquedaService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/catalogos/CarteraCatalogosController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/catalogos/CarteraCatalogosRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/catalogos/CarteraCatalogosService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/catalogos/Dto/CarteraCatalogoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/consultacreditos/ConsultaCreditosController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/consultacreditos/ConsultaCreditosRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/consultacreditos/ConsultaCreditosService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/consultacreditos/dto/ConsultaCreditoAlivioDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/consultacreditos/dto/ConsultaCreditoAsociadoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/consultacreditos/dto/ConsultaCreditoDetalleDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/consultacreditos/dto/ConsultaCreditoEvaluacionDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/consultacreditos/dto/ConsultaCreditoExtractoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/consultacreditos/dto/ConsultaCreditoIntegralDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/consultacreditos/dto/ConsultaCreditoInteresDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/consultacreditos/dto/ConsultaCreditoResumenDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/consultacreditos/dto/ConsultaCreditoSeguroDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/consultacreditos/pdf/ConsultaCreditoExtractoPdfService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/centralriesgos/resultados/CentralRiesgoResultadoController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/centralriesgos/resultados/CentralRiesgoResultadoRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/centralriesgos/resultados/CentralRiesgoResultadoService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/centralriesgos/resultados/dto/CentralRiesgoResultadoDatoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/centralriesgos/resultados/dto/CentralRiesgoResultadoImportacionDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/criterios/EvaluacionCriterioController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/criterios/EvaluacionCriterioRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/criterios/EvaluacionCriterioService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/criterios/dto/EvaluacionCriterioDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/EvaluacionCarteraController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/EvaluacionCarteraRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/EvaluacionCarteraService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio102/Criterio102ActualizacionDatosRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio102/Criterio102ActualizacionDatosService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio102/dto/Criterio102DatoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio201/Criterio201EdadCronologicaRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio201/Criterio201EdadCronologicaService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio201/dto/Criterio201DatoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio401/Criterio401ServicioDeudaRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio401/Criterio401ServicioDeudaService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio401/dto/Criterio401DatoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio402/Criterio402HistorialCentralRiesgoRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio402/Criterio402HistorialCentralRiesgoService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio402/dto/Criterio402DatoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio403/Criterio403CapacidadPagoRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio403/Criterio403CapacidadPagoService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio403/dto/Criterio403DatoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio502/Criterio502SolvenciaDeudorRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio502/Criterio502SolvenciaDeudorService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio502/dto/Criterio502DatoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio601/Criterio601GarantiasRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio601/Criterio601GarantiasService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio601/dto/Criterio601DatoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio701/Criterio701ReestructuracionesRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio701/Criterio701ReestructuracionesService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio701/dto/Criterio701DatoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio710/Criterio710SectorEconomicoRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio710/Criterio710SectorEconomicoService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio710/dto/Criterio710DatoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio711/Criterio711AlertasCentralRiesgosRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio711/Criterio711AlertasCentralRiesgosService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/criterios/criterio711/dto/Criterio711DatoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/dto/ContextoEvaluacionDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/dto/EvaluacionCarteraDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/dto/EvaluacionCreditoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/dto/EvaluacionCriterioResultadoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/motor/EvaluacionEdadRiesgoService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/motor/EvaluacionMotorParametrosRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/motor/EvaluacionMotorRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/motor/EvaluacionMotorService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/motor/dto/EvaluacionCreditoResultadoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/motor/dto/EvaluacionEdadRiesgoResultadoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/reglas/EvaluacionReglasRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/reglas/EvaluacionReglasService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/resultados/EvaluacionResultadosController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/resultados/EvaluacionResultadosRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/resultados/EvaluacionResultadosService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/resultados/dto/EvaluacionResultadoCreditoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/resultados/dto/EvaluacionResultadoDetalleDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/resultados/dto/EvaluacionResultadoHojaVidaDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/proceso/resultados/dto/EvaluacionResultadoMorosidadDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/reglas/EvaluacionCriterioReglaController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/reglas/EvaluacionCriterioReglaRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/reglas/EvaluacionCriterioReglaService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/evaluacion/reglas/dto/EvaluacionCriterioReglaDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cartera/DashboardCarteraController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cartera/DashboardCarteraRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cartera/DashboardCarteraService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cartera/dto/DashboardCarteraAgenciaDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cartera/dto/DashboardCarteraAlertaDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cartera/dto/DashboardCarteraLineaDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cartera/dto/DashboardCarteraRecaudoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cartera/dto/DashboardCarteraRequestDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cartera/dto/DashboardCarteraResponseDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cartera/dto/DashboardCarteraResumenDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cartera/dto/DashboardCarteraRiesgoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/cartera-menu.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/cartera.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/consulta-creditos/buscador/consulta-creditos-buscador.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/consulta-creditos/buscador/consulta-creditos-buscador.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/consulta-creditos/buscador/consulta-creditos-buscador.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/consulta-creditos/consulta-creditos.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/consulta-creditos/consulta-creditos.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/consulta-creditos/consulta-creditos.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/consulta-creditos/consulta-creditos.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/consulta-creditos/consulta-creditos.models.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/consulta-creditos/consulta-creditos.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/consulta-creditos/extracto/consulta-creditos-extracto.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/consulta-creditos/extracto/consulta-creditos-extracto.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/consulta-creditos/extracto/consulta-creditos-extracto.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/consulta-creditos/seguros/consulta-creditos-seguros.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/consulta-creditos/seguros/consulta-creditos-seguros.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/consulta-creditos/seguros/consulta-creditos-seguros.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/central-riesgos/resultados/central-riesgo-resultado-import.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/central-riesgos/resultados/central-riesgo-resultado-import.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/central-riesgos/resultados/central-riesgo-resultado-import.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/central-riesgos/resultados/central-riesgo-resultado.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/central-riesgos/resultados/central-riesgo-resultado.models.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/central-riesgos/resultados/central-riesgo-resultado.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/evaluaciones/evaluacion-cartera.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/evaluaciones/evaluacion-cartera.models.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/evaluaciones/evaluacion-cartera.routes.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/evaluaciones/gestionar/evaluacion-cartera-gestionar.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/evaluaciones/gestionar/evaluacion-cartera-gestionar.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/evaluaciones/gestionar/evaluacion-cartera-gestionar.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/evaluaciones/list/evaluacion-cartera-list.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/evaluaciones/list/evaluacion-cartera-list.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/evaluaciones/list/evaluacion-cartera-list.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/evaluaciones/resultados/detalle/evaluacion-resultado-detalle.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/evaluaciones/resultados/detalle/evaluacion-resultado-detalle.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/evaluaciones/resultados/detalle/evaluacion-resultado-detalle.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/evaluaciones/resultados/evaluacion-cartera-resultados.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/evaluaciones/resultados/evaluacion-cartera-resultados.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/evaluaciones/resultados/evaluacion-cartera-resultados.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/evaluaciones/resultados/evaluacion-cartera-resultados.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/evaluaciones/resultados/excel/evaluacion-resultados-excel.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/evaluacion/evaluaciones/resultados/impresion/evaluacion-resultado-print.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cartera/dashboard-cartera-bar-chart.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cartera/dashboard-cartera-bar-chart.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cartera/dashboard-cartera-bar-chart.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cartera/dashboard-cartera-donut-chart.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cartera/dashboard-cartera-donut-chart.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cartera/dashboard-cartera-donut-chart.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cartera/dashboard-cartera.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cartera/dashboard-cartera.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cartera/dashboard-cartera.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cartera/dashboard-cartera.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cartera/dashboard-cartera.models.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/shared/catalogos/cartera-catalogos.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/shared/catalogos/cartera-catalogos.models.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/expedienteasociado/ExpedienteAsociadoService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/expedienteasociado/ExpedienteAsociadoService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/expedienteasociado/dto/ExpedienteCreditoDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/expedienteasociado/dto/ExpedienteCreditoDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/expedienteasociado/repository/ExpedienteCarteraRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/expedienteasociado/repository/ExpedienteCarteraRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/CierreMensualController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/CierreMensualFotoRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/CierreMensualRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/CierreMensualService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/alivios/ConsolidacionAliviosController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/alivios/ConsolidacionAliviosRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/alivios/ConsolidacionAliviosService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/anexo1/Anexo1Controller.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/anexo1/Anexo1Repository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/anexo1/Anexo1Service.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/anexo2/Anexo2Controller.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/anexo2/Anexo2Repository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/anexo2/Anexo2Service.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/calculosprevios/CalculosPreviosController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/calculosprevios/CalculosPreviosRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/calculosprevios/CalculosPreviosService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/causacionintereses/CausacionInteresesController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/causacionintereses/CausacionInteresesRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/causacionintereses/CausacionInteresesService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/causacionseguros/CausacionSegurosController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/causacionseguros/CausacionSegurosRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/causacionseguros/CausacionSegurosService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/dto/CierreMensualDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/cierre-mensual/cierre-mensual-cartera.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/cierre-mensual/cierre-mensual-cartera.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/cierre-mensual/cierre-mensual-cartera.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/cierre-mensual/cierre-mensual-cartera.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/cierre-mensual/cierre-mensual-cartera.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/catalogos/CarteraCatalogosRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/catalogos/CarteraCatalogosRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/catalogos/Dto/CarteraCatalogoDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/catalogos/Dto/CarteraCatalogoDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/cierre_mensual_depositos/CierreMensualDepositosRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/cierre_mensual_depositos/CierreMensualDepositosRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/expedienteasociado/repository/ExpedienteCdatRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/expedienteasociado/repository/ExpedienteCdatRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../docs/Diseno_Evaluacion_Cartera_ASSIP_ERP.docx" beforeDir="false" afterPath="$PROJECT_DIR$/../docs/Diseno_Evaluacion_Cartera_ASSIP_ERP.docx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/app.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/app.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/expediente-asociado/creditos/expediente-creditos.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/gerencia/expediente-asociado/creditos/expediente-creditos.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/expediente-asociado/creditos/expediente-creditos.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/gerencia/expediente-asociado/creditos/expediente-creditos.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/expediente-asociado/creditos/expediente-creditos.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/gerencia/expediente-asociado/creditos/expediente-creditos.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/expediente-asociado/expediente-asociado.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/gerencia/expediente-asociado/expediente-asociado.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/expediente-asociado/expediente-asociado.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/gerencia/expediente-asociado/expediente-asociado.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/expediente-asociado/expediente-asociado.dto.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/gerencia/expediente-asociado/expediente-asociado.dto.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/gerencia-menu.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/gerencia/gerencia-menu.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/gerencia.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/gerencia/gerencia.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/layout/main-menu.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout/main-menu.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/layout/menu-registry.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout/menu-registry.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/cartera-menu.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/cartera-menu.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/cartera.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/cartera.routes.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

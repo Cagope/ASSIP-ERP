@@ -6,6 +6,11 @@ import { Routes } from '@angular/router';
 import { CONSULTA_CREDITOS_ROUTES } from './consulta-creditos/consulta-creditos.routes';
 
 // =============================
+// CIERRE MENSUAL
+// =============================
+import { CIERRE_MENSUAL_CARTERA_ROUTES } from './cierre-mensual/cierre-mensual-cartera.routes';
+
+// =============================
 // EVALUACIÓN DE CARTERA
 // =============================
 import { EVALUACION_CARTERA_ROUTES } from './evaluacion/evaluaciones/evaluacion-cartera.routes';
@@ -23,6 +28,14 @@ export const CARTERA_ROUTES: Routes = [
   {
     path: 'consulta-creditos',
     children: CONSULTA_CREDITOS_ROUTES
+  },
+
+  // =============================
+  // CIERRE MENSUAL
+  // =============================
+  {
+    path: 'cierre-mensual',
+    children: CIERRE_MENSUAL_CARTERA_ROUTES
   },
 
   // =============================

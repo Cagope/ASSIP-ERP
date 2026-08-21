@@ -1,0 +1,19 @@
+$BASE = "http://localhost:8080/api/v1"
+
+# --- LOGIN AUTOMÁTICO ---
+$credenciales = @{
+    username = "admin1"
+    password = "1234"
+} | ConvertTo-Json
+
+$login = Invoke-RestMethod `
+    -Method POST `
+    -Uri "$BASE/auth/login" `
+    -ContentType "application/json" `
+    -Body $credenciales
+
+# Guarda automáticamente el token
+$API_TOKEN = $login.token
+
+# Muestra el token
+"Token generado: $API_TOKEN"

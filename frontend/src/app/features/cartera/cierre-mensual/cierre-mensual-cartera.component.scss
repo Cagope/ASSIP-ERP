@@ -1,0 +1,594 @@
+// =========================================================
+// CIERRE MENSUAL DE CARTERA
+// =========================================================
+
+.cierre-mensual-cartera {
+  padding: 1rem;
+}
+
+
+// =========================================================
+// ENCABEZADO
+// =========================================================
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+}
+
+
+// =========================================================
+// TARJETAS
+// =========================================================
+
+.card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  padding: 1rem;
+  margin-bottom: 1rem;
+
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+
+// =========================================================
+// ENCABEZADO DE SECCIÓN
+// =========================================================
+
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  small {
+    display: block;
+    margin-top: 0.2rem;
+
+    font-size: 0.8rem;
+    color: #6b7280;
+  }
+}
+
+
+// =========================================================
+// ACCIONES DE SECCIÓN
+// =========================================================
+
+.section-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+
+  flex-shrink: 0;
+}
+
+
+// =========================================================
+// FORMULARIO DEL PROCESO
+// =========================================================
+
+.form-grid {
+  display: grid;
+
+  grid-template-columns:
+    minmax(180px, 220px)
+    minmax(280px, 1fr)
+    auto;
+
+  gap: 1rem;
+
+  align-items: end;
+}
+
+
+// =========================================================
+// CAMPOS
+// =========================================================
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  input {
+    width: 100%;
+    min-height: 38px;
+
+    padding: 0.45rem 0.6rem;
+
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+
+    background: #ffffff;
+    color: #111827;
+
+    font-size: 0.9rem;
+
+    outline: none;
+
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  input:focus {
+    border-color: #047857;
+
+    box-shadow:
+      0 0 0 2px rgba(4, 120, 87, 0.12);
+  }
+
+  input:disabled {
+    background: #f3f4f6;
+    color: #6b7280;
+    cursor: not-allowed;
+  }
+}
+
+
+// =========================================================
+// ESTADO DE LA FECHA
+// =========================================================
+
+.estado-fecha {
+  min-width: 0;
+}
+
+.estado-fecha-box {
+  display: flex;
+  align-items: center;
+
+  min-height: 38px;
+
+  padding: 0.45rem 0.7rem;
+
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.estado-nuevo {
+  border-color: #a7f3d0;
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.estado-existe {
+  border-color: #fde68a;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+
+// =========================================================
+// ACCIONES PRINCIPALES
+// =========================================================
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+
+  white-space: nowrap;
+}
+
+
+// =========================================================
+// BOTONES
+// =========================================================
+
+.btn {
+  min-height: 38px;
+
+  padding: 0.45rem 0.85rem;
+
+  border: 1px solid transparent;
+  border-radius: 6px;
+
+  font-size: 0.82rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+
+// =========================================================
+// BOTÓN PRINCIPAL
+// =========================================================
+
+.btn--primary {
+  background: #047857;
+  border-color: #047857;
+  color: #ffffff;
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: #065f46;
+  border-color: #065f46;
+}
+
+
+// =========================================================
+// BOTÓN SECUNDARIO
+// =========================================================
+
+.btn--secondary {
+  background: #ffffff;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+
+// =========================================================
+// BOTÓN REGENERAR
+// =========================================================
+
+.btn--warning {
+  background: #fffbeb;
+  border-color: #f59e0b;
+  color: #92400e;
+}
+
+.btn--warning:hover:not(:disabled) {
+  background: #fef3c7;
+  border-color: #d97706;
+  color: #78350f;
+}
+
+
+// =========================================================
+// BOTÓN PEQUEÑO
+// =========================================================
+
+.btn-sm {
+  min-height: 30px;
+
+  padding: 0.3rem 0.65rem;
+
+  font-size: 0.78rem;
+}
+
+
+// =========================================================
+// MENSAJES
+// =========================================================
+
+.mensaje {
+  padding: 0.7rem 0.85rem;
+  margin-bottom: 1rem;
+
+  border: 1px solid transparent;
+  border-radius: 6px;
+
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.mensaje--ok {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+.mensaje--error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+
+// =========================================================
+// RESUMEN DEL CIERRE
+// =========================================================
+
+.resumen-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(160px, 1fr));
+
+  gap: 0.75rem;
+}
+
+.resumen-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  min-width: 0;
+
+  padding: 0.7rem;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+
+  background: #f9fafb;
+
+  strong {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #111827;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.resumen-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+
+  color: #6b7280;
+
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+
+// =========================================================
+// TABLA
+// =========================================================
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  font-size: 0.82rem;
+
+  th,
+  td {
+    padding: 0.55rem 0.65rem;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    white-space: nowrap;
+  }
+
+  thead th {
+    background: #f6f6f6;
+
+    color: #374151;
+
+    font-size: 0.76rem;
+    font-weight: 700;
+
+    text-align: left;
+  }
+
+  tbody td {
+    color: #374151;
+  }
+
+  tbody tr {
+    transition: background 0.12s ease;
+  }
+
+  tbody tr:hover {
+    background: #f9fafb;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+}
+
+
+// =========================================================
+// ACCIONES DE TABLA
+// =========================================================
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.4rem;
+
+  white-space: nowrap;
+}
+
+
+// =========================================================
+// ALINEACIÓN
+// =========================================================
+
+.center {
+  text-align: center !important;
+}
+
+.right {
+  text-align: right !important;
+}
+
+
+// =========================================================
+// FILA SELECCIONADA
+// =========================================================
+
+.row-selected {
+  background: #ecfdf5 !important;
+
+  td {
+    border-bottom-color: #d1fae5;
+  }
+}
+
+
+// =========================================================
+// BADGES DE ESTADO
+// =========================================================
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 76px;
+
+  padding: 0.2rem 0.5rem;
+
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+
+  background: #f9fafb;
+  color: #374151;
+
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.badge--proceso {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.badge--cerrado {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+
+// =========================================================
+// CARGANDO / VACÍO
+// =========================================================
+
+.loading,
+.empty {
+  padding: 1.5rem 0.75rem;
+
+  text-align: center;
+
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+
+// =========================================================
+// RESPONSIVE
+// =========================================================
+
+@media (max-width: 1100px) {
+
+  .form-grid {
+    grid-template-columns:
+      minmax(180px, 220px)
+      1fr;
+  }
+
+  .form-actions {
+    grid-column: 1 / -1;
+
+    justify-content: flex-start;
+
+    flex-wrap: wrap;
+  }
+
+  .resumen-grid {
+    grid-template-columns:
+      repeat(2, minmax(160px, 1fr));
+  }
+
+}
+
+
+@media (max-width: 700px) {
+
+  .cierre-mensual-cartera {
+    padding: 0.75rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    grid-column: auto;
+
+    flex-wrap: wrap;
+  }
+
+  .resumen-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-header,
+  .section-header {
+    flex-direction: column;
+  }
+
+  .section-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .table-actions {
+    justify-content: flex-start;
+  }
+
+}

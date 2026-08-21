@@ -131,7 +131,7 @@ public class ExpedienteCdatRepository
                     c.saldo_actual_cdat,
                     0
                 )::numeric(18,2)
-                    AS saldo_capital,
+                    AS saldo_actual,
 
                 COALESCE(
                     c.saldo_actual_cdat,
