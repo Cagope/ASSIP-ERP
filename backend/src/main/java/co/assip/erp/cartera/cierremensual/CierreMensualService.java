@@ -306,6 +306,11 @@ public class CierreMensualService {
                         idCierreCartera
                 );
 
+        int cantidadFotoConSaldo =
+                fotoRepository.contarCreditosFotoConSaldo(
+                        idCierreCartera
+                );
+
         // =====================================================
         // 4. Contar base de cálculos
         // =====================================================
@@ -335,13 +340,13 @@ public class CierreMensualService {
         // 6. Validar foto contra base de cálculos
         // =====================================================
 
-        if (cantidadFoto != cantidadResultados) {
+        if (cantidadFotoConSaldo != cantidadResultados) {
 
             throw new IllegalStateException(
-                    "Inconsistencia al generar el cierre de cartera. "
-                            + "Créditos fotografiados: "
-                            + cantidadFoto
-                            + ". Registros de cálculos comunes: "
+                    "No es posible cerrar la fotografía. "
+                            + "Créditos fotografiados con saldo: "
+                            + cantidadFotoConSaldo
+                            + ". Registros de resultados: "
                             + cantidadResultados
                             + "."
             );
@@ -413,6 +418,151 @@ public class CierreMensualService {
                                         + "del cierre."
                         )
                 );
+    }
+
+    // =========================================================
+// CERRAR FOTOGRAFÍA EN FIRME
+//
+// P = En proceso / fotografía abierta
+// C = Cerrado / fotografía firme
+//
+// Una vez cerrado:
+// - no se puede regenerar la fotografía
+// - se habilitan los cálculos de cierre
+// =========================================================
+
+    public CierreMensualDTO cerrarFotografia(
+            Integer idCierreCartera
+    ) {
+
+        validarIdCierre(
+                idCierreCartera
+        );
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        // =====================================================
+        // 1. Recuperar cierre
+        // =====================================================
+
+        CierreMensualDTO cierre =
+                repository.buscarPorId(
+                        idCierreCartera
+                ).orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "No existe el cierre de cartera: "
+                                        + idCierreCartera
+                        )
+                );
+
+        // =====================================================
+        // 2. Validar estado
+        // =====================================================
+
+        String estado =
+                cierre.getEstadoCierre();
+
+        if (estado == null
+                || !"P".equalsIgnoreCase(
+                estado.trim()
+        )) {
+
+            throw new IllegalStateException(
+                    "La fotografía solamente puede cerrarse "
+                            + "cuando el cierre se encuentra "
+                            + "en estado En proceso."
+            );
+        }
+
+        // =====================================================
+        // 3. Validar existencia de fotografía
+        // =====================================================
+
+        int cantidadFoto =
+                fotoRepository.contarCreditosFoto(
+                        idCierreCartera
+                );
+
+        if (cantidadFoto <= 0) {
+
+            throw new IllegalStateException(
+                    "El cierre "
+                            + idCierreCartera
+                            + " no tiene fotografía de créditos."
+            );
+        }
+
+        // =====================================================
+        // 4. Validar base de resultados
+        // =====================================================
+
+        int cantidadResultados =
+                fotoRepository.contarResultadosBase(
+                        idCierreCartera
+                );
+
+        if (cantidadResultados <= 0) {
+
+            throw new IllegalStateException(
+                    "El cierre "
+                            + idCierreCartera
+                            + " no tiene base de cálculos."
+            );
+        }
+
+        // =====================================================
+        // 5. Validar correspondencia foto / resultados
+        // =====================================================
+
+        int cantidadFotoConSaldo =
+                fotoRepository.contarCreditosFotoConSaldo(
+                        idCierreCartera
+                );
+
+        if (cantidadFotoConSaldo != cantidadResultados) {
+
+            throw new IllegalStateException(
+                    "No es posible cerrar la fotografía. "
+                            + "Créditos fotografiados con saldo: "
+                            + cantidadFotoConSaldo
+                            + ". Registros de resultados: "
+                            + cantidadResultados
+                            + "."
+            );
+        }
+
+        // =====================================================
+        // 6. Cerrar fotografía en firme
+        // =====================================================
+
+        int actualizados =
+                repository.finalizar(
+                        idCierreCartera,
+                        idUsuario
+                );
+
+        if (actualizados != 1) {
+
+            throw new IllegalStateException(
+                    "No fue posible cerrar la fotografía del cierre "
+                            + idCierreCartera
+                            + "."
+            );
+        }
+
+        // =====================================================
+        // 7. Recuperar cierre actualizado
+        // =====================================================
+
+        return repository.buscarPorId(
+                idCierreCartera
+        ).orElseThrow(() ->
+                new IllegalStateException(
+                        "La fotografía fue cerrada, pero no fue posible "
+                                + "recuperar el cierre actualizado."
+                )
+        );
     }
 
     // =========================================================

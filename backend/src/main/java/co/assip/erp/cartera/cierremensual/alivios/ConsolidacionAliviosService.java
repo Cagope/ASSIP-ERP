@@ -29,7 +29,7 @@ public class ConsolidacionAliviosService {
     //
     // 1. valida id del cierre
     // 2. recupera cierre
-    // 3. valida estado P
+    // 3. valida estado C
     // 4. obtiene usuario de sesión
     // 5. consolida:
     //      - valor_alivios_mes
@@ -66,7 +66,7 @@ public class ConsolidacionAliviosService {
         // 2. VALIDAR ESTADO
         // =====================================================
 
-        validarEstadoEnProceso(
+        validarEstadoCerrado(
                 cierre
         );
 
@@ -108,24 +108,29 @@ public class ConsolidacionAliviosService {
     }
 
     // =========================================================
-    // VALIDAR ESTADO P
+    // VALIDAR CIERRE CERRADO
+    //
+    // C = fotografía cerrada en firme.
+    // Solamente desde este estado se permiten los cálculos
+    // definitivos del cierre.
     // =========================================================
 
-    private void validarEstadoEnProceso(
+    private void validarEstadoCerrado(
             CierreMensualDTO cierre
     ) {
 
         if (
                 cierre.getEstadoCierre() == null
-                        || !"P".equalsIgnoreCase(
-                        cierre.getEstadoCierre()
+                        || !"C".equalsIgnoreCase(
+                        cierre.getEstadoCierre().trim()
                 )
         ) {
 
             throw new IllegalStateException(
                     "El cierre "
                             + cierre.getIdCierreCartera()
-                            + " no se encuentra en estado P."
+                            + " debe estar cerrado en firme "
+                            + "para consolidar los alivios."
             );
         }
     }

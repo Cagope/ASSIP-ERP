@@ -11,16 +11,26 @@ public class Anexo2Controller {
 
     private final Anexo2Service service;
 
+    // =========================================================
+    // PREPARAR / EJECUTAR ANEXO 2
+    //
+    // El usuario se obtiene desde la sesión autenticada.
+    //
+    // Ejemplo:
+    //
+    // POST
+    // /api/v1/cartera/anexo2/41/preparar
+    //
+    // =========================================================
+
     @PostMapping("/{idCierreCartera}/preparar")
     public ResponseEntity<Anexo2Service.ResultadoPreparacionAnexo2> preparar(
-            @PathVariable Integer idCierreCartera,
-            @RequestParam Integer idUsuario
+            @PathVariable Integer idCierreCartera
     ) {
 
         return ResponseEntity.ok(
                 service.preparar(
-                        idCierreCartera,
-                        idUsuario
+                        idCierreCartera
                 )
         );
     }

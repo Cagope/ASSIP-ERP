@@ -1828,4 +1828,124 @@ public class CalculosPreviosRepository {
         );
     }
 
+    // =========================================================
+    // CONSOLIDAR COSTAS JUDICIALES
+    //
+    // REGLAS:
+    //
+    // 1. Las costas judiciales NO se causan mensualmente.
+    //
+    // 2. Se toma el saldo de los movimientos existentes
+    //    hasta la fecha de corte.
+    //
+    // 3. Solamente participan movimientos activos:
+    //
+    //        estado = 'A'
+    //
+    // 4. Saldo:
+    //
+    //        SUM(valor_debito - valor_credito)
+    //
+    // 5. No se depende del estado actual de la cabecera
+    //    de costas judiciales, porque una cabecera puede
+    //    desactivarse posteriormente y no debe alterar
+    //    un cierre histórico.
+    //
+    // 6. Todos los resultados del cierre se reinician
+    //    primero a cero para permitir reejecución segura.
+    //
+    // =========================================================
+
+    public int consolidarCostasJudiciales(
+            Integer idCierreCartera,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+            WITH fecha_cierre AS
+            (
+                SELECT
+                    c.fecha_corte
+
+                FROM cartera.cierres_cartera c
+
+                WHERE c.id_cierre_cartera =
+                      :idCierreCartera
+            ),
+
+            movimientos AS
+            (
+                SELECT
+                    cj.id_cartera_credito,
+
+                    SUM(
+                        d.valor_debito
+                        -
+                        d.valor_credito
+                    ) AS saldo_costas_judiciales
+
+                FROM cartera.creditos_costas_judiciales cj
+
+                INNER JOIN cartera.creditos_costas_judiciales_detalle d
+                    ON d.id_credito_costa_judicial =
+                       cj.id_credito_costa_judicial
+
+                CROSS JOIN fecha_cierre fc
+
+                WHERE d.estado = 'A'
+
+                  AND d.fecha_movimiento <=
+                      fc.fecha_corte
+
+                GROUP BY
+                    cj.id_cartera_credito
+            )
+
+            UPDATE cartera.cierres_cartera_resultados r
+
+               SET valor_costas_judiciales =
+                       COALESCE(
+                           m.saldo_costas_judiciales,
+                           0
+                       ),
+
+                   fk_seguridad_edicion =
+                       :idUsuario,
+
+                   fecha_edicion =
+                       CURRENT_TIMESTAMP
+
+              FROM cartera.cierres_cartera_creditos f
+
+              LEFT JOIN movimientos m
+                  ON m.id_cartera_credito =
+                     f.id_cartera_credito
+
+             WHERE f.id_cierre_cartera_credito =
+                   r.id_cierre_cartera_credito
+
+               AND f.id_cierre_cartera =
+                   :idCierreCartera
+
+               AND r.id_cierre_cartera =
+                   :idCierreCartera
+            """;
+
+        MapSqlParameterSource parametros =
+                new MapSqlParameterSource()
+                        .addValue(
+                                "idCierreCartera",
+                                idCierreCartera
+                        )
+                        .addValue(
+                                "idUsuario",
+                                idUsuario
+                        );
+
+        return jdbc.update(
+                sql,
+                parametros
+        );
+    }
+
 }

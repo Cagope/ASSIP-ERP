@@ -30,7 +30,7 @@ public class CalculosPreviosService {
     // PROCESO ACTUAL:
     //
     // 1. Validar cierre.
-    // 2. Validar estado P.
+    // 2. Validar estado C.
     // 3. Validar base de cálculos.
     // 4. Calcular días de mora.
     // 5. Calcular edad de mora.
@@ -41,9 +41,13 @@ public class CalculosPreviosService {
     // 10. Calcular edades de reestructuración.
     // 11. Calcular prorrateo de aportes.
     // 12. Validar cantidades y edades.
+    // 13. Limpiar detalle de garantías.
+    // 14. Calcular prorrateo de garantías.
+    // 15. Consolidar garantías por crédito.
+    // 16. Consolidar costas judiciales.
+    // 17. Validar cantidades finales.
     //
     // Todavía NO calcula:
-    // - prorrateo de garantías
     // - VEA
     // - deterioros
     // - edad de PE
@@ -63,7 +67,7 @@ public class CalculosPreviosService {
                 usuarioSesionService.idUsuario();
 
         // =====================================================
-        // 1. Recuperar cierre
+        // 1. RECUPERAR CIERRE
         // =====================================================
 
         CierreMensualDTO cierre =
@@ -79,22 +83,21 @@ public class CalculosPreviosService {
                         );
 
         // =====================================================
-        // 2. Validar estado del cierre
+        // 2. VALIDAR ESTADO DEL CIERRE
         // =====================================================
 
-        validarEstadoEnProceso(
+        validarEstadoCerrado(
                 cierre
         );
 
         // =====================================================
-        // 4. VALIDAR BASE DE CÁLCULOS
+        // 3. VALIDAR BASE DE CÁLCULOS
         // =====================================================
 
         int cantidadResultados =
                 repository.contarResultados(
                         idCierreCartera
                 );
-
 
         if (cantidadResultados <= 0) {
 
@@ -366,8 +369,6 @@ public class CalculosPreviosService {
         // =====================================================
         // 13. CALCULAR PRORRATEO DE APORTES
         //
-        // REGLA:
-        //
         // porcentaje_aportes_credito =
         //
         // saldo_capital_credito
@@ -376,8 +377,8 @@ public class CalculosPreviosService {
         //
         // El porcentaje se almacena así:
         //
-        // 60 %  = 60.000000
-        // 40 %  = 40.000000
+        // 60 % = 60.000000
+        // 40 % = 40.000000
         //
         // valor_aportes_credito =
         //
@@ -415,6 +416,7 @@ public class CalculosPreviosService {
                 idCierreCartera
         );
 
+
         // =====================================================
         // 15. CALCULAR PRORRATEO DE GARANTÍAS
         // =====================================================
@@ -424,8 +426,25 @@ public class CalculosPreviosService {
                 idUsuario
         );
 
+
         // =====================================================
         // 16. CONSOLIDAR GARANTÍAS POR CRÉDITO
+        //
+        // IMPORTANTE:
+        //
+        // El consolidado solamente actualiza los créditos
+        // que realmente tienen garantías.
+        //
+        // Los créditos sin garantía permanecen correctamente
+        // con:
+        //
+        // cantidad_bienes_garantia = 0
+        // valor_garantias_total = 0
+        // porcentaje_garantias_credito = 0
+        // valor_garantias_credito = 0
+        //
+        // Por tanto, la cantidad retornada por este UPDATE
+        // no debe compararse con la población total del cierre.
         // =====================================================
 
         repository.consolidarProrrateoGarantias(
@@ -433,8 +452,51 @@ public class CalculosPreviosService {
                 idUsuario
         );
 
+
         // =====================================================
-        // 17. RESULTADO
+        // 17. CONSOLIDAR COSTAS JUDICIALES
+        //
+        // Las costas judiciales:
+        //
+        // - NO se causan mensualmente.
+        // - NO generan movimientos durante el cierre.
+        // - se toman de los movimientos existentes.
+        // - solamente se consideran movimientos activos.
+        // - solamente se consideran movimientos hasta
+        //   la fecha de corte.
+        //
+        // saldo =
+        //     SUM(valor_debito - valor_credito)
+        //
+        // El resultado queda congelado en:
+        //
+        // cierres_cartera_resultados.valor_costas_judiciales
+        // =====================================================
+
+        int cantidadCostasJudiciales =
+                repository.consolidarCostasJudiciales(
+                        idCierreCartera,
+                        idUsuario
+                );
+
+        if (cantidadCostasJudiciales
+                != cantidadResultados) {
+
+            throw new IllegalStateException(
+                    "Inconsistencia al consolidar las costas judiciales "
+                            + "del cierre "
+                            + idCierreCartera
+                            + ". Créditos esperados: "
+                            + cantidadResultados
+                            + ". Créditos actualizados: "
+                            + cantidadCostasJudiciales
+                            + "."
+            );
+        }
+
+
+        // =====================================================
+        // 18. RESULTADO
         // =====================================================
 
         return cantidadResultados;
@@ -457,6 +519,10 @@ public class CalculosPreviosService {
         Integer idUsuario =
                 usuarioSesionService.idUsuario();
 
+        // =====================================================
+        // 1. RECUPERAR CIERRE
+        // =====================================================
+
         CierreMensualDTO cierre =
                 cierreRepository
                         .buscarPorId(
@@ -469,9 +535,17 @@ public class CalculosPreviosService {
                                 )
                         );
 
-        validarEstadoEnProceso(
+        // =====================================================
+        // 2. VALIDAR ESTADO
+        // =====================================================
+
+        validarEstadoCerrado(
                 cierre
         );
+
+        // =====================================================
+        // 3. VALIDAR BASE
+        // =====================================================
 
         int cantidadResultados =
                 repository.contarResultados(
@@ -487,6 +561,10 @@ public class CalculosPreviosService {
                             + "de cálculos comunes."
             );
         }
+
+        // =====================================================
+        // 4. CALCULAR MORA
+        // =====================================================
 
         int cantidadActualizada =
                 repository.calcularMora(
@@ -508,6 +586,10 @@ public class CalculosPreviosService {
             );
         }
 
+        // =====================================================
+        // 5. VALIDAR EDAD DE MORA
+        // =====================================================
+
         int cantidadSinEdadMora =
                 repository.contarSinEdadMora(
                         idCierreCartera
@@ -524,6 +606,10 @@ public class CalculosPreviosService {
                             + "cartera.clasificaciones_mora."
             );
         }
+
+        // =====================================================
+        // 6. VALIDAR DÍAS DE MORA NEGATIVOS
+        // =====================================================
 
         int cantidadDiasNegativos =
                 repository.contarDiasMoraNegativos(
@@ -546,10 +632,15 @@ public class CalculosPreviosService {
     }
 
     // =========================================================
-    // VALIDAR CIERRE EN PROCESO
+    // VALIDAR CIERRE CERRADO
+    //
+    // C = fotografía cerrada en firme.
+    //
+    // Los cálculos previos definitivos solamente se ejecutan
+    // después de cerrar la fotografía.
     // =========================================================
 
-    private void validarEstadoEnProceso(
+    private void validarEstadoCerrado(
             CierreMensualDTO cierre
     ) {
 
@@ -557,14 +648,15 @@ public class CalculosPreviosService {
                 cierre.getEstadoCierre();
 
         if (estado == null
-                || !"P".equalsIgnoreCase(
+                || !"C".equalsIgnoreCase(
                 estado.trim()
         )) {
 
             throw new IllegalStateException(
-                    "Los cálculos previos solamente pueden "
-                            + "ejecutarse cuando el cierre se "
-                            + "encuentra En proceso."
+                    "El cierre "
+                            + cierre.getIdCierreCartera()
+                            + " debe estar cerrado en firme "
+                            + "para ejecutar los cálculos previos."
             );
         }
     }
@@ -587,26 +679,25 @@ public class CalculosPreviosService {
     }
 
     // =========================================================
-// CALCULAR SOLO PRORRATEO DE APORTES
-//
-// Permite calcular aportes sobre:
-// - cierres en proceso
-// - cierres históricos migrados
-//
-// REQUISITOS:
-// - el cierre debe existir
-// - debe existir la base de resultados
-//
-// IMPORTANTE:
-// Este método NO exige estado P porque se utiliza también
-// para completar cálculos de cierres históricos migrados.
-//
-// NO modifica:
-// - cabecera
-// - fotografía
-// - mora
-// - edades
-// =========================================================
+    // CALCULAR SOLO PRORRATEO DE APORTES
+    //
+    // Permite calcular aportes sobre cierres históricos
+    // migrados y procesos de soporte.
+    //
+    // REQUISITOS:
+    // - el cierre debe existir
+    // - debe existir la base de resultados
+    //
+    // IMPORTANTE:
+    // Este método NO exige estado C porque se utiliza también
+    // para completar cálculos de cierres históricos migrados.
+    //
+    // NO modifica:
+    // - cabecera
+    // - fotografía
+    // - mora
+    // - edades
+    // =========================================================
 
     public int calcularProrrateoAportes(
             Integer idCierreCartera
@@ -684,5 +775,4 @@ public class CalculosPreviosService {
 
         return cantidadActualizada;
     }
-
 }

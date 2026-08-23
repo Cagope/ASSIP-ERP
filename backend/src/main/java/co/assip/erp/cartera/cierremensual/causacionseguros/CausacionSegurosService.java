@@ -29,7 +29,7 @@ public class CausacionSegurosService {
     //
     // 1. valida id del cierre
     // 2. recupera el cierre
-    // 3. valida estado P
+    // 3. valida estado C
     // 4. obtiene usuario de sesión
     // 5. valida seguros duplicados
     // 6. valida causaciones ya contabilizadas
@@ -66,7 +66,7 @@ public class CausacionSegurosService {
         // 2. VALIDAR ESTADO
         // =====================================================
 
-        validarEstadoEnProceso(
+        validarEstadoCerrado(
                 cierre
         );
 
@@ -174,24 +174,29 @@ public class CausacionSegurosService {
     }
 
     // =========================================================
-    // VALIDAR ESTADO P
-    // =========================================================
+// VALIDAR CIERRE CERRADO
+//
+// C = fotografía cerrada en firme.
+// Solamente desde este estado se permiten los cálculos
+// definitivos del cierre.
+// =========================================================
 
-    private void validarEstadoEnProceso(
+    private void validarEstadoCerrado(
             CierreMensualDTO cierre
     ) {
 
         if (
                 cierre.getEstadoCierre() == null
-                        || !"P".equalsIgnoreCase(
-                        cierre.getEstadoCierre()
+                        || !"C".equalsIgnoreCase(
+                        cierre.getEstadoCierre().trim()
                 )
         ) {
 
             throw new IllegalStateException(
                     "El cierre "
                             + cierre.getIdCierreCartera()
-                            + " no se encuentra en estado P."
+                            + " debe estar cerrado en firme "
+                            + "para ejecutar la causación de seguros."
             );
         }
     }

@@ -116,9 +116,12 @@ public class Anexo1Repository {
             )
 
             UPDATE cartera.cierres_cartera_resultados r
-
+            
                SET edad_contable =
                        c.edad_contable,
+
+                   codigo_metodo_calculo =
+                       'A1',
 
                    fk_seguridad_edicion =
                        :idUsuario,

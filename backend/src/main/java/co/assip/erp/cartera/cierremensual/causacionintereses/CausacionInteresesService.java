@@ -28,7 +28,7 @@ public class CausacionInteresesService {
     // EJECUTAR CAUSACIÓN DE INTERESES
     //
     // 1. valida cierre
-    // 2. valida estado P
+    // 2. valida estado C
     // 3. obtiene usuario de sesión
     // 4. valida que no existan movimientos contabilizados
     // 5. limpia causaciones automáticas previas del cierre
@@ -73,7 +73,7 @@ public class CausacionInteresesService {
         // 2. VALIDAR ESTADO
         // =====================================================
 
-        validarEstadoEnProceso(
+        validarEstadoCerrado(
                 cierre
         );
 
@@ -181,24 +181,29 @@ public class CausacionInteresesService {
     }
 
     // =========================================================
-    // VALIDAR ESTADO P
+    // VALIDAR CIERRE CERRADO
+    //
+    // C = fotografía cerrada en firme.
+    // Solamente desde este estado se permiten los cálculos
+    // definitivos del cierre.
     // =========================================================
 
-    private void validarEstadoEnProceso(
+    private void validarEstadoCerrado(
             CierreMensualDTO cierre
     ) {
 
         if (
                 cierre.getEstadoCierre() == null
-                        || !"P".equalsIgnoreCase(
-                        cierre.getEstadoCierre()
+                        || !"C".equalsIgnoreCase(
+                        cierre.getEstadoCierre().trim()
                 )
         ) {
 
             throw new IllegalStateException(
                     "El cierre "
                             + cierre.getIdCierreCartera()
-                            + " no se encuentra en estado P."
+                            + " debe estar cerrado en firme "
+                            + "para ejecutar la causación de intereses."
             );
         }
     }

@@ -126,6 +126,37 @@ public class CierreMensualController {
     }
 
     // =========================================================
+    // CERRAR FOTOGRAFÍA EN FIRME
+    //
+    // POST
+    // /api/v1/cartera/cierre-mensual/{idCierreCartera}/cerrar-fotografia
+    //
+    // REGLAS:
+    //
+    // - solamente cierre estado P
+    // - la fotografía debe existir
+    // - la base de resultados debe existir
+    // - cantidad foto = cantidad resultados
+    // - cambia estado_cierre de P a C
+    // - registra fecha_finalizacion
+    // - después de cerrar:
+    //      * ya no se puede regenerar la fotografía
+    //      * se habilitan los cálculos de cierre
+    // =========================================================
+
+    @PostMapping("/{idCierreCartera}/cerrar-fotografia")
+    public ResponseEntity<CierreMensualDTO> cerrarFotografia(
+            @PathVariable Integer idCierreCartera
+    ) {
+
+        return ResponseEntity.ok(
+                service.cerrarFotografia(
+                        idCierreCartera
+                )
+        );
+    }
+
+    // =========================================================
     // CONSULTAR SI EL CIERRE TIENE FOTO
     // =========================================================
 

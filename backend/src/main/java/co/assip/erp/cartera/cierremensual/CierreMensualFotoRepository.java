@@ -341,7 +341,7 @@ public class CierreMensualFotoRepository {
 
                 FROM cartera.carteras_creditos c
                 
-                INNER JOIN cartera.obligaciones_juridicas oj
+                LEFT JOIN cartera.obligaciones_juridicas oj
                     ON oj.id_obligacion_juridica =
                        c.id_obligacion_juridica
 
@@ -416,11 +416,6 @@ public class CierreMensualFotoRepository {
                     LIMIT 1
                 ) hv
                     ON true
-
-                WHERE COALESCE(
-                          c.saldo_actual,
-                          0
-                      ) > 0
 
                 ORDER BY
                     c.id_cartera_credito

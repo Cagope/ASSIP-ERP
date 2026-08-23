@@ -345,8 +345,13 @@ public class CierreMensualRepository {
     }
 
     // =========================================================
-    // MARCAR CIERRE COMO FINALIZADO
-    // =========================================================
+// CERRAR FOTOGRAFÍA EN FIRME
+//
+// P = En proceso / fotografía abierta
+// C = Cerrado / fotografía firme
+//
+// Solamente permite transición P -> C.
+// =========================================================
 
     public int finalizar(
             Integer idCierreCartera,
@@ -354,22 +359,26 @@ public class CierreMensualRepository {
     ) {
 
         String sql = """
-                UPDATE cartera.cierres_cartera
+            UPDATE cartera.cierres_cartera
 
-                   SET estado_cierre = 'C',
+               SET estado_cierre =
+                       'C',
 
-                       fecha_finalizacion =
-                           CURRENT_TIMESTAMP,
+                   fecha_finalizacion =
+                       CURRENT_TIMESTAMP,
 
-                       fk_seguridad_edicion =
-                           :idUsuario,
+                   fk_seguridad_edicion =
+                       :idUsuario,
 
-                       fecha_edicion =
-                           CURRENT_TIMESTAMP
+                   fecha_edicion =
+                       CURRENT_TIMESTAMP
 
-                 WHERE id_cierre_cartera =
-                       :idCierreCartera
-                """;
+             WHERE id_cierre_cartera =
+                   :idCierreCartera
+
+               AND estado_cierre =
+                   'P'
+            """;
 
         MapSqlParameterSource parametros =
                 new MapSqlParameterSource()
