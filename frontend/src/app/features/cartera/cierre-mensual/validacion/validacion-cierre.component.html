@@ -1,0 +1,694 @@
+<div class="validacion-cierre">
+
+  <!-- ===================================================== -->
+  <!-- CABECERA -->
+  <!-- ===================================================== -->
+
+  <div class="validacion-cierre__header">
+
+    <div>
+
+      <h3>
+        Validaciones Finales
+      </h3>
+
+      <p>
+        Controles de integridad y consistencia del cierre.
+      </p>
+
+    </div>
+
+
+    <button
+      *ngIf="idCierreCartera"
+      type="button"
+      class="btn btn--secondary btn-sm"
+      [disabled]="cargando"
+      (click)="consultar()">
+
+      {{
+      cargando
+      ? 'Consultando...'
+      : 'Actualizar'
+      }}
+
+    </button>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- SIN CIERRE -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="!idCierreCartera"
+    class="validacion-cierre__empty">
+
+    Seleccione un cierre para consultar sus validaciones.
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CARGANDO -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="cargando"
+    class="validacion-cierre__loading">
+
+    Consultando validaciones del cierre...
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- ERROR DE CONSULTA -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="error"
+    class="validacion-cierre__message validacion-cierre__message--error">
+
+    {{ error }}
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- RESULTADO -->
+  <!-- ===================================================== -->
+
+  <ng-container *ngIf="resultado as r">
+
+    <!-- =================================================== -->
+    <!-- ESTADO GENERAL -->
+    <!-- =================================================== -->
+
+    <div
+      class="validacion-cierre__resultado"
+      [class.validacion-cierre__resultado--ok]="r.valido"
+      [class.validacion-cierre__resultado--error]="!r.valido">
+
+      <div>
+
+        <span>
+          Resultado de la validación
+        </span>
+
+        <strong>
+          {{
+          r.valido
+          ? 'Cierre validado correctamente'
+          : 'Cierre con inconsistencias'
+          }}
+        </strong>
+
+        <small>
+          {{ r.mensaje }}
+        </small>
+
+      </div>
+
+
+      <div class="validacion-cierre__estado">
+
+        {{ r.estado }}
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- POBLACIÓN -->
+    <!-- =================================================== -->
+
+    <section class="validacion-cierre__section">
+
+      <h4>
+        Control de población
+      </h4>
+
+
+      <div class="validacion-cierre__grid">
+
+        <div class="validacion-cierre__card">
+
+          <span>
+            Cabecera
+          </span>
+
+          <strong>
+            {{ formatearEntero(r.cantidadCreditosCabecera) }}
+          </strong>
+
+        </div>
+
+
+        <div class="validacion-cierre__card">
+
+          <span>
+            Fotografía
+          </span>
+
+          <strong>
+            {{ formatearEntero(r.cantidadCreditosFotografia) }}
+          </strong>
+
+        </div>
+
+
+        <div class="validacion-cierre__card">
+
+          <span>
+            Resultados
+          </span>
+
+          <strong>
+            {{ formatearEntero(r.cantidadResultados) }}
+          </strong>
+
+        </div>
+
+
+        <div class="validacion-cierre__card">
+
+          <span>
+            Población
+          </span>
+
+          <strong
+            [class.validacion-cierre__ok]="poblacionCuadrada()"
+            [class.validacion-cierre__error]="!poblacionCuadrada()">
+
+            {{
+            poblacionCuadrada()
+            ? 'OK'
+            : 'ERROR'
+            }}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- DISTRIBUCIÓN -->
+    <!-- =================================================== -->
+
+    <section class="validacion-cierre__section">
+
+      <h4>
+        Distribución del cálculo
+      </h4>
+
+
+      <div class="validacion-cierre__grid">
+
+        <div class="validacion-cierre__card">
+
+          <span>
+            Anexo 1
+          </span>
+
+          <strong>
+            {{ formatearEntero(r.cantidadResultadosA1) }}
+          </strong>
+
+        </div>
+
+
+        <div class="validacion-cierre__card">
+
+          <span>
+            Pérdida Esperada
+          </span>
+
+          <strong>
+            {{ formatearEntero(r.cantidadResultadosPe) }}
+          </strong>
+
+        </div>
+
+
+        <div class="validacion-cierre__card">
+
+          <span>
+            PE persistidos
+          </span>
+
+          <strong>
+            {{ formatearEntero(r.cantidadPePersistidos) }}
+          </strong>
+
+        </div>
+
+
+        <div class="validacion-cierre__card">
+
+          <span>
+            Distribución
+          </span>
+
+          <strong
+            [class.validacion-cierre__ok]="
+              distribucionCuadrada()
+              && pePersistidoCuadrado()
+            "
+            [class.validacion-cierre__error]="
+              !distribucionCuadrada()
+              || !pePersistidoCuadrado()
+            ">
+
+            {{
+            distribucionCuadrada()
+            && pePersistidoCuadrado()
+            ? 'OK'
+            : 'ERROR'
+            }}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- INTEGRIDAD -->
+    <!-- =================================================== -->
+
+    <section class="validacion-cierre__section">
+
+      <h4>
+        Integridad
+      </h4>
+
+
+      <div class="validacion-cierre__table-wrapper">
+
+        <table>
+
+          <thead>
+
+          <tr>
+            <th>Control</th>
+            <th class="text-end">Hallazgos</th>
+            <th class="text-center">Estado</th>
+          </tr>
+
+          </thead>
+
+
+          <tbody>
+
+          <tr>
+            <td>Créditos sin resultado</td>
+            <td class="text-end">
+              {{ formatearEntero(r.creditosSinResultado) }}
+            </td>
+            <td class="text-center">
+                <span [class.ok]="controlOk(r.creditosSinResultado)">
+                  {{ controlOk(r.creditosSinResultado) ? 'OK' : 'ERROR' }}
+                </span>
+            </td>
+          </tr>
+
+
+          <tr>
+            <td>Resultados duplicados</td>
+            <td class="text-end">
+              {{ formatearEntero(r.creditosConResultadoDuplicado) }}
+            </td>
+            <td class="text-center">
+                <span [class.ok]="controlOk(r.creditosConResultadoDuplicado)">
+                  {{ controlOk(r.creditosConResultadoDuplicado) ? 'OK' : 'ERROR' }}
+                </span>
+            </td>
+          </tr>
+
+
+          <tr>
+            <td>Métodos inválidos</td>
+            <td class="text-end">
+              {{ formatearEntero(r.metodosInvalidos) }}
+            </td>
+            <td class="text-center">
+                <span [class.ok]="controlOk(r.metodosInvalidos)">
+                  {{ controlOk(r.metodosInvalidos) ? 'OK' : 'ERROR' }}
+                </span>
+            </td>
+          </tr>
+
+
+          <tr>
+            <td>PE sin resultado</td>
+            <td class="text-end">
+              {{ formatearEntero(r.peSinResultadoPe) }}
+            </td>
+            <td class="text-center">
+                <span [class.ok]="controlOk(r.peSinResultadoPe)">
+                  {{ controlOk(r.peSinResultadoPe) ? 'OK' : 'ERROR' }}
+                </span>
+            </td>
+          </tr>
+
+
+          <tr>
+            <td>PE duplicados</td>
+            <td class="text-end">
+              {{ formatearEntero(r.peDuplicados) }}
+            </td>
+            <td class="text-center">
+                <span [class.ok]="controlOk(r.peDuplicados)">
+                  {{ controlOk(r.peDuplicados) ? 'OK' : 'ERROR' }}
+                </span>
+            </td>
+          </tr>
+
+
+          <tr>
+            <td>PE huérfanos</td>
+            <td class="text-end">
+              {{ formatearEntero(r.peHuerfanos) }}
+            </td>
+            <td class="text-center">
+                <span [class.ok]="controlOk(r.peHuerfanos)">
+                  {{ controlOk(r.peHuerfanos) ? 'OK' : 'ERROR' }}
+                </span>
+            </td>
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- EDADES -->
+    <!-- =================================================== -->
+
+    <section class="validacion-cierre__section">
+
+      <h4>
+        Edades y calificaciones
+      </h4>
+
+
+      <div class="validacion-cierre__grid">
+
+        <div class="validacion-cierre__control">
+
+          <span>
+            Edades nulas
+          </span>
+
+          <strong>
+            {{ formatearEntero(r.edadesNulas) }}
+          </strong>
+
+          <small
+            [class.ok]="controlOk(r.edadesNulas)">
+
+            {{ controlOk(r.edadesNulas) ? 'OK' : 'ERROR' }}
+
+          </small>
+
+        </div>
+
+
+        <div class="validacion-cierre__control">
+
+          <span>
+            Edades inválidas
+          </span>
+
+          <strong>
+            {{ formatearEntero(r.edadesInvalidas) }}
+          </strong>
+
+          <small
+            [class.ok]="controlOk(r.edadesInvalidas)">
+
+            {{ controlOk(r.edadesInvalidas) ? 'OK' : 'ERROR' }}
+
+          </small>
+
+        </div>
+
+
+        <div class="validacion-cierre__control">
+
+          <span>
+            Edades PE nulas
+          </span>
+
+          <strong>
+            {{ formatearEntero(r.edadesPeNulas) }}
+          </strong>
+
+          <small
+            [class.ok]="controlOk(r.edadesPeNulas)">
+
+            {{ controlOk(r.edadesPeNulas) ? 'OK' : 'ERROR' }}
+
+          </small>
+
+        </div>
+
+
+        <div class="validacion-cierre__control">
+
+          <span>
+            Edades PE inválidas
+          </span>
+
+          <strong>
+            {{ formatearEntero(r.edadesPeInvalidas) }}
+          </strong>
+
+          <small
+            [class.ok]="controlOk(r.edadesPeInvalidas)">
+
+            {{ controlOk(r.edadesPeInvalidas) ? 'OK' : 'ERROR' }}
+
+          </small>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- VALORES -->
+    <!-- =================================================== -->
+
+    <section class="validacion-cierre__section">
+
+      <h4>
+        Valores y Pérdida Esperada
+      </h4>
+
+
+      <div class="validacion-cierre__grid">
+
+        <div class="validacion-cierre__control">
+
+          <span>Valores negativos</span>
+
+          <strong>
+            {{ formatearEntero(r.valoresNegativos) }}
+          </strong>
+
+          <small [class.ok]="controlOk(r.valoresNegativos)">
+            {{ controlOk(r.valoresNegativos) ? 'OK' : 'ERROR' }}
+          </small>
+
+        </div>
+
+
+        <div class="validacion-cierre__control">
+
+          <span>Valores PE negativos</span>
+
+          <strong>
+            {{ formatearEntero(r.valoresPeNegativos) }}
+          </strong>
+
+          <small [class.ok]="controlOk(r.valoresPeNegativos)">
+            {{ controlOk(r.valoresPeNegativos) ? 'OK' : 'ERROR' }}
+          </small>
+
+        </div>
+
+
+        <div class="validacion-cierre__control">
+
+          <span>PI/PDI fuera de rango</span>
+
+          <strong>
+            {{ formatearEntero(r.piPdiFueraRango) }}
+          </strong>
+
+          <small [class.ok]="controlOk(r.piPdiFueraRango)">
+            {{ controlOk(r.piPdiFueraRango) ? 'OK' : 'ERROR' }}
+          </small>
+
+        </div>
+
+
+        <div class="validacion-cierre__control">
+
+          <span>PI/PDI PE fuera de rango</span>
+
+          <strong>
+            {{ formatearEntero(r.piPdiPeFueraRango) }}
+          </strong>
+
+          <small [class.ok]="controlOk(r.piPdiPeFueraRango)">
+            {{ controlOk(r.piPdiPeFueraRango) ? 'OK' : 'ERROR' }}
+          </small>
+
+        </div>
+
+
+        <div class="validacion-cierre__control">
+
+          <span>PE descuadrados</span>
+
+          <strong>
+            {{ formatearEntero(r.peDescuadrados) }}
+          </strong>
+
+          <small [class.ok]="controlOk(r.peDescuadrados)">
+            {{ controlOk(r.peDescuadrados) ? 'OK' : 'ERROR' }}
+          </small>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- CONTROLES FINALES -->
+    <!-- =================================================== -->
+
+    <section class="validacion-cierre__section">
+
+      <h4>
+        Controles finales
+      </h4>
+
+
+      <div class="validacion-cierre__finales">
+
+        <div>
+
+          <span>
+            Proceso de Pérdida Esperada
+          </span>
+
+          <strong
+            [class.ok]="r.procesoPeFinalizado">
+
+            {{
+            r.procesoPeFinalizado
+            ? 'FINALIZADO'
+            : 'PENDIENTE'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            Cuadre consolidado
+          </span>
+
+          <strong
+            [class.ok]="r.cuadreConsolidadoOk">
+
+            {{ r.estadoCuadreConsolidado }}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- ERRORES -->
+    <!-- =================================================== -->
+
+    <section
+      *ngIf="r.errores && r.errores.length > 0"
+      class="validacion-cierre__section">
+
+      <h4>
+        Errores
+      </h4>
+
+
+      <ul class="validacion-cierre__errores">
+
+        <li *ngFor="let item of r.errores">
+          {{ item }}
+        </li>
+
+      </ul>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- ADVERTENCIAS -->
+    <!-- =================================================== -->
+
+    <section
+      *ngIf="
+        r.advertencias
+        &&
+        r.advertencias.length > 0
+      "
+      class="validacion-cierre__section">
+
+      <h4>
+        Advertencias
+      </h4>
+
+
+      <ul class="validacion-cierre__advertencias">
+
+        <li *ngFor="let item of r.advertencias">
+          {{ item }}
+        </li>
+
+      </ul>
+
+    </section>
+
+  </ng-container>
+
+</div>

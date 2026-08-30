@@ -1,0 +1,412 @@
+:host {
+  display: block;
+}
+
+.curacion-reincidencia {
+  padding: 1rem;
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0.35rem 0 0;
+    max-width: 950px;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+}
+
+.panel {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.filtros-panel {
+  display: block;
+}
+
+.filtros-panel .panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.filtros-panel .acciones {
+  flex: 0 0 auto;
+}
+
+.filtros-panel .filtro-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(150px, 0.8fr)
+    minmax(150px, 0.8fr)
+    minmax(190px, 1fr)
+    minmax(210px, 1.1fr)
+    minmax(140px, 0.7fr);
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.filtros-panel .control-info {
+  display: block;
+  width: 100%;
+  margin-top: 0.8rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid #e5e7eb;
+
+  color: #6b7280;
+  font-size: 0.76rem;
+}
+
+.panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  span {
+    display: block;
+    margin-top: 0.2rem;
+    color: #6b7280;
+    font-size: 0.8rem;
+  }
+}
+
+.acciones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn {
+  min-height: 36px;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid transparent;
+  border-radius: 0.45rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
+}
+
+.btn--primary {
+  background: #1f4e79;
+  color: #fff;
+}
+
+.btn--secondary {
+  border-color: #d1d5db;
+  background: #fff;
+  color: #374151;
+}
+
+.filtro-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(160px, 1fr));
+  gap: 0.75rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  input,
+  select {
+    min-height: 36px;
+    width: 100%;
+    padding: 0.4rem 0.55rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.4rem;
+    background: #fff;
+    font-size: 0.85rem;
+  }
+}
+
+.control-info {
+  margin-top: 0.75rem;
+  color: #6b7280;
+  font-size: 0.8rem;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(170px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.kpi {
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  background: #fff;
+
+  .kpi-label {
+    display: block;
+    min-height: 2.1rem;
+    color: #6b7280;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  strong {
+    display: block;
+    margin: 0.25rem 0;
+    font-size: 1.45rem;
+    line-height: 1.1;
+    color: #111827;
+  }
+
+  small {
+    color: #6b7280;
+    font-size: 0.72rem;
+    line-height: 1.25;
+  }
+}
+
+.grafico-wrap {
+  margin-bottom: 1rem;
+}
+
+.barras {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.barra-fila {
+  display: grid;
+  grid-template-columns: 150px minmax(180px, 1fr) 120px;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.barra-label {
+  font-size: 0.8rem;
+  color: #374151;
+}
+
+.barra-track {
+  height: 20px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #eef2f7;
+}
+
+.barra-fill {
+  height: 100%;
+  min-width: 2px;
+  border-radius: inherit;
+  background: #5b7fa3;
+}
+
+.barra-valor {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+
+  span {
+    color: #6b7280;
+  }
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  white-space: nowrap;
+
+  th,
+  td {
+    padding: 0.55rem 0.6rem;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: top;
+  }
+
+  th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #f8fafc;
+    color: #374151;
+    text-align: left;
+    font-weight: 700;
+  }
+
+  tbody tr:hover {
+    background: #f8fafc;
+  }
+
+  .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.cell-sub {
+  display: block;
+  margin-top: 0.15rem;
+  color: #6b7280;
+  font-size: 0.7rem;
+}
+
+.badge-edad {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  min-height: 24px;
+  padding: 0 0.4rem;
+  border-radius: 0.35rem;
+  background: #eef2f7;
+  font-weight: 700;
+}
+
+.detalle-tools {
+  display: grid;
+  grid-template-columns: minmax(200px, 260px) minmax(280px, 1fr) 160px;
+  align-items: end;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.detalle-contador {
+  padding: 0.35rem 0;
+  text-align: right;
+
+  span {
+    display: block;
+    color: #6b7280;
+    font-size: 0.72rem;
+  }
+
+  strong {
+    font-size: 1.05rem;
+  }
+}
+
+.detalle-table {
+  max-height: 620px;
+  overflow: auto;
+
+  .table th {
+    top: 0;
+  }
+}
+
+.estado-ok {
+  font-weight: 700;
+  color: #166534;
+}
+
+.estado-open {
+  font-weight: 700;
+  color: #92400e;
+}
+
+.estado-alert {
+  font-weight: 700;
+  color: #991b1b;
+}
+
+.loading,
+.empty,
+.error {
+  padding: 0.85rem;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.error {
+  margin-bottom: 1rem;
+  border: 1px solid #fecaca;
+  border-radius: 0.5rem;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.empty {
+  color: #6b7280;
+}
+
+@media (max-width: 1200px) {
+
+  .filtros-panel .filtro-grid {
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+  }
+
+  .kpis {
+    grid-template-columns: repeat(3, minmax(170px, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+
+  .curacion-reincidencia {
+    padding: 0.75rem;
+  }
+
+  .panel-head,
+  .filtros-panel .panel-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filtros-panel .acciones {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .filtros-panel .filtro-grid,
+  .kpis,
+  .detalle-tools {
+    grid-template-columns: 1fr;
+  }
+
+  .barra-fila {
+    grid-template-columns: 110px minmax(120px, 1fr) 100px;
+  }
+
+  .detalle-contador {
+    text-align: left;
+  }
+}

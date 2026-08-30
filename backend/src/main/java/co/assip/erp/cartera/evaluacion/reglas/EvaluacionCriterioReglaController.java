@@ -73,7 +73,7 @@ public class EvaluacionCriterioReglaController {
     // ACTIVAR / DESACTIVAR
     // =========================================================
 
-    @PatchMapping("/{idEvaluacionCriterioRegla}/activo/{activo}")
+    @PutMapping("/{idEvaluacionCriterioRegla}/activo/{activo}")
     public EvaluacionCriterioReglaDTO cambiarActivo(
             @PathVariable Integer idEvaluacionCriterioRegla,
             @PathVariable boolean activo

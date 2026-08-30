@@ -7,6 +7,7 @@ import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoExtractoDTO;
 import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoInteresDTO;
 import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoResumenDTO;
 import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoSeguroDTO;
+import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoResultadoMensualDTO;
 
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoProrrogaDTO;
 
 /**
  * Repositorio de consulta especializada de créditos.
@@ -164,6 +166,21 @@ public class ConsultaCreditosRepository {
                 s.id_credito_seguro DESC
             """;
 
+
+    // =========================================================
+    // SQL: movimientos de seguros
+    // =========================================================
+
+    private static final String SQL_LISTAR_MOVIMIENTOS_SEGURO = """
+        SELECT
+            m.*
+        FROM cartera.vw_cartera_seguros_movimientos_total m
+        WHERE m.id_credito_seguro = :idCreditoSeguro
+        ORDER BY
+            m.fecha_movimiento ASC NULLS LAST,
+            m.id_credito_seguro_detalle ASC
+        """;
+
     // =========================================================
     // SQL: alivios
     // =========================================================
@@ -231,6 +248,35 @@ public class ConsultaCreditosRepository {
             """;
 
     // =========================================================
+    // SQL: prórrogas
+    // =========================================================
+
+    private static final String SQL_LISTAR_PRORROGAS = """
+        SELECT
+            p.*
+        FROM cartera.vw_cartera_prorrogas_total p
+        WHERE p.id_cartera_credito = :idCarteraCredito
+        ORDER BY
+            p.numero_prorroga DESC,
+            p.fecha_prorroga DESC NULLS LAST,
+            p.id_credito_prorroga DESC
+        """;
+
+    // =========================================================
+    // SQL: resultados mensuales
+    // =========================================================
+
+    private static final String SQL_LISTAR_RESULTADOS_MENSUALES = """
+        SELECT
+            r.*
+        FROM cartera.vw_cartera_resultados_mensuales_total r
+        WHERE r.id_cartera_credito = :idCarteraCredito
+        ORDER BY
+            r.fecha_corte DESC,
+            r.id_cierre_cartera DESC
+        """;
+
+    // =========================================================
     // Dependencia
     // =========================================================
 
@@ -270,6 +316,13 @@ public class ConsultaCreditosRepository {
                     ConsultaCreditoSeguroDTO.class
             );
 
+    private static final BeanPropertyRowMapper<
+            ConsultaCreditoSeguroDTO.MovimientoSeguroDTO>
+            MOVIMIENTO_SEGURO_MAPPER =
+            crearMapper(
+                    ConsultaCreditoSeguroDTO.MovimientoSeguroDTO.class
+            );
+
     private static final BeanPropertyRowMapper<ConsultaCreditoAlivioDTO>
             ALIVIO_MAPPER =
             crearMapper(
@@ -286,6 +339,18 @@ public class ConsultaCreditosRepository {
             EVALUACION_MAPPER =
             crearMapper(
                     ConsultaCreditoEvaluacionDTO.class
+            );
+
+    private static final BeanPropertyRowMapper<ConsultaCreditoProrrogaDTO>
+            PRORROGA_MAPPER =
+            crearMapper(
+                    ConsultaCreditoProrrogaDTO.class
+            );
+
+    private static final BeanPropertyRowMapper<ConsultaCreditoResultadoMensualDTO>
+            RESULTADO_MENSUAL_MAPPER =
+            crearMapper(
+                    ConsultaCreditoResultadoMensualDTO.class
             );
 
     private static <T> BeanPropertyRowMapper<T> crearMapper(
@@ -406,13 +471,38 @@ public class ConsultaCreditosRepository {
                 idCarteraCredito
         );
 
-        return jdbc.query(
-                SQL_LISTAR_SEGUROS,
-                parametrosCredito(
-                        idCarteraCredito
-                ),
-                SEGURO_MAPPER
-        );
+        List<ConsultaCreditoSeguroDTO> seguros =
+                jdbc.query(
+                        SQL_LISTAR_SEGUROS,
+                        parametrosCredito(
+                                idCarteraCredito
+                        ),
+                        SEGURO_MAPPER
+                );
+
+        for (ConsultaCreditoSeguroDTO seguro : seguros) {
+
+            if (seguro.getIdCreditoSeguro() == null) {
+                continue;
+            }
+
+            List<ConsultaCreditoSeguroDTO.MovimientoSeguroDTO> movimientos =
+                    jdbc.query(
+                            SQL_LISTAR_MOVIMIENTOS_SEGURO,
+                            new MapSqlParameterSource()
+                                    .addValue(
+                                            "idCreditoSeguro",
+                                            seguro.getIdCreditoSeguro()
+                                    ),
+                            MOVIMIENTO_SEGURO_MAPPER
+                    );
+
+            seguro.setMovimientos(
+                    movimientos
+            );
+        }
+
+        return seguros;
     }
 
     // =========================================================
@@ -458,6 +548,27 @@ public class ConsultaCreditosRepository {
     }
 
     // =========================================================
+    // Prórrogas
+    // =========================================================
+
+    public List<ConsultaCreditoProrrogaDTO> listarProrrogas(
+            Integer idCarteraCredito
+    ) {
+
+        validarIdCarteraCredito(
+                idCarteraCredito
+        );
+
+        return jdbc.query(
+                SQL_LISTAR_PRORROGAS,
+                parametrosCredito(
+                        idCarteraCredito
+                ),
+                PRORROGA_MAPPER
+        );
+    }
+
+    // =========================================================
     // Evaluaciones
     // =========================================================
 
@@ -477,6 +588,28 @@ public class ConsultaCreditosRepository {
                 EVALUACION_MAPPER
         );
     }
+
+    // =========================================================
+    // Resultados mensuales de cartera
+    // =========================================================
+
+    public List<ConsultaCreditoResultadoMensualDTO> listarResultadosMensuales(
+            Integer idCarteraCredito
+    ) {
+
+        validarIdCarteraCredito(
+                idCarteraCredito
+        );
+
+        return jdbc.query(
+                SQL_LISTAR_RESULTADOS_MENSUALES,
+                parametrosCredito(
+                        idCarteraCredito
+                ),
+                RESULTADO_MENSUAL_MAPPER
+        );
+    }
+
 
     public Optional<ConsultaCreditoEvaluacionDTO> buscarUltimaEvaluacion(
             Integer idCarteraCredito

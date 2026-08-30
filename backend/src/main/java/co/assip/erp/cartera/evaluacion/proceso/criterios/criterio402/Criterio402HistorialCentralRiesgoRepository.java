@@ -19,15 +19,15 @@ public class Criterio402HistorialCentralRiesgoRepository {
     // =========================================================
     // OBTENER DATOS DEL CRITERIO 402
     //
-    // Para cada crédito se busca la calificación de la central
-    // utilizando la combinación exacta:
+    // Para cada crÃ©dito se busca la calificaciÃ³n de la central
+    // utilizando la combinaciÃ³n exacta:
     //
     // fecha de corte
     // + documento
-    // + clasificación del crédito
+    // + clasificaciÃ³n del crÃ©dito
     //
     // Si existen varias cargas para la misma fecha de corte,
-    // se utiliza el archivo importado más recientemente.
+    // se utiliza el archivo importado mÃ¡s recientemente.
     // =========================================================
 
     public List<Criterio402DatoDTO> obtenerDatos(
@@ -147,13 +147,18 @@ public class Criterio402HistorialCentralRiesgoRepository {
                        TRIM(cc.codigo_clasificacion_credito)
 
                 WHERE cierre.fecha_corte =
-                      :fechaCorte
+                       :fechaCorte
 
-                ORDER BY
-                    cierre.id_agencia,
-                    hv.documento,
-                    cc.codigo_clasificacion_credito,
-                    cc.id_cartera_credito
+                   AND COALESCE(
+                           cc.saldo_actual,
+                           0
+                       ) > 0
+
+                 ORDER BY
+                     cc.id_agencia,
+                     hv.documento,
+                     cc.codigo_clasificacion_credito,
+                     cc.id_cartera_credito
                 """;
 
         MapSqlParameterSource parametros =

@@ -1,0 +1,276 @@
+<div class="mora-temprana">
+  <app-header-actions
+    titulo="Mora Temprana / Calidad de Originación"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <section class="panel filtros">
+    <div class="filtro-grid">
+      <label>
+        <span>Cosecha desde</span>
+        <input type="month" [(ngModel)]="cosechaDesde" />
+      </label>
+
+      <label>
+        <span>Cosecha hasta</span>
+        <input type="month" [(ngModel)]="cosechaHasta" [max]="ultimaCosechaMadura" />
+      </label>
+
+      <label>
+        <span>Agencia</span>
+        <select [(ngModel)]="idAgencia">
+          <option [ngValue]="null">Todas</option>
+          <option *ngFor="let a of catalogoAgencias" [ngValue]="a.id">{{ a.codigo }} · {{ a.descripcion }}</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Línea de crédito</span>
+        <select [(ngModel)]="idLineaCredito">
+          <option [ngValue]="null">Todas</option>
+          <option *ngFor="let l of catalogoLineas" [ngValue]="l.id">{{ l.codigo }} · {{ l.descripcion }}</option>
+        </select>
+      </label>
+
+      <button type="button" class="btn btn--primary" (click)="analizar()" [disabled]="cargando">
+        {{ cargando ? 'Analizando...' : 'Analizar' }}
+      </button>
+
+      <button type="button" class="btn" (click)="exportarExcel()" [disabled]="!resumen || cargandoDetalle">
+        Excel completo
+      </button>
+    </div>
+  </section>
+
+  <div class="error" *ngIf="error">{{ error }}</div>
+
+  <ng-container *ngIf="resumen as r">
+    <section class="kpis">
+      <article class="kpi">
+        <span>Créditos originados</span>
+        <strong>{{ r.creditosOriginados | number:'1.0-0' }}</strong>
+        <small>{{ r.cantidadCosechas }} cosechas analizadas</small>
+      </article>
+
+      <article class="kpi">
+        <span>Valor desembolsado</span>
+        <strong>{{ money(r.valorDesembolsado) }}</strong>
+        <small>Base de originación</small>
+      </article>
+
+      <article class="kpi clickable" (click)="abrirDetalle('MORA30_MOB3')">
+        <span>30+ hasta MOB3</span>
+        <strong>{{ pct(r.porcentajeMora30Mob3, 2) }}</strong>
+        <small>{{ r.mora30HastaMob3 }} créditos · ver detalle</small>
+      </article>
+
+      <article class="kpi clickable" (click)="abrirDetalle('MORA30_MOB6')">
+        <span>30+ hasta MOB6</span>
+        <strong>{{ pct(r.porcentajeMora30Mob6, 2) }}</strong>
+        <small>{{ r.mora30HastaMob6 }} créditos · ver detalle</small>
+      </article>
+
+      <article class="kpi clickable alerta" (click)="abrirDetalle('MORA60_MOB6')">
+        <span>60+ hasta MOB6</span>
+        <strong>{{ pct(r.porcentajeMora60Mob6, 2) }}</strong>
+        <small>{{ r.mora60HastaMob6 }} créditos · ver detalle</small>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h3>Calidad por cosecha</h3>
+          <p>Evolución de la mora temprana de cada mes de originación.</p>
+        </div>
+      </div>
+
+      <app-mora-temprana-cosechas-chart [datos]="cosechas"></app-mora-temprana-cosechas-chart>
+
+      <div class="table-wrap separador">
+        <table>
+          <thead>
+            <tr>
+              <th>Cosecha</th>
+              <th>Originados</th>
+              <th>Desembolsado</th>
+              <th>30+ MOB3</th>
+              <th>%</th>
+              <th>30+ MOB6</th>
+              <th>%</th>
+              <th>60+ MOB6</th>
+              <th>%</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of cosechas">
+              <td>{{ c.cosecha | date:'yyyy-MM':'UTC' }}</td>
+              <td>{{ c.creditosOriginados | number:'1.0-0' }}</td>
+              <td>{{ money(c.valorDesembolsado) }}</td>
+              <td>{{ c.mora30HastaMob3 }}</td>
+              <td>{{ pct(c.porcentajeMora30Mob3) }}</td>
+              <td>{{ c.mora30HastaMob6 }}</td>
+              <td>{{ pct(c.porcentajeMora30Mob6) }}</td>
+              <td>{{ c.mora60HastaMob6 }}</td>
+              <td>{{ pct(c.porcentajeMora60Mob6) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h3>Calidad por línea de crédito</h3>
+          <p>Compara la proporción de créditos que entran en mora durante los primeros seis meses.</p>
+        </div>
+      </div>
+
+      <app-mora-temprana-segmentos-chart [datos]="lineas"></app-mora-temprana-segmentos-chart>
+
+      <div class="table-wrap separador">
+        <table>
+          <thead>
+            <tr><th>Código</th><th>Línea</th><th>Originados</th><th>Desembolsado</th><th>30+ MOB3</th><th>30+ MOB6</th><th>60+ MOB6</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let l of lineas">
+              <td>{{ l.codigo }}</td>
+              <td>{{ l.descripcion }}</td>
+              <td>{{ l.creditosOriginados }}</td>
+              <td>{{ money(l.valorDesembolsado) }}</td>
+              <td>{{ pct(l.porcentajeMora30Mob3) }} · {{ l.mora30HastaMob3 }}</td>
+              <td>{{ pct(l.porcentajeMora30Mob6) }} · {{ l.mora30HastaMob6 }}</td>
+              <td>{{ pct(l.porcentajeMora60Mob6) }} · {{ l.mora60HastaMob6 }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h3>Calidad por agencia</h3>
+          <p>Permite identificar dónde la colocación presenta señales tempranas de deterioro.</p>
+        </div>
+      </div>
+
+      <app-mora-temprana-segmentos-chart [datos]="agencias"></app-mora-temprana-segmentos-chart>
+
+      <div class="table-wrap separador">
+        <table>
+          <thead>
+            <tr><th>Código</th><th>Agencia</th><th>Originados</th><th>Desembolsado</th><th>30+ MOB3</th><th>30+ MOB6</th><th>60+ MOB6</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let a of agencias">
+              <td>{{ a.codigo }}</td>
+              <td>{{ a.descripcion }}</td>
+              <td>{{ a.creditosOriginados }}</td>
+              <td>{{ money(a.valorDesembolsado) }}</td>
+              <td>{{ pct(a.porcentajeMora30Mob3) }} · {{ a.mora30HastaMob3 }}</td>
+              <td>{{ pct(a.porcentajeMora30Mob6) }} · {{ a.mora30HastaMob6 }}</td>
+              <td>{{ pct(a.porcentajeMora60Mob6) }} · {{ a.mora60HastaMob6 }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h3>Momento de primera mora</h3>
+          <p>MOB en el que cada crédito alcanza por primera vez 30+ o 60+ días de mora.</p>
+        </div>
+      </div>
+
+      <app-mora-temprana-primera-mora-chart [datos]="primeraMora"></app-mora-temprana-primera-mora-chart>
+
+      <div class="table-wrap separador">
+        <table>
+          <thead><tr><th>Evento</th><th>MOB</th><th>Créditos</th><th>% originados</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let p of primeraMora">
+              <td>{{ p.evento }}</td>
+              <td>MOB {{ p.mob }}</td>
+              <td>{{ p.cantidadCreditos }}</td>
+              <td>{{ pct(p.porcentajeCreditos) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h3>Detalle auditable</h3>
+          <p>Créditos que soportan los indicadores y el informe detallado.</p>
+        </div>
+        <div class="inline-controls">
+          <select [(ngModel)]="indicadorDetalle">
+            <option *ngFor="let i of indicadoresDetalle" [ngValue]="i.value">{{ i.label }}</option>
+          </select>
+          <button type="button" class="btn" (click)="cargarDetalle()" [disabled]="cargandoDetalle">
+            {{ cargandoDetalle ? 'Cargando...' : 'Consultar detalle' }}
+          </button>
+        </div>
+      </div>
+
+      <ng-container *ngIf="detalleVisible">
+        <div class="detalle-tools">
+          <input type="text" [(ngModel)]="textoDetalle" (ngModelChange)="paginaDetalle = 1"
+                 placeholder="Buscar documento, asociado, pagaré, agencia o línea..." />
+          <span>{{ detalleFiltrado.length }} registros</span>
+        </div>
+
+        <div class="table-wrap detalle">
+          <table>
+            <thead>
+              <tr>
+                <th>Cosecha</th><th>Agencia</th><th>Línea</th><th>Pagaré</th><th>Documento</th><th>Asociado</th>
+                <th>Desembolso</th><th>Valor desembolsado</th><th>1er MOB 30+</th><th>1er MOB 60+</th>
+                <th>Máx. días mora MOB6</th><th>Último corte</th><th>MOB observado</th><th>Saldo observado</th>
+                <th>Días mora</th><th>Teléfono</th><th>Celular</th><th>Correo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let d of detallePaginado">
+                <td>{{ d.cosecha | date:'yyyy-MM':'UTC' }}</td>
+                <td>{{ d.codigoAgencia }} · {{ d.nombreAgencia }}</td>
+                <td>{{ d.codigoLineaCredito }} · {{ d.nombreLineaCredito }}</td>
+                <td>{{ d.pagareCartera }}</td>
+                <td>{{ d.documento }}</td>
+                <td>{{ d.nombreCompleto }}</td>
+                <td>{{ d.fechaDesembolso | date:'yyyy-MM-dd':'UTC' }}</td>
+                <td>{{ money(d.valorDesembolsado) }}</td>
+                <td>{{ d.primerMob30 ?? '-' }}</td>
+                <td>{{ d.primerMob60 ?? '-' }}</td>
+                <td>{{ d.maxDiasMoraHastaMob6 }}</td>
+                <td>{{ d.fechaUltimoCorteObservado ? (d.fechaUltimoCorteObservado | date:'yyyy-MM-dd':'UTC') : '-' }}</td>
+                <td>{{ d.mobUltimoCorteObservado ?? '-' }}</td>
+                <td>{{ money(d.saldoUltimoCorteObservado) }}</td>
+                <td>{{ d.diasMoraUltimoCorteObservado }}</td>
+                <td>{{ d.telefono || '-' }}</td>
+                <td>{{ d.celular || '-' }}</td>
+                <td>{{ d.correo || '-' }}</td>
+              </tr>
+              <tr *ngIf="!detallePaginado.length"><td colspan="18" class="empty">No hay registros para el criterio seleccionado.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="paginacion">
+          <button type="button" class="btn" (click)="paginaAnterior()" [disabled]="paginaDetalle <= 1">Anterior</button>
+          <span>Página {{ paginaDetalle }} de {{ totalPaginasDetalle }}</span>
+          <button type="button" class="btn" (click)="paginaSiguiente()" [disabled]="paginaDetalle >= totalPaginasDetalle">Siguiente</button>
+        </div>
+      </ng-container>
+    </section>
+  </ng-container>
+</div>

@@ -1,0 +1,177 @@
+<div class="riesgo-deterioro">
+  <app-header-actions
+    titulo="Análisis de Riesgo y Deterioro"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+  <section class="panel filtros">
+    <div class="filtro-grid">
+      <label>
+        <span>Fecha de corte</span>
+        <select [(ngModel)]="fechaCorte">
+          <option *ngFor="let c of cortes" [value]="c">{{ c }}</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Evolución desde</span>
+        <select [(ngModel)]="fechaDesde">
+          <option *ngFor="let c of cortes" [value]="c">{{ c }}</option>
+        </select>
+      </label>
+
+      <label>
+        <span>Agencia (opcional)</span>
+        <input type="number" [(ngModel)]="idAgencia" placeholder="Todas" />
+      </label>
+
+      <label>
+        <span>Línea (opcional)</span>
+        <input type="number" [(ngModel)]="idLineaCredito" placeholder="Todas" />
+      </label>
+
+      <button type="button" class="btn btn--primary" (click)="analizar()" [disabled]="cargando || !fechaCorte">
+        {{ cargando ? 'Analizando...' : 'Analizar' }}
+      </button>
+
+      <button type="button" class="btn" (click)="exportarExcel()" [disabled]="!resumen || cargandoDetalle">
+        Excel completo
+      </button>
+    </div>
+  </section>
+
+  <div class="error" *ngIf="error">{{ error }}</div>
+
+  <ng-container *ngIf="resumen as r">
+    <section class="kpis">
+      <article class="kpi"><span>Saldo cartera</span><strong>{{ money(r.saldoCartera) }}</strong><small>{{ r.cantidadCreditos | number:'1.0-0' }} créditos</small></article>
+      <article class="kpi"><span>VEA</span><strong>{{ money(r.vea) }}</strong><small>Exposición: {{ money(r.exposicionTotal) }}</small></article>
+      <article class="kpi"><span>Deterioro total</span><strong>{{ money(r.deterioroTotal) }}</strong><small>{{ pct(r.porcentajeDeterioroSobreSaldo, 4) }} del saldo</small></article>
+      <article class="kpi"><span>Pérdida esperada</span><strong>{{ money(r.perdidaEsperada) }}</strong><small>{{ pct(r.porcentajePerdidaEsperadaSobreVea, 4) }} de VEA</small></article>
+    </section>
+
+    <section class="kpis mora">
+      <article class="kpi"><span>Mora 30+</span><strong>{{ pct(r.porcentajeSaldoMora30, 4) }}</strong><small>{{ money(r.saldoMora30) }} · {{ r.cantidadMora30 }} créditos</small></article>
+      <article class="kpi"><span>Mora 60+</span><strong>{{ pct(r.porcentajeSaldoMora60, 4) }}</strong><small>{{ money(r.saldoMora60) }} · {{ r.cantidadMora60 }} créditos</small></article>
+      <article class="kpi"><span>Mora 90+</span><strong>{{ pct(r.porcentajeSaldoMora90, 4) }}</strong><small>{{ money(r.saldoMora90) }} · {{ r.cantidadMora90 }} créditos</small></article>
+      <article class="kpi"><span>Mora 180+</span><strong>{{ pct(r.porcentajeSaldoMora180, 4) }}</strong><small>{{ money(r.saldoMora180) }} · {{ r.cantidadMora180 }} créditos</small></article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div><h3>Distribución por edad</h3><p>Exposición, saldo y deterioro según la edad seleccionada.</p></div>
+        <select [(ngModel)]="tipoEdad" (change)="recargarEdades()">
+          <option *ngFor="let o of tiposEdad" [ngValue]="o.value">{{ o.label }}</option>
+        </select>
+      </div>
+
+      <div class="grafico-wrap">
+        <app-riesgo-deterioro-edades-chart
+          [items]="edades">
+        </app-riesgo-deterioro-edades-chart>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Edad</th><th>Créditos</th><th>Saldo</th><th>% saldo</th><th>VEA</th><th>Exposición</th><th>Deterioro</th></tr></thead>
+          <tbody>
+          <tr *ngFor="let x of edades">
+            <td><span class="edad">{{ x.edad }}</span></td><td>{{ x.cantidadCreditos }}</td><td>{{ money(x.saldoCartera) }}</td><td>{{ pct(x.porcentajeSaldo, 4) }}</td><td>{{ money(x.vea) }}</td><td>{{ money(x.exposicionTotal) }}</td><td>{{ money(x.deterioroTotal) }}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div><h3>Segmentación</h3><p>Identifica dónde se concentra el saldo y el deterioro.</p></div>
+        <select [(ngModel)]="dimension" (change)="recargarSegmentacion()">
+          <option *ngFor="let o of dimensiones" [ngValue]="o.value">{{ o.label }}</option>
+        </select>
+      </div>
+
+      <div class="grafico-wrap">
+        <app-riesgo-deterioro-segmentacion-chart
+          [items]="segmentacion">
+        </app-riesgo-deterioro-segmentacion-chart>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Código</th><th>Descripción</th><th>Créditos</th><th>Saldo</th><th>% saldo</th><th>Deterioro</th><th>% det./saldo</th></tr></thead>
+          <tbody>
+          <tr *ngFor="let x of segmentacion">
+            <td>{{ x.codigo }}</td><td>{{ x.descripcion }}</td><td>{{ x.cantidadCreditos }}</td><td>{{ money(x.saldoCartera) }}</td><td>{{ pct(x.porcentajeSaldo, 4) }}</td><td>{{ money(x.deterioroTotal) }}</td><td>{{ pct(x.porcentajeDeterioroSobreSaldo, 4) }}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><div><h3>Evolución histórica</h3><p>Comportamiento mensual del saldo, deterioro y mora.</p></div></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Corte</th><th>Saldo</th><th>Var. saldo</th><th>Deterioro</th><th>Var. deterioro</th><th>Mora 30+</th><th>Mora 60+</th><th>Mora 90+</th><th>Mora 180+</th></tr></thead>
+          <tbody>
+          <tr *ngFor="let x of evolucion">
+            <td>{{ x.fechaCorte }}</td><td>{{ money(x.saldoCartera) }}</td><td>{{ pct(x.variacionSaldoPorcentaje, 4) }}</td><td>{{ money(x.deterioroTotal) }}</td><td>{{ pct(x.variacionDeterioroPorcentaje, 4) }}</td><td>{{ pct(x.porcentajeMora30, 4) }}</td><td>{{ pct(x.porcentajeMora60, 4) }}</td><td>{{ pct(x.porcentajeMora90, 4) }}</td><td>{{ pct(x.porcentajeMora180, 4) }}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div><h3>Concentración</h3><p>Ranking de créditos que concentran el riesgo económico.</p></div>
+        <div class="inline-controls">
+          <select [(ngModel)]="criterio" (change)="recargarConcentracion()"><option *ngFor="let o of criterios" [ngValue]="o.value">{{ o.label }}</option></select>
+          <input type="number" min="1" max="500" [(ngModel)]="limite" (change)="recargarConcentracion()" />
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Documento</th><th>Asociado</th><th>Pagaré</th><th>Línea</th><th>Saldo</th><th>Días mora</th><th>Edad</th><th>Deterioro</th><th>% total</th><th>% acum.</th></tr></thead>
+          <tbody>
+          <tr *ngFor="let x of concentracion">
+            <td>{{ x.posicion }}</td><td>{{ x.documento }}</td><td>{{ x.nombreCompleto }}</td><td>{{ x.pagareCartera }}</td><td>{{ x.codigoLineaCredito }} - {{ x.nombreLineaCredito }}</td><td>{{ money(x.saldoCartera) }}</td><td>{{ x.diasMora }}</td><td>{{ x.edadContable }}</td><td>{{ money(x.deterioroTotal) }}</td><td>{{ pct(x.porcentajeSobreTotal, 4) }}</td><td>{{ pct(x.porcentajeAcumulado, 4) }}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel detalle-panel">
+      <div class="panel-head">
+        <div><h3>Detalle auditable</h3><p>Créditos que soportan el análisis del corte seleccionado.</p></div>
+        <button type="button" class="btn" (click)="cargarDetalle()" [disabled]="cargandoDetalle">{{ cargandoDetalle ? 'Cargando...' : 'Cargar detalle' }}</button>
+      </div>
+
+      <ng-container *ngIf="detalleVisible">
+        <div class="detalle-tools">
+          <input type="text" [(ngModel)]="textoDetalle" (ngModelChange)="paginaDetalle = 1" placeholder="Buscar documento, nombre, pagaré, línea o edad" />
+          <span>{{ detalleFiltrado.length | number:'1.0-0' }} registros</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Documento</th><th>Asociado</th><th>Pagaré</th><th>Línea</th><th>Clasificación</th><th>Garantía</th><th>Estado jurídico</th><th>Saldo</th><th>Días mora</th><th>Edad contable</th><th>VEA</th><th>Exposición</th><th>Deterioro</th></tr></thead>
+            <tbody>
+            <tr *ngFor="let d of detallePaginado">
+              <td>{{ d.documento }}</td><td>{{ d.nombreCompleto }}</td><td>{{ d.pagareCartera }}</td><td>{{ d.codigoLineaCredito }} - {{ d.nombreLineaCredito }}</td><td>{{ d.descripcionClasificacionCredito }}</td><td>{{ d.descripcionGarantiaCredito }}</td><td>{{ d.descripcionEstadoJuridico }}</td><td>{{ money(d.saldoCartera) }}</td><td>{{ d.diasMora }}</td><td>{{ d.edadContable }}</td><td>{{ money(d.vea) }}</td><td>{{ money(d.exposicionTotal) }}</td><td>{{ money(d.deterioroTotal) }}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="paginacion">
+          <button type="button" class="btn" (click)="paginaAnterior()" [disabled]="paginaDetalle <= 1">Anterior</button>
+          <span>Página {{ paginaDetalle }} de {{ totalPaginasDetalle }}</span>
+          <button type="button" class="btn" (click)="paginaSiguiente()" [disabled]="paginaDetalle >= totalPaginasDetalle">Siguiente</button>
+        </div>
+      </ng-container>
+    </section>
+  </ng-container>
+</div>

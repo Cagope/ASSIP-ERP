@@ -20,7 +20,7 @@ public class Criterio502SolvenciaDeudorRepository {
     // OBTENER DATOS DEL CRITERIO 502 - SOLVENCIA DEL DEUDOR
     //
     // Los datos patrimoniales se toman exclusivamente de la
-    // fotografía histórica de Hoja de Vida correspondiente
+    // fotografÃ­a histÃ³rica de Hoja de Vida correspondiente
     // a la misma fecha de corte de la cartera.
     //
     // Se utilizan:
@@ -73,9 +73,14 @@ public class Criterio502SolvenciaDeudorRepository {
 
                 WHERE cierre.fecha_corte =
                       :fechaCorte
+                
+                  AND COALESCE(
+                          cc.saldo_actual,
+                          0
+                      ) > 0
 
                 ORDER BY
-                    cierre.id_agencia,
+                    cc.id_agencia,
                     hv.documento,
                     cc.id_cartera_credito
                 """;

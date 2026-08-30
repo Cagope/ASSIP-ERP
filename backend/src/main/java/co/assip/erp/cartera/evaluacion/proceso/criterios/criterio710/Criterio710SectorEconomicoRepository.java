@@ -17,17 +17,17 @@ public class Criterio710SectorEconomicoRepository {
     private final NamedParameterJdbcTemplate jdbc;
 
     // =========================================================
-    // OBTENER DATOS DEL CRITERIO 710 - SECTOR ECONÓMICO
+    // OBTENER DATOS DEL CRITERIO 710 - SECTOR ECONÃ“MICO
     //
-    // El sector económico se toma directamente de la fotografía
-    // histórica de Hoja de Vida correspondiente a la fecha de
+    // El sector econÃ³mico se toma directamente de la fotografÃ­a
+    // histÃ³rica de Hoja de Vida correspondiente a la fecha de
     // corte:
     //
     // cierres_hoja_vida_personas.codigo_sector_economico
     //
-    // No se consulta el catálogo de sectores para determinar
-    // la regla. La parametrización del criterio 710 es la que
-    // valida y puntúa el código recibido.
+    // No se consulta el catÃ¡logo de sectores para determinar
+    // la regla. La parametrizaciÃ³n del criterio 710 es la que
+    // valida y puntÃºa el cÃ³digo recibido.
     // =========================================================
 
     public List<Criterio710DatoDTO> obtenerDatos(
@@ -71,9 +71,14 @@ public class Criterio710SectorEconomicoRepository {
 
                 WHERE cierre.fecha_corte =
                       :fechaCorte
+                
+                  AND COALESCE(
+                          cc.saldo_actual,
+                          0
+                      ) > 0
 
                 ORDER BY
-                    cierre.id_agencia,
+                    cc.id_agencia,
                     hv.documento,
                     cc.id_cartera_credito
                 """;

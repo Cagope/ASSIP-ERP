@@ -2,12 +2,14 @@ package co.assip.erp.cartera.cierremensual;
 
 import co.assip.erp.cartera.cierremensual.dto.CierreMensualDTO;
 import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.cartera.cierremensual.hojavida.CierreHojaVidaCarteraService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+
 
 @Service
 @Transactional
@@ -16,15 +18,21 @@ public class CierreMensualService {
     private final CierreMensualRepository repository;
     private final CierreMensualFotoRepository fotoRepository;
     private final UsuarioSesionService usuarioSesionService;
+    private final CierreHojaVidaCarteraService cierreHojaVidaCarteraService;
+
 
     public CierreMensualService(
             CierreMensualRepository repository,
             CierreMensualFotoRepository fotoRepository,
-            UsuarioSesionService usuarioSesionService
+            UsuarioSesionService usuarioSesionService,
+            CierreHojaVidaCarteraService cierreHojaVidaCarteraService
     ) {
+
         this.repository = repository;
         this.fotoRepository = fotoRepository;
         this.usuarioSesionService = usuarioSesionService;
+        this.cierreHojaVidaCarteraService =
+                cierreHojaVidaCarteraService;
     }
 
     // =========================================================
@@ -288,7 +296,38 @@ public class CierreMensualService {
         }
 
         // =====================================================
-        // 2. Crear base de cálculos
+// 2. GENERAR PRECierre AUTOMÁTICO DE HOJA DE VIDA
+//
+// Incluye:
+//
+// - personas
+// - bienes
+// - relaciones bienes-personas
+//
+// La fotografía de Hoja de Vida permanece en estado P
+// mientras la fotografía de cartera esté abierta.
+// =====================================================
+
+        CierreHojaVidaCarteraService.ResultadoPrecierreHojaVida
+                resultadoHojaVida =
+                cierreHojaVidaCarteraService.generarPrecierre(
+                        idCierreCartera,
+                        fechaCorte,
+                        idUsuario
+                );
+
+        if (resultadoHojaVida == null) {
+
+            throw new IllegalStateException(
+                    "No fue posible generar el precierre "
+                            + "de Hoja de Vida para el cierre "
+                            + idCierreCartera
+                            + "."
+            );
+        }
+
+        // =====================================================
+        // 3. Crear base de cálculos
         // =====================================================
 
         int cantidadResultadosCreados =

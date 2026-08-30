@@ -26,6 +26,7 @@ import {
 
 import {
   EvaluacionCartera,
+  EvaluacionCarteraGuardar,
   EstadoEvaluacionCartera,
   ESTADO_EVALUACION_DESCRIPCION
 } from '../evaluacion-cartera.models';
@@ -54,13 +55,29 @@ export class EvaluacionCarteraListComponent implements OnInit {
   // DATOS
   // =========================================================
 
-  evaluaciones: EvaluacionCartera[] = [];
+  evaluaciones:
+    EvaluacionCartera[] = [];
 
-  evaluacionesFiltradas: EvaluacionCartera[] = [];
+  evaluacionesFiltradas:
+    EvaluacionCartera[] = [];
 
   cargando = false;
 
+  guardando = false;
+
   error = '';
+
+  mensaje = '';
+
+  // =========================================================
+  // NUEVA EVALUACIÓN
+  // =========================================================
+
+  mostrarNuevaEvaluacion = false;
+
+  nuevaEvaluacion:
+    EvaluacionCarteraGuardar =
+      this.crearModeloNuevaEvaluacion();
 
   // =========================================================
   // FILTROS
@@ -83,6 +100,7 @@ export class EvaluacionCarteraListComponent implements OnInit {
   // =========================================================
 
   ngOnInit(): void {
+
     this.cargar();
   }
 
@@ -93,36 +111,199 @@ export class EvaluacionCarteraListComponent implements OnInit {
   cargar(): void {
 
     this.cargando = true;
+
     this.error = '';
 
-    this.api.listar().subscribe({
+    this.mensaje = '';
 
-      next: (data) => {
+    this.api
+      .listar()
+      .subscribe({
 
-        this.evaluaciones =
-          data ?? [];
+        next: (
+          data:
+            EvaluacionCartera[]
+        ) => {
 
-        this.aplicarFiltros();
+          this.evaluaciones =
+            data ?? [];
 
-        this.cargando = false;
-      },
+          this.aplicarFiltros();
 
-      error: (err) => {
+          this.cargando = false;
+        },
 
-        console.error(
-          'Error cargando evaluaciones de cartera',
-          err
-        );
+        error: (err) => {
 
-        this.evaluaciones = [];
-        this.evaluacionesFiltradas = [];
+          console.error(
+            'Error cargando evaluaciones de cartera',
+            err
+          );
 
-        this.error =
-          'No fue posible cargar las evaluaciones de cartera.';
+          this.evaluaciones = [];
 
-        this.cargando = false;
-      }
-    });
+          this.evaluacionesFiltradas = [];
+
+          this.error =
+            err?.error?.message
+            || 'No fue posible cargar las evaluaciones de cartera.';
+
+          this.cargando = false;
+        }
+      });
+  }
+
+  // =========================================================
+  // NUEVO
+  // =========================================================
+
+  nuevo(): void {
+
+    if (
+      this.cargando
+      || this.guardando
+    ) {
+      return;
+    }
+
+    this.error = '';
+
+    this.mensaje = '';
+
+    this.nuevaEvaluacion =
+      this.crearModeloNuevaEvaluacion();
+
+    this.mostrarNuevaEvaluacion =
+      true;
+  }
+
+  // =========================================================
+  // CANCELAR NUEVO
+  // =========================================================
+
+  cancelarNuevo(): void {
+
+    if (
+      this.guardando
+    ) {
+      return;
+    }
+
+    this.error = '';
+
+    this.mensaje = '';
+
+    this.mostrarNuevaEvaluacion =
+      false;
+
+    this.nuevaEvaluacion =
+      this.crearModeloNuevaEvaluacion();
+  }
+
+  // =========================================================
+  // CREAR EVALUACIÓN
+  // =========================================================
+
+  crearEvaluacion(): void {
+
+    if (
+      this.guardando
+    ) {
+      return;
+    }
+
+    this.error = '';
+
+    this.mensaje = '';
+
+    const validacion =
+      this.validarNuevaEvaluacion();
+
+    if (
+      validacion
+    ) {
+
+      this.error =
+        validacion;
+
+      return;
+    }
+
+    const dto:
+      EvaluacionCarteraGuardar = {
+
+        fechaCorte:
+          this.nuevaEvaluacion
+            .fechaCorte,
+
+        /*
+         * La evaluación utiliza las reglas activas
+         * al momento de ejecutar el proceso.
+         *
+         * Este valor se conserva únicamente porque
+         * actualmente la tabla y el DTO lo requieren.
+         */
+        versionMetodologia:
+          'VIGENTE',
+
+        fechaComiteRiesgos:
+          null,
+
+        numeroActaRiesgos:
+          null,
+
+        fechaConsejo:
+          null,
+
+        numeroActaConsejo:
+          null,
+
+        observaciones:
+          null
+      };
+
+    this.guardando = true;
+
+    this.api
+      .crear(
+        dto
+      )
+      .subscribe({
+
+        next: (
+          evaluacion:
+            EvaluacionCartera
+        ) => {
+
+          this.guardando = false;
+
+          this.mostrarNuevaEvaluacion =
+            false;
+
+          this.nuevaEvaluacion =
+            this.crearModeloNuevaEvaluacion();
+
+          this.router.navigate([
+            '/cartera/evaluacion/evaluaciones',
+            evaluacion.idEvaluacionCartera,
+            'gestionar'
+          ]);
+        },
+
+        error: (err) => {
+
+          console.error(
+            'Error creando evaluación de cartera',
+            err
+          );
+
+          this.error =
+            err?.error?.message
+            || 'No fue posible iniciar la evaluación de cartera.';
+
+          this.guardando = false;
+        }
+      });
   }
 
   // =========================================================
@@ -130,7 +311,9 @@ export class EvaluacionCarteraListComponent implements OnInit {
   // =========================================================
 
   buscar(): void {
+
     this.paginaActual = 1;
+
     this.aplicarFiltros();
   }
 
@@ -141,6 +324,7 @@ export class EvaluacionCarteraListComponent implements OnInit {
   limpiar(): void {
 
     this.filtroFechaCorte = '';
+
     this.filtroEstado = '';
 
     this.paginaActual = 1;
@@ -155,27 +339,34 @@ export class EvaluacionCarteraListComponent implements OnInit {
   private aplicarFiltros(): void {
 
     const fecha =
-      this.filtroFechaCorte.trim();
+      this.filtroFechaCorte
+        .trim();
 
     const estado =
-      this.filtroEstado.trim();
+      this.filtroEstado
+        .trim();
 
     this.evaluacionesFiltradas =
-      this.evaluaciones.filter(
-        evaluacion => {
+      this.evaluaciones
+        .filter(
+          evaluacion => {
 
-          const cumpleFecha =
-            !fecha
-            || evaluacion.fechaCorte === fecha;
+            const cumpleFecha =
+              !fecha
+              || evaluacion.fechaCorte
+              === fecha;
 
-          const cumpleEstado =
-            !estado
-            || evaluacion.estado === estado;
+            const cumpleEstado =
+              !estado
+              || evaluacion.estado
+              === estado;
 
-          return cumpleFecha
-            && cumpleEstado;
-        }
-      );
+            return (
+              cumpleFecha
+              && cumpleEstado
+            );
+          }
+        );
 
     this.ajustarPaginaActual();
   }
@@ -184,18 +375,26 @@ export class EvaluacionCarteraListComponent implements OnInit {
   // REGISTROS DE LA PÁGINA
   // =========================================================
 
-  get evaluacionesPagina(): EvaluacionCartera[] {
+  get evaluacionesPagina():
+    EvaluacionCartera[] {
 
     const inicio =
-      (this.paginaActual - 1)
+      (
+        this.paginaActual
+        - 1
+      )
       * this.tamanioPagina;
 
     const fin =
-      inicio + this.tamanioPagina;
+      inicio
+      + this.tamanioPagina;
 
-    return this.evaluacionesFiltradas.slice(
-      inicio,
-      fin
+    return (
+      this.evaluacionesFiltradas
+        .slice(
+          inicio,
+          fin
+        )
     );
   }
 
@@ -206,13 +405,15 @@ export class EvaluacionCarteraListComponent implements OnInit {
   get totalPaginas(): number {
 
     if (
-      this.evaluacionesFiltradas.length === 0
+      this.evaluacionesFiltradas
+        .length === 0
     ) {
       return 1;
     }
 
     return Math.ceil(
-      this.evaluacionesFiltradas.length
+      this.evaluacionesFiltradas
+        .length
       / this.tamanioPagina
     );
   }
@@ -222,7 +423,11 @@ export class EvaluacionCarteraListComponent implements OnInit {
   // =========================================================
 
   get totalRegistros(): number {
-    return this.evaluacionesFiltradas.length;
+
+    return (
+      this.evaluacionesFiltradas
+        .length
+    );
   }
 
   // =========================================================
@@ -231,7 +436,10 @@ export class EvaluacionCarteraListComponent implements OnInit {
 
   paginaAnterior(): void {
 
-    if (this.paginaActual <= 1) {
+    if (
+      this.paginaActual
+      <= 1
+    ) {
       return;
     }
 
@@ -245,7 +453,8 @@ export class EvaluacionCarteraListComponent implements OnInit {
   paginaSiguiente(): void {
 
     if (
-      this.paginaActual >= this.totalPaginas
+      this.paginaActual
+      >= this.totalPaginas
     ) {
       return;
     }
@@ -260,14 +469,21 @@ export class EvaluacionCarteraListComponent implements OnInit {
   private ajustarPaginaActual(): void {
 
     if (
-      this.paginaActual > this.totalPaginas
+      this.paginaActual
+      > this.totalPaginas
     ) {
+
       this.paginaActual =
         this.totalPaginas;
     }
 
-    if (this.paginaActual < 1) {
-      this.paginaActual = 1;
+    if (
+      this.paginaActual
+      < 1
+    ) {
+
+      this.paginaActual =
+        1;
     }
   }
 
@@ -276,12 +492,16 @@ export class EvaluacionCarteraListComponent implements OnInit {
   // =========================================================
 
   descripcionEstado(
-    estado: EstadoEvaluacionCartera
+    estado:
+      EstadoEvaluacionCartera
   ): string {
 
-    return ESTADO_EVALUACION_DESCRIPCION[
-      estado
-    ] ?? estado;
+    return (
+      ESTADO_EVALUACION_DESCRIPCION[
+        estado
+      ]
+      ?? estado
+    );
   }
 
   // =========================================================
@@ -289,7 +509,8 @@ export class EvaluacionCarteraListComponent implements OnInit {
   // =========================================================
 
   gestionar(
-    evaluacion: EvaluacionCartera
+    evaluacion:
+      EvaluacionCartera
   ): void {
 
     this.router.navigate([
@@ -297,5 +518,115 @@ export class EvaluacionCarteraListComponent implements OnInit {
       evaluacion.idEvaluacionCartera,
       'gestionar'
     ]);
+  }
+
+  // =========================================================
+  // VALIDAR NUEVA EVALUACIÓN
+  // =========================================================
+
+  private validarNuevaEvaluacion():
+    string | null {
+
+    if (
+      !this.nuevaEvaluacion
+        .fechaCorte
+    ) {
+
+      return (
+        'Debe seleccionar la fecha de corte.'
+      );
+    }
+
+    const fecha =
+      new Date(
+        `${this.nuevaEvaluacion.fechaCorte}T00:00:00`
+      );
+
+    if (
+      Number.isNaN(
+        fecha.getTime()
+      )
+    ) {
+
+      return (
+        'La fecha de corte no es válida.'
+      );
+    }
+
+    const ultimoDiaMes =
+      new Date(
+        fecha.getFullYear(),
+        fecha.getMonth() + 1,
+        0
+      );
+
+    if (
+      fecha.getDate()
+      !== ultimoDiaMes.getDate()
+    ) {
+
+      return (
+        'La fecha de corte debe corresponder al último día del mes.'
+      );
+    }
+
+    const yaExiste =
+      this.evaluaciones
+        .some(
+          evaluacion =>
+            evaluacion.fechaCorte
+            === this.nuevaEvaluacion
+              .fechaCorte
+        );
+
+    if (
+      yaExiste
+    ) {
+
+      return (
+        'Ya existe una evaluación de cartera para la fecha de corte seleccionada.'
+      );
+    }
+
+    return null;
+  }
+
+  // =========================================================
+  // MODELO NUEVO
+  // =========================================================
+
+  private crearModeloNuevaEvaluacion():
+    EvaluacionCarteraGuardar {
+
+    return {
+
+      fechaCorte:
+        '',
+
+      /*
+       * Valor interno.
+       *
+       * No se presenta al usuario.
+       * Las reglas utilizadas serán las reglas
+       * activas cuando se ejecute la evaluación.
+       */
+      versionMetodologia:
+        'VIGENTE',
+
+      fechaComiteRiesgos:
+        null,
+
+      numeroActaRiesgos:
+        null,
+
+      fechaConsejo:
+        null,
+
+      numeroActaConsejo:
+        null,
+
+      observaciones:
+        null
+    };
   }
 }

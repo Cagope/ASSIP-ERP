@@ -13,7 +13,7 @@
       </h2>
 
       <span>
-        Configuraciones de seguro registradas para el pagaré
+        Configuraciones de seguro y movimientos registrados para el pagaré
         {{ credito.pagareCartera || 'sin número' }}.
       </span>
 
@@ -88,6 +88,19 @@
 
     </article>
 
+
+    <article>
+
+      <span>
+        Movimientos
+      </span>
+
+      <strong>
+        {{ cantidadMovimientos }}
+      </strong>
+
+    </article>
+
   </div>
 
 
@@ -111,153 +124,166 @@
 
 
   <!-- ======================================================= -->
-  <!-- TABLA DE SEGUROS                                        -->
+  <!-- CONFIGURACIONES DE SEGURO                               -->
   <!-- ======================================================= -->
 
   <div
     *ngIf="tieneSeguros"
-    class="tabla-contenedor">
+    class="seguros-seccion">
 
-    <table class="tabla-seguros">
+    <div class="seguros-seccion__titulo">
 
-      <thead>
+      Configuraciones de seguro
 
-      <tr>
-
-        <th>
-          Configuración
-        </th>
-
-        <th>
-          Tipo de cobro
-        </th>
-
-        <th class="columna-numero">
-          Porcentaje
-        </th>
-
-        <th>
-          Última fecha
-        </th>
-
-        <th>
-          Próxima fecha
-        </th>
-
-        <th>
-          Vencimiento
-        </th>
-
-        <th>
-          Estado
-        </th>
-
-        <th class="columna-numero">
-          Sobre desembolso
-        </th>
-
-        <th class="columna-numero">
-          Sobre saldo
-        </th>
-
-        <th class="columna-numero">
-          Sobre cuota
-        </th>
-
-        <th>
-          Alerta
-        </th>
-
-      </tr>
-
-      </thead>
+    </div>
 
 
-      <tbody>
+    <div class="tabla-contenedor">
 
-      <tr
-        *ngFor="
-            let seguro of seguros;
-            trackBy: trackBySeguro
+      <table class="tabla-seguros">
+
+        <thead>
+
+        <tr>
+
+          <th>
+            Configuración
+          </th>
+
+          <th>
+            Tipo de cobro
+          </th>
+
+          <th class="columna-numero">
+            Porcentaje
+          </th>
+
+          <th>
+            Última fecha
+          </th>
+
+          <th>
+            Próxima fecha
+          </th>
+
+          <th>
+            Vencimiento
+          </th>
+
+          <th>
+            Estado
+          </th>
+
+          <th class="columna-numero">
+            Sobre desembolso
+          </th>
+
+          <th class="columna-numero">
+            Sobre saldo
+          </th>
+
+          <th class="columna-numero">
+            Sobre cuota
+          </th>
+
+          <th>
+            Alerta
+          </th>
+
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        <tr
+          *ngFor="
+              let seguro of seguros;
+              trackBy: trackBySeguro
+            "
+          [class.fila-inactiva]="
+            !esSeguroActivo(seguro)
           "
-        [class.fila-inactiva]="!esSeguroActivo(seguro)"
-        [class.fila-vencida]="esSeguroVencido(seguro)">
+          [class.fila-vencida]="
+            esSeguroVencido(seguro)
+          ">
 
-        <td>
+          <td>
 
-          <div class="configuracion-seguro">
+            <div class="configuracion-seguro">
 
-            <strong>
-              {{
-              seguro.numeroConfiguracionSeguro
-              ?? seguro.idCreditoSeguro
-              ?? ''
-              }}
-            </strong>
+              <strong>
+                {{
+                seguro.numeroConfiguracionSeguro
+                ?? seguro.idCreditoSeguro
+                ?? ''
+                }}
+              </strong>
 
-            <span
-              *ngIf="esConfiguracionPrincipal(seguro)"
-              class="badge badge--principal">
+              <span
+                *ngIf="esConfiguracionPrincipal(seguro)"
+                class="badge badge--principal">
 
                 Principal
 
               </span>
 
-          </div>
+            </div>
 
-        </td>
-
-
-        <td>
-
-          {{
-          descripcionTipoCobro(seguro)
-          || 'Sin definir'
-          }}
-
-        </td>
+          </td>
 
 
-        <td class="columna-numero">
+          <td>
 
-          {{
-          seguro.porcentajeSeguro
-          ?? 0
-          | number:'1.2-4'
-          }} %
+            {{
+            descripcionTipoCobro(seguro)
+            || 'Sin definir'
+            }}
 
-        </td>
-
-
-        <td>
-
-          {{
-          seguro.ultimaFechaSeguro
-          ? (
-          seguro.ultimaFechaSeguro
-          | date:'dd/MM/yyyy'
-          )
-          : ''
-          }}
-
-        </td>
+          </td>
 
 
-        <td>
+          <td class="columna-numero">
 
-          {{
-          seguro.proximaFechaSeguro
-          ? (
-          seguro.proximaFechaSeguro
-          | date:'dd/MM/yyyy'
-          )
-          : ''
-          }}
+            {{
+            seguro.porcentajeSeguro
+            ?? 0
+            | number:'1.2-4'
+            }} %
 
-        </td>
+          </td>
 
 
-        <td>
+          <td>
+
+            {{
+            seguro.ultimaFechaSeguro
+            ? (
+            seguro.ultimaFechaSeguro
+            | date:'dd/MM/yyyy'
+            )
+            : ''
+            }}
+
+          </td>
+
+
+          <td>
+
+            {{
+            seguro.proximaFechaSeguro
+            ? (
+            seguro.proximaFechaSeguro
+            | date:'dd/MM/yyyy'
+            )
+            : ''
+            }}
+
+          </td>
+
+
+          <td>
 
             <span
               class="badge"
@@ -272,10 +298,10 @@
 
             </span>
 
-        </td>
+          </td>
 
 
-        <td>
+          <td>
 
             <span
               class="badge"
@@ -290,66 +316,70 @@
 
             </span>
 
-        </td>
+          </td>
 
 
-        <td class="columna-numero">
+          <td class="columna-numero">
 
-          {{
-          seguro.valorSeguroSobreDesembolsoEstimado
-          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
-          }}
+            {{
+            seguro.valorSeguroSobreDesembolsoEstimado
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
 
-        </td>
-
-
-        <td class="columna-numero">
-
-          {{
-          seguro.valorSeguroSobreSaldoEstimado
-          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
-          }}
-
-        </td>
+          </td>
 
 
-        <td class="columna-numero">
+          <td class="columna-numero">
 
-          {{
-          seguro.valorSeguroSobreCuotaEstimado
-          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
-          }}
+            {{
+            seguro.valorSeguroSobreSaldoEstimado
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
 
-        </td>
+          </td>
 
 
-        <td>
+          <td class="columna-numero">
 
-          <div class="alerta-seguro">
+            {{
+            seguro.valorSeguroSobreCuotaEstimado
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
 
-            <strong
-              *ngIf="seguro.nivelAlertaSeguro">
+          </td>
 
-              {{ seguro.nivelAlertaSeguro }}
 
-            </strong>
+          <td>
 
-            <span>
+            <div class="alerta-seguro">
+
+              <strong
+                *ngIf="seguro.nivelAlertaSeguro">
+
+                {{ seguro.nivelAlertaSeguro }}
+
+              </strong>
+
+              <span>
+
                 {{
                   seguro.motivoAlertaSeguro
                   || 'Sin novedades'
                 }}
+
               </span>
 
-          </div>
+            </div>
 
-        </td>
+          </td>
 
-      </tr>
+        </tr>
 
-      </tbody>
+        </tbody>
 
-    </table>
+      </table>
+
+    </div>
 
   </div>
 
@@ -428,6 +458,486 @@
       </strong>
 
     </article>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- MOVIMIENTOS DEL SEGURO                                  -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="tieneSeguros"
+    class="seguros-movimientos">
+
+    <div class="seguros-seccion__titulo">
+
+      Movimientos del seguro
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- SIN MOVIMIENTOS                                       -->
+    <!-- ===================================================== -->
+
+    <div
+      *ngIf="!tieneMovimientos"
+      class="estado-vacio">
+
+      <strong>
+        El seguro no tiene movimientos registrados
+      </strong>
+
+      <span>
+        Las causaciones, pagos y demás movimientos del seguro
+        aparecerán en esta sección.
+      </span>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- MOVIMIENTOS POR CONFIGURACIÓN                         -->
+    <!-- ===================================================== -->
+
+    <ng-container
+      *ngFor="
+        let seguro of seguros;
+        trackBy: trackBySeguro
+      ">
+
+      <div
+        *ngIf="tieneMovimientosSeguro(seguro)"
+        class="seguro-movimientos-grupo">
+
+
+        <!-- ================================================= -->
+        <!-- ENCABEZADO DE CONFIGURACIÓN                       -->
+        <!-- ================================================= -->
+
+        <div class="seguro-movimientos-grupo__encabezado">
+
+          <div>
+
+            <strong>
+              Configuración
+              {{
+              seguro.numeroConfiguracionSeguro
+              ?? seguro.idCreditoSeguro
+              ?? ''
+              }}
+            </strong>
+
+            <span>
+
+              {{
+                descripcionTipoCobro(seguro)
+                || 'Sin tipo de cobro'
+              }}
+
+              ·
+
+              {{
+                seguro.porcentajeSeguro
+                ?? 0
+                | number:'1.2-4'
+              }} %
+
+            </span>
+
+          </div>
+
+
+          <span class="badge badge--principal">
+
+            {{
+              movimientosSeguro(seguro).length
+            }}
+            movimientos
+
+          </span>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- TABLA DE MOVIMIENTOS                              -->
+        <!-- ================================================= -->
+
+        <div class="tabla-contenedor">
+
+          <table class="tabla-seguros tabla-movimientos-seguro">
+
+            <thead>
+
+            <tr>
+
+              <th>
+                Nº
+              </th>
+
+              <th>
+                Fecha
+              </th>
+
+              <th>
+                Comprobante
+              </th>
+
+              <th>
+                Concepto
+              </th>
+
+              <th class="columna-numero">
+                Saldo base
+              </th>
+
+              <th class="columna-numero">
+                Intereses base
+              </th>
+
+              <th class="columna-numero">
+                Otros base
+              </th>
+
+              <th class="columna-numero">
+                Base cálculo
+              </th>
+
+              <th class="columna-numero">
+                % base
+              </th>
+
+              <th class="columna-numero">
+                % extraprima
+              </th>
+
+              <th class="columna-numero">
+                % aplicado
+              </th>
+
+              <th class="columna-numero">
+                Débito
+              </th>
+
+              <th class="columna-numero">
+                Crédito
+              </th>
+
+              <th class="columna-numero">
+                Saldo seguro
+              </th>
+
+              <th>
+                Naturaleza
+              </th>
+
+              <th>
+                Estado
+              </th>
+
+            </tr>
+
+            </thead>
+
+
+            <tbody>
+
+            <tr
+              *ngFor="
+                let movimiento of movimientosSeguro(seguro);
+                trackBy: trackByMovimiento
+              "
+              [class.fila-inactiva]="
+                movimiento.movimientoActivo !== true
+              "
+              [class.movimiento-debito]="
+                esMovimientoDebito(movimiento)
+              "
+              [class.movimiento-credito]="
+                esMovimientoCredito(movimiento)
+              ">
+
+
+              <!-- =========================================== -->
+              <!-- SECUENCIA                                   -->
+              <!-- =========================================== -->
+
+              <td>
+
+                {{
+                movimiento.numeroMovimientoSeguro
+                ?? ''
+                }}
+
+              </td>
+
+
+              <!-- =========================================== -->
+              <!-- FECHA                                       -->
+              <!-- =========================================== -->
+
+              <td>
+
+                {{
+                movimiento.fechaMovimiento
+                ? (
+                movimiento.fechaMovimiento
+                | date:'dd/MM/yyyy'
+                )
+                : ''
+                }}
+
+              </td>
+
+
+              <!-- =========================================== -->
+              <!-- COMPROBANTE                                 -->
+              <!-- =========================================== -->
+
+              <td>
+
+                {{
+                descripcionComprobante(
+                movimiento
+                )
+                || ''
+                }}
+
+              </td>
+
+
+              <!-- =========================================== -->
+              <!-- OBSERVACIÓN / CONCEPTO                      -->
+              <!-- =========================================== -->
+
+              <td>
+
+                {{
+                movimiento.observacionSeguro
+                || ''
+                }}
+
+              </td>
+
+
+              <!-- =========================================== -->
+              <!-- SALDO BASE                                  -->
+              <!-- =========================================== -->
+
+              <td class="columna-numero">
+
+                {{
+                movimiento.saldoBase
+                | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+
+              </td>
+
+
+              <!-- =========================================== -->
+              <!-- INTERESES BASE                              -->
+              <!-- =========================================== -->
+
+              <td class="columna-numero">
+
+                {{
+                movimiento.interesesCausadosBase
+                | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+
+              </td>
+
+
+              <!-- =========================================== -->
+              <!-- OTROS BASE                                  -->
+              <!-- =========================================== -->
+
+              <td class="columna-numero">
+
+                {{
+                movimiento.otrosBase
+                | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+
+              </td>
+
+
+              <!-- =========================================== -->
+              <!-- BASE DE CÁLCULO                             -->
+              <!-- =========================================== -->
+
+              <td class="columna-numero">
+
+                {{
+                movimiento.baseCalculo
+                | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+
+              </td>
+
+
+              <!-- =========================================== -->
+              <!-- PORCENTAJE BASE                             -->
+              <!-- =========================================== -->
+
+              <td class="columna-numero">
+
+                {{
+                movimiento.porcentajeBaseSeguro
+                ?? 0
+                | number:'1.2-4'
+                }} %
+
+              </td>
+
+
+              <!-- =========================================== -->
+              <!-- EXTRAPRIMA                                  -->
+              <!-- =========================================== -->
+
+              <td class="columna-numero">
+
+                {{
+                movimiento.porcentajeExtraprima
+                ?? 0
+                | number:'1.2-4'
+                }} %
+
+              </td>
+
+
+              <!-- =========================================== -->
+              <!-- PORCENTAJE APLICADO                         -->
+              <!-- =========================================== -->
+
+              <td class="columna-numero">
+
+                {{
+                movimiento.porcentajeAplicar
+                ?? 0
+                | number:'1.2-4'
+                }} %
+
+              </td>
+
+
+              <!-- =========================================== -->
+              <!-- DÉBITO                                      -->
+              <!-- =========================================== -->
+
+              <td
+                class="columna-numero"
+                [class.valor-debito]="
+                  esMovimientoDebito(movimiento)
+                ">
+
+                {{
+                movimiento.valorDebito
+                | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+
+              </td>
+
+
+              <!-- =========================================== -->
+              <!-- CRÉDITO                                     -->
+              <!-- =========================================== -->
+
+              <td
+                class="columna-numero"
+                [class.valor-credito]="
+                  esMovimientoCredito(movimiento)
+                ">
+
+                {{
+                movimiento.valorCredito
+                | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+
+              </td>
+
+
+              <!-- =========================================== -->
+              <!-- SALDO ACUMULADO                             -->
+              <!-- =========================================== -->
+
+              <td class="columna-numero">
+
+                <strong>
+
+                  {{
+                  movimiento.saldoSeguroAcumuladoConfiguracion
+                  | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                  }}
+
+                </strong>
+
+              </td>
+
+
+              <!-- =========================================== -->
+              <!-- NATURALEZA                                  -->
+              <!-- =========================================== -->
+
+              <td>
+
+                <span
+                  class="badge"
+                  [class.badge--activo]="
+                    esMovimientoDebito(movimiento)
+                  "
+                  [class.badge--vigente]="
+                    esMovimientoCredito(movimiento)
+                  ">
+
+                  {{
+                    movimiento.naturalezaMovimiento
+                    || ''
+                  }}
+
+                </span>
+
+              </td>
+
+
+              <!-- =========================================== -->
+              <!-- ESTADO                                      -->
+              <!-- =========================================== -->
+
+              <td>
+
+                <span
+                  class="badge"
+                  [class.badge--activo]="
+                    movimiento.movimientoActivo === true
+                  "
+                  [class.badge--inactivo]="
+                    movimiento.movimientoActivo !== true
+                  ">
+
+                  {{
+                    descripcionEstadoMovimiento(
+                      movimiento
+                    )
+                  }}
+
+                </span>
+
+              </td>
+
+            </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </ng-container>
 
   </div>
 

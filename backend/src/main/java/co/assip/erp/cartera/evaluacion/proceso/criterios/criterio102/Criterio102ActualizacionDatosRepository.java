@@ -21,8 +21,8 @@ public class Criterio102ActualizacionDatosRepository {
     // OBTENER DATOS DEL CRITERIO 102
     //
     // Usa:
-    // - créditos del cierre de cartera de la fecha evaluada;
-    // - fotografía definitiva de Hoja de Vida del mismo corte.
+    // - crÃ©ditos del cierre de cartera de la fecha evaluada;
+    // - fotografÃ­a definitiva de Hoja de Vida del mismo corte.
     //
     // La consulta obtiene los datos de todas las agencias.
     // =========================================================
@@ -32,48 +32,53 @@ public class Criterio102ActualizacionDatosRepository {
     ) {
 
         String sql = """
-                SELECT
-                    cc.id_cierre_cartera_credito
-                        AS idCierreCarteraCredito,
+            SELECT
+                cc.id_cierre_cartera_credito
+                    AS idCierreCarteraCredito,
 
-                    cc.id_cartera_credito
-                        AS idCarteraCredito,
+                cc.id_cartera_credito
+                    AS idCarteraCredito,
 
-                    cc.id_datos_personal
-                        AS idDatosPersonal,
+                cc.id_datos_personal
+                    AS idDatosPersonal,
 
-                    hv.documento,
+                hv.documento,
 
-                    hv.fecha_actualizacion
-                        AS fechaActualizacionDatos
+                hv.fecha_actualizacion
+                    AS fechaActualizacionDatos
 
-                FROM cartera.cierres_cartera cierre
+            FROM cartera.cierres_cartera cierre
 
-                INNER JOIN cartera.cierres_cartera_creditos cc
-                    ON cc.id_cierre_cartera =
-                       cierre.id_cierre_cartera
+            INNER JOIN cartera.cierres_cartera_creditos cc
+                ON cc.id_cierre_cartera =
+                   cierre.id_cierre_cartera
 
-                INNER JOIN hoja_vida.cierres_hoja_vida cierre_hv
-                    ON cierre_hv.fecha_corte =
-                       cierre.fecha_corte
+            INNER JOIN hoja_vida.cierres_hoja_vida cierre_hv
+                ON cierre_hv.fecha_corte =
+                   cierre.fecha_corte
 
-                   AND cierre_hv.estado = 'D'
+               AND cierre_hv.estado = 'D'
 
-                INNER JOIN hoja_vida.cierres_hoja_vida_personas hv
-                    ON hv.id_cierre_hoja_vida =
-                       cierre_hv.id_cierre_hoja_vida
+            INNER JOIN hoja_vida.cierres_hoja_vida_personas hv
+                ON hv.id_cierre_hoja_vida =
+                   cierre_hv.id_cierre_hoja_vida
 
-                   AND hv.id_datos_personal =
-                       cc.id_datos_personal
+               AND hv.id_datos_personal =
+                   cc.id_datos_personal
 
-                WHERE cierre.fecha_corte =
-                      :fechaCorte
+            WHERE cierre.fecha_corte =
+                  :fechaCorte
 
-                ORDER BY
-                    cierre.id_agencia,
-                    hv.documento,
-                    cc.id_cartera_credito
-                """;
+              AND COALESCE(
+                      cc.saldo_actual,
+                      0
+                  ) > 0
+
+            ORDER BY
+                cc.id_agencia,
+                hv.documento,
+                cc.id_cartera_credito
+            """;
 
         MapSqlParameterSource parametros =
                 new MapSqlParameterSource()
@@ -92,10 +97,10 @@ public class Criterio102ActualizacionDatosRepository {
     }
 
     // =========================================================
-    // OBTENER PARÁMETRO 121
-    // DÍAS MÁXIMO DE ACTUALIZACIÓN
+    // OBTENER PARÃMETRO 121
+    // DÃAS MÃXIMO DE ACTUALIZACIÃ“N
     //
-    // Para la evaluación institucional se usa la configuración
+    // Para la evaluaciÃ³n institucional se usa la configuraciÃ³n
     // general de la agencia 1.
     // =========================================================
 

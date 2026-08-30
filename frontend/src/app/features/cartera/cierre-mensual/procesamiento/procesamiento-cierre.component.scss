@@ -1,0 +1,493 @@
+.procesamiento-cierre {
+  width: 100%;
+}
+
+
+// =========================================================
+// CABECERA
+// =========================================================
+
+.procesamiento-cierre__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+
+  margin-bottom: 1rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+}
+
+.procesamiento-cierre__subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+
+// =========================================================
+// ESTADO DEL CIERRE
+// =========================================================
+
+.procesamiento-cierre__estado {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  white-space: nowrap;
+}
+
+.procesamiento-cierre__estado-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.procesamiento-cierre__estado-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 80px;
+
+  padding: 0.3rem 0.65rem;
+
+  border-radius: 999px;
+
+  font-size: 0.78rem;
+  font-weight: 700;
+
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.procesamiento-cierre__estado-value--ok {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.procesamiento-cierre__estado-value--pendiente {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+
+// =========================================================
+// CIERRE SELECCIONADO
+// =========================================================
+
+.procesamiento-cierre__seleccion {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  background: #f9fafb;
+}
+
+.procesamiento-cierre__dato {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+
+  strong {
+    font-size: 0.9rem;
+    color: #111827;
+  }
+}
+
+.procesamiento-cierre__dato-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+
+// =========================================================
+// SIN SELECCIÓN
+// =========================================================
+
+.procesamiento-cierre__empty {
+  padding: 1.25rem;
+
+  border: 1px dashed #d1d5db;
+  border-radius: 8px;
+
+  text-align: center;
+
+  font-size: 0.85rem;
+  color: #6b7280;
+
+  background: #fafafa;
+}
+
+
+// =========================================================
+// ADVERTENCIA DE BLOQUEO
+// =========================================================
+
+.procesamiento-cierre__warning {
+  padding: 0.75rem 0.9rem;
+  margin-bottom: 1rem;
+
+  border: 1px solid #fde68a;
+  border-radius: 6px;
+
+  background: #fffbeb;
+  color: #92400e;
+
+  font-size: 0.82rem;
+}
+
+
+// =========================================================
+// MENSAJES
+// =========================================================
+
+.procesamiento-cierre__message {
+  padding: 0.75rem 0.9rem;
+  margin-bottom: 1rem;
+
+  border-radius: 6px;
+
+  font-size: 0.82rem;
+}
+
+.procesamiento-cierre__message--success {
+  border: 1px solid #bbf7d0;
+
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.procesamiento-cierre__message--error {
+  border: 1px solid #fecaca;
+
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+
+// =========================================================
+// ACCIONES
+// =========================================================
+
+.procesamiento-cierre__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  margin-bottom: 1rem;
+
+  .btn {
+    min-width: 155px;
+  }
+}
+
+
+// =========================================================
+// PROCESANDO
+// =========================================================
+
+.procesamiento-cierre__loading {
+  padding: 0.85rem 1rem;
+  margin-bottom: 1rem;
+
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+
+  background: #eff6ff;
+  color: #1e40af;
+
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+
+// =========================================================
+// RESULTADO
+// =========================================================
+
+.procesamiento-cierre__resultado {
+  margin-top: 1rem;
+}
+
+
+// =========================================================
+// RESULTADO GENERAL
+// =========================================================
+
+.procesamiento-cierre__resultado-general {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  padding: 1rem;
+
+  margin-bottom: 1rem;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  background: #f9fafb;
+
+  strong {
+    display: block;
+
+    margin-top: 0.15rem;
+
+    font-size: 0.95rem;
+  }
+}
+
+.procesamiento-cierre__resultado-general--ok {
+  border-color: #86efac;
+  background: #f0fdf4;
+
+  strong {
+    color: #166534;
+  }
+}
+
+.procesamiento-cierre__resultado-general--error {
+  border-color: #fca5a5;
+  background: #fef2f2;
+
+  strong {
+    color: #991b1b;
+  }
+}
+
+.procesamiento-cierre__resultado-label {
+  display: block;
+
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.procesamiento-cierre__resultado-estado {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 65px;
+
+  padding: 0.35rem 0.65rem;
+
+  border-radius: 999px;
+
+  background: #ffffff;
+
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+
+// =========================================================
+// SECCIONES
+// =========================================================
+
+.procesamiento-cierre__section {
+  margin-top: 1.25rem;
+
+  h4 {
+    margin: 0 0 0.65rem;
+
+    font-size: 0.9rem;
+    font-weight: 700;
+
+    color: #374151;
+  }
+}
+
+
+// =========================================================
+// GRID DE RESULTADOS
+// =========================================================
+
+.procesamiento-cierre__grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      auto-fit,
+      minmax(165px, 1fr)
+    );
+
+  gap: 0.75rem;
+}
+
+.procesamiento-cierre__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  min-height: 68px;
+
+  padding: 0.75rem 0.85rem;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 7px;
+
+  background: #ffffff;
+
+  strong {
+    font-size: 1rem;
+    color: #111827;
+  }
+}
+
+.procesamiento-cierre__card-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+
+// =========================================================
+// TABLA
+// =========================================================
+
+.procesamiento-cierre__table-wrapper {
+  width: 100%;
+
+  overflow-x: auto;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 7px;
+}
+
+.procesamiento-cierre__table-wrapper .table {
+  width: 100%;
+
+  margin: 0;
+
+  border-collapse: collapse;
+
+  font-size: 0.82rem;
+}
+
+.procesamiento-cierre__table-wrapper .table th,
+.procesamiento-cierre__table-wrapper .table td {
+  padding: 0.55rem 0.7rem;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  vertical-align: middle;
+}
+
+.procesamiento-cierre__table-wrapper .table thead th {
+  background: #f9fafb;
+
+  font-weight: 700;
+  color: #374151;
+}
+
+.procesamiento-cierre__table-wrapper .table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.text-end {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+
+// =========================================================
+// ESTADO DE VALIDACIONES
+// =========================================================
+
+.procesamiento-cierre__status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 55px;
+
+  padding: 0.2rem 0.5rem;
+
+  border-radius: 999px;
+
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.procesamiento-cierre__status--ok {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.procesamiento-cierre__status--error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+
+// =========================================================
+// ADVERTENCIAS DEL RESULTADO
+// =========================================================
+
+.procesamiento-cierre__warnings {
+  margin: 0;
+
+  padding: 0.75rem 0.75rem 0.75rem 2rem;
+
+  border: 1px solid #fde68a;
+  border-radius: 7px;
+
+  background: #fffbeb;
+  color: #92400e;
+
+  font-size: 0.8rem;
+
+  li + li {
+    margin-top: 0.35rem;
+  }
+}
+
+
+// =========================================================
+// RESPONSIVE
+// =========================================================
+
+@media (max-width: 768px) {
+
+  .procesamiento-cierre__header {
+    flex-direction: column;
+  }
+
+  .procesamiento-cierre__estado {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .procesamiento-cierre__seleccion {
+    gap: 1rem;
+  }
+
+  .procesamiento-cierre__resultado-general {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .procesamiento-cierre__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .procesamiento-cierre__actions {
+
+    .btn {
+      width: 100%;
+    }
+  }
+}

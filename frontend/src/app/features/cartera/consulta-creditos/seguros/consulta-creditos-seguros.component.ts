@@ -11,7 +11,8 @@ import {
 
 import {
   ConsultaCreditoDetalle,
-  ConsultaCreditoSeguro
+  ConsultaCreditoSeguro,
+  ConsultaCreditoSeguroMovimiento
 } from '../consulta-creditos.models';
 
 
@@ -54,7 +55,7 @@ export class ConsultaCreditosSegurosComponent {
 
 
   // =========================================================
-  // INDICADORES
+  // INDICADORES DE CONFIGURACIONES
   // =========================================================
 
   get cantidadSeguros(): number {
@@ -125,6 +126,60 @@ export class ConsultaCreditosSegurosComponent {
 
 
   // =========================================================
+  // INDICADORES DE MOVIMIENTOS
+  // =========================================================
+
+  get cantidadMovimientos(): number {
+
+    return this.seguros
+      ?.reduce(
+        (
+          total,
+          seguro
+        ) =>
+          total
+          + (
+            seguro.movimientos?.length
+            ?? 0
+          ),
+        0
+      )
+      ?? 0;
+
+  }
+
+  get tieneMovimientos(): boolean {
+
+    return this.cantidadMovimientos > 0;
+
+  }
+
+  movimientosSeguro(
+    seguro:
+      ConsultaCreditoSeguro
+  ): ConsultaCreditoSeguroMovimiento[] {
+
+    return (
+      seguro.movimientos
+      ?? []
+    );
+
+  }
+
+  tieneMovimientosSeguro(
+    seguro:
+      ConsultaCreditoSeguro
+  ): boolean {
+
+    return (
+      seguro.movimientos?.length
+      ?? 0
+    ) > 0;
+
+  }
+
+
+  // =========================================================
   // ACCIONES
   // =========================================================
 
@@ -190,6 +245,42 @@ export class ConsultaCreditosSegurosComponent {
 
   }
 
+  descripcionEstadoMovimiento(
+    movimiento:
+      ConsultaCreditoSeguroMovimiento
+  ): string {
+
+    if (
+      movimiento.movimientoActivo === true
+    ) {
+      return 'Activo';
+    }
+
+    return 'Inactivo';
+
+  }
+
+  descripcionComprobante(
+    movimiento:
+      ConsultaCreditoSeguroMovimiento
+  ): string {
+
+    if (
+      movimiento.comprobanteCompleto
+    ) {
+      return movimiento.comprobanteCompleto;
+    }
+
+    if (
+      movimiento.numeroComprobante
+    ) {
+      return movimiento.numeroComprobante;
+    }
+
+    return '';
+
+  }
+
 
   // =========================================================
   // SELECCIÓN VISUAL
@@ -225,6 +316,34 @@ export class ConsultaCreditosSegurosComponent {
 
   }
 
+  esMovimientoDebito(
+    movimiento:
+      ConsultaCreditoSeguroMovimiento
+  ): boolean {
+
+    return (
+      Number(
+        movimiento.valorDebito
+        ?? 0
+      ) > 0
+    );
+
+  }
+
+  esMovimientoCredito(
+    movimiento:
+      ConsultaCreditoSeguroMovimiento
+  ): boolean {
+
+    return (
+      Number(
+        movimiento.valorCredito
+        ?? 0
+      ) > 0
+    );
+
+  }
+
 
   // =========================================================
   // TRACK BY
@@ -238,6 +357,19 @@ export class ConsultaCreditosSegurosComponent {
 
     return (
       seguro.idCreditoSeguro
+      ?? indice
+    );
+
+  }
+
+  trackByMovimiento(
+    indice: number,
+    movimiento:
+      ConsultaCreditoSeguroMovimiento
+  ): number {
+
+    return (
+      movimiento.idCreditoSeguroDetalle
       ?? indice
     );
 

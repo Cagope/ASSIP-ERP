@@ -1,0 +1,14 @@
+<div class="chart" *ngIf="datos.length; else sinDatos">
+  <div class="legend"><span><i class="m30"></i>Primera mora 30+</span><span><i class="m60"></i>Primera mora 60+</span></div>
+  <div class="plot">
+    <div class="mob" *ngFor="let mob of mobs">
+      <div class="bars">
+        <div class="bar b30" [style.height.%]="alto('30+', mob)" [title]="'30+ · MOB ' + mob + ': ' + (valor('30+', mob)?.cantidadCreditos || 0)"></div>
+        <div class="bar b60" [style.height.%]="alto('60+', mob)" [title]="'60+ · MOB ' + mob + ': ' + (valor('60+', mob)?.cantidadCreditos || 0)"></div>
+      </div>
+      <strong>MOB {{ mob }}</strong>
+      <small>{{ valor('30+', mob)?.cantidadCreditos || 0 }} / {{ valor('60+', mob)?.cantidadCreditos || 0 }}</small>
+    </div>
+  </div>
+</div>
+<ng-template #sinDatos><div class="empty">Sin información para graficar.</div></ng-template>

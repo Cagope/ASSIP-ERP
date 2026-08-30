@@ -9,8 +9,15 @@ import java.time.LocalDate;
 @Setter
 public class CierreMensualDepositosRequestDTO {
 
-    private Integer idAgencia;
+    // =========================================================
+    // FECHA DE CIERRE
+    //
+    // El cierre mensual de depósitos es centralizado.
+    //
+    // - una sola fotografía por fecha
+    // - incluye todas las agencias
+    // - debe corresponder al último día del mes
+    // =========================================================
 
     private LocalDate fechaCierre;
-
 }

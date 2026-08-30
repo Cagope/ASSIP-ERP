@@ -464,6 +464,70 @@ export interface ConsultaCreditoExtracto {
 // SEGUROS DEL CRÉDITO
 // =========================================================
 
+export interface ConsultaCreditoSeguroMovimiento {
+
+  // Identificación
+  idCreditoSeguroDetalle: number | null;
+  idCreditoSeguro: number | null;
+  idCarteraCredito: number | null;
+
+  // Fecha
+  fechaMovimiento: string | null;
+
+  // Base de liquidación
+  saldoBase: number | null;
+  interesesCausadosBase: number | null;
+  otrosBase: number | null;
+  baseCalculo: number | null;
+
+  // Porcentajes
+  porcentajeBaseSeguro: number | null;
+  porcentajeExtraprima: number | null;
+  porcentajeAplicar: number | null;
+
+  // Condiciones aplicadas
+  sobreSaldoActual: boolean | null;
+  incluyeInteresesCausados: boolean | null;
+
+  // Movimiento
+  valorDebito: number | null;
+  valorCredito: number | null;
+  valorMovimiento: number | null;
+
+  naturalezaMovimiento: string | null;
+
+  // Saldo acumulado
+  saldoSeguroAcumuladoCredito: number | null;
+  saldoSeguroAcumuladoConfiguracion: number | null;
+
+  // Comprobante
+  tipoComprobante: string | null;
+  numeroComprobante: string | null;
+  comprobanteCompleto: string | null;
+
+  // Estado
+  estado: string | null;
+  movimientoActivo: boolean | null;
+
+  // Secuencia
+  numeroMovimientoCredito: number | null;
+  numeroMovimientoSeguro: number | null;
+
+  cantidadMovimientosCredito: number | null;
+  cantidadMovimientosSeguro: number | null;
+
+  // Observación
+  observacionSeguro: string | null;
+
+  // Auditoría
+  fkSeguridadCreacion: number | null;
+  fechaCreacion: string | null;
+
+  fkSeguridadEdicion: number | null;
+  fechaEdicion: string | null;
+}
+
+
 export interface ConsultaCreditoSeguro {
 
   // Identificación
@@ -549,10 +613,13 @@ export interface ConsultaCreditoSeguro {
   motivoAlertaSeguro: string | null;
   ordenAlertaSeguro: number | null;
 
-  // Historial
+  // Historial de configuraciones
   numeroConfiguracionSeguro: number | null;
   cantidadRegistrosSeguroCredito: number | null;
   configuracionSeguroPrincipal: boolean | null;
+
+  // Movimientos
+  movimientos: ConsultaCreditoSeguroMovimiento[];
 
   // Riesgo
   edadDeRiesgo: string | null;
@@ -671,14 +738,29 @@ export interface ConsultaCreditoAlivio {
 
 export interface ConsultaCreditoInteres {
 
+  // =========================================================
+  // Identificación
+  // =========================================================
+
   idInteresCausado: number | null;
   idCarteraCredito: number | null;
+
   pagareCartera: string | null;
   idDatosPersonal: number | null;
+
+
+  // =========================================================
+  // Agencia
+  // =========================================================
 
   idAgencia: number | null;
   codigoAgencia: string | null;
   nombreAgencia: string | null;
+
+
+  // =========================================================
+  // Crédito
+  // =========================================================
 
   idLineaCredito: number | null;
   codigoLineaCredito: string | null;
@@ -690,40 +772,109 @@ export interface ConsultaCreditoInteres {
   codigoEstadoJuridico: string | null;
   descripcionEstadoJuridico: string | null;
 
-  fechaProceso: string | null;
-  periodoInicial: string | null;
-  periodoFinal: string | null;
 
-  diasLiquidados: number | null;
+  // =========================================================
+  // Movimiento
+  // =========================================================
 
-  saldoCapital: number | null;
-  saldoNetoPendiente: number | null;
-  saldoBaseLiquidacion: number | null;
+  fechaMovimiento: string | null;
 
-  tasaNominal: number | null;
-  tasaEfectiva: number | null;
-  tasaMora: number | null;
+  fechaInicialPeriodo: string | null;
+  fechaFinalPeriodo: string | null;
 
-  interesCorrienteCausado: number | null;
-  interesMoraCausado: number | null;
-  seguroCausado: number | null;
-  fondoGarantiaCausado: number | null;
-  otrosConceptosCausados: number | null;
-  totalCausado: number | null;
+  diasCausados: number | null;
 
-  interesCorrientePagado: number | null;
-  interesMoraPagado: number | null;
-  seguroPagado: number | null;
-  fondoGarantiaPagado: number | null;
-  otrosConceptosPagados: number | null;
-  totalPagado: number | null;
 
-  saldoInteresCorriente: number | null;
-  saldoInteresMora: number | null;
-  saldoSeguro: number | null;
-  saldoFondoGarantia: number | null;
-  saldoOtrosConceptos: number | null;
-  saldoPendiente: number | null;
+  // =========================================================
+  // Base de liquidación
+  // =========================================================
+
+  saldoBase: number | null;
+
+  interesBruto: number | null;
+
+  porcentajeAplicacion: number | null;
+
+
+  // =========================================================
+  // Tasa
+  // =========================================================
+
+  tasaInteres: number | null;
+
+
+  // =========================================================
+  // Débito / Crédito
+  // =========================================================
+
+  valorDebito: number | null;
+  valorCredito: number | null;
+
+  valorMovimiento: number | null;
+
+  naturalezaMovimiento: string | null;
+
+
+  // =========================================================
+  // Saldo acumulado
+  // =========================================================
+
+  saldoInteresesAcumulado: number | null;
+
+
+  // =========================================================
+  // Comprobante
+  // =========================================================
+
+  tipoComprobante: string | null;
+  numeroComprobante: string | null;
+  comprobanteCompleto: string | null;
+
+
+  // =========================================================
+  // Observación
+  // =========================================================
+
+  observacionInteres: string | null;
+
+
+  // =========================================================
+  // Control del período
+  // =========================================================
+
+  diasCalendarioPeriodo: number | null;
+  diasCausadosCoincidenPeriodo: boolean | null;
+
+
+  // =========================================================
+  // Secuencia
+  // =========================================================
+
+  numeroMovimientoCredito: number | null;
+  cantidadMovimientosCredito: number | null;
+
+
+  // =========================================================
+  // Resumen del crédito
+  // =========================================================
+
+  cantidadMovimientos: number | null;
+
+  cantidadDebitos: number | null;
+  cantidadCreditos: number | null;
+
+  totalDebitos: number | null;
+  totalCreditos: number | null;
+
+  saldoIntereses: number | null;
+
+  primeraFechaMovimiento: string | null;
+  ultimaFechaMovimiento: string | null;
+
+
+  // =========================================================
+  // Riesgo
+  // =========================================================
 
   edadDeRiesgo: string | null;
   descripcionEdadDeRiesgo: string | null;
@@ -731,20 +882,62 @@ export interface ConsultaCreditoInteres {
   edadDeMora: string | null;
   descripcionEdadDeMora: string | null;
 
-  procesoActivo: boolean | null;
-  procesoAplicado: boolean | null;
+  edadContable: string | null;
+  descripcionEdadContable: string | null;
+
+
+  // =========================================================
+  // Estado financiero
+  // =========================================================
+
+  saldoActual: number | null;
+  saldoNetoPendiente: number | null;
+
+  creditoEnMora: boolean | null;
+  riesgoAlto: boolean | null;
   requiereRevision: boolean | null;
 
-  porcentajeCobrado: number | null;
-  porcentajePendiente: number | null;
-  numeroProceso: number | null;
+
+  // =========================================================
+  // Alertas
+  // =========================================================
+
+  nivelAlertaCredito: string | null;
+  motivoAlertaCredito: string | null;
+
+
+  // =========================================================
+  // Compatibilidad temporal
+  // =========================================================
+
+  fechaProceso: string | null;
+
+  periodoInicial: string | null;
+  periodoFinal: string | null;
+
+  diasLiquidados: number | null;
+
+  saldoCapital: number | null;
+  saldoBaseLiquidacion: number | null;
+
+  tasaNominal: number | null;
+
+  // Compatibilidad con el extracto actual
+  saldoInteresCorriente: number | null;
+  saldoInteresMora: number | null;
+
+  saldoSeguro: number | null;
+  saldoFondoGarantia: number | null;
+  saldoOtrosConceptos: number | null;
+
+  saldoPendiente: number | null;
 
   observacion: string | null;
-  comentario: string | null;
 
-  nivelAlerta: string | null;
-  ordenAlerta: number | null;
-  motivoAlerta: string | null;
+
+  // =========================================================
+  // Auditoría
+  // =========================================================
 
   fkSeguridadCreacion: number | null;
   fechaCreacion: string | null;
@@ -863,6 +1056,8 @@ export interface ConsultaCreditoIntegral {
   ultimaEvaluacion: ConsultaCreditoEvaluacion | null;
 
   prorrogas: ConsultaCreditoProrroga[];
+
+  resultadosMensuales: ConsultaCreditoResultadoMensual[];
 }
 
 // =========================================================
@@ -893,29 +1088,293 @@ export interface CarteraAsociadoBusqueda {
 
 export interface ConsultaCreditoProrroga {
 
+  // =========================================================
+  // Identificación
+  // =========================================================
+
   idCreditoProrroga: number | null;
-
   idCarteraCredito: number | null;
-
   numeroProrroga: number | null;
 
   fechaProrroga: string | null;
 
-  fechaCapitalAnterior: string | null;
-
-  fechaCapitalNueva: string | null;
-
+  diasProrroga: number | null;
   mesesProrroga: number | null;
+
+  // =========================================================
+  // Situación anterior
+  // =========================================================
+
+  proximaFechaCapitalAnterior: string | null;
+  proximaFechaInteresAnterior: string | null;
+
+  fechaVencimientoAnterior: string | null;
+  plazoAnterior: number | null;
+
+  // =========================================================
+  // Situación nueva
+  // =========================================================
+
+  proximaFechaCapitalNueva: string | null;
+  proximaFechaInteresNueva: string | null;
+
+  fechaVencimientoNueva: string | null;
+  plazoNuevo: number | null;
+
+  // =========================================================
+  // Valores liquidados
+  // =========================================================
+
+  valorInteresCorriente: number | null;
+  valorInteresMora: number | null;
+  valorSeguro: number | null;
+  valorAportes: number | null;
+  valorFondoGarantia: number | null;
+  valorOtrosConceptos: number | null;
 
   valorTotalLiquidado: number | null;
 
+  // =========================================================
+  // Valores pagados
+  // =========================================================
+
+  valorInteresCorrientePagado: number | null;
+  valorInteresMoraPagado: number | null;
+  valorSeguroPagado: number | null;
+  valorAportesPagado: number | null;
+  valorFondoGarantiaPagado: number | null;
+  valorOtrosConceptosPagado: number | null;
+
   valorTotalPagado: number | null;
+
+  // =========================================================
+  // Comprobante
+  // =========================================================
+
+  tipoComprobante: string | null;
+  numeroComprobante: string | null;
+  fechaComprobante: string | null;
+
+  idAgencia: number | null;
+
+  // =========================================================
+  // Estado
+  // =========================================================
 
   estadoProrroga: string | null;
 
-  observacion: string | null;
+  fechaAplicacion: string | null;
+  fechaAnulacion: string | null;
 
+  motivoAnulacion: string | null;
+  observacion: string | null;
 }
+
+// =========================================================
+// RESULTADOS MENSUALES DE CARTERA
+// =========================================================
+
+export interface ConsultaCreditoResultadoMensual {
+
+  // =========================================================
+  // Cierre
+  // =========================================================
+
+  idCierreCartera: number | null;
+
+  fechaCorte: string | null;
+  estadoCierre: string | null;
+
+  anioCorte: number | null;
+  mesCorte: number | null;
+  periodoCorte: string | null;
+
+
+  // =========================================================
+  // Crédito
+  // =========================================================
+
+  idCierreCarteraCredito: number | null;
+  idCarteraCredito: number | null;
+
+  idAgencia: number | null;
+
+  idLineaCredito: number | null;
+  codigoLineaCredito: string | null;
+  nombreLineaCredito: string | null;
+
+  pagareCartera: string | null;
+
+
+  // =========================================================
+  // Estado del crédito en el corte
+  // =========================================================
+
+  codigoEstadoCartera: string | null;
+  descripcionEstadoCartera: string | null;
+
+  codigoEstadoJuridico: string | null;
+  descripcionEstadoJuridico: string | null;
+
+  codigoClasificacionCredito: string | null;
+  descripcionClasificacionCredito: string | null;
+
+
+  // =========================================================
+  // Condiciones
+  // =========================================================
+
+  plazo: number | null;
+
+  valorCuota: number | null;
+
+  tasaNominalAnual: number | null;
+  tasaEfectivaAnual: number | null;
+
+
+  // =========================================================
+  // Fechas
+  // =========================================================
+
+  fechaFinal: string | null;
+
+  ultimaFechaCapital: string | null;
+  ultimaFechaInteres: string | null;
+
+  proximaFechaCapital: string | null;
+  proximaFechaInteres: string | null;
+
+
+  // =========================================================
+  // Resultado mensual
+  // =========================================================
+
+  idCierreCarteraResultado: number | null;
+
+  codigoMetodoCalculo: string | null;
+
+  esUnaSolaCuota: boolean | null;
+  esReestructurado: boolean | null;
+
+  diasMora: number | null;
+  diasDiferencia: number | null;
+
+
+  // =========================================================
+  // Edades resultantes
+  // =========================================================
+
+  edadRiesgoInicialResultado: string | null;
+  edadDeMoraResultado: string | null;
+  edadDeRiesgoResultado: string | null;
+  edadDePeResultado: string | null;
+  edadDeHomologacionResultado: string | null;
+  edadContableResultado: string | null;
+
+  edadReestructuracionInicialResultado: string | null;
+  edadReestructuradoResultado: string | null;
+
+
+  // =========================================================
+  // Saldos
+  // =========================================================
+
+  saldoActualFotografia: number | null;
+  saldoActualResultado: number | null;
+  saldoCreditoFechaCorte: number | null;
+
+
+  // =========================================================
+  // Concentración del asociado
+  // =========================================================
+
+  cantidadCreditosAsociado: number | null;
+  saldoTotalCreditosAsociado: number | null;
+
+
+  // =========================================================
+  // Aportes
+  // =========================================================
+
+  saldoAportesFechaCorte: number | null;
+  porcentajeAportesCredito: number | null;
+  valorAportesCredito: number | null;
+
+
+  // =========================================================
+  // Garantías
+  // =========================================================
+
+  cantidadBienesGarantia: number | null;
+  valorGarantiasTotal: number | null;
+  porcentajeGarantiasCredito: number | null;
+  valorGarantiasCredito: number | null;
+
+
+  // =========================================================
+  // Exposición
+  // =========================================================
+
+  vea: number | null;
+  exposicionTotalCalculada: number | null;
+
+
+  // =========================================================
+  // Intereses
+  // =========================================================
+
+  saldoInteresesCausados: number | null;
+  valorInteresesCausadosMes: number | null;
+
+  saldoInteresesContingentes: number | null;
+  valorInteresesContingentesMes: number | null;
+
+
+  // =========================================================
+  // Otros conceptos
+  // =========================================================
+
+  valorCostasJudiciales: number | null;
+
+  saldoSeguros: number | null;
+  valorSegurosMes: number | null;
+
+  saldoAlivios: number | null;
+  valorAliviosMes: number | null;
+
+  valorFondosGarantias: number | null;
+  valorOtrosConceptos: number | null;
+
+
+  // =========================================================
+  // Pérdida esperada
+  // =========================================================
+
+  pi: number | null;
+  pdi: number | null;
+  perdidaEsperada: number | null;
+
+
+  // =========================================================
+  // Deterioros
+  // =========================================================
+
+  deterioroCapital: number | null;
+  deterioroIntereses: number | null;
+  deterioroOtros: number | null;
+
+  deterioroTotal: number | null;
+
+  porcentajeDeterioroCapital: number | null;
+
+
+  // =========================================================
+  // Cálculo
+  // =========================================================
+
+  fechaCalculo: string | null;
+}
+
 
 // =========================================================
 // ESTADO INICIAL
@@ -932,8 +1391,8 @@ ConsultaCreditoIntegral {
     interesesCausados: [],
     evaluaciones: [],
     prorrogas: [],
+    resultadosMensuales: [],
     ultimaEvaluacion: null
-
   };
 
 }

@@ -19,7 +19,7 @@ public class Criterio401ServicioDeudaRepository {
     // =========================================================
     // OBTENER DATOS DEL CRITERIO 401
     //
-    // Evalúa los pagos registrados durante el último año,
+    // EvalÃºa los pagos registrados durante el Ãºltimo aÃ±o,
     // contado desde la fecha de corte.
     //
     // Cada pago se consolida por:
@@ -42,176 +42,181 @@ public class Criterio401ServicioDeudaRepository {
                         .plusDays(1);
 
         String sql = """
-                WITH pagos_consolidados AS
-                (
-                    SELECT
-                        ec.id_cartera_credito,
+            WITH pagos_consolidados AS
+            (
+                SELECT
+                    ec.id_cartera_credito,
 
-                        ec.tipo_comprobante,
+                    ec.tipo_comprobante,
 
-                        ec.numero_comprobante,
+                    ec.numero_comprobante,
 
-                        SUM(
-                            COALESCE(
-                                ec.valor_capital,
-                                0
-                            )
+                    SUM(
+                        COALESCE(
+                            ec.valor_capital,
+                            0
                         )
-                            AS valor_capital,
+                    )
+                        AS valor_capital,
 
-                        /*
-                         * Un mismo comprobante puede generar varias
-                         * filas contables.
-                         *
-                         * Se toma la mayor cantidad de días de mora
-                         * informada dentro del comprobante.
-                         */
-                        MAX(ec.dias_mora)
-                            AS dias_mora
+                    /*
+                     * Un mismo comprobante puede generar varias
+                     * filas contables.
+                     *
+                     * Se toma la mayor cantidad de días de mora
+                     * informada dentro del comprobante.
+                     */
+                    MAX(ec.dias_mora)
+                        AS dias_mora
 
-                    FROM cartera.extractos_cartera ec
+                FROM cartera.extractos_cartera ec
 
-                    WHERE ec.fecha_contable
-                          BETWEEN :fechaInicial
-                              AND :fechaCorte
+                WHERE ec.fecha_contable
+                      BETWEEN :fechaInicial
+                          AND :fechaCorte
 
-                    GROUP BY
-                        ec.id_cartera_credito,
-                        ec.tipo_comprobante,
-                        ec.numero_comprobante
-                ),
+                GROUP BY
+                    ec.id_cartera_credito,
+                    ec.tipo_comprobante,
+                    ec.numero_comprobante
+            ),
 
-                servicio_deuda AS
-                (
-                    SELECT
-                        pc.id_cartera_credito,
+            servicio_deuda AS
+            (
+                SELECT
+                    pc.id_cartera_credito,
 
-                        /*
-                         * Cada registro consolidado representa
-                         * un único pago o comprobante.
-                         */
-                        COUNT(*)
-                            AS cantidad_pagos,
+                    /*
+                     * Cada registro consolidado representa
+                     * un único pago o comprobante.
+                     */
+                    COUNT(*)
+                        AS cantidad_pagos,
 
-                        /*
-                         * Campo informativo:
-                         * pagos que registraron abono a capital.
-                         */
-                        COUNT(*) FILTER
+                    /*
+                     * Campo informativo:
+                     * pagos que registraron abono a capital.
+                     */
+                    COUNT(*) FILTER
+                    (
+                        WHERE pc.valor_capital > 0
+                    )
+                        AS cantidad_pagos_capital,
+
+                    /*
+                     * Participan en el promedio los pagos que
+                     * tienen informado el campo dias_mora.
+                     */
+                    COUNT(*) FILTER
+                    (
+                        WHERE pc.dias_mora IS NOT NULL
+                    )
+                        AS cantidad_pagos_evaluables,
+
+                    COALESCE(
+                        SUM(pc.dias_mora) FILTER
                         (
-                            WHERE pc.valor_capital > 0
-                        )
-                            AS cantidad_pagos_capital,
+                            WHERE pc.dias_mora IS NOT NULL
+                        ),
+                        0
+                    )
+                        AS suma_dias_mora,
 
-                        /*
-                         * Participan en el promedio los pagos que
-                         * tienen informado el campo dias_mora.
-                         */
-                        COUNT(*) FILTER
+                    /*
+                     * El promedio se redondea siempre hacia arriba
+                     * para evitar valores decimales entre rangos.
+                     */
+                    CEIL(
+                        AVG(
+                            pc.dias_mora::numeric
+                        ) FILTER
                         (
                             WHERE pc.dias_mora IS NOT NULL
                         )
-                            AS cantidad_pagos_evaluables,
+                    )
+                        AS promedio_dias_mora
 
-                        COALESCE(
-                            SUM(pc.dias_mora) FILTER
-                            (
-                                WHERE pc.dias_mora IS NOT NULL
-                            ),
-                            0
-                        )
-                            AS suma_dias_mora,
+                FROM pagos_consolidados pc
 
-                        /*
-                         * El promedio se redondea siempre hacia arriba
-                         * para evitar valores decimales entre rangos.
-                         */
-                        CEIL(
-                            AVG(
-                                pc.dias_mora::numeric
-                            ) FILTER
-                            (
-                                WHERE pc.dias_mora IS NOT NULL
-                            )
-                        )
-                            AS promedio_dias_mora
+                GROUP BY
+                    pc.id_cartera_credito
+            )
 
-                    FROM pagos_consolidados pc
+            SELECT
+                cc.id_cierre_cartera_credito
+                    AS idCierreCarteraCredito,
 
-                    GROUP BY
-                        pc.id_cartera_credito
+                cc.id_cartera_credito
+                    AS idCarteraCredito,
+
+                cc.id_datos_personal
+                    AS idDatosPersonal,
+
+                hv.documento,
+
+                COALESCE(
+                    sd.cantidad_pagos,
+                    0
                 )
+                    AS cantidadPagosUltimoAnio,
 
-                SELECT
-                    cc.id_cierre_cartera_credito
-                        AS idCierreCarteraCredito,
+                COALESCE(
+                    sd.cantidad_pagos_capital,
+                    0
+                )
+                    AS cantidadPagosCapitalUltimoAnio,
 
-                    cc.id_cartera_credito
-                        AS idCarteraCredito,
+                COALESCE(
+                    sd.cantidad_pagos_evaluables,
+                    0
+                )
+                    AS cantidadPagosEvaluablesUltimoAnio,
 
-                    cc.id_datos_personal
-                        AS idDatosPersonal,
+                COALESCE(
+                    sd.suma_dias_mora,
+                    0
+                )
+                    AS sumaDiasMoraUltimoAnio,
 
-                    hv.documento,
+                sd.promedio_dias_mora
+                    AS promedioDiasMoraUltimoAnio
 
-                    COALESCE(
-                        sd.cantidad_pagos,
-                        0
-                    )
-                        AS cantidadPagosUltimoAnio,
+            FROM cartera.cierres_cartera cierre
 
-                    COALESCE(
-                        sd.cantidad_pagos_capital,
-                        0
-                    )
-                        AS cantidadPagosCapitalUltimoAnio,
+            INNER JOIN cartera.cierres_cartera_creditos cc
+                ON cc.id_cierre_cartera =
+                   cierre.id_cierre_cartera
 
-                    COALESCE(
-                        sd.cantidad_pagos_evaluables,
-                        0
-                    )
-                        AS cantidadPagosEvaluablesUltimoAnio,
+            INNER JOIN hoja_vida.cierres_hoja_vida cierre_hv
+                ON cierre_hv.fecha_corte =
+                   cierre.fecha_corte
 
-                    COALESCE(
-                        sd.suma_dias_mora,
-                        0
-                    )
-                        AS sumaDiasMoraUltimoAnio,
+               AND cierre_hv.estado = 'D'
 
-                    sd.promedio_dias_mora
-                        AS promedioDiasMoraUltimoAnio
+            INNER JOIN hoja_vida.cierres_hoja_vida_personas hv
+                ON hv.id_cierre_hoja_vida =
+                   cierre_hv.id_cierre_hoja_vida
 
-                FROM cartera.cierres_cartera cierre
+               AND hv.id_datos_personal =
+                   cc.id_datos_personal
 
-                INNER JOIN cartera.cierres_cartera_creditos cc
-                    ON cc.id_cierre_cartera =
-                       cierre.id_cierre_cartera
+            LEFT JOIN servicio_deuda sd
+                ON sd.id_cartera_credito =
+                   cc.id_cartera_credito
 
-                INNER JOIN hoja_vida.cierres_hoja_vida cierre_hv
-                    ON cierre_hv.fecha_corte =
-                       cierre.fecha_corte
+            WHERE cierre.fecha_corte =
+                  :fechaCorte
 
-                   AND cierre_hv.estado = 'D'
+              AND COALESCE(
+                      cc.saldo_actual,
+                      0
+                  ) > 0
 
-                INNER JOIN hoja_vida.cierres_hoja_vida_personas hv
-                    ON hv.id_cierre_hoja_vida =
-                       cierre_hv.id_cierre_hoja_vida
-
-                   AND hv.id_datos_personal =
-                       cc.id_datos_personal
-
-                LEFT JOIN servicio_deuda sd
-                    ON sd.id_cartera_credito =
-                       cc.id_cartera_credito
-
-                WHERE cierre.fecha_corte =
-                      :fechaCorte
-
-                ORDER BY
-                    cierre.id_agencia,
-                    hv.documento,
-                    cc.id_cartera_credito
-                """;
+            ORDER BY
+                cc.id_agencia,
+                hv.documento,
+                cc.id_cartera_credito
+            """;
 
         MapSqlParameterSource parametros =
                 new MapSqlParameterSource()

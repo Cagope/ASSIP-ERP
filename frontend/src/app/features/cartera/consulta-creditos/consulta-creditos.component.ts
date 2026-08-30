@@ -34,13 +34,31 @@ import {
   ConsultaCreditosSegurosComponent
 } from './seguros/consulta-creditos-seguros.component';
 
+import {
+  ConsultaCreditosInteresesComponent
+} from './intereses/consulta-creditos-intereses.component';
+
+import {
+  ConsultaCreditosEvaluacionesComponent
+} from './evaluaciones/consulta-creditos-evaluaciones.component';
+
+import {
+  ConsultaCreditosProrrogasComponent
+} from './prorrogas/consulta-creditos-prorrogas.component';
+
+import {
+  ConsultaCreditosResultadosMensualesComponent
+} from './resultados-mensuales/consulta-creditos-resultados-mensuales.component';
+
+
 type ModuloRelacionado =
   | 'extracto'
   | 'seguros'
   | 'alivios'
   | 'intereses'
   | 'evaluaciones'
-  | 'prorrogas';
+  | 'prorrogas'
+  | 'resultadosMensuales';
 
 @Component({
   selector: 'app-consulta-creditos',
@@ -50,8 +68,13 @@ type ModuloRelacionado =
     HeaderActionsComponent,
     ConsultaCreditosBuscadorComponent,
     ConsultaCreditosExtractoComponent,
-    ConsultaCreditosSegurosComponent
+    ConsultaCreditosSegurosComponent,
+    ConsultaCreditosInteresesComponent,
+    ConsultaCreditosEvaluacionesComponent,
+    ConsultaCreditosProrrogasComponent,
+    ConsultaCreditosResultadosMensualesComponent
   ],
+
   templateUrl:
     './consulta-creditos.component.html',
   styleUrls: [
@@ -339,6 +362,9 @@ export class ConsultaCreditosComponent {
               ?? [],
             prorrogas:
               respuesta?.prorrogas
+              ?? [],
+            resultadosMensuales:
+              respuesta?.resultadosMensuales
               ?? [],
             ultimaEvaluacion:
               respuesta?.ultimaEvaluacion

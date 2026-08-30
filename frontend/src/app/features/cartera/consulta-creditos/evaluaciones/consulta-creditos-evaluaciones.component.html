@@ -1,0 +1,833 @@
+<section class="consulta-bloque evaluaciones-detalle">
+
+  <!-- ======================================================= -->
+  <!-- ENCABEZADO                                              -->
+  <!-- ======================================================= -->
+
+  <div class="bloque-encabezado">
+
+    <div>
+
+      <h2>
+        Evaluaciones de cartera
+      </h2>
+
+      <span>
+        Histórico de evaluaciones realizadas para el pagaré
+        {{ credito.pagareCartera || 'sin número' }}.
+      </span>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn btn--cancel btn-sm"
+      (click)="cerrarDetalle()">
+
+      Cerrar evaluaciones
+
+    </button>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- RESUMEN                                                 -->
+  <!-- ======================================================= -->
+
+  <div class="evaluaciones-resumen">
+
+    <article>
+
+      <span>
+        Evaluaciones
+      </span>
+
+      <strong>
+        {{ cantidadEvaluaciones }}
+      </strong>
+
+    </article>
+
+
+    <article class="resumen-recalificar">
+
+      <span>
+        Recalificar
+      </span>
+
+      <strong>
+        {{ cantidadRecalificadas }}
+      </strong>
+
+    </article>
+
+
+    <article class="resumen-habilitar">
+
+      <span>
+        Habilitar
+      </span>
+
+      <strong>
+        {{ cantidadHabilitadas }}
+      </strong>
+
+    </article>
+
+
+    <article class="resumen-mantener">
+
+      <span>
+        Mantener
+      </span>
+
+      <strong>
+        {{ cantidadMantenidas }}
+      </strong>
+
+    </article>
+
+
+    <article class="resumen-mejora">
+
+      <span>
+        Mejoras
+      </span>
+
+      <strong>
+        {{ cantidadMejoras }}
+      </strong>
+
+    </article>
+
+
+    <article class="resumen-deterioro">
+
+      <span>
+        Deterioros
+      </span>
+
+      <strong>
+        {{ cantidadDeterioros }}
+      </strong>
+
+    </article>
+
+
+    <article>
+
+      <span>
+        Sin variación
+      </span>
+
+      <strong>
+        {{ cantidadIguales }}
+      </strong>
+
+    </article>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- SIN EVALUACIONES                                        -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="!tieneEvaluaciones"
+    class="estado-vacio">
+
+    <strong>
+      El crédito no tiene evaluaciones registradas
+    </strong>
+
+    <span>
+      Cuando el crédito sea incluido en un proceso de evaluación
+      de cartera, sus resultados aparecerán en esta sección.
+    </span>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- ÚLTIMA EVALUACIÓN                                       -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="
+      tieneEvaluaciones
+      && ultimaEvaluacion as evaluacion
+    "
+    class="ultima-evaluacion">
+
+    <div class="evaluaciones-seccion__titulo">
+
+      Última evaluación
+
+    </div>
+
+
+    <div class="ultima-evaluacion-grid">
+
+      <article>
+
+        <span>
+          Fecha
+        </span>
+
+        <strong>
+          {{
+          evaluacion.fechaEvaluacion
+          ? (
+          evaluacion.fechaEvaluacion
+          | date:'dd/MM/yyyy'
+          )
+          : ''
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Evaluación
+        </span>
+
+        <strong>
+          {{
+          evaluacion.numeroEvaluacion
+          ?? evaluacion.idEvaluacionCartera
+          ?? ''
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Riesgo anterior
+        </span>
+
+        <strong>
+          {{
+          edadAnterior(
+          evaluacion
+          )
+          || ''
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Riesgo inicial
+        </span>
+
+        <strong>
+          {{
+          edadInicial(
+          evaluacion
+          )
+          || ''
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Edad de mora
+        </span>
+
+        <strong>
+          {{
+          edadMora(
+          evaluacion
+          )
+          || ''
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Riesgo evaluado
+        </span>
+
+        <strong>
+          {{
+          edadEvaluada(
+          evaluacion
+          )
+          || ''
+          }}
+        </strong>
+
+      </article>
+
+
+      <article class="ultima-evaluacion-final">
+
+        <span>
+          Riesgo final
+        </span>
+
+        <strong>
+          {{
+          edadFinal(
+          evaluacion
+          )
+          || ''
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Acción
+        </span>
+
+        <strong>
+          {{
+          descripcionAccion(
+          evaluacion
+          )
+          || ''
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Variación
+        </span>
+
+        <strong
+          [class.texto-mejora]="
+            esMejora(evaluacion)
+          "
+          [class.texto-deterioro]="
+            esDeterioro(evaluacion)
+          ">
+
+          {{
+          descripcionVariacion(
+          evaluacion
+          )
+          || ''
+          }}
+
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Estado
+        </span>
+
+        <strong>
+          {{
+          descripcionEstado(
+          evaluacion
+          )
+          || ''
+          }}
+        </strong>
+
+      </article>
+
+    </div>
+
+
+    <div
+      *ngIf="
+        evaluacion.comentarioEvaluacion
+        || evaluacion.observacion
+      "
+      class="ultima-evaluacion-comentario">
+
+      <strong>
+        Comentario
+      </strong>
+
+      <span>
+        {{
+          evaluacion.comentarioEvaluacion
+          || evaluacion.observacion
+          || ''
+        }}
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- HISTÓRICO                                               -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="tieneEvaluaciones"
+    class="evaluaciones-seccion">
+
+    <div class="evaluaciones-seccion__titulo">
+
+      Histórico de evaluaciones
+
+    </div>
+
+
+    <div class="tabla-contenedor">
+
+      <table class="tabla-evaluaciones">
+
+        <thead>
+
+        <tr>
+
+          <th>
+            Nº
+          </th>
+
+          <th>
+            Fecha
+          </th>
+
+          <th>
+            Estado
+          </th>
+
+          <th>
+            Mora
+          </th>
+
+          <th>
+            Riesgo anterior
+          </th>
+
+          <th>
+            Riesgo inicial
+          </th>
+
+          <th>
+            Riesgo evaluado
+          </th>
+
+          <th>
+            Riesgo final
+          </th>
+
+          <th>
+            Acción
+          </th>
+
+          <th>
+            Variación
+          </th>
+
+          <th class="columna-numero">
+            Diferencia
+          </th>
+
+          <th>
+            Revisión
+          </th>
+
+          <th>
+            Alerta
+          </th>
+
+          <th>
+            Comentario
+          </th>
+
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        <tr
+          *ngFor="
+            let evaluacion of evaluaciones;
+            trackBy: trackByEvaluacion
+          "
+          [class.fila-ultima]="
+            esUltimaEvaluacion(evaluacion)
+          "
+          [class.fila-mejora]="
+            esMejora(evaluacion)
+          "
+          [class.fila-deterioro]="
+            esDeterioro(evaluacion)
+          ">
+
+          <!-- ================================================= -->
+          <!-- NÚMERO                                            -->
+          <!-- ================================================= -->
+
+          <td>
+
+            <div class="numero-evaluacion">
+
+              <strong>
+                {{
+                evaluacion.numeroEvaluacion
+                ?? evaluacion.idEvaluacionCartera
+                ?? ''
+                }}
+              </strong>
+
+              <span
+                *ngIf="
+                  esUltimaEvaluacion(
+                    evaluacion
+                  )
+                "
+                class="badge badge--ultima">
+
+                Última
+
+              </span>
+
+            </div>
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- FECHA                                             -->
+          <!-- ================================================= -->
+
+          <td>
+
+            {{
+            evaluacion.fechaEvaluacion
+            ? (
+            evaluacion.fechaEvaluacion
+            | date:'dd/MM/yyyy'
+            )
+            : ''
+            }}
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- ESTADO                                            -->
+          <!-- ================================================= -->
+
+          <td>
+
+            <span
+              class="badge"
+              [class.badge--aplicada]="
+                evaluacion.evaluacionAplicada === true
+              "
+              [class.badge--no-aplicada]="
+                evaluacion.evaluacionAplicada === false
+              ">
+
+              {{
+                descripcionEstado(
+                  evaluacion
+                )
+                || ''
+              }}
+
+            </span>
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- MORA                                              -->
+          <!-- ================================================= -->
+
+          <td>
+
+            <span class="edad-badge">
+
+              {{
+                edadMora(
+                  evaluacion
+                )
+                || ''
+              }}
+
+            </span>
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- RIESGO ANTERIOR                                   -->
+          <!-- ================================================= -->
+
+          <td>
+
+            <span class="edad-badge">
+
+              {{
+                edadAnterior(
+                  evaluacion
+                )
+                || ''
+              }}
+
+            </span>
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- RIESGO INICIAL                                    -->
+          <!-- ================================================= -->
+
+          <td>
+
+            <span class="edad-badge">
+
+              {{
+                edadInicial(
+                  evaluacion
+                )
+                || ''
+              }}
+
+            </span>
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- RIESGO EVALUADO                                   -->
+          <!-- ================================================= -->
+
+          <td>
+
+            <span class="edad-badge">
+
+              {{
+                edadEvaluada(
+                  evaluacion
+                )
+                || ''
+              }}
+
+            </span>
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- RIESGO FINAL                                      -->
+          <!-- ================================================= -->
+
+          <td>
+
+            <span class="edad-badge edad-badge--final">
+
+              {{
+                edadFinal(
+                  evaluacion
+                )
+                || ''
+              }}
+
+            </span>
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- ACCIÓN                                            -->
+          <!-- ================================================= -->
+
+          <td>
+
+            <span
+              class="badge"
+              [class.badge--recalificar]="
+                descripcionAccion(evaluacion)
+                === 'Recalificar'
+              "
+              [class.badge--habilitar]="
+                descripcionAccion(evaluacion)
+                === 'Habilitar'
+              "
+              [class.badge--mantener]="
+                descripcionAccion(evaluacion)
+                === 'Mantener'
+              ">
+
+              {{
+                descripcionAccion(
+                  evaluacion
+                )
+                || ''
+              }}
+
+            </span>
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- VARIACIÓN                                         -->
+          <!-- ================================================= -->
+
+          <td>
+
+            <span
+              class="badge"
+              [class.badge--mejora]="
+                esMejora(evaluacion)
+              "
+              [class.badge--deterioro]="
+                esDeterioro(evaluacion)
+              "
+              [class.badge--igual]="
+                esIgual(evaluacion)
+              ">
+
+              {{
+                descripcionVariacion(
+                  evaluacion
+                )
+                || ''
+              }}
+
+            </span>
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- DIFERENCIA                                        -->
+          <!-- ================================================= -->
+
+          <td class="columna-numero">
+
+            {{
+            evaluacion.diferenciaNivelRiesgo
+            ?? 0
+            }}
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- REVISIÓN                                          -->
+          <!-- ================================================= -->
+
+          <td>
+
+            <span
+              class="badge"
+              [class.badge--revisar]="
+                requiereRevision(evaluacion)
+              "
+              [class.badge--ok]="
+                !requiereRevision(evaluacion)
+              ">
+
+              {{
+                requiereRevision(evaluacion)
+                  ? 'Revisar'
+                  : 'Correcto'
+              }}
+
+            </span>
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- ALERTA                                            -->
+          <!-- ================================================= -->
+
+          <td>
+
+            <div class="alerta-evaluacion">
+
+              <strong
+                *ngIf="
+                  evaluacion.nivelAlertaEvaluacion
+                ">
+
+                {{
+                evaluacion.nivelAlertaEvaluacion
+                }}
+
+              </strong>
+
+              <span>
+
+                {{
+                  descripcionAlerta(
+                    evaluacion
+                  )
+                  || 'Sin novedades'
+                }}
+
+              </span>
+
+            </div>
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- COMENTARIO                                        -->
+          <!-- ================================================= -->
+
+          <td>
+
+            <div class="comentario-evaluacion">
+
+              {{
+              evaluacion.comentarioEvaluacion
+              || evaluacion.observacion
+              || ''
+              }}
+
+            </div>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</section>

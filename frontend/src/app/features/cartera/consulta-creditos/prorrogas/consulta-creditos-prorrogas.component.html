@@ -1,0 +1,864 @@
+<section class="consulta-bloque prorrogas-detalle">
+
+  <!-- ======================================================= -->
+  <!-- ENCABEZADO                                              -->
+  <!-- ======================================================= -->
+
+  <div class="bloque-encabezado">
+
+    <div>
+
+      <h2>
+        Prórrogas del crédito
+      </h2>
+
+      <span>
+        Histórico de prórrogas registradas para el pagaré
+        {{ credito.pagareCartera || 'sin número' }}.
+      </span>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn btn--cancel btn-sm"
+      (click)="cerrarDetalle()">
+
+      Cerrar prórrogas
+
+    </button>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- RESUMEN                                                 -->
+  <!-- ======================================================= -->
+
+  <div class="prorrogas-resumen">
+
+    <article>
+
+      <span>
+        Prórrogas
+      </span>
+
+      <strong>
+        {{ cantidadProrrogas }}
+      </strong>
+
+    </article>
+
+
+    <article class="resumen-aplicadas">
+
+      <span>
+        Aplicadas
+      </span>
+
+      <strong>
+        {{ cantidadAplicadas }}
+      </strong>
+
+    </article>
+
+
+    <article class="resumen-pendientes">
+
+      <span>
+        Pendientes
+      </span>
+
+      <strong>
+        {{ cantidadPendientes }}
+      </strong>
+
+    </article>
+
+
+    <article class="resumen-anuladas">
+
+      <span>
+        Anuladas
+      </span>
+
+      <strong>
+        {{ cantidadAnuladas }}
+      </strong>
+
+    </article>
+
+
+    <article>
+
+      <span>
+        Meses prorrogados
+      </span>
+
+      <strong>
+        {{ totalMesesProrrogados }}
+      </strong>
+
+    </article>
+
+
+    <article class="resumen-valor">
+
+      <span>
+        Total liquidado
+      </span>
+
+      <strong>
+        {{
+        totalLiquidado
+        | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+        }}
+      </strong>
+
+    </article>
+
+
+    <article class="resumen-valor">
+
+      <span>
+        Total pagado
+      </span>
+
+      <strong>
+        {{
+        totalPagado
+        | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+        }}
+      </strong>
+
+    </article>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- SIN PRÓRROGAS                                           -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="!tieneProrrogas"
+    class="estado-vacio">
+
+    <strong>
+      El crédito no tiene prórrogas registradas
+    </strong>
+
+    <span>
+      Cuando se registre una prórroga para este crédito,
+      su información aparecerá en esta sección.
+    </span>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- ÚLTIMA PRÓRROGA                                         -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="
+      tieneProrrogas
+      && ultimaProrroga as prorroga
+    "
+    class="ultima-prorroga">
+
+    <div class="prorrogas-seccion__titulo">
+      Última prórroga
+    </div>
+
+
+    <div class="ultima-prorroga-grid">
+
+      <article>
+
+        <span>
+          N°
+        </span>
+
+        <strong>
+          {{ prorroga.numeroProrroga ?? '' }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Fecha
+        </span>
+
+        <strong>
+          {{
+          prorroga.fechaProrroga
+          ? (
+          prorroga.fechaProrroga
+          | date:'dd/MM/yyyy'
+          )
+          : ''
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Días
+        </span>
+
+        <strong>
+          {{ prorroga.diasProrroga ?? '' }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Meses
+        </span>
+
+        <strong>
+          {{ prorroga.mesesProrroga ?? '' }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Estado
+        </span>
+
+        <strong
+          [class.texto-aplicada]="esAplicada(prorroga)"
+          [class.texto-pendiente]="esPendiente(prorroga)"
+          [class.texto-anulada]="esAnulada(prorroga)">
+
+          {{ descripcionEstado(prorroga) }}
+
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Comprobante
+        </span>
+
+        <strong>
+          {{ comprobante(prorroga) || 'Sin registrar' }}
+        </strong>
+
+      </article>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- CAMBIO DE CONDICIONES                                 -->
+    <!-- ===================================================== -->
+
+    <div class="prorrogas-seccion__titulo subgrupo">
+      Cambio de condiciones
+    </div>
+
+
+    <div class="condiciones-grid">
+
+      <article>
+
+        <span>
+          Próx. capital anterior
+        </span>
+
+        <strong>
+          {{
+          prorroga.proximaFechaCapitalAnterior
+          ? (
+          prorroga.proximaFechaCapitalAnterior
+          | date:'dd/MM/yyyy'
+          )
+          : ''
+          }}
+        </strong>
+
+      </article>
+
+
+      <article class="condicion-nueva">
+
+        <span>
+          Próx. capital nueva
+        </span>
+
+        <strong>
+          {{
+          prorroga.proximaFechaCapitalNueva
+          ? (
+          prorroga.proximaFechaCapitalNueva
+          | date:'dd/MM/yyyy'
+          )
+          : ''
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Próx. interés anterior
+        </span>
+
+        <strong>
+          {{
+          prorroga.proximaFechaInteresAnterior
+          ? (
+          prorroga.proximaFechaInteresAnterior
+          | date:'dd/MM/yyyy'
+          )
+          : ''
+          }}
+        </strong>
+
+      </article>
+
+
+      <article class="condicion-nueva">
+
+        <span>
+          Próx. interés nueva
+        </span>
+
+        <strong>
+          {{
+          prorroga.proximaFechaInteresNueva
+          ? (
+          prorroga.proximaFechaInteresNueva
+          | date:'dd/MM/yyyy'
+          )
+          : ''
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Vencimiento anterior
+        </span>
+
+        <strong>
+          {{
+          prorroga.fechaVencimientoAnterior
+          ? (
+          prorroga.fechaVencimientoAnterior
+          | date:'dd/MM/yyyy'
+          )
+          : ''
+          }}
+        </strong>
+
+      </article>
+
+
+      <article class="condicion-nueva">
+
+        <span>
+          Vencimiento nuevo
+        </span>
+
+        <strong>
+          {{
+          prorroga.fechaVencimientoNueva
+          ? (
+          prorroga.fechaVencimientoNueva
+          | date:'dd/MM/yyyy'
+          )
+          : ''
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Plazo anterior
+        </span>
+
+        <strong>
+          {{ prorroga.plazoAnterior ?? '' }}
+        </strong>
+
+      </article>
+
+
+      <article class="condicion-nueva">
+
+        <span>
+          Plazo nuevo
+        </span>
+
+        <strong>
+          {{ prorroga.plazoNuevo ?? '' }}
+
+          <small
+            *ngIf="
+              incrementoPlazo(prorroga) !== null
+              && incrementoPlazo(prorroga)! > 0
+            ">
+
+            (+{{ incrementoPlazo(prorroga) }})
+
+          </small>
+
+        </strong>
+
+      </article>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- LIQUIDACIÓN                                           -->
+    <!-- ===================================================== -->
+
+    <div class="prorrogas-seccion__titulo subgrupo">
+      Liquidación
+    </div>
+
+
+    <div class="liquidacion-grid">
+
+      <article>
+
+        <span>
+          Interés corriente
+        </span>
+
+        <strong>
+          {{
+          prorroga.valorInteresCorriente
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Interés mora
+        </span>
+
+        <strong>
+          {{
+          prorroga.valorInteresMora
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Seguro
+        </span>
+
+        <strong>
+          {{
+          prorroga.valorSeguro
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Aportes
+        </span>
+
+        <strong>
+          {{
+          prorroga.valorAportes
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Fondo garantía
+        </span>
+
+        <strong>
+          {{
+          prorroga.valorFondoGarantia
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Otros
+        </span>
+
+        <strong>
+          {{
+          prorroga.valorOtrosConceptos
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article class="liquidacion-total">
+
+        <span>
+          Total liquidado
+        </span>
+
+        <strong>
+          {{
+          prorroga.valorTotalLiquidado
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article class="liquidacion-total">
+
+        <span>
+          Total pagado
+        </span>
+
+        <strong>
+          {{
+          prorroga.valorTotalPagado
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+    </div>
+
+
+    <div
+      *ngIf="prorroga.observacion"
+      class="ultima-prorroga-observacion">
+
+      <strong>
+        Observación
+      </strong>
+
+      <span>
+        {{ prorroga.observacion }}
+      </span>
+
+    </div>
+
+
+    <div
+      *ngIf="
+        esAnulada(prorroga)
+        && prorroga.motivoAnulacion
+      "
+      class="ultima-prorroga-anulacion">
+
+      <strong>
+        Motivo de anulación
+      </strong>
+
+      <span>
+        {{ prorroga.motivoAnulacion }}
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- HISTÓRICO                                               -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="tieneProrrogas"
+    class="prorrogas-seccion">
+
+    <div class="prorrogas-seccion__titulo">
+      Histórico de prórrogas
+    </div>
+
+
+    <div class="tabla-contenedor">
+
+      <table class="tabla-prorrogas">
+
+        <thead>
+
+        <tr>
+
+          <th>
+            N°
+          </th>
+
+          <th>
+            Fecha
+          </th>
+
+          <th class="center">
+            Meses
+          </th>
+
+          <th>
+            Capital anterior
+          </th>
+
+          <th>
+            Capital nuevo
+          </th>
+
+          <th>
+            Vencimiento anterior
+          </th>
+
+          <th>
+            Vencimiento nuevo
+          </th>
+
+          <th class="columna-numero">
+            Liquidado
+          </th>
+
+          <th class="columna-numero">
+            Pagado
+          </th>
+
+          <th>
+            Comprobante
+          </th>
+
+          <th>
+            Estado
+          </th>
+
+          <th>
+            Observación
+          </th>
+
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        <tr
+          *ngFor="
+            let prorroga of prorrogas;
+            trackBy: trackByProrroga
+          "
+          [class.fila-anulada]="
+            esAnulada(prorroga)
+          ">
+
+          <td>
+
+            <strong>
+              {{ prorroga.numeroProrroga ?? '' }}
+            </strong>
+
+          </td>
+
+
+          <td>
+
+            {{
+            prorroga.fechaProrroga
+            ? (
+            prorroga.fechaProrroga
+            | date:'dd/MM/yyyy'
+            )
+            : ''
+            }}
+
+          </td>
+
+
+          <td class="center">
+
+            {{ prorroga.mesesProrroga ?? '' }}
+
+          </td>
+
+
+          <td>
+
+            {{
+            prorroga.proximaFechaCapitalAnterior
+            ? (
+            prorroga.proximaFechaCapitalAnterior
+            | date:'dd/MM/yyyy'
+            )
+            : ''
+            }}
+
+          </td>
+
+
+          <td>
+
+            {{
+            prorroga.proximaFechaCapitalNueva
+            ? (
+            prorroga.proximaFechaCapitalNueva
+            | date:'dd/MM/yyyy'
+            )
+            : ''
+            }}
+
+          </td>
+
+
+          <td>
+
+            {{
+            prorroga.fechaVencimientoAnterior
+            ? (
+            prorroga.fechaVencimientoAnterior
+            | date:'dd/MM/yyyy'
+            )
+            : ''
+            }}
+
+          </td>
+
+
+          <td>
+
+            {{
+            prorroga.fechaVencimientoNueva
+            ? (
+            prorroga.fechaVencimientoNueva
+            | date:'dd/MM/yyyy'
+            )
+            : ''
+            }}
+
+          </td>
+
+
+          <td class="columna-numero">
+
+            {{
+            prorroga.valorTotalLiquidado
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+
+          </td>
+
+
+          <td class="columna-numero">
+
+            {{
+            prorroga.valorTotalPagado
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+
+          </td>
+
+
+          <td>
+
+            {{ comprobante(prorroga) }}
+
+          </td>
+
+
+          <td>
+
+            <span
+              class="badge"
+              [class.badge--aplicada]="
+                esAplicada(prorroga)
+              "
+              [class.badge--pendiente]="
+                esPendiente(prorroga)
+              "
+              [class.badge--anulada]="
+                esAnulada(prorroga)
+              ">
+
+              {{ descripcionEstado(prorroga) }}
+
+            </span>
+
+          </td>
+
+
+          <td>
+
+            <span
+              class="observacion-prorroga"
+              [title]="
+                prorroga.observacion
+                || prorroga.motivoAnulacion
+                || ''
+              ">
+
+              {{
+              prorroga.observacion
+              || prorroga.motivoAnulacion
+              || ''
+              }}
+
+            </span>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</section>

@@ -19,15 +19,15 @@ public class Criterio711AlertasCentralRiesgosRepository {
     // =========================================================
     // OBTENER DATOS DEL CRITERIO 711
     //
-    // Para cada crédito se buscan las alertas de la central
-    // utilizando la combinación exacta:
+    // Para cada crÃ©dito se buscan las alertas de la central
+    // utilizando la combinaciÃ³n exacta:
     //
     // fecha de corte
     // + documento
-    // + clasificación del crédito
+    // + clasificaciÃ³n del crÃ©dito
     //
     // Si existen varias cargas para la misma fecha de corte,
-    // se utiliza el archivo importado más recientemente.
+    // se utiliza el archivo importado mÃ¡s recientemente.
     // =========================================================
 
     public List<Criterio711DatoDTO> obtenerDatos(
@@ -140,9 +140,14 @@ public class Criterio711AlertasCentralRiesgosRepository {
 
                 WHERE cierre.fecha_corte =
                       :fechaCorte
+                
+                  AND COALESCE(
+                          cc.saldo_actual,
+                          0
+                      ) > 0
 
                 ORDER BY
-                    cierre.id_agencia,
+                    cc.id_agencia,
                     hv.documento,
                     cc.codigo_clasificacion_credito,
                     cc.id_cartera_credito

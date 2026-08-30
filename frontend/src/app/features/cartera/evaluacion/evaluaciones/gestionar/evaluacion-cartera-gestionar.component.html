@@ -119,13 +119,13 @@
         <div>
 
           <span>
-            Fecha de ejecución
+            Fecha de inicio
           </span>
 
           <strong>
 
             <ng-container
-              *ngIf="e.fechaEjecucion; else sinEjecucion">
+              *ngIf="e.fechaEjecucion; else sinFechaInicio">
 
               {{
               e.fechaEjecucion
@@ -134,8 +134,8 @@
 
             </ng-container>
 
-            <ng-template #sinEjecucion>
-              Sin ejecutar
+            <ng-template #sinFechaInicio>
+              Sin registrar
             </ng-template>
 
           </strong>
@@ -146,11 +146,32 @@
         <div>
 
           <span>
-            Versión de metodología
+            Situación del proceso
           </span>
 
           <strong>
-            {{ e.versionMetodologia || 'No definida' }}
+
+            <ng-container
+              *ngIf="pendienteEjecucion">
+
+              Pendiente de ejecutar
+
+            </ng-container>
+
+            <ng-container
+              *ngIf="ejecutadaEnRevision">
+
+              Ejecutada - En revisión
+
+            </ng-container>
+
+            <ng-container
+              *ngIf="esDefinitiva">
+
+              Definitiva
+
+            </ng-container>
+
           </strong>
 
         </div>
@@ -161,10 +182,51 @@
 
 
     <!-- =================================================== -->
-    <!-- RESUMEN GENERAL -->
+    <!-- PENDIENTE DE EJECUCIÓN -->
     <!-- =================================================== -->
 
-    <section class="card">
+    <section
+      *ngIf="pendienteEjecucion"
+      class="card proceso-pendiente-card">
+
+      <div class="proceso-pendiente">
+
+        <div class="proceso-pendiente__contenido">
+
+          <h3>
+            Evaluación pendiente de ejecutar
+          </h3>
+
+          <p>
+            El proceso fue creado para el corte
+            <strong>
+              {{ e.fechaCorte | date:'dd/MM/yyyy' }}
+            </strong>,
+            pero todavía no se han calculado los resultados
+            de la evaluación.
+          </p>
+
+          <p>
+            Al ejecutar, el sistema tomará la cartera
+            correspondiente al corte y aplicará las reglas
+            vigentes de evaluación.
+          </p>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- RESUMEN GENERAL -->
+    <!-- SOLO DESPUÉS DE EJECUTAR -->
+    <!-- =================================================== -->
+
+    <section
+      *ngIf="tieneResultados"
+      class="card">
 
       <div class="seccion-titulo">
 
@@ -239,9 +301,12 @@
 
     <!-- =================================================== -->
     <!-- RESULTADOS / RECOMENDACIONES -->
+    <!-- SOLO DESPUÉS DE EJECUTAR -->
     <!-- =================================================== -->
 
-    <section class="card">
+    <section
+      *ngIf="tieneResultados"
+      class="card">
 
       <div class="seccion-titulo">
 
@@ -252,7 +317,8 @@
           </h3>
 
           <span>
-            Resultado informativo sugerido por el motor de evaluación.
+            Resultado informativo sugerido por el motor
+            de evaluación.
           </span>
 
         </div>
@@ -264,7 +330,11 @@
 
         <!-- RECLASIFICAR -->
 
-        <article class="resultado-card resultado-card--reclasificar">
+        <article
+          class="
+            resultado-card
+            resultado-card--reclasificar
+          ">
 
           <span class="resultado-card__titulo">
             Reclasificar
@@ -287,7 +357,11 @@
 
         <!-- HABILITAR -->
 
-        <article class="resultado-card resultado-card--habilitar">
+        <article
+          class="
+            resultado-card
+            resultado-card--habilitar
+          ">
 
           <span class="resultado-card__titulo">
             Habilitar
@@ -310,7 +384,11 @@
 
         <!-- MANTENER -->
 
-        <article class="resultado-card resultado-card--mantener">
+        <article
+          class="
+            resultado-card
+            resultado-card--mantener
+          ">
 
           <span class="resultado-card__titulo">
             Mantener
@@ -349,9 +427,12 @@
 
     <!-- =================================================== -->
     <!-- COMITÉ DE RIESGOS Y CONSEJO -->
+    <!-- SOLO DESPUÉS DE EJECUTAR -->
     <!-- =================================================== -->
 
-    <section class="card">
+    <section
+      *ngIf="tieneResultados"
+      class="card">
 
       <div class="seccion-titulo">
 
@@ -362,7 +443,8 @@
           </h3>
 
           <span>
-            Información asociada al seguimiento de la evaluación.
+            Información asociada al seguimiento
+            de la evaluación.
           </span>
 
         </div>
@@ -391,7 +473,10 @@
               <strong>
                 {{
                 e.fechaComiteRiesgos
-                ? (e.fechaComiteRiesgos | date:'dd/MM/yyyy')
+                ? (
+                e.fechaComiteRiesgos
+                | date:'dd/MM/yyyy'
+                )
                 : 'Sin registrar'
                 }}
               </strong>
@@ -438,7 +523,10 @@
               <strong>
                 {{
                 e.fechaConsejo
-                ? (e.fechaConsejo | date:'dd/MM/yyyy')
+                ? (
+                e.fechaConsejo
+                | date:'dd/MM/yyyy'
+                )
                 : 'Sin registrar'
                 }}
               </strong>
@@ -475,7 +563,10 @@
     <!-- =================================================== -->
 
     <section
-      *ngIf="e.observaciones"
+      *ngIf="
+        tieneResultados
+        && e.observaciones
+      "
       class="card">
 
       <div class="seccion-titulo">
@@ -518,24 +609,16 @@
         </button>
 
 
-        <!-- EJECUTAR -->
+        <!-- EJECUTAR / VOLVER A EJECUTAR -->
 
         <button
+          *ngIf="estaEnProceso"
           type="button"
           class="btn btn--primary"
-          *ngIf="estaEnProceso"
-          [disabled]="procesando"
+          [disabled]="!puedeEjecutar"
           (click)="ejecutarEvaluacion()">
 
-          {{
-          ejecutando
-          ? 'Ejecutando...'
-          : (
-          tieneResultados
-          ? 'Volver a ejecutar'
-          : 'Ejecutar evaluación'
-          )
-          }}
+          {{ textoBotonEjecutar }}
 
         </button>
 
@@ -543,12 +626,10 @@
         <!-- VER RESULTADOS -->
 
         <button
+          *ngIf="tieneResultados"
           type="button"
           class="btn btn--secondary"
-          [disabled]="
-            procesando
-            || !tieneResultados
-          "
+          [disabled]="!puedeVerResultados"
           (click)="verResultados()">
 
           Ver resultados
@@ -559,13 +640,10 @@
         <!-- MARCAR DEFINITIVA -->
 
         <button
+          *ngIf="estaEnProceso && tieneResultados"
           type="button"
           class="btn btn--success"
-          *ngIf="estaEnProceso"
-          [disabled]="
-            procesando
-            || !tieneResultados
-          "
+          [disabled]="!puedeMarcarDefinitiva"
           (click)="marcarDefinitiva()">
 
           {{

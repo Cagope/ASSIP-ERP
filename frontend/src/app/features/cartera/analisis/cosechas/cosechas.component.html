@@ -1,0 +1,997 @@
+<div class="cosechas-page">
+
+  <app-header-actions
+    titulo="Análisis de Cosechas"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="true"
+    (exportar)="exportarExcel()">
+  </app-header-actions>
+
+
+  <!-- ===================================================== -->
+  <!-- PARÁMETROS -->
+  <!-- ===================================================== -->
+
+  <section class="panel panel-parametros">
+
+    <div class="panel-titulo">
+      Parámetros de análisis
+    </div>
+
+
+    <div class="parametros-grid">
+
+      <div class="campo">
+
+        <label>
+          Cosecha desde
+        </label>
+
+        <input
+          type="month"
+          [(ngModel)]="cosechaDesdeMes">
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          Cosecha hasta
+        </label>
+
+        <input
+          type="month"
+          [(ngModel)]="cosechaHastaMes">
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          Corte de análisis
+        </label>
+
+        <select
+          [(ngModel)]="hastaCorte">
+
+          <option value="">
+            Seleccione...
+          </option>
+
+          <option
+            *ngFor="let corte of cortes"
+            [value]="corte.fechaCorte">
+
+            {{ corte.fechaCorte }}
+            -
+            {{ formatearNumero(corte.cantidadCreditos) }}
+            créditos
+
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          Agencia
+        </label>
+
+        <select
+          [(ngModel)]="idAgencia">
+
+          <option [ngValue]="null">
+            Todas las agencias
+          </option>
+
+          <option
+            *ngFor="let agencia of agencias"
+            [ngValue]="agencia.id">
+
+            {{ agencia.codigo }}
+            -
+            {{ agencia.nombre }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          Línea de crédito
+        </label>
+
+        <select
+          [(ngModel)]="idLineaCredito">
+
+          <option [ngValue]="null">
+            Todas las líneas
+          </option>
+
+          <option
+            *ngFor="let linea of lineas"
+            [ngValue]="linea.id">
+
+            {{ linea.codigo }}
+            -
+            {{ linea.nombre }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          Indicador
+        </label>
+
+        <select
+          [(ngModel)]="indicador"
+          (ngModelChange)="cambiarIndicador()">
+
+          <option
+            *ngFor="let item of indicadores"
+            [value]="item.codigo">
+
+            {{ item.nombre }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="campo campo-accion">
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          [disabled]="
+            cargandoCatalogos
+            ||
+            cargandoAnalisis
+          "
+          (click)="analizar()">
+
+          {{
+          cargandoAnalisis
+          ? 'Analizando...'
+          : 'Analizar'
+          }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="indicador-ayuda"
+      *ngIf="descripcionIndicador">
+
+      <strong>
+        {{ nombreIndicador }}:
+      </strong>
+
+      {{ descripcionIndicador }}
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- ERROR -->
+  <!-- ===================================================== -->
+
+  <div
+    class="alert alert-error"
+    *ngIf="error">
+
+    {{ error }}
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CARGANDO -->
+  <!-- ===================================================== -->
+
+  <div
+    class="loading"
+    *ngIf="cargandoCatalogos">
+
+    Consultando información disponible...
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- RESUMEN -->
+  <!-- ===================================================== -->
+
+  <section
+    class="resumen-grid"
+    *ngIf="resumen">
+
+    <div class="resumen-card">
+
+      <span class="resumen-label">
+        Cosechas
+      </span>
+
+      <strong>
+        {{ formatearNumero(resumen.cantidadCosechas) }}
+      </strong>
+
+    </div>
+
+
+    <div class="resumen-card">
+
+      <span class="resumen-label">
+        Créditos originados
+      </span>
+
+      <strong>
+        {{
+        formatearNumero(
+        resumen.cantidadCreditosOriginados
+        )
+        }}
+      </strong>
+
+    </div>
+
+
+    <div class="resumen-card">
+
+      <span class="resumen-label">
+        Valor desembolsado
+      </span>
+
+      <strong>
+        $
+        {{
+        formatearMoneda(
+        resumen.valorTotalDesembolsado
+        )
+        }}
+      </strong>
+
+    </div>
+
+
+    <div class="resumen-card">
+
+      <span class="resumen-label">
+        MOB máximo
+      </span>
+
+      <strong>
+        {{ resumen.maxMob }}
+      </strong>
+
+    </div>
+
+
+    <div class="resumen-card">
+
+      <span class="resumen-label">
+        Corte
+      </span>
+
+      <strong>
+        {{ resumen.hastaCorte }}
+      </strong>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- MATRIZ -->
+  <!-- ===================================================== -->
+
+  <section
+    class="panel panel-matriz"
+    *ngIf="resumen">
+
+    <div class="panel-cabecera">
+
+      <div>
+
+        <div class="panel-titulo">
+          Matriz de Cosechas
+        </div>
+
+        <div class="panel-subtitulo">
+          Indicador:
+          <strong>
+            {{ nombreIndicador }}
+          </strong>
+
+          · Porcentaje calculado sobre el valor
+          originalmente desembolsado.
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="matriz-scroll"
+      *ngIf="resumen.filas.length > 0">
+
+      <table class="tabla-matriz">
+
+        <thead>
+
+        <tr>
+
+          <th class="col-fija col-cosecha">
+            Cosecha
+          </th>
+
+          <th class="col-originados">
+            Créditos
+          </th>
+
+          <th class="col-desembolsado">
+            Desembolsado
+          </th>
+
+          <th
+            *ngFor="let mob of mobs">
+
+            MOB {{ mob }}
+
+          </th>
+
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        <tr
+          *ngFor="let fila of resumen.filas">
+
+          <td class="col-fija col-cosecha">
+
+            <strong>
+              {{ formatearCosecha(fila.cosecha) }}
+            </strong>
+
+          </td>
+
+
+          <td class="numero">
+
+            {{
+            formatearNumero(
+            fila.cantidadOriginada
+            )
+            }}
+
+          </td>
+
+
+          <td class="numero">
+
+            $
+            {{
+            formatearMoneda(
+            fila.valorDesembolsadoOriginal
+            )
+            }}
+
+          </td>
+
+
+          <td
+            *ngFor="let mob of mobs"
+            class="celda-wrapper">
+
+            <ng-container
+              *ngIf="
+                  obtenerCelda(fila, mob)
+                  as celda
+                ">
+
+              <button
+                type="button"
+                class="celda-matriz"
+                [ngClass]="claseCelda(celda)"
+                (click)="seleccionarCelda(celda)"
+                [title]="
+                    'Cosecha '
+                    + formatearCosecha(celda.cosecha)
+                    + ' | MOB '
+                    + celda.mob
+                    + ' | Corte '
+                    + celda.fechaCorte
+                  ">
+
+                  <span class="celda-porcentaje">
+
+                    {{
+                      formatearPorcentaje(
+                        valorPrincipal(celda)
+                      )
+                    }}%
+
+                  </span>
+
+
+                <span class="celda-valor">
+
+                    $
+                    {{
+                      formatearMoneda(
+                        valorMonetario(celda)
+                      )
+                    }}
+
+                  </span>
+
+
+                <span class="celda-cantidad">
+
+                    {{
+                      formatearNumero(
+                        cantidadIndicador(celda)
+                      )
+                    }}
+                    créditos
+
+                  </span>
+
+              </button>
+
+            </ng-container>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <div
+      class="empty"
+      *ngIf="resumen.filas.length === 0">
+
+      No se encontraron cosechas para los parámetros seleccionados.
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- DETALLE -->
+  <!-- ===================================================== -->
+
+  <section
+    class="panel panel-detalle"
+    *ngIf="celdaSeleccionada">
+
+    <div class="detalle-cabecera">
+
+      <div>
+
+        <div class="panel-titulo">
+          Detalle de la celda
+        </div>
+
+        <div class="panel-subtitulo">
+
+          Cosecha
+          <strong>
+            {{
+            formatearCosecha(
+            celdaSeleccionada.cosecha
+            )
+            }}
+          </strong>
+
+          · MOB
+          <strong>
+            {{ celdaSeleccionada.mob }}
+          </strong>
+
+          · Corte
+          <strong>
+            {{ celdaSeleccionada.fechaCorte }}
+          </strong>
+
+          ·
+          <strong>
+            {{ nombreIndicador }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="detalle-acciones">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          [disabled]="detalle.length === 0"
+          (click)="exportarDetalle()">
+
+          Exportar detalle
+
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          [disabled]="cargandoDetalle"
+          (click)="cerrarDetalle()">
+
+          Cerrar
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="loading"
+      *ngIf="cargandoDetalle">
+
+      Consultando detalle...
+
+    </div>
+
+
+    <div
+      class="alert alert-error"
+      *ngIf="errorDetalle">
+
+      {{ errorDetalle }}
+
+    </div>
+
+
+    <ng-container
+      *ngIf="
+        !cargandoDetalle
+        &&
+        !errorDetalle
+      ">
+
+      <div class="detalle-resumen">
+
+        <div>
+
+          <span>
+            Créditos
+          </span>
+
+          <strong>
+            {{ formatearNumero(detalle.length) }}
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            Saldo
+          </span>
+
+          <strong>
+            $
+            {{
+            formatearMoneda(
+            totalSaldoDetalle
+            )
+            }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="detalle-toolbar"
+        *ngIf="detalle.length > 0">
+
+        <input
+          type="text"
+          [(ngModel)]="filtroDetalle"
+          (ngModelChange)="cambiarFiltroDetalle()"
+          placeholder="Buscar por documento, asociado, pagaré, línea, teléfono...">
+
+        <select
+          [(ngModel)]="tamanoPaginaDetalle"
+          (ngModelChange)="paginaDetalle = 1">
+
+          <option [ngValue]="20">
+            20 por página
+          </option>
+
+          <option [ngValue]="50">
+            50 por página
+          </option>
+
+          <option [ngValue]="100">
+            100 por página
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div
+        class="detalle-scroll"
+        *ngIf="detalleFiltrado.length > 0">
+
+        <table class="tabla-detalle">
+
+          <thead>
+
+          <tr>
+
+            <th>
+              Agencia
+            </th>
+
+            <th>
+              Línea
+            </th>
+
+            <th>
+              Pagaré
+            </th>
+
+            <th>
+              Documento
+            </th>
+
+            <th>
+              Asociado
+            </th>
+
+            <th>
+              Fecha desembolso
+            </th>
+
+            <th>
+              Valor desembolsado
+            </th>
+
+            <th>
+              Saldo
+            </th>
+
+            <th>
+              Días mora
+            </th>
+
+            <th>
+              Categoría
+            </th>
+
+            <th>
+              Estado
+            </th>
+
+            <th>
+              R. Inicial
+            </th>
+
+            <th>
+              Mora
+            </th>
+
+            <th>
+              Riesgo
+            </th>
+
+            <th>
+              PE
+            </th>
+
+            <th>
+              Homolog.
+            </th>
+
+            <th>
+              Contable
+            </th>
+
+            <th>
+              PI
+            </th>
+
+            <th>
+              PDI
+            </th>
+
+            <th>
+              VEA
+            </th>
+
+            <th>
+              Pérdida esperada
+            </th>
+
+            <th>
+              Deterioro total
+            </th>
+
+            <th>
+              Celular
+            </th>
+
+            <th>
+              Correo
+            </th>
+
+          </tr>
+
+          </thead>
+
+
+          <tbody>
+
+          <tr
+            *ngFor="let item of detallePaginado">
+
+            <td>
+              {{ item.idAgencia }}
+            </td>
+
+            <td>
+
+              {{ item.codigoLineaCredito }}
+
+              <span
+                class="texto-secundario"
+                *ngIf="item.nombreLineaCredito">
+
+                  {{ item.nombreLineaCredito }}
+
+                </span>
+
+            </td>
+
+            <td>
+              {{ item.pagareCartera }}
+            </td>
+
+            <td>
+              {{ item.documento }}
+            </td>
+
+            <td class="nombre-asociado">
+              {{ item.nombreCompleto }}
+            </td>
+
+            <td>
+              {{ item.fechaDesembolso }}
+            </td>
+
+            <td class="numero">
+              $
+              {{
+              formatearMoneda(
+              item.valorDesembolsado
+              )
+              }}
+            </td>
+
+            <td class="numero">
+              $
+              {{
+              formatearMoneda(
+              item.saldoCapital
+              )
+              }}
+            </td>
+
+            <td
+              class="numero"
+              [class.mora-activa]="item.diasMora > 0">
+
+              {{ item.diasMora }}
+
+            </td>
+
+            <td>
+              {{ item.categoriaMora }}
+            </td>
+
+            <td>
+              {{
+              item.descripcionEstadoCartera
+              ||
+              item.codigoEstadoCartera
+              }}
+            </td>
+
+            <td>
+              {{ item.edadRiesgoInicial }}
+            </td>
+
+            <td>
+              {{ item.edadMora }}
+            </td>
+
+            <td>
+              {{ item.edadRiesgo }}
+            </td>
+
+            <td>
+              {{ item.edadPe }}
+            </td>
+
+            <td>
+              {{ item.edadHomologacion }}
+            </td>
+
+            <td>
+              {{ item.edadContable }}
+            </td>
+
+            <td class="numero">
+              {{
+              formatearPorcentaje(
+              item.pi
+              )
+              }}
+            </td>
+
+            <td class="numero">
+              {{
+              formatearPorcentaje(
+              item.pdi
+              )
+              }}
+            </td>
+
+            <td class="numero">
+              $
+              {{
+              formatearMoneda(
+              item.vea
+              )
+              }}
+            </td>
+
+            <td class="numero">
+              $
+              {{
+              formatearMoneda(
+              item.perdidaEsperada
+              )
+              }}
+            </td>
+
+            <td class="numero">
+              $
+              {{
+              formatearMoneda(
+              item.deterioroTotal
+              )
+              }}
+            </td>
+
+            <td>
+              {{ item.celular }}
+            </td>
+
+            <td>
+              {{ item.correo }}
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <div
+        class="empty"
+        *ngIf="detalleFiltrado.length === 0">
+
+        No hay registros para mostrar.
+
+      </div>
+
+
+      <div
+        class="paginacion"
+        *ngIf="detalleFiltrado.length > 0">
+
+        <button
+          type="button"
+          class="btn btn--secondary btn-sm"
+          [disabled]="paginaDetalle <= 1"
+          (click)="paginaAnteriorDetalle()">
+
+          Anterior
+
+        </button>
+
+
+        <span>
+
+          Página
+          {{ paginaDetalle }}
+          de
+          {{ totalPaginasDetalle }}
+
+          ·
+
+          {{
+            formatearNumero(
+              detalleFiltrado.length
+            )
+          }}
+          registros
+
+        </span>
+
+
+        <button
+          type="button"
+          class="btn btn--secondary btn-sm"
+          [disabled]="
+            paginaDetalle
+            >=
+            totalPaginasDetalle
+          "
+          (click)="paginaSiguienteDetalle()">
+
+          Siguiente
+
+        </button>
+
+      </div>
+
+    </ng-container>
+
+  </section>
+
+</div>

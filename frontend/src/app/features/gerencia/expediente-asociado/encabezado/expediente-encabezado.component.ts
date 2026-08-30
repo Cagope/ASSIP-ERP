@@ -65,6 +65,32 @@ export class ExpedienteEncabezadoComponent {
     );
   }
 
+  get tipoPersona(): string {
+
+    const codigo = String(
+      this.resumen?.tipoPersona ?? ''
+    )
+      .trim()
+      .toUpperCase();
+
+    switch (codigo) {
+
+      case '1':
+        return 'Natural';
+
+      case '2':
+        return 'Jurídica';
+
+      case '':
+        return 'Sin información';
+
+      default:
+        return String(
+          this.resumen?.tipoPersona ?? ''
+        ).trim() || 'Sin información';
+    }
+  }
+
   get nombreEstado(): string {
     return this.resumen?.nombreEstadoAsociado ??
       'Sin estado';

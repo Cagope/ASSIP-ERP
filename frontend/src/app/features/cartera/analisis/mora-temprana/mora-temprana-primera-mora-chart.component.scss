@@ -1,0 +1,12 @@
+.chart { display:grid; gap:.8rem; }
+.legend { display:flex; gap:1rem; font-size:.76rem; color:#4b5563; }
+.legend span { display:flex; gap:.35rem; align-items:center; }
+.legend i { width:18px; height:7px; border-radius:999px; display:inline-block; }
+.m30,.b30 { background:#3b82f6; } .m60,.b60 { background:#ef4444; }
+.plot { min-height:210px; display:grid; grid-template-columns:repeat(6,1fr); gap:.6rem; align-items:end; border-bottom:1px solid #d1d5db; padding:.5rem .5rem 0; }
+.mob { height:190px; display:grid; grid-template-rows:1fr auto auto; gap:.25rem; text-align:center; }
+.bars { display:flex; align-items:end; justify-content:center; gap:5px; height:145px; }
+.bar { width:22px; min-height:2px; border-radius:4px 4px 0 0; }
+.mob strong { font-size:.72rem; }
+.mob small { font-size:.68rem; color:#6b7280; }
+.empty { padding:1rem; text-align:center; color:#6b7280; }

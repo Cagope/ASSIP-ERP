@@ -140,6 +140,52 @@
   }
 }
 
+// =========================================================
+// PROCESO PENDIENTE DE EJECUCIÓN
+// =========================================================
+
+.proceso-pendiente-card {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.proceso-pendiente {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 1rem;
+}
+
+.proceso-pendiente__contenido {
+  max-width: 820px;
+
+  h3 {
+    margin: 0 0 0.45rem;
+
+    font-size: 1rem;
+    font-weight: 700;
+
+    color: #92400e;
+  }
+
+  p {
+    margin: 0 0 0.45rem;
+
+    font-size: 0.84rem;
+    line-height: 1.5;
+
+    color: #4b5563;
+  }
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+
+  strong {
+    color: #111827;
+  }
+}
+
 
 // =========================================================
 // TÍTULOS DE SECCIÓN

@@ -6,15 +6,22 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Configuración de seguros asociados al crédito.
  *
- * Fuente:
+ * Fuente configuración:
  * cartera.vw_cartera_seguros_total
  *
- * El DTO representa la configuración vigente e histórica
- * de los seguros asociados al crédito.
+ * Fuente movimientos:
+ * cartera.vw_cartera_seguros_movimientos_total
+ *
+ * El DTO representa:
+ *
+ * - configuración vigente e histórica del seguro;
+ * - movimientos asociados a cada configuración.
  *
  * No realiza cálculos.
  */
@@ -143,13 +150,20 @@ public class ConsultaCreditoSeguroDTO {
     private Integer ordenAlertaSeguro;
 
     // =========================================================
-    // Historial
+    // Historial de configuraciones
     // =========================================================
 
     private Integer numeroConfiguracionSeguro;
     private Integer cantidadRegistrosSeguroCredito;
 
     private Boolean configuracionSeguroPrincipal;
+
+    // =========================================================
+    // Movimientos del seguro
+    // =========================================================
+
+    private List<MovimientoSeguroDTO> movimientos =
+            new ArrayList<>();
 
     // =========================================================
     // Riesgo del crédito
@@ -181,4 +195,116 @@ public class ConsultaCreditoSeguroDTO {
     private Integer fkSeguridadEdicion;
     private LocalDateTime fechaEdicion;
 
+
+    // =========================================================
+    // MOVIMIENTO DEL SEGURO
+    //
+    // Se mantiene dentro del mismo DTO para no crear
+    // otro archivo únicamente para el detalle.
+    //
+    // Fuente:
+    // cartera.vw_cartera_seguros_movimientos_total
+    // =========================================================
+
+    @Getter
+    @Setter
+    public static class MovimientoSeguroDTO {
+
+        // =====================================================
+        // Identificación
+        // =====================================================
+
+        private Integer idCreditoSeguroDetalle;
+        private Integer idCreditoSeguro;
+        private Integer idCarteraCredito;
+
+        // =====================================================
+        // Fecha
+        // =====================================================
+
+        private LocalDate fechaMovimiento;
+
+        // =====================================================
+        // Base de liquidación
+        // =====================================================
+
+        private BigDecimal saldoBase;
+        private BigDecimal interesesCausadosBase;
+        private BigDecimal otrosBase;
+
+        private BigDecimal baseCalculo;
+
+        // =====================================================
+        // Porcentajes
+        // =====================================================
+
+        private BigDecimal porcentajeBaseSeguro;
+        private BigDecimal porcentajeExtraprima;
+        private BigDecimal porcentajeAplicar;
+
+        // =====================================================
+        // Condiciones aplicadas
+        // =====================================================
+
+        private Boolean sobreSaldoActual;
+        private Boolean incluyeInteresesCausados;
+
+        // =====================================================
+        // Movimiento
+        // =====================================================
+
+        private BigDecimal valorDebito;
+        private BigDecimal valorCredito;
+        private BigDecimal valorMovimiento;
+
+        private String naturalezaMovimiento;
+
+        // =====================================================
+        // Saldo
+        // =====================================================
+
+        private BigDecimal saldoSeguroAcumuladoCredito;
+        private BigDecimal saldoSeguroAcumuladoConfiguracion;
+
+        // =====================================================
+        // Comprobante
+        // =====================================================
+
+        private String tipoComprobante;
+        private String numeroComprobante;
+        private String comprobanteCompleto;
+
+        // =====================================================
+        // Estado
+        // =====================================================
+
+        private String estado;
+        private Boolean movimientoActivo;
+
+        // =====================================================
+        // Secuencia
+        // =====================================================
+
+        private Long numeroMovimientoCredito;
+        private Long numeroMovimientoSeguro;
+
+        private Long cantidadMovimientosCredito;
+        private Long cantidadMovimientosSeguro;
+
+        // =====================================================
+        // Observación
+        // =====================================================
+
+        private String observacionSeguro;
+
+        // =====================================================
+        // Auditoría
+        // =====================================================
+
+        private Integer fkSeguridadCreacion;
+        private LocalDateTime fechaCreacion;
+
+        private Integer fkSeguridadEdicion;
+        private LocalDateTime fechaEdicion;
+    }
 }

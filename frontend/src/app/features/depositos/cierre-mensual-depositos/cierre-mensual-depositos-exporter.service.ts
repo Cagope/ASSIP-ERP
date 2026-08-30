@@ -6,9 +6,12 @@ import {
 } from '../../../shared/services/excel-export.service';
 
 import {
+  CierreMensualDepositosDetalle,
   CierreMensualDepositosPreview,
+  CierreMensualDepositosResumenAgencia,
   CierreMensualDepositosResumenForma
 } from './cierre-mensual-depositos.api';
+
 
 @Injectable({
   providedIn: 'root'
@@ -20,17 +23,32 @@ export class CierreMensualDepositosExporterService {
   ) {
   }
 
+
+  // =========================================================
+  // EXPORTAR
+  // =========================================================
+
   exportar(
     preview: CierreMensualDepositosPreview,
     fechaCierre: string
   ): void {
 
     if (!preview?.detalle?.length) {
-      alert('No hay información para exportar.');
+
+      alert(
+        'No hay información para exportar.'
+      );
+
       return;
     }
 
+
     const hojas: ExcelSheetOptions[] = [];
+
+
+    // =====================================================
+    // 1. RESUMEN GENERAL
+    // =====================================================
 
     hojas.push(
       this.crearResumenGeneral(
@@ -39,11 +57,32 @@ export class CierreMensualDepositosExporterService {
       )
     );
 
+
+    // =====================================================
+    // 2. RESUMEN POR AGENCIA
+    // =====================================================
+
+    hojas.push(
+      this.crearResumenAgencias(
+        preview.resumenAgencias || []
+      )
+    );
+
+
+    // =====================================================
+    // 3. RESUMEN POR AGENCIA + FORMA
+    // =====================================================
+
     hojas.push(
       this.crearResumenFormas(
         preview.resumenFormas || []
       )
     );
+
+
+    // =====================================================
+    // 4. DETALLE GENERAL
+    // =====================================================
 
     hojas.push(
       this.crearDetalleGeneral(
@@ -51,7 +90,33 @@ export class CierreMensualDepositosExporterService {
       )
     );
 
-    for (const forma of preview.resumenFormas || []) {
+
+    // =====================================================
+    // 5. DETALLE POR AGENCIA
+    // =====================================================
+
+    for (
+      const agencia
+      of preview.resumenAgencias || []
+    ) {
+
+      hojas.push(
+        this.crearDetalleAgencia(
+          preview,
+          agencia
+        )
+      );
+    }
+
+
+    // =====================================================
+    // 6. DETALLE POR AGENCIA + FORMA
+    // =====================================================
+
+    for (
+      const forma
+      of preview.resumenFormas || []
+    ) {
 
       hojas.push(
         this.crearDetalleForma(
@@ -59,8 +124,12 @@ export class CierreMensualDepositosExporterService {
           forma
         )
       );
-
     }
+
+
+    // =====================================================
+    // 7. GENERAR ARCHIVO
+    // =====================================================
 
     this.excelExport.exportar({
 
@@ -70,24 +139,35 @@ export class CierreMensualDepositosExporterService {
       hojas
 
     });
-
   }
+
+
+  // =========================================================
+  // RESUMEN GENERAL
+  // =========================================================
 
   private crearResumenGeneral(
     preview: CierreMensualDepositosPreview,
     fechaCierre: string
   ): ExcelSheetOptions {
 
-    const r = preview.resumen;
+    const r =
+      preview.resumen;
+
 
     return {
 
-      nombreHoja: 'Resumen',
+      nombreHoja:
+        'Resumen',
 
-      titulo: 'CIERRE MENSUAL DEPÓSITOS',
+      titulo:
+        'CIERRE MENSUAL DEPÓSITOS',
 
       filtros: [
-        ['Fecha cierre', fechaCierre || '']
+        [
+          'Fecha cierre',
+          fechaCierre || ''
+        ]
       ],
 
       columnas: [
@@ -99,42 +179,51 @@ export class CierreMensualDepositosExporterService {
 
         [
           'Total cuentas',
-          Number(r?.totalCuentas || 0)
+          Number(
+            r?.totalCuentas || 0
+          )
         ],
 
         [
           'Saldo total',
-          Number(r?.saldoTotal || 0)
+          Number(
+            r?.saldoTotal || 0
+          )
         ],
 
         [
           'Total débitos',
-          Number(r?.totalDebitos || 0)
+          Number(
+            r?.totalDebitos || 0
+          )
         ],
 
         [
           'Total créditos',
-          Number(r?.totalCreditos || 0)
-        ],
-
-        [
-          'Total formas',
-          Number(r?.totalFormas || 0)
+          Number(
+            r?.totalCreditos || 0
+          )
         ],
 
         [
           'Hombres',
-          Number(r?.hombres || 0)
+          Number(
+            r?.hombres || 0
+          )
         ],
 
         [
           'Mujeres',
-          Number(r?.mujeres || 0)
+          Number(
+            r?.mujeres || 0
+          )
         ],
 
         [
           'Jurídicas',
-          Number(r?.juridicas || 0)
+          Number(
+            r?.juridicas || 0
+          )
         ]
 
       ],
@@ -143,10 +232,93 @@ export class CierreMensualDepositosExporterService {
         28,
         22
       ]
-
     };
-
   }
+
+
+  // =========================================================
+  // RESUMEN POR AGENCIA
+  // =========================================================
+
+  private crearResumenAgencias(
+    resumenAgencias: CierreMensualDepositosResumenAgencia[]
+  ): ExcelSheetOptions {
+
+    return {
+
+      nombreHoja:
+        'Resumen agencias',
+
+      titulo:
+        'RESUMEN POR AGENCIA',
+
+      columnas: [
+        'Agencia',
+        'Cuentas',
+        'Saldo',
+        'Débitos',
+        'Créditos',
+        'Hombres',
+        'Mujeres',
+        'Jurídicas'
+      ],
+
+      filas:
+        (resumenAgencias || [])
+          .map(
+            r => [
+
+              Number(
+                r.idAgencia || 0
+              ),
+
+              Number(
+                r.totalCuentas || 0
+              ),
+
+              Number(
+                r.saldoTotal || 0
+              ),
+
+              Number(
+                r.totalDebitos || 0
+              ),
+
+              Number(
+                r.totalCreditos || 0
+              ),
+
+              Number(
+                r.hombres || 0
+              ),
+
+              Number(
+                r.mujeres || 0
+              ),
+
+              Number(
+                r.juridicas || 0
+              )
+            ]
+          ),
+
+      anchos: [
+        12,
+        12,
+        18,
+        18,
+        18,
+        12,
+        12,
+        12
+      ]
+    };
+  }
+
+
+  // =========================================================
+  // RESUMEN POR AGENCIA + FORMA
+  // =========================================================
 
   private crearResumenFormas(
     resumenFormas: CierreMensualDepositosResumenForma[]
@@ -154,11 +326,14 @@ export class CierreMensualDepositosExporterService {
 
     return {
 
-      nombreHoja: 'Resumen formas',
+      nombreHoja:
+        'Resumen formas',
 
-      titulo: 'RESUMEN POR FORMAS',
+      titulo:
+        'RESUMEN POR AGENCIA Y FORMA',
 
       columnas: [
+        'Agencia',
         'Código',
         'Forma',
         'Cuentas',
@@ -170,29 +345,51 @@ export class CierreMensualDepositosExporterService {
         'Jurídicas'
       ],
 
-      filas: (resumenFormas || []).map(r => [
+      filas:
+        (resumenFormas || [])
+          .map(
+            r => [
 
-        r.codigoForma || '',
+              Number(
+                r.idAgencia || 0
+              ),
 
-        r.nombreForma || '',
+              r.codigoForma || '',
 
-        Number(r.cantidadCuentas || 0),
+              r.nombreForma || '',
 
-        Number(r.saldoTotal || 0),
+              Number(
+                r.cantidadCuentas || 0
+              ),
 
-        Number(r.totalDebitos || 0),
+              Number(
+                r.saldoTotal || 0
+              ),
 
-        Number(r.totalCreditos || 0),
+              Number(
+                r.totalDebitos || 0
+              ),
 
-        Number(r.hombres || 0),
+              Number(
+                r.totalCreditos || 0
+              ),
 
-        Number(r.mujeres || 0),
+              Number(
+                r.hombres || 0
+              ),
 
-        Number(r.juridicas || 0)
+              Number(
+                r.mujeres || 0
+              ),
 
-      ]),
+              Number(
+                r.juridicas || 0
+              )
+            ]
+          ),
 
       anchos: [
+        12,
         10,
         28,
         12,
@@ -203,10 +400,13 @@ export class CierreMensualDepositosExporterService {
         12,
         12
       ]
-
     };
-
   }
+
+
+  // =========================================================
+  // DETALLE GENERAL
+  // =========================================================
 
   private crearDetalleGeneral(
     preview: CierreMensualDepositosPreview
@@ -214,57 +414,120 @@ export class CierreMensualDepositosExporterService {
 
     return {
 
-      nombreHoja: 'Detalle general',
+      nombreHoja:
+        'Detalle general',
 
-      titulo: 'DETALLE GENERAL',
+      titulo:
+        'DETALLE GENERAL',
 
-      columnas: this.columnasDetalle(),
+      columnas:
+        this.columnasDetalle(),
 
-      filas: this.filasDetalle(
-        preview.detalle || []
-      ),
+      filas:
+        this.filasDetalle(
+          preview.detalle || []
+        ),
 
-      anchos: this.anchosDetalle()
-
+      anchos:
+        this.anchosDetalle()
     };
-
   }
+
+
+  // =========================================================
+  // DETALLE POR AGENCIA
+  // =========================================================
+
+  private crearDetalleAgencia(
+    preview: CierreMensualDepositosPreview,
+    agencia: CierreMensualDepositosResumenAgencia
+  ): ExcelSheetOptions {
+
+    const detalle =
+      (preview.detalle || [])
+        .filter(
+          d =>
+            d.idAgencia
+            === agencia.idAgencia
+        );
+
+
+    return {
+
+      nombreHoja:
+        this.nombreHojaSegura(
+          `Agencia-${agencia.idAgencia}`
+        ),
+
+      titulo:
+        `AGENCIA ${agencia.idAgencia}`,
+
+      columnas:
+        this.columnasDetalle(),
+
+      filas:
+        this.filasDetalle(
+          detalle
+        ),
+
+      anchos:
+        this.anchosDetalle()
+    };
+  }
+
+
+  // =========================================================
+  // DETALLE POR AGENCIA + FORMA
+  // =========================================================
 
   private crearDetalleForma(
     preview: CierreMensualDepositosPreview,
     forma: CierreMensualDepositosResumenForma
   ): ExcelSheetOptions {
 
-    const detalle = (preview.detalle || [])
-      .filter(
-        d => d.codigoForma === forma.codigoForma
-      );
+    const detalle =
+      (preview.detalle || [])
+        .filter(
+          d =>
+            d.idAgencia === forma.idAgencia
+            &&
+            d.codigoForma === forma.codigoForma
+        );
+
 
     return {
 
       nombreHoja:
         this.nombreHojaSegura(
-          `${forma.codigoForma}-${forma.nombreForma}`
+          `A${forma.idAgencia}-${forma.codigoForma}`
         ),
 
       titulo:
-        `${forma.codigoForma} - ${forma.nombreForma}`,
+        `AGENCIA ${forma.idAgencia} - `
+        + `${forma.codigoForma} - ${forma.nombreForma}`,
 
-      columnas: this.columnasDetalle(),
+      columnas:
+        this.columnasDetalle(),
 
-      filas: this.filasDetalle(
-        detalle
-      ),
+      filas:
+        this.filasDetalle(
+          detalle
+        ),
 
-      anchos: this.anchosDetalle()
-
+      anchos:
+        this.anchosDetalle()
     };
-
   }
+
+
+  // =========================================================
+  // COLUMNAS DETALLE
+  // =========================================================
 
   private columnasDetalle(): string[] {
 
     return [
+      'Agencia',
       'Forma',
       'Nombre forma',
       'Cuenta',
@@ -284,58 +547,85 @@ export class CierreMensualDepositosExporterService {
       'Fecha final',
       'Tasa'
     ];
-
   }
+
+
+  // =========================================================
+  // FILAS DETALLE
+  // =========================================================
 
   private filasDetalle(
-    detalle: any[]
+    detalle: CierreMensualDepositosDetalle[]
   ): any[][] {
 
-    return (detalle || []).map(item => [
+    return (detalle || [])
+      .map(
+        item => [
 
-      item.codigoForma || '',
+          Number(
+            item.idAgencia || 0
+          ),
 
-      item.nombreForma || '',
+          item.codigoForma || '',
 
-      item.codigoCuenta || '',
+          item.nombreForma || '',
 
-      item.documento || '',
+          item.codigoCuenta || '',
 
-      item.nombreCompleto || '',
+          item.documento || '',
 
-      item.tipoPersona || '',
+          item.nombreCompleto || '',
 
-      item.nombreGenero || '',
+          item.tipoPersona || '',
 
-      item.estadoCuenta || '',
+          item.nombreGenero || '',
 
-      item.fechaAperturaCuenta || '',
+          item.estadoCuenta || '',
 
-      Number(item.saldoCierre || 0),
+          item.fechaAperturaCuenta || '',
 
-      Number(item.totalDebitos || 0),
+          Number(
+            item.saldoCierre || 0
+          ),
 
-      Number(item.totalCreditos || 0),
+          Number(
+            item.totalDebitos || 0
+          ),
 
-      item.gmfCuenta || '',
+          Number(
+            item.totalCreditos || 0
+          ),
 
-      item.fechaGmf || '',
+          item.gmfCuenta || '',
 
-      Number(item.plazo || 0),
+          item.fechaGmf || '',
 
-      Number(item.cuotaMensual || 0),
+          Number(
+            item.plazo || 0
+          ),
 
-      item.fechaFinal || '',
+          Number(
+            item.cuotaMensual || 0
+          ),
 
-      Number(item.tasa || 0)
+          item.fechaFinal || '',
 
-    ]);
-
+          Number(
+            item.tasa || 0
+          )
+        ]
+      );
   }
+
+
+  // =========================================================
+  // ANCHOS DETALLE
+  // =========================================================
 
   private anchosDetalle(): number[] {
 
     return [
+      10,
       10,
       28,
       16,
@@ -355,17 +645,28 @@ export class CierreMensualDepositosExporterService {
       16,
       10
     ];
-
   }
+
+
+  // =========================================================
+  // NOMBRE DE HOJA SEGURO
+  // =========================================================
 
   private nombreHojaSegura(
     nombre: string
   ): string {
 
-    return String(nombre || 'Detalle')
-      .replace(/[\\/?*[\]:]/g, '')
-      .substring(0, 31);
-
+    return String(
+      nombre || 'Detalle'
+    )
+      .replace(
+        /[\\/?*[\]:]/g,
+        ''
+      )
+      .substring(
+        0,
+        31
+      );
   }
 
 }

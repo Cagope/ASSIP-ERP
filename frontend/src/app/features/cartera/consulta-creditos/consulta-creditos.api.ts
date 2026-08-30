@@ -23,6 +23,7 @@ import {
   ConsultaCreditoExtracto,
   ConsultaCreditoIntegral,
   ConsultaCreditoInteres,
+  ConsultaCreditoResultadoMensual,
   ConsultaCreditoResumen,
   ConsultaCreditoSeguro
 } from './consulta-creditos.models';
@@ -287,6 +288,21 @@ export class ConsultaCreditosApi {
 
   }
 
+  // =========================================================
+  // RESULTADOS MENSUALES
+  // =========================================================
+
+  listarResultadosMensuales(
+    idCarteraCredito: number
+  ): Observable<ConsultaCreditoResultadoMensual[]> {
+
+    return this.http.get<
+      ConsultaCreditoResultadoMensual[]
+    >(
+      `${this.baseUrl}/${idCarteraCredito}/resultados-mensuales`
+    );
+
+  }
 
   // =========================================================
   // CONSULTA INTEGRAL

@@ -1198,16 +1198,16 @@
         <article
           class="modulo-card modulo-card--accion"
           [class.modulo-card--activo]="
-      moduloRelacionadoAbierto('extracto')
-    ">
+            moduloRelacionadoAbierto('extracto')
+          ">
 
           <strong>
             {{ creditoSeleccionado.extracto.length }}
           </strong>
 
           <span>
-      Movimientos del extracto
-    </span>
+            Movimientos del extracto
+          </span>
 
           <button
             type="button"
@@ -1232,16 +1232,16 @@
         <article
           class="modulo-card modulo-card--accion"
           [class.modulo-card--activo]="
-      moduloRelacionadoAbierto('seguros')
-    ">
+            moduloRelacionadoAbierto('seguros')
+          ">
 
           <strong>
             {{ creditoSeleccionado.seguros.length }}
           </strong>
 
           <span>
-      Configuraciones de seguro
-    </span>
+            Configuraciones de seguro
+          </span>
 
           <button
             type="button"
@@ -1270,59 +1270,140 @@
           </strong>
 
           <span>
-      Registros de alivios
-    </span>
+            Registros de alivios
+          </span>
 
         </article>
-
 
         <!-- =================================================== -->
         <!-- INTERESES CAUSADOS -->
         <!-- =================================================== -->
 
-        <article>
+        <article
+          class="modulo-card modulo-card--accion"
+          [class.modulo-card--activo]="
+            moduloRelacionadoAbierto('intereses')
+          ">
 
           <strong>
             {{ creditoSeleccionado.interesesCausados.length }}
           </strong>
 
           <span>
-      Causaciones de intereses
-    </span>
+            Causaciones de intereses
+          </span>
+
+          <button
+            type="button"
+            class="btn btn--primary btn-sm modulo-card__accion"
+            (click)="abrirModuloRelacionado('intereses')">
+
+            {{
+            moduloRelacionadoAbierto('intereses')
+            ? 'Cerrar intereses'
+            : 'Ver intereses'
+            }}
+
+          </button>
 
         </article>
-
 
         <!-- =================================================== -->
         <!-- EVALUACIONES -->
         <!-- =================================================== -->
 
-        <article>
+        <article
+          class="modulo-card modulo-card--accion"
+          [class.modulo-card--activo]="
+            moduloRelacionadoAbierto('evaluaciones')
+          ">
 
           <strong>
             {{ creditoSeleccionado.evaluaciones.length }}
           </strong>
 
           <span>
-      Evaluaciones de cartera
-    </span>
+            Evaluaciones de cartera
+          </span>
+
+          <button
+            type="button"
+            class="btn btn--primary btn-sm modulo-card__accion"
+            (click)="abrirModuloRelacionado('evaluaciones')">
+
+            {{
+            moduloRelacionadoAbierto('evaluaciones')
+            ? 'Cerrar evaluaciones'
+            : 'Ver evaluaciones'
+            }}
+
+          </button>
 
         </article>
-
 
         <!-- =================================================== -->
         <!-- PRÓRROGAS -->
         <!-- =================================================== -->
 
-        <article>
+        <article
+          class="modulo-card modulo-card--accion"
+          [class.modulo-card--activo]="
+            moduloRelacionadoAbierto('prorrogas')
+          ">
 
           <strong>
             {{ creditoSeleccionado.prorrogas.length }}
           </strong>
 
           <span>
-      Prórrogas del crédito
-    </span>
+            Prórrogas del crédito
+          </span>
+
+          <button
+            type="button"
+            class="btn btn--primary btn-sm modulo-card__accion"
+            (click)="abrirModuloRelacionado('prorrogas')">
+
+            {{
+            moduloRelacionadoAbierto('prorrogas')
+            ? 'Cerrar prórrogas'
+            : 'Ver prórrogas'
+            }}
+
+          </button>
+
+        </article>
+
+        <!-- =================================================== -->
+        <!-- RESULTADOS MENSUALES -->
+        <!-- =================================================== -->
+
+        <article
+          class="modulo-card modulo-card--accion"
+          [class.modulo-card--activo]="
+            moduloRelacionadoAbierto('resultadosMensuales')
+          ">
+
+          <strong>
+            {{ creditoSeleccionado.resultadosMensuales.length }}
+          </strong>
+
+          <span>
+            Resultados mensuales
+          </span>
+
+          <button
+            type="button"
+            class="btn btn--primary btn-sm modulo-card__accion"
+            (click)="abrirModuloRelacionado('resultadosMensuales')">
+
+            {{
+            moduloRelacionadoAbierto('resultadosMensuales')
+            ? 'Cerrar resultados'
+            : 'Ver resultados'
+            }}
+
+          </button>
 
         </article>
 
@@ -1355,136 +1436,50 @@
       (cerrar)="cerrarModuloRelacionado()">
     </app-consulta-creditos-seguros>
 
+    <!-- ===================================================== -->
+    <!-- INTERESES CAUSADOS DEL CRÉDITO                        -->
+    <!-- ===================================================== -->
+
+    <app-consulta-creditos-intereses
+      *ngIf="moduloRelacionadoAbierto('intereses')"
+      [credito]="credito"
+      [intereses]="creditoSeleccionado.interesesCausados"
+      (cerrar)="cerrarModuloRelacionado()">
+    </app-consulta-creditos-intereses>
+
 
     <!-- ===================================================== -->
-    <!-- ÚLTIMA EVALUACIÓN                                     -->
+    <!-- EVALUACIONES DE CARTERA DEL CRÉDITO                   -->
     <!-- ===================================================== -->
 
-    <section
-      *ngIf="creditoSeleccionado.ultimaEvaluacion as evaluacion"
-      class="consulta-bloque">
+    <app-consulta-creditos-evaluaciones
+      *ngIf="moduloRelacionadoAbierto('evaluaciones')"
+      [credito]="credito"
+      [evaluaciones]="creditoSeleccionado.evaluaciones"
+      (cerrar)="cerrarModuloRelacionado()">
+    </app-consulta-creditos-evaluaciones>
 
-      <div class="bloque-encabezado">
+    <!-- ===================================================== -->
+    <!-- PRÓRROGAS DEL CRÉDITO                                 -->
+    <!-- ===================================================== -->
 
-        <div>
+    <app-consulta-creditos-prorrogas
+      *ngIf="moduloRelacionadoAbierto('prorrogas')"
+      [credito]="credito"
+      [prorrogas]="creditoSeleccionado.prorrogas"
+      (cerrar)="cerrarModuloRelacionado()">
+    </app-consulta-creditos-prorrogas>
 
-          <h2>
-            Última evaluación de cartera
-          </h2>
+    <!-- ===================================================== -->
+    <!-- RESULTADOS MENSUALES DEL CRÉDITO                      -->
+    <!-- ===================================================== -->
 
-          <span>
-            Estado más reciente de la evaluación del crédito.
-          </span>
-
-        </div>
-
-      </div>
-
-
-      <div class="datos-grid">
-
-        <div>
-
-          <span>
-            Fecha de evaluación
-          </span>
-
-          <strong>
-            {{
-            evaluacion.fechaEvaluacion
-            ? (
-            evaluacion.fechaEvaluacion
-            | date:'dd/MM/yyyy'
-            )
-            : ''
-            }}
-          </strong>
-
-        </div>
-
-
-        <div>
-
-          <span>
-            Riesgo anterior
-          </span>
-
-          <strong>
-            {{ evaluacion.edadRiesgoAnterior || '' }}
-          </strong>
-
-        </div>
-
-
-        <div>
-
-          <span>
-            Riesgo inicial
-          </span>
-
-          <strong>
-            {{ evaluacion.edadRiesgoInicial || '' }}
-          </strong>
-
-        </div>
-
-
-        <div>
-
-          <span>
-            Edad de mora
-          </span>
-
-          <strong>
-            {{ evaluacion.edadMora || '' }}
-          </strong>
-
-        </div>
-
-
-        <div>
-
-          <span>
-            Riesgo nuevo
-          </span>
-
-          <strong>
-            {{ evaluacion.edadRiesgoNueva || '' }}
-          </strong>
-
-        </div>
-
-
-        <div>
-
-          <span>
-            Acción
-          </span>
-
-          <strong>
-            {{ evaluacion.accionEvaluacion || '' }}
-          </strong>
-
-        </div>
-
-      </div>
-
-
-      <div
-        *ngIf="evaluacion.comentarioEvaluacion"
-        class="detalle-observacion">
-
-        <strong>
-          Comentario
-        </strong>
-
-        <span>
-          {{ evaluacion.comentarioEvaluacion }}
-        </span>
-
-      </div>
-
-    </section>
+    <app-consulta-creditos-resultados-mensuales
+      *ngIf="moduloRelacionadoAbierto('resultadosMensuales')"
+      [credito]="credito"
+      [resultadosMensuales]="creditoSeleccionado.resultadosMensuales"
+      (cerrar)="cerrarModuloRelacionado()">
+    </app-consulta-creditos-resultados-mensuales>
 
   </ng-container>
 

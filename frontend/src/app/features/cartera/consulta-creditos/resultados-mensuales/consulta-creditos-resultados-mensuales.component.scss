@@ -1,0 +1,549 @@
+@use '../../../../../styles/forms';
+@use '../../../../../styles/informes-base';
+
+
+/* =========================================
+   CONTENEDOR
+========================================= */
+
+.resultados-mensuales {
+  margin-top: 18px;
+}
+
+
+/* =========================================
+   ENCABEZADO
+========================================= */
+
+.bloque-encabezado {
+  display: flex;
+
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  margin-bottom: 18px;
+
+  h2 {
+    margin: 0;
+
+    color: #111827;
+
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  span {
+    display: block;
+
+    margin-top: 5px;
+
+    color: #667085;
+
+    font-size: 13px;
+    line-height: 1.45;
+  }
+}
+
+
+/* =========================================
+   ESTADO VACÍO
+========================================= */
+
+.estado-vacio {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+
+  padding: 24px;
+
+  background: #f9fafb;
+
+  border: 1px dashed #d0d5dd;
+  border-radius: 10px;
+
+  text-align: center;
+
+  strong {
+    color: #344054;
+
+    font-size: 14px;
+  }
+
+  span {
+    color: #667085;
+
+    font-size: 13px;
+  }
+}
+
+
+/* =========================================
+   RESUMEN
+========================================= */
+
+.resumen-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(7, minmax(120px, 1fr));
+
+  gap: 10px;
+
+  margin-bottom: 18px;
+
+  article {
+    min-width: 0;
+
+    padding: 13px 14px;
+
+    background: #fff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+
+    span {
+      display: block;
+
+      margin-bottom: 5px;
+
+      color: #667085;
+
+      font-size: 11px;
+      font-weight: 600;
+
+      white-space: nowrap;
+    }
+
+    strong {
+      color: #111827;
+
+      font-size: 15px;
+      font-weight: 700;
+
+      white-space: nowrap;
+    }
+  }
+}
+
+
+.resumen-saldo {
+  border-left: 3px solid #2563eb !important;
+}
+
+
+.resumen-mora {
+  border-left: 3px solid #d97706 !important;
+}
+
+
+.resumen-deterioro {
+  border-left: 3px solid #dc2626 !important;
+}
+
+
+.resumen-pe {
+  border-left: 3px solid #7c3aed !important;
+}
+
+
+/* =========================================
+   SECCIONES
+========================================= */
+
+.seccion-titulo {
+  margin-bottom: 10px;
+
+  color: #344054;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+
+.subgrupo {
+  margin-top: 16px;
+}
+
+
+/* =========================================
+   ÚLTIMO CORTE
+========================================= */
+
+.ultimo-corte {
+  margin-bottom: 18px;
+
+  padding: 16px;
+
+  background: #f8fafc;
+
+  border: 1px solid #dbe3ea;
+  border-radius: 12px;
+}
+
+
+.ultimo-corte-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(6, minmax(130px, 1fr));
+
+  gap: 10px;
+
+  article {
+    min-width: 0;
+
+    padding: 11px 12px;
+
+    background: #fff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 9px;
+
+    span {
+      display: block;
+
+      margin-bottom: 5px;
+
+      color: #667085;
+
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    strong {
+      color: #111827;
+
+      font-size: 13px;
+      font-weight: 700;
+
+      white-space: nowrap;
+    }
+  }
+}
+
+
+/* =========================================
+   EDADES
+========================================= */
+
+.edades-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(6, minmax(110px, 1fr));
+
+  gap: 10px;
+
+  article {
+    padding: 10px 12px;
+
+    background: #fff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 9px;
+
+    span {
+      display: block;
+
+      margin-bottom: 7px;
+
+      color: #667085;
+
+      font-size: 11px;
+      font-weight: 600;
+    }
+  }
+}
+
+
+.edad {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-width: 27px;
+  min-height: 24px;
+
+  padding: 2px 7px;
+
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+
+  color: #344054;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+
+.edad--a {
+  background: #ecfdf3;
+
+  border-color: #bbf7d0;
+
+  color: #166534;
+}
+
+
+.edad--b {
+  background: #eff6ff;
+
+  border-color: #bfdbfe;
+
+  color: #1d4ed8;
+}
+
+
+.edad--c {
+  background: #fffbeb;
+
+  border-color: #fde68a;
+
+  color: #92400e;
+}
+
+
+.edad--d {
+  background: #fff7ed;
+
+  border-color: #fed7aa;
+
+  color: #c2410c;
+}
+
+
+.edad--e {
+  background: #fef2f2;
+
+  border-color: #fecaca;
+
+  color: #991b1b;
+}
+
+
+/* =========================================
+   VALORES
+========================================= */
+
+.valores-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(6, minmax(130px, 1fr));
+
+  gap: 10px;
+
+  article {
+    min-width: 0;
+
+    padding: 10px 12px;
+
+    background: #fff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 9px;
+
+    span {
+      display: block;
+
+      margin-bottom: 5px;
+
+      color: #667085;
+
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    strong {
+      color: #344054;
+
+      font-size: 12px;
+      font-weight: 700;
+
+      white-space: nowrap;
+    }
+  }
+}
+
+
+/* =========================================
+   HISTÓRICO
+========================================= */
+
+.historico {
+  margin-top: 18px;
+}
+
+
+/* =========================================
+   TABLA
+========================================= */
+
+.tabla-contenedor {
+  width: 100%;
+
+  overflow-x: auto;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+
+.tabla-resultados {
+  width: 100%;
+
+  min-width: 2500px;
+
+  border-collapse: collapse;
+
+  font-size: 11px;
+
+  thead {
+    position: sticky;
+
+    top: 0;
+
+    z-index: 2;
+  }
+
+  th {
+    padding: 8px 9px;
+
+    background: #f9fafb;
+
+    border-bottom: 1px solid #dfe3e8;
+
+    color: #344054;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    text-align: left;
+
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 8px 9px;
+
+    border-bottom: 1px solid #f0f2f5;
+
+    color: #344054;
+
+    vertical-align: middle;
+
+    white-space: nowrap;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  tbody tr:hover {
+    background: #f8fafc;
+  }
+}
+
+
+.center {
+  text-align: center !important;
+}
+
+
+.numero {
+  text-align: right !important;
+}
+
+
+.total {
+  font-weight: 700;
+}
+
+
+/* =========================================
+   VARIACIONES
+========================================= */
+
+.variacion-positiva {
+  color: #b42318 !important;
+
+  font-weight: 700;
+}
+
+
+.variacion-negativa {
+  color: #027a48 !important;
+
+  font-weight: 700;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1350px) {
+
+  .resumen-grid {
+    grid-template-columns:
+      repeat(4, minmax(120px, 1fr));
+  }
+
+  .ultimo-corte-grid,
+  .edades-grid,
+  .valores-grid {
+    grid-template-columns:
+      repeat(3, minmax(120px, 1fr));
+  }
+
+}
+
+
+@media (max-width: 900px) {
+
+  .bloque-encabezado {
+    flex-direction: column;
+
+    align-items: stretch;
+
+    .btn {
+      align-self: flex-start;
+    }
+  }
+
+  .resumen-grid {
+    grid-template-columns:
+      repeat(2, minmax(120px, 1fr));
+  }
+
+  .ultimo-corte-grid,
+  .edades-grid,
+  .valores-grid {
+    grid-template-columns:
+      repeat(2, minmax(120px, 1fr));
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .resumen-grid,
+  .ultimo-corte-grid,
+  .edades-grid,
+  .valores-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bloque-encabezado {
+
+    .btn {
+      width: 100%;
+    }
+  }
+
+}

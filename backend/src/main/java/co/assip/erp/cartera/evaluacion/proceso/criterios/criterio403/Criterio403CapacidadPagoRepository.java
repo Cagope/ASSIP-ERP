@@ -19,17 +19,17 @@ public class Criterio403CapacidadPagoRepository {
     // =========================================================
     // OBTENER DATOS DEL CRITERIO 403 - CAPACIDAD DE PAGO
     //
-    // Los datos económicos se toman exclusivamente de la
-    // fotografía histórica de Hoja de Vida correspondiente
+    // Los datos econÃ³micos se toman exclusivamente de la
+    // fotografÃ­a histÃ³rica de Hoja de Vida correspondiente
     // a la misma fecha de corte de la cartera.
     //
-    // La fotografía ya contiene:
+    // La fotografÃ­a ya contiene:
     //
     // ingresos_totales
     // egresos_totales
     //
     // Por lo tanto, estos valores no se reconstruyen a partir
-    // de los diferentes conceptos económicos.
+    // de los diferentes conceptos econÃ³micos.
     // =========================================================
 
     public List<Criterio403DatoDTO> obtenerDatos(
@@ -75,10 +75,15 @@ public class Criterio403CapacidadPagoRepository {
                        cc.id_datos_personal
 
                 WHERE cierre.fecha_corte =
-                      :fechaCorte
+                       :fechaCorte
+
+                   AND COALESCE(
+                           cc.saldo_actual,
+                           0
+                       ) > 0
 
                 ORDER BY
-                    cierre.id_agencia,
+                    cc.id_agencia,
                     hv.documento,
                     cc.id_cartera_credito
                 """;

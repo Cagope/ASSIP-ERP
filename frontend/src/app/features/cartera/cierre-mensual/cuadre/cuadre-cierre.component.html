@@ -1,0 +1,507 @@
+<div class="cuadre-cierre">
+
+  <!-- ===================================================== -->
+  <!-- CABECERA -->
+  <!-- ===================================================== -->
+
+  <div class="cuadre-cierre__header">
+
+    <div>
+
+      <h3>
+        Cuadre Consolidado
+      </h3>
+
+      <p>
+        Control de valores Total, Anexo 1 y Pérdida Esperada.
+      </p>
+
+    </div>
+
+
+    <button
+      *ngIf="idCierreCartera"
+      type="button"
+      class="btn btn--secondary btn-sm"
+      [disabled]="cargando"
+      (click)="consultar()">
+
+      {{
+      cargando
+      ? 'Consultando...'
+      : 'Actualizar'
+      }}
+
+    </button>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- SIN CIERRE -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="!idCierreCartera"
+    class="cuadre-cierre__empty">
+
+    Seleccione un cierre para consultar su cuadre consolidado.
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CARGANDO -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="cargando"
+    class="cuadre-cierre__loading">
+
+    Consultando cuadre consolidado...
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- ERROR -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="error"
+    class="cuadre-cierre__message cuadre-cierre__message--error">
+
+    {{ error }}
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- RESULTADO -->
+  <!-- ===================================================== -->
+
+  <ng-container *ngIf="resultado as r">
+
+    <!-- =================================================== -->
+    <!-- ESTADO GENERAL -->
+    <!-- =================================================== -->
+
+    <div
+      class="cuadre-cierre__resultado"
+      [class.cuadre-cierre__resultado--ok]="r.cuadrado"
+      [class.cuadre-cierre__resultado--error]="!r.cuadrado">
+
+      <div>
+
+        <span>
+          Resultado del cuadre
+        </span>
+
+        <strong>
+          {{
+          r.cuadrado
+          ? 'Cuadre correcto'
+          : 'Cuadre con diferencias'
+          }}
+        </strong>
+
+        <small>
+          {{ r.mensaje }}
+        </small>
+
+      </div>
+
+
+      <div class="cuadre-cierre__estado">
+
+        {{ r.estado }}
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- POBLACIÓN -->
+    <!-- =================================================== -->
+
+    <section class="cuadre-cierre__section">
+
+      <h4>
+        Población
+      </h4>
+
+
+      <div class="cuadre-cierre__grid">
+
+        <div class="cuadre-cierre__card">
+
+          <span>
+            Total
+          </span>
+
+          <strong>
+            {{ formatearEntero(r.cantidadCreditosTotal) }}
+          </strong>
+
+        </div>
+
+
+        <div class="cuadre-cierre__card">
+
+          <span>
+            Anexo 1
+          </span>
+
+          <strong>
+            {{ formatearEntero(r.cantidadCreditosA1) }}
+          </strong>
+
+        </div>
+
+
+        <div class="cuadre-cierre__card">
+
+          <span>
+            Pérdida Esperada
+          </span>
+
+          <strong>
+            {{ formatearEntero(r.cantidadCreditosPe) }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- CONSOLIDADO PRINCIPAL -->
+    <!-- =================================================== -->
+
+    <section class="cuadre-cierre__section">
+
+      <h4>
+        Consolidado principal
+      </h4>
+
+
+      <div class="cuadre-cierre__table-wrapper">
+
+        <table>
+
+          <thead>
+
+          <tr>
+            <th>Concepto</th>
+            <th class="text-end">Total</th>
+            <th class="text-end">A1</th>
+            <th class="text-end">PE</th>
+            <th class="text-end">Diferencia</th>
+          </tr>
+
+          </thead>
+
+
+          <tbody>
+
+          <tr>
+            <td>Saldo actual</td>
+            <td class="text-end">{{ formatearMoneda(r.saldoActualTotal) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.saldoActualA1) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.saldoActualPe) }}</td>
+            <td
+              class="text-end"
+              [class.ok]="diferenciaOk(r.diferenciaSaldoActual)">
+              {{ formatearMoneda(r.diferenciaSaldoActual) }}
+            </td>
+          </tr>
+
+
+          <tr>
+            <td>Intereses causados</td>
+            <td class="text-end">{{ formatearMoneda(r.saldoInteresesCausadosTotal) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.saldoInteresesCausadosA1) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.saldoInteresesCausadosPe) }}</td>
+            <td
+              class="text-end"
+              [class.ok]="diferenciaOk(r.diferenciaInteresesCausados)">
+              {{ formatearMoneda(r.diferenciaInteresesCausados) }}
+            </td>
+          </tr>
+
+
+          <tr>
+            <td>Intereses contingentes</td>
+            <td class="text-end">{{ formatearMoneda(r.saldoInteresesContingentesTotal) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.saldoInteresesContingentesA1) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.saldoInteresesContingentesPe) }}</td>
+            <td
+              class="text-end"
+              [class.ok]="diferenciaOk(r.diferenciaInteresesContingentes)">
+              {{ formatearMoneda(r.diferenciaInteresesContingentes) }}
+            </td>
+          </tr>
+
+
+          <tr>
+            <td>Seguros</td>
+            <td class="text-end">{{ formatearMoneda(r.saldoSegurosTotal) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.saldoSegurosA1) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.saldoSegurosPe) }}</td>
+            <td
+              class="text-end"
+              [class.ok]="diferenciaOk(r.diferenciaSeguros)">
+              {{ formatearMoneda(r.diferenciaSeguros) }}
+            </td>
+          </tr>
+
+
+          <tr>
+            <td>Alivios</td>
+            <td class="text-end">{{ formatearMoneda(r.saldoAliviosTotal) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.saldoAliviosA1) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.saldoAliviosPe) }}</td>
+            <td
+              class="text-end"
+              [class.ok]="diferenciaOk(r.diferenciaAlivios)">
+              {{ formatearMoneda(r.diferenciaAlivios) }}
+            </td>
+          </tr>
+
+
+          <tr>
+            <td>Costas judiciales</td>
+            <td class="text-end">{{ formatearMoneda(r.valorCostasJudicialesTotal) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.valorCostasJudicialesA1) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.valorCostasJudicialesPe) }}</td>
+            <td
+              class="text-end"
+              [class.ok]="diferenciaOk(r.diferenciaCostasJudiciales)">
+              {{ formatearMoneda(r.diferenciaCostasJudiciales) }}
+            </td>
+          </tr>
+
+
+          <tr>
+            <td>Aportes reconocidos</td>
+            <td class="text-end">{{ formatearMoneda(r.valorAportesCreditoTotal) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.valorAportesCreditoA1) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.valorAportesCreditoPe) }}</td>
+            <td
+              class="text-end"
+              [class.ok]="diferenciaOk(r.diferenciaAportes)">
+              {{ formatearMoneda(r.diferenciaAportes) }}
+            </td>
+          </tr>
+
+
+          <tr>
+            <td>Garantías reconocidas</td>
+            <td class="text-end">{{ formatearMoneda(r.valorGarantiasCreditoTotal) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.valorGarantiasCreditoA1) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.valorGarantiasCreditoPe) }}</td>
+            <td
+              class="text-end"
+              [class.ok]="diferenciaOk(r.diferenciaGarantias)">
+              {{ formatearMoneda(r.diferenciaGarantias) }}
+            </td>
+          </tr>
+
+
+          <tr>
+            <td>Fondos de garantías</td>
+            <td class="text-end">{{ formatearMoneda(r.valorFondosGarantiasTotal) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.valorFondosGarantiasA1) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.valorFondosGarantiasPe) }}</td>
+            <td
+              class="text-end"
+              [class.ok]="diferenciaOk(r.diferenciaFondosGarantias)">
+              {{ formatearMoneda(r.diferenciaFondosGarantias) }}
+            </td>
+          </tr>
+
+
+          <tr>
+            <td>Otros conceptos</td>
+            <td class="text-end">{{ formatearMoneda(r.valorOtrosConceptosTotal) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.valorOtrosConceptosA1) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.valorOtrosConceptosPe) }}</td>
+            <td
+              class="text-end"
+              [class.ok]="diferenciaOk(r.diferenciaOtrosConceptos)">
+              {{ formatearMoneda(r.diferenciaOtrosConceptos) }}
+            </td>
+          </tr>
+
+
+          <tr class="cuadre-cierre__row-highlight">
+            <td>Deterioro capital</td>
+            <td class="text-end">{{ formatearMoneda(r.deterioroCapitalTotal) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.deterioroCapitalA1) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.deterioroCapitalPe) }}</td>
+            <td
+              class="text-end"
+              [class.ok]="diferenciaOk(r.diferenciaDeterioroCapital)">
+              {{ formatearMoneda(r.diferenciaDeterioroCapital) }}
+            </td>
+          </tr>
+
+
+          <tr class="cuadre-cierre__row-highlight">
+            <td>Deterioro intereses</td>
+            <td class="text-end">{{ formatearMoneda(r.deterioroInteresesTotal) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.deterioroInteresesA1) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.deterioroInteresesPe) }}</td>
+            <td
+              class="text-end"
+              [class.ok]="diferenciaOk(r.diferenciaDeterioroIntereses)">
+              {{ formatearMoneda(r.diferenciaDeterioroIntereses) }}
+            </td>
+          </tr>
+
+
+          <tr class="cuadre-cierre__row-highlight">
+            <td>Deterioro otros</td>
+            <td class="text-end">{{ formatearMoneda(r.deterioroOtrosTotal) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.deterioroOtrosA1) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.deterioroOtrosPe) }}</td>
+            <td
+              class="text-end"
+              [class.ok]="diferenciaOk(r.diferenciaDeterioroOtros)">
+              {{ formatearMoneda(r.diferenciaDeterioroOtros) }}
+            </td>
+          </tr>
+
+
+          <tr class="cuadre-cierre__row-highlight">
+            <td>Pérdida esperada</td>
+            <td class="text-end">{{ formatearMoneda(r.perdidaEsperadaTotal) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.perdidaEsperadaA1) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.perdidaEsperadaPe) }}</td>
+            <td
+              class="text-end"
+              [class.ok]="diferenciaOk(r.diferenciaPerdidaEsperada)">
+              {{ formatearMoneda(r.diferenciaPerdidaEsperada) }}
+            </td>
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- CONTROL PE -->
+    <!-- =================================================== -->
+
+    <section class="cuadre-cierre__section">
+
+      <h4>
+        Control Pérdida Esperada
+      </h4>
+
+
+      <div class="cuadre-cierre__table-wrapper">
+
+        <table>
+
+          <thead>
+
+          <tr>
+            <th>Concepto</th>
+            <th class="text-end">Resultado general</th>
+            <th class="text-end">Detalle PE</th>
+            <th class="text-end">Diferencia</th>
+          </tr>
+
+          </thead>
+
+
+          <tbody>
+
+          <tr>
+            <td>Pérdida esperada</td>
+            <td class="text-end">{{ formatearMoneda(r.perdidaEsperadaPe) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.perdidaEsperadaPeDetalle) }}</td>
+            <td
+              class="text-end"
+              [class.ok]="diferenciaOk(r.diferenciaPerdidaEsperadaPe)">
+              {{ formatearMoneda(r.diferenciaPerdidaEsperadaPe) }}
+            </td>
+          </tr>
+
+
+          <tr>
+            <td>Deterioro capital</td>
+            <td class="text-end">{{ formatearMoneda(r.deterioroCapitalPe) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.deterioroCapitalPeDetalle) }}</td>
+            <td
+              class="text-end"
+              [class.ok]="diferenciaOk(r.diferenciaDeterioroCapitalPe)">
+              {{ formatearMoneda(r.diferenciaDeterioroCapitalPe) }}
+            </td>
+          </tr>
+
+
+          <tr>
+            <td>Deterioro intereses</td>
+            <td class="text-end">{{ formatearMoneda(r.deterioroInteresesPe) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.deterioroInteresesPeDetalle) }}</td>
+            <td
+              class="text-end"
+              [class.ok]="diferenciaOk(r.diferenciaDeterioroInteresesPe)">
+              {{ formatearMoneda(r.diferenciaDeterioroInteresesPe) }}
+            </td>
+          </tr>
+
+
+          <tr>
+            <td>Deterioro otros</td>
+            <td class="text-end">{{ formatearMoneda(r.deterioroOtrosPe) }}</td>
+            <td class="text-end">{{ formatearMoneda(r.deterioroOtrosPeDetalle) }}</td>
+            <td
+              class="text-end"
+              [class.ok]="diferenciaOk(r.diferenciaDeterioroOtrosPe)">
+              {{ formatearMoneda(r.diferenciaDeterioroOtrosPe) }}
+            </td>
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- TOTAL PE -->
+    <!-- =================================================== -->
+
+    <section class="cuadre-cierre__section">
+
+      <div class="cuadre-cierre__pe-total">
+
+        <span>
+          Deterioro total PE
+        </span>
+
+        <strong>
+          {{ formatearMoneda(r.deterioroTotalPeDetalle) }}
+        </strong>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</div>

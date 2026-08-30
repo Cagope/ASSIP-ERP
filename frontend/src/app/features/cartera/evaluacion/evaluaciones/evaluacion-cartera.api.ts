@@ -117,13 +117,14 @@ export class EvaluacionCarteraApi {
   // MARCAR DEFINITIVA
   // =========================================================
 
-  marcarDefinitiva(
-    idEvaluacionCartera: number
-  ): Observable<EvaluacionCartera> {
+   marcarDefinitiva(
+     idEvaluacionCartera: number
+   ): Observable<EvaluacionCartera> {
 
-    return this.http.patch<EvaluacionCartera>(
-      `${this.baseUrl}/${idEvaluacionCartera}/definitiva`,
-      null
-    );
-  }
+     return this.http.put<EvaluacionCartera>(
+       `${this.baseUrl}/${idEvaluacionCartera}/definitiva`,
+       null
+     );
+   }
+
 }

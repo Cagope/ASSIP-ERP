@@ -8,13 +8,20 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * Causación de intereses del crédito.
+ * Movimiento de intereses causados del crédito.
  *
  * Fuente:
  * cartera.vw_cartera_intereses_causados_total
  *
- * Representa cada proceso de causación registrado
- * para un crédito.
+ * Representa cada movimiento registrado:
+ *
+ * - causación;
+ * - pago;
+ * - ajuste.
+ *
+ * El saldo se controla mediante:
+ *
+ * valor_debito - valor_credito
  */
 @Getter
 @Setter
@@ -28,7 +35,6 @@ public class ConsultaCreditoInteresDTO {
     private Integer idCarteraCredito;
 
     private String pagareCartera;
-
     private Integer idDatosPersonal;
 
     // =========================================================
@@ -54,86 +60,104 @@ public class ConsultaCreditoInteresDTO {
     private String descripcionEstadoJuridico;
 
     // =========================================================
-    // Período de causación
+    // Movimiento
     // =========================================================
 
-    private LocalDate fechaProceso;
+    private LocalDate fechaMovimiento;
 
-    private LocalDate periodoInicial;
-    private LocalDate periodoFinal;
+    private LocalDate fechaInicialPeriodo;
+    private LocalDate fechaFinalPeriodo;
 
-    private Integer diasLiquidados;
+    private Integer diasCausados;
 
     // =========================================================
     // Base de liquidación
     // =========================================================
 
-    private BigDecimal saldoCapital;
+    private BigDecimal saldoBase;
 
-    private BigDecimal saldoNetoPendiente;
+    private BigDecimal interesBruto;
 
-    private BigDecimal saldoBaseLiquidacion;
-
-    // =========================================================
-    // Tasas
-    // =========================================================
-
-    private BigDecimal tasaNominal;
-
-    private BigDecimal tasaEfectiva;
-
-    private BigDecimal tasaMora;
+    private BigDecimal porcentajeAplicacion;
 
     // =========================================================
-    // Valores causados
+    // Tasa
     // =========================================================
 
-    private BigDecimal interesCorrienteCausado;
-
-    private BigDecimal interesMoraCausado;
-
-    private BigDecimal seguroCausado;
-
-    private BigDecimal fondoGarantiaCausado;
-
-    private BigDecimal otrosConceptosCausados;
-
-    private BigDecimal totalCausado;
+    private BigDecimal tasaInteres;
 
     // =========================================================
-    // Valores pagados
+    // Débito / Crédito
     // =========================================================
 
-    private BigDecimal interesCorrientePagado;
+    private BigDecimal valorDebito;
 
-    private BigDecimal interesMoraPagado;
+    private BigDecimal valorCredito;
 
-    private BigDecimal seguroPagado;
+    private BigDecimal valorMovimiento;
 
-    private BigDecimal fondoGarantiaPagado;
-
-    private BigDecimal otrosConceptosPagados;
-
-    private BigDecimal totalPagado;
+    private String naturalezaMovimiento;
 
     // =========================================================
-    // Saldos
+    // Saldo acumulado
     // =========================================================
 
-    private BigDecimal saldoInteresCorriente;
-
-    private BigDecimal saldoInteresMora;
-
-    private BigDecimal saldoSeguro;
-
-    private BigDecimal saldoFondoGarantia;
-
-    private BigDecimal saldoOtrosConceptos;
-
-    private BigDecimal saldoPendiente;
+    private BigDecimal saldoInteresesAcumulado;
 
     // =========================================================
-    // Riesgo
+    // Comprobante
+    // =========================================================
+
+    private String tipoComprobante;
+
+    private String numeroComprobante;
+
+    private String comprobanteCompleto;
+
+    // =========================================================
+    // Observación
+    // =========================================================
+
+    private String observacionInteres;
+
+    // =========================================================
+    // Control del período
+    // =========================================================
+
+    private Integer diasCalendarioPeriodo;
+
+    private Boolean diasCausadosCoincidenPeriodo;
+
+    // =========================================================
+    // Secuencia
+    // =========================================================
+
+    private Long numeroMovimientoCredito;
+
+    private Long cantidadMovimientosCredito;
+
+    // =========================================================
+    // Resumen del crédito
+    // =========================================================
+
+    private Long cantidadMovimientos;
+
+    private Long cantidadDebitos;
+
+    private Long cantidadCreditos;
+
+    private BigDecimal totalDebitos;
+
+    private BigDecimal totalCreditos;
+
+    private BigDecimal saldoIntereses;
+
+    private LocalDate primeraFechaMovimiento;
+
+    private LocalDate ultimaFechaMovimiento;
+
+    // =========================================================
+    // Riesgo del crédito
     // =========================================================
 
     private String edadDeRiesgo;
@@ -144,43 +168,53 @@ public class ConsultaCreditoInteresDTO {
 
     private String descripcionEdadDeMora;
 
+    private String edadContable;
+
+    private String descripcionEdadContable;
+
     // =========================================================
-    // Estado
+    // Estado financiero del crédito
     // =========================================================
 
-    private Boolean procesoActivo;
+    private BigDecimal saldoActual;
 
-    private Boolean procesoAplicado;
+    private BigDecimal saldoNetoPendiente;
+
+    private Boolean creditoEnMora;
+
+    private Boolean riesgoAlto;
 
     private Boolean requiereRevision;
 
     // =========================================================
-    // Indicadores
+    // Alertas del crédito
     // =========================================================
 
-    private BigDecimal porcentajeCobrado;
+    private String nivelAlertaCredito;
 
-    private BigDecimal porcentajePendiente;
-
-    private Integer numeroProceso;
+    private String motivoAlertaCredito;
 
     // =========================================================
-    // Observaciones
+    // COMPATIBILIDAD TEMPORAL CON FRONT ACTUAL
     // =========================================================
+
+    private LocalDate fechaProceso;
+
+    private LocalDate periodoInicial;
+
+    private LocalDate periodoFinal;
+
+    private Integer diasLiquidados;
+
+    private BigDecimal saldoCapital;
+
+    private BigDecimal saldoBaseLiquidacion;
+
+    private BigDecimal tasaNominal;
+
+    private BigDecimal saldoPendiente;
 
     private String observacion;
-
-    private String comentario;
-
-    // =========================================================
-    // Alertas
-    // =========================================================
-
-    private String nivelAlerta;
-
-    private Integer ordenAlerta;
-
-    private String motivoAlerta;
 
     // =========================================================
     // Auditoría
@@ -193,5 +227,4 @@ public class ConsultaCreditoInteresDTO {
     private Integer fkSeguridadEdicion;
 
     private LocalDateTime fechaEdicion;
-
 }

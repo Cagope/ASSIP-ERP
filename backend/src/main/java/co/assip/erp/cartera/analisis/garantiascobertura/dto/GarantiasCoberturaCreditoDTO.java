@@ -1,0 +1,4 @@
+package co.assip.erp.cartera.analisis.garantiascobertura.dto;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+public record GarantiasCoberturaCreditoDTO(Integer idCierreCartera, LocalDate fechaCorte, Long idCarteraCredito, Long idDatosPersonal, String tipoDocumento, String documento, String nombreCompleto, String pagareCartera, Integer idAgencia, Long idLineaCredito, String codigoLineaCredito, String nombreLineaCredito, BigDecimal saldoCredito, Long cantidadBienes, BigDecimal valorGarantiasAsignadas, BigDecimal coberturaEfectivaCredito, BigDecimal exposicionNoCubierta, BigDecimal porcentajeCoberturaCredito, String estadoCoberturaCredito, Integer diasMora, String edadContableResultado, BigDecimal deterioroCapital, BigDecimal deterioroIntereses, BigDecimal deterioroOtros, BigDecimal deterioroTotal, Long cantidadCodeudoresActual, Boolean tieneCodeudorActual) {}

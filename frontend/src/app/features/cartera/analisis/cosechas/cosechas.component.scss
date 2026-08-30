@@ -1,0 +1,493 @@
+.cosechas-page {
+  padding: 1rem;
+}
+
+
+// =========================================================
+// PANELES
+// =========================================================
+
+.panel {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #dfe3e8;
+  border-radius: 8px;
+}
+
+.panel-titulo {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #25313c;
+}
+
+.panel-subtitulo {
+  margin-top: 0.25rem;
+  font-size: 0.82rem;
+  color: #667085;
+}
+
+
+// =========================================================
+// PARÁMETROS
+// =========================================================
+
+.parametros-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      6,
+      minmax(150px, 1fr)
+    );
+  gap: 0.8rem;
+  align-items: end;
+  margin-top: 1rem;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.campo label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #344054;
+}
+
+.campo input,
+.campo select {
+  width: 100%;
+  min-height: 36px;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid #cfd6dd;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.84rem;
+}
+
+.campo-accion {
+  justify-content: flex-end;
+}
+
+.campo-accion .btn {
+  min-height: 36px;
+}
+
+.indicador-ayuda {
+  margin-top: 0.8rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 6px;
+  background: #f7f8fa;
+  color: #59636e;
+  font-size: 0.8rem;
+}
+
+
+// =========================================================
+// RESUMEN
+// =========================================================
+
+.resumen-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      5,
+      minmax(150px, 1fr)
+    );
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.resumen-card {
+  padding: 0.9rem 1rem;
+  background: #fff;
+  border: 1px solid #dfe3e8;
+  border-radius: 8px;
+}
+
+.resumen-card strong {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 1.05rem;
+  color: #1f2937;
+}
+
+.resumen-label {
+  font-size: 0.75rem;
+  color: #667085;
+}
+
+
+// =========================================================
+// MATRIZ
+// =========================================================
+
+.panel-cabecera,
+.detalle-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.matriz-scroll {
+  overflow: auto;
+  max-width: 100%;
+  margin-top: 1rem;
+  border: 1px solid #e3e7eb;
+  border-radius: 6px;
+}
+
+.tabla-matriz {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.78rem;
+}
+
+.tabla-matriz th,
+.tabla-matriz td {
+  border-right: 1px solid #e3e7eb;
+  border-bottom: 1px solid #e3e7eb;
+}
+
+.tabla-matriz thead th {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  padding: 0.55rem;
+  background: #f4f6f8;
+  white-space: nowrap;
+  text-align: center;
+  font-weight: 700;
+}
+
+.tabla-matriz tbody td {
+  background: #fff;
+}
+
+.col-fija {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  background: #fff !important;
+}
+
+.tabla-matriz thead .col-fija {
+  z-index: 6;
+  background: #f4f6f8 !important;
+}
+
+.col-cosecha {
+  min-width: 95px;
+  padding: 0.55rem 0.7rem;
+}
+
+.col-originados {
+  min-width: 85px;
+}
+
+.col-desembolsado {
+  min-width: 130px;
+}
+
+.celda-wrapper {
+  min-width: 112px;
+  padding: 0;
+}
+
+.celda-matriz {
+  width: 100%;
+  min-height: 76px;
+  padding: 0.35rem 0.45rem;
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.13rem;
+  font: inherit;
+}
+
+.celda-matriz:hover {
+  outline: 2px solid rgba(0, 0, 0, 0.12);
+  outline-offset: -2px;
+}
+
+.celda-porcentaje {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.celda-valor {
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.celda-cantidad {
+  font-size: 0.68rem;
+  opacity: 0.8;
+}
+
+
+// =========================================================
+// ESCALA VISUAL
+// =========================================================
+
+.nivel-cero {
+  background: #f8fafc;
+  color: #667085;
+}
+
+.nivel-bajo {
+  background: #edf7ed;
+  color: #245b2a;
+}
+
+.nivel-medio {
+  background: #fff6df;
+  color: #7a5400;
+}
+
+.nivel-alto {
+  background: #eaf2ff;
+  color: #234f8b;
+}
+
+.riesgo-bajo {
+  background: #fff7dc;
+  color: #725200;
+}
+
+.riesgo-medio {
+  background: #ffe6c7;
+  color: #7a3f00;
+}
+
+.riesgo-alto {
+  background: #ffe2e2;
+  color: #8c2222;
+}
+
+
+// =========================================================
+// DETALLE
+// =========================================================
+
+.detalle-acciones {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.detalle-resumen {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  background: #f7f8fa;
+  border-radius: 6px;
+}
+
+.detalle-resumen div {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.detalle-resumen span {
+  color: #667085;
+  font-size: 0.78rem;
+}
+
+.detalle-resumen strong {
+  font-size: 0.9rem;
+}
+
+.detalle-toolbar {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.detalle-toolbar input {
+  width: 420px;
+  max-width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid #cfd6dd;
+  border-radius: 6px;
+  font-size: 0.82rem;
+}
+
+.detalle-toolbar select {
+  min-height: 34px;
+  border: 1px solid #cfd6dd;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.detalle-scroll {
+  overflow: auto;
+  margin-top: 0.75rem;
+  border: 1px solid #e3e7eb;
+  border-radius: 6px;
+}
+
+.tabla-detalle {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: 0.74rem;
+}
+
+.tabla-detalle th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 0.5rem 0.55rem;
+  background: #f4f6f8;
+  border-bottom: 1px solid #d9dee3;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.tabla-detalle td {
+  padding: 0.45rem 0.55rem;
+  border-bottom: 1px solid #edf0f2;
+  white-space: nowrap;
+}
+
+.tabla-detalle tbody tr:hover {
+  background: #f7f9fc;
+}
+
+.nombre-asociado {
+  min-width: 230px;
+}
+
+.texto-secundario {
+  display: block;
+  margin-top: 0.15rem;
+  color: #667085;
+  font-size: 0.68rem;
+}
+
+.numero {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.mora-activa {
+  font-weight: 700;
+}
+
+
+// =========================================================
+// PAGINACIÓN
+// =========================================================
+
+.paginacion {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+  font-size: 0.76rem;
+  color: #59636e;
+}
+
+
+// =========================================================
+// ESTADOS
+// =========================================================
+
+.loading,
+.empty {
+  padding: 1.2rem 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #667085;
+}
+
+.alert {
+  margin-top: 1rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+}
+
+.alert-error {
+  background: #fff1f1;
+  border: 1px solid #f2c9c9;
+  color: #9b2929;
+}
+
+
+// =========================================================
+// RESPONSIVE
+// =========================================================
+
+@media (
+  max-width: 1400px
+) {
+
+  .parametros-grid {
+    grid-template-columns:
+      repeat(
+        4,
+        minmax(160px, 1fr)
+      );
+  }
+
+  .resumen-grid {
+    grid-template-columns:
+      repeat(
+        3,
+        minmax(150px, 1fr)
+      );
+  }
+}
+
+
+@media (
+  max-width: 900px
+) {
+
+  .parametros-grid,
+  .resumen-grid {
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(140px, 1fr)
+      );
+  }
+
+  .detalle-cabecera {
+    flex-direction: column;
+  }
+}
+
+
+@media (
+  max-width: 600px
+) {
+
+  .parametros-grid,
+  .resumen-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detalle-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .detalle-toolbar input {
+    width: 100%;
+  }
+}

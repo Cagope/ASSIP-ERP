@@ -1,0 +1,561 @@
+<div class="curacion-reincidencia">
+
+  <div class="page-head">
+    <div>
+      <h1>Curación y Reincidencia</h1>
+      <p>
+        Seguimiento de episodios de deterioro de riesgo, recuperación a edad A
+        y reincidencia durante los seis meses posteriores a la cura.
+      </p>
+    </div>
+  </div>
+
+  <section class="panel filtros-panel">
+    <div class="panel-head">
+      <div>
+        <h2>Filtros</h2>
+        <span>El período corresponde al mes de inicio del episodio de riesgo.</span>
+      </div>
+
+      <div class="acciones">
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiarFiltros()"
+          [disabled]="cargando">
+          Limpiar
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="cargarAnalisis()"
+          [disabled]="cargando">
+          {{ cargando ? 'Consultando...' : 'Consultar' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="filtro-grid">
+      <div class="field">
+        <label>Período desde</label>
+        <input
+          type="date"
+          [(ngModel)]="periodoDesde">
+      </div>
+
+      <div class="field">
+        <label>Período hasta</label>
+        <input
+          type="date"
+          [(ngModel)]="periodoHasta">
+      </div>
+
+      <div class="field">
+        <label>Agencia</label>
+        <select [(ngModel)]="idAgencia">
+          <option [ngValue]="null">Todas</option>
+          <option
+            *ngFor="let a of opcionesAgencia"
+            [ngValue]="a.id">
+            {{ a.codigo }} - {{ a.descripcion }}
+          </option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Línea de crédito</label>
+        <select [(ngModel)]="idLineaCredito">
+          <option [ngValue]="null">Todas</option>
+          <option
+            *ngFor="let l of opcionesLinea"
+            [ngValue]="l.id">
+            {{ l.codigo }} - {{ l.descripcion }}
+          </option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Edad de entrada</label>
+        <select [(ngModel)]="edadEntrada">
+          <option value="">Todas</option>
+          <option value="B">B</option>
+          <option value="C">C</option>
+          <option value="D">D</option>
+          <option value="E">E</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="control-info" *ngIf="control">
+      Histórico disponible:
+      <strong>{{ control.primerCorteDisponible | date:'dd/MM/yyyy' }}</strong>
+      a
+      <strong>{{ control.ultimoCorteDisponible | date:'dd/MM/yyyy' }}</strong>.
+      Reincidencia medida a
+      <strong>{{ control.mesesSeguimientoReincidencia }} meses</strong>.
+    </div>
+  </section>
+
+  <div class="error" *ngIf="error">
+    {{ error }}
+  </div>
+
+  <ng-container *ngIf="resumen as r">
+
+    <section class="kpis">
+      <article class="kpi">
+        <span class="kpi-label">Episodios</span>
+        <strong>{{ r.episodios | number:'1.0-0' }}</strong>
+        <small>
+          {{ r.episodiosCurados | number:'1.0-0' }} curados ·
+          {{ r.episodiosAbiertos | number:'1.0-0' }} abiertos
+        </small>
+      </article>
+
+      <article class="kpi">
+        <span class="kpi-label">Tasa de cura observada</span>
+        <strong>{{ r.tasaCuraObservada | number:'1.2-2' }}%</strong>
+        <small>Curados sobre todos los episodios observados</small>
+      </article>
+
+      <article class="kpi">
+        <span class="kpi-label">Tiempo promedio hasta cura</span>
+        <strong>
+          {{ r.mesesPromedioCura == null ? '—' : (r.mesesPromedioCura | number:'1.2-2') }}
+        </strong>
+        <small>Meses entre inicio del episodio y retorno a A</small>
+      </article>
+
+      <article class="kpi">
+        <span class="kpi-label">Reincidencia a 6 meses</span>
+        <strong>
+          {{ r.tasaReincidencia6m == null ? '—' : ((r.tasaReincidencia6m | number:'1.2-2') + '%') }}
+        </strong>
+        <small>
+          {{ r.reincidentes6m | number:'1.0-0' }} de
+          {{ r.curasSeguimiento6m | number:'1.0-0' }} curas maduras
+        </small>
+      </article>
+
+      <article class="kpi">
+        <span class="kpi-label">Tiempo promedio hasta reincidencia</span>
+        <strong>
+          {{ r.mesesPromedioReincidencia == null ? '—' : (r.mesesPromedioReincidencia | number:'1.2-2') }}
+        </strong>
+        <small>Meses después de la cura</small>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Distribución del tiempo hasta la cura</h2>
+          <span>Incluye episodios curados y episodios que permanecen abiertos.</span>
+        </div>
+      </div>
+
+      <div class="grafico-wrap barras">
+        <div
+          class="barra-fila"
+          *ngFor="let item of distribucionCura">
+          <div class="barra-label">{{ item.descripcion }}</div>
+          <div class="barra-track">
+            <div
+              class="barra-fill"
+              [style.width.%]="anchoDistribucion(item.episodios)">
+            </div>
+          </div>
+          <div class="barra-valor">
+            <strong>{{ item.episodios | number:'1.0-0' }}</strong>
+            <span>{{ item.porcentajeEpisodios | number:'1.2-2' }}%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Tiempo hasta cura</th>
+              <th class="num">Episodios</th>
+              <th class="num">% episodios</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of distribucionCura">
+              <td>{{ item.descripcion }}</td>
+              <td class="num">{{ item.episodios | number:'1.0-0' }}</td>
+              <td class="num">{{ item.porcentajeEpisodios | number:'1.2-2' }}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Evolución por período de inicio</h2>
+          <span>Una fila por mes en que comenzó el episodio de riesgo.</span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Período</th>
+              <th class="num">Episodios</th>
+              <th class="num">Curados</th>
+              <th class="num">Abiertos</th>
+              <th class="num">Tasa cura</th>
+              <th class="num">Meses cura</th>
+              <th class="num">Curas 6M</th>
+              <th class="num">Reinc. 6M</th>
+              <th class="num">Tasa reinc.</th>
+              <th class="num">Meses reinc.</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of periodos; trackBy: trackByPeriodo">
+              <td>{{ p.periodoInicio | date:'MM/yyyy' }}</td>
+              <td class="num">{{ p.episodios | number:'1.0-0' }}</td>
+              <td class="num">{{ p.episodiosCurados | number:'1.0-0' }}</td>
+              <td class="num">{{ p.episodiosAbiertos | number:'1.0-0' }}</td>
+              <td class="num">{{ p.tasaCuraObservada | number:'1.2-2' }}%</td>
+              <td class="num">{{ p.mesesPromedioCura == null ? '—' : (p.mesesPromedioCura | number:'1.2-2') }}</td>
+              <td class="num">{{ p.curasSeguimiento6m | number:'1.0-0' }}</td>
+              <td class="num">{{ p.reincidentes6m | number:'1.0-0' }}</td>
+              <td class="num">{{ p.tasaReincidencia6m == null ? '—' : ((p.tasaReincidencia6m | number:'1.2-2') + '%') }}</td>
+              <td class="num">{{ p.mesesPromedioReincidencia == null ? '—' : (p.mesesPromedioReincidencia | number:'1.2-2') }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Resultados por agencia</h2>
+          <span>La agencia corresponde a la situación del crédito al inicio del episodio.</span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Agencia</th>
+              <th class="num">Episodios</th>
+              <th class="num">Curados</th>
+              <th class="num">Abiertos</th>
+              <th class="num">Tasa cura</th>
+              <th class="num">Meses cura</th>
+              <th class="num">Curas 6M</th>
+              <th class="num">Reinc. 6M</th>
+              <th class="num">Tasa reinc.</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let a of agencias; trackBy: trackBySegmento">
+              <td>
+                <strong>{{ a.codigo }}</strong>
+                <span class="cell-sub">{{ a.descripcion }}</span>
+              </td>
+              <td class="num">{{ a.episodios | number:'1.0-0' }}</td>
+              <td class="num">{{ a.episodiosCurados | number:'1.0-0' }}</td>
+              <td class="num">{{ a.episodiosAbiertos | number:'1.0-0' }}</td>
+              <td class="num">{{ a.tasaCuraObservada | number:'1.2-2' }}%</td>
+              <td class="num">{{ a.mesesPromedioCura == null ? '—' : (a.mesesPromedioCura | number:'1.2-2') }}</td>
+              <td class="num">{{ a.curasSeguimiento6m | number:'1.0-0' }}</td>
+              <td class="num">{{ a.reincidentes6m | number:'1.0-0' }}</td>
+              <td class="num">{{ a.tasaReincidencia6m == null ? '—' : ((a.tasaReincidencia6m | number:'1.2-2') + '%') }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Resultados por línea de crédito</h2>
+          <span>Siempre se muestran cantidad y porcentaje para interpretar correctamente poblaciones pequeñas.</span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Línea</th>
+              <th class="num">Episodios</th>
+              <th class="num">Curados</th>
+              <th class="num">Abiertos</th>
+              <th class="num">Tasa cura</th>
+              <th class="num">Meses cura</th>
+              <th class="num">Curas 6M</th>
+              <th class="num">Reinc. 6M</th>
+              <th class="num">Tasa reinc.</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let l of lineas; trackBy: trackBySegmento">
+              <td>
+                <strong>{{ l.codigo }}</strong>
+                <span class="cell-sub">{{ l.descripcion }}</span>
+              </td>
+              <td class="num">{{ l.episodios | number:'1.0-0' }}</td>
+              <td class="num">{{ l.episodiosCurados | number:'1.0-0' }}</td>
+              <td class="num">{{ l.episodiosAbiertos | number:'1.0-0' }}</td>
+              <td class="num">{{ l.tasaCuraObservada | number:'1.2-2' }}%</td>
+              <td class="num">{{ l.mesesPromedioCura == null ? '—' : (l.mesesPromedioCura | number:'1.2-2') }}</td>
+              <td class="num">{{ l.curasSeguimiento6m | number:'1.0-0' }}</td>
+              <td class="num">{{ l.reincidentes6m | number:'1.0-0' }}</td>
+              <td class="num">{{ l.tasaReincidencia6m == null ? '—' : ((l.tasaReincidencia6m | number:'1.2-2') + '%') }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Resultados por edad de entrada</h2>
+          <span>Clasificación de riesgo con la que comienza cada episodio.</span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Edad entrada</th>
+              <th class="num">Episodios</th>
+              <th class="num">Curados</th>
+              <th class="num">Abiertos</th>
+              <th class="num">Tasa cura</th>
+              <th class="num">Meses cura</th>
+              <th class="num">Curas 6M</th>
+              <th class="num">Reinc. 6M</th>
+              <th class="num">Tasa reinc.</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let e of edadesEntrada; trackBy: trackByEdad">
+              <td><span class="badge-edad">{{ e.edadEntrada }}</span></td>
+              <td class="num">{{ e.episodios | number:'1.0-0' }}</td>
+              <td class="num">{{ e.episodiosCurados | number:'1.0-0' }}</td>
+              <td class="num">{{ e.episodiosAbiertos | number:'1.0-0' }}</td>
+              <td class="num">{{ e.tasaCuraObservada | number:'1.2-2' }}%</td>
+              <td class="num">{{ e.mesesPromedioCura == null ? '—' : (e.mesesPromedioCura | number:'1.2-2') }}</td>
+              <td class="num">{{ e.curasSeguimiento6m | number:'1.0-0' }}</td>
+              <td class="num">{{ e.reincidentes6m | number:'1.0-0' }}</td>
+              <td class="num">{{ e.tasaReincidencia6m == null ? '—' : ((e.tasaReincidencia6m | number:'1.2-2') + '%') }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Primera reincidencia después de la cura</h2>
+          <span>Distribución del primer retorno a B/C/D/E durante los seis meses posteriores.</span>
+        </div>
+      </div>
+
+      <div class="grafico-wrap barras">
+        <div
+          class="barra-fila"
+          *ngFor="let item of primeraReincidencia">
+          <div class="barra-label">Mes {{ item.mes }}</div>
+          <div class="barra-track">
+            <div
+              class="barra-fill"
+              [style.width.%]="anchoPrimeraReincidencia(item.reincidentes)">
+            </div>
+          </div>
+          <div class="barra-valor">
+            <strong>{{ item.reincidentes | number:'1.0-0' }}</strong>
+            <span>{{ item.porcentajeSobreCurasMaduras | number:'1.2-2' }}%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Mes posterior a cura</th>
+              <th class="num">Reincidentes</th>
+              <th class="num">% sobre curas maduras</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of primeraReincidencia">
+              <td>Mes {{ item.mes }}</td>
+              <td class="num">{{ item.reincidentes | number:'1.0-0' }}</td>
+              <td class="num">{{ item.porcentajeSobreCurasMaduras | number:'1.2-2' }}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel detalle-panel">
+      <div class="panel-head">
+        <div>
+          <h2>Detalle auditable de episodios</h2>
+          <span>Una fila por episodio. Permite llegar desde el indicador hasta el crédito y el asociado.</span>
+        </div>
+      </div>
+
+      <div class="detalle-tools">
+        <div class="field">
+          <label>Indicador</label>
+          <select
+            [(ngModel)]="indicadorDetalle"
+            (ngModelChange)="cargarDetalle()">
+            <option value="TODOS">Todos los episodios</option>
+            <option value="CURADOS">Curados</option>
+            <option value="ABIERTOS">Abiertos</option>
+            <option value="CURAS_MADURAS_6M">Curas con seguimiento 6M</option>
+            <option value="REINCIDENTES_6M">Reincidentes 6M</option>
+            <option value="NO_REINCIDENTES_6M">No reincidentes 6M</option>
+          </select>
+        </div>
+
+        <div class="field buscador">
+          <label>Buscar en detalle</label>
+          <input
+            type="text"
+            [(ngModel)]="textoDetalle"
+            placeholder="Documento, nombre, pagaré, agencia o línea">
+        </div>
+
+        <div class="detalle-contador">
+          <span>Registros mostrados</span>
+          <strong>{{ detalleFiltrado().length | number:'1.0-0' }}</strong>
+        </div>
+      </div>
+
+      <div class="loading" *ngIf="cargandoDetalle">
+        Consultando detalle...
+      </div>
+
+      <div class="table-wrap detalle-table" *ngIf="!cargandoDetalle">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Crédito</th>
+              <th>Episodio</th>
+              <th>Asociado</th>
+              <th>Agencia / línea</th>
+              <th>Inicio</th>
+              <th>Edad</th>
+              <th class="num">Saldo inicio</th>
+              <th class="num">Días mora inicio</th>
+              <th>Cura</th>
+              <th class="num">Meses cura</th>
+              <th class="num">Saldo cura</th>
+              <th>Seguimiento 6M</th>
+              <th>Reincidencia</th>
+              <th class="num">Meses reinc.</th>
+              <th>Edad reinc.</th>
+              <th class="num">Saldo reinc.</th>
+              <th>Estado actual</th>
+              <th class="num">Saldo actual</th>
+              <th class="num">Días mora actual</th>
+              <th>Contacto</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let d of detalleFiltrado(); trackBy: trackByDetalle">
+              <td>
+                <strong>{{ d.pagareCartera }}</strong>
+                <span class="cell-sub">ID {{ d.idCarteraCredito }}</span>
+              </td>
+
+              <td>#{{ d.numeroEpisodio }}</td>
+
+              <td>
+                <strong>{{ d.nombreCompleto }}</strong>
+                <span class="cell-sub">{{ d.tipoDocumento }} {{ d.documento }}</span>
+              </td>
+
+              <td>
+                <strong>{{ d.codigoAgencia }} - {{ d.nombreAgencia }}</strong>
+                <span class="cell-sub">{{ d.codigoLineaCredito }} - {{ d.nombreLineaCredito }}</span>
+              </td>
+
+              <td>{{ d.fechaInicio | date:'dd/MM/yyyy' }}</td>
+
+              <td>
+                <span class="badge-edad">{{ d.edadEntrada }}</span>
+                <span class="cell-sub">Máx. {{ d.maximaEdadAlcanzada }}</span>
+              </td>
+
+              <td class="num">{{ d.saldoInicio | number:'1.2-2' }}</td>
+              <td class="num">{{ d.diasMoraInicio | number:'1.0-0' }}</td>
+
+              <td>
+                <span [class.estado-ok]="d.curado" [class.estado-open]="!d.curado">
+                  {{ d.curado ? 'Sí' : 'No' }}
+                </span>
+                <span class="cell-sub" *ngIf="d.fechaCura">
+                  {{ d.fechaCura | date:'dd/MM/yyyy' }}
+                </span>
+              </td>
+
+              <td class="num">{{ d.mesesHastaCura == null ? '—' : d.mesesHastaCura }}</td>
+              <td class="num">{{ d.saldoCura == null ? '—' : (d.saldoCura | number:'1.2-2') }}</td>
+
+              <td>{{ d.seguimiento6mCompleto ? 'Sí' : 'No' }}</td>
+
+              <td>
+                <span [class.estado-alert]="d.reincidente6m">
+                  {{ d.reincidente6m ? 'Sí' : 'No' }}
+                </span>
+                <span class="cell-sub" *ngIf="d.fechaReincidencia">
+                  {{ d.fechaReincidencia | date:'dd/MM/yyyy' }}
+                </span>
+              </td>
+
+              <td class="num">{{ d.mesesHastaReincidencia == null ? '—' : d.mesesHastaReincidencia }}</td>
+              <td>{{ d.edadReincidencia ?? '—' }}</td>
+              <td class="num">{{ d.saldoReincidencia == null ? '—' : (d.saldoReincidencia | number:'1.2-2') }}</td>
+
+              <td>
+                <strong>{{ d.edadActual }}</strong>
+                <span class="cell-sub">{{ d.fechaUltimoCorteObservado | date:'dd/MM/yyyy' }}</span>
+              </td>
+
+              <td class="num">{{ d.saldoActual | number:'1.2-2' }}</td>
+              <td class="num">{{ d.diasMoraActual | number:'1.0-0' }}</td>
+
+              <td>
+                <span *ngIf="d.telefono">{{ d.telefono }}</span>
+                <span *ngIf="d.celular">{{ d.celular }}</span>
+                <span *ngIf="d.correo">{{ d.correo }}</span>
+                <span *ngIf="!d.telefono && !d.celular && !d.correo">—</span>
+              </td>
+            </tr>
+
+            <tr *ngIf="detalleFiltrado().length === 0">
+              <td colspan="20" class="empty">
+                No hay episodios para los filtros seleccionados.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </ng-container>
+</div>

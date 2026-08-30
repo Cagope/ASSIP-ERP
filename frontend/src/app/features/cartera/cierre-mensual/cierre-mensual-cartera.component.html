@@ -419,6 +419,108 @@
 
     </div>
 
+
+    <!-- ===================================================== -->
+    <!-- PROCESOS DEL CIERRE -->
+    <!-- ===================================================== -->
+
+    <div class="cierre-detalle-procesos">
+
+      <!-- ===================================================== -->
+      <!-- NAVEGACIÓN DEL PROCESO -->
+      <!-- ===================================================== -->
+
+      <div class="cierre-detalle-tabs">
+
+        <button
+          type="button"
+          class="cierre-detalle-tab"
+          [class.cierre-detalle-tab--activo]="
+        seccionCierreActiva === 'procesamiento'
+      "
+          (click)="cambiarSeccionCierre('procesamiento')">
+
+          Procesamiento
+
+        </button>
+
+
+        <button
+          type="button"
+          class="cierre-detalle-tab"
+          [class.cierre-detalle-tab--activo]="
+        seccionCierreActiva === 'validacion'
+      "
+          (click)="cambiarSeccionCierre('validacion')">
+
+          Validaciones
+
+        </button>
+
+
+        <button
+          type="button"
+          class="cierre-detalle-tab"
+          [class.cierre-detalle-tab--activo]="
+        seccionCierreActiva === 'cuadre'
+      "
+          (click)="cambiarSeccionCierre('cuadre')">
+
+          Cuadre
+
+        </button>
+
+      </div>
+
+
+      <!-- ===================================================== -->
+      <!-- PROCESAMIENTO -->
+      <!-- ===================================================== -->
+
+      <div
+        class="cierre-detalle-bloque"
+        *ngIf="seccionCierreActiva === 'procesamiento'">
+
+        <app-procesamiento-cierre
+          [idCierreCartera]="cierre.idCierreCartera"
+          [estadoCierre]="cierre.estadoCierre"
+          [fechaCorte]="cierre.fechaCorte">
+        </app-procesamiento-cierre>
+
+      </div>
+
+
+      <!-- ===================================================== -->
+      <!-- VALIDACIONES -->
+      <!-- ===================================================== -->
+
+      <div
+        class="cierre-detalle-bloque"
+        *ngIf="seccionCierreActiva === 'validacion'">
+
+        <app-validacion-cierre
+          [idCierreCartera]="cierre.idCierreCartera">
+        </app-validacion-cierre>
+
+      </div>
+
+
+      <!-- ===================================================== -->
+      <!-- CUADRE -->
+      <!-- ===================================================== -->
+
+      <div
+        class="cierre-detalle-bloque"
+        *ngIf="seccionCierreActiva === 'cuadre'">
+
+        <app-cuadre-cierre
+          [idCierreCartera]="cierre.idCierreCartera">
+        </app-cuadre-cierre>
+
+      </div>
+
+    </div>
+
   </div>
 
 

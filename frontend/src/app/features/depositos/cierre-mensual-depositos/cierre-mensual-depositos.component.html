@@ -1,84 +1,136 @@
 <div class="page">
 
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
   <div class="page-header">
 
     <div>
-      <h2>Proceso — Cierre Mensual Depósitos</h2>
+
+      <h2>
+        Proceso — Cierre Mensual Depósitos
+      </h2>
 
       <p>
-        Genera la foto mensual consolidada de cuentas de ahorro.
+        Genera una fotografía mensual centralizada de depósitos
+        para todas las agencias de la entidad.
       </p>
+
     </div>
 
   </div>
 
-  <!-- PARAMETROS -->
+
+  <!-- ===================================================== -->
+  <!-- PARÁMETROS -->
+  <!-- ===================================================== -->
+
   <section class="card">
 
-    <h3>Parámetros del cierre</h3>
+    <h3>
+      Parámetros del cierre
+    </h3>
+
 
     <div class="filters-grid">
 
-      <div class="field">
-
-        <label>
-          Agencia
-        </label>
-
-        <select
-          [(ngModel)]="model.idAgencia"
-          (change)="limpiarResultados()">
-
-          <option [ngValue]="null">
-            Seleccione...
-          </option>
-
-          <option
-            *ngFor="let a of agencias"
-            [ngValue]="a.idAgencia">
-
-            {{ a.nombreAgencia || a.nombre || a.descripcion }}
-
-          </option>
-
-        </select>
-
-      </div>
+      <!-- FECHA -->
 
       <div class="field">
 
         <label>
-          Fecha cierre
+          Fecha de cierre
         </label>
 
         <input
           type="date"
           [(ngModel)]="model.fechaCierre"
+          [disabled]="modoConsulta"
           (change)="limpiarResultados()">
 
       </div>
 
+
+      <!-- ACCIONES -->
+
       <div class="actions">
+
+        <!-- PREVIEW -->
 
         <button
           type="button"
           class="btn btn--secondary"
           (click)="consultar()"
-          [disabled]="modoConsulta || procesando || cargando">
+          [disabled]="
+            modoConsulta
+            || procesando
+            || cargando
+            || generando
+            || regenerando
+            || cerrando
+          ">
 
           Generar preview
 
         </button>
 
+
+        <!-- GENERAR FOTOGRAFÍA -->
+
         <button
           type="button"
           class="btn btn--primary"
-          (click)="aplicar()"
-          [disabled]="modoConsulta || aplicando || !detalle.length">
+          (click)="generar()"
+          [disabled]="
+            modoConsulta
+            || generando
+            || procesando
+            || !detalle.length
+          ">
 
-          Aplicar cierre
+          Generar fotografía
 
         </button>
+
+
+        <!-- REGENERAR -->
+
+        <button
+          *ngIf="modoConsulta && esCierreEnProceso()"
+          type="button"
+          class="btn btn--secondary"
+          (click)="regenerar()"
+          [disabled]="
+            regenerando
+            || procesando
+            || cerrando
+          ">
+
+          Regenerar
+
+        </button>
+
+
+        <!-- CERRAR -->
+
+        <button
+          *ngIf="modoConsulta && esCierreEnProceso()"
+          type="button"
+          class="btn btn--primary"
+          (click)="cerrar()"
+          [disabled]="
+            cerrando
+            || procesando
+            || regenerando
+          ">
+
+          Cerrar en firme
+
+        </button>
+
+
+        <!-- EXPORTAR -->
 
         <button
           type="button"
@@ -90,18 +142,32 @@
 
         </button>
 
+
+        <!-- LIMPIAR -->
+
         <button
           type="button"
           class="btn btn--secondary"
-          (click)="limpiar()">
+          (click)="limpiar()"
+          [disabled]="
+            procesando
+            || generando
+            || regenerando
+            || cerrando
+          ">
 
-          Limpiar
+          Nuevo / Limpiar
 
         </button>
 
       </div>
 
     </div>
+
+
+    <!-- =================================================== -->
+    <!-- MENSAJES -->
+    <!-- =================================================== -->
 
     <div
       *ngIf="error"
@@ -111,45 +177,113 @@
 
     </div>
 
+
+    <div
+      *ngIf="mensaje"
+      class="alert alert--success">
+
+      {{ mensaje }}
+
+    </div>
+
+
     <div
       *ngIf="procesando && !modoConsulta"
       class="alert alert--warning">
 
-      Generando preview del cierre mensual...
-      Espere un momento.
+      Generando información del cierre mensual.
+      Espere un momento...
 
     </div>
 
-    <div
-      *ngIf="modoConsulta"
-      class="alert alert--success">
-
-      Está visualizando un cierre mensual ya aplicado.
-      Para generar un nuevo proceso utilice el botón Limpiar.
-
-    </div>
 
     <div
-      *ngIf="!modoConsulta && detalle.length"
+      *ngIf="generando"
       class="alert alert--warning">
 
-      Preview generado correctamente.
-      Revise la información antes de aplicar el cierre mensual.
+      Generando la fotografía mensual de depósitos...
+
+    </div>
+
+
+    <div
+      *ngIf="regenerando"
+      class="alert alert--warning">
+
+      Regenerando la fotografía mensual de depósitos...
+
+    </div>
+
+
+    <div
+      *ngIf="cerrando"
+      class="alert alert--warning">
+
+      Cerrando la fotografía mensual en firme...
+
+    </div>
+
+
+    <div
+      *ngIf="
+        !modoConsulta
+        && detalle.length
+        && !procesando
+        && !generando
+      "
+      class="alert alert--warning">
+
+      Preview generado.
+      Revise los totales antes de generar la fotografía mensual.
+
+    </div>
+
+
+    <!-- ESTADO DEL CIERRE CONSULTADO -->
+
+    <div
+      *ngIf="modoConsulta && esCierreEnProceso()"
+      class="alert alert--warning">
+
+      La fotografía se encuentra en estado
+      <strong>En proceso</strong>.
+
+      Puede regenerarla o cerrarla en firme.
+
+    </div>
+
+
+    <div
+      *ngIf="modoConsulta && esCierreCerrado()"
+      class="alert alert--success">
+
+      La fotografía mensual se encuentra
+      <strong>cerrada en firme</strong>.
+
+      Ya no puede regenerarse ni eliminarse.
 
     </div>
 
   </section>
 
+
+  <!-- ===================================================== -->
   <!-- CIERRES GENERADOS -->
+  <!-- ===================================================== -->
+
   <section class="card">
 
-    <h3>Cierres generados</h3>
+    <h3>
+      Cierres mensuales
+    </h3>
 
     <p class="section-description">
-      Consulte cierres mensuales previamente aplicados o elimine cierres generados por error.
+      Cada fecha corresponde a una única fotografía centralizada
+      de depósitos para toda la entidad.
     </p>
 
-    <div class="table-wrap">
+
+    <div class="table-wrap table-wrap--cierres">
 
       <table>
 
@@ -189,6 +323,7 @@
 
         </thead>
 
+
         <tbody>
 
         <tr *ngFor="let cierre of cierres">
@@ -202,19 +337,28 @@
           </td>
 
           <td class="num">
-            {{ cierre.saldoTotal | number:'1.0-0' }}
+            $ {{ cierre.saldoTotal | number:'1.2-2' }}
           </td>
 
           <td class="num">
-            {{ cierre.totalDebitos | number:'1.0-0' }}
+            $ {{ cierre.totalDebitos | number:'1.2-2' }}
           </td>
 
           <td class="num">
-            {{ cierre.totalCreditos | number:'1.0-0' }}
+            $ {{ cierre.totalCreditos | number:'1.2-2' }}
           </td>
 
           <td>
-            {{ cierre.estado }}
+
+            <span
+              class="estado-badge"
+              [class.estado-badge--proceso]="cierre.estado === 'P'"
+              [class.estado-badge--cerrado]="cierre.estado === 'C'">
+
+              {{ textoEstado(cierre.estado) }}
+
+            </span>
+
           </td>
 
           <td class="text-end">
@@ -224,13 +368,16 @@
               <button
                 type="button"
                 class="btn-action-edit btn-action-text"
-                (click)="verCierre(cierre.idCierreMensual)">
+                (click)="verCierre(cierre.idCierreMensual)"
+                [disabled]="procesando">
 
                 Ver
 
               </button>
 
+
               <button
+                *ngIf="cierre.estado === 'P'"
                 type="button"
                 class="btn-action-delete btn-action-text"
                 (click)="eliminarCierre(cierre)"
@@ -245,6 +392,7 @@
           </td>
 
         </tr>
+
 
         <tr *ngIf="!cierres.length">
 
@@ -266,7 +414,11 @@
 
   </section>
 
-  <!-- RESUMEN -->
+
+  <!-- ===================================================== -->
+  <!-- RESUMEN GENERAL -->
+  <!-- ===================================================== -->
+
   <section
     *ngIf="detalle.length"
     class="summary-grid">
@@ -283,6 +435,7 @@
 
     </div>
 
+
     <div class="summary-card">
 
       <span>
@@ -290,10 +443,11 @@
       </span>
 
       <strong>
-        $ {{ resumen.saldoTotal | number:'1.0-0' }}
+        $ {{ resumen.saldoTotal | number:'1.2-2' }}
       </strong>
 
     </div>
+
 
     <div class="summary-card">
 
@@ -302,10 +456,11 @@
       </span>
 
       <strong>
-        $ {{ resumen.totalDebitos | number:'1.0-0' }}
+        $ {{ resumen.totalDebitos | number:'1.2-2' }}
       </strong>
 
     </div>
+
 
     <div class="summary-card">
 
@@ -314,10 +469,11 @@
       </span>
 
       <strong>
-        $ {{ resumen.totalCreditos | number:'1.0-0' }}
+        $ {{ resumen.totalCreditos | number:'1.2-2' }}
       </strong>
 
     </div>
+
 
     <div class="summary-card">
 
@@ -331,6 +487,7 @@
 
     </div>
 
+
     <div class="summary-card">
 
       <span>
@@ -342,6 +499,7 @@
       </strong>
 
     </div>
+
 
     <div class="summary-card">
 
@@ -357,12 +515,24 @@
 
   </section>
 
-  <!-- RESUMEN FORMAS -->
+
+  <!-- ===================================================== -->
+  <!-- RESUMEN POR AGENCIA -->
+  <!-- ===================================================== -->
+
   <section
-    *ngIf="resumenFormas.length"
+    *ngIf="resumenAgencias.length"
     class="card">
 
-    <h3>Resumen por forma</h3>
+    <h3>
+      Resumen por agencia
+    </h3>
+
+    <p class="section-description">
+      Totales fotografiados para cada agencia incluidos dentro
+      del cierre centralizado.
+    </p>
+
 
     <div class="table-wrap">
 
@@ -371,6 +541,115 @@
         <thead>
 
         <tr>
+
+          <th>
+            Agencia
+          </th>
+
+          <th class="num">
+            Cuentas
+          </th>
+
+          <th class="num">
+            Saldo
+          </th>
+
+          <th class="num">
+            Débitos
+          </th>
+
+          <th class="num">
+            Créditos
+          </th>
+
+          <th class="num">
+            Hombres
+          </th>
+
+          <th class="num">
+            Mujeres
+          </th>
+
+          <th class="num">
+            Jurídicas
+          </th>
+
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        <tr *ngFor="let agencia of resumenAgencias">
+
+          <td>
+            {{ agencia.idAgencia }}
+          </td>
+
+          <td class="num">
+            {{ agencia.totalCuentas | number:'1.0-0' }}
+          </td>
+
+          <td class="num">
+            $ {{ agencia.saldoTotal | number:'1.2-2' }}
+          </td>
+
+          <td class="num">
+            $ {{ agencia.totalDebitos | number:'1.2-2' }}
+          </td>
+
+          <td class="num">
+            $ {{ agencia.totalCreditos | number:'1.2-2' }}
+          </td>
+
+          <td class="num">
+            {{ agencia.hombres | number:'1.0-0' }}
+          </td>
+
+          <td class="num">
+            {{ agencia.mujeres | number:'1.0-0' }}
+          </td>
+
+          <td class="num">
+            {{ agencia.juridicas | number:'1.0-0' }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- RESUMEN POR AGENCIA + FORMA -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="resumenFormas.length"
+    class="card">
+
+    <h3>
+      Resumen por agencia y forma de ahorro
+    </h3>
+
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+
+        <tr>
+
+          <th>
+            Agencia
+          </th>
 
           <th>
             Código
@@ -412,9 +691,14 @@
 
         </thead>
 
+
         <tbody>
 
         <tr *ngFor="let item of resumenFormas">
+
+          <td>
+            {{ item.idAgencia }}
+          </td>
 
           <td>
             {{ item.codigoForma }}
@@ -429,15 +713,15 @@
           </td>
 
           <td class="num">
-            {{ item.saldoTotal | number:'1.0-0' }}
+            $ {{ item.saldoTotal | number:'1.2-2' }}
           </td>
 
           <td class="num">
-            {{ item.totalDebitos | number:'1.0-0' }}
+            $ {{ item.totalDebitos | number:'1.2-2' }}
           </td>
 
           <td class="num">
-            {{ item.totalCreditos | number:'1.0-0' }}
+            $ {{ item.totalCreditos | number:'1.2-2' }}
           </td>
 
           <td class="num">
@@ -462,12 +746,24 @@
 
   </section>
 
+
+  <!-- ===================================================== -->
   <!-- DETALLE -->
+  <!-- ===================================================== -->
+
   <section
     *ngIf="detalle.length"
     class="card">
 
-    <h3>Detalle del cierre mensual</h3>
+    <h3>
+      Detalle de la fotografía mensual
+    </h3>
+
+    <p class="section-description">
+      Solo se incluyen cuentas cuyo saldo a la fecha de corte
+      es diferente de cero.
+    </p>
+
 
     <div class="table-wrap">
 
@@ -476,6 +772,10 @@
         <thead>
 
         <tr>
+
+          <th>
+            Agencia
+          </th>
 
           <th>
             Forma
@@ -517,9 +817,14 @@
 
         </thead>
 
+
         <tbody>
 
         <tr *ngFor="let item of detalle">
+
+          <td>
+            {{ item.idAgencia }}
+          </td>
 
           <td>
             {{ item.codigoForma }}
@@ -542,15 +847,15 @@
           </td>
 
           <td class="num">
-            {{ item.saldoCierre | number:'1.0-0' }}
+            $ {{ item.saldoCierre | number:'1.2-2' }}
           </td>
 
           <td class="num">
-            {{ item.totalDebitos | number:'1.0-0' }}
+            $ {{ item.totalDebitos | number:'1.2-2' }}
           </td>
 
           <td class="num">
-            {{ item.totalCreditos | number:'1.0-0' }}
+            $ {{ item.totalCreditos | number:'1.2-2' }}
           </td>
 
           <td class="num">
@@ -559,10 +864,11 @@
 
         </tr>
 
+
         <tr *ngIf="!detalle.length">
 
           <td
-            colspan="9"
+            colspan="10"
             class="empty">
 
             No hay cuentas para la fecha seleccionada.

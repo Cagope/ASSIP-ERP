@@ -1,0 +1,112 @@
+<div
+  class="chart-card"
+  *ngIf="itemsGrafico.length > 0">
+
+  <div class="chart-header">
+    <div>
+      <h3>Concentración por segmento</h3>
+      <p>
+        Comparación del saldo de cartera y deterioro
+        entre los segmentos seleccionados.
+      </p>
+    </div>
+
+    <div class="legend">
+      <span class="legend-item">
+        <span class="legend-color legend-color--saldo"></span>
+        Saldo cartera
+      </span>
+
+      <span class="legend-item">
+        <span class="legend-color legend-color--deterioro"></span>
+        Deterioro
+      </span>
+    </div>
+  </div>
+
+  <div class="chart-body">
+
+    <div
+      class="chart-row"
+      *ngFor="let item of itemsGrafico">
+
+      <div class="segmento-col">
+        <strong>
+          {{ item.codigo }}
+        </strong>
+
+        <span>
+          {{ item.descripcion }}
+        </span>
+      </div>
+
+      <div class="bars-col">
+
+        <div class="bar-group">
+
+          <div class="bar-info">
+            <span>Saldo</span>
+            <strong>
+              {{ money(item.saldoCartera) }}
+            </strong>
+          </div>
+
+          <div class="bar-track">
+            <div
+              class="bar-fill bar-fill--saldo"
+              [style.width.%]="item.porcentajeBarraSaldo">
+            </div>
+          </div>
+
+        </div>
+
+        <div class="bar-group">
+
+          <div class="bar-info">
+            <span>Deterioro</span>
+            <strong>
+              {{ money(item.deterioroTotal) }}
+            </strong>
+          </div>
+
+          <div class="bar-track">
+            <div
+              class="bar-fill bar-fill--deterioro"
+              [style.width.%]="item.porcentajeBarraDeterioro">
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="metrics-col">
+
+        <div>
+          <span>% saldo</span>
+          <strong>
+            {{ pct(item.porcentajeSaldo) }}
+          </strong>
+        </div>
+
+        <div>
+          <span>% det./saldo</span>
+          <strong>
+            {{ pct(item.porcentajeDeterioroSobreSaldo) }}
+          </strong>
+        </div>
+
+        <div>
+          <span>Créditos</span>
+          <strong>
+            {{ item.cantidadCreditos | number:'1.0-0' }}
+          </strong>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

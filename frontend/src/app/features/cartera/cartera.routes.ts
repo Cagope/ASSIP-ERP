@@ -20,6 +20,46 @@ import { EVALUACION_CARTERA_ROUTES } from './evaluacion/evaluaciones/evaluacion-
 // =============================
 import { CENTRAL_RIESGO_RESULTADO_ROUTES } from './evaluacion/central-riesgos/resultados/central-riesgo-resultado.routes';
 
+// =============================
+// VECTOR DE COMPORTAMIENTO - ACTUAL
+// =============================
+import { VECTOR_COMPORTAMIENTO_ROUTES } from './analisis/vector-comportamiento/actual/vector-comportamiento.routes';
+
+// =============================
+// VECTOR DE COMPORTAMIENTO - CORTE
+// =============================
+import { VECTOR_COMPORTAMIENTO_CORTE_ROUTES } from './analisis/vector-comportamiento/corte/vector-comportamiento-corte.routes';
+
+// =============================
+// MATRIZ DE RODAMIENTO
+// =============================
+import { MATRIZ_RODAMIENTO_ROUTES } from './analisis/matriz-rodamiento/matriz-rodamiento.routes';
+
+// =============================
+// ANÁLISIS DE COSECHAS
+// =============================
+import { COSECHAS_ROUTES } from './analisis/cosechas/cosechas.routes';
+
+// =============================
+// ANÁLISIS DE RIESGO Y DETERIORO
+// =============================
+import { RIESGO_DETERIORO_ROUTES } from './analisis/riesgo-deterioro/riesgo-deterioro.routes';
+
+// =============================
+// MORA TEMPRANA / CALIDAD DE ORIGINACIÓN
+// =============================
+import { MORA_TEMPRANA_ROUTES } from './analisis/mora-temprana/mora-temprana.routes';
+
+// =============================
+// CURACIÓN Y REINCIDENCIA
+// =============================
+import { CURACION_REINCIDENCIA_ROUTES } from './analisis/curacion-reincidencia/curacion-reincidencia.routes';
+
+// =============================
+// CONCENTRACIÓN DE CARTERA
+// =============================
+import { CONCENTRACION_CARTERA_ROUTES } from './analisis/concentracion-cartera/concentracion-cartera.routes';
+
 export const CARTERA_ROUTES: Routes = [
 
   // =============================
@@ -52,6 +92,72 @@ export const CARTERA_ROUTES: Routes = [
   {
     path: 'evaluacion/central-riesgos/resultados',
     children: CENTRAL_RIESGO_RESULTADO_ROUTES
+  },
+
+  // =============================
+  // VECTOR DE COMPORTAMIENTO
+  // ACTUAL
+  // =============================
+  {
+    path: 'analisis/vector-comportamiento',
+    children: VECTOR_COMPORTAMIENTO_ROUTES
+  },
+
+  // =============================
+  // VECTOR DE COMPORTAMIENTO
+  // POR CORTE
+  // =============================
+  {
+    path: 'analisis/vector-comportamiento/corte',
+    children: VECTOR_COMPORTAMIENTO_CORTE_ROUTES
+  },
+
+  // =============================
+  // MATRIZ DE RODAMIENTO
+  // =============================
+  {
+    path: 'analisis/matriz-rodamiento',
+    children: MATRIZ_RODAMIENTO_ROUTES
+  },
+
+  // =============================
+  // ANÁLISIS DE COSECHAS
+  // =============================
+  {
+    path: 'analisis/cosechas',
+    children: COSECHAS_ROUTES
+  },
+
+  // =============================
+  // ANÁLISIS DE RIESGO Y DETERIORO
+  // =============================
+  {
+    path: 'analisis/riesgo-deterioro',
+    children: RIESGO_DETERIORO_ROUTES
+  },
+
+  // =============================
+  // MORA TEMPRANA / CALIDAD DE ORIGINACIÓN
+  // =============================
+  {
+    path: 'analisis/mora-temprana',
+    children: MORA_TEMPRANA_ROUTES
+  },
+
+  // =============================
+  // CURACIÓN Y REINCIDENCIA
+  // =============================
+  {
+    path: 'analisis/curacion-reincidencia',
+    children: CURACION_REINCIDENCIA_ROUTES
+  },
+
+  // =============================
+  // CONCENTRACIÓN DE CARTERA
+  // =============================
+  {
+    path: 'analisis/concentracion-cartera',
+    children: CONCENTRACION_CARTERA_ROUTES
   }
 
 ];

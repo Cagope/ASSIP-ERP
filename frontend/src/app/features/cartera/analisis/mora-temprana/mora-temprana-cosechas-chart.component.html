@@ -1,0 +1,17 @@
+<div class="chart" *ngIf="datos.length; else sinDatos">
+  <div class="legend">
+    <span><i class="s s1"></i>30+ hasta MOB3</span>
+    <span><i class="s s2"></i>30+ hasta MOB6</span>
+    <span><i class="s s3"></i>60+ hasta MOB6</span>
+  </div>
+
+  <div class="cohorte" *ngFor="let d of datos">
+    <div class="label">{{ mes(d.cosecha) }}</div>
+    <div class="series">
+      <div class="row"><div class="bar b1" [style.width.%]="ancho(d.porcentajeMora30Mob3)"></div><span>{{ pct(d.porcentajeMora30Mob3) }}</span></div>
+      <div class="row"><div class="bar b2" [style.width.%]="ancho(d.porcentajeMora30Mob6)"></div><span>{{ pct(d.porcentajeMora30Mob6) }}</span></div>
+      <div class="row"><div class="bar b3" [style.width.%]="ancho(d.porcentajeMora60Mob6)"></div><span>{{ pct(d.porcentajeMora60Mob6) }}</span></div>
+    </div>
+  </div>
+</div>
+<ng-template #sinDatos><div class="empty">Sin información para graficar.</div></ng-template>

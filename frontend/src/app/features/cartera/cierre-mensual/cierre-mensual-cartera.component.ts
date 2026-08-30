@@ -20,6 +20,17 @@ import {
   CierreMensualCarteraApi
 } from './cierre-mensual-cartera.api';
 
+import {
+  ProcesamientoCierreComponent
+} from './procesamiento/procesamiento-cierre.component';
+
+import {
+  ValidacionCierreComponent
+} from './validacion/validacion-cierre.component';
+
+import {
+  CuadreCierreComponent
+} from './cuadre/cuadre-cierre.component';
 
 // =========================================================
 // COMPONENTE
@@ -32,7 +43,10 @@ import {
 
   imports: [
     CommonModule,
-    FormsModule
+    FormsModule,
+    ProcesamientoCierreComponent,
+    ValidacionCierreComponent,
+    CuadreCierreComponent
   ],
 
   templateUrl:
@@ -101,7 +115,6 @@ export class CierreMensualCarteraComponent
     this.cargarCierres();
 
   }
-
 
   // =========================================================
   // CARGAR HISTÓRICO
@@ -727,6 +740,29 @@ export class CierreMensualCarteraComponent
     }
 
     return `${meses[mes]} de ${anio}`;
+  }
+
+  // =========================================================
+  // SECCIÓN ACTIVA DEL PROCESO DE CIERRE
+  // =========================================================
+
+  seccionCierreActiva:
+    'procesamiento'
+    | 'validacion'
+    | 'cuadre' = 'procesamiento';
+
+  // =========================================================
+  // CAMBIAR SECCIÓN DEL PROCESO DE CIERRE
+  // =========================================================
+
+  cambiarSeccionCierre(
+    seccion:
+      'procesamiento'
+      | 'validacion'
+      | 'cuadre'
+  ): void {
+
+    this.seccionCierreActiva = seccion;
   }
 
 }

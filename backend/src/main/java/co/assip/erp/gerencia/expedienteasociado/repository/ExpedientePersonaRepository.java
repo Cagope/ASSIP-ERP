@@ -634,21 +634,49 @@ public class ExpedientePersonaRepository {
     // =========================================================
 
     private static final String SQL_FINANCIERO = """
-            WITH financiero AS (
-                SELECT DISTINCT ON (f.id_datos_personal)
-                    f.*
-                FROM reporting.vw_hoja_vida_financieros_total f
-                WHERE f.id_datos_personal = :idDatosPersonal
-                ORDER BY
-                    f.id_datos_personal,
-                    f.fecha_edicion DESC NULLS LAST,
-                    f.fecha_creacion DESC NULLS LAST,
-                    f.id_financiero DESC
-            )
+        WITH financiero AS (
+            SELECT DISTINCT ON (f.id_datos_personal)
+                f.*
+            FROM reporting.vw_hoja_vida_financieros_total f
+            WHERE f.id_datos_personal = :idDatosPersonal
+            ORDER BY
+                f.id_datos_personal,
+                f.fecha_edicion DESC NULLS LAST,
+                f.fecha_creacion DESC NULLS LAST,
+                f.id_financiero DESC
+        ),
 
+        persona AS (
             SELECT
+                h.id_datos_personal,
+
+                h.nombre_actividad_ses,
+                h.nombre_sector_economico,
+                h.nombre_ocupacion,
+                h.nombre_empresa
+
+            FROM reporting.vw_hoja_vida_general_total h
+
+            WHERE h.id_datos_personal = :idDatosPersonal
+
+            LIMIT 1
+        )
+
+        SELECT
                 f.id_financiero,
                 f.id_datos_personal,
+                
+                p.nombre_actividad_ses
+                    AS nombre_actividad_economica,
+            
+                p.nombre_sector_economico
+                    AS nombre_sector_economico,
+            
+                p.nombre_ocupacion
+                    AS ocupacion,
+            
+                p.nombre_empresa
+                    AS empresa,
 
                 f.valor_salario,
                 f.valor_pension,
@@ -808,6 +836,11 @@ public class ExpedientePersonaRepository {
                 f.fecha_edicion::date AS fecha_edicion
 
             FROM financiero f
+            
+            LEFT JOIN persona p
+                   ON p.id_datos_personal =
+                      f.id_datos_personal
+            
             """;
 
     // =========================================================

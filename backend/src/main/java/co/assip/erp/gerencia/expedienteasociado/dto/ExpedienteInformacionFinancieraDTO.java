@@ -26,6 +26,20 @@ public class ExpedienteInformacionFinancieraDTO {
     private String nombreCompleto;
 
     // =========================================================
+    // Actividad económica
+    // =========================================================
+
+    private String nombreActividadEconomica;
+
+    private String nombreSectorEconomico;
+
+    private String ocupacion;
+
+    private String empresa;
+
+    private String cargo;
+
+    // =========================================================
     // Ingresos
     // =========================================================
 

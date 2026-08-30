@@ -1,0 +1,1061 @@
+<section class="consulta-bloque resultados-mensuales">
+
+  <!-- ======================================================= -->
+  <!-- ENCABEZADO                                              -->
+  <!-- ======================================================= -->
+
+  <div class="bloque-encabezado">
+
+    <div>
+
+      <h2>
+        Resultados mensuales de cartera
+      </h2>
+
+      <span>
+        Evolución histórica del crédito
+        {{ credito.pagareCartera || 'sin pagaré' }}
+        en los cierres mensuales de cartera.
+      </span>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn btn--cancel btn-sm"
+      (click)="cerrarDetalle()">
+
+      Cerrar resultados
+
+    </button>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- SIN RESULTADOS                                          -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="!tieneResultados"
+    class="estado-vacio">
+
+    <strong>
+      El crédito no tiene resultados mensuales registrados
+    </strong>
+
+    <span>
+      No existen cierres históricos con resultado de cálculo
+      para este crédito.
+    </span>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- RESUMEN                                                 -->
+  <!-- ======================================================= -->
+
+  <ng-container *ngIf="tieneResultados">
+
+    <div class="resumen-grid">
+
+      <article>
+
+        <span>
+          Cortes disponibles
+        </span>
+
+        <strong>
+          {{ cantidadResultados }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Primer corte
+        </span>
+
+        <strong>
+          {{
+          primerResultado?.fechaCorte
+          ? (
+          primerResultado?.fechaCorte
+          | date:'dd/MM/yyyy'
+          )
+          : ''
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Último corte
+        </span>
+
+        <strong>
+          {{
+          ultimoResultado?.fechaCorte
+          ? (
+          ultimoResultado?.fechaCorte
+          | date:'dd/MM/yyyy'
+          )
+          : ''
+          }}
+        </strong>
+
+      </article>
+
+
+      <article class="resumen-saldo">
+
+        <span>
+          Saldo último corte
+        </span>
+
+        <strong>
+          {{
+          saldoUltimoCorte
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article class="resumen-mora">
+
+        <span>
+          Días de mora
+        </span>
+
+        <strong>
+          {{ diasMoraUltimoCorte }}
+        </strong>
+
+      </article>
+
+
+      <article class="resumen-deterioro">
+
+        <span>
+          Deterioro último corte
+        </span>
+
+        <strong>
+          {{
+          deterioroUltimoCorte
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article class="resumen-pe">
+
+        <span>
+          Pérdida esperada
+        </span>
+
+        <strong>
+          {{
+          perdidaEsperadaUltimoCorte
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- ÚLTIMO RESULTADO                                      -->
+    <!-- ===================================================== -->
+
+    <div
+      *ngIf="ultimoResultado as resultado"
+      class="ultimo-corte">
+
+      <div class="seccion-titulo">
+        Último resultado mensual
+      </div>
+
+
+      <div class="ultimo-corte-grid">
+
+        <article>
+
+          <span>
+            Fecha de corte
+          </span>
+
+          <strong>
+            {{
+            resultado.fechaCorte
+            ? (
+            resultado.fechaCorte
+            | date:'dd/MM/yyyy'
+            )
+            : ''
+            }}
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            Método
+          </span>
+
+          <strong>
+            {{ descripcionMetodo(resultado) }}
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            Saldo
+          </span>
+
+          <strong>
+            {{
+            resultado.saldoCreditoFechaCorte
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            Días de mora
+          </span>
+
+          <strong>
+            {{ resultado.diasMora ?? 0 }}
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            VEA
+          </span>
+
+          <strong>
+            {{
+            resultado.vea
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            Deterioro total
+          </span>
+
+          <strong>
+            {{
+            resultado.deterioroTotal
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+      </div>
+
+
+      <!-- =================================================== -->
+      <!-- EDADES                                              -->
+      <!-- =================================================== -->
+
+      <div class="seccion-titulo subgrupo">
+        Edades del resultado
+      </div>
+
+
+      <div class="edades-grid">
+
+        <article>
+
+          <span>
+            Inicial
+          </span>
+
+          <strong
+            [class]="
+              claseEdad(
+                resultado.edadRiesgoInicialResultado
+              )
+            ">
+
+            {{
+            resultado.edadRiesgoInicialResultado
+            || ''
+            }}
+
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            Mora
+          </span>
+
+          <strong
+            [class]="
+              claseEdad(
+                resultado.edadDeMoraResultado
+              )
+            ">
+
+            {{
+            resultado.edadDeMoraResultado
+            || ''
+            }}
+
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            Riesgo
+          </span>
+
+          <strong
+            [class]="
+              claseEdad(
+                resultado.edadDeRiesgoResultado
+              )
+            ">
+
+            {{
+            resultado.edadDeRiesgoResultado
+            || ''
+            }}
+
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            PE
+          </span>
+
+          <strong
+            [class]="
+              claseEdad(
+                resultado.edadDePeResultado
+              )
+            ">
+
+            {{
+            resultado.edadDePeResultado
+            || ''
+            }}
+
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            Homologación
+          </span>
+
+          <strong
+            [class]="
+              claseEdad(
+                resultado.edadDeHomologacionResultado
+              )
+            ">
+
+            {{
+            resultado.edadDeHomologacionResultado
+            || ''
+            }}
+
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            Contable
+          </span>
+
+          <strong
+            [class]="
+              claseEdad(
+                resultado.edadContableResultado
+              )
+            ">
+
+            {{
+            resultado.edadContableResultado
+            || ''
+            }}
+
+          </strong>
+
+        </article>
+
+      </div>
+
+
+      <!-- =================================================== -->
+      <!-- APORTES Y GARANTÍAS                                 -->
+      <!-- =================================================== -->
+
+      <div class="seccion-titulo subgrupo">
+        Aportes y garantías
+      </div>
+
+
+      <div class="valores-grid">
+
+        <article>
+
+          <span>
+            Aportes asociado
+          </span>
+
+          <strong>
+            {{
+            resultado.saldoAportesFechaCorte
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            % aportes crédito
+          </span>
+
+          <strong>
+            {{
+            resultado.porcentajeAportesCredito
+            ?? 0
+            }} %
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            Aportes reconocidos
+          </span>
+
+          <strong>
+            {{
+            resultado.valorAportesCredito
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            Garantías totales
+          </span>
+
+          <strong>
+            {{
+            resultado.valorGarantiasTotal
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            % garantía crédito
+          </span>
+
+          <strong>
+            {{
+            resultado.porcentajeGarantiasCredito
+            ?? 0
+            }} %
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            Garantía reconocida
+          </span>
+
+          <strong>
+            {{
+            resultado.valorGarantiasCredito
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+      </div>
+
+
+      <!-- =================================================== -->
+      <!-- PÉRDIDA ESPERADA                                    -->
+      <!-- =================================================== -->
+
+      <div class="seccion-titulo subgrupo">
+        Pérdida esperada y deterioro
+      </div>
+
+
+      <div class="valores-grid">
+
+        <article>
+
+          <span>
+            PI
+          </span>
+
+          <strong>
+            {{ resultado.pi ?? 0 }} %
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            PDI
+          </span>
+
+          <strong>
+            {{ resultado.pdi ?? 0 }} %
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            Pérdida esperada
+          </span>
+
+          <strong>
+            {{
+            resultado.perdidaEsperada
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            Deterioro capital
+          </span>
+
+          <strong>
+            {{
+            resultado.deterioroCapital
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            Deterioro intereses
+          </span>
+
+          <strong>
+            {{
+            resultado.deterioroIntereses
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+
+        <article>
+
+          <span>
+            Deterioro otros
+          </span>
+
+          <strong>
+            {{
+            resultado.deterioroOtros
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+          </strong>
+
+        </article>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================== -->
+    <!-- HISTÓRICO                                             -->
+    <!-- ===================================================== -->
+
+    <div class="historico">
+
+      <div class="seccion-titulo">
+        Histórico mensual
+      </div>
+
+
+      <div class="tabla-contenedor">
+
+        <table class="tabla-resultados">
+
+          <thead>
+
+          <tr>
+
+            <th>
+              Corte
+            </th>
+
+            <th>
+              Método
+            </th>
+
+            <th class="numero">
+              Saldo
+            </th>
+
+            <th class="center">
+              Mora
+            </th>
+
+            <th class="center">
+              Inicial
+            </th>
+
+            <th class="center">
+              Edad mora
+            </th>
+
+            <th class="center">
+              Riesgo
+            </th>
+
+            <th class="center">
+              PE
+            </th>
+
+            <th class="center">
+              Homol.
+            </th>
+
+            <th class="center">
+              Contable
+            </th>
+
+            <th class="numero">
+              VEA
+            </th>
+
+            <th class="numero">
+              PI
+            </th>
+
+            <th class="numero">
+              PDI
+            </th>
+
+            <th class="numero">
+              Pérdida esperada
+            </th>
+
+            <th class="numero">
+              Deterioro capital
+            </th>
+
+            <th class="numero">
+              Deterioro intereses
+            </th>
+
+            <th class="numero">
+              Deterioro otros
+            </th>
+
+            <th class="numero">
+              Deterioro total
+            </th>
+
+            <th class="numero">
+              Variación saldo
+            </th>
+
+            <th class="numero">
+              Variación deterioro
+            </th>
+
+          </tr>
+
+          </thead>
+
+
+          <tbody>
+
+          <tr
+            *ngFor="
+              let resultado of resultadosMensuales;
+              let i = index;
+              trackBy: trackByResultado
+            ">
+
+            <td>
+
+              <strong>
+                {{
+                resultado.fechaCorte
+                ? (
+                resultado.fechaCorte
+                | date:'dd/MM/yyyy'
+                )
+                : ''
+                }}
+              </strong>
+
+            </td>
+
+
+            <td>
+              {{ descripcionMetodo(resultado) }}
+            </td>
+
+
+            <td class="numero">
+
+              {{
+              resultado.saldoCreditoFechaCorte
+              | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+              }}
+
+            </td>
+
+
+            <td class="center">
+              {{ resultado.diasMora ?? 0 }}
+            </td>
+
+
+            <td class="center">
+
+              <span
+                [class]="
+                  claseEdad(
+                    resultado.edadRiesgoInicialResultado
+                  )
+                ">
+
+                {{
+                  resultado.edadRiesgoInicialResultado
+                  || ''
+                }}
+
+              </span>
+
+            </td>
+
+
+            <td class="center">
+
+              <span
+                [class]="
+                  claseEdad(
+                    resultado.edadDeMoraResultado
+                  )
+                ">
+
+                {{
+                  resultado.edadDeMoraResultado
+                  || ''
+                }}
+
+              </span>
+
+            </td>
+
+
+            <td class="center">
+
+              <span
+                [class]="
+                  claseEdad(
+                    resultado.edadDeRiesgoResultado
+                  )
+                ">
+
+                {{
+                  resultado.edadDeRiesgoResultado
+                  || ''
+                }}
+
+              </span>
+
+            </td>
+
+
+            <td class="center">
+
+              <span
+                [class]="
+                  claseEdad(
+                    resultado.edadDePeResultado
+                  )
+                ">
+
+                {{
+                  resultado.edadDePeResultado
+                  || ''
+                }}
+
+              </span>
+
+            </td>
+
+
+            <td class="center">
+
+              <span
+                [class]="
+                  claseEdad(
+                    resultado.edadDeHomologacionResultado
+                  )
+                ">
+
+                {{
+                  resultado.edadDeHomologacionResultado
+                  || ''
+                }}
+
+              </span>
+
+            </td>
+
+
+            <td class="center">
+
+              <span
+                [class]="
+                  claseEdad(
+                    resultado.edadContableResultado
+                  )
+                ">
+
+                {{
+                  resultado.edadContableResultado
+                  || ''
+                }}
+
+              </span>
+
+            </td>
+
+
+            <td class="numero">
+
+              {{
+              resultado.vea
+              | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+              }}
+
+            </td>
+
+
+            <td class="numero">
+              {{ resultado.pi ?? 0 }} %
+            </td>
+
+
+            <td class="numero">
+              {{ resultado.pdi ?? 0 }} %
+            </td>
+
+
+            <td class="numero">
+
+              {{
+              resultado.perdidaEsperada
+              | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+              }}
+
+            </td>
+
+
+            <td class="numero">
+
+              {{
+              resultado.deterioroCapital
+              | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+              }}
+
+            </td>
+
+
+            <td class="numero">
+
+              {{
+              resultado.deterioroIntereses
+              | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+              }}
+
+            </td>
+
+
+            <td class="numero">
+
+              {{
+              resultado.deterioroOtros
+              | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+              }}
+
+            </td>
+
+
+            <td class="numero total">
+
+              {{
+              resultado.deterioroTotal
+              | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+              }}
+
+            </td>
+
+
+            <td
+              class="numero"
+              [class.variacion-negativa]="
+                variacionSaldo(i) !== null
+                && variacionSaldo(i)! < 0
+              "
+              [class.variacion-positiva]="
+                variacionSaldo(i) !== null
+                && variacionSaldo(i)! > 0
+              ">
+
+              <ng-container
+                *ngIf="
+                  variacionSaldo(i) !== null;
+                  else sinVariacionSaldo
+                ">
+
+                {{
+                variacionSaldo(i)
+                | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+
+              </ng-container>
+
+              <ng-template #sinVariacionSaldo>
+                —
+              </ng-template>
+
+            </td>
+
+
+            <td
+              class="numero"
+              [class.variacion-negativa]="
+                variacionDeterioro(i) !== null
+                && variacionDeterioro(i)! < 0
+              "
+              [class.variacion-positiva]="
+                variacionDeterioro(i) !== null
+                && variacionDeterioro(i)! > 0
+              ">
+
+              <ng-container
+                *ngIf="
+                  variacionDeterioro(i) !== null;
+                  else sinVariacionDeterioro
+                ">
+
+                {{
+                variacionDeterioro(i)
+                | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                }}
+
+              </ng-container>
+
+              <ng-template #sinVariacionDeterioro>
+                —
+              </ng-template>
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </ng-container>
+
+</section>

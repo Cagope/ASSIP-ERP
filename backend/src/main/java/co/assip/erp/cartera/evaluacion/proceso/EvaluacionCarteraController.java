@@ -107,11 +107,10 @@ public class EvaluacionCarteraController {
     // MARCAR DEFINITIVA
     // =========================================================
 
-    @PatchMapping("/{idEvaluacionCartera}/definitiva")
+    @PutMapping("/{idEvaluacionCartera}/definitiva")
     public EvaluacionCarteraDTO marcarDefinitiva(
             @PathVariable Integer idEvaluacionCartera
     ) {
-
         return service.marcarDefinitiva(
                 idEvaluacionCartera
         );

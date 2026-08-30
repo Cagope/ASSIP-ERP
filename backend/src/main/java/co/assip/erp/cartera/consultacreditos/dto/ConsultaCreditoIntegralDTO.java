@@ -18,6 +18,7 @@ import java.util.List;
  * - Intereses causados.
  * - Historial de evaluaciones.
  * - Última evaluación de cartera.
+ * - Historial de prórrogas.
  *
  * Este DTO no realiza cálculos.
  * Los valores provienen directamente de las vistas de cartera.
@@ -65,6 +66,18 @@ public class ConsultaCreditoIntegralDTO {
     private ConsultaCreditoEvaluacionDTO ultimaEvaluacion;
 
     // =========================================================
+    // Prórrogas
+    // =========================================================
+
+    private List<ConsultaCreditoProrrogaDTO> prorrogas;
+
+    // =========================================================
+    // Resultados mensuales de cartera
+    // =========================================================
+
+    private List<ConsultaCreditoResultadoMensualDTO> resultadosMensuales;
+
+    // =========================================================
     // Constructor
     // =========================================================
 
@@ -83,6 +96,12 @@ public class ConsultaCreditoIntegralDTO {
                 new ArrayList<>();
 
         this.evaluaciones =
+                new ArrayList<>();
+
+        this.prorrogas =
+                new ArrayList<>();
+
+        this.resultadosMensuales =
                 new ArrayList<>();
     }
 }

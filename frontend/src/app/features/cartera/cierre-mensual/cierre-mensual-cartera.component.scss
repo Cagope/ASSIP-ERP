@@ -382,6 +382,83 @@
   letter-spacing: 0.02em;
 }
 
+// =========================================================
+// PROCESOS DEL CIERRE
+// =========================================================
+
+.cierre-detalle-procesos {
+  display: flex;
+  flex-direction: column;
+
+  gap: 1rem;
+
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+
+  border-top: 1px solid #e5e7eb;
+}
+
+// =========================================================
+// NAVEGACIÓN DE PROCESOS DEL CIERRE
+// =========================================================
+
+.cierre-detalle-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  flex-wrap: wrap;
+}
+
+.cierre-detalle-tab {
+  min-height: 34px;
+
+  padding: 0.4rem 0.8rem;
+
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+
+  background: #ffffff;
+  color: #374151;
+
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.cierre-detalle-tab:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.cierre-detalle-tab--activo {
+  background: #047857;
+  border-color: #047857;
+  color: #ffffff;
+}
+
+.cierre-detalle-tab--activo:hover {
+  background: #065f46;
+  border-color: #065f46;
+}
+
+.cierre-detalle-bloque {
+  width: 100%;
+  min-width: 0;
+
+  padding: 1rem;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  background: #ffffff;
+}
 
 // =========================================================
 // TABLA

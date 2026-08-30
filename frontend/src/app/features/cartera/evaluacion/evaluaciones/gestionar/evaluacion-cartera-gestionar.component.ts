@@ -116,7 +116,9 @@ export class EvaluacionCarteraGestionarComponent implements OnInit {
     }
 
     this.cargando = true;
+
     this.error = '';
+
     this.mensaje = '';
 
     this.api
@@ -136,14 +138,18 @@ export class EvaluacionCarteraGestionarComponent implements OnInit {
           this.cargando = false;
         },
 
-        error: (error: unknown) => {
+        error: (
+          error:
+            unknown
+        ) => {
 
           console.error(
             'Error cargando la evaluación de cartera:',
             error
           );
 
-          this.evaluacion = null;
+          this.evaluacion =
+            null;
 
           this.error =
             this.obtenerMensajeError(
@@ -165,26 +171,42 @@ export class EvaluacionCarteraGestionarComponent implements OnInit {
     if (
       this.idEvaluacionCartera === null
       || !this.evaluacion
-      || this.evaluacion.estado !== 'P'
+      || !this.estaEnProceso
       || this.ejecutando
       || this.marcandoDefinitiva
     ) {
       return;
     }
 
+    const mensajeConfirmacion =
+      this.tieneResultados
+        ? (
+          'La evaluación será ejecutada nuevamente. '
+          + 'Los resultados actuales serán recalculados '
+          + 'utilizando la información y las reglas vigentes. '
+          + '¿Desea continuar?'
+        )
+        : (
+          'Se ejecutará la evaluación de cartera '
+          + 'para el corte seleccionado. '
+          + '¿Desea continuar?'
+        );
+
     const continuar =
       window.confirm(
-        'Se ejecutará nuevamente la evaluación de cartera. '
-        + 'Los resultados en proceso serán recalculados. '
-        + '¿Desea continuar?'
+        mensajeConfirmacion
       );
 
-    if (!continuar) {
+    if (
+      !continuar
+    ) {
       return;
     }
 
     this.ejecutando = true;
+
     this.error = '';
+
     this.mensaje = '';
 
     this.api
@@ -196,14 +218,19 @@ export class EvaluacionCarteraGestionarComponent implements OnInit {
         next: () => {
 
           this.mensaje =
-            'La evaluación de cartera fue ejecutada correctamente.';
+            this.tieneResultados
+              ? 'La evaluación de cartera fue recalculada correctamente.'
+              : 'La evaluación de cartera fue ejecutada correctamente.';
 
           this.ejecutando = false;
 
           this.recargarDespuesDeProceso();
         },
 
-        error: (error: unknown) => {
+        error: (
+          error:
+            unknown
+        ) => {
 
           console.error(
             'Error ejecutando la evaluación de cartera:',
@@ -230,7 +257,8 @@ export class EvaluacionCarteraGestionarComponent implements OnInit {
     if (
       this.idEvaluacionCartera === null
       || !this.evaluacion
-      || this.evaluacion.estado !== 'P'
+      || !this.estaEnProceso
+      || !this.tieneResultados
       || this.marcandoDefinitiva
       || this.ejecutando
     ) {
@@ -244,12 +272,16 @@ export class EvaluacionCarteraGestionarComponent implements OnInit {
         + '¿Desea continuar?'
       );
 
-    if (!continuar) {
+    if (
+      !continuar
+    ) {
       return;
     }
 
     this.marcandoDefinitiva = true;
+
     this.error = '';
+
     this.mensaje = '';
 
     this.api
@@ -269,10 +301,14 @@ export class EvaluacionCarteraGestionarComponent implements OnInit {
           this.mensaje =
             'La evaluación de cartera fue marcada como definitiva.';
 
-          this.marcandoDefinitiva = false;
+          this.marcandoDefinitiva =
+            false;
         },
 
-        error: (error: unknown) => {
+        error: (
+          error:
+            unknown
+        ) => {
 
           console.error(
             'Error marcando la evaluación como definitiva:',
@@ -285,7 +321,8 @@ export class EvaluacionCarteraGestionarComponent implements OnInit {
               'No fue posible marcar la evaluación como definitiva.'
             );
 
-          this.marcandoDefinitiva = false;
+          this.marcandoDefinitiva =
+            false;
         }
       });
   }
@@ -299,7 +336,7 @@ export class EvaluacionCarteraGestionarComponent implements OnInit {
     if (
       this.idEvaluacionCartera === null
       || !this.evaluacion
-      || this.evaluacion.cantidadCreditos <= 0
+      || !this.tieneResultados
     ) {
       return;
     }
@@ -359,13 +396,105 @@ export class EvaluacionCarteraGestionarComponent implements OnInit {
     );
   }
 
+  // =========================================================
+  // RESULTADOS
+  // =========================================================
+
   get tieneResultados(): boolean {
 
     return (
-      (this.evaluacion?.cantidadCreditos ?? 0)
-      > 0
+      (
+        this.evaluacion
+          ?.cantidadCreditos
+        ?? 0
+      ) > 0
     );
   }
+
+  // =========================================================
+  // PENDIENTE DE EJECUTAR
+  // =========================================================
+
+  get pendienteEjecucion(): boolean {
+
+    return (
+      this.estaEnProceso
+      && !this.tieneResultados
+    );
+  }
+
+  // =========================================================
+  // EJECUTADA EN REVISIÓN
+  // =========================================================
+
+  get ejecutadaEnRevision(): boolean {
+
+    return (
+      this.estaEnProceso
+      && this.tieneResultados
+    );
+  }
+
+  // =========================================================
+  // PUEDE EJECUTAR
+  // =========================================================
+
+  get puedeEjecutar(): boolean {
+
+    return (
+      this.estaEnProceso
+      && !this.procesando
+    );
+  }
+
+  // =========================================================
+  // PUEDE VER RESULTADOS
+  // =========================================================
+
+  get puedeVerResultados(): boolean {
+
+    return (
+      this.tieneResultados
+      && !this.procesando
+    );
+  }
+
+  // =========================================================
+  // PUEDE MARCAR DEFINITIVA
+  // =========================================================
+
+  get puedeMarcarDefinitiva(): boolean {
+
+    return (
+      this.estaEnProceso
+      && this.tieneResultados
+      && !this.procesando
+    );
+  }
+
+  // =========================================================
+  // TEXTO BOTÓN EJECUCIÓN
+  // =========================================================
+
+  get textoBotonEjecutar(): string {
+
+    if (
+      this.ejecutando
+    ) {
+
+      return this.tieneResultados
+        ? 'RECALCULANDO...'
+        : 'EJECUTANDO...';
+    }
+
+    return this.tieneResultados
+      ? 'VOLVER A EJECUTAR'
+      : 'EJECUTAR EVALUACIÓN';
+  }
+
+  // =========================================================
+  // PROCESANDO
+  // =========================================================
 
   get procesando(): boolean {
 
@@ -403,7 +532,10 @@ export class EvaluacionCarteraGestionarComponent implements OnInit {
             evaluacion;
         },
 
-        error: (error: unknown) => {
+        error: (
+          error:
+            unknown
+        ) => {
 
           console.error(
             'Error recargando la evaluación:',
@@ -424,14 +556,17 @@ export class EvaluacionCarteraGestionarComponent implements OnInit {
   // =========================================================
 
   private obtenerMensajeError(
-    error: unknown,
-    mensajePredeterminado: string
+    error:
+      unknown,
+    mensajePredeterminado:
+      string
   ): string {
 
     if (
       !error
       || typeof error !== 'object'
     ) {
+
       return mensajePredeterminado;
     }
 

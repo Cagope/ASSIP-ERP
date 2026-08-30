@@ -9,6 +9,8 @@ import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoInteresDTO;
 import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoResumenDTO;
 import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoSeguroDTO;
 import co.assip.erp.cartera.consultacreditos.pdf.ConsultaCreditoExtractoPdfService;
+import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoProrrogaDTO;
+import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoResultadoMensualDTO;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +38,7 @@ import java.util.List;
  * - Intereses causados.
  * - Evaluaciones de cartera.
  * - Última evaluación.
+ * - Prórrogas.
  * - Consulta integral.
  *
  * Este controlador es exclusivamente de lectura.
@@ -260,6 +263,53 @@ public class ConsultaCreditosController {
 
         return ResponseEntity.ok(
                 service.listarEvaluaciones(
+                        idCarteraCredito
+                )
+        );
+    }
+
+    // =========================================================
+    // PRÓRROGAS
+    // =========================================================
+
+    /**
+     * Consulta el historial completo de prórrogas
+     * registradas para el crédito.
+     */
+    @GetMapping("/{idCarteraCredito}/prorrogas")
+    public ResponseEntity<List<ConsultaCreditoProrrogaDTO>>
+    listarProrrogas(
+            @PathVariable
+            Integer idCarteraCredito
+    ) {
+
+        return ResponseEntity.ok(
+                service.listarProrrogas(
+                        idCarteraCredito
+                )
+        );
+    }
+
+    // =========================================================
+// RESULTADOS MENSUALES
+// =========================================================
+
+    /**
+     * Consulta el historial de resultados mensuales
+     * calculados para el crédito.
+     *
+     * Cada registro corresponde a un cierre de cartera
+     * en el cual el crédito tuvo resultado de cálculo.
+     */
+    @GetMapping("/{idCarteraCredito}/resultados-mensuales")
+    public ResponseEntity<List<ConsultaCreditoResultadoMensualDTO>>
+    listarResultadosMensuales(
+            @PathVariable
+            Integer idCarteraCredito
+    ) {
+
+        return ResponseEntity.ok(
+                service.listarResultadosMensuales(
                         idCarteraCredito
                 )
         );

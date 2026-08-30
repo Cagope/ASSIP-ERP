@@ -210,28 +210,34 @@ public class EvaluacionCarteraRepository {
     }
 
     // =========================================================
-    // VALIDAR CRÉDITOS EN LOS CIERRES DE LA FECHA
-    // =========================================================
+// VALIDAR CRÉDITOS EVALUABLES EN LOS CIERRES DE LA FECHA
+// Solo créditos con saldo_actual > 0
+// =========================================================
 
     public boolean existenCreditosPorFecha(
             LocalDate fechaCorte
     ) {
 
         String sql = """
-                SELECT EXISTS
-                (
-                    SELECT 1
+            SELECT EXISTS
+            (
+                SELECT 1
 
-                    FROM cartera.cierres_cartera c
+                FROM cartera.cierres_cartera c
 
-                    INNER JOIN cartera.cierres_cartera_creditos cc
-                        ON cc.id_cierre_cartera =
-                           c.id_cierre_cartera
+                INNER JOIN cartera.cierres_cartera_creditos cc
+                    ON cc.id_cierre_cartera =
+                       c.id_cierre_cartera
 
-                    WHERE c.fecha_corte =
-                          :fechaCorte
-                )
-                """;
+                WHERE c.fecha_corte =
+                      :fechaCorte
+
+                  AND COALESCE(
+                          cc.saldo_actual,
+                          0
+                      ) > 0
+            )
+            """;
 
         MapSqlParameterSource parametros =
                 new MapSqlParameterSource()
@@ -514,6 +520,7 @@ public class EvaluacionCarteraRepository {
     //
     // Usa:
     // - créditos del cierre de cartera de la fecha evaluada;
+    // - únicamente créditos con saldo_actual > 0;
     // - fotografía definitiva de Hoja de Vida del mismo corte.
     //
     // Este método solo obtiene información general del crédito.
@@ -526,79 +533,84 @@ public class EvaluacionCarteraRepository {
     ) {
 
         String sql = """
-                SELECT
-                    cc.id_cierre_cartera
-                        AS idCierreCartera,
+            SELECT
+                cc.id_cierre_cartera
+                    AS idCierreCartera,
 
-                    cc.id_cierre_cartera_credito
-                        AS idCierreCarteraCredito,
+                cc.id_cierre_cartera_credito
+                    AS idCierreCarteraCredito,
 
-                    cc.id_cartera_credito
-                        AS idCarteraCredito,
+                cc.id_cartera_credito
+                    AS idCarteraCredito,
 
-                    cc.id_datos_personal
-                        AS idDatosPersonal,
+                cc.id_datos_personal
+                    AS idDatosPersonal,
 
-                    hv.documento,
+                hv.documento,
 
-                    hv.nombres,
+                hv.nombres,
 
-                    hv.primer_apellido
-                        AS primerApellido,
+                hv.primer_apellido
+                    AS primerApellido,
 
-                    hv.segundo_apellido
-                        AS segundoApellido,
+                hv.segundo_apellido
+                    AS segundoApellido,
 
-                    cc.pagare_cartera
-                        AS pagareCartera,
+                cc.pagare_cartera
+                    AS pagareCartera,
 
-                    cc.codigo_clasificacion_credito
-                        AS codigoClasificacionCredito,
+                cc.codigo_clasificacion_credito
+                    AS codigoClasificacionCredito,
 
-                    cc.saldo_actual
-                        AS saldoActual,
-                    
-                    cc.credito_evaluado
-                        AS creditoEvaluado,
+                cc.saldo_actual
+                    AS saldoActual,
 
-                    cc.edad_de_mora
-                        AS edadMora,
+                cc.credito_evaluado
+                    AS creditoEvaluado,
 
-                    cc.edad_de_riesgo
-                        AS edadRiesgoAnterior,
+                cc.edad_de_mora
+                    AS edadMora,
 
-                    cc.edad_riesgo_inicial
-                        AS edadRiesgoInicial
+                cc.edad_de_riesgo
+                    AS edadRiesgoAnterior,
 
-                FROM cartera.cierres_cartera cierre
+                cc.edad_riesgo_inicial
+                    AS edadRiesgoInicial
 
-                INNER JOIN cartera.cierres_cartera_creditos cc
-                    ON cc.id_cierre_cartera =
-                       cierre.id_cierre_cartera
+            FROM cartera.cierres_cartera cierre
 
-                INNER JOIN hoja_vida.cierres_hoja_vida cierre_hv
-                    ON cierre_hv.fecha_corte =
-                       cierre.fecha_corte
+            INNER JOIN cartera.cierres_cartera_creditos cc
+                ON cc.id_cierre_cartera =
+                   cierre.id_cierre_cartera
 
-                   AND cierre_hv.estado = 'D'
+            INNER JOIN hoja_vida.cierres_hoja_vida cierre_hv
+                ON cierre_hv.fecha_corte =
+                   cierre.fecha_corte
 
-                INNER JOIN hoja_vida.cierres_hoja_vida_personas hv
-                    ON hv.id_cierre_hoja_vida =
-                       cierre_hv.id_cierre_hoja_vida
+               AND cierre_hv.estado = 'D'
 
-                   AND hv.id_datos_personal =
-                       cc.id_datos_personal
+            INNER JOIN hoja_vida.cierres_hoja_vida_personas hv
+                ON hv.id_cierre_hoja_vida =
+                   cierre_hv.id_cierre_hoja_vida
 
-                WHERE cierre.fecha_corte =
-                      :fechaCorte
+               AND hv.id_datos_personal =
+                   cc.id_datos_personal
 
-                ORDER BY
-                    cierre.id_agencia,
-                    hv.primer_apellido,
-                    hv.segundo_apellido,
-                    hv.nombres,
-                    cc.pagare_cartera
-                """;
+            WHERE cierre.fecha_corte =
+                  :fechaCorte
+
+              AND COALESCE(
+                      cc.saldo_actual,
+                      0
+                  ) > 0
+
+            ORDER BY
+                cc.id_agencia,
+                hv.primer_apellido,
+                hv.segundo_apellido,
+                hv.nombres,
+                cc.pagare_cartera
+            """;
 
         MapSqlParameterSource parametros =
                 new MapSqlParameterSource()
@@ -656,7 +668,8 @@ public class EvaluacionCarteraRepository {
 
     // =========================================================
     // CONTAR CRÉDITOS SIN PERSONA EN EL CIERRE DE HOJA DE VIDA
-    // Revisa todos los cierres de todas las agencias del corte
+    // Solo valida créditos que hacen parte de la evaluación:
+    // saldo_actual > 0
     // =========================================================
 
     public int contarCreditosSinCierreHojaVida(
@@ -664,33 +677,38 @@ public class EvaluacionCarteraRepository {
     ) {
 
         String sql = """
-                SELECT COUNT(*)
+            SELECT COUNT(*)
 
-                FROM cartera.cierres_cartera cierre
+            FROM cartera.cierres_cartera cierre
 
-                INNER JOIN cartera.cierres_cartera_creditos cc
-                    ON cc.id_cierre_cartera =
-                       cierre.id_cierre_cartera
+            INNER JOIN cartera.cierres_cartera_creditos cc
+                ON cc.id_cierre_cartera =
+                   cierre.id_cierre_cartera
 
-                LEFT JOIN hoja_vida.cierres_hoja_vida cierre_hv
-                    ON cierre_hv.fecha_corte =
-                       cierre.fecha_corte
+            LEFT JOIN hoja_vida.cierres_hoja_vida cierre_hv
+                ON cierre_hv.fecha_corte =
+                   cierre.fecha_corte
 
-                   AND cierre_hv.estado = 'D'
+               AND cierre_hv.estado = 'D'
 
-                LEFT JOIN hoja_vida.cierres_hoja_vida_personas hv
-                    ON hv.id_cierre_hoja_vida =
-                       cierre_hv.id_cierre_hoja_vida
+            LEFT JOIN hoja_vida.cierres_hoja_vida_personas hv
+                ON hv.id_cierre_hoja_vida =
+                   cierre_hv.id_cierre_hoja_vida
 
-                   AND hv.id_datos_personal =
-                       cc.id_datos_personal
+               AND hv.id_datos_personal =
+                   cc.id_datos_personal
 
-                WHERE cierre.fecha_corte =
-                      :fechaCorte
+            WHERE cierre.fecha_corte =
+                  :fechaCorte
 
-                  AND hv.id_cierre_hoja_vida_persona
-                      IS NULL
-                """;
+              AND COALESCE(
+                      cc.saldo_actual,
+                      0
+                  ) > 0
+
+              AND hv.id_cierre_hoja_vida_persona
+                  IS NULL
+            """;
 
         MapSqlParameterSource parametros =
                 new MapSqlParameterSource()
@@ -712,7 +730,8 @@ public class EvaluacionCarteraRepository {
     }
 
     // =========================================================
-    // CONTAR CRÉDITOS DEL CORTE
+    // CONTAR CRÉDITOS EVALUABLES DEL CORTE
+    // Solo créditos con saldo_actual > 0
     // =========================================================
 
     public int contarCreditosPorFecha(
@@ -720,17 +739,22 @@ public class EvaluacionCarteraRepository {
     ) {
 
         String sql = """
-                SELECT COUNT(*)
+            SELECT COUNT(*)
 
-                FROM cartera.cierres_cartera cierre
+            FROM cartera.cierres_cartera cierre
 
-                INNER JOIN cartera.cierres_cartera_creditos cc
-                    ON cc.id_cierre_cartera =
-                       cierre.id_cierre_cartera
+            INNER JOIN cartera.cierres_cartera_creditos cc
+                ON cc.id_cierre_cartera =
+                   cierre.id_cierre_cartera
 
-                WHERE cierre.fecha_corte =
-                      :fechaCorte
-                """;
+            WHERE cierre.fecha_corte =
+                  :fechaCorte
+
+              AND COALESCE(
+                      cc.saldo_actual,
+                      0
+                  ) > 0
+            """;
 
         MapSqlParameterSource parametros =
                 new MapSqlParameterSource()
@@ -752,27 +776,33 @@ public class EvaluacionCarteraRepository {
     }
 
     // =========================================================
-    // CONTAR ASOCIADOS DEL CORTE
-    // =========================================================
+// CONTAR ASOCIADOS EVALUABLES DEL CORTE
+// Solo asociados con créditos cuyo saldo_actual > 0
+// =========================================================
 
     public int contarAsociadosPorFecha(
             LocalDate fechaCorte
     ) {
 
         String sql = """
-                SELECT COUNT(
-                    DISTINCT cc.id_datos_personal
-                )
+            SELECT COUNT(
+                DISTINCT cc.id_datos_personal
+            )
 
-                FROM cartera.cierres_cartera cierre
+            FROM cartera.cierres_cartera cierre
 
-                INNER JOIN cartera.cierres_cartera_creditos cc
-                    ON cc.id_cierre_cartera =
-                       cierre.id_cierre_cartera
+            INNER JOIN cartera.cierres_cartera_creditos cc
+                ON cc.id_cierre_cartera =
+                   cierre.id_cierre_cartera
 
-                WHERE cierre.fecha_corte =
-                      :fechaCorte
-                """;
+            WHERE cierre.fecha_corte =
+                  :fechaCorte
+
+              AND COALESCE(
+                      cc.saldo_actual,
+                      0
+                  ) > 0
+            """;
 
         MapSqlParameterSource parametros =
                 new MapSqlParameterSource()
@@ -794,28 +824,34 @@ public class EvaluacionCarteraRepository {
     }
 
     // =========================================================
-    // OBTENER SALDO TOTAL DEL CORTE
-    // =========================================================
+// OBTENER SALDO TOTAL EVALUABLE DEL CORTE
+// Solo créditos con saldo_actual > 0
+// =========================================================
 
     public BigDecimal obtenerSaldoTotalPorFecha(
             LocalDate fechaCorte
     ) {
 
         String sql = """
-                SELECT COALESCE(
-                    SUM(cc.saldo_actual),
-                    0
-                )
+            SELECT COALESCE(
+                SUM(cc.saldo_actual),
+                0
+            )
 
-                FROM cartera.cierres_cartera cierre
+            FROM cartera.cierres_cartera cierre
 
-                INNER JOIN cartera.cierres_cartera_creditos cc
-                    ON cc.id_cierre_cartera =
-                       cierre.id_cierre_cartera
+            INNER JOIN cartera.cierres_cartera_creditos cc
+                ON cc.id_cierre_cartera =
+                   cierre.id_cierre_cartera
 
-                WHERE cierre.fecha_corte =
-                      :fechaCorte
-                """;
+            WHERE cierre.fecha_corte =
+                  :fechaCorte
+
+              AND COALESCE(
+                      cc.saldo_actual,
+                      0
+                  ) > 0
+            """;
 
         MapSqlParameterSource parametros =
                 new MapSqlParameterSource()

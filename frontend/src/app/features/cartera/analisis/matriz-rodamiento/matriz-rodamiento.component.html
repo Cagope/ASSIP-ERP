@@ -1,0 +1,1075 @@
+<div class="matriz-rodamiento">
+
+  <app-header-actions
+    titulo="Matriz de Rodamiento"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="true"
+    (exportar)="exportarExcel()">
+  </app-header-actions>
+
+
+  <!-- ===================================================== -->
+  <!-- PARÁMETROS -->
+  <!-- ===================================================== -->
+
+  <section class="panel panel-parametros">
+
+    <div class="panel-titulo">
+      Parámetros de análisis
+    </div>
+
+    <div class="parametros-grid">
+
+      <div class="campo">
+
+        <label>
+          Datos de partida
+        </label>
+
+        <select
+          [(ngModel)]="tipoPartida"
+          (ngModelChange)="cambiarTipoPartida()">
+
+          <option value="ACTUAL">
+            Cartera actual
+          </option>
+
+          <option value="CORTE">
+            Corte histórico
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div
+        class="campo"
+        *ngIf="tipoPartida === 'CORTE'">
+
+        <label>
+          Corte datos de partida
+        </label>
+
+        <select
+          [(ngModel)]="fechaPartida">
+
+          <option value="">
+            Seleccione...
+          </option>
+
+          <option
+            *ngFor="let corte of cortes"
+            [value]="corte.fechaCorte">
+
+            {{ corte.fechaCorte }}
+            -
+            {{ formatearNumero(corte.cantidadCreditos) }}
+            créditos
+
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="campo">
+
+        <label>
+          Período de comparación
+        </label>
+
+        <select
+          [(ngModel)]="fechaComparacion">
+
+          <option value="">
+            Seleccione...
+          </option>
+
+          <option
+            *ngFor="let corte of cortes"
+            [value]="corte.fechaCorte">
+
+            {{ corte.fechaCorte }}
+            -
+            {{ formatearNumero(corte.cantidadCreditos) }}
+            créditos
+
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="campo campo-accion">
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          [disabled]="cargandoMatriz || cargandoCortes"
+          (click)="calcular()">
+
+          {{
+          cargandoMatriz
+          ? 'Calculando...'
+          : 'Calcular matriz'
+          }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- ERROR -->
+  <!-- ===================================================== -->
+
+  <div
+    class="mensaje mensaje-error"
+    *ngIf="error">
+
+    {{ error }}
+
+  </div>
+
+
+  <div
+    class="mensaje"
+    *ngIf="cargandoMatriz">
+
+    Calculando Matriz de Rodamiento...
+
+  </div>
+
+
+  <ng-container *ngIf="matriz && !cargandoMatriz">
+
+
+    <!-- =================================================== -->
+    <!-- RESUMEN -->
+    <!-- =================================================== -->
+
+    <section class="resumen-grid">
+
+      <div class="resumen-card">
+
+        <span class="resumen-etiqueta">
+          Período anterior
+        </span>
+
+        <strong>
+          {{ matriz.fechaComparacion }}
+        </strong>
+
+      </div>
+
+
+      <div class="resumen-card">
+
+        <span class="resumen-etiqueta">
+          Datos de partida
+        </span>
+
+        <strong>
+
+          {{
+          matriz.tipoPartida === 'ACTUAL'
+          ? 'Actual ' + matriz.fechaPartida
+          : matriz.fechaPartida
+          }}
+
+        </strong>
+
+      </div>
+
+
+      <div class="resumen-card">
+
+        <span class="resumen-etiqueta">
+          Población partida
+        </span>
+
+        <strong>
+
+          {{
+          formatearNumero(
+          matriz.cantidadPoblacionPartida
+          )
+          }}
+
+        </strong>
+
+      </div>
+
+
+      <div class="resumen-card">
+
+        <span class="resumen-etiqueta">
+          Créditos en matriz
+        </span>
+
+        <strong>
+
+          {{
+          formatearNumero(
+          matriz.cantidadCreditosMatriz
+          )
+          }}
+
+        </strong>
+
+      </div>
+
+
+      <div class="resumen-card">
+
+        <span class="resumen-etiqueta">
+          Valor analizado
+        </span>
+
+        <strong>
+
+          $
+          {{
+          formatearMoneda(
+          matriz.totalValor
+          )
+          }}
+
+        </strong>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- MATRIZ POR CANTIDADES -->
+    <!-- =================================================== -->
+
+    <section class="panel">
+
+      <div class="panel-titulo panel-titulo-matriz">
+
+        <div>
+
+          <strong>
+            Matriz por cantidades
+          </strong>
+
+          <span>
+            Filas: categoría anterior ·
+            Columnas: categoría datos de partida
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="table-wrap">
+
+        <table class="table matriz-table">
+
+          <thead>
+
+          <tr>
+
+            <th rowspan="2">
+              Categoría anterior
+            </th>
+
+            <th
+              colspan="5"
+              class="grupo-destino">
+
+              Categoría datos de partida
+
+            </th>
+
+            <th rowspan="2">
+              Total
+            </th>
+
+            <th rowspan="2">
+              Mejora
+            </th>
+
+            <th rowspan="2">
+              Permanencia
+            </th>
+
+            <th rowspan="2">
+              Deterioro
+            </th>
+
+          </tr>
+
+
+          <tr>
+
+            <th
+              *ngFor="let categoria of categorias">
+
+              {{ categoria }}
+
+            </th>
+
+          </tr>
+
+          </thead>
+
+
+          <tbody>
+
+          <tr
+            *ngFor="let fila of matriz.filas">
+
+            <th class="categoria-fila">
+
+              {{ fila.categoriaAnterior }}
+
+            </th>
+
+
+            <td
+              *ngFor="let categoria of categorias"
+              class="celda-matriz"
+
+              [ngClass]="claseMovimiento(
+                  fila.categoriaAnterior,
+                  categoria
+                )"
+
+              [class.celda-vacia]="
+                  (obtenerCelda(
+                    fila.categoriaAnterior,
+                    categoria
+                  )?.cantidad ?? 0) === 0
+                "
+
+              (click)="seleccionarCeldaPorCategorias(
+                  fila.categoriaAnterior,
+                  categoria
+                )">
+
+              {{
+              formatearNumero(
+              obtenerCelda(
+              fila.categoriaAnterior,
+              categoria
+              )?.cantidad
+              )
+              }}
+
+            </td>
+
+
+            <td class="total">
+
+              {{
+              formatearNumero(
+              fila.totalCantidad
+              )
+              }}
+
+            </td>
+
+
+            <td class="probabilidad mejora">
+
+              {{
+              formatearPorcentaje(
+              fila.probabilidadMejoraCantidad
+              )
+              }}
+
+            </td>
+
+
+            <td class="probabilidad permanencia">
+
+              {{
+              formatearPorcentaje(
+              fila.probabilidadPermanenciaCantidad
+              )
+              }}
+
+            </td>
+
+
+            <td class="probabilidad deterioro">
+
+              {{
+              formatearPorcentaje(
+              fila.probabilidadDeterioroCantidad
+              )
+              }}
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+
+          <tfoot>
+
+          <tr>
+
+            <th>
+              TOTAL
+            </th>
+
+
+            <td
+              *ngFor="let categoria of categorias"
+              class="total">
+
+              {{
+              formatearNumero(
+              totalCantidadCategoria(
+              categoria
+              )
+              )
+              }}
+
+            </td>
+
+
+            <td class="total total-general">
+
+              {{
+              formatearNumero(
+              matriz.totalCantidad
+              )
+              }}
+
+            </td>
+
+
+            <td colspan="3"></td>
+
+          </tr>
+
+          </tfoot>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- MATRIZ POR VALORES -->
+    <!-- =================================================== -->
+
+    <section class="panel">
+
+      <div class="panel-titulo panel-titulo-matriz">
+
+        <div>
+
+          <strong>
+            Matriz por valores
+          </strong>
+
+          <span>
+            Saldo de los datos de partida
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="table-wrap">
+
+        <table class="table matriz-table matriz-valores">
+
+          <thead>
+
+          <tr>
+
+            <th rowspan="2">
+              Categoría anterior
+            </th>
+
+            <th
+              colspan="5"
+              class="grupo-destino">
+
+              Categoría datos de partida
+
+            </th>
+
+            <th rowspan="2">
+              Total
+            </th>
+
+            <th rowspan="2">
+              Mejora
+            </th>
+
+            <th rowspan="2">
+              Permanencia
+            </th>
+
+            <th rowspan="2">
+              Deterioro
+            </th>
+
+          </tr>
+
+
+          <tr>
+
+            <th
+              *ngFor="let categoria of categorias">
+
+              {{ categoria }}
+
+            </th>
+
+          </tr>
+
+          </thead>
+
+
+          <tbody>
+
+          <tr
+            *ngFor="let fila of matriz.filas">
+
+            <th class="categoria-fila">
+
+              {{ fila.categoriaAnterior }}
+
+            </th>
+
+
+            <td
+              *ngFor="let categoria of categorias"
+              class="celda-matriz celda-valor"
+
+              [ngClass]="claseMovimiento(
+                  fila.categoriaAnterior,
+                  categoria
+                )"
+
+              [class.celda-vacia]="
+                  (obtenerCelda(
+                    fila.categoriaAnterior,
+                    categoria
+                  )?.cantidad ?? 0) === 0
+                "
+
+              (click)="seleccionarCeldaPorCategorias(
+                  fila.categoriaAnterior,
+                  categoria
+                )">
+
+              $
+              {{
+              formatearMoneda(
+              obtenerCelda(
+              fila.categoriaAnterior,
+              categoria
+              )?.valor
+              )
+              }}
+
+            </td>
+
+
+            <td class="total celda-valor">
+
+              $
+              {{
+              formatearMoneda(
+              fila.totalValor
+              )
+              }}
+
+            </td>
+
+
+            <td class="probabilidad mejora">
+
+              {{
+              formatearPorcentaje(
+              fila.probabilidadMejoraValor
+              )
+              }}
+
+            </td>
+
+
+            <td class="probabilidad permanencia">
+
+              {{
+              formatearPorcentaje(
+              fila.probabilidadPermanenciaValor
+              )
+              }}
+
+            </td>
+
+
+            <td class="probabilidad deterioro">
+
+              {{
+              formatearPorcentaje(
+              fila.probabilidadDeterioroValor
+              )
+              }}
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+
+          <tfoot>
+
+          <tr>
+
+            <th>
+              TOTAL
+            </th>
+
+
+            <td
+              *ngFor="let categoria of categorias"
+              class="total celda-valor">
+
+              $
+              {{
+              formatearMoneda(
+              totalValorCategoria(
+              categoria
+              )
+              )
+              }}
+
+            </td>
+
+
+            <td class="total total-general celda-valor">
+
+              $
+              {{
+              formatearMoneda(
+              matriz.totalValor
+              )
+              }}
+
+            </td>
+
+
+            <td colspan="3"></td>
+
+          </tr>
+
+          </tfoot>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- DETALLE DE CELDA -->
+    <!-- =================================================== -->
+
+    <section
+      class="panel panel-detalle"
+
+      *ngIf="
+        categoriaAnteriorSeleccionada
+        &&
+        categoriaPartidaSeleccionada
+      ">
+
+      <div class="detalle-header">
+
+        <div>
+
+          <div class="panel-titulo">
+
+            Detalle de la transición
+            {{ categoriaAnteriorSeleccionada }}
+            →
+            {{ categoriaPartidaSeleccionada }}
+
+          </div>
+
+
+          <div class="detalle-subtitulo">
+
+            {{
+            formatearNumero(
+            detalle.length
+            )
+            }}
+            crédito(s)
+
+          </div>
+
+        </div>
+
+
+        <div class="detalle-acciones">
+
+          <button
+            type="button"
+            class="btn btn--secondary"
+            [disabled]="detalle.length === 0"
+            (click)="exportarDetalle()">
+
+            Exportar detalle
+
+          </button>
+
+
+          <button
+            type="button"
+            class="btn btn--secondary"
+            (click)="cerrarDetalle()">
+
+            Cerrar
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="mensaje"
+        *ngIf="cargandoDetalle">
+
+        Consultando créditos...
+
+      </div>
+
+
+      <div
+        class="mensaje mensaje-error"
+        *ngIf="errorDetalle">
+
+        {{ errorDetalle }}
+
+      </div>
+
+
+      <ng-container
+        *ngIf="!cargandoDetalle">
+
+        <div class="detalle-filtro">
+
+          <input
+            type="text"
+            [(ngModel)]="filtroDetalle"
+            (ngModelChange)="cambiarFiltroDetalle()"
+            placeholder="Buscar por documento, nombre, pagaré, línea, teléfono, celular o correo">
+
+        </div>
+
+
+        <div class="table-wrap">
+
+          <table class="table detalle-table">
+
+            <thead>
+
+            <tr>
+
+              <th>
+                Documento
+              </th>
+
+              <th>
+                Nombre
+              </th>
+
+              <th>
+                Teléfono
+              </th>
+
+              <th>
+                Celular
+              </th>
+
+              <th>
+                Correo
+              </th>
+
+              <th>
+                Agencia
+              </th>
+
+              <th>
+                Línea
+              </th>
+
+              <th>
+                Pagaré
+              </th>
+
+              <th>
+                Saldo anterior
+              </th>
+
+              <th>
+                Mora anterior
+              </th>
+
+              <th>
+                Cat. anterior
+              </th>
+
+              <th>
+                Saldo partida
+              </th>
+
+              <th>
+                Mora partida
+              </th>
+
+              <th>
+                Cat. partida
+              </th>
+
+            </tr>
+
+            </thead>
+
+
+            <tbody>
+
+            <tr
+              *ngFor="let item of detallePaginado">
+
+              <td>
+
+                {{ item.documento }}
+
+              </td>
+
+
+              <td class="nombre">
+
+                {{ item.nombreCompleto }}
+
+              </td>
+
+
+              <td>
+
+                {{ item.telefono || '—' }}
+
+              </td>
+
+
+              <td>
+
+                {{ item.celular || '—' }}
+
+              </td>
+
+
+              <td>
+
+                {{ item.correo || '—' }}
+
+              </td>
+
+
+              <td>
+
+                {{ item.idAgencia }}
+
+              </td>
+
+
+              <td>
+
+                {{ item.codigoLineaCredito }}
+                -
+                {{ item.nombreLineaCredito }}
+
+              </td>
+
+
+              <td>
+
+                {{ item.pagareCartera }}
+
+              </td>
+
+
+              <td class="numero">
+
+                $
+                {{
+                formatearMoneda(
+                item.saldoAnterior
+                )
+                }}
+
+              </td>
+
+
+              <td class="numero">
+
+                {{
+                formatearNumero(
+                item.diasMoraAnterior
+                )
+                }}
+
+              </td>
+
+
+              <td class="categoria">
+
+                {{ item.categoriaAnterior }}
+
+              </td>
+
+
+              <td class="numero">
+
+                $
+                {{
+                formatearMoneda(
+                item.saldoPartida
+                )
+                }}
+
+              </td>
+
+
+              <td class="numero">
+
+                {{
+                formatearNumero(
+                item.diasMoraPartida
+                )
+                }}
+
+              </td>
+
+
+              <td class="categoria">
+
+                {{ item.categoriaPartida }}
+
+              </td>
+
+            </tr>
+
+
+            <tr
+              *ngIf="
+                  detalleFiltrado.length === 0
+                  &&
+                  !errorDetalle
+                ">
+
+              <td
+                colspan="14"
+                class="sin-registros">
+
+                No existen créditos para esta transición.
+
+              </td>
+
+            </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+
+        <div
+          class="paginacion"
+          *ngIf="detalleFiltrado.length > 0">
+
+          <div>
+
+            {{
+            formatearNumero(
+            detalleFiltrado.length
+            )
+            }}
+            registro(s)
+
+          </div>
+
+
+          <div class="paginacion-controles">
+
+            <button
+              type="button"
+              class="btn btn--secondary btn-sm"
+              [disabled]="paginaDetalle <= 1"
+              (click)="paginaAnteriorDetalle()">
+
+              Anterior
+
+            </button>
+
+
+            <span>
+
+              Página
+              {{ paginaDetalle }}
+              de
+              {{ totalPaginasDetalle }}
+
+            </span>
+
+
+            <button
+              type="button"
+              class="btn btn--secondary btn-sm"
+
+              [disabled]="
+                paginaDetalle
+                >=
+                totalPaginasDetalle
+              "
+
+              (click)="paginaSiguienteDetalle()">
+
+              Siguiente
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </ng-container>
+
+    </section>
+
+  </ng-container>
+
+</div>

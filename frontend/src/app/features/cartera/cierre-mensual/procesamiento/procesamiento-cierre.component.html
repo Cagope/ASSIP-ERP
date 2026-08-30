@@ -1,0 +1,661 @@
+<div class="procesamiento-cierre">
+
+  <!-- ===================================================== -->
+  <!-- CABECERA -->
+  <!-- ===================================================== -->
+
+  <div class="procesamiento-cierre__header">
+
+    <div>
+      <h3>Procesamiento del Cierre</h3>
+
+      <p class="procesamiento-cierre__subtitle">
+        Ejecuta los cálculos completos del cierre mensual de cartera.
+      </p>
+    </div>
+
+    <div
+      *ngIf="idCierreCartera"
+      class="procesamiento-cierre__estado">
+
+      <span class="procesamiento-cierre__estado-label">
+        Estado:
+      </span>
+
+      <span
+        class="procesamiento-cierre__estado-value"
+        [class.procesamiento-cierre__estado-value--ok]="puedeProcesar()"
+        [class.procesamiento-cierre__estado-value--pendiente]="!puedeProcesar()">
+
+        {{ descripcionEstado(estadoCierre) }}
+
+      </span>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CIERRE SELECCIONADO -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="idCierreCartera"
+    class="procesamiento-cierre__seleccion">
+
+    <div class="procesamiento-cierre__dato">
+
+      <span class="procesamiento-cierre__dato-label">
+        Cierre
+      </span>
+
+      <strong>
+        #{{ idCierreCartera }}
+      </strong>
+
+    </div>
+
+    <div class="procesamiento-cierre__dato">
+
+      <span class="procesamiento-cierre__dato-label">
+        Fecha de corte
+      </span>
+
+      <strong>
+        {{ formatearFecha(fechaCorte) }}
+      </strong>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- SIN CIERRE -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="!idCierreCartera"
+    class="procesamiento-cierre__empty">
+
+    Seleccione un cierre para consultar o ejecutar sus cálculos.
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJE DE BLOQUEO -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="idCierreCartera && !puedeProcesar()"
+    class="procesamiento-cierre__warning">
+
+    La fotografía debe encontrarse cerrada en firme antes de ejecutar
+    los cálculos del cierre.
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJES -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="mensaje"
+    class="procesamiento-cierre__message procesamiento-cierre__message--success">
+
+    {{ mensaje }}
+
+  </div>
+
+  <div
+    *ngIf="error"
+    class="procesamiento-cierre__message procesamiento-cierre__message--error">
+
+    {{ error }}
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- ACCIONES -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="idCierreCartera"
+    class="procesamiento-cierre__actions">
+
+    <button
+      type="button"
+      class="btn btn--primary"
+      [disabled]="!puedeProcesar() || ejecutando"
+      (click)="procesar()">
+
+      <span *ngIf="!ejecutando">
+        Procesar cálculos
+      </span>
+
+      <span *ngIf="ejecutando">
+        Procesando...
+      </span>
+
+    </button>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- PROCESANDO -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="ejecutando"
+    class="procesamiento-cierre__loading">
+
+    Ejecutando intereses, seguros, alivios, cálculos previos,
+    Anexo 1, Anexo 2 y validaciones finales...
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- RESULTADO -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="resultado"
+    class="procesamiento-cierre__resultado">
+
+    <!-- =================================================== -->
+    <!-- ESTADO GENERAL -->
+    <!-- =================================================== -->
+
+    <div
+      class="procesamiento-cierre__resultado-general"
+      [class.procesamiento-cierre__resultado-general--ok]="procesamientoCorrecto()"
+      [class.procesamiento-cierre__resultado-general--error]="!procesamientoCorrecto()">
+
+      <div>
+
+        <span class="procesamiento-cierre__resultado-label">
+          Resultado final
+        </span>
+
+        <strong>
+          {{
+          procesamientoCorrecto()
+          ? 'Procesamiento correcto'
+          : 'Procesamiento con inconsistencias'
+          }}
+        </strong>
+
+      </div>
+
+      <div class="procesamiento-cierre__resultado-estado">
+
+        {{
+        resultado.estadoValidacionFinal
+        }}
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- PROCESOS -->
+    <!-- =================================================== -->
+
+    <div class="procesamiento-cierre__section">
+
+      <h4>
+        Procesos ejecutados
+      </h4>
+
+      <div class="procesamiento-cierre__grid">
+
+        <div class="procesamiento-cierre__card">
+
+          <span class="procesamiento-cierre__card-label">
+            Intereses
+          </span>
+
+          <strong>
+            {{ formatearEntero(resultado.interesesCausados) }}
+          </strong>
+
+        </div>
+
+        <div class="procesamiento-cierre__card">
+
+          <span class="procesamiento-cierre__card-label">
+            Seguros
+          </span>
+
+          <strong>
+            {{ formatearEntero(resultado.segurosCausados) }}
+          </strong>
+
+        </div>
+
+        <div class="procesamiento-cierre__card">
+
+          <span class="procesamiento-cierre__card-label">
+            Alivios
+          </span>
+
+          <strong>
+            {{ formatearEntero(resultado.aliviosConsolidados) }}
+          </strong>
+
+        </div>
+
+        <div class="procesamiento-cierre__card">
+
+          <span class="procesamiento-cierre__card-label">
+            Cálculos previos
+          </span>
+
+          <strong>
+            {{ formatearEntero(resultado.calculosPrevios) }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- ANEXO 1 -->
+    <!-- =================================================== -->
+
+    <div class="procesamiento-cierre__section">
+
+      <h4>
+        Anexo 1
+      </h4>
+
+      <div class="procesamiento-cierre__grid">
+
+        <div class="procesamiento-cierre__card">
+
+          <span class="procesamiento-cierre__card-label">
+            Edades contables
+          </span>
+
+          <strong>
+            {{
+            formatearEntero(
+            resultado.anexo1EdadesContables
+            )
+            }}
+          </strong>
+
+        </div>
+
+        <div class="procesamiento-cierre__card">
+
+          <span class="procesamiento-cierre__card-label">
+            Deterioros de capital
+          </span>
+
+          <strong>
+            {{
+            formatearEntero(
+            resultado.anexo1DeteriorosCapital
+            )
+            }}
+          </strong>
+
+        </div>
+
+        <div class="procesamiento-cierre__card">
+
+          <span class="procesamiento-cierre__card-label">
+            Deterioros de intereses
+          </span>
+
+          <strong>
+            {{
+            formatearEntero(
+            resultado.anexo1DeteriorosIntereses
+            )
+            }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- ANEXO 2 -->
+    <!-- =================================================== -->
+
+    <div class="procesamiento-cierre__section">
+
+      <h4>
+        Anexo 2 / Pérdida Esperada
+      </h4>
+
+      <div class="procesamiento-cierre__grid">
+
+        <div class="procesamiento-cierre__card">
+
+          <span class="procesamiento-cierre__card-label">
+            Población PE
+          </span>
+
+          <strong>
+            {{
+            formatearEntero(
+            resultado.poblacionAnexo2
+            )
+            }}
+          </strong>
+
+        </div>
+
+        <div class="procesamiento-cierre__card">
+
+          <span class="procesamiento-cierre__card-label">
+            Resultados PE persistidos
+          </span>
+
+          <strong>
+            {{
+            formatearEntero(
+            resultado.resultadosAnexo2Persistidos
+            )
+            }}
+          </strong>
+
+        </div>
+
+        <div class="procesamiento-cierre__card">
+
+          <span class="procesamiento-cierre__card-label">
+            Proceso PE
+          </span>
+
+          <strong>
+            {{
+            resultado.procesoPeFinalizado
+            ? 'Finalizado'
+            : 'Pendiente'
+            }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- CONTROL DE POBLACIÓN -->
+    <!-- =================================================== -->
+
+    <div class="procesamiento-cierre__section">
+
+      <h4>
+        Control de población
+      </h4>
+
+      <div class="procesamiento-cierre__table-wrapper">
+
+        <table class="table">
+
+          <thead>
+
+          <tr>
+            <th>Concepto</th>
+            <th class="text-end">Cantidad</th>
+            <th class="text-center">Estado</th>
+          </tr>
+
+          </thead>
+
+          <tbody>
+
+          <tr>
+
+            <td>
+              Créditos cabecera
+            </td>
+
+            <td class="text-end">
+              {{
+              formatearEntero(
+              resultado.cantidadCreditosCabecera
+              )
+              }}
+            </td>
+
+            <td class="text-center">
+              —
+            </td>
+
+          </tr>
+
+          <tr>
+
+            <td>
+              Créditos fotografía
+            </td>
+
+            <td class="text-end">
+              {{
+              formatearEntero(
+              resultado.cantidadCreditosFotografia
+              )
+              }}
+            </td>
+
+            <td class="text-center">
+              —
+            </td>
+
+          </tr>
+
+          <tr>
+
+            <td>
+              Resultados
+            </td>
+
+            <td class="text-end">
+              {{
+              formatearEntero(
+              resultado.cantidadResultados
+              )
+              }}
+            </td>
+
+            <td class="text-center">
+              —
+            </td>
+
+          </tr>
+
+          <tr>
+
+            <td>
+              A1 + PE
+            </td>
+
+            <td class="text-end">
+              {{
+              formatearEntero(
+              resultado.cantidadResultadosA1
+              +
+              resultado.cantidadResultadosPe
+              )
+              }}
+            </td>
+
+            <td class="text-center">
+
+                <span
+                  class="procesamiento-cierre__status"
+                  [class.procesamiento-cierre__status--ok]="poblacionFinalCuadrada()"
+                  [class.procesamiento-cierre__status--error]="!poblacionFinalCuadrada()">
+
+                  {{
+                    poblacionFinalCuadrada()
+                      ? 'OK'
+                      : 'ERROR'
+                  }}
+
+                </span>
+
+            </td>
+
+          </tr>
+
+          <tr>
+
+            <td>
+              PE persistidos
+            </td>
+
+            <td class="text-end">
+              {{
+              formatearEntero(
+              resultado.cantidadPePersistidos
+              )
+              }}
+            </td>
+
+            <td class="text-center">
+
+                <span
+                  class="procesamiento-cierre__status"
+                  [class.procesamiento-cierre__status--ok]="poblacionPeCuadrada()"
+                  [class.procesamiento-cierre__status--error]="!poblacionPeCuadrada()">
+
+                  {{
+                    poblacionPeCuadrada()
+                      ? 'OK'
+                      : 'ERROR'
+                  }}
+
+                </span>
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- DISTRIBUCIÓN FINAL -->
+    <!-- =================================================== -->
+
+    <div class="procesamiento-cierre__section">
+
+      <h4>
+        Distribución final
+      </h4>
+
+      <div class="procesamiento-cierre__grid">
+
+        <div class="procesamiento-cierre__card">
+
+          <span class="procesamiento-cierre__card-label">
+            Anexo 1
+          </span>
+
+          <strong>
+            {{
+            formatearEntero(
+            resultado.cantidadResultadosA1
+            )
+            }}
+          </strong>
+
+        </div>
+
+        <div class="procesamiento-cierre__card">
+
+          <span class="procesamiento-cierre__card-label">
+            Pérdida Esperada
+          </span>
+
+          <strong>
+            {{
+            formatearEntero(
+            resultado.cantidadResultadosPe
+            )
+            }}
+          </strong>
+
+        </div>
+
+        <div class="procesamiento-cierre__card">
+
+          <span class="procesamiento-cierre__card-label">
+            Total
+          </span>
+
+          <strong>
+            {{
+            formatearEntero(
+            resultado.cantidadResultados
+            )
+            }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- ADVERTENCIAS -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="
+        resultado.advertencias
+        &&
+        resultado.advertencias.length > 0
+      "
+      class="procesamiento-cierre__section">
+
+      <h4>
+        Advertencias
+      </h4>
+
+      <ul class="procesamiento-cierre__warnings">
+
+        <li
+          *ngFor="let advertencia of resultado.advertencias">
+
+          {{ advertencia }}
+
+        </li>
+
+      </ul>
+
+    </div>
+
+  </div>
+
+</div>

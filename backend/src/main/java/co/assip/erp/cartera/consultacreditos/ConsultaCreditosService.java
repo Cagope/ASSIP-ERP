@@ -8,6 +8,8 @@ import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoIntegralDTO;
 import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoInteresDTO;
 import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoResumenDTO;
 import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoSeguroDTO;
+import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoProrrogaDTO;
+import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoResultadoMensualDTO;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,7 @@ import java.util.Optional;
  * - Intereses causados.
  * - Historial de evaluaciones.
  * - Última evaluación de cartera.
+ * - Historial de prórrogas.
  * - Consulta integral del crédito.
  *
  * Este servicio es exclusivamente de lectura.
@@ -228,6 +231,54 @@ public class ConsultaCreditosService {
     }
 
     // =========================================================
+    // Prórrogas
+    // =========================================================
+
+    /**
+     * Lista el historial completo de prórrogas
+     * registradas para el crédito.
+     *
+     * Un crédito puede no tener prórrogas o puede
+     * registrar varias durante su vigencia.
+     */
+    public List<ConsultaCreditoProrrogaDTO> listarProrrogas(
+            Integer idCarteraCredito
+    ) {
+
+        validarExistenciaCredito(
+                idCarteraCredito
+        );
+
+        return repository.listarProrrogas(
+                idCarteraCredito
+        );
+    }
+
+    // =========================================================
+    // Resultados mensuales
+    // =========================================================
+
+    /**
+     * Lista el historial de resultados mensuales
+     * calculados para el crédito.
+     *
+     * Cada registro corresponde a un cierre de cartera
+     * en el cual el crédito tuvo saldo y resultado de cálculo.
+     */
+    public List<ConsultaCreditoResultadoMensualDTO> listarResultadosMensuales(
+            Integer idCarteraCredito
+    ) {
+
+        validarExistenciaCredito(
+                idCarteraCredito
+        );
+
+        return repository.listarResultadosMensuales(
+                idCarteraCredito
+        );
+    }
+
+    // =========================================================
     // Consulta integral
     // =========================================================
 
@@ -297,6 +348,18 @@ public class ConsultaCreditosService {
                                 idCarteraCredito
                         )
                         .orElse(null)
+        );
+
+        integral.setProrrogas(
+                repository.listarProrrogas(
+                        idCarteraCredito
+                )
+        );
+
+        integral.setResultadosMensuales(
+                repository.listarResultadosMensuales(
+                        idCarteraCredito
+                )
         );
 
         return integral;

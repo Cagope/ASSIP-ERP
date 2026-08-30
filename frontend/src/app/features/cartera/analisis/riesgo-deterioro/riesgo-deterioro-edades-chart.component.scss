@@ -1,0 +1,242 @@
+:host {
+  display: block;
+}
+
+.chart-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.chart-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    font-size: 0.8rem;
+    color: #6b7280;
+  }
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: #4b5563;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.legend-color--saldo {
+  background: #3b82f6;
+}
+
+.legend-color--deterioro {
+  background: #ef4444;
+}
+
+.chart-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.chart-row {
+  display: grid;
+  grid-template-columns:
+    48px
+    minmax(280px, 1fr)
+    180px;
+  gap: 1rem;
+  align-items: center;
+}
+
+.edad-col {
+  display: flex;
+  justify-content: center;
+}
+
+.edad-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 34px;
+  height: 34px;
+
+  border-radius: 50%;
+
+  font-weight: 700;
+  font-size: 0.85rem;
+
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.edad-badge[data-edad='A'] {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.edad-badge[data-edad='B'] {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.edad-badge[data-edad='C'] {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.edad-badge[data-edad='D'] {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.edad-badge[data-edad='E'] {
+  background: #fecaca;
+  color: #7f1d1d;
+}
+
+.bars-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.bar-group {
+  min-width: 0;
+}
+
+.bar-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+
+  margin-bottom: 0.2rem;
+
+  font-size: 0.72rem;
+
+  span {
+    color: #6b7280;
+  }
+
+  strong {
+    color: #374151;
+    font-weight: 600;
+  }
+}
+
+.bar-track {
+  width: 100%;
+  height: 10px;
+
+  overflow: hidden;
+
+  background: #f3f4f6;
+  border-radius: 999px;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.25s ease;
+}
+
+.bar-fill--saldo {
+  background: #3b82f6;
+}
+
+.bar-fill--deterioro {
+  background: #ef4444;
+}
+
+.metrics-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+
+    padding: 0.45rem 0.55rem;
+
+    background: #f9fafb;
+    border-radius: 7px;
+  }
+
+  span {
+    font-size: 0.68rem;
+    color: #6b7280;
+  }
+
+  strong {
+    font-size: 0.78rem;
+    color: #1f2937;
+  }
+}
+
+@media (max-width: 900px) {
+
+  .chart-header {
+    flex-direction: column;
+  }
+
+  .chart-row {
+    grid-template-columns:
+      42px
+      minmax(0, 1fr);
+  }
+
+  .metrics-col {
+    grid-column: 2;
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .chart-card {
+    padding: 0.75rem;
+  }
+
+  .chart-row {
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 0.65rem;
+  }
+
+  .edad-badge {
+    width: 30px;
+    height: 30px;
+  }
+
+  .metrics-col {
+    grid-template-columns: 1fr;
+  }
+
+}

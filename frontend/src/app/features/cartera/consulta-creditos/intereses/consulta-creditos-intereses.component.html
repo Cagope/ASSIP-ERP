@@ -1,0 +1,734 @@
+<section class="consulta-bloque intereses-detalle">
+
+  <!-- ======================================================= -->
+  <!-- ENCABEZADO                                              -->
+  <!-- ======================================================= -->
+
+  <div class="bloque-encabezado">
+
+    <div>
+
+      <h2>
+        Movimientos de intereses
+      </h2>
+
+      <span>
+        Causaciones, pagos y ajustes de intereses registrados para el pagaré
+        {{ credito.pagareCartera || 'sin número' }}.
+      </span>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn btn--cancel btn-sm"
+      (click)="cerrarDetalle()">
+
+      Cerrar intereses
+
+    </button>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- RESUMEN                                                 -->
+  <!-- ======================================================= -->
+
+  <div class="intereses-resumen">
+
+    <article>
+
+      <span>
+        Movimientos
+      </span>
+
+      <strong>
+        {{ cantidadMovimientos }}
+      </strong>
+
+    </article>
+
+
+    <article class="resumen-debito">
+
+      <span>
+        Débitos
+      </span>
+
+      <strong>
+        {{ cantidadDebitos }}
+      </strong>
+
+      <small>
+        {{
+        totalDebitos
+        | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+        }}
+      </small>
+
+    </article>
+
+
+    <article class="resumen-credito">
+
+      <span>
+        Créditos
+      </span>
+
+      <strong>
+        {{ cantidadCreditos }}
+      </strong>
+
+      <small>
+        {{
+        totalCreditos
+        | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+        }}
+      </small>
+
+    </article>
+
+
+    <article class="resumen-saldo">
+
+      <span>
+        Saldo pendiente
+      </span>
+
+      <strong>
+        {{
+        saldoPendiente
+        | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+        }}
+      </strong>
+
+    </article>
+
+
+    <article>
+
+      <span>
+        Último movimiento
+      </span>
+
+      <strong>
+        {{
+        fechaUltimoMovimiento
+        ? (
+        fechaUltimoMovimiento
+        | date:'dd/MM/yyyy'
+        )
+        : ''
+        }}
+      </strong>
+
+    </article>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- SIN MOVIMIENTOS                                         -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="!tieneMovimientos"
+    class="estado-vacio">
+
+    <strong>
+      El crédito no tiene movimientos de intereses registrados
+    </strong>
+
+    <span>
+      Las causaciones mensuales, pagos y ajustes aparecerán
+      en esta sección cuando sean registrados.
+    </span>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- DETALLE DE MOVIMIENTOS                                  -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="tieneMovimientos"
+    class="intereses-seccion">
+
+    <div class="intereses-seccion__titulo">
+
+      Detalle de movimientos
+
+    </div>
+
+
+    <div class="tabla-contenedor">
+
+      <table class="tabla-intereses">
+
+        <thead>
+
+        <tr>
+
+          <th>
+            Nº
+          </th>
+
+          <th>
+            Fecha
+          </th>
+
+          <th>
+            Período
+          </th>
+
+          <th class="columna-numero">
+            Saldo base
+          </th>
+
+          <th class="columna-numero">
+            Tasa
+          </th>
+
+          <th class="columna-numero">
+            Días
+          </th>
+
+          <th class="columna-numero">
+            Interés bruto
+          </th>
+
+          <th class="columna-numero">
+            % aplicación
+          </th>
+
+          <th class="columna-numero">
+            Débito
+          </th>
+
+          <th class="columna-numero">
+            Crédito
+          </th>
+
+          <th class="columna-numero">
+            Saldo acumulado
+          </th>
+
+          <th>
+            Naturaleza
+          </th>
+
+          <th>
+            Comprobante
+          </th>
+
+          <th>
+            Observación
+          </th>
+
+          <th>
+            Control período
+          </th>
+
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        <tr
+          *ngFor="
+            let movimiento of intereses;
+            trackBy: trackByMovimiento
+          "
+          [class.movimiento-debito]="
+            esDebito(movimiento)
+          "
+          [class.movimiento-credito]="
+            esCredito(movimiento)
+          "
+          [class.movimiento-sin-valor]="
+            esMovimientoSinValor(movimiento)
+          ">
+
+          <!-- ================================================= -->
+          <!-- SECUENCIA                                         -->
+          <!-- ================================================= -->
+
+          <td>
+
+            {{
+            movimiento.numeroMovimientoCredito
+            ?? movimiento.idInteresCausado
+            ?? ''
+            }}
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- FECHA                                             -->
+          <!-- ================================================= -->
+
+          <td>
+
+            {{
+            movimiento.fechaMovimiento
+            ? (
+            movimiento.fechaMovimiento
+            | date:'dd/MM/yyyy'
+            )
+            : ''
+            }}
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- PERÍODO                                           -->
+          <!-- ================================================= -->
+
+          <td>
+
+            <div class="periodo-interes">
+
+              <span>
+
+                {{
+                  movimiento.fechaInicialPeriodo
+                  ? (
+                      movimiento.fechaInicialPeriodo
+                      | date:'dd/MM/yyyy'
+                    )
+                  : ''
+                }}
+
+              </span>
+
+              <span>
+                -
+              </span>
+
+              <span>
+
+                {{
+                  movimiento.fechaFinalPeriodo
+                  ? (
+                      movimiento.fechaFinalPeriodo
+                      | date:'dd/MM/yyyy'
+                    )
+                  : ''
+                }}
+
+              </span>
+
+            </div>
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- SALDO BASE                                        -->
+          <!-- ================================================= -->
+
+          <td class="columna-numero">
+
+            {{
+            movimiento.saldoBase
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- TASA                                              -->
+          <!-- ================================================= -->
+
+          <td class="columna-numero">
+
+            {{
+            movimiento.tasaInteres
+            ?? 0
+            | number:'1.2-4'
+            }} %
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- DÍAS                                              -->
+          <!-- ================================================= -->
+
+          <td class="columna-numero">
+
+            {{
+            movimiento.diasCausados
+            ?? 0
+            }}
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- INTERÉS BRUTO                                     -->
+          <!-- ================================================= -->
+
+          <td class="columna-numero">
+
+            {{
+            movimiento.interesBruto
+            | currency:'COP':'symbol-narrow':'1.0-2':'es-CO'
+            }}
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- PORCENTAJE APLICACIÓN                             -->
+          <!-- ================================================= -->
+
+          <td class="columna-numero">
+
+            {{
+            movimiento.porcentajeAplicacion
+            ?? 0
+            | number:'1.2-4'
+            }} %
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- DÉBITO                                            -->
+          <!-- ================================================= -->
+
+          <td
+            class="columna-numero"
+            [class.valor-debito]="
+              esDebito(movimiento)
+            ">
+
+            {{
+            movimiento.valorDebito
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- CRÉDITO                                           -->
+          <!-- ================================================= -->
+
+          <td
+            class="columna-numero"
+            [class.valor-credito]="
+              esCredito(movimiento)
+            ">
+
+            {{
+            movimiento.valorCredito
+            | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+            }}
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- SALDO ACUMULADO                                   -->
+          <!-- ================================================= -->
+
+          <td class="columna-numero">
+
+            <strong>
+
+              {{
+              movimiento.saldoInteresesAcumulado
+              | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+              }}
+
+            </strong>
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- NATURALEZA                                        -->
+          <!-- ================================================= -->
+
+          <td>
+
+            <span
+              class="badge"
+              [class.badge--debito]="
+                esDebito(movimiento)
+              "
+              [class.badge--credito]="
+                esCredito(movimiento)
+              "
+              [class.badge--neutral]="
+                esMovimientoSinValor(movimiento)
+              ">
+
+              {{
+                descripcionNaturaleza(
+                  movimiento
+                )
+              }}
+
+            </span>
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- COMPROBANTE                                       -->
+          <!-- ================================================= -->
+
+          <td>
+
+            {{
+            descripcionComprobante(
+            movimiento
+            )
+            || ''
+            }}
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- OBSERVACIÓN                                       -->
+          <!-- ================================================= -->
+
+          <td>
+
+            <div class="observacion-interes">
+
+              {{
+              descripcionObservacion(
+              movimiento
+              )
+              || ''
+              }}
+
+            </div>
+
+          </td>
+
+
+          <!-- ================================================= -->
+          <!-- CONTROL DE PERÍODO                                -->
+          <!-- ================================================= -->
+
+          <td>
+
+            <span
+              class="badge"
+              [class.badge--ok]="
+                periodoCoincide(movimiento)
+              "
+              [class.badge--advertencia]="
+                !periodoCoincide(movimiento)
+              ">
+
+              {{
+                periodoCoincide(movimiento)
+                ? 'Correcto'
+                : 'Revisar'
+              }}
+
+            </span>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- ======================================================= -->
+  <!-- RESUMEN DEL ÚLTIMO MOVIMIENTO                           -->
+  <!-- ======================================================= -->
+
+  <div
+    *ngIf="
+      tieneMovimientos
+      && ultimoMovimiento as ultimo
+    "
+    class="ultimo-movimiento">
+
+    <div class="intereses-seccion__titulo">
+
+      Último movimiento registrado
+
+    </div>
+
+
+    <div class="ultimo-movimiento-grid">
+
+      <article>
+
+        <span>
+          Fecha
+        </span>
+
+        <strong>
+          {{
+          ultimo.fechaMovimiento
+          ? (
+          ultimo.fechaMovimiento
+          | date:'dd/MM/yyyy'
+          )
+          : ''
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Naturaleza
+        </span>
+
+        <strong>
+          {{
+          descripcionNaturaleza(
+          ultimo
+          )
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Período
+        </span>
+
+        <strong>
+
+          {{
+          ultimo.fechaInicialPeriodo
+          ? (
+          ultimo.fechaInicialPeriodo
+          | date:'dd/MM/yyyy'
+          )
+          : ''
+          }}
+
+          -
+
+          {{
+          ultimo.fechaFinalPeriodo
+          ? (
+          ultimo.fechaFinalPeriodo
+          | date:'dd/MM/yyyy'
+          )
+          : ''
+          }}
+
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Interés bruto
+        </span>
+
+        <strong>
+          {{
+          ultimo.interesBruto
+          | currency:'COP':'symbol-narrow':'1.0-2':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Débito
+        </span>
+
+        <strong>
+          {{
+          ultimo.valorDebito
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Crédito
+        </span>
+
+        <strong>
+          {{
+          ultimo.valorCredito
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article class="ultimo-movimiento-saldo">
+
+        <span>
+          Saldo de intereses
+        </span>
+
+        <strong>
+          {{
+          ultimo.saldoInteresesAcumulado
+          | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+          }}
+        </strong>
+
+      </article>
+
+
+      <article>
+
+        <span>
+          Observación
+        </span>
+
+        <strong>
+          {{
+          descripcionObservacion(
+          ultimo
+          )
+          || ''
+          }}
+        </strong>
+
+      </article>
+
+    </div>
+
+  </div>
+
+</section>

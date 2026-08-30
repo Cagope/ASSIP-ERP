@@ -6,10 +6,133 @@
 
   <app-header-actions
     titulo="Evaluación de Cartera"
-    [mostrarNuevo]="false"
+    [mostrarNuevo]="true"
     [mostrarImprimir]="false"
-    [mostrarExportar]="false">
+    [mostrarExportar]="false"
+    (nuevo)="nuevo()">
   </app-header-actions>
+
+
+  <!-- ===================================================== -->
+  <!-- INICIAR EVALUACIÓN -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="mostrarNuevaEvaluacion"
+    class="nueva-evaluacion-card">
+
+    <div class="nueva-evaluacion-header">
+
+      <div>
+
+        <h3>
+          Iniciar evaluación de cartera
+        </h3>
+
+        <p>
+          Seleccione la fecha de corte que desea evaluar.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <form
+      class="nueva-evaluacion-form"
+      (ngSubmit)="crearEvaluacion()">
+
+      <div class="nueva-evaluacion-grid">
+
+        <!-- FECHA DE CORTE -->
+
+        <div class="f-row">
+
+          <label for="nuevaFechaCorte">
+
+            Fecha de corte
+
+            <span class="requerido">
+              *
+            </span>
+
+          </label>
+
+          <input
+            id="nuevaFechaCorte"
+            type="date"
+            name="nuevaFechaCorte"
+            [(ngModel)]="nuevaEvaluacion.fechaCorte"
+            [disabled]="guardando"
+            required>
+
+          <small>
+            Debe corresponder al último día del mes.
+          </small>
+
+        </div>
+
+
+        <!-- ACCIONES -->
+
+        <div class="f-buttons nueva-evaluacion-acciones">
+
+          <button
+            type="submit"
+            class="btn btn--primary"
+            [disabled]="guardando">
+
+            {{
+            guardando
+            ? 'Iniciando...'
+            : 'Continuar'
+            }}
+
+          </button>
+
+          <button
+            type="button"
+            class="btn btn--cancel"
+            [disabled]="guardando"
+            (click)="cancelarNuevo()">
+
+            Cancelar
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </form>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJE -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="mensaje"
+    class="alert alert--success">
+
+    {{ mensaje }}
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- ERROR -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="error"
+    class="alert alert--error">
+
+    {{ error }}
+
+  </div>
 
 
   <!-- ===================================================== -->
@@ -25,6 +148,7 @@
       <!-- FECHA DE CORTE -->
 
       <div class="f-row">
+
         <label for="filtroFechaCorte">
           Fecha de corte
         </label>
@@ -34,12 +158,14 @@
           type="date"
           name="filtroFechaCorte"
           [(ngModel)]="filtroFechaCorte">
+
       </div>
 
 
       <!-- ESTADO -->
 
       <div class="f-row">
+
         <label for="filtroEstado">
           Estado
         </label>
@@ -62,6 +188,7 @@
           </option>
 
         </select>
+
       </div>
 
 
@@ -73,7 +200,9 @@
           type="submit"
           class="btn btn--primary"
           [disabled]="cargando">
+
           🔍 Buscar
+
         </button>
 
         <button
@@ -81,7 +210,9 @@
           class="btn btn--cancel"
           [disabled]="cargando"
           (click)="limpiar()">
+
           Limpiar
+
         </button>
 
       </div>
@@ -105,25 +236,11 @@
 
 
   <!-- ===================================================== -->
-  <!-- ERROR -->
-  <!-- ===================================================== -->
-
-  <div
-    *ngIf="!cargando && error"
-    class="alert alert--error">
-
-    {{ error }}
-
-  </div>
-
-
-  <!-- ===================================================== -->
   <!-- CONTENIDO -->
   <!-- ===================================================== -->
 
   <ng-container
-    *ngIf="!cargando && !error">
-
+    *ngIf="!cargando">
 
     <!-- =================================================== -->
     <!-- RESUMEN DEL LISTADO -->
@@ -132,8 +249,13 @@
     <div class="listado-resumen">
 
       <span>
+
         Evaluaciones encontradas:
-        <strong>{{ totalRegistros }}</strong>
+
+        <strong>
+          {{ totalRegistros }}
+        </strong>
+
       </span>
 
     </div>
@@ -201,12 +323,19 @@
         <tbody>
 
         <tr
-          *ngFor="let evaluacion of evaluacionesPagina">
+          *ngFor="
+            let evaluacion of evaluacionesPagina
+          ">
 
           <!-- FECHA CORTE -->
 
           <td>
-            {{ evaluacion.fechaCorte | date:'dd/MM/yyyy' }}
+
+            {{
+            evaluacion.fechaCorte
+            | date:'dd/MM/yyyy'
+            }}
+
           </td>
 
 
@@ -215,16 +344,25 @@
           <td>
 
             <ng-container
-              *ngIf="evaluacion.fechaEjecucion; else sinEjecucion">
+              *ngIf="
+                evaluacion.fechaEjecucion;
+                else sinEjecucion
+              ">
 
-              {{ evaluacion.fechaEjecucion | date:'dd/MM/yyyy HH:mm' }}
+              {{
+              evaluacion.fechaEjecucion
+              | date:'dd/MM/yyyy HH:mm'
+              }}
 
             </ng-container>
 
-            <ng-template #sinEjecucion>
-                <span class="sin-dato">
-                  Sin ejecutar
-                </span>
+            <ng-template
+              #sinEjecucion>
+
+              <span class="sin-dato">
+                Sin ejecutar
+              </span>
+
             </ng-template>
 
           </td>
@@ -234,14 +372,22 @@
 
           <td>
 
-              <span
-                class="estado"
-                [class.estado--proceso]="evaluacion.estado === 'P'"
-                [class.estado--definitiva]="evaluacion.estado === 'D'">
+            <span
+              class="estado"
+              [class.estado--proceso]="
+                evaluacion.estado === 'P'
+              "
+              [class.estado--definitiva]="
+                evaluacion.estado === 'D'
+              ">
 
-                {{ descripcionEstado(evaluacion.estado) }}
+              {{
+                descripcionEstado(
+                  evaluacion.estado
+                )
+              }}
 
-              </span>
+            </span>
 
           </td>
 
@@ -249,24 +395,39 @@
           <!-- CRÉDITOS -->
 
           <td class="text-end">
-            {{ evaluacion.cantidadCreditos | number:'1.0-0' }}
+
+            {{
+            evaluacion.cantidadCreditos
+            | number:'1.0-0'
+            }}
+
           </td>
 
 
           <!-- ASOCIADOS -->
 
           <td class="text-end">
-            {{ evaluacion.cantidadAsociados | number:'1.0-0' }}
+
+            {{
+            evaluacion.cantidadAsociados
+            | number:'1.0-0'
+            }}
+
           </td>
 
 
           <!-- SALDO -->
 
           <td class="text-end saldo">
+
             {{
             evaluacion.saldoTotalEvaluado
-            | currency:'COP':'symbol-narrow':'1.0-0'
+            | currency:
+            'COP':
+            'symbol-narrow':
+            '1.0-0'
             }}
+
           </td>
 
 
@@ -274,15 +435,15 @@
 
           <td class="text-end">
 
-              <span
-                class="resultado resultado--reclasificar">
+            <span
+              class="resultado resultado--reclasificar">
 
-                {{
-                  evaluacion.cantidadRecalificados
-                    | number:'1.0-0'
-                }}
+              {{
+                evaluacion.cantidadRecalificados
+                  | number:'1.0-0'
+              }}
 
-              </span>
+            </span>
 
           </td>
 
@@ -291,15 +452,15 @@
 
           <td class="text-end">
 
-              <span
-                class="resultado resultado--habilitar">
+            <span
+              class="resultado resultado--habilitar">
 
-                {{
-                  evaluacion.cantidadHabilitados
-                    | number:'1.0-0'
-                }}
+              {{
+                evaluacion.cantidadHabilitados
+                  | number:'1.0-0'
+              }}
 
-              </span>
+            </span>
 
           </td>
 
@@ -308,15 +469,15 @@
 
           <td class="text-end">
 
-              <span
-                class="resultado resultado--mantener">
+            <span
+              class="resultado resultado--mantener">
 
-                {{
-                  evaluacion.cantidadMantenidos
-                    | number:'1.0-0'
-                }}
+              {{
+                evaluacion.cantidadMantenidos
+                  | number:'1.0-0'
+              }}
 
-              </span>
+            </span>
 
           </td>
 
@@ -350,7 +511,9 @@
     <!-- =================================================== -->
 
     <div
-      *ngIf="evaluacionesPagina.length === 0"
+      *ngIf="
+        evaluacionesPagina.length === 0
+      "
       class="empty">
 
       No se encontraron evaluaciones de cartera.
@@ -369,15 +532,26 @@
       <div class="paginacion-info">
 
         Página
-        <strong>{{ paginaActual }}</strong>
+
+        <strong>
+          {{ paginaActual }}
+        </strong>
+
         de
-        <strong>{{ totalPaginas }}</strong>
+
+        <strong>
+          {{ totalPaginas }}
+        </strong>
 
         <span class="paginacion-separador">
           —
         </span>
 
-        {{ totalRegistros | number:'1.0-0' }}
+        {{
+        totalRegistros
+        | number:'1.0-0'
+        }}
+
         evaluaciones
 
       </div>
@@ -398,7 +572,9 @@
         <button
           type="button"
           class="btn btn--secondary"
-          [disabled]="paginaActual >= totalPaginas"
+          [disabled]="
+            paginaActual >= totalPaginas
+          "
           (click)="paginaSiguiente()">
 
           Siguiente

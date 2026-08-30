@@ -17,15 +17,15 @@ public class Criterio601GarantiasRepository {
     private final NamedParameterJdbcTemplate jdbc;
 
     // =========================================================
-    // OBTENER DATOS DEL CRITERIO 601 - GARANTÍAS
+    // OBTENER DATOS DEL CRITERIO 601 - GARANTÃAS
     //
-    // La garantía se toma directamente de la fotografía
-    // histórica del crédito:
+    // La garantÃ­a se toma directamente de la fotografÃ­a
+    // histÃ³rica del crÃ©dito:
     //
     // cierres_cartera_creditos.codigo_garantia_credito
     //
-    // El catálogo cartera.garantias_creditos se utiliza
-    // únicamente para complementar la descripción y el tipo.
+    // El catÃ¡logo cartera.garantias_creditos se utiliza
+    // Ãºnicamente para complementar la descripciÃ³n y el tipo.
     // =========================================================
 
     public List<Criterio601DatoDTO> obtenerDatos(
@@ -79,9 +79,14 @@ public class Criterio601GarantiasRepository {
 
                 WHERE cierre.fecha_corte =
                       :fechaCorte
+                
+                  AND COALESCE(
+                          cc.saldo_actual,
+                          0
+                      ) > 0
 
                 ORDER BY
-                    cierre.id_agencia,
+                    cc.id_agencia,
                     hv.documento,
                     cc.id_cartera_credito
                 """;

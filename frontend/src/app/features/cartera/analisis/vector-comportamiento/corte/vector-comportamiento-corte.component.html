@@ -1,0 +1,2253 @@
+<div class="vector-comportamiento-page">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO                                            -->
+  <!-- ===================================================== -->
+
+  <app-header-actions
+    titulo="Vector de Comportamiento por Corte"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="true"
+    (exportar)="exportarExcel()">
+  </app-header-actions>
+
+
+  <!-- ===================================================== -->
+  <!-- DESCRIPCIÓN                                           -->
+  <!-- ===================================================== -->
+
+  <section class="intro-card">
+
+    <div>
+
+      <h2>
+        Análisis histórico de comportamiento de cartera
+      </h2>
+
+      <p>
+        Consulta el comportamiento de los créditos que presentaban
+        saldo en una fecha de corte determinada. La fecha seleccionada
+        se toma como posición actual de referencia y se analizan hasta
+        doce cierres anteriores.
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- SELECCIÓN DE FECHA DE CORTE                           -->
+  <!-- ===================================================== -->
+
+  <section class="corte-card">
+
+    <div class="corte-card__header">
+
+      <div>
+
+        <span class="corte-card__eyebrow">
+          Consulta histórica
+        </span>
+
+        <h3>
+          Fecha de corte
+        </h3>
+
+      </div>
+
+      <div
+        *ngIf="fechaCorteSeleccionada"
+        class="corte-seleccionado">
+
+        <span>
+          Corte consultado:
+        </span>
+
+        <strong>
+          {{
+          fechaCorteSeleccionada
+          | date:'dd/MM/yyyy'
+          }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <div class="corte-selector">
+
+      <div class="filtro-campo">
+
+        <label>
+          Seleccione el corte
+        </label>
+
+        <select
+          [(ngModel)]="fechaCorteSeleccionada"
+          [disabled]="
+            cargandoFechas
+            || cargando
+          "
+          (change)="cambiarFechaCorte()">
+
+          <option value="">
+            Seleccione...
+          </option>
+
+          <option
+            *ngFor="let fecha of fechasCorte"
+            [value]="fecha">
+
+            {{
+            fecha
+            | date:'dd/MM/yyyy'
+            }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div>
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          [disabled]="
+            !fechaCorteSeleccionada
+            || cargando
+            || cargandoFechas
+          "
+          (click)="cargarResumen()">
+
+          CONSULTAR
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- CARGANDO FECHAS                                      -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="cargandoFechas"
+    class="estado estado--cargando">
+
+    Consultando fechas de corte disponibles...
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- ESTADO DE CARGA                                      -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="
+      !cargandoFechas
+      && cargando
+    "
+    class="estado estado--cargando">
+
+    Consultando Vector de Comportamiento...
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- ERROR GENERAL                                        -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="
+      !cargandoFechas
+      && !cargando
+      && error
+    "
+    class="estado estado--error">
+
+    {{ error }}
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJE SIN CORTE                                    -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="
+      !cargandoFechas
+      && !cargando
+      && !error
+      && !fechaCorteSeleccionada
+    "
+    class="estado estado--cargando">
+
+    Seleccione una fecha de corte para consultar el Vector de
+    Comportamiento.
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- CONTENIDO                                            -->
+  <!-- ===================================================== -->
+
+  <ng-container
+    *ngIf="
+      fechaCorteSeleccionada
+      && !cargandoFechas
+      && !cargando
+      && !error
+    ">
+
+
+    <!-- =================================================== -->
+    <!-- INDICADORES - COMPORTAMIENTO                        -->
+    <!-- =================================================== -->
+
+    <section class="indicadores-bloque">
+
+      <div class="indicadores-bloque__header">
+
+        <div>
+
+          <span class="indicadores-bloque__eyebrow">
+            Comportamiento
+          </span>
+
+          <h3>
+            Comportamiento histórico de la cartera al corte
+          </h3>
+
+        </div>
+
+      </div>
+
+
+      <div
+        class="
+          indicadores-grid
+          indicadores-grid--comportamiento
+        ">
+
+
+        <!-- ================================================= -->
+        <!-- CRÉDITOS DEL CORTE                                -->
+        <!-- ================================================= -->
+
+        <article class="indicador-card">
+
+          <span class="indicador-card__titulo">
+            Créditos del corte
+          </span>
+
+          <strong class="indicador-card__valor">
+            {{ cantidadCreditos | number:'1.0-0' }}
+          </strong>
+
+          <small>
+            Saldo al corte mayor a cero
+          </small>
+
+        </article>
+
+
+        <!-- ================================================= -->
+        <!-- CORTES OBSERVADOS                                 -->
+        <!-- ================================================= -->
+
+        <article class="indicador-card">
+
+          <span class="indicador-card__titulo">
+            Cortes observados
+          </span>
+
+          <strong class="indicador-card__valor">
+            {{ totalCortesObservados | number:'1.0-0' }}
+          </strong>
+
+          <small>
+            Registros históricos anteriores
+          </small>
+
+        </article>
+
+
+        <!-- ================================================= -->
+        <!-- CORTES AL DÍA                                     -->
+        <!-- ================================================= -->
+
+        <article
+          class="
+            indicador-card
+            indicador-card--verde
+          ">
+
+          <span class="indicador-card__titulo">
+            Cortes al día
+          </span>
+
+          <strong class="indicador-card__valor">
+            {{
+            porcentajeCortesAlDia
+            | number:'1.2-2'
+            }} %
+          </strong>
+
+          <small>
+            {{
+            totalCortesAlDia
+            | number:'1.0-0'
+            }}
+            cortes
+          </small>
+
+        </article>
+
+
+        <!-- ================================================= -->
+        <!-- PBB                                               -->
+        <!-- ================================================= -->
+
+        <article
+          class="
+            indicador-card
+            indicador-card--amarillo
+          ">
+
+          <span class="indicador-card__titulo">
+            PBB
+          </span>
+
+          <strong class="indicador-card__valor">
+            {{
+            pbbMoraCartera
+            | number:'1.2-2'
+            }} %
+          </strong>
+
+          <small>
+            Cortes con mora / cortes observados
+          </small>
+
+        </article>
+
+
+        <!-- ================================================= -->
+        <!-- MORA MÁXIMA HISTÓRICA                             -->
+        <!-- ================================================= -->
+
+        <article class="indicador-card">
+
+          <span class="indicador-card__titulo">
+            Mora máxima histórica
+          </span>
+
+          <strong class="indicador-card__valor">
+            {{
+            moraMaximaCartera
+            | number:'1.0-0'
+            }}
+          </strong>
+
+          <small>
+            días
+          </small>
+
+        </article>
+
+
+        <!-- ================================================= -->
+        <!-- CON MORA HISTÓRICA                                -->
+        <!-- ================================================= -->
+
+        <article class="indicador-card">
+
+          <span class="indicador-card__titulo">
+            Con mora histórica
+          </span>
+
+          <strong class="indicador-card__valor">
+            {{
+            cantidadConMoraHistorica
+            | number:'1.0-0'
+            }}
+          </strong>
+
+          <small>
+            créditos
+          </small>
+
+        </article>
+
+
+        <!-- ================================================= -->
+        <!-- SIN MORA HISTÓRICA                                -->
+        <!-- ================================================= -->
+
+        <article
+          class="
+            indicador-card
+            indicador-card--verde
+          ">
+
+          <span class="indicador-card__titulo">
+            Sin mora histórica
+          </span>
+
+          <strong class="indicador-card__valor">
+            {{
+            cantidadSinMoraHistorica
+            | number:'1.0-0'
+            }}
+          </strong>
+
+          <small>
+            créditos con historia
+          </small>
+
+        </article>
+
+
+        <!-- ================================================= -->
+        <!-- SALDO AL CORTE                                    -->
+        <!-- ================================================= -->
+
+        <article
+          class="
+            indicador-card
+            indicador-card--saldo
+          ">
+
+          <span class="indicador-card__titulo">
+            Saldo al corte
+          </span>
+
+          <strong
+            class="
+              indicador-card__valor
+              indicador-card__valor--dinero
+            ">
+
+            {{
+            saldoTotalCorte
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+
+          </strong>
+
+          <small>
+            Cartera analizada al corte
+          </small>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- INDICADORES - SEVERIDAD                             -->
+    <!-- =================================================== -->
+
+    <section
+      class="
+        indicadores-bloque
+        indicadores-bloque--severidad
+      ">
+
+      <div class="indicadores-bloque__header">
+
+        <div>
+
+          <span class="indicadores-bloque__eyebrow">
+            Severidad
+          </span>
+
+          <h3>
+            Distribución por saldo pendiente frente al valor desembolsado
+          </h3>
+
+        </div>
+
+
+        <div class="indicadores-bloque__total">
+
+          <span>
+            Saldo analizado
+          </span>
+
+          <strong>
+
+            {{
+            saldoTotalCorte
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="severidad-grid">
+
+
+        <!-- ================================================= -->
+        <!-- SEVERIDAD 0 - 10                                  -->
+        <!-- ================================================= -->
+
+        <article
+          class="
+            severidad-card
+            severidad-card--muy-baja
+          ">
+
+          <div class="severidad-card__header">
+
+            <span>
+              Severidad
+            </span>
+
+            <strong>
+              ≤ 10%
+            </strong>
+
+          </div>
+
+
+          <div class="severidad-card__cantidad">
+
+            <strong>
+              {{
+              cantidadSeveridad0_10
+              | number:'1.0-0'
+              }}
+            </strong>
+
+            <span>
+              créditos
+            </span>
+
+          </div>
+
+
+          <div class="severidad-card__detalle">
+
+            <div>
+
+              <span>
+                Participación
+              </span>
+
+              <strong>
+                {{
+                porcentajeSeveridad0_10
+                | number:'1.2-2'
+                }} %
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Saldo al corte
+              </span>
+
+              <strong>
+
+                {{
+                saldoSeveridad0_10
+                | currency:'COP':'symbol-narrow':'1.0-0'
+                }}
+
+              </strong>
+
+            </div>
+
+          </div>
+
+        </article>
+
+
+        <!-- ================================================= -->
+        <!-- SEVERIDAD 10 - 25                                 -->
+        <!-- ================================================= -->
+
+        <article
+          class="
+            severidad-card
+            severidad-card--baja
+          ">
+
+          <div class="severidad-card__header">
+
+            <span>
+              Severidad
+            </span>
+
+            <strong>
+              &gt; 10% - 25%
+            </strong>
+
+          </div>
+
+
+          <div class="severidad-card__cantidad">
+
+            <strong>
+              {{
+              cantidadSeveridad10_25
+              | number:'1.0-0'
+              }}
+            </strong>
+
+            <span>
+              créditos
+            </span>
+
+          </div>
+
+
+          <div class="severidad-card__detalle">
+
+            <div>
+
+              <span>
+                Participación
+              </span>
+
+              <strong>
+                {{
+                porcentajeSeveridad10_25
+                | number:'1.2-2'
+                }} %
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Saldo al corte
+              </span>
+
+              <strong>
+
+                {{
+                saldoSeveridad10_25
+                | currency:'COP':'symbol-narrow':'1.0-0'
+                }}
+
+              </strong>
+
+            </div>
+
+          </div>
+
+        </article>
+
+
+        <!-- ================================================= -->
+        <!-- SEVERIDAD 25 - 50                                 -->
+        <!-- ================================================= -->
+
+        <article
+          class="
+            severidad-card
+            severidad-card--media
+          ">
+
+          <div class="severidad-card__header">
+
+            <span>
+              Severidad
+            </span>
+
+            <strong>
+              &gt; 25% - 50%
+            </strong>
+
+          </div>
+
+
+          <div class="severidad-card__cantidad">
+
+            <strong>
+              {{
+              cantidadSeveridad25_50
+              | number:'1.0-0'
+              }}
+            </strong>
+
+            <span>
+              créditos
+            </span>
+
+          </div>
+
+
+          <div class="severidad-card__detalle">
+
+            <div>
+
+              <span>
+                Participación
+              </span>
+
+              <strong>
+                {{
+                porcentajeSeveridad25_50
+                | number:'1.2-2'
+                }} %
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Saldo al corte
+              </span>
+
+              <strong>
+
+                {{
+                saldoSeveridad25_50
+                | currency:'COP':'symbol-narrow':'1.0-0'
+                }}
+
+              </strong>
+
+            </div>
+
+          </div>
+
+        </article>
+
+
+        <!-- ================================================= -->
+        <!-- SEVERIDAD 50 - 75                                 -->
+        <!-- ================================================= -->
+
+        <article
+          class="
+            severidad-card
+            severidad-card--alta
+          ">
+
+          <div class="severidad-card__header">
+
+            <span>
+              Severidad
+            </span>
+
+            <strong>
+              &gt; 50% - 75%
+            </strong>
+
+          </div>
+
+
+          <div class="severidad-card__cantidad">
+
+            <strong>
+              {{
+              cantidadSeveridad50_75
+              | number:'1.0-0'
+              }}
+            </strong>
+
+            <span>
+              créditos
+            </span>
+
+          </div>
+
+
+          <div class="severidad-card__detalle">
+
+            <div>
+
+              <span>
+                Participación
+              </span>
+
+              <strong>
+                {{
+                porcentajeSeveridad50_75
+                | number:'1.2-2'
+                }} %
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Saldo al corte
+              </span>
+
+              <strong>
+
+                {{
+                saldoSeveridad50_75
+                | currency:'COP':'symbol-narrow':'1.0-0'
+                }}
+
+              </strong>
+
+            </div>
+
+          </div>
+
+        </article>
+
+
+        <!-- ================================================= -->
+        <!-- SEVERIDAD 75 - 100                                -->
+        <!-- ================================================= -->
+
+        <article
+          class="
+            severidad-card
+            severidad-card--muy-alta
+          ">
+
+          <div class="severidad-card__header">
+
+            <span>
+              Severidad
+            </span>
+
+            <strong>
+              &gt; 75%
+            </strong>
+
+          </div>
+
+
+          <div class="severidad-card__cantidad">
+
+            <strong>
+              {{
+              cantidadSeveridad75_100
+              | number:'1.0-0'
+              }}
+            </strong>
+
+            <span>
+              créditos
+            </span>
+
+          </div>
+
+
+          <div class="severidad-card__detalle">
+
+            <div>
+
+              <span>
+                Participación
+              </span>
+
+              <strong>
+                {{
+                porcentajeSeveridad75_100
+                | number:'1.2-2'
+                }} %
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                Saldo al corte
+              </span>
+
+              <strong>
+
+                {{
+                saldoSeveridad75_100
+                | currency:'COP':'symbol-narrow':'1.0-0'
+                }}
+
+              </strong>
+
+            </div>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- FILTROS                                             -->
+    <!-- =================================================== -->
+
+    <section class="filtros-card">
+
+      <div class="filtros-grid">
+
+
+        <!-- DOCUMENTO -->
+
+        <div class="filtro-campo">
+
+          <label>
+            Documento
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="filtroDocumento"
+            (keyup.enter)="aplicarFiltros()"
+            placeholder="Documento">
+
+        </div>
+
+
+        <!-- NOMBRE -->
+
+        <div class="filtro-campo">
+
+          <label>
+            Nombre
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="filtroNombre"
+            (keyup.enter)="aplicarFiltros()"
+            placeholder="Nombre del asociado">
+
+        </div>
+
+
+        <!-- PAGARÉ -->
+
+        <div class="filtro-campo">
+
+          <label>
+            Pagaré
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="filtroPagare"
+            (keyup.enter)="aplicarFiltros()"
+            placeholder="Número de pagaré">
+
+        </div>
+
+
+        <!-- LÍNEA -->
+
+        <div class="filtro-campo">
+
+          <label>
+            Línea
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="filtroLinea"
+            (keyup.enter)="aplicarFiltros()"
+            placeholder="Código o descripción">
+
+        </div>
+
+
+        <!-- COMPORTAMIENTO -->
+
+        <div class="filtro-campo">
+
+          <label>
+            Comportamiento
+          </label>
+
+          <select
+            [(ngModel)]="filtroComportamiento"
+            (change)="aplicarFiltros()">
+
+            <option value="TODOS">
+              Todos
+            </option>
+
+            <option value="AL_DIA">
+              Al día al corte
+            </option>
+
+            <option value="EN_MORA">
+              En mora al corte
+            </option>
+
+            <option value="MORA_HISTORICA">
+              Con mora histórica
+            </option>
+
+            <option value="MORA_MAYOR_90">
+              Mora histórica mayor a 90 días
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- ACCIONES -->
+
+        <div class="filtros-acciones">
+
+          <button
+            type="button"
+            class="btn btn--primary"
+            (click)="aplicarFiltros()">
+
+            🔍 BUSCAR
+
+          </button>
+
+          <button
+            type="button"
+            class="btn btn--secondary"
+            (click)="limpiarFiltros()">
+
+            LIMPIAR
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- RESUMEN DE RESULTADOS                               -->
+    <!-- =================================================== -->
+
+    <div class="resultado-info">
+
+      <span>
+
+        Créditos encontrados:
+
+        <strong>
+          {{
+            cantidadCreditosFiltrados
+            | number:'1.0-0'
+          }}
+        </strong>
+
+      </span>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- TABLA PRINCIPAL                                     -->
+    <!-- =================================================== -->
+
+    <section class="tabla-card">
+
+      <div class="tabla-scroll">
+
+        <table class="tabla-vector">
+
+          <thead>
+
+          <tr>
+
+            <th>
+              Documento
+            </th>
+
+            <th>
+              Nombre
+            </th>
+
+            <th>
+              Pagaré
+            </th>
+
+            <th>
+              Línea
+            </th>
+
+            <th class="center">
+              Cortes
+            </th>
+
+            <th class="center">
+              Mora al corte
+            </th>
+
+            <th class="center">
+              Mora máxima
+            </th>
+
+            <th class="center">
+              Al día
+            </th>
+
+            <th class="center">
+              Con mora
+            </th>
+
+            <th class="center">
+              PBB mora
+            </th>
+
+            <th class="numero">
+              Saldo al corte
+            </th>
+
+            <th class="center">
+              Severidad
+            </th>
+
+            <th class="center">
+              Acción
+            </th>
+
+          </tr>
+
+          </thead>
+
+
+          <tbody>
+
+          <tr
+            *ngFor="
+              let credito of creditosPagina;
+              let i = index;
+              trackBy: trackByCredito
+            "
+            [class.fila-seleccionada]="
+              esCreditoSeleccionado(
+                credito
+              )
+            ">
+
+
+            <!-- DOCUMENTO -->
+
+            <td>
+
+              <strong>
+                {{ credito.documento }}
+              </strong>
+
+            </td>
+
+
+            <!-- NOMBRE -->
+
+            <td>
+              {{ credito.nombreCompleto }}
+            </td>
+
+
+            <!-- PAGARÉ -->
+
+            <td>
+
+              <strong>
+                {{ credito.pagareCartera }}
+              </strong>
+
+            </td>
+
+
+            <!-- LÍNEA -->
+
+            <td>
+
+              <div class="linea-credito">
+
+                <strong>
+                  {{ credito.codigoLineaCredito }}
+                </strong>
+
+                <span>
+                  {{ credito.nombreLineaCredito }}
+                </span>
+
+              </div>
+
+            </td>
+
+
+            <!-- CORTES -->
+
+            <td class="center">
+              {{
+              credito.cantidadCortesObservados
+              | number:'1.0-0'
+              }}
+            </td>
+
+
+            <!-- MORA AL CORTE -->
+
+            <td class="center">
+
+              <span
+                [class]="
+                  claseMora(
+                    credito.moraUltimoCorte
+                  )
+                ">
+
+                {{ credito.moraUltimoCorte }}
+
+              </span>
+
+            </td>
+
+
+            <!-- MORA MÁXIMA -->
+
+            <td class="center">
+
+              <span
+                [class]="
+                  claseMora(
+                    credito.moraMaxima
+                  )
+                ">
+
+                {{ credito.moraMaxima }}
+
+              </span>
+
+            </td>
+
+
+            <!-- CORTES AL DÍA -->
+
+            <td class="center">
+              {{
+              credito.cantidadCortesAlDia
+              | number:'1.0-0'
+              }}
+            </td>
+
+
+            <!-- CORTES CON MORA -->
+
+            <td class="center">
+              {{
+              credito.cantidadCortesConMora
+              | number:'1.0-0'
+              }}
+            </td>
+
+
+            <!-- PBB -->
+
+            <td class="center">
+
+              <strong>
+                {{
+                credito.pbbMora
+                | number:'1.2-2'
+                }} %
+              </strong>
+
+            </td>
+
+
+            <!-- SALDO AL CORTE -->
+
+            <td class="numero">
+
+              {{
+              credito.saldoUltimoCorte
+              | currency:'COP':'symbol-narrow':'1.0-0'
+              }}
+
+            </td>
+
+
+            <!-- SEVERIDAD -->
+
+            <td class="center">
+
+              {{
+              credito.severidad
+              | number:'1.2-2'
+              }} %
+
+            </td>
+
+
+            <!-- ACCIÓN -->
+
+            <td class="center">
+
+              <button
+                type="button"
+                class="btn btn--primary btn-sm"
+                [disabled]="cargandoDetalle"
+                (click)="seleccionarCredito(credito)">
+
+                {{
+                esCreditoSeleccionado(credito)
+                ? 'SELECCIONADO'
+                : 'VER'
+                }}
+
+              </button>
+
+            </td>
+
+          </tr>
+
+
+          <!-- SIN RESULTADOS -->
+
+          <tr
+            *ngIf="creditosPagina.length === 0">
+
+            <td
+              colspan="13"
+              class="sin-resultados">
+
+              No se encontraron créditos con los filtros seleccionados.
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- PAGINACIÓN                                          -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="cantidadCreditosFiltrados > 0"
+      class="paginacion">
+
+      <div>
+
+        Mostrando
+
+        <strong>
+          {{ registroInicialPagina }}
+        </strong>
+
+        a
+
+        <strong>
+          {{ registroFinalPagina }}
+        </strong>
+
+        de
+
+        <strong>
+          {{ cantidadCreditosFiltrados }}
+        </strong>
+
+        créditos
+
+      </div>
+
+
+      <div class="paginacion__acciones">
+
+        <button
+          type="button"
+          class="btn btn--secondary btn-sm"
+          [disabled]="pagina <= 1"
+          (click)="paginaAnterior()">
+
+          ANTERIOR
+
+        </button>
+
+
+        <span class="paginacion__pagina">
+
+          Página
+
+          <strong>
+            {{ pagina }}
+          </strong>
+
+          de
+
+          <strong>
+            {{ totalPaginas }}
+          </strong>
+
+        </span>
+
+
+        <button
+          type="button"
+          class="btn btn--secondary btn-sm"
+          [disabled]="pagina >= totalPaginas"
+          (click)="paginaSiguiente()">
+
+          SIGUIENTE
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- DETALLE DEL CRÉDITO                                 -->
+    <!-- =================================================== -->
+
+    <section
+      *ngIf="creditoSeleccionado as credito"
+      class="detalle-card">
+
+
+      <!-- ================================================= -->
+      <!-- CABECERA DETALLE                                  -->
+      <!-- ================================================= -->
+
+      <div class="detalle-header">
+
+        <div>
+
+          <span class="detalle-header__subtitulo">
+            Crédito seleccionado
+          </span>
+
+          <h3>
+            {{ credito.pagareCartera }}
+            ·
+            {{ credito.nombreLineaCredito }}
+          </h3>
+
+          <p>
+            {{ credito.documento }}
+            ·
+            {{ credito.nombreCompleto }}
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="btn btn--secondary btn-sm"
+          [disabled]="cargandoDetalle"
+          (click)="cerrarDetalle()">
+
+          CERRAR
+
+        </button>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- RESUMEN DEL CRÉDITO                               -->
+      <!-- ================================================= -->
+
+      <div class="detalle-resumen-grid">
+
+
+        <!-- CORTE DE REFERENCIA -->
+
+        <article>
+
+          <span>
+            Corte de referencia
+          </span>
+
+          <strong>
+
+            {{
+            credito.fechaCorte
+            | date:'dd/MM/yyyy'
+            }}
+
+          </strong>
+
+        </article>
+
+
+        <!-- PRIMER CORTE HISTÓRICO -->
+
+        <article>
+
+          <span>
+            Primer corte histórico
+          </span>
+
+          <strong>
+
+            {{
+            credito.primerCorte
+            ? (
+            credito.primerCorte
+            | date:'dd/MM/yyyy'
+            )
+            : '-'
+            }}
+
+          </strong>
+
+        </article>
+
+
+        <!-- ÚLTIMO CORTE HISTÓRICO -->
+
+        <article>
+
+          <span>
+            Último corte histórico
+          </span>
+
+          <strong>
+
+            {{
+            credito.ultimoCorte
+            ? (
+            credito.ultimoCorte
+            | date:'dd/MM/yyyy'
+            )
+            : '-'
+            }}
+
+          </strong>
+
+        </article>
+
+
+        <!-- CORTES OBSERVADOS -->
+
+        <article>
+
+          <span>
+            Cortes observados
+          </span>
+
+          <strong>
+            {{
+            credito.cantidadCortesObservados
+            | number:'1.0-0'
+            }}
+          </strong>
+
+        </article>
+
+
+        <!-- MORA AL CORTE -->
+
+        <article>
+
+          <span>
+            Mora al corte
+          </span>
+
+          <strong
+            [class]="
+              claseMora(
+                credito.moraUltimoCorte
+              )
+            ">
+
+            {{ credito.moraUltimoCorte }}
+
+          </strong>
+
+        </article>
+
+
+        <!-- MORA MÁXIMA -->
+
+        <article>
+
+          <span>
+            Mora máxima histórica
+          </span>
+
+          <strong
+            [class]="
+              claseMora(
+                credito.moraMaxima
+              )
+            ">
+
+            {{ credito.moraMaxima }}
+
+          </strong>
+
+        </article>
+
+
+        <!-- PBB -->
+
+        <article>
+
+          <span>
+            PBB mora
+          </span>
+
+          <strong>
+            {{
+            credito.pbbMora
+            | number:'1.2-2'
+            }} %
+          </strong>
+
+        </article>
+
+
+        <!-- SEVERIDAD -->
+
+        <article>
+
+          <span>
+            Severidad
+          </span>
+
+          <strong>
+            {{
+            credito.severidad
+            | number:'1.2-2'
+            }} %
+          </strong>
+
+        </article>
+
+
+        <!-- SALDO AL CORTE -->
+
+        <article>
+
+          <span>
+            Saldo al corte
+          </span>
+
+          <strong>
+
+            {{
+            credito.saldoUltimoCorte
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+
+          </strong>
+
+        </article>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- CARGANDO DETALLE                                  -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="cargandoDetalle"
+        class="estado estado--cargando">
+
+        Consultando Vector del crédito...
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- ERROR DETALLE                                     -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="
+          !cargandoDetalle
+          && errorDetalle
+        "
+        class="estado estado--error">
+
+        {{ errorDetalle }}
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- VECTOR                                            -->
+      <!-- ================================================= -->
+
+      <ng-container
+        *ngIf="
+          !cargandoDetalle
+          && !errorDetalle
+        ">
+
+
+        <!-- ================================================= -->
+        <!-- INDICADORES HISTÓRICOS DEL CRÉDITO                -->
+        <!-- ================================================= -->
+
+        <div class="detalle-indicadores">
+
+          <div>
+
+            <span>
+              Cortes históricos
+            </span>
+
+            <strong>
+              {{ cantidadCortesDetalle }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Al día
+            </span>
+
+            <strong>
+              {{ cantidadCortesDetalleAlDia }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Con mora
+            </span>
+
+            <strong>
+              {{ cantidadCortesDetalleConMora }}
+            </strong>
+
+          </div>
+
+
+          <div>
+
+            <span>
+              Mora máxima
+            </span>
+
+            <strong>
+              {{ moraMaximaDetalle }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- VECTOR DE COMPORTAMIENTO                          -->
+        <!-- ================================================= -->
+
+        <div class="vector-historico">
+
+          <div class="seccion-titulo">
+            Vector de comportamiento
+          </div>
+
+
+          <div
+            *ngIf="tieneDetalle"
+            class="vector-cortes">
+
+            <article
+              *ngFor="
+                let corte of detalle;
+                let i = index;
+                trackBy: trackByDetalle
+              "
+              class="vector-corte"
+              [class.vector-corte--actual]="
+                esPosicionActual(corte)
+              ">
+
+
+              <!-- POSICIÓN -->
+
+              <span class="vector-corte__posicion">
+
+                Pos.
+                {{ corte.posicionVector }}
+
+              </span>
+
+
+              <!-- TIPO -->
+
+              <span
+                *ngIf="esPosicionActual(corte)"
+                class="vector-corte__tipo">
+
+                Actual
+
+              </span>
+
+
+              <!-- PERÍODO -->
+
+              <span class="vector-corte__periodo">
+
+                {{
+                  corte.periodoVector
+                  || '-'
+                }}
+
+              </span>
+
+
+              <!-- DÍAS MORA -->
+
+              <strong
+                [class]="
+                  claseMora(
+                    corte.diasMora
+                  )
+                ">
+
+                {{ corte.diasMora }}
+
+              </strong>
+
+
+              <!-- RANGO -->
+
+              <small>
+                {{ corte.rangoMora }}
+              </small>
+
+            </article>
+
+          </div>
+
+
+          <div
+            *ngIf="!tieneDetalle"
+            class="sin-resultados">
+
+            No existe información del crédito para el corte consultado.
+
+          </div>
+
+        </div>
+
+
+        <!-- ================================================= -->
+        <!-- TABLA DEL VECTOR                                  -->
+        <!-- ================================================= -->
+
+        <div
+          *ngIf="tieneDetalle"
+          class="historico-tabla">
+
+          <div class="seccion-titulo">
+            Detalle mensual del Vector
+          </div>
+
+
+          <div class="tabla-scroll">
+
+            <table
+              class="
+                tabla-vector
+                tabla-vector--detalle
+              ">
+
+              <thead>
+
+              <tr>
+
+                <th class="center">
+                  Pos.
+                </th>
+
+                <th>
+                  Tipo
+                </th>
+
+                <th>
+                  Período
+                </th>
+
+                <th>
+                  Fecha
+                </th>
+
+                <th class="center">
+                  Días mora
+                </th>
+
+                <th>
+                  Rango
+                </th>
+
+                <th class="center">
+                  Mora
+                </th>
+
+                <th class="numero">
+                  Saldo
+                </th>
+
+                <th class="center">
+                  Edad mora
+                </th>
+
+                <th class="center">
+                  Riesgo
+                </th>
+
+                <th class="center">
+                  PE
+                </th>
+
+                <th class="center">
+                  Homologación
+                </th>
+
+                <th class="center">
+                  Contable
+                </th>
+
+                <th class="numero">
+                  Deterioro capital
+                </th>
+
+                <th class="numero">
+                  Deterioro intereses
+                </th>
+
+                <th class="numero">
+                  Deterioro total
+                </th>
+
+              </tr>
+
+              </thead>
+
+
+              <tbody>
+
+              <tr
+                *ngFor="
+                  let corte of detalle;
+                  let i = index;
+                  trackBy: trackByDetalle
+                "
+                [class.fila-actual]="
+                  esPosicionActual(corte)
+                ">
+
+
+                <!-- POSICIÓN -->
+
+                <td class="center">
+
+                  <strong>
+                    {{ corte.posicionVector }}
+                  </strong>
+
+                </td>
+
+
+                <!-- TIPO -->
+
+                <td>
+
+                  <strong>
+                    {{
+                    esPosicionActual(corte)
+                    ? 'ACTUAL'
+                    : 'CIERRE'
+                    }}
+                  </strong>
+
+                  <span
+                    *ngIf="esPosicionActual(corte)"
+                    class="etiqueta-actual">
+
+                    Referencia
+
+                  </span>
+
+                </td>
+
+
+                <!-- PERÍODO -->
+
+                <td>
+
+                  {{
+                  corte.periodoVector
+                  || '-'
+                  }}
+
+                </td>
+
+
+                <!-- FECHA -->
+
+                <td>
+
+                  <strong>
+
+                    {{
+                    corte.fechaReferencia
+                    | date:'dd/MM/yyyy'
+                    }}
+
+                  </strong>
+
+                </td>
+
+
+                <!-- DÍAS MORA -->
+
+                <td class="center">
+
+                  <span
+                    [class]="
+                      claseMora(
+                        corte.diasMora
+                      )
+                    ">
+
+                    {{ corte.diasMora }}
+
+                  </span>
+
+                </td>
+
+
+                <!-- RANGO -->
+
+                <td>
+                  {{ corte.rangoMora }}
+                </td>
+
+
+                <!-- MORA -->
+
+                <td class="center">
+
+                  {{
+                  corte.tieneMora
+                  ? 'Sí'
+                  : 'No'
+                  }}
+
+                </td>
+
+
+                <!-- SALDO -->
+
+                <td class="numero">
+
+                  {{
+                  corte.saldoCreditoFechaCorte
+                  | currency:'COP':'symbol-narrow':'1.0-0'
+                  }}
+
+                </td>
+
+
+                <!-- EDAD MORA -->
+
+                <td class="center">
+
+                  <span
+                    [class]="
+                      claseEdad(
+                        corte.edadDeMoraResultado
+                      )
+                    ">
+
+                    {{
+                      corte.edadDeMoraResultado
+                      || ''
+                    }}
+
+                  </span>
+
+                </td>
+
+
+                <!-- RIESGO -->
+
+                <td class="center">
+
+                  <span
+                    [class]="
+                      claseEdad(
+                        corte.edadDeRiesgoResultado
+                      )
+                    ">
+
+                    {{
+                      corte.edadDeRiesgoResultado
+                      || ''
+                    }}
+
+                  </span>
+
+                </td>
+
+
+                <!-- PE -->
+
+                <td class="center">
+
+                  <span
+                    [class]="
+                      claseEdad(
+                        corte.edadDePeResultado
+                      )
+                    ">
+
+                    {{
+                      corte.edadDePeResultado
+                      || ''
+                    }}
+
+                  </span>
+
+                </td>
+
+
+                <!-- HOMOLOGACIÓN -->
+
+                <td class="center">
+
+                  <span
+                    [class]="
+                      claseEdad(
+                        corte.edadDeHomologacionResultado
+                      )
+                    ">
+
+                    {{
+                      corte.edadDeHomologacionResultado
+                      || ''
+                    }}
+
+                  </span>
+
+                </td>
+
+
+                <!-- CONTABLE -->
+
+                <td class="center">
+
+                  <span
+                    [class]="
+                      claseEdad(
+                        corte.edadContableResultado
+                      )
+                    ">
+
+                    {{
+                      corte.edadContableResultado
+                      || ''
+                    }}
+
+                  </span>
+
+                </td>
+
+
+                <!-- DETERIORO CAPITAL -->
+
+                <td class="numero">
+
+                  {{
+                  corte.deterioroCapital
+                  | currency:'COP':'symbol-narrow':'1.0-0'
+                  }}
+
+                </td>
+
+
+                <!-- DETERIORO INTERESES -->
+
+                <td class="numero">
+
+                  {{
+                  corte.deterioroIntereses
+                  | currency:'COP':'symbol-narrow':'1.0-0'
+                  }}
+
+                </td>
+
+
+                <!-- DETERIORO TOTAL -->
+
+                <td class="numero total">
+
+                  {{
+                  corte.deterioroTotal
+                  | currency:'COP':'symbol-narrow':'1.0-0'
+                  }}
+
+                </td>
+
+              </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </ng-container>
+
+    </section>
+
+  </ng-container>
+
+</div>

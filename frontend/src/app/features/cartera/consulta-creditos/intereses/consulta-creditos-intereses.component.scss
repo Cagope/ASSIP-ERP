@@ -1,0 +1,620 @@
+@use '../../../../../styles/forms';
+@use '../../../../../styles/informes-base';
+
+
+/* =========================================================
+   CONTENEDOR PRINCIPAL
+========================================================= */
+
+.intereses-detalle {
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+}
+
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.bloque-encabezado {
+  display: flex;
+
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  h2 {
+    margin: 0 0 4px;
+
+    color: #101828;
+
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  span {
+    display: block;
+
+    color: #667085;
+
+    font-size: 12px;
+    line-height: 1.45;
+  }
+}
+
+
+/* =========================================================
+   RESUMEN
+========================================================= */
+
+.intereses-resumen {
+  display: grid;
+
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr));
+
+  gap: 10px;
+}
+
+
+.intereses-resumen article {
+  min-width: 0;
+
+  padding: 12px 14px;
+
+  background: #f8fafc;
+
+  border: 1px solid #dbe2ea;
+  border-left: 3px solid #64748b;
+  border-radius: 8px;
+
+  span {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #64748b;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+
+  strong {
+    display: block;
+
+    color: #101828;
+
+    font-size: 18px;
+    font-weight: 700;
+
+    white-space: nowrap;
+  }
+
+  small {
+    display: block;
+
+    margin-top: 4px;
+
+    color: #667085;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    white-space: nowrap;
+  }
+}
+
+
+.intereses-resumen .resumen-debito {
+  background: #fff7ed;
+
+  border-color: #fed7aa;
+  border-left-color: #ea580c;
+
+  strong {
+    color: #9a3412;
+  }
+}
+
+
+.intereses-resumen .resumen-credito {
+  background: #ecfdf3;
+
+  border-color: #bbf7d0;
+  border-left-color: #16a34a;
+
+  strong {
+    color: #166534;
+  }
+}
+
+
+.intereses-resumen .resumen-saldo {
+  background: #eff6ff;
+
+  border-color: #bfdbfe;
+  border-left-color: #2563eb;
+
+  strong {
+    color: #1d4ed8;
+  }
+}
+
+
+/* =========================================================
+   SECCIONES
+========================================================= */
+
+.intereses-seccion,
+.ultimo-movimiento {
+  overflow: hidden;
+
+  background: #fff;
+
+  border: 1px solid #dbe2ea;
+  border-radius: 8px;
+}
+
+
+.intereses-seccion__titulo {
+  padding: 10px 14px;
+
+  background: #f8fafc;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  color: #344054;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  letter-spacing: 0.02em;
+}
+
+
+/* =========================================================
+   TABLA
+========================================================= */
+
+.tabla-contenedor {
+  width: 100%;
+
+  overflow-x: auto;
+  overflow-y: auto;
+
+  max-height: 560px;
+}
+
+
+.tabla-intereses {
+  width: 100%;
+
+  min-width: 1750px;
+
+  border-collapse: separate;
+  border-spacing: 0;
+
+  font-size: 11px;
+
+
+  thead {
+    position: sticky;
+
+    top: 0;
+
+    z-index: 3;
+  }
+
+
+  th {
+    padding: 9px 10px;
+
+    background: #f8fafc;
+
+    border-bottom: 1px solid #dbe2ea;
+
+    color: #475467;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    text-align: left;
+
+    white-space: nowrap;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.02em;
+  }
+
+
+  td {
+    padding: 8px 10px;
+
+    background: #fff;
+
+    border-bottom: 1px solid #eef2f6;
+
+    color: #1f2937;
+
+    vertical-align: middle;
+
+    white-space: nowrap;
+  }
+
+
+  tbody tr:hover td {
+    background: #f8fafc;
+  }
+
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+}
+
+
+/* =========================================================
+   COLUMNAS NUMÉRICAS
+========================================================= */
+
+.columna-numero {
+  text-align: right !important;
+
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* =========================================================
+   PERÍODO
+========================================================= */
+
+.periodo-interes {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 4px;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   MOVIMIENTOS
+========================================================= */
+
+.tabla-intereses {
+
+  tr.movimiento-debito td:first-child {
+    border-left: 3px solid #ea580c;
+  }
+
+  tr.movimiento-credito td:first-child {
+    border-left: 3px solid #16a34a;
+  }
+
+  tr.movimiento-sin-valor td:first-child {
+    border-left: 3px solid #94a3b8;
+  }
+}
+
+
+.valor-debito {
+  color: #9a3412 !important;
+
+  font-weight: 700;
+}
+
+
+.valor-credito {
+  color: #166534 !important;
+
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+.badge {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-width: 64px;
+
+  padding: 3px 7px;
+
+  border: 1px solid transparent;
+  border-radius: 999px;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  line-height: 1.2;
+
+  white-space: nowrap;
+}
+
+
+.badge--debito {
+  background: #fff7ed;
+
+  border-color: #fed7aa;
+
+  color: #9a3412;
+}
+
+
+.badge--credito {
+  background: #ecfdf3;
+
+  border-color: #bbf7d0;
+
+  color: #166534;
+}
+
+
+.badge--neutral {
+  background: #f1f5f9;
+
+  border-color: #cbd5e1;
+
+  color: #475569;
+}
+
+
+.badge--ok {
+  background: #ecfdf3;
+
+  border-color: #bbf7d0;
+
+  color: #166534;
+}
+
+
+.badge--advertencia {
+  background: #fffbeb;
+
+  border-color: #fde68a;
+
+  color: #92400e;
+}
+
+
+/* =========================================================
+   OBSERVACIÓN
+========================================================= */
+
+.observacion-interes {
+  max-width: 260px;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   ESTADO VACÍO
+========================================================= */
+
+.estado-vacio {
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 110px;
+
+  padding: 20px;
+
+  background: #f8fafc;
+
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+
+  text-align: center;
+
+
+  strong {
+    margin-bottom: 5px;
+
+    color: #344054;
+
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+
+  span {
+    max-width: 600px;
+
+    color: #667085;
+
+    font-size: 11px;
+    line-height: 1.5;
+  }
+}
+
+
+/* =========================================================
+   ÚLTIMO MOVIMIENTO
+========================================================= */
+
+.ultimo-movimiento-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 0;
+}
+
+
+.ultimo-movimiento-grid article {
+  min-width: 0;
+
+  padding: 12px 14px;
+
+  border-right: 1px solid #eef2f6;
+  border-bottom: 1px solid #eef2f6;
+
+
+  span {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #667085;
+
+    font-size: 10px;
+    font-weight: 600;
+
+    text-transform: uppercase;
+  }
+
+
+  strong {
+    display: block;
+
+    overflow: hidden;
+
+    color: #101828;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+  }
+}
+
+
+.ultimo-movimiento-saldo {
+  background: #eff6ff;
+
+  strong {
+    color: #1d4ed8 !important;
+
+    font-size: 14px !important;
+  }
+}
+
+
+/* =========================================================
+   SCROLL
+========================================================= */
+
+.tabla-contenedor {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f8fafc;
+}
+
+
+.tabla-contenedor::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+
+.tabla-contenedor::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+
+.tabla-contenedor::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+
+  border-radius: 999px;
+}
+
+
+.tabla-contenedor::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1200px) {
+
+  .intereses-resumen {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+
+  .ultimo-movimiento-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+}
+
+
+@media (max-width: 900px) {
+
+  .bloque-encabezado {
+    flex-direction: column;
+
+    align-items: stretch;
+  }
+
+
+  .bloque-encabezado .btn {
+    align-self: flex-start;
+  }
+
+
+  .intereses-resumen {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+
+  .ultimo-movimiento-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .intereses-resumen {
+    grid-template-columns: 1fr;
+  }
+
+
+  .ultimo-movimiento-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .intereses-resumen article strong {
+    white-space: normal;
+  }
+
+
+  .ultimo-movimiento-grid article strong {
+    white-space: normal;
+  }
+
+}

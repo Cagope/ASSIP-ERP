@@ -1,0 +1,11 @@
+<div class="chart" *ngIf="visibles.length; else sinDatos">
+  <div class="item" *ngFor="let d of visibles">
+    <div class="head">
+      <span class="name">{{ d.codigo }} · {{ d.descripcion }}</span>
+      <span class="value">{{ pct(d.porcentajeMora30Mob6) }} · {{ d.mora30HastaMob6 }}/{{ d.creditosOriginados }}</span>
+    </div>
+    <div class="track"><div class="bar" [style.width.%]="ancho(d.porcentajeMora30Mob6)"></div></div>
+    <div class="foot">60+ MOB6: {{ pct(d.porcentajeMora60Mob6) }} · {{ d.mora60HastaMob6 }} créditos</div>
+  </div>
+</div>
+<ng-template #sinDatos><div class="empty">Sin información para graficar.</div></ng-template>

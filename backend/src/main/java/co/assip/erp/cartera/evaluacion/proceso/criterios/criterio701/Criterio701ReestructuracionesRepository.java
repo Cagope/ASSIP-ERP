@@ -19,16 +19,16 @@ public class Criterio701ReestructuracionesRepository {
     // =========================================================
     // OBTENER DATOS DEL CRITERIO 701 - REESTRUCTURACIONES
     //
-    // La condición de reestructuración se toma directamente
-    // de la fotografía histórica del crédito:
+    // La condiciÃ³n de reestructuraciÃ³n se toma directamente
+    // de la fotografÃ­a histÃ³rica del crÃ©dito:
     //
     // cierres_cartera_creditos.credito_reestructurado
     //
-    // false = sin reestructuración
-    // true  = con reestructuración
+    // false = sin reestructuraciÃ³n
+    // true  = con reestructuraciÃ³n
     //
-    // Los demás campos relacionados con la reestructuración
-    // se recuperan únicamente como información complementaria.
+    // Los demÃ¡s campos relacionados con la reestructuraciÃ³n
+    // se recuperan Ãºnicamente como informaciÃ³n complementaria.
     // =========================================================
 
     public List<Criterio701DatoDTO> obtenerDatos(
@@ -81,9 +81,14 @@ public class Criterio701ReestructuracionesRepository {
 
                 WHERE cierre.fecha_corte =
                       :fechaCorte
+                
+                  AND COALESCE(
+                          cc.saldo_actual,
+                          0
+                      ) > 0
 
                 ORDER BY
-                    cierre.id_agencia,
+                    cc.id_agencia,
                     hv.documento,
                     cc.id_cartera_credito
                 """;
