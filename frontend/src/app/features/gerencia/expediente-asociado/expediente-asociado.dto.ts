@@ -1,3 +1,16 @@
+export interface ExpedientePersonaBusqueda {
+  idDatosPersonal: number;
+
+  tipoDocumento: string | null;
+  nombreTipoDocumento: string | null;
+  documento: string | null;
+
+  nombres: string | null;
+  primerApellido: string | null;
+  segundoApellido: string | null;
+  nombreCompleto: string | null;
+}
+
 export interface ExpedienteAsociado {
 
   encontrado: boolean;

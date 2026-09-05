@@ -36,7 +36,7 @@ public class CierreMensualDTO {
     private BigDecimal diferenciaCuadre;
 
     // =========================================================
-    // Foto
+    // Fotografía
     // =========================================================
 
     private Integer cantidadCreditos;
@@ -47,7 +47,45 @@ public class CierreMensualDTO {
 
     private LocalDateTime fechaFotografia;
 
-    private LocalDateTime fechaFinal;
+    private String estadoFotografia;
+
+    private LocalDateTime fechaFotografiaFirme;
+
+    // =========================================================
+    // Cálculos
+    // =========================================================
+
+    private String estadoCalculos;
+
+    private LocalDateTime fechaCalculosInicio;
+
+    private LocalDateTime fechaCalculosFirme;
+
+    // =========================================================
+    // Anexo 1
+    // =========================================================
+
+    private String estadoAnexo1;
+
+    private LocalDateTime fechaAnexo1Inicio;
+
+    private LocalDateTime fechaAnexo1Firme;
+
+    // =========================================================
+    // Anexo 2
+    // =========================================================
+
+    private String estadoAnexo2;
+
+    private LocalDateTime fechaAnexo2Inicio;
+
+    private LocalDateTime fechaAnexo2Firme;
+
+    // =========================================================
+    // Finalización general
+    // =========================================================
+
+    private LocalDateTime fechaFinalizacion;
 
     // =========================================================
     // Observaciones

@@ -117,18 +117,56 @@ public class CierreHojaVidaCarteraService {
                 );
             }
 
-            if (!"P".equalsIgnoreCase(
-                    estado.trim()
-            )) {
+            String estadoNormalizado =
+                    estado.trim().toUpperCase();
 
-                throw new IllegalStateException(
-                        "Existe una fotografía definitiva "
-                                + "de Hoja de Vida para la fecha "
-                                + fechaCorte
-                                + ". No puede regenerarse."
+            if ("D".equals(estadoNormalizado)) {
+
+                ResultadoValidacionPrecierre validacion =
+                        validarPrecierre(
+                                idCierreCartera,
+                                fechaCorte
+                        );
+
+                if (!validacion.valido()) {
+
+                    throw new IllegalStateException(
+                            "Existe una fotografía definitiva de Hoja de Vida "
+                                    + "para la fecha "
+                                    + fechaCorte
+                                    + ", pero no coincide con la fotografía "
+                                    + "de cartera que se está regenerando."
+                    );
+                }
+
+                return new ResultadoPrecierreHojaVida(
+                        validacion.idCierreHojaVida(),
+                        idCierreCartera,
+                        fechaCorte,
+
+                        validacion.cantidadPersonasEsperadas(),
+                        validacion.cantidadPersonasFotografiadas(),
+
+                        validacion.cantidadBienesEsperados(),
+                        validacion.cantidadBienesFotografiados(),
+
+                        validacion.cantidadRelacionesEsperadas(),
+                        validacion.cantidadRelacionesFotografiadas(),
+
+                        validacion.cantidadBienesSinPropietario(),
+
+                        "D"
                 );
             }
 
+            if (!"P".equals(estadoNormalizado)) {
+
+                throw new IllegalStateException(
+                        "Estado no válido de la fotografía de Hoja de Vida: "
+                                + estado
+                                + "."
+                );
+            }
 
             // =================================================
             // 3. LIMPIAR PERSONAS DEL PRECierre ANTERIOR

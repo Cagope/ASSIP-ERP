@@ -1,0 +1,43 @@
+package co.assip.erp.cartera.analisis.reciprocidadaportes.dto;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+public record ReciprocidadAportesDetalleDTO(
+        Integer idCierreCartera,
+        LocalDate fechaCorte,
+        Long idDatosPersonal,
+        String tipoDocumento,
+        String documento,
+        String nombreCompleto,
+        Long cantidadCreditosPersona,
+        BigDecimal saldoCarteraPersona,
+        BigDecimal saldoAportesPersona,
+        BigDecimal porcentajeReciprocidadPersona,
+        BigDecimal apalancamientoPersona,
+        Integer idCierreCarteraCredito,
+        Long idCarteraCredito,
+        String pagareCartera,
+        Integer idAgencia,
+        Long idLineaCredito,
+        String codigoLineaCredito,
+        String nombreLineaCredito,
+        String codigoClasificacionCredito,
+        String descripcionClasificacionCredito,
+        String codigoDestinoEconomico,
+        String descripcionDestinoEconomico,
+        LocalDate fechaDesembolso,
+        BigDecimal valorInicialCredito,
+        BigDecimal valorDesembolsado,
+        BigDecimal saldoCreditoFechaCorte,
+        BigDecimal porcentajeAportesCredito,
+        BigDecimal valorAportesCredito,
+        BigDecimal exposicionNetaCredito,
+        BigDecimal excedenteAportesCredito,
+        Integer diasMora,
+        String edadContableResultado,
+        BigDecimal deterioroCapital,
+        BigDecimal deterioroIntereses,
+        BigDecimal deterioroOtros,
+        BigDecimal deterioroTotal
+) {}

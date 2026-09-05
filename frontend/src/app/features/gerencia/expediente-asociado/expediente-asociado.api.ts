@@ -1,9 +1,12 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import { ExpedienteAsociado } from './expediente-asociado.dto';
+import {
+  ExpedienteAsociado,
+  ExpedientePersonaBusqueda
+} from './expediente-asociado.dto';
 
 @Injectable({
   providedIn: 'root'
@@ -16,6 +19,61 @@ export class ExpedienteAsociadoApi {
   constructor(
     private readonly http: HttpClient
   ) {
+  }
+
+  buscarPersonas(
+    documento: string,
+    nombres: string,
+    primerApellido: string,
+    segundoApellido: string
+  ): Observable<ExpedientePersonaBusqueda[]> {
+
+    let params = new HttpParams();
+
+    const documentoFiltro =
+      String(documento ?? '').trim();
+
+    const nombresFiltro =
+      String(nombres ?? '').trim();
+
+    const primerApellidoFiltro =
+      String(primerApellido ?? '').trim();
+
+    const segundoApellidoFiltro =
+      String(segundoApellido ?? '').trim();
+
+    if (documentoFiltro) {
+      params = params.set(
+        'documento',
+        documentoFiltro
+      );
+    }
+
+    if (nombresFiltro) {
+      params = params.set(
+        'nombres',
+        nombresFiltro
+      );
+    }
+
+    if (primerApellidoFiltro) {
+      params = params.set(
+        'primerApellido',
+        primerApellidoFiltro
+      );
+    }
+
+    if (segundoApellidoFiltro) {
+      params = params.set(
+        'segundoApellido',
+        segundoApellidoFiltro
+      );
+    }
+
+    return this.http.get<ExpedientePersonaBusqueda[]>(
+      `${this.baseUrl}/buscar`,
+      { params }
+    );
   }
 
   consultarPorIdDatosPersonal(

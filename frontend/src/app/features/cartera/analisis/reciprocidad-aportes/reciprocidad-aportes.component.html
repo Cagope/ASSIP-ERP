@@ -1,0 +1,402 @@
+<div class="reciprocidad-aportes">
+
+  <div class="encabezado">
+    <div>
+      <h2>Reciprocidad de Aportes</h2>
+      <p>Análisis por persona de la relación entre aportes sociales y cartera al corte.</p>
+    </div>
+
+    <div class="acciones-superiores">
+      <div class="corte">
+        <label for="fechaCorte">Corte</label>
+        <select
+          id="fechaCorte"
+          [(ngModel)]="fechaCorte">
+          <option
+            *ngFor="let corte of cortes"
+            [value]="corte">
+            {{ corte }}
+          </option>
+        </select>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        [disabled]="!fechaCorte || cargando"
+        (click)="consultar()">
+        Consultar
+      </button>
+
+      <button
+        type="button"
+        class="btn"
+        [disabled]="!resumen || exportando || cargando"
+        (click)="exportarExcel()">
+        {{ exportando ? 'Generando...' : 'Exportar Excel' }}
+      </button>
+    </div>
+  </div>
+
+  <div
+    *ngIf="error"
+    class="mensaje mensaje--error">
+    {{ error }}
+  </div>
+
+  <div
+    *ngIf="cargando"
+    class="mensaje">
+    Cargando análisis...
+  </div>
+
+  <ng-container *ngIf="!cargando && resumen">
+
+    <section class="kpis">
+      <article class="kpi">
+        <span>Personas</span>
+        <strong>{{ resumen.cantidadPersonas | number:'1.0-0' }}</strong>
+        <small>{{ resumen.cantidadCreditos | number:'1.0-0' }} créditos</small>
+      </article>
+
+      <article class="kpi">
+        <span>Saldo cartera</span>
+        <strong>{{ resumen.saldoCartera | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+        <small>Cartera con saldo positivo al corte</small>
+      </article>
+
+      <article class="kpi">
+        <span>Saldo aportes</span>
+        <strong>{{ resumen.saldoAportes | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+        <small>Aportes de las personas con cartera</small>
+      </article>
+
+      <article class="kpi kpi--destacado">
+        <span>Reciprocidad global</span>
+        <strong>{{ resumen.porcentajeReciprocidadGlobal | number:'1.2-4' }}%</strong>
+        <small>Aportes / cartera</small>
+      </article>
+
+      <article class="kpi">
+        <span>Apalancamiento global</span>
+        <strong>{{ resumen.apalancamientoGlobal | number:'1.2-4' }}x</strong>
+        <small>Cartera / aportes</small>
+      </article>
+
+      <article class="kpi">
+        <span>Exposición neta</span>
+        <strong>{{ resumen.exposicionNetaAportes | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+        <small>{{ resumen.personasAportesCubrenCartera | number:'1.0-0' }} personas cubren su cartera</small>
+      </article>
+    </section>
+
+    <section class="panel">
+      <div class="panel__titulo">
+        <div>
+          <h3>Reciprocidad por persona</h3>
+          <p>Una fila por asociado. El detalle muestra la distribución de los aportes entre sus créditos.</p>
+        </div>
+
+        <span class="contador">
+          {{ personasFiltradas.length | number:'1.0-0' }}
+        </span>
+      </div>
+
+      <div class="filtros">
+        <div class="filtro">
+          <label for="filtroDocumento">Documento</label>
+          <input
+            id="filtroDocumento"
+            type="text"
+            [(ngModel)]="filtroDocumento"
+            (keyup.enter)="aplicarFiltros()"
+            placeholder="Número de documento">
+        </div>
+
+        <div class="filtro filtro--nombre">
+          <label for="filtroNombre">Nombre</label>
+          <input
+            id="filtroNombre"
+            type="text"
+            [(ngModel)]="filtroNombre"
+            (keyup.enter)="aplicarFiltros()"
+            placeholder="Nombre o apellido">
+        </div>
+
+        <div class="filtro">
+          <label for="filtroRango">Reciprocidad</label>
+          <select
+            id="filtroRango"
+            [(ngModel)]="filtroRango"
+            (change)="aplicarFiltros()">
+            <option
+              *ngFor="let rango of rangos"
+              [value]="rango">
+              {{ rango === 'TODOS' ? 'Todos los rangos' : rango }}
+            </option>
+          </select>
+        </div>
+
+        <div class="filtros__acciones">
+          <button
+            type="button"
+            class="btn btn--primary"
+            (click)="aplicarFiltros()">
+            Buscar
+          </button>
+
+          <button
+            type="button"
+            class="btn"
+            (click)="limpiarFiltros()">
+            Limpiar
+          </button>
+        </div>
+      </div>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Documento</th>
+              <th>Nombre</th>
+              <th class="num">Créditos</th>
+              <th class="num">Saldo cartera</th>
+              <th class="num">Aportes</th>
+              <th class="num">Reciprocidad</th>
+              <th class="num">Apalancamiento</th>
+              <th class="num">Exposición neta</th>
+              <th>Rango</th>
+              <th></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr
+              *ngFor="
+                let p of personasPaginadas;
+                trackBy: trackByPersona
+              ">
+              <td>{{ p.documento }}</td>
+              <td class="nombre">{{ p.nombreCompleto }}</td>
+              <td class="num">{{ p.cantidadCreditos | number:'1.0-0' }}</td>
+              <td class="num">{{ p.saldoCartera | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td class="num">{{ p.saldoAportes | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td class="num fuerte">{{ p.porcentajeReciprocidad | number:'1.2-4' }}%</td>
+              <td class="num">{{ p.apalancamiento | number:'1.2-4' }}x</td>
+              <td class="num">{{ p.exposicionNetaAportes | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td>
+                <span [class]="claseRango(p.rangoReciprocidad)">
+                  {{ p.rangoReciprocidad }}
+                </span>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="btn-link"
+                  (click)="verDetalle(p)">
+                  Ver
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="!personasPaginadas.length">
+              <td
+                colspan="10"
+                class="vacio">
+                No hay personas para los filtros seleccionados.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="paginacion">
+        <div class="paginacion__info">
+          Mostrando
+          {{ personasPaginadas.length | number:'1.0-0' }}
+          de
+          {{ personasFiltradas.length | number:'1.0-0' }}
+          personas
+        </div>
+
+        <div class="paginacion__controles">
+          <label>
+            Filas
+            <select
+              [(ngModel)]="tamanoPagina"
+              (change)="cambiarTamanoPagina()">
+              <option [ngValue]="20">20</option>
+              <option [ngValue]="50">50</option>
+              <option [ngValue]="100">100</option>
+            </select>
+          </label>
+
+          <button
+            type="button"
+            class="btn-pagina"
+            [disabled]="pagina <= 1"
+            (click)="irPrimera()">
+            «
+          </button>
+
+          <button
+            type="button"
+            class="btn-pagina"
+            [disabled]="pagina <= 1"
+            (click)="irAnterior()">
+            ‹
+          </button>
+
+          <span>
+            Página {{ pagina }} de {{ totalPaginas }}
+          </span>
+
+          <button
+            type="button"
+            class="btn-pagina"
+            [disabled]="pagina >= totalPaginas"
+            (click)="irSiguiente()">
+            ›
+          </button>
+
+          <button
+            type="button"
+            class="btn-pagina"
+            [disabled]="pagina >= totalPaginas"
+            (click)="irUltima()">
+            »
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </ng-container>
+
+  <div
+    class="modal-backdrop"
+    *ngIf="mostrarDetalle"
+    (click)="cerrarDetalle()">
+
+    <section
+      class="modal"
+      (click)="$event.stopPropagation()">
+
+      <div class="modal__header">
+        <div>
+          <h3>Detalle de Reciprocidad de Aportes</h3>
+          <p *ngIf="personaSeleccionada">
+            {{ personaSeleccionada.nombreCompleto }}
+            · {{ personaSeleccionada.documento }}
+            · Corte {{ fechaCorte }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="cerrar"
+          (click)="cerrarDetalle()">
+          ×
+        </button>
+      </div>
+
+      <div
+        class="detalle-kpis"
+        *ngIf="personaSeleccionada">
+        <div>
+          <span>Créditos</span>
+          <strong>{{ personaSeleccionada.cantidadCreditos | number:'1.0-0' }}</strong>
+        </div>
+
+        <div>
+          <span>Cartera</span>
+          <strong>{{ personaSeleccionada.saldoCartera | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+        </div>
+
+        <div>
+          <span>Aportes</span>
+          <strong>{{ personaSeleccionada.saldoAportes | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+        </div>
+
+        <div>
+          <span>Reciprocidad</span>
+          <strong>{{ personaSeleccionada.porcentajeReciprocidad | number:'1.2-4' }}%</strong>
+        </div>
+
+        <div>
+          <span>Apalancamiento</span>
+          <strong>{{ personaSeleccionada.apalancamiento | number:'1.2-4' }}x</strong>
+        </div>
+
+        <div>
+          <span>Exposición neta</span>
+          <strong>{{ personaSeleccionada.exposicionNetaAportes | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+        </div>
+      </div>
+
+      <div
+        *ngIf="cargandoDetalle"
+        class="mensaje">
+        Cargando detalle de créditos...
+      </div>
+
+      <div
+        *ngIf="errorDetalle"
+        class="mensaje mensaje--error">
+        {{ errorDetalle }}
+      </div>
+
+      <div
+        class="tabla-wrap tabla-wrap--detalle"
+        *ngIf="!cargandoDetalle && !errorDetalle">
+
+        <table>
+          <thead>
+            <tr>
+              <th>Pagaré</th>
+              <th>Línea</th>
+              <th>Clasificación</th>
+              <th class="num">Saldo al corte</th>
+              <th class="num">% distribución</th>
+              <th class="num">Aportes asignados</th>
+              <th class="num">Exposición neta</th>
+              <th class="num">Mora</th>
+              <th>Edad</th>
+              <th class="num">Deterioro</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr
+              *ngFor="
+                let d of detallePersona;
+                trackBy: trackByCredito
+              ">
+              <td>{{ d.pagareCartera }}</td>
+              <td>
+                {{ d.codigoLineaCredito }}
+                <small>{{ d.nombreLineaCredito }}</small>
+              </td>
+              <td>{{ d.descripcionClasificacionCredito }}</td>
+              <td class="num">{{ d.saldoCreditoFechaCorte | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td class="num">{{ d.porcentajeAportesCredito | number:'1.2-6' }}%</td>
+              <td class="num">{{ d.valorAportesCredito | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td class="num">{{ d.exposicionNetaCredito | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td class="num">{{ d.diasMora | number:'1.0-0' }}</td>
+              <td>{{ d.edadContableResultado }}</td>
+              <td class="num">{{ d.deterioroTotal | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+            </tr>
+
+            <tr *ngIf="!detallePersona.length">
+              <td
+                colspan="10"
+                class="vacio">
+                No hay créditos para esta persona en el corte seleccionado.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>

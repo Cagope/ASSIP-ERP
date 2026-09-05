@@ -1,0 +1,1539 @@
+<div class="calculos-cierre">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <div class="page-title">
+
+    <h2>
+      Cálculos del Cierre Mensual
+    </h2>
+
+    <p>
+      Ejecución de los cálculos previos requeridos para
+      Anexo 1 y Anexo PE.
+    </p>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJES -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="error"
+    class="alert alert--error">
+
+    {{ error }}
+
+  </div>
+
+
+  <div
+    *ngIf="mensaje"
+    class="alert alert--success">
+
+    {{ mensaje }}
+
+    <strong
+      *ngIf="cantidadProcesada !== null">
+
+      Créditos procesados:
+      {{ cantidadProcesada | number:'1.0-0' }}.
+
+    </strong>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- SELECCIÓN DEL CIERRE -->
+  <!-- ===================================================== -->
+
+  <section class="panel">
+
+    <div class="panel__header">
+
+      <strong>
+        Seleccionar cierre
+      </strong>
+
+      <span>
+        Seleccione una fotografía en firme para ejecutar
+        los cálculos.
+      </span>
+
+    </div>
+
+
+    <div class="panel__body">
+
+      <div
+        *ngIf="cargando"
+        class="loading">
+
+        Cargando cierres mensuales...
+
+      </div>
+
+
+      <div
+        *ngIf="!cargando"
+        class="seleccion-row">
+
+        <div class="field">
+
+          <label for="idCierre">
+            Cierre mensual
+          </label>
+
+          <select
+            id="idCierre"
+            name="idCierre"
+            [(ngModel)]="idCierreSeleccionado"
+            (ngModelChange)="seleccionarCierre()">
+
+            <option [ngValue]="null">
+              Seleccione un cierre
+            </option>
+
+            <option
+              *ngFor="let cierre of cierres"
+              [ngValue]="cierre.idCierreCartera">
+
+              {{ cierre.fechaCorte }}
+              -
+              {{
+              cierre.estadoFotografia === 'C'
+              ? 'Foto en firme'
+              : 'Foto abierta'
+              }}
+              -
+              {{
+              cierre.estadoCalculos === 'C'
+              ? 'Cálculos en firme'
+              : cierre.estadoCalculos === 'E'
+              ? 'Cálculos en proceso'
+              : 'Cálculos pendientes'
+              }}
+
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="seleccion-actions">
+
+          <button
+            type="button"
+            class="btn btn--secondary"
+            [disabled]="cargando || procesando"
+            (click)="cargarCierres()">
+
+            ACTUALIZAR
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- CIERRE SELECCIONADO -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="cierreSeleccionado"
+    class="panel">
+
+    <div class="panel__header">
+
+      <strong>
+        Cierre seleccionado
+      </strong>
+
+      <span>
+      Estado de la fotografía y de los cálculos del cierre.
+    </span>
+
+    </div>
+
+    <div class="panel__body">
+
+      <div class="resumen">
+
+        <!-- FECHA DE CORTE -->
+
+        <div class="resumen__item">
+
+        <span>
+          Fecha de corte
+        </span>
+
+          <strong>
+            {{ cierreSeleccionado.fechaCorte }}
+          </strong>
+
+        </div>
+
+        <!-- CRÉDITOS -->
+
+        <div class="resumen__item">
+
+        <span>
+          Créditos
+        </span>
+
+          <strong>
+            {{
+            cierreSeleccionado.cantidadCreditos
+            | number:'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+        <!-- SALDO -->
+
+        <div class="resumen__item">
+
+        <span>
+          Saldo cartera
+        </span>
+
+          <strong>
+            {{
+            cierreSeleccionado.saldoCarteraMaestro
+            | number:'1.2-2'
+            }}
+          </strong>
+
+        </div>
+
+        <!-- ESTADO FOTOGRAFÍA -->
+
+        <div class="resumen__item">
+
+        <span>
+          Estado fotografía
+        </span>
+
+          <strong
+            class="estado"
+            [class.estado--firme]="fotoEnFirme()"
+            [class.estado--abierta]="!fotoEnFirme()">
+
+            {{
+            fotoEnFirme()
+            ? 'EN FIRME'
+            : 'ABIERTA'
+            }}
+
+          </strong>
+
+        </div>
+
+        <!-- ESTADO CÁLCULOS -->
+
+        <div class="resumen__item">
+
+        <span>
+          Estado cálculos
+        </span>
+
+          <strong
+            class="estado"
+            [class.estado--firme]="calculosEnFirme()"
+            [class.estado--abierta]="calculosPendientes()"
+            [class.estado--proceso]="calculosEnProceso()">
+
+            {{ textoEstadoCalculos() | uppercase }}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+      <!-- ================================================= -->
+      <!-- FOTO NO ESTÁ EN FIRME -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="!fotoEnFirme()"
+        class="notice notice--warning">
+
+        La fotografía todavía no está en firme.
+        Debe cerrarse desde
+        <strong>Consolidación del Cierre</strong>
+        antes de ejecutar los cálculos.
+
+      </div>
+
+      <!-- ================================================= -->
+      <!-- CÁLCULOS PENDIENTES -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="fotoEnFirme() && calculosPendientes()"
+        class="notice notice--warning">
+
+        Los cálculos todavía no han sido ejecutados.
+
+      </div>
+
+      <!-- ================================================= -->
+      <!-- CÁLCULOS EN PROCESO -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="calculosEnProceso()"
+        class="notice notice--warning">
+
+        Los cálculos están
+        <strong>EN PROCESO</strong>.
+
+        Puede revisarlos, exportarlos y volverlos a ejecutar.
+        Cuando los resultados sean correctos, déjelos en firme.
+
+      </div>
+
+      <!-- ================================================= -->
+      <!-- CÁLCULOS EN FIRME -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="calculosEnFirme()"
+        class="notice notice--success">
+
+        Los cálculos están
+        <strong>EN FIRME</strong>.
+
+        Esta etapa ya no puede recalcularse y el cierre
+        queda habilitado para continuar con
+        <strong>Anexo 1</strong>.
+
+      </div>
+
+      <!-- ================================================= -->
+      <!-- ACCIONES -->
+      <!-- ================================================= -->
+
+      <div class="actions">
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          [disabled]="!puedeProcesar()"
+          (click)="ejecutar()">
+
+          {{
+          procesando
+          ? 'PROCESANDO...'
+          : calculosEnProceso()
+          ? 'RECALCULAR'
+          : 'EJECUTAR CÁLCULOS'
+          }}
+
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          [disabled]="
+          procesando
+          || cerrandoCalculos
+          || exportandoExcel
+          || !cierreSeleccionado
+          || resumenEdadMora.length === 0
+        "
+          (click)="exportarExcel()">
+
+          {{
+          exportandoExcel
+          ? 'GENERANDO EXCEL...'
+          : 'EXPORTAR EXCEL'
+          }}
+
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          *ngIf="!calculosEnFirme()"
+          [disabled]="!puedeCerrarCalculos()"
+          (click)="cerrarCalculos()">
+
+          {{
+          cerrandoCalculos
+          ? 'CERRANDO...'
+          : 'CERRAR CÁLCULOS EN FIRME'
+          }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- DISTRIBUCIÓN POR EDAD DE MORA -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="cierreSeleccionado"
+    class="panel">
+
+    <div class="panel__header">
+
+      <strong>
+        Distribución por edad de mora
+      </strong>
+
+      <span>
+        Resultado calculado por clasificación del crédito
+        y edad de mora.
+      </span>
+
+    </div>
+
+
+    <div class="panel__body">
+
+      <!-- ================================================= -->
+      <!-- CARGANDO RESUMEN -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="cargandoResumen"
+        class="loading">
+
+        Cargando distribución por edad de mora...
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- SIN RESULTADOS -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="
+          !cargandoResumen
+          && resumenEdadMora.length === 0
+        "
+        class="empty">
+
+        No hay resultados calculados para este cierre.
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- RESULTADOS -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="
+          !cargandoResumen
+          && resumenEdadMora.length > 0
+        "
+        class="resumen-mora">
+
+
+        <!-- =============================================== -->
+        <!-- COMERCIAL -->
+        <!-- =============================================== -->
+
+        <div class="mora-grupo">
+
+          <div class="mora-grupo__header">
+
+            <strong>
+              Comercial
+            </strong>
+
+          </div>
+
+
+          <div class="table-wrap">
+
+            <table class="table">
+
+              <thead>
+
+              <tr>
+
+                <th>
+                  Edad
+                </th>
+
+                <th class="text-right">
+                  Créditos
+                </th>
+
+                <th class="text-right">
+                  Saldo
+                </th>
+
+                <th class="text-right">
+                  % Créditos
+                </th>
+
+                <th class="text-right">
+                  % Saldo
+                </th>
+
+              </tr>
+
+              </thead>
+
+
+              <tbody>
+
+              <ng-container
+                *ngFor="let fila of resumenEdadMora">
+
+                <tr
+                  *ngIf="
+                      fila.codigoClasificacion === 'C'
+                    ">
+
+                  <td>
+
+                    <strong>
+                      {{ fila.edadMora }}
+                    </strong>
+
+                  </td>
+
+                  <td class="text-right">
+                    {{
+                    fila.cantidadCreditos
+                    | number:'1.0-0'
+                    }}
+                  </td>
+
+                  <td class="text-right">
+                    {{
+                    fila.saldoCapital
+                    | number:'1.2-2'
+                    }}
+                  </td>
+
+                  <td class="text-right">
+                    {{
+                    fila.porcentajeCantidad
+                    | number:'1.2-2'
+                    }} %
+                  </td>
+
+                  <td class="text-right">
+                    {{
+                    fila.porcentajeSaldo
+                    | number:'1.2-2'
+                    }} %
+                  </td>
+
+                </tr>
+
+              </ng-container>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+
+        <!-- =============================================== -->
+        <!-- MICROCRÉDITO -->
+        <!-- =============================================== -->
+
+        <div class="mora-grupo">
+
+          <div class="mora-grupo__header">
+
+            <strong>
+              Microcrédito
+            </strong>
+
+          </div>
+
+
+          <div class="table-wrap">
+
+            <table class="table">
+
+              <thead>
+
+              <tr>
+
+                <th>
+                  Edad
+                </th>
+
+                <th class="text-right">
+                  Créditos
+                </th>
+
+                <th class="text-right">
+                  Saldo
+                </th>
+
+                <th class="text-right">
+                  % Créditos
+                </th>
+
+                <th class="text-right">
+                  % Saldo
+                </th>
+
+              </tr>
+
+              </thead>
+
+
+              <tbody>
+
+              <ng-container
+                *ngFor="let fila of resumenEdadMora">
+
+                <tr
+                  *ngIf="
+                      fila.codigoClasificacion === 'M'
+                    ">
+
+                  <td>
+
+                    <strong>
+                      {{ fila.edadMora }}
+                    </strong>
+
+                  </td>
+
+                  <td class="text-right">
+                    {{
+                    fila.cantidadCreditos
+                    | number:'1.0-0'
+                    }}
+                  </td>
+
+                  <td class="text-right">
+                    {{
+                    fila.saldoCapital
+                    | number:'1.2-2'
+                    }}
+                  </td>
+
+                  <td class="text-right">
+                    {{
+                    fila.porcentajeCantidad
+                    | number:'1.2-2'
+                    }} %
+                  </td>
+
+                  <td class="text-right">
+                    {{
+                    fila.porcentajeSaldo
+                    | number:'1.2-2'
+                    }} %
+                  </td>
+
+                </tr>
+
+              </ng-container>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+
+        <!-- =============================================== -->
+        <!-- CONSUMO -->
+        <!-- =============================================== -->
+
+        <div class="mora-grupo">
+
+          <div class="mora-grupo__header">
+
+            <strong>
+              Consumo
+            </strong>
+
+          </div>
+
+
+          <div class="table-wrap">
+
+            <table class="table">
+
+              <thead>
+
+              <tr>
+
+                <th>
+                  Edad
+                </th>
+
+                <th class="text-right">
+                  Créditos
+                </th>
+
+                <th class="text-right">
+                  Saldo
+                </th>
+
+                <th class="text-right">
+                  % Créditos
+                </th>
+
+                <th class="text-right">
+                  % Saldo
+                </th>
+
+              </tr>
+
+              </thead>
+
+
+              <tbody>
+
+              <ng-container
+                *ngFor="let fila of resumenEdadMora">
+
+                <tr
+                  *ngIf="
+                      fila.codigoClasificacion === 'S'
+                    ">
+
+                  <td>
+
+                    <strong>
+                      {{ fila.edadMora }}
+                    </strong>
+
+                  </td>
+
+                  <td class="text-right">
+                    {{
+                    fila.cantidadCreditos
+                    | number:'1.0-0'
+                    }}
+                  </td>
+
+                  <td class="text-right">
+                    {{
+                    fila.saldoCapital
+                    | number:'1.2-2'
+                    }}
+                  </td>
+
+                  <td class="text-right">
+                    {{
+                    fila.porcentajeCantidad
+                    | number:'1.2-2'
+                    }} %
+                  </td>
+
+                  <td class="text-right">
+                    {{
+                    fila.porcentajeSaldo
+                    | number:'1.2-2'
+                    }} %
+                  </td>
+
+                </tr>
+
+              </ng-container>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- CONTROL DEL PROCESO -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="cierreSeleccionado"
+    class="panel">
+
+    <div class="panel__header">
+
+      <strong>
+        Control del proceso
+      </strong>
+
+      <span>
+        Validaciones de integridad sobre los resultados
+        calculados del cierre.
+      </span>
+
+    </div>
+
+
+    <div class="panel__body">
+
+      <!-- ================================================= -->
+      <!-- CARGANDO -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="cargandoControles"
+        class="loading">
+
+        Verificando controles del proceso...
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- SIN INFORMACIÓN -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="
+          !cargandoControles
+          && !resumenControles
+        "
+        class="empty">
+
+        No hay información de controles para este cierre.
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- CONTROLES -->
+      <!-- ================================================= -->
+
+      <ng-container
+        *ngIf="
+          !cargandoControles
+          && resumenControles
+        ">
+
+        <!-- =============================================== -->
+        <!-- ESTADO GENERAL -->
+        <!-- =============================================== -->
+
+        <div
+          class="control-estado"
+          [class.control-estado--ok]="
+            resumenControles.procesoConsistente
+          "
+          [class.control-estado--error]="
+            !resumenControles.procesoConsistente
+          ">
+
+          <div class="control-estado__texto">
+
+            <strong>
+              {{
+              resumenControles.procesoConsistente
+              ? 'PROCESO CONSISTENTE'
+              : 'REQUIERE REVISIÓN'
+              }}
+            </strong>
+
+            <span>
+              {{
+                resumenControles.procesoConsistente
+                  ? 'Los controles de integridad fueron superados correctamente.'
+                  : 'Se encontraron inconsistencias que deben revisarse antes de continuar.'
+              }}
+            </span>
+
+          </div>
+
+          <div
+            class="control-estado__badge"
+            [class.control-estado__badge--ok]="
+              resumenControles.procesoConsistente
+            "
+            [class.control-estado__badge--error]="
+              !resumenControles.procesoConsistente
+            ">
+
+            {{
+            resumenControles.procesoConsistente
+            ? 'OK'
+            : 'REVISAR'
+            }}
+
+          </div>
+
+        </div>
+
+
+        <!-- =============================================== -->
+        <!-- TABLA DE CONTROLES -->
+        <!-- =============================================== -->
+
+        <div class="controles-tabla-wrap">
+
+          <table class="table controles-tabla">
+
+            <thead>
+
+            <tr>
+
+              <th>
+                Control
+              </th>
+
+              <th class="text-right">
+                Cantidad
+              </th>
+
+              <th class="text-center">
+                Estado
+              </th>
+
+            </tr>
+
+            </thead>
+
+
+            <tbody>
+
+            <!-- RESULTADOS -->
+
+            <tr>
+
+              <td>
+                Créditos en resultados
+              </td>
+
+              <td class="text-right">
+                {{
+                resumenControles.cantidadResultados
+                | number:'1.0-0'
+                }}
+              </td>
+
+              <td class="text-center">
+
+                  <span class="control-badge control-badge--ok">
+                    OK
+                  </span>
+
+              </td>
+
+            </tr>
+
+
+            <!-- SIN EDAD DE MORA -->
+
+            <tr>
+
+              <td>
+                Créditos sin edad de mora
+              </td>
+
+              <td class="text-right">
+                {{
+                resumenControles.sinEdadMora
+                | number:'1.0-0'
+                }}
+              </td>
+
+              <td class="text-center">
+
+                  <span
+                    class="control-badge"
+                    [class.control-badge--ok]="
+                      resumenControles.sinEdadMora === 0
+                    "
+                    [class.control-badge--error]="
+                      resumenControles.sinEdadMora > 0
+                    ">
+
+                    {{
+                      resumenControles.sinEdadMora === 0
+                        ? 'OK'
+                        : 'REVISAR'
+                    }}
+
+                  </span>
+
+              </td>
+
+            </tr>
+
+
+            <!-- DÍAS NEGATIVOS -->
+
+            <tr>
+
+              <td>
+                Créditos con días de mora negativos
+              </td>
+
+              <td class="text-right">
+                {{
+                resumenControles.diasMoraNegativos
+                | number:'1.0-0'
+                }}
+              </td>
+
+              <td class="text-center">
+
+                  <span
+                    class="control-badge"
+                    [class.control-badge--ok]="
+                      resumenControles.diasMoraNegativos === 0
+                    "
+                    [class.control-badge--error]="
+                      resumenControles.diasMoraNegativos > 0
+                    ">
+
+                    {{
+                      resumenControles.diasMoraNegativos === 0
+                        ? 'OK'
+                        : 'REVISAR'
+                    }}
+
+                  </span>
+
+              </td>
+
+            </tr>
+
+
+            <!-- EDADES DE RIESGO -->
+
+            <tr>
+
+              <td>
+                Créditos con edades de riesgo inválidas
+              </td>
+
+              <td class="text-right">
+                {{
+                resumenControles.edadesRiesgoInvalidas
+                | number:'1.0-0'
+                }}
+              </td>
+
+              <td class="text-center">
+
+                  <span
+                    class="control-badge"
+                    [class.control-badge--ok]="
+                      resumenControles.edadesRiesgoInvalidas === 0
+                    "
+                    [class.control-badge--error]="
+                      resumenControles.edadesRiesgoInvalidas > 0
+                    ">
+
+                    {{
+                      resumenControles.edadesRiesgoInvalidas === 0
+                        ? 'OK'
+                        : 'REVISAR'
+                    }}
+
+                  </span>
+
+              </td>
+
+            </tr>
+
+
+            <!-- EDADES REESTRUCTURACIÓN -->
+
+            <tr>
+
+              <td>
+                Créditos con edades de reestructuración inválidas
+              </td>
+
+              <td class="text-right">
+                {{
+                resumenControles.edadesReestructuracionInvalidas
+                | number:'1.0-0'
+                }}
+              </td>
+
+              <td class="text-center">
+
+                  <span
+                    class="control-badge"
+                    [class.control-badge--ok]="
+                      resumenControles.edadesReestructuracionInvalidas === 0
+                    "
+                    [class.control-badge--error]="
+                      resumenControles.edadesReestructuracionInvalidas > 0
+                    ">
+
+                    {{
+                      resumenControles.edadesReestructuracionInvalidas === 0
+                        ? 'OK'
+                        : 'REVISAR'
+                    }}
+
+                  </span>
+
+              </td>
+
+            </tr>
+
+
+            <!-- NO REESTRUCTURADOS INCONSISTENTES -->
+
+            <tr>
+
+              <td>
+                Créditos no reestructurados inconsistentes
+              </td>
+
+              <td class="text-right">
+                {{
+                resumenControles.noReestructuradosInconsistentes
+                | number:'1.0-0'
+                }}
+              </td>
+
+              <td class="text-center">
+
+                  <span
+                    class="control-badge"
+                    [class.control-badge--ok]="
+                      resumenControles.noReestructuradosInconsistentes === 0
+                    "
+                    [class.control-badge--error]="
+                      resumenControles.noReestructuradosInconsistentes > 0
+                    ">
+
+                    {{
+                      resumenControles.noReestructuradosInconsistentes === 0
+                        ? 'OK'
+                        : 'REVISAR'
+                    }}
+
+                  </span>
+
+              </td>
+
+            </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+
+        <!-- =============================================== -->
+        <!-- INFORMACIÓN DEL CIERRE -->
+        <!-- =============================================== -->
+
+        <div class="control-info">
+
+          <div class="control-info__title">
+
+            <strong>
+              Información del cálculo
+            </strong>
+
+            <span>
+              Características identificadas durante el procesamiento.
+            </span>
+
+          </div>
+
+
+          <div class="control-info__grid">
+
+            <!-- REESTRUCTURADOS -->
+
+            <div class="control-info__item">
+
+              <span>
+                Créditos reestructurados
+              </span>
+
+              <strong>
+                {{
+                resumenControles.cantidadReestructurados
+                | number:'1.0-0'
+                }}
+              </strong>
+
+            </div>
+
+
+            <!-- UNA SOLA CUOTA -->
+
+            <div class="control-info__item">
+
+              <span>
+                Créditos de una sola cuota
+              </span>
+
+              <strong>
+                {{
+                resumenControles.cantidadUnaSolaCuota
+                | number:'1.0-0'
+                }}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </ng-container>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- APORTES Y GARANTÍAS -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="cierreSeleccionado"
+    class="panel">
+
+    <div class="panel__header">
+
+      <strong>
+        Aportes y garantías
+      </strong>
+
+      <span>
+        Resumen de los aportes y garantías aplicados
+        durante los cálculos del cierre.
+      </span>
+
+    </div>
+
+
+    <div class="panel__body">
+
+      <!-- ================================================= -->
+      <!-- CARGANDO -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="cargandoAportesGarantias"
+        class="loading">
+
+        Cargando información de aportes y garantías...
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- SIN INFORMACIÓN -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="
+          !cargandoAportesGarantias
+          && !resumenAportesGarantias
+        "
+        class="empty">
+
+        No hay información de aportes y garantías
+        para este cierre.
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- INFORMACIÓN -->
+      <!-- ================================================= -->
+
+      <ng-container
+        *ngIf="
+          !cargandoAportesGarantias
+          && resumenAportesGarantias
+        ">
+
+        <div class="aportes-garantias">
+
+
+          <!-- ============================================= -->
+          <!-- APORTES -->
+          <!-- ============================================= -->
+
+          <div class="aportes-garantias__grupo">
+
+            <div class="aportes-garantias__header">
+
+              <div>
+
+                <strong>
+                  Aportes
+                </strong>
+
+                <span>
+                  Distribución de los aportes disponibles
+                  entre los créditos del cierre.
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="aportes-garantias__grid">
+
+              <!-- CRÉDITOS CON APORTES -->
+
+              <div class="aportes-garantias__item">
+
+                <span>
+                  Créditos con aportes aplicados
+                </span>
+
+                <strong>
+                  {{
+                  resumenAportesGarantias.creditosConAportes
+                  | number:'1.0-0'
+                  }}
+                </strong>
+
+              </div>
+
+
+              <!-- CRÉDITOS SIN APORTES -->
+
+              <div class="aportes-garantias__item">
+
+                <span>
+                  Créditos sin aportes aplicados
+                </span>
+
+                <strong>
+                  {{
+                  resumenAportesGarantias.creditosSinAportes
+                  | number:'1.0-0'
+                  }}
+                </strong>
+
+              </div>
+
+
+              <!-- SALDO DISPONIBLE -->
+
+              <div class="aportes-garantias__item">
+
+                <span>
+                  Saldo total de aportes disponible
+                </span>
+
+                <strong>
+                  {{
+                  resumenAportesGarantias.saldoAportesDisponible
+                  | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                  }}
+                </strong>
+
+              </div>
+
+
+              <!-- VALOR PRORRATEADO -->
+
+              <div class="aportes-garantias__item">
+
+                <span>
+                  Valor total de aportes prorrateado
+                </span>
+
+                <strong>
+                  {{
+                  resumenAportesGarantias.valorAportesProrrateado
+                  | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                  }}
+                </strong>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- GARANTÍAS -->
+          <!-- ============================================= -->
+
+          <div class="aportes-garantias__grupo">
+
+            <div class="aportes-garantias__header">
+
+              <div>
+
+                <strong>
+                  Garantías
+                </strong>
+
+                <span>
+                  Bienes y valores de garantía consolidados
+                  para los créditos del cierre.
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="aportes-garantias__grid">
+
+              <!-- CRÉDITOS CON GARANTÍA -->
+
+              <div class="aportes-garantias__item">
+
+                <span>
+                  Créditos con garantía
+                </span>
+
+                <strong>
+                  {{
+                  resumenAportesGarantias.creditosConGarantia
+                  | number:'1.0-0'
+                  }}
+                </strong>
+
+              </div>
+
+
+              <!-- CRÉDITOS SIN GARANTÍA -->
+
+              <div class="aportes-garantias__item">
+
+                <span>
+                  Créditos sin garantía
+                </span>
+
+                <strong>
+                  {{
+                  resumenAportesGarantias.creditosSinGarantia
+                  | number:'1.0-0'
+                  }}
+                </strong>
+
+              </div>
+
+
+              <!-- BIENES -->
+
+              <div class="aportes-garantias__item">
+
+                <span>
+                  Bienes utilizados como garantía
+                </span>
+
+                <strong>
+                  {{
+                  resumenAportesGarantias.cantidadBienesGarantia
+                  | number:'1.0-0'
+                  }}
+                </strong>
+
+              </div>
+
+
+              <!-- VALOR BIENES -->
+
+              <div class="aportes-garantias__item">
+
+                <span>
+                  Valor total de los bienes
+                </span>
+
+                <strong>
+                  {{
+                  resumenAportesGarantias.valorBienesGarantia
+                  | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                  }}
+                </strong>
+
+              </div>
+
+
+              <!-- VALOR ASIGNADO -->
+
+              <div
+                class="
+                  aportes-garantias__item
+                  aportes-garantias__item--destacado
+                ">
+
+                <span>
+                  Valor de garantías asignado a créditos
+                </span>
+
+                <strong>
+                  {{
+                  resumenAportesGarantias.valorGarantiasAsignado
+                  | currency:'COP':'symbol-narrow':'1.0-0':'es-CO'
+                  }}
+                </strong>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </ng-container>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- SIN CIERRE SELECCIONADO -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="
+      !cargando
+      && !cierreSeleccionado
+    "
+    class="empty">
+
+    Seleccione un cierre mensual para continuar.
+
+  </div>
+
+</div>

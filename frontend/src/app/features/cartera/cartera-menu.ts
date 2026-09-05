@@ -27,9 +27,34 @@ export const carteraMenu = {
         // =============================
         // CIERRE MENSUAL
         // =============================
+        // =============================
+        // CIERRE MENSUAL
+        // =============================
         {
           label: 'Cierre Mensual',
-          route: '/cartera/cierre-mensual'
+          children: [
+
+            {
+              label: 'Consolidación del Cierre',
+              route: '/cartera/cierre-mensual'
+            },
+
+            {
+              label: 'Cálculos',
+              route: '/cartera/cierre-mensual/calculos'
+            },
+
+            {
+              label: 'Anexo 1',
+              route: '/cartera/cierre-mensual/anexo1'
+            },
+
+            {
+              label: 'Anexo PE',
+              route: '/cartera/cierre-mensual/anexo2'
+            }
+
+          ]
         },
 
         // =============================
@@ -68,18 +93,55 @@ export const carteraMenu = {
         {
           label: 'Vector de Comportamiento',
           children: [
-
             {
               label: 'Actual',
               route: '/cartera/analisis/vector-comportamiento'
             },
-
             {
               label: 'Por Corte',
               route: '/cartera/analisis/vector-comportamiento/corte'
             }
-
           ]
+        },
+
+        // =============================
+        // MORA TEMPRANA
+        // =============================
+        {
+          label: 'Mora Temprana',
+          route: '/cartera/analisis/mora-temprana'
+        },
+
+        // =============================
+        // RIESGO Y DETERIORO
+        // =============================
+        {
+          label: 'Riesgo y Deterioro',
+          route: '/cartera/analisis/riesgo-deterioro'
+        },
+
+        // =============================
+        // CONCENTRACIÓN DE CARTERA
+        // =============================
+        {
+          label: 'Concentración de Cartera',
+          route: '/cartera/analisis/concentracion-cartera'
+        },
+
+        // =============================
+        // GARANTÍAS Y COBERTURA
+        // =============================
+        {
+          label: 'Garantías y Cobertura',
+          route: '/cartera/analisis/garantias-cobertura'
+        },
+
+        // =============================
+        // RECIPROCIDAD DE APORTES
+        // =============================
+        {
+          label: 'Reciprocidad de Aportes',
+          route: '/cartera/analisis/reciprocidad-aportes'
         },
 
         // =============================
@@ -99,22 +161,6 @@ export const carteraMenu = {
         },
 
         // =============================
-        // RIESGO Y DETERIORO
-        // =============================
-        {
-          label: 'Riesgo y Deterioro',
-          route: '/cartera/analisis/riesgo-deterioro'
-        },
-
-        // =============================
-        // MORA TEMPRANA / CALIDAD DE ORIGINACIÓN
-        // =============================
-        {
-          label: 'Mora Temprana',
-          route: '/cartera/analisis/mora-temprana'
-        },
-
-        // =============================
         // CURACIÓN Y REINCIDENCIA
         // =============================
         {
@@ -123,11 +169,19 @@ export const carteraMenu = {
         },
 
         // =============================
-        // CONCENTRACIÓN DE CARTERA
+        // CANCELACIÓN Y PREPAGO
         // =============================
         {
-          label: 'Concentración de Cartera',
-          route: '/cartera/analisis/concentracion-cartera'
+          label: 'Cancelación y Prepago',
+          route: '/cartera/analisis/cancelacion-prepago'
+        },
+
+        // =============================
+        // ROLL FORWARD
+        // =============================
+        {
+          label: 'Roll Forward',
+          route: '/cartera/analisis/roll-forward'
         }
 
       ]

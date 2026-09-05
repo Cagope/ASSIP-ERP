@@ -37,6 +37,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import co.assip.erp.gerencia.expedienteasociado.repository.ExpedienteAfiliacionRepository;
+import co.assip.erp.gerencia.expedienteasociado.dto.ExpedientePersonaBusquedaDTO;
 
 @Service
 @Transactional(readOnly = true)
@@ -76,6 +77,24 @@ public class ExpedienteAsociadoService {
         this.bienesRepository = bienesRepository;
         this.participacionRepository = participacionRepository;
         this.usuarioSesionService = usuarioSesionService;
+    }
+
+    // =========================================================
+    // Búsqueda de personas para el list del expediente
+    // =========================================================
+
+    public List<ExpedientePersonaBusquedaDTO> buscarPersonas(
+            String documento,
+            String nombres,
+            String primerApellido,
+            String segundoApellido
+    ) {
+        return personaRepository.buscarPersonas(
+                documento,
+                nombres,
+                primerApellido,
+                segundoApellido
+        );
     }
 
     // =========================================================
@@ -1415,8 +1434,6 @@ public class ExpedienteAsociadoService {
     // Utilidades financieras
     // =========================================================
 
-
-
     private BigDecimal totalBienes(
             ExpedienteAsociadoDTO expediente
     ) {
@@ -1425,7 +1442,7 @@ public class ExpedienteAsociadoService {
                         .stream()
                         .map(
                                 ExpedienteBienInmuebleDTO
-                                        ::getValorNeto
+                                        ::getValorComercial
                         )
                         .map(this::valorSeguro)
                         .reduce(CERO, BigDecimal::add);
@@ -1435,7 +1452,7 @@ public class ExpedienteAsociadoService {
                         .stream()
                         .map(
                                 ExpedienteBienVehiculoDTO
-                                        ::getValorNeto
+                                        ::getValorComercial
                         )
                         .map(this::valorSeguro)
                         .reduce(CERO, BigDecimal::add);
@@ -1445,7 +1462,7 @@ public class ExpedienteAsociadoService {
                         .stream()
                         .map(
                                 ExpedienteBienMaquinariaDTO
-                                        ::getValorNeto
+                                        ::getValorComercial
                         )
                         .map(this::valorSeguro)
                         .reduce(CERO, BigDecimal::add);
@@ -1455,7 +1472,7 @@ public class ExpedienteAsociadoService {
                         .stream()
                         .map(
                                 ExpedienteBienInversionDTO
-                                        ::getValorNeto
+                                        ::getValorComercial
                         )
                         .map(this::valorSeguro)
                         .reduce(CERO, BigDecimal::add);
@@ -1465,7 +1482,6 @@ public class ExpedienteAsociadoService {
                 .add(maquinaria)
                 .add(inversiones);
     }
-
 
     private BigDecimal porcentaje(
             BigDecimal numerador,

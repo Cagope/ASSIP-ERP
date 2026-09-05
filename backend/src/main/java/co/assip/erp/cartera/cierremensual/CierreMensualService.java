@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-
 @Service
 @Transactional
 public class CierreMensualService {
@@ -20,14 +19,12 @@ public class CierreMensualService {
     private final UsuarioSesionService usuarioSesionService;
     private final CierreHojaVidaCarteraService cierreHojaVidaCarteraService;
 
-
     public CierreMensualService(
             CierreMensualRepository repository,
             CierreMensualFotoRepository fotoRepository,
             UsuarioSesionService usuarioSesionService,
             CierreHojaVidaCarteraService cierreHojaVidaCarteraService
     ) {
-
         this.repository = repository;
         this.fotoRepository = fotoRepository;
         this.usuarioSesionService = usuarioSesionService;
@@ -67,14 +64,13 @@ public class CierreMensualService {
     // =========================================================
     // EJECUTAR CIERRE MENSUAL
     //
-    // FOTO:
-    // - solamente créditos con saldo_actual > 0
+    // Genera:
+    // - fotografía de cartera
+    // - precierre de Hoja de Vida
+    // - base común de cálculos
     //
-    // BASE DE CÁLCULOS:
-    // - una fila por cada crédito fotografiado
-    //
-    // Por tanto:
-    // cantidadFoto = cantidadResultados
+    // Al finalizar:
+    // estado_fotografia = E
     // =========================================================
 
     public CierreMensualDTO ejecutar(
@@ -85,10 +81,6 @@ public class CierreMensualService {
 
         Integer idUsuario =
                 usuarioSesionService.idUsuario();
-
-        // =====================================================
-        // 1. Buscar o crear cabecera
-        // =====================================================
 
         CierreMensualDTO cierre =
                 repository
@@ -110,10 +102,22 @@ public class CierreMensualService {
             idCierreCartera =
                     cierre.getIdCierreCartera();
 
+            String estadoFotografia =
+                    normalizarEstado(
+                            cierre.getEstadoFotografia()
+                    );
+
+            if ("C".equals(estadoFotografia)) {
+                throw new IllegalStateException(
+                        "La fotografía del cierre "
+                                + fechaCorte
+                                + " ya se encuentra cerrada en firme."
+                );
+            }
+
             if (fotoRepository.existeFoto(
                     idCierreCartera
             )) {
-
                 throw new IllegalStateException(
                         "El cierre de cartera para la fecha "
                                 + fechaCorte
@@ -122,19 +126,11 @@ public class CierreMensualService {
             }
         }
 
-        // =====================================================
-        // 2. Generar foto y base de cálculos
-        // =====================================================
-
         generarFoto(
                 idCierreCartera,
                 fechaCorte,
                 idUsuario
         );
-
-        // =====================================================
-        // 3. Devolver cierre actualizado
-        // =====================================================
 
         return recuperarCierreActualizado(
                 idCierreCartera
@@ -144,12 +140,12 @@ public class CierreMensualService {
     // =========================================================
     // REGENERAR FOTOGRAFÍA
     //
-    // - conserva la cabecera
-    // - conserva id_cierre_cartera
-    // - solamente estado P
-    // - elimina cálculos comunes
-    // - elimina foto
-    // - vuelve a generar
+    // Permitido:
+    // P = pendiente
+    // E = en proceso
+    //
+    // No permitido:
+    // C = fotografía cerrada en firme
     // =========================================================
 
     public CierreMensualDTO regenerar(
@@ -161,10 +157,6 @@ public class CierreMensualService {
         Integer idUsuario =
                 usuarioSesionService.idUsuario();
 
-        // =====================================================
-        // 1. Recuperar cierre
-        // =====================================================
-
         CierreMensualDTO cierre =
                 repository.buscarPorId(idCierreCartera)
                         .orElseThrow(() ->
@@ -174,27 +166,31 @@ public class CierreMensualService {
                                 )
                         );
 
-        // =====================================================
-        // 2. Validar estado
-        // =====================================================
+        String estadoFotografia =
+                normalizarEstado(
+                        cierre.getEstadoFotografia()
+                );
 
-        String estado =
-                cierre.getEstadoCierre();
-
-        if (estado == null
-                || !"P".equalsIgnoreCase(
-                estado.trim()
-        )) {
+        if ("C".equals(estadoFotografia)) {
 
             throw new IllegalStateException(
-                    "La fotografía solamente puede regenerarse "
-                            + "cuando el cierre se encuentra "
-                            + "en estado En proceso."
+                    "La fotografía del cierre "
+                            + idCierreCartera
+                            + " se encuentra cerrada en firme "
+                            + "y no puede regenerarse."
             );
         }
 
         // =====================================================
-        // 3. Eliminar base de cálculos
+        // 1. Eliminar tablas hijas de resultados
+        // =====================================================
+
+        fotoRepository.eliminarResultadosGarantias(
+                idCierreCartera
+        );
+
+        // =====================================================
+        // 2. Eliminar base de resultados
         // =====================================================
 
         fotoRepository.eliminarResultadosBase(
@@ -202,16 +198,12 @@ public class CierreMensualService {
         );
 
         // =====================================================
-        // 4. Eliminar foto
+        // 3. Eliminar fotografía de créditos
         // =====================================================
 
         fotoRepository.eliminarFotoCreditos(
                 idCierreCartera
         );
-
-        // =====================================================
-        // 5. Validar eliminación
-        // =====================================================
 
         int cantidadFotoAnterior =
                 fotoRepository.contarCreditosFoto(
@@ -234,19 +226,11 @@ public class CierreMensualService {
             );
         }
 
-        // =====================================================
-        // 6. Generar nuevamente
-        // =====================================================
-
         generarFoto(
                 idCierreCartera,
                 cierre.getFechaCorte(),
                 idUsuario
         );
-
-        // =====================================================
-        // 7. Devolver cierre actualizado
-        // =====================================================
 
         return recuperarCierreActualizado(
                 idCierreCartera
@@ -254,20 +238,7 @@ public class CierreMensualService {
     }
 
     // =========================================================
-    // GENERAR FOTO
-    //
-    // Solamente se fotografían créditos con saldo_actual > 0.
-    //
-    // Por cada crédito fotografiado se crea una fila
-    // en cierres_cartera_resultados.
-    //
-    // Aquí todavía NO se calculan:
-    // - días de mora
-    // - edades
-    // - aportes
-    // - garantías
-    // - VEA
-    // - deterioros
+    // GENERAR FOTOGRAFÍA
     // =========================================================
 
     private void generarFoto(
@@ -277,7 +248,7 @@ public class CierreMensualService {
     ) {
 
         // =====================================================
-        // 1. Generar fotografía de créditos activos
+        // 1. Generar fotografía de créditos
         // =====================================================
 
         int cantidadInsertadaFoto =
@@ -296,17 +267,8 @@ public class CierreMensualService {
         }
 
         // =====================================================
-// 2. GENERAR PRECierre AUTOMÁTICO DE HOJA DE VIDA
-//
-// Incluye:
-//
-// - personas
-// - bienes
-// - relaciones bienes-personas
-//
-// La fotografía de Hoja de Vida permanece en estado P
-// mientras la fotografía de cartera esté abierta.
-// =====================================================
+        // 2. Generar precierre de Hoja de Vida
+        // =====================================================
 
         CierreHojaVidaCarteraService.ResultadoPrecierreHojaVida
                 resultadoHojaVida =
@@ -337,7 +299,7 @@ public class CierreMensualService {
                 );
 
         // =====================================================
-        // 3. Contar fotografía
+        // 4. Contar fotografía
         // =====================================================
 
         int cantidadFoto =
@@ -351,7 +313,7 @@ public class CierreMensualService {
                 );
 
         // =====================================================
-        // 4. Contar base de cálculos
+        // 5. Contar base de cálculos
         // =====================================================
 
         int cantidadResultados =
@@ -360,7 +322,7 @@ public class CierreMensualService {
                 );
 
         // =====================================================
-        // 5. Validar cantidad insertada en fotografía
+        // 6. Validar fotografía
         // =====================================================
 
         if (cantidadFoto != cantidadInsertadaFoto) {
@@ -376,13 +338,13 @@ public class CierreMensualService {
         }
 
         // =====================================================
-        // 6. Validar foto contra base de cálculos
+        // 7. Validar foto contra base
         // =====================================================
 
         if (cantidadFotoConSaldo != cantidadResultados) {
 
             throw new IllegalStateException(
-                    "No es posible cerrar la fotografía. "
+                    "No es posible preparar la fotografía. "
                             + "Créditos fotografiados con saldo: "
                             + cantidadFotoConSaldo
                             + ". Registros de resultados: "
@@ -392,7 +354,7 @@ public class CierreMensualService {
         }
 
         // =====================================================
-        // 7. Validar cantidad insertada en resultados
+        // 8. Validar resultados insertados
         // =====================================================
 
         if (cantidadResultados
@@ -409,7 +371,7 @@ public class CierreMensualService {
         }
 
         // =====================================================
-        // 8. Calcular saldo total de cartera activa
+        // 9. Calcular saldo total
         // =====================================================
 
         BigDecimal saldoCarteraMaestro =
@@ -418,7 +380,7 @@ public class CierreMensualService {
                 );
 
         // =====================================================
-        // 9. Actualizar saldo maestro
+        // 10. Actualizar saldo maestro
         // =====================================================
 
         repository.actualizarSaldoCarteraMaestro(
@@ -428,16 +390,29 @@ public class CierreMensualService {
         );
 
         // =====================================================
-        // 10. Actualizar cabecera
+        // 11. Actualizar fotografía
         //
-        // cantidad_creditos = créditos activos fotografiados
+        // Aquí queda:
+        // estado_fotografia = E
+        // fecha_fotografia = CURRENT_TIMESTAMP
         // =====================================================
 
-        repository.actualizarFoto(
-                idCierreCartera,
-                cantidadFoto,
-                idUsuario
-        );
+        int actualizados =
+                repository.actualizarFoto(
+                        idCierreCartera,
+                        cantidadFotoConSaldo,
+                        idUsuario
+                );
+
+        if (actualizados != 1) {
+
+            throw new IllegalStateException(
+                    "No fue posible actualizar la cabecera "
+                            + "de la fotografía del cierre "
+                            + idCierreCartera
+                            + "."
+            );
+        }
     }
 
     // =========================================================
@@ -452,23 +427,22 @@ public class CierreMensualService {
                 .buscarPorId(idCierreCartera)
                 .orElseThrow(() ->
                         new IllegalStateException(
-                                "Se generó la fotografía, pero no fue "
-                                        + "posible recuperar la cabecera "
-                                        + "del cierre."
+                                "No fue posible recuperar la cabecera "
+                                        + "actualizada del cierre."
                         )
                 );
     }
 
     // =========================================================
-// CERRAR FOTOGRAFÍA EN FIRME
-//
-// P = En proceso / fotografía abierta
-// C = Cerrado / fotografía firme
-//
-// Una vez cerrado:
-// - no se puede regenerar la fotografía
-// - se habilitan los cálculos de cierre
-// =========================================================
+    // CERRAR FOTOGRAFÍA EN FIRME
+    //
+    // Solamente:
+    // E -> C
+    //
+    // No modifica:
+    // estado_cierre
+    // fecha_finalizacion
+    // =========================================================
 
     public CierreMensualDTO cerrarFotografia(
             Integer idCierreCartera
@@ -481,10 +455,6 @@ public class CierreMensualService {
         Integer idUsuario =
                 usuarioSesionService.idUsuario();
 
-        // =====================================================
-        // 1. Recuperar cierre
-        // =====================================================
-
         CierreMensualDTO cierre =
                 repository.buscarPorId(
                         idCierreCartera
@@ -495,28 +465,26 @@ public class CierreMensualService {
                         )
                 );
 
-        // =====================================================
-        // 2. Validar estado
-        // =====================================================
+        String estadoFotografia =
+                normalizarEstado(
+                        cierre.getEstadoFotografia()
+                );
 
-        String estado =
-                cierre.getEstadoCierre();
+        if (!"E".equals(estadoFotografia)) {
 
-        if (estado == null
-                || !"P".equalsIgnoreCase(
-                estado.trim()
-        )) {
+            if ("C".equals(estadoFotografia)) {
+                throw new IllegalStateException(
+                        "La fotografía del cierre "
+                                + idCierreCartera
+                                + " ya se encuentra cerrada en firme."
+                );
+            }
 
             throw new IllegalStateException(
                     "La fotografía solamente puede cerrarse "
-                            + "cuando el cierre se encuentra "
-                            + "en estado En proceso."
+                            + "cuando se encuentra En proceso."
             );
         }
-
-        // =====================================================
-        // 3. Validar existencia de fotografía
-        // =====================================================
 
         int cantidadFoto =
                 fotoRepository.contarCreditosFoto(
@@ -532,10 +500,6 @@ public class CierreMensualService {
             );
         }
 
-        // =====================================================
-        // 4. Validar base de resultados
-        // =====================================================
-
         int cantidadResultados =
                 fotoRepository.contarResultadosBase(
                         idCierreCartera
@@ -549,10 +513,6 @@ public class CierreMensualService {
                             + " no tiene base de cálculos."
             );
         }
-
-        // =====================================================
-        // 5. Validar correspondencia foto / resultados
-        // =====================================================
 
         int cantidadFotoConSaldo =
                 fotoRepository.contarCreditosFotoConSaldo(
@@ -571,10 +531,6 @@ public class CierreMensualService {
             );
         }
 
-        // =====================================================
-        // 6. Cerrar fotografía en firme
-        // =====================================================
-
         int actualizados =
                 repository.finalizar(
                         idCierreCartera,
@@ -590,17 +546,8 @@ public class CierreMensualService {
             );
         }
 
-        // =====================================================
-        // 7. Recuperar cierre actualizado
-        // =====================================================
-
-        return repository.buscarPorId(
+        return recuperarCierreActualizado(
                 idCierreCartera
-        ).orElseThrow(() ->
-                new IllegalStateException(
-                        "La fotografía fue cerrada, pero no fue posible "
-                                + "recuperar el cierre actualizado."
-                )
         );
     }
 
@@ -620,6 +567,70 @@ public class CierreMensualService {
         return fotoRepository.existeFoto(
                 idCierreCartera
         );
+    }
+
+    // =========================================================
+    // PREPARAR BASE DE CÁLCULOS DE CIERRE HISTÓRICO
+    // =========================================================
+
+    public int prepararBaseCalculosHistorico(
+            Integer idCierreCartera
+    ) {
+
+        validarIdCierre(
+                idCierreCartera
+        );
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        repository.buscarPorId(
+                idCierreCartera
+        ).orElseThrow(() ->
+                new IllegalArgumentException(
+                        "No existe el cierre de cartera: "
+                                + idCierreCartera
+                )
+        );
+
+        int cantidadFoto =
+                fotoRepository.contarCreditosFotoConSaldo(
+                        idCierreCartera
+                );
+
+        if (cantidadFoto <= 0) {
+
+            throw new IllegalStateException(
+                    "El cierre "
+                            + idCierreCartera
+                            + " no tiene fotografía de créditos."
+            );
+        }
+
+        fotoRepository.crearResultadosBase(
+                idCierreCartera,
+                idUsuario
+        );
+
+        int cantidadResultados =
+                fotoRepository.contarResultadosBase(
+                        idCierreCartera
+                );
+
+        if (cantidadFoto != cantidadResultados) {
+
+            throw new IllegalStateException(
+                    "Inconsistencia en la base de cálculos del cierre "
+                            + idCierreCartera
+                            + ". Créditos fotografiados: "
+                            + cantidadFoto
+                            + ". Resultados: "
+                            + cantidadResultados
+                            + "."
+            );
+        }
+
+        return cantidadResultados;
     }
 
     // =========================================================
@@ -651,90 +662,12 @@ public class CierreMensualService {
         }
     }
 
-    // =========================================================
-    // PREPARAR BASE DE CÁLCULOS DE CIERRE HISTÓRICO
-    //
-    // - La cabecera ya existe.
-    // - La fotografía ya existe.
-    // - No modifica la fotografía.
-    // - Crea cierres_cartera_resultados.
-    // - Se usa para cierres migrados.
-    // =========================================================
-
-    public int prepararBaseCalculosHistorico(
-            Integer idCierreCartera
+    private String normalizarEstado(
+            String estado
     ) {
 
-        validarIdCierre(
-                idCierreCartera
-        );
-
-        Integer idUsuario =
-                usuarioSesionService.idUsuario();
-
-        // =====================================================
-        // 1. Validar cierre
-        // =====================================================
-
-        repository.buscarPorId(
-                idCierreCartera
-        ).orElseThrow(() ->
-                new IllegalArgumentException(
-                        "No existe el cierre de cartera: "
-                                + idCierreCartera
-                )
-        );
-
-        // =====================================================
-        // 2. Validar fotografía
-        // =====================================================
-
-        int cantidadFoto =
-                fotoRepository.contarCreditosFotoConSaldo(
-                        idCierreCartera
-                );
-
-        if (cantidadFoto <= 0) {
-
-            throw new IllegalStateException(
-                    "El cierre "
-                            + idCierreCartera
-                            + " no tiene fotografía de créditos."
-            );
-        }
-
-        // =====================================================
-        // 3. Crear base de cálculos faltante
-        // =====================================================
-
-        fotoRepository.crearResultadosBase(
-                idCierreCartera,
-                idUsuario
-        );
-
-        // =====================================================
-        // 4. Validar base
-        // =====================================================
-
-        int cantidadResultados =
-                fotoRepository.contarResultadosBase(
-                        idCierreCartera
-                );
-
-        if (cantidadFoto != cantidadResultados) {
-
-            throw new IllegalStateException(
-                    "Inconsistencia en la base de cálculos del cierre "
-                            + idCierreCartera
-                            + ". Créditos fotografiados: "
-                            + cantidadFoto
-                            + ". Resultados: "
-                            + cantidadResultados
-                            + "."
-            );
-        }
-
-        return cantidadResultados;
+        return estado == null
+                ? ""
+                : estado.trim().toUpperCase();
     }
-
 }

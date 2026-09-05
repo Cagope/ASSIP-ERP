@@ -5,6 +5,14 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import co.assip.erp.cartera.calculosprevios.dto.ResumenEdadMoraDTO;
+import co.assip.erp.cartera.calculosprevios.dto.ResumenAportesGarantiasDTO;
+import co.assip.erp.cartera.calculosprevios.dto.DetalleCalculosCierreDTO;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Repository
 @RequiredArgsConstructor
 public class CalculosPreviosRepository {
@@ -1019,6 +1027,59 @@ public class CalculosPreviosRepository {
     }
 
     // =========================================================
+// VALIDAR CIERRE DE DEPÓSITOS EN FIRME
+//
+// Los cálculos de cartera dependen del cierre mensual
+// de depósitos de la misma fecha de corte.
+//
+// Solamente se considera disponible cuando:
+// - existe el cierre mensual de depósitos
+// - corresponde exactamente a la fecha del cierre de cartera
+// - estado_cierre = 'C'
+// =========================================================
+
+    public boolean existeCierreDepositosEnFirme(
+            Integer idCierreCartera
+    ) {
+
+        String sql = """
+        SELECT EXISTS
+        (
+            SELECT 1
+
+            FROM cartera.cierres_cartera cc
+
+            INNER JOIN depositos.cierres_mensuales cm
+                ON cm.fecha_cierre =
+                   cc.fecha_corte
+
+            WHERE cc.id_cierre_cartera =
+                  :idCierreCartera
+
+              AND UPPER(
+                    TRIM(cm.estado_cierre)
+                  ) = 'C'
+        )
+        """;
+
+        MapSqlParameterSource parametros =
+                new MapSqlParameterSource()
+                        .addValue(
+                                "idCierreCartera",
+                                idCierreCartera
+                        );
+
+        Boolean existe =
+                jdbc.queryForObject(
+                        sql,
+                        parametros,
+                        Boolean.class
+                );
+
+        return Boolean.TRUE.equals(existe);
+    }
+
+    // =========================================================
     // CALCULAR PRORRATEO DE APORTES
     //
     // REGLA:
@@ -1945,6 +2006,1566 @@ public class CalculosPreviosRepository {
         return jdbc.update(
                 sql,
                 parametros
+        );
+    }
+
+    // =========================================================
+    // RESUMEN POR CLASIFICACIÓN Y EDAD DE MORA
+    //
+    // REGLAS:
+    //
+    // 1. La información se consulta exclusivamente sobre los
+    //    resultados persistidos del cierre.
+    //
+    // 2. Se agrupa por:
+    //
+    //    - clasificación del crédito
+    //    - edad de mora calculada
+    //
+    // 3. Para cada clasificación siempre se presentan las
+    //    edades A, B, C, D y E, aunque alguna no tenga créditos.
+    //
+    // 4. Los porcentajes se calculan dentro de cada
+    //    clasificación.
+    //
+    // 5. Este método NO recalcula ni modifica información.
+    // =========================================================
+
+    public List<ResumenEdadMoraDTO> obtenerResumenEdadMora(
+            Integer idCierreCartera
+    ) {
+
+        String sql = """
+            WITH edades AS
+            (
+                SELECT 'A'::varchar AS edad_mora, 1 AS orden
+                UNION ALL
+                SELECT 'B'::varchar, 2
+                UNION ALL
+                SELECT 'C'::varchar, 3
+                UNION ALL
+                SELECT 'D'::varchar, 4
+                UNION ALL
+                SELECT 'E'::varchar, 5
+            ),
+
+            base AS
+            (
+                SELECT
+                    f.codigo_clasificacion_credito,
+
+                    r.edad_de_mora,
+
+                    COALESCE(
+                        r.saldo_actual,
+                        f.saldo_actual,
+                        0
+                    ) AS saldo_actual
+
+                FROM cartera.cierres_cartera_resultados r
+
+                INNER JOIN cartera.cierres_cartera_creditos f
+                    ON f.id_cierre_cartera_credito =
+                       r.id_cierre_cartera_credito
+
+                WHERE r.id_cierre_cartera =
+                      :idCierreCartera
+
+                  AND f.id_cierre_cartera =
+                      :idCierreCartera
+
+                  AND COALESCE(
+                          f.saldo_actual,
+                          0
+                      ) > 0
+            ),
+
+            clasificaciones_cierre AS
+            (
+                SELECT DISTINCT
+                    b.codigo_clasificacion_credito,
+
+                    c.descripcion_clasificacion_credito
+
+                FROM base b
+
+                INNER JOIN cartera.clasificaciones_creditos c
+                    ON c.codigo_clasificacion_credito =
+                       b.codigo_clasificacion_credito
+            ),
+
+            combinaciones AS
+            (
+                SELECT
+                    c.codigo_clasificacion_credito,
+                    c.descripcion_clasificacion_credito,
+                    e.edad_mora,
+                    e.orden
+
+                FROM clasificaciones_cierre c
+
+                CROSS JOIN edades e
+            ),
+
+            agrupado AS
+            (
+                SELECT
+                    b.codigo_clasificacion_credito,
+                    UPPER(
+                        TRIM(
+                            b.edad_de_mora
+                        )
+                    ) AS edad_mora,
+
+                    COUNT(*) AS cantidad_creditos,
+
+                    SUM(
+                        b.saldo_actual
+                    ) AS saldo_capital
+
+                FROM base b
+
+                WHERE UPPER(
+                          TRIM(
+                              COALESCE(
+                                  b.edad_de_mora,
+                                  ''
+                              )
+                          )
+                      ) IN ('A', 'B', 'C', 'D', 'E')
+
+                GROUP BY
+                    b.codigo_clasificacion_credito,
+
+                    UPPER(
+                        TRIM(
+                            b.edad_de_mora
+                        )
+                    )
+            ),
+
+            totales AS
+            (
+                SELECT
+                    b.codigo_clasificacion_credito,
+
+                    COUNT(*) AS cantidad_total,
+
+                    SUM(
+                        b.saldo_actual
+                    ) AS saldo_total
+
+                FROM base b
+
+                GROUP BY
+                    b.codigo_clasificacion_credito
+            )
+
+            SELECT
+                c.codigo_clasificacion_credito,
+
+                c.descripcion_clasificacion_credito,
+
+                c.edad_mora,
+
+                COALESCE(
+                    a.cantidad_creditos,
+                    0
+                )::integer AS cantidad_creditos,
+
+                COALESCE(
+                    a.saldo_capital,
+                    0
+                ) AS saldo_capital,
+
+                CASE
+                    WHEN COALESCE(
+                             t.cantidad_total,
+                             0
+                         ) > 0
+                    THEN ROUND(
+                        (
+                            COALESCE(
+                                a.cantidad_creditos,
+                                0
+                            )::numeric
+                            /
+                            t.cantidad_total::numeric
+                        ) * 100,
+                        2
+                    )
+
+                    ELSE 0
+                END AS porcentaje_cantidad,
+
+                CASE
+                    WHEN COALESCE(
+                             t.saldo_total,
+                             0
+                         ) > 0
+                    THEN ROUND(
+                        (
+                            COALESCE(
+                                a.saldo_capital,
+                                0
+                            )
+                            /
+                            t.saldo_total
+                        ) * 100,
+                        2
+                    )
+
+                    ELSE 0
+                END AS porcentaje_saldo
+
+            FROM combinaciones c
+
+            INNER JOIN totales t
+                ON t.codigo_clasificacion_credito =
+                   c.codigo_clasificacion_credito
+
+            LEFT JOIN agrupado a
+                ON a.codigo_clasificacion_credito =
+                   c.codigo_clasificacion_credito
+
+               AND a.edad_mora =
+                   c.edad_mora
+
+            ORDER BY
+                c.codigo_clasificacion_credito,
+                c.orden
+            """;
+
+        MapSqlParameterSource parametros =
+                new MapSqlParameterSource()
+                        .addValue(
+                                "idCierreCartera",
+                                idCierreCartera
+                        );
+
+        return jdbc.query(
+                sql,
+                parametros,
+                (rs, rowNum) ->
+                        new ResumenEdadMoraDTO(
+                                rs.getString(
+                                        "codigo_clasificacion_credito"
+                                ),
+                                rs.getString(
+                                        "descripcion_clasificacion_credito"
+                                ),
+                                rs.getString(
+                                        "edad_mora"
+                                ),
+                                rs.getInt(
+                                        "cantidad_creditos"
+                                ),
+                                rs.getBigDecimal(
+                                        "saldo_capital"
+                                ),
+                                rs.getBigDecimal(
+                                        "porcentaje_cantidad"
+                                ),
+                                rs.getBigDecimal(
+                                        "porcentaje_saldo"
+                                )
+                        )
+        );
+    }
+
+    // =========================================================
+    // RESUMEN DE APORTES Y GARANTÍAS
+    //
+    // REGLAS:
+    //
+    // APORTES
+    //
+    // 1. Créditos con aportes:
+    //    valor_aportes_credito > 0.
+    //
+    // 2. El saldo disponible de aportes se suma una sola vez
+    //    por asociado, porque un asociado puede tener varios
+    //    créditos dentro del cierre.
+    //
+    // 3. El valor prorrateado corresponde a la suma de
+    //    valor_aportes_credito de todos los créditos.
+    //
+    // GARANTÍAS
+    //
+    // 4. Un crédito tiene garantía cuando posee al menos un
+    //    bien consolidado.
+    //
+    // 5. La cantidad de bienes corresponde a id_bien distintos.
+    //
+    // 6. El valor de los bienes se suma una sola vez por bien,
+    //    evitando duplicarlo cuando respalda varios créditos.
+    //
+    // 7. El valor asignado corresponde al valor de garantía
+    //    efectivamente prorrateado a los créditos.
+    //
+    // Este método solamente consulta información persistida.
+    // NO recalcula ni modifica el cierre.
+    // =========================================================
+
+    public ResumenAportesGarantiasDTO obtenerResumenAportesGarantias(
+            Integer idCierreCartera
+    ) {
+
+        String sql = """
+            WITH resultados AS
+            (
+                SELECT
+                    r.id_cierre_cartera_resultado,
+                    r.id_cierre_cartera_credito,
+
+                    f.id_datos_personal,
+
+                    COALESCE(
+                        r.saldo_aportes_fecha_corte,
+                        0
+                    ) AS saldo_aportes_fecha_corte,
+
+                    COALESCE(
+                        r.valor_aportes_credito,
+                        0
+                    ) AS valor_aportes_credito,
+
+                    COALESCE(
+                        r.cantidad_bienes_garantia,
+                        0
+                    ) AS cantidad_bienes_garantia,
+
+                    COALESCE(
+                        r.valor_garantias_credito,
+                        0
+                    ) AS valor_garantias_credito
+
+                FROM cartera.cierres_cartera_resultados r
+
+                INNER JOIN cartera.cierres_cartera_creditos f
+                    ON f.id_cierre_cartera_credito =
+                       r.id_cierre_cartera_credito
+
+                   AND f.id_cierre_cartera =
+                       r.id_cierre_cartera
+
+                WHERE r.id_cierre_cartera =
+                      :idCierreCartera
+            ),
+
+            aportes_creditos AS
+            (
+                SELECT
+                    COUNT(*) FILTER
+                    (
+                        WHERE valor_aportes_credito > 0
+                    ) AS creditos_con_aportes,
+
+                    COUNT(*) FILTER
+                    (
+                        WHERE valor_aportes_credito <= 0
+                    ) AS creditos_sin_aportes,
+
+                    COALESCE(
+                        SUM(
+                            valor_aportes_credito
+                        ),
+                        0
+                    ) AS valor_aportes_prorrateado
+
+                FROM resultados
+            ),
+
+            aportes_persona AS
+            (
+                SELECT
+                    id_datos_personal,
+
+                    MAX(
+                        saldo_aportes_fecha_corte
+                    ) AS saldo_aportes_fecha_corte
+
+                FROM resultados
+
+                GROUP BY
+                    id_datos_personal
+            ),
+
+            aportes_totales AS
+            (
+                SELECT
+                    COALESCE(
+                        SUM(
+                            saldo_aportes_fecha_corte
+                        ),
+                        0
+                    ) AS saldo_aportes_disponible
+
+                FROM aportes_persona
+            ),
+
+            garantias_creditos AS
+            (
+                SELECT
+                    COUNT(*) FILTER
+                    (
+                        WHERE cantidad_bienes_garantia > 0
+                    ) AS creditos_con_garantia,
+
+                    COUNT(*) FILTER
+                    (
+                        WHERE cantidad_bienes_garantia <= 0
+                    ) AS creditos_sin_garantia,
+
+                    COALESCE(
+                        SUM(
+                            valor_garantias_credito
+                        ),
+                        0
+                    ) AS valor_garantias_asignado
+
+                FROM resultados
+            ),
+
+            bienes_unicos AS
+            (
+                SELECT
+                    g.id_bien,
+
+                    MAX(
+                        COALESCE(
+                            g.valor_bien_fecha_corte,
+                            0
+                        )
+                    ) AS valor_bien_fecha_corte
+
+                FROM cartera.cierres_cartera_resultados_garantias g
+
+                WHERE g.id_cierre_cartera =
+                      :idCierreCartera
+
+                  AND g.id_bien IS NOT NULL
+
+                GROUP BY
+                    g.id_bien
+            ),
+
+            garantias_bienes AS
+            (
+                SELECT
+                    COUNT(*)::integer
+                        AS cantidad_bienes_garantia,
+
+                    COALESCE(
+                        SUM(
+                            valor_bien_fecha_corte
+                        ),
+                        0
+                    ) AS valor_bienes_garantia
+
+                FROM bienes_unicos
+            )
+
+            SELECT
+                COALESCE(
+                    ac.creditos_con_aportes,
+                    0
+                )::integer
+                    AS creditos_con_aportes,
+
+                COALESCE(
+                    ac.creditos_sin_aportes,
+                    0
+                )::integer
+                    AS creditos_sin_aportes,
+
+                COALESCE(
+                    at.saldo_aportes_disponible,
+                    0
+                )
+                    AS saldo_aportes_disponible,
+
+                COALESCE(
+                    ac.valor_aportes_prorrateado,
+                    0
+                )
+                    AS valor_aportes_prorrateado,
+
+                COALESCE(
+                    gc.creditos_con_garantia,
+                    0
+                )::integer
+                    AS creditos_con_garantia,
+
+                COALESCE(
+                    gc.creditos_sin_garantia,
+                    0
+                )::integer
+                    AS creditos_sin_garantia,
+
+                COALESCE(
+                    gb.cantidad_bienes_garantia,
+                    0
+                )::integer
+                    AS cantidad_bienes_garantia,
+
+                COALESCE(
+                    gb.valor_bienes_garantia,
+                    0
+                )
+                    AS valor_bienes_garantia,
+
+                COALESCE(
+                    gc.valor_garantias_asignado,
+                    0
+                )
+                    AS valor_garantias_asignado
+
+            FROM aportes_creditos ac
+
+            CROSS JOIN aportes_totales at
+
+            CROSS JOIN garantias_creditos gc
+
+            CROSS JOIN garantias_bienes gb
+            """;
+
+        MapSqlParameterSource parametros =
+                new MapSqlParameterSource()
+                        .addValue(
+                                "idCierreCartera",
+                                idCierreCartera
+                        );
+
+        return jdbc.queryForObject(
+                sql,
+                parametros,
+                (rs, rowNum) ->
+                        new ResumenAportesGarantiasDTO(
+
+                                rs.getInt(
+                                        "creditos_con_aportes"
+                                ),
+
+                                rs.getInt(
+                                        "creditos_sin_aportes"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "saldo_aportes_disponible"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "valor_aportes_prorrateado"
+                                ),
+
+                                rs.getInt(
+                                        "creditos_con_garantia"
+                                ),
+
+                                rs.getInt(
+                                        "creditos_sin_garantia"
+                                ),
+
+                                rs.getInt(
+                                        "cantidad_bienes_garantia"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "valor_bienes_garantia"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "valor_garantias_asignado"
+                                )
+                        )
+        );
+    }
+
+    // =========================================================
+    // DETALLE COMPLETO DE CÁLCULOS DEL CIERRE
+    //
+    // Fuente principal para:
+    //
+    // - Excel de revisión.
+    // - Auditoría del cierre.
+    // - Comparación fotografía vs cálculos.
+    //
+    // IMPORTANTE:
+    //
+    // - Solamente consulta información persistida.
+    // - NO recalcula.
+    // - NO modifica el cierre.
+    // - Una fila por crédito fotografiado.
+    // =========================================================
+
+    public List<DetalleCalculosCierreDTO> obtenerDetalleCalculosCierre(
+            Integer idCierreCartera
+    ) {
+
+        String sql = """
+            SELECT
+
+                -- =============================================
+                -- CIERRE
+                -- =============================================
+
+                c.id_cierre_cartera,
+                c.fecha_corte,
+
+                -- =============================================
+                -- IDENTIFICACIÓN
+                -- =============================================
+
+                f.id_cartera_credito,
+                f.id_cierre_cartera_credito,
+                r.id_cierre_cartera_resultado,
+                f.id_agencia,
+
+                f.pagare_cartera,
+
+                f.id_datos_personal,
+                f.tipo_documento,
+                f.documento,
+                f.nombres,
+                f.primer_apellido,
+                f.segundo_apellido,
+
+                TRIM(
+                    CONCAT_WS(
+                        ' ',
+                        NULLIF(TRIM(f.nombres), ''),
+                        NULLIF(TRIM(f.primer_apellido), ''),
+                        NULLIF(TRIM(f.segundo_apellido), '')
+                    )
+                ) AS nombre_completo,
+
+                -- =============================================
+                -- LÍNEA Y CLASIFICACIÓN
+                -- =============================================
+
+                f.id_linea_credito,
+                f.codigo_linea_credito,
+                f.nombre_linea_credito,
+
+                f.codigo_clasificacion_credito,
+                f.descripcion_clasificacion_credito,
+
+                f.codigo_garantia_credito,
+                f.descripcion_garantia_credito,
+                f.tipo_garantia,
+
+                f.codigo_subgarantia,
+                f.descripcion_subgarantia,
+
+                f.codigo_destino_economico,
+                f.descripcion_destino_economico,
+
+                -- =============================================
+                -- CONDICIONES FINANCIERAS
+                -- =============================================
+
+                f.tipo_modalidad_interes,
+                f.descripcion_modalidad_interes,
+                f.periodo_codigo_interes,
+                f.periodo_meses_interes,
+
+                f.amortizacion_capital,
+
+                f.codigo_tipo_cuota,
+                f.descripcion_tipo_cuota,
+
+                f.plazo,
+                f.meses_gracia_capital,
+                f.meses_gracia_interes,
+
+                f.codigo_forma_pago,
+                f.descripcion_forma_pago,
+
+                f.tasa_nominal_anual,
+                f.tasa_efectiva_anual,
+
+                -- =============================================
+                -- ORIGEN / APROBACIÓN
+                -- =============================================
+
+                f.id_empresa_libranza,
+                f.documento_empresa_libranza,
+
+                f.id_ente_aprobacion,
+                f.nombre_ente_aprobacion,
+
+                f.tipo_comprobante,
+                f.numero_comprobante,
+
+                -- =============================================
+                -- ESTADO
+                -- =============================================
+
+                f.codigo_estado_cartera,
+                f.descripcion_estado_cartera,
+
+                f.codigo_estado_juridico,
+                f.descripcion_estado_juridico,
+                f.fecha_estado_juridico,
+
+                f.codigo_modificacion_credito,
+                f.descripcion_modificacion_credito,
+                f.numero_novaciones,
+
+                -- =============================================
+                -- VALORES DEL CRÉDITO
+                -- =============================================
+
+                f.valor_inicial_credito,
+                f.valor_desembolsado,
+                f.valor_base_calculo_cuota,
+                f.valor_primera_cuota,
+                f.valor_cuota,
+
+                f.saldo_actual
+                    AS saldo_fotografia,
+
+                f.abonos_pendientes,
+
+                f.altura_cuota,
+
+                -- =============================================
+                -- FECHAS
+                -- =============================================
+
+                f.fecha_inclusion_sistema,
+                f.fecha_contable,
+                f.fecha_desembolso,
+                f.fecha_primera_cuota,
+                f.fecha_primera_cuota_capital,
+                f.fecha_primera_cuota_interes,
+                f.fecha_final,
+
+                f.ultima_fecha_capital,
+                f.ultima_fecha_interes,
+                f.ultima_fecha_mora,
+                f.ultima_fecha_seguro,
+                f.ultima_fecha_fondo,
+
+                f.proxima_fecha_capital,
+                f.proxima_fecha_interes,
+                f.proxima_fecha_seguro,
+                f.proxima_fecha_fondo,
+
+                f.intereses_pagados_hasta,
+                f.intereses_mora_hasta,
+
+                -- =============================================
+                -- EVALUACIÓN / RIESGO FOTOGRAFÍA
+                -- =============================================
+
+                f.credito_evaluado,
+                f.fecha_evaluacion,
+
+                f.edad_de_riesgo
+                    AS edad_riesgo_fotografia,
+
+                f.edad_riesgo_inicial
+                    AS edad_riesgo_inicial_fotografia,
+
+                f.edad_de_mora
+                    AS edad_mora_fotografia,
+
+                f.edad_de_pe
+                    AS edad_pe_fotografia,
+
+                f.edad_de_homologacion
+                    AS edad_homologacion_fotografia,
+
+                f.edad_contable
+                    AS edad_contable_fotografia,
+
+                -- =============================================
+                -- REESTRUCTURACIÓN FOTOGRAFÍA
+                -- =============================================
+
+                f.credito_reestructurado
+                    AS credito_reestructurado_fotografia,
+
+                f.fecha_reestructuracion,
+
+                f.edad_reestructuracion_inicial
+                    AS edad_reestructuracion_inicial_fotografia,
+
+                f.edad_reestructurado
+                    AS edad_reestructurado_fotografia,
+
+                -- =============================================
+                -- CÁLCULOS DEL CIERRE
+                -- =============================================
+
+                r.es_una_sola_cuota,
+                r.es_reestructurado,
+
+                r.dias_mora,
+                r.dias_diferencia,
+
+                r.edad_riesgo_inicial
+                    AS edad_riesgo_inicial_calculada,
+
+                r.edad_de_mora
+                    AS edad_mora_calculada,
+
+                r.edad_de_riesgo
+                    AS edad_riesgo_calculada,
+
+                r.edad_reestructuracion_inicial
+                    AS edad_reestructuracion_inicial_calculada,
+
+                r.edad_reestructurado
+                    AS edad_reestructurado_calculada,
+
+                -- =============================================
+                -- APORTES
+                -- =============================================
+
+                r.cantidad_creditos_asociado,
+                r.saldo_total_creditos_asociado,
+                r.saldo_aportes_fecha_corte,
+                r.porcentaje_aportes_credito,
+                r.valor_aportes_credito,
+
+                -- =============================================
+                -- GARANTÍAS
+                -- =============================================
+
+                r.cantidad_bienes_garantia,
+                r.valor_garantias_total,
+                r.porcentaje_garantias_credito,
+                r.valor_garantias_credito,
+
+                -- =============================================
+                -- OTROS VALORES
+                -- =============================================
+
+                r.saldo_intereses_causados,
+                r.valor_intereses_causados_mes,
+
+                r.saldo_intereses_contingentes,
+                r.valor_intereses_contingentes_mes,
+
+                r.valor_costas_judiciales,
+
+                r.saldo_seguros,
+                r.valor_seguros_mes,
+
+                r.saldo_alivios,
+                r.valor_alivios_mes,
+
+                r.valor_fondos_garantias,
+                r.valor_otros_conceptos,
+
+                -- =============================================
+                -- RESULTADOS POSTERIORES
+                -- =============================================
+
+                r.edad_de_pe
+                    AS edad_pe_resultado,
+
+                r.edad_de_homologacion
+                    AS edad_homologacion_resultado,
+
+                r.edad_contable
+                    AS edad_contable_resultado,
+
+                r.vea,
+                r.pi,
+                r.pdi,
+                r.perdida_esperada,
+
+                r.deterioro_capital,
+                r.deterioro_intereses,
+                r.deterioro_otros,
+
+                r.codigo_metodo_calculo,
+
+                -- =============================================
+                -- CONTROL
+                -- =============================================
+
+                r.fecha_calculo
+
+            FROM cartera.cierres_cartera_creditos f
+
+            INNER JOIN cartera.cierres_cartera c
+                ON c.id_cierre_cartera =
+                   f.id_cierre_cartera
+
+            LEFT JOIN cartera.cierres_cartera_resultados r
+                ON r.id_cierre_cartera =
+                   f.id_cierre_cartera
+
+                AND r.id_cierre_cartera_credito =
+                    f.id_cierre_cartera_credito
+
+            WHERE f.id_cierre_cartera = :idCierreCartera
+                 AND COALESCE(f.saldo_actual, 0) > 0
+
+            ORDER BY
+                f.codigo_clasificacion_credito,
+                f.documento,
+                f.pagare_cartera,
+                f.id_cartera_credito
+            """;
+
+        MapSqlParameterSource parametros =
+                new MapSqlParameterSource()
+                        .addValue(
+                                "idCierreCartera",
+                                idCierreCartera
+                        );
+
+        return jdbc.query(
+                sql,
+                parametros,
+                (rs, rowNum) ->
+                        new DetalleCalculosCierreDTO(
+
+                                // =============================
+                                // CIERRE
+                                // =============================
+
+                                rs.getObject(
+                                    "id_cierre_cartera",
+                                    Integer.class
+                                ),
+
+                                rs.getObject(
+                                        "fecha_corte",
+                                        LocalDate.class
+                                ),
+
+                                // =============================
+                                // IDENTIFICACIÓN
+                                // =============================
+
+                                rs.getInt(
+                                        "id_cartera_credito"
+                                ),
+
+                                rs.getInt(
+                                        "id_cierre_cartera_credito"
+                                ),
+
+                                rs.getInt(
+                                        "id_cierre_cartera_resultado"
+                                ),
+
+                                rs.getInt(
+                                        "id_agencia"
+                                ),
+
+                                rs.getString(
+                                        "pagare_cartera"
+                                ),
+
+                                rs.getObject(
+                                        "id_datos_personal",
+                                        Integer.class
+                                ),
+
+                                rs.getString(
+                                        "tipo_documento"
+                                ),
+
+                                rs.getString(
+                                        "documento"
+                                ),
+
+                                rs.getString(
+                                        "nombres"
+                                ),
+
+                                rs.getString(
+                                        "primer_apellido"
+                                ),
+
+                                rs.getString(
+                                        "segundo_apellido"
+                                ),
+
+                                rs.getString(
+                                        "nombre_completo"
+                                ),
+
+                                // =============================
+                                // LÍNEA Y CLASIFICACIÓN
+                                // =============================
+
+                                rs.getObject(
+                                        "id_linea_credito",
+                                        Integer.class
+                                ),
+
+                                rs.getString(
+                                        "codigo_linea_credito"
+                                ),
+
+                                rs.getString(
+                                        "nombre_linea_credito"
+                                ),
+
+                                rs.getString(
+                                        "codigo_clasificacion_credito"
+                                ),
+
+                                rs.getString(
+                                        "descripcion_clasificacion_credito"
+                                ),
+
+                                rs.getString(
+                                        "codigo_garantia_credito"
+                                ),
+
+                                rs.getString(
+                                        "descripcion_garantia_credito"
+                                ),
+
+                                rs.getString(
+                                        "tipo_garantia"
+                                ),
+
+                                rs.getString(
+                                        "codigo_subgarantia"
+                                ),
+
+                                rs.getString(
+                                        "descripcion_subgarantia"
+                                ),
+
+                                rs.getString(
+                                        "codigo_destino_economico"
+                                ),
+
+                                rs.getString(
+                                        "descripcion_destino_economico"
+                                ),
+
+                                // =============================
+                                // CONDICIONES FINANCIERAS
+                                // =============================
+
+                                rs.getString(
+                                        "tipo_modalidad_interes"
+                                ),
+
+                                rs.getString(
+                                        "descripcion_modalidad_interes"
+                                ),
+
+                                rs.getString(
+                                        "periodo_codigo_interes"
+                                ),
+
+                                rs.getObject(
+                                        "periodo_meses_interes",
+                                        Integer.class
+                                ),
+
+                                rs.getObject(
+                                        "amortizacion_capital",
+                                        Integer.class
+                                ),
+
+                                rs.getString(
+                                        "codigo_tipo_cuota"
+                                ),
+
+                                rs.getString(
+                                        "descripcion_tipo_cuota"
+                                ),
+
+                                rs.getObject(
+                                        "plazo",
+                                        Integer.class
+                                ),
+
+                                rs.getObject(
+                                        "meses_gracia_capital",
+                                        Integer.class
+                                ),
+
+                                rs.getObject(
+                                        "meses_gracia_interes",
+                                        Integer.class
+                                ),
+
+                                rs.getString(
+                                        "codigo_forma_pago"
+                                ),
+
+                                rs.getString(
+                                        "descripcion_forma_pago"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "tasa_nominal_anual"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "tasa_efectiva_anual"
+                                ),
+
+                                // =============================
+                                // ORIGEN / APROBACIÓN
+                                // =============================
+
+                                rs.getObject(
+                                        "id_empresa_libranza",
+                                        Integer.class
+                                ),
+
+                                rs.getString(
+                                        "documento_empresa_libranza"
+                                ),
+
+                                rs.getObject(
+                                        "id_ente_aprobacion",
+                                        Integer.class
+                                ),
+
+                                rs.getString(
+                                        "nombre_ente_aprobacion"
+                                ),
+
+                                rs.getString(
+                                        "tipo_comprobante"
+                                ),
+
+                                rs.getString(
+                                        "numero_comprobante"
+                                ),
+
+                                // =============================
+                                // ESTADO
+                                // =============================
+
+                                rs.getString(
+                                        "codigo_estado_cartera"
+                                ),
+
+                                rs.getString(
+                                        "descripcion_estado_cartera"
+                                ),
+
+                                rs.getString(
+                                        "codigo_estado_juridico"
+                                ),
+
+                                rs.getString(
+                                        "descripcion_estado_juridico"
+                                ),
+
+                                rs.getObject(
+                                        "fecha_estado_juridico",
+                                        LocalDate.class
+                                ),
+
+                                rs.getString(
+                                        "codigo_modificacion_credito"
+                                ),
+
+                                rs.getString(
+                                        "descripcion_modificacion_credito"
+                                ),
+
+                                rs.getObject(
+                                        "numero_novaciones",
+                                        Integer.class
+                                ),
+
+                                // =============================
+                                // VALORES
+                                // =============================
+
+                                rs.getBigDecimal(
+                                        "valor_inicial_credito"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "valor_desembolsado"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "valor_base_calculo_cuota"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "valor_primera_cuota"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "valor_cuota"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "saldo_fotografia"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "abonos_pendientes"
+                                ),
+
+                                rs.getObject(
+                                        "altura_cuota",
+                                        Integer.class
+                                ),
+
+                                // =============================
+                                // FECHAS
+                                // =============================
+
+                                rs.getObject(
+                                        "fecha_inclusion_sistema",
+                                        LocalDate.class
+                                ),
+
+                                rs.getObject(
+                                        "fecha_contable",
+                                        LocalDate.class
+                                ),
+
+                                rs.getObject(
+                                        "fecha_desembolso",
+                                        LocalDate.class
+                                ),
+
+                                rs.getObject(
+                                        "fecha_primera_cuota",
+                                        LocalDate.class
+                                ),
+
+                                rs.getObject(
+                                        "fecha_primera_cuota_capital",
+                                        LocalDate.class
+                                ),
+
+                                rs.getObject(
+                                        "fecha_primera_cuota_interes",
+                                        LocalDate.class
+                                ),
+
+                                rs.getObject(
+                                        "fecha_final",
+                                        LocalDate.class
+                                ),
+
+                                rs.getObject(
+                                        "ultima_fecha_capital",
+                                        LocalDate.class
+                                ),
+
+                                rs.getObject(
+                                        "ultima_fecha_interes",
+                                        LocalDate.class
+                                ),
+
+                                rs.getObject(
+                                        "ultima_fecha_mora",
+                                        LocalDate.class
+                                ),
+
+                                rs.getObject(
+                                        "ultima_fecha_seguro",
+                                        LocalDate.class
+                                ),
+
+                                rs.getObject(
+                                        "ultima_fecha_fondo",
+                                        LocalDate.class
+                                ),
+
+                                rs.getObject(
+                                        "proxima_fecha_capital",
+                                        LocalDate.class
+                                ),
+
+                                rs.getObject(
+                                        "proxima_fecha_interes",
+                                        LocalDate.class
+                                ),
+
+                                rs.getObject(
+                                        "proxima_fecha_seguro",
+                                        LocalDate.class
+                                ),
+
+                                rs.getObject(
+                                        "proxima_fecha_fondo",
+                                        LocalDate.class
+                                ),
+
+                                rs.getObject(
+                                        "intereses_pagados_hasta",
+                                        LocalDate.class
+                                ),
+
+                                rs.getObject(
+                                        "intereses_mora_hasta",
+                                        LocalDate.class
+                                ),
+
+                                // =============================
+                                // EVALUACIÓN / FOTO
+                                // =============================
+
+                                rs.getObject(
+                                        "credito_evaluado",
+                                        Boolean.class
+                                ),
+
+                                rs.getObject(
+                                        "fecha_evaluacion",
+                                        LocalDate.class
+                                ),
+
+                                rs.getString(
+                                        "edad_riesgo_fotografia"
+                                ),
+
+                                rs.getString(
+                                        "edad_riesgo_inicial_fotografia"
+                                ),
+
+                                rs.getString(
+                                        "edad_mora_fotografia"
+                                ),
+
+                                rs.getString(
+                                        "edad_pe_fotografia"
+                                ),
+
+                                rs.getString(
+                                        "edad_homologacion_fotografia"
+                                ),
+
+                                rs.getString(
+                                        "edad_contable_fotografia"
+                                ),
+
+                                // =============================
+                                // REESTRUCTURACIÓN FOTO
+                                // =============================
+
+                                rs.getObject(
+                                        "credito_reestructurado_fotografia",
+                                        Boolean.class
+                                ),
+
+                                rs.getObject(
+                                        "fecha_reestructuracion",
+                                        LocalDate.class
+                                ),
+
+                                rs.getString(
+                                        "edad_reestructuracion_inicial_fotografia"
+                                ),
+
+                                rs.getString(
+                                        "edad_reestructurado_fotografia"
+                                ),
+
+                                // =============================
+                                // CÁLCULOS
+                                // =============================
+
+                                rs.getObject(
+                                        "es_una_sola_cuota",
+                                        Boolean.class
+                                ),
+
+                                rs.getObject(
+                                        "es_reestructurado",
+                                        Boolean.class
+                                ),
+
+                                rs.getObject(
+                                        "dias_mora",
+                                        Integer.class
+                                ),
+
+                                rs.getObject(
+                                        "dias_diferencia",
+                                        Integer.class
+                                ),
+
+                                rs.getString(
+                                        "edad_riesgo_inicial_calculada"
+                                ),
+
+                                rs.getString(
+                                        "edad_mora_calculada"
+                                ),
+
+                                rs.getString(
+                                        "edad_riesgo_calculada"
+                                ),
+
+                                rs.getString(
+                                        "edad_reestructuracion_inicial_calculada"
+                                ),
+
+                                rs.getString(
+                                        "edad_reestructurado_calculada"
+                                ),
+
+                                // =============================
+                                // APORTES
+                                // =============================
+
+                                rs.getObject(
+                                        "cantidad_creditos_asociado",
+                                        Integer.class
+                                ),
+
+                                rs.getBigDecimal(
+                                        "saldo_total_creditos_asociado"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "saldo_aportes_fecha_corte"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "porcentaje_aportes_credito"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "valor_aportes_credito"
+                                ),
+
+                                // =============================
+                                // GARANTÍAS
+                                // =============================
+
+                                rs.getObject(
+                                        "cantidad_bienes_garantia",
+                                        Integer.class
+                                ),
+
+                                rs.getBigDecimal(
+                                        "valor_garantias_total"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "porcentaje_garantias_credito"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "valor_garantias_credito"
+                                ),
+
+                                // =============================
+                                // OTROS VALORES
+                                // =============================
+
+                                rs.getBigDecimal(
+                                        "saldo_intereses_causados"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "valor_intereses_causados_mes"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "saldo_intereses_contingentes"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "valor_intereses_contingentes_mes"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "valor_costas_judiciales"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "saldo_seguros"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "valor_seguros_mes"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "saldo_alivios"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "valor_alivios_mes"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "valor_fondos_garantias"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "valor_otros_conceptos"
+                                ),
+
+                                // =============================
+                                // RESULTADOS POSTERIORES
+                                // =============================
+
+                                rs.getString(
+                                        "edad_pe_resultado"
+                                ),
+
+                                rs.getString(
+                                        "edad_homologacion_resultado"
+                                ),
+
+                                rs.getString(
+                                        "edad_contable_resultado"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "vea"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "pi"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "pdi"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "perdida_esperada"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "deterioro_capital"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "deterioro_intereses"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "deterioro_otros"
+                                ),
+
+                                rs.getString(
+                                        "codigo_metodo_calculo"
+                                ),
+
+                                // =============================
+                                // CONTROL
+                                // =============================
+
+                                rs.getObject(
+                                        "fecha_calculo",
+                                        LocalDateTime.class
+                                )
+                        )
         );
     }
 

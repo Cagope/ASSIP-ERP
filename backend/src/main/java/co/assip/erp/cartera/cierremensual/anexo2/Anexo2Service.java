@@ -7,14 +7,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import co.assip.erp.cartera.cierremensual.anexo2.dto.DetalleAnexo2DTO;
+import co.assip.erp.cartera.cierremensual.anexo2.dto.MoraAnexo2DTO;
+import co.assip.erp.cartera.cierremensual.anexo2.dto.ResumenAnexo2DTO;
+import co.assip.erp.cartera.cierremensual.anexo2.dto.TrabajoAnexo2DTO;
+
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class Anexo2Service {
 
     private final Anexo2Repository repository;
+    private final Anexo2ConsultaRepository consultaRepository;
     private final CierreMensualRepository cierreRepository;
     private final UsuarioSesionService usuarioSesionService;
-
 
     // =========================================================
     // PREPARAR / EJECUTAR ANEXO 2
@@ -433,6 +440,155 @@ public class Anexo2Service {
     // - Anexo 1
     //
     // =========================================================
+
+    // =========================================================
+// CONSULTAS ANEXO 2
+// =========================================================
+
+    @Transactional(readOnly = true)
+    public List<Integer> obtenerModelosDelCierre(
+            Integer idCierreCartera
+    ) {
+
+        validarIdCierre(
+                idCierreCartera
+        );
+
+        validarCierreCerrado(
+                idCierreCartera
+        );
+
+        return consultaRepository.obtenerModelosDelCierre(
+                idCierreCartera
+        );
+    }
+
+
+// =========================================================
+// HOJA: RESULTADO
+// =========================================================
+
+    @Transactional(readOnly = true)
+    public List<DetalleAnexo2DTO> obtenerDetalle(
+            Integer idCierreCartera,
+            Integer idModeloPe
+    ) {
+
+        validarParametrosConsulta(
+                idCierreCartera,
+                idModeloPe
+        );
+
+        validarCierreCerrado(
+                idCierreCartera
+        );
+
+        return consultaRepository.obtenerDetalle(
+                idCierreCartera,
+                idModeloPe
+        );
+    }
+
+
+// =========================================================
+// HOJA: HOJA_TRABAJO
+// =========================================================
+
+    @Transactional(readOnly = true)
+    public List<TrabajoAnexo2DTO> obtenerTrabajo(
+            Integer idCierreCartera,
+            Integer idModeloPe
+    ) {
+
+        validarParametrosConsulta(
+                idCierreCartera,
+                idModeloPe
+        );
+
+        validarCierreCerrado(
+                idCierreCartera
+        );
+
+        return consultaRepository.obtenerTrabajo(
+                idCierreCartera,
+                idModeloPe
+        );
+    }
+
+
+// =========================================================
+// HOJA: MORA
+// =========================================================
+
+    @Transactional(readOnly = true)
+    public List<MoraAnexo2DTO> obtenerMora(
+            Integer idCierreCartera,
+            Integer idModeloPe
+    ) {
+
+        validarParametrosConsulta(
+                idCierreCartera,
+                idModeloPe
+        );
+
+        validarCierreCerrado(
+                idCierreCartera
+        );
+
+        return consultaRepository.obtenerMora(
+                idCierreCartera,
+                idModeloPe
+        );
+    }
+
+
+// =========================================================
+// HOJA: RESUMEN
+// =========================================================
+
+    @Transactional(readOnly = true)
+    public List<ResumenAnexo2DTO> obtenerResumen(
+            Integer idCierreCartera,
+            Integer idModeloPe
+    ) {
+
+        validarParametrosConsulta(
+                idCierreCartera,
+                idModeloPe
+        );
+
+        validarCierreCerrado(
+                idCierreCartera
+        );
+
+        return consultaRepository.obtenerResumen(
+                idCierreCartera,
+                idModeloPe
+        );
+    }
+
+
+    // =========================================================
+    // VALIDAR PARÁMETROS DE CONSULTA
+    // =========================================================
+
+    private void validarParametrosConsulta(
+            Integer idCierreCartera,
+            Integer idModeloPe
+    ) {
+
+        validarIdCierre(
+                idCierreCartera
+        );
+
+        if (idModeloPe == null
+                || idModeloPe <= 0) {
+
+            throw new IllegalArgumentException(
+                    "El modelo PE es obligatorio."
+            );
+        }
+    }
 
     private void validarCierreCerrado(
             Integer idCierreCartera

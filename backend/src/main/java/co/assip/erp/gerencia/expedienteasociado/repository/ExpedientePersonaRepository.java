@@ -10,9 +10,10 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 import co.assip.erp.gerencia.expedienteasociado.dto.ExpedienteContactoDTO;
+import co.assip.erp.gerencia.expedienteasociado.dto.ExpedientePersonaBusquedaDTO;
 
 import java.util.Optional;
-
+import java.util.List;
 /**
  * Repositorio de consulta del dominio Persona del
  * Expediente Integral del Asociado.
@@ -32,6 +33,10 @@ public class ExpedientePersonaRepository {
     ) {
         this.jdbc = jdbc;
     }
+
+    private static final BeanPropertyRowMapper<ExpedientePersonaBusquedaDTO>
+            PERSONA_BUSQUEDA_MAPPER =
+            mapper(ExpedientePersonaBusquedaDTO.class);
 
     // =========================================================
     // RowMapper
@@ -264,7 +269,7 @@ public class ExpedientePersonaRepository {
                      count(*)::integer AS numero_bienes,
             
                      COALESCE(
-                         sum(valor_neto),
+                         sum(valor_comercial),
                          0
                      )::numeric AS valor_bienes
             
@@ -278,9 +283,9 @@ public class ExpedientePersonaRepository {
                              i.id_datos_personal,
                              i.id_bien,
                              COALESCE(
-                                 i.valor_neto_asociado,
+                                 i.valor_comercial,
                                  0
-                             ) AS valor_neto
+                             ) AS valor_comercial
             
                          FROM reporting.vw_hoja_vida_bienes_inmuebles_total i
             
@@ -304,9 +309,9 @@ public class ExpedientePersonaRepository {
                              v.id_datos_personal,
                              v.id_bien,
                              COALESCE(
-                                 v.valor_neto_asociado,
+                                 v.valor_comercial,
                                  0
-                             ) AS valor_neto
+                             ) AS valor_comercial
             
                          FROM reporting.vw_hoja_vida_bienes_vehiculos_total v
             
@@ -329,9 +334,9 @@ public class ExpedientePersonaRepository {
                              m.id_datos_personal,
                              m.id_bien,
                              COALESCE(
-                                 m.valor_neto_asociado,
+                                 m.valor_comercial,
                                  0
-                             ) AS valor_neto
+                             ) AS valor_comercial
             
                          FROM reporting.vw_hoja_vida_bienes_maquinaria_total m
             
@@ -354,9 +359,9 @@ public class ExpedientePersonaRepository {
                              n.id_datos_personal,
                              n.id_bien,
                              COALESCE(
-                                 n.valor_neto_asociado,
+                                 n.valor_comercial,
                                  0
-                             ) AS valor_neto
+                             ) AS valor_comercial
             
                          FROM reporting.vw_hoja_vida_bienes_inversiones_total n
             
@@ -370,7 +375,7 @@ public class ExpedientePersonaRepository {
                      )
             
                  ) x
-            )
+             )
 
             SELECT
                 p.id_datos_personal,
@@ -988,6 +993,59 @@ public class ExpedientePersonaRepository {
         LIMIT 1
         """;
 
+    public List<ExpedientePersonaBusquedaDTO> buscarPersonas(
+            String documento,
+            String nombres,
+            String primerApellido,
+            String segundoApellido
+    ) {
+
+        String documentoFiltro =
+                documento == null ? "" : documento.trim();
+
+        String nombresFiltro =
+                nombres == null ? "" : nombres.trim();
+
+        String primerApellidoFiltro =
+                primerApellido == null ? "" : primerApellido.trim();
+
+        String segundoApellidoFiltro =
+                segundoApellido == null ? "" : segundoApellido.trim();
+
+        if (documentoFiltro.isEmpty()
+                && nombresFiltro.isEmpty()
+                && primerApellidoFiltro.isEmpty()
+                && segundoApellidoFiltro.isEmpty()) {
+
+            return List.of();
+        }
+
+        MapSqlParameterSource parametros =
+                new MapSqlParameterSource()
+                        .addValue(
+                                "documento",
+                                documentoFiltro
+                        )
+                        .addValue(
+                                "nombres",
+                                nombresFiltro
+                        )
+                        .addValue(
+                                "primerApellido",
+                                primerApellidoFiltro
+                        )
+                        .addValue(
+                                "segundoApellido",
+                                segundoApellidoFiltro
+                        );
+
+        return jdbc.query(
+                SQL_BUSCAR_PERSONAS,
+                parametros,
+                PERSONA_BUSQUEDA_MAPPER
+        );
+    }
+
     // =========================================================
     // Consultas públicas
     // =========================================================
@@ -1095,4 +1153,69 @@ public class ExpedientePersonaRepository {
             );
         }
     }
+
+    private static final String SQL_BUSCAR_PERSONAS = """
+        SELECT DISTINCT ON (h.id_datos_personal)
+
+            h.id_datos_personal,
+            h.tipo_documento,
+            h.nombre_tipo_documento,
+            h.documento,
+            h.nombres,
+            h.primer_apellido,
+            h.segundo_apellido,
+
+            trim(
+                concat_ws(
+                    ' ',
+                    h.nombres,
+                    h.primer_apellido,
+                    h.segundo_apellido
+                )
+            ) AS nombre_completo
+
+        FROM reporting.vw_hoja_vida_general_total h
+
+        WHERE
+            (
+                NULLIF(trim(:documento), '') IS NULL
+                OR h.documento ILIKE '%' || trim(:documento) || '%'
+            )
+
+            AND
+            (
+                NULLIF(trim(:nombres), '') IS NULL
+                OR h.nombres ILIKE '%' || trim(:nombres) || '%'
+            )
+
+            AND
+            (
+                NULLIF(trim(:primerApellido), '') IS NULL
+                OR h.primer_apellido ILIKE '%' || trim(:primerApellido) || '%'
+            )
+
+            AND
+            (
+                NULLIF(trim(:segundoApellido), '') IS NULL
+                OR h.segundo_apellido ILIKE '%' || trim(:segundoApellido) || '%'
+            )
+
+            AND
+            (
+                NULLIF(trim(:documento), '') IS NOT NULL
+                OR NULLIF(trim(:nombres), '') IS NOT NULL
+                OR NULLIF(trim(:primerApellido), '') IS NOT NULL
+                OR NULLIF(trim(:segundoApellido), '') IS NOT NULL
+            )
+
+        ORDER BY
+            h.id_datos_personal,
+            h.primer_apellido,
+            h.segundo_apellido,
+            h.nombres
+
+        LIMIT 50
+        """;
+
+
 }

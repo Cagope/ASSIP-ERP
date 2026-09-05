@@ -80,6 +80,122 @@
   margin: 0;
 }
 
+/* ========================================================= */
+/* EXPEDIENTES RECIENTES                                     */
+/* ========================================================= */
+
+.recientes {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.recientes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  margin-bottom: 0.65rem;
+}
+
+.recientes-titulo {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.btn-link {
+  padding: 0;
+
+  font-size: 0.8rem;
+  color: #047857;
+
+  background: transparent;
+  border: 0;
+
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.recientes-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.reciente-item {
+  display: inline-flex;
+  align-items: center;
+
+  overflow: hidden;
+
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+
+.reciente-documento {
+  padding: 0.4rem 0.65rem;
+
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1f2937;
+
+  background: transparent;
+  border: 0;
+
+  cursor: pointer;
+
+  &:hover {
+    background: #f3f4f6;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    color: #9ca3af;
+  }
+}
+
+.reciente-eliminar {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 1rem;
+  line-height: 1;
+  color: #6b7280;
+
+  background: transparent;
+  border: 0;
+  border-left: 1px solid #d1d5db;
+
+  cursor: pointer;
+
+  &:hover {
+    color: #991b1b;
+    background: #fef2f2;
+  }
+}
+
+.empty--inicial {
+  margin-top: 0.5rem;
+
+  background: #f9fafb;
+  border: 1px dashed #d1d5db;
+  border-radius: 8px;
+}
+
 
 /* ========================================================= */
 /* TABLA                                                     */

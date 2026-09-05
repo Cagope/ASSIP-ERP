@@ -190,8 +190,7 @@ public class ProcesamientoCierreService {
 
         Anexo1Service.ResultadoAnexo1 anexo1 =
                 anexo1Service.procesarAnexo1(
-                        idCierreCartera,
-                        idUsuario
+                        idCierreCartera
                 );
 
 

@@ -32,6 +32,7 @@ import {
   CuadreCierreComponent
 } from './cuadre/cuadre-cierre.component';
 
+
 // =========================================================
 // COMPONENTE
 // =========================================================
@@ -91,9 +92,21 @@ export class CierreMensualCarteraComponent
 
   regenerando = false;
 
+  cerrandoFotografia = false;
+
   error = '';
 
   mensaje = '';
+
+
+  // =========================================================
+  // SECCIÓN ACTIVA DEL PROCESO DE CIERRE
+  // =========================================================
+
+  seccionCierreActiva:
+    'procesamiento'
+    | 'validacion'
+    | 'cuadre' = 'procesamiento';
 
 
   // =========================================================
@@ -115,6 +128,7 @@ export class CierreMensualCarteraComponent
     this.cargarCierres();
 
   }
+
 
   // =========================================================
   // CARGAR HISTÓRICO
@@ -141,9 +155,6 @@ export class CierreMensualCarteraComponent
             Array.isArray(data)
               ? data
               : [];
-
-          // Si hay un cierre seleccionado,
-          // refrescamos su referencia dentro del histórico.
 
           if (this.cierreSeleccionado) {
 
@@ -207,6 +218,8 @@ export class CierreMensualCarteraComponent
       this.ejecutando
       ||
       this.regenerando
+      ||
+      this.cerrandoFotografia
     ) {
       return;
     }
@@ -285,8 +298,7 @@ export class CierreMensualCarteraComponent
     if (!this.puedeRegenerar(cierreProceso)) {
 
       this.error =
-        'La fotografía solamente puede regenerarse mientras '
-        + 'el cierre se encuentre En proceso.';
+        'La fotografía solamente puede regenerarse mientras no se encuentre en firme.';
 
       return;
 
@@ -296,6 +308,8 @@ export class CierreMensualCarteraComponent
       this.ejecutando
       ||
       this.regenerando
+      ||
+      this.cerrandoFotografia
     ) {
       return;
     }
@@ -316,6 +330,11 @@ export class CierreMensualCarteraComponent
     }
 
     this.regenerando = true;
+
+    this.mensaje =
+      `Regenerando fotografía del cierre ` +
+      `${this.formatearFecha(cierreProceso.fechaCorte)}. ` +
+      `Este proceso puede tardar unos segundos...`;
 
     this.api
       .regenerar(
@@ -354,10 +373,127 @@ export class CierreMensualCarteraComponent
             err
           );
 
+          this.mensaje = '';
+
           this.error =
             this.obtenerMensajeError(
               err,
               'No fue posible regenerar la fotografía de cartera.'
+            );
+
+        }
+
+      });
+
+  }
+
+
+  // =========================================================
+  // CERRAR FOTOGRAFÍA EN FIRME
+  // =========================================================
+
+  cerrarFotografia(
+    cierre?: CierreMensualCartera | null
+  ): void {
+
+    this.limpiarMensajes();
+
+    const cierreProceso =
+      cierre
+      ?? this.cierreSeleccionado
+      ?? this.obtenerCierreFecha();
+
+    if (!cierreProceso) {
+
+      this.error =
+        'Debe seleccionar un cierre.';
+
+      return;
+
+    }
+
+    const estado =
+      (cierreProceso.estadoFotografia ?? '')
+        .trim()
+        .toUpperCase();
+
+    if (estado === 'C') {
+
+      this.error =
+        'La fotografía ya se encuentra en firme.';
+
+      return;
+
+    }
+
+    if (estado !== 'E') {
+
+      this.error =
+        'Debe generar la fotografía antes de dejarla en firme.';
+
+      return;
+
+    }
+
+    if (
+      this.ejecutando
+      ||
+      this.regenerando
+      ||
+      this.cerrandoFotografia
+    ) {
+      return;
+    }
+
+    const confirmar =
+      window.confirm(
+        'La fotografía quedará cerrada en firme y ya no podrá regenerarse.\n\n'
+        + '¿Desea continuar?'
+      );
+
+    if (!confirmar) {
+      return;
+    }
+
+    this.cerrandoFotografia = true;
+
+    this.api
+      .cerrarFotografia(
+        cierreProceso.idCierreCartera
+      )
+      .pipe(
+        finalize(() => {
+          this.cerrandoFotografia = false;
+        })
+      )
+      .subscribe({
+
+        next: (actualizado) => {
+
+          this.cierreSeleccionado =
+            actualizado;
+
+          this.fechaCorte =
+            actualizado.fechaCorte;
+
+          this.mensaje =
+            'La fotografía quedó cerrada en firme correctamente.';
+
+          this.cargarCierres();
+
+        },
+
+        error: (err) => {
+
+          console.error(
+            'Error cerrando fotografía de cartera:',
+            err
+          );
+
+          this.error =
+            this.obtenerMensajeError(
+              err,
+              'No fue posible cerrar la fotografía en firme.'
             );
 
         }
@@ -379,10 +515,28 @@ export class CierreMensualCarteraComponent
       return false;
     }
 
-    return (
-      (cierre.estadoCierre ?? '')
+    const estado =
+      (cierre.estadoFotografia ?? '')
         .trim()
-        .toUpperCase() === 'P'
+        .toUpperCase();
+
+    return estado === 'P' || estado === 'E';
+
+  }
+
+
+  // =========================================================
+  // VALIDAR SI LA FOTOGRAFÍA ESTÁ EN FIRME
+  // =========================================================
+
+  fotografiaEnFirme(
+    cierre: CierreMensualCartera | null | undefined
+  ): boolean {
+
+    return (
+      (cierre?.estadoFotografia ?? '')
+        .trim()
+        .toUpperCase() === 'C'
     );
 
   }
@@ -430,6 +584,8 @@ export class CierreMensualCarteraComponent
       this.ejecutando
       ||
       this.regenerando
+      ||
+      this.cerrandoFotografia
     ) {
       return;
     }
@@ -483,7 +639,7 @@ export class CierreMensualCarteraComponent
 
 
   // =========================================================
-  // TEXTO DEL ESTADO
+  // TEXTO DEL ESTADO GENERAL
   // =========================================================
 
   descripcionEstado(
@@ -646,6 +802,73 @@ export class CierreMensualCarteraComponent
 
 
   // =========================================================
+  // NOMBRE DEL MES DEL CIERRE
+  // =========================================================
+
+  nombreMesCierre(
+    fecha: string | null | undefined
+  ): string {
+
+    if (!fecha) {
+      return '';
+    }
+
+    const partes =
+      fecha.substring(0, 10).split('-');
+
+    if (partes.length !== 3) {
+      return '';
+    }
+
+    const anio =
+      Number(partes[0]);
+
+    const mes =
+      Number(partes[1]);
+
+    const meses = [
+      '',
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre'
+    ];
+
+    if (mes < 1 || mes > 12) {
+      return '';
+    }
+
+    return `${meses[mes]} de ${anio}`;
+
+  }
+
+
+  // =========================================================
+  // CAMBIAR SECCIÓN DEL PROCESO DE CIERRE
+  // =========================================================
+
+  cambiarSeccionCierre(
+    seccion:
+      'procesamiento'
+      | 'validacion'
+      | 'cuadre'
+  ): void {
+
+    this.seccionCierreActiva =
+      seccion;
+
+  }
+
+
+  // =========================================================
   // LIMPIAR MENSAJES
   // =========================================================
 
@@ -699,70 +922,6 @@ export class CierreMensualCarteraComponent
 
     return mensajeDefecto;
 
-  }
-
-  nombreMesCierre(
-    fecha: string | null | undefined
-  ): string {
-
-    if (!fecha) {
-      return '';
-    }
-
-    const partes =
-      fecha.substring(0, 10).split('-');
-
-    if (partes.length !== 3) {
-      return '';
-    }
-
-    const anio = Number(partes[0]);
-    const mes = Number(partes[1]);
-
-    const meses = [
-      '',
-      'Enero',
-      'Febrero',
-      'Marzo',
-      'Abril',
-      'Mayo',
-      'Junio',
-      'Julio',
-      'Agosto',
-      'Septiembre',
-      'Octubre',
-      'Noviembre',
-      'Diciembre'
-    ];
-
-    if (mes < 1 || mes > 12) {
-      return '';
-    }
-
-    return `${meses[mes]} de ${anio}`;
-  }
-
-  // =========================================================
-  // SECCIÓN ACTIVA DEL PROCESO DE CIERRE
-  // =========================================================
-
-  seccionCierreActiva:
-    'procesamiento'
-    | 'validacion'
-    | 'cuadre' = 'procesamiento';
-
-  // =========================================================
-  // CAMBIAR SECCIÓN DEL PROCESO DE CIERRE
-  // =========================================================
-
-  cambiarSeccionCierre(
-    seccion:
-      'procesamiento'
-      | 'validacion'
-      | 'cuadre'
-  ): void {
-
-    this.seccionCierreActiva = seccion;
   }
 
 }

@@ -1,0 +1,543 @@
+<div class="roll-forward">
+
+  <app-header-actions
+    titulo="Roll Forward de Cartera"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="true"
+    (exportar)="exportarExcel()">
+  </app-header-actions>
+
+  <div class="encabezado">
+    <div>
+      <h2>Análisis de evolución de cartera</h2>
+      <p>
+        Conciliación entre cierres consecutivos: entradas, permanencias,
+        reducciones y salidas, con detalle auditable por crédito.
+      </p>
+    </div>
+
+    <div class="encabezado">
+
+      <div class="encabezado__info">
+        <h2>Evolución y conciliación de cartera</h2>
+
+        <p>
+          Analiza los movimientos entre cierres consecutivos,
+          identificando entradas, reducciones, permanencias,
+          prepagos y cancelaciones.
+        </p>
+      </div>
+
+      <div class="corte">
+        <label for="fechaCorte">Período de análisis</label>
+
+        <select
+          id="fechaCorte"
+          [(ngModel)]="fechaCorte"
+          (change)="cambiarCorte()">
+
+          <option
+            *ngFor="let corte of cortes"
+            [value]="corte.fechaCorte">
+
+            {{ corte.fechaCorteAnterior }} → {{ corte.fechaCorte }}
+
+          </option>
+
+        </select>
+      </div>
+
+    </div>
+  </div>
+
+  <div *ngIf="error" class="mensaje mensaje--error">
+    {{ error }}
+  </div>
+
+  <div *ngIf="cargando" class="mensaje">
+    Cargando análisis...
+  </div>
+
+  <ng-container *ngIf="!cargando && resumen">
+
+    <div class="controles">
+      <div>
+        <span>Control financiero</span>
+        <strong [class.ok]="resumen.diferenciaControl === 0">
+          {{ money(resumen.diferenciaControl) }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Control de créditos</span>
+        <strong [class.ok]="resumen.diferenciaControlCreditos === 0">
+          {{ resumen.diferenciaControlCreditos | number:'1.0-0' }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Corte anterior</span>
+        <strong>{{ resumen.fechaCorteAnterior }}</strong>
+      </div>
+
+      <div>
+        <span>Corte actual</span>
+        <strong>{{ resumen.fechaCorte }}</strong>
+      </div>
+    </div>
+
+    <nav class="tabs">
+      <button
+        type="button"
+        [class.active]="vista === 'RESUMEN'"
+        (click)="cambiarVista('RESUMEN')">
+        Resumen
+      </button>
+
+      <button
+        type="button"
+        [class.active]="vista === 'LINEAS'"
+        (click)="cambiarVista('LINEAS')">
+        Por línea
+      </button>
+
+      <button
+        type="button"
+        [class.active]="vista === 'HISTORICO'"
+        (click)="cambiarVista('HISTORICO')">
+        Histórico
+      </button>
+
+      <button
+        type="button"
+        [class.active]="vista === 'DETALLE'"
+        (click)="cambiarVista('DETALLE')">
+        Detalle
+      </button>
+    </nav>
+
+    <!-- =====================================================
+         RESUMEN
+         ===================================================== -->
+    <section *ngIf="vista === 'RESUMEN'">
+
+      <div class="kpis kpis--principal">
+        <article class="kpi">
+          <span>Saldo inicial</span>
+          <strong>{{ money(resumen.saldoInicial) }}</strong>
+          <small>{{ resumen.creditosIniciales | number:'1.0-0' }} créditos</small>
+        </article>
+
+        <article class="kpi kpi--entrada">
+          <span>Total entradas</span>
+          <strong>{{ money(resumen.totalEntradas) }}</strong>
+          <small>Nuevos + reingresos + aumentos</small>
+        </article>
+
+        <article class="kpi kpi--salida">
+          <span>Salidas y reducciones</span>
+          <strong>{{ money(resumen.totalSalidasReducciones) }}</strong>
+          <small>Reducciones + salidas del período</small>
+        </article>
+
+        <article class="kpi">
+          <span>Saldo final</span>
+          <strong>{{ money(resumen.saldoFinal) }}</strong>
+          <small>{{ resumen.creditosFinales | number:'1.0-0' }} créditos</small>
+        </article>
+      </div>
+
+      <section class="panel">
+        <div class="panel__titulo">
+          <div>
+            <h3>Movimientos del período</h3>
+            <p>Seleccione un indicador para abrir directamente su detalle.</p>
+          </div>
+        </div>
+
+        <div class="movimientos">
+          <button type="button" class="movimiento" (click)="verMovimiento('NUEVO')">
+            <span>Nuevos</span>
+            <strong>{{ resumen.creditosNuevos | number:'1.0-0' }}</strong>
+            <small>{{ money(resumen.nuevos) }}</small>
+          </button>
+
+          <button type="button" class="movimiento" (click)="verMovimiento('REINGRESO')">
+            <span>Reingresos</span>
+            <strong>{{ resumen.creditosReingresados | number:'1.0-0' }}</strong>
+            <small>{{ money(resumen.reingresos) }}</small>
+          </button>
+
+          <button type="button" class="movimiento" (click)="verMovimiento('PERMANECE_DISMINUYE')">
+            <span>Reducen saldo</span>
+            <strong>{{ resumen.creditosReduccion | number:'1.0-0' }}</strong>
+            <small>{{ money(resumen.reduccionesSaldo) }}</small>
+          </button>
+
+          <button type="button" class="movimiento" (click)="verMovimiento('PERMANECE_IGUAL')">
+            <span>Sin variación</span>
+            <strong>{{ resumen.creditosSinVariacion | number:'1.0-0' }}</strong>
+            <small>Créditos</small>
+          </button>
+
+          <button type="button" class="movimiento" (click)="verMovimiento('PERMANECE_AUMENTA')">
+            <span>Aumentan saldo</span>
+            <strong>{{ resumen.creditosAumento | number:'1.0-0' }}</strong>
+            <small>{{ money(resumen.aumentosSaldo) }}</small>
+          </button>
+
+          <button type="button" class="movimiento" (click)="verMovimiento('SALIDA_PREPAGO')">
+            <span>Prepagos</span>
+            <strong>{{ resumen.creditosPrepago | number:'1.0-0' }}</strong>
+            <small>{{ money(resumen.prepagos) }}</small>
+          </button>
+
+          <button type="button" class="movimiento" (click)="verMovimiento('SALIDA_NORMAL')">
+            <span>Cancelación normal</span>
+            <strong>{{ resumen.creditosCancelacionNormal | number:'1.0-0' }}</strong>
+            <small>{{ money(resumen.cancelacionesNormales) }}</small>
+          </button>
+
+          <button type="button" class="movimiento" (click)="verMovimiento('SALIDA_POST_VENCIMIENTO')">
+            <span>Post vencimiento</span>
+            <strong>{{ resumen.creditosCancelacionPostVencimiento | number:'1.0-0' }}</strong>
+            <small>{{ money(resumen.cancelacionesPostVencimiento) }}</small>
+          </button>
+
+          <button type="button" class="movimiento" (click)="verMovimiento('AUSENCIA_TEMPORAL')">
+            <span>Ausencia temporal</span>
+            <strong>{{ resumen.creditosAusenciaTemporal | number:'1.0-0' }}</strong>
+            <small>{{ money(resumen.ausenciasTemporales) }}</small>
+          </button>
+
+          <button type="button" class="movimiento" (click)="verMovimiento('SALIDA_OTRA')">
+            <span>Otras salidas</span>
+            <strong>{{ resumen.creditosOtrasSalidas | number:'1.0-0' }}</strong>
+            <small>{{ money(resumen.otrasSalidas) }}</small>
+          </button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel__titulo">
+          <div>
+            <h3>Indicadores del período</h3>
+            <p>Lectura gerencial del crecimiento y las salidas de cartera.</p>
+          </div>
+        </div>
+
+        <div class="indicadores">
+          <div>
+            <span>Variación neta</span>
+            <strong>{{ money(resumen.variacionNeta) }}</strong>
+          </div>
+
+          <div>
+            <span>Variación</span>
+            <strong>{{ pct(resumen.variacionPorcentaje, 4) }}</strong>
+          </div>
+
+          <div>
+            <span>Nuevos / saldo inicial</span>
+            <strong>{{ pct(resumen.tasaNuevosSobreSaldoInicial, 4) }}</strong>
+          </div>
+
+          <div>
+            <span>Reducción / saldo inicial</span>
+            <strong>{{ pct(resumen.tasaReduccionSobreSaldoInicial, 4) }}</strong>
+          </div>
+
+          <div>
+            <span>Prepago / saldo inicial</span>
+            <strong>{{ pct(resumen.tasaPrepagoSobreSaldoInicial, 4) }}</strong>
+          </div>
+
+          <div>
+            <span>Salidas definitivas / saldo inicial</span>
+            <strong>{{ pct(resumen.tasaSalidasDefinitivasSobreSaldoInicial, 4) }}</strong>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- =====================================================
+         POR LÍNEA
+         ===================================================== -->
+    <section *ngIf="vista === 'LINEAS'" class="panel">
+      <div class="panel__titulo">
+        <div>
+          <h3>Roll Forward por línea de crédito</h3>
+          <p>Cada línea concilia individualmente saldo y cantidad de créditos.</p>
+        </div>
+        <span class="contador">{{ lineas.length }}</span>
+      </div>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Línea</th>
+              <th class="num">Créd. iniciales</th>
+              <th class="num">Créd. finales</th>
+              <th class="num">Nuevos</th>
+              <th class="num">Reingresos</th>
+              <th class="num">Reducen</th>
+              <th class="num">Prepagos</th>
+              <th class="num">Saldo inicial</th>
+              <th class="num">Saldo final</th>
+              <th class="num">Variación</th>
+              <th class="num">Control $</th>
+              <th class="num">Control créditos</th>
+              <th></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let linea of lineas; trackBy: trackLinea">
+              <td>
+                <strong>{{ linea.codigoLineaCredito }}</strong>
+                <div>{{ linea.nombreLineaCredito }}</div>
+              </td>
+              <td class="num">{{ linea.creditosIniciales | number:'1.0-0' }}</td>
+              <td class="num">{{ linea.creditosFinales | number:'1.0-0' }}</td>
+              <td class="num">{{ linea.creditosNuevos | number:'1.0-0' }}</td>
+              <td class="num">{{ linea.creditosReingresados | number:'1.0-0' }}</td>
+              <td class="num">{{ linea.creditosReduccion | number:'1.0-0' }}</td>
+              <td class="num">{{ linea.creditosPrepago | number:'1.0-0' }}</td>
+              <td class="num">{{ money(linea.saldoInicial) }}</td>
+              <td class="num">{{ money(linea.saldoFinal) }}</td>
+              <td class="num" [class.negativo]="linea.variacionNeta < 0">
+                {{ money(linea.variacionNeta) }}
+              </td>
+              <td class="num control-ok">{{ money(linea.diferenciaControl) }}</td>
+              <td class="num control-ok">{{ linea.diferenciaControlCreditos }}</td>
+              <td>
+                <button type="button" class="btn-link" (click)="verLinea(linea)">
+                  Detalle
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="lineas.length === 0">
+              <td colspan="13" class="vacio">
+                No existen líneas para el corte seleccionado.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         HISTÓRICO
+         ===================================================== -->
+    <section *ngIf="vista === 'HISTORICO'" class="panel">
+      <div class="panel__titulo">
+        <div>
+          <h3>Histórico de Roll Forward</h3>
+          <p>Comportamiento entre todos los cierres consecutivos disponibles.</p>
+        </div>
+        <span class="contador">{{ historico.length }}</span>
+      </div>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Período</th>
+              <th class="num">Créd. iniciales</th>
+              <th class="num">Créd. finales</th>
+              <th class="num">Nuevos</th>
+              <th class="num">Reingresos</th>
+              <th class="num">Prepagos</th>
+              <th class="num">Ausencias</th>
+              <th class="num">Saldo inicial</th>
+              <th class="num">Saldo final</th>
+              <th class="num">Variación</th>
+              <th class="num">Variación %</th>
+              <th class="num">Control</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let h of historico">
+              <td>{{ h.fechaCorteAnterior }} → {{ h.fechaCorte }}</td>
+              <td class="num">{{ h.creditosIniciales | number:'1.0-0' }}</td>
+              <td class="num">{{ h.creditosFinales | number:'1.0-0' }}</td>
+              <td class="num">{{ h.creditosNuevos | number:'1.0-0' }}</td>
+              <td class="num">{{ h.creditosReingresados | number:'1.0-0' }}</td>
+              <td class="num">{{ h.creditosPrepago | number:'1.0-0' }}</td>
+              <td class="num">{{ h.creditosAusenciaTemporal | number:'1.0-0' }}</td>
+              <td class="num">{{ money(h.saldoInicial) }}</td>
+              <td class="num">{{ money(h.saldoFinal) }}</td>
+              <td class="num" [class.negativo]="h.variacionNeta < 0">{{ money(h.variacionNeta) }}</td>
+              <td class="num" [class.negativo]="h.variacionPorcentaje < 0">
+                {{ pct(h.variacionPorcentaje, 4) }}
+              </td>
+              <td class="num control-ok">{{ money(h.diferenciaControl) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- =====================================================
+         DETALLE
+         ===================================================== -->
+    <section *ngIf="vista === 'DETALLE'" class="panel">
+      <div class="panel__titulo panel__titulo--filtros">
+        <div>
+          <h3>Detalle auditable</h3>
+          <p>
+            Identifica los créditos que explican cada movimiento del período.
+          </p>
+        </div>
+
+        <div class="filtros">
+          <div class="campo">
+            <label for="tipoMovimiento">Movimiento</label>
+            <select
+              id="tipoMovimiento"
+              [(ngModel)]="tipoMovimiento">
+              <option value="">Todos</option>
+              <option *ngFor="let tipo of tiposMovimiento" [value]="tipo">
+                {{ nombreMovimiento(tipo) }}
+              </option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="lineaCredito">Línea</label>
+            <select
+              id="lineaCredito"
+              [(ngModel)]="idLineaCredito">
+              <option [ngValue]="null">Todas</option>
+              <option
+                *ngFor="let linea of lineas"
+                [ngValue]="linea.idLineaCredito">
+                {{ linea.codigoLineaCredito }} - {{ linea.nombreLineaCredito }}
+              </option>
+            </select>
+          </div>
+
+          <button type="button" class="btn btn--primary" (click)="cargarDetalle()">
+            Consultar
+          </button>
+
+          <button type="button" class="btn btn--secondary" (click)="limpiarFiltrosDetalle()">
+            Limpiar
+          </button>
+        </div>
+      </div>
+
+      <div class="detalle-barra">
+        <input
+          type="text"
+          [(ngModel)]="textoDetalle"
+          (ngModelChange)="paginaDetalle = 1"
+          placeholder="Buscar documento, asociado, pagaré, línea, destino o movimiento">
+
+        <span>
+          {{ detalleFiltrado.length | number:'1.0-0' }} registro(s)
+        </span>
+      </div>
+
+      <div *ngIf="cargandoDetalle" class="mensaje">
+        Cargando detalle...
+      </div>
+
+      <div *ngIf="!cargandoDetalle" class="tabla-wrap tabla-wrap--detalle">
+        <table class="tabla-detalle">
+          <thead>
+            <tr>
+              <th>Movimiento</th>
+              <th>Documento</th>
+              <th>Asociado</th>
+              <th>Pagaré</th>
+              <th>Línea</th>
+              <th>Clasificación</th>
+              <th>Destino</th>
+              <th>F. desembolso</th>
+              <th>F. final</th>
+              <th class="num">Saldo anterior</th>
+              <th class="num">Saldo actual</th>
+              <th class="num">Variación</th>
+              <th class="num">Anticipación</th>
+              <th>Rango salida</th>
+              <th class="num">Mora ant.</th>
+              <th class="num">Mora act.</th>
+              <th>Edad ant.</th>
+              <th>Edad act.</th>
+              <th class="num">Deterioro ant.</th>
+              <th class="num">Deterioro act.</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let d of detallePaginado; trackBy: trackDetalle">
+              <td>
+                <span [class]="claseMovimiento(d.tipoMovimiento)">
+                  {{ nombreMovimiento(d.tipoMovimiento) }}
+                </span>
+              </td>
+              <td>{{ d.documento || '-' }}</td>
+              <td>{{ d.nombreCompleto || '-' }}</td>
+              <td>{{ d.pagareCartera || '-' }}</td>
+              <td>
+                <strong>{{ d.codigoLineaCredito || '-' }}</strong>
+                <div>{{ d.nombreLineaCredito || '' }}</div>
+              </td>
+              <td>{{ d.descripcionClasificacionCredito || d.codigoClasificacionCredito || '-' }}</td>
+              <td>{{ d.descripcionDestinoEconomico || d.codigoDestinoEconomico || '-' }}</td>
+              <td>{{ d.fechaDesembolso || '-' }}</td>
+              <td>{{ d.fechaFinal || '-' }}</td>
+              <td class="num">{{ money(d.saldoAnterior) }}</td>
+              <td class="num">{{ money(d.saldoActual) }}</td>
+              <td class="num" [class.negativo]="d.variacionSaldo < 0">
+                {{ money(d.variacionSaldo) }}
+              </td>
+              <td class="num">{{ d.diasAnticipacion ?? '-' }}</td>
+              <td>{{ d.rangoSalida || '-' }}</td>
+              <td class="num">{{ d.diasMoraAnterior ?? '-' }}</td>
+              <td class="num">{{ d.diasMoraActual ?? '-' }}</td>
+              <td>{{ d.edadContableAnterior || '-' }}</td>
+              <td>{{ d.edadContableActual || '-' }}</td>
+              <td class="num">{{ money(d.deterioroTotalAnterior) }}</td>
+              <td class="num">{{ money(d.deterioroTotalActual) }}</td>
+            </tr>
+
+            <tr *ngIf="detallePaginado.length === 0">
+              <td colspan="20" class="vacio">
+                No existen registros para los filtros seleccionados.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="paginador" *ngIf="!cargandoDetalle && detalleFiltrado.length">
+        <button
+          type="button"
+          class="btn btn--secondary"
+          [disabled]="paginaDetalle <= 1"
+          (click)="paginaAnterior()">
+          Anterior
+        </button>
+
+        <span>
+          Página {{ paginaDetalle }} de {{ totalPaginasDetalle }}
+        </span>
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          [disabled]="paginaDetalle >= totalPaginasDetalle"
+          (click)="paginaSiguiente()">
+          Siguiente
+        </button>
+      </div>
+    </section>
+
+  </ng-container>
+</div>

@@ -21,9 +21,12 @@ import {
 } from '../../../../shared/header-actions/header-actions.component';
 
 import {
-  DatosPersonales,
-  DatosPersonalesApi
-} from '../../../hoja-vida/datos-personales/datos-personales.api';
+  ExpedienteAsociadoApi
+} from '../expediente-asociado.api';
+
+import {
+  ExpedientePersonaBusqueda
+} from '../expediente-asociado.dto';
 
 
 @Component({
@@ -44,11 +47,22 @@ export class ExpedienteAsociadoListComponent
 implements OnInit {
 
   // ========================================================
+  // CONSTANTES
+  // ========================================================
+
+  private static readonly STORAGE_HISTORIAL =
+    'assip.expediente.historial-filtros';
+
+  private static readonly MAX_HISTORIAL =
+    10;
+
+
+  // ========================================================
   // SERVICIOS
   // ========================================================
 
   private readonly api =
-    inject(DatosPersonalesApi);
+    inject(ExpedienteAsociadoApi);
 
   private readonly router =
     inject(Router);
@@ -58,9 +72,20 @@ implements OnInit {
   // DATOS
   // ========================================================
 
-  personas: DatosPersonales[] = [];
+  resultados: ExpedientePersonaBusqueda[] = [];
 
-  filtradas: DatosPersonales[] = [];
+
+  // ========================================================
+  // HISTORIAL DE FILTROS
+  // ========================================================
+
+  historialDocumento: string[] = [];
+
+  historialNombres: string[] = [];
+
+  historialPrimerApellido: string[] = [];
+
+  historialSegundoApellido: string[] = [];
 
 
   // ========================================================
@@ -68,6 +93,8 @@ implements OnInit {
   // ========================================================
 
   cargando = false;
+
+  busquedaRealizada = false;
 
   error = '';
 
@@ -98,77 +125,7 @@ implements OnInit {
   // ========================================================
 
   ngOnInit(): void {
-    this.cargar();
-  }
-
-
-  // ========================================================
-  // CARGA
-  // ========================================================
-
-  cargar(): void {
-
-    if (this.cargando) {
-      return;
-    }
-
-    this.cargando = true;
-
-    this.error = '';
-
-    this.api
-      .listar()
-      .subscribe({
-
-        next: lista => {
-
-          this.personas =
-            [...(lista ?? [])]
-              .sort((a, b) => {
-
-                const fechaA =
-                  a.fechaActualizacion
-                    ? Date.parse(
-                        a.fechaActualizacion
-                      )
-                    : 0;
-
-                const fechaB =
-                  b.fechaActualizacion
-                    ? Date.parse(
-                        b.fechaActualizacion
-                      )
-                    : 0;
-
-                return fechaB - fechaA;
-              });
-
-          this.buscar();
-
-          this.cargando = false;
-        },
-
-        error: error => {
-
-          console.error(
-            'Error cargando asociados para el expediente:',
-            error
-          );
-
-          this.personas = [];
-
-          this.filtradas = [];
-
-          this.pagina = 1;
-
-          this.error =
-            error?.error?.mensaje ??
-            error?.error?.message ??
-            'No fue posible cargar los asociados.';
-
-          this.cargando = false;
-        }
-      });
+    this.cargarHistorial();
   }
 
 
@@ -179,82 +136,88 @@ implements OnInit {
   buscar(): void {
 
     const documento =
-      this.normalizarTexto(
-        this.filtros.documento
-      );
+      String(this.filtros.documento ?? '')
+        .trim();
 
     const nombres =
-      this.normalizarTexto(
-        this.filtros.nombres
-      );
+      String(this.filtros.nombres ?? '')
+        .trim();
 
     const primerApellido =
-      this.normalizarTexto(
-        this.filtros.primerApellido
-      );
+      String(this.filtros.primerApellido ?? '')
+        .trim();
 
     const segundoApellido =
-      this.normalizarTexto(
-        this.filtros.segundoApellido
-      );
+      String(this.filtros.segundoApellido ?? '')
+        .trim();
 
-    this.filtradas =
-      this.personas.filter(persona => {
+    if (
+      !documento &&
+      !nombres &&
+      !primerApellido &&
+      !segundoApellido
+    ) {
 
-        const documentoPersona =
-          this.normalizarTexto(
-            persona.documento
-          );
+      this.resultados = [];
+      this.busquedaRealizada = false;
+      this.pagina = 1;
 
-        const nombresPersona =
-          this.normalizarTexto(
-            persona.nombres
-          );
+      this.error =
+        'Ingrese al menos un criterio de búsqueda.';
 
-        const primerApellidoPersona =
-          this.normalizarTexto(
-            persona.primerApellido
-          );
+      return;
+    }
 
-        const segundoApellidoPersona =
-          this.normalizarTexto(
-            persona.segundoApellido
-          );
+    if (this.cargando) {
+      return;
+    }
 
-        return (
-          (
-            !documento ||
-            documentoPersona.includes(
-              documento
-            )
-          )
-          &&
-          (
-            !nombres ||
-            nombresPersona.includes(
-              nombres
-            )
-          )
-          &&
-          (
-            !primerApellido ||
-            primerApellidoPersona.includes(
-              primerApellido
-            )
-          )
-          &&
-          (
-            !segundoApellido ||
-            segundoApellidoPersona.includes(
-              segundoApellido
-            )
-          )
-        );
-      });
+    this.guardarHistorialBusqueda(
+      documento,
+      nombres,
+      primerApellido,
+      segundoApellido
+    );
 
+    this.cargando = true;
+    this.busquedaRealizada = true;
+    this.error = '';
     this.pagina = 1;
 
-    this.error = '';
+    this.api
+      .buscarPersonas(
+        documento,
+        nombres,
+        primerApellido,
+        segundoApellido
+      )
+      .subscribe({
+
+        next: lista => {
+
+          this.resultados =
+            [...(lista ?? [])];
+
+          this.cargando = false;
+        },
+
+        error: error => {
+
+          console.error(
+            'Error buscando asociados para el expediente:',
+            error
+          );
+
+          this.resultados = [];
+
+          this.error =
+            error?.error?.mensaje ??
+            error?.error?.message ??
+            'No fue posible realizar la búsqueda.';
+
+          this.cargando = false;
+        }
+      });
   }
 
 
@@ -267,9 +230,9 @@ implements OnInit {
       segundoApellido: ''
     };
 
-    this.filtradas = [
-      ...this.personas
-    ];
+    this.resultados = [];
+
+    this.busquedaRealizada = false;
 
     this.pagina = 1;
 
@@ -281,13 +244,14 @@ implements OnInit {
   // PAGINACIÓN
   // ========================================================
 
-  get paginadas(): DatosPersonales[] {
+  get paginadas():
+    ExpedientePersonaBusqueda[] {
 
     const inicio =
       (this.pagina - 1) *
       this.tamanoPagina;
 
-    return this.filtradas.slice(
+    return this.resultados.slice(
       inicio,
       inicio + this.tamanoPagina
     );
@@ -299,7 +263,7 @@ implements OnInit {
     return Math.max(
       1,
       Math.ceil(
-        this.filtradas.length /
+        this.resultados.length /
         this.tamanoPagina
       )
     );
@@ -326,20 +290,17 @@ implements OnInit {
   // ========================================================
 
   gestionar(
-    persona: DatosPersonales
+    persona: ExpedientePersonaBusqueda
   ): void {
 
     const idDatosPersonal =
-      Number(
-        persona.idDatosPersonal
-      );
+      Number(persona.idDatosPersonal);
 
     if (
-      !Number.isInteger(
-        idDatosPersonal
-      ) ||
+      !Number.isInteger(idDatosPersonal) ||
       idDatosPersonal <= 0
     ) {
+
       this.error =
         'El registro seleccionado no tiene un identificador válido.';
 
@@ -357,7 +318,7 @@ implements OnInit {
 
   trackByPersona(
     index: number,
-    persona: DatosPersonales
+    persona: ExpedientePersonaBusqueda
   ): number {
 
     return (
@@ -368,12 +329,195 @@ implements OnInit {
 
 
   // ========================================================
+  // HISTORIAL
+  // ========================================================
+
+  private cargarHistorial(): void {
+
+    try {
+
+      const contenido =
+        localStorage.getItem(
+          ExpedienteAsociadoListComponent
+            .STORAGE_HISTORIAL
+        );
+
+      if (!contenido) {
+        return;
+      }
+
+      const historial =
+        JSON.parse(contenido);
+
+      this.historialDocumento =
+        this.normalizarHistorial(
+          historial?.documento
+        );
+
+      this.historialNombres =
+        this.normalizarHistorial(
+          historial?.nombres
+        );
+
+      this.historialPrimerApellido =
+        this.normalizarHistorial(
+          historial?.primerApellido
+        );
+
+      this.historialSegundoApellido =
+        this.normalizarHistorial(
+          historial?.segundoApellido
+        );
+
+    } catch (error) {
+
+      console.warn(
+        'No fue posible recuperar el historial de filtros:',
+        error
+      );
+
+      this.historialDocumento = [];
+      this.historialNombres = [];
+      this.historialPrimerApellido = [];
+      this.historialSegundoApellido = [];
+    }
+  }
+
+
+  private guardarHistorialBusqueda(
+    documento: string,
+    nombres: string,
+    primerApellido: string,
+    segundoApellido: string
+  ): void {
+
+    this.historialDocumento =
+      this.agregarAlHistorial(
+        this.historialDocumento,
+        documento
+      );
+
+    this.historialNombres =
+      this.agregarAlHistorial(
+        this.historialNombres,
+        nombres
+      );
+
+    this.historialPrimerApellido =
+      this.agregarAlHistorial(
+        this.historialPrimerApellido,
+        primerApellido
+      );
+
+    this.historialSegundoApellido =
+      this.agregarAlHistorial(
+        this.historialSegundoApellido,
+        segundoApellido
+      );
+
+    this.persistirHistorial();
+  }
+
+
+  private agregarAlHistorial(
+    historial: string[],
+    valor: string
+  ): string[] {
+
+    const limpio =
+      String(valor ?? '')
+        .trim();
+
+    if (!limpio) {
+      return historial;
+    }
+
+    return [
+      limpio,
+      ...historial.filter(
+        actual =>
+          actual.toLocaleUpperCase() !==
+          limpio.toLocaleUpperCase()
+      )
+    ].slice(
+      0,
+      ExpedienteAsociadoListComponent
+        .MAX_HISTORIAL
+    );
+  }
+
+
+  private normalizarHistorial(
+    valores: unknown
+  ): string[] {
+
+    if (!Array.isArray(valores)) {
+      return [];
+    }
+
+    return valores
+      .map(valor =>
+        String(valor ?? '').trim()
+      )
+      .filter(valor =>
+        Boolean(valor)
+      )
+      .slice(
+        0,
+        ExpedienteAsociadoListComponent
+          .MAX_HISTORIAL
+      );
+  }
+
+
+  private persistirHistorial(): void {
+
+    try {
+
+      localStorage.setItem(
+        ExpedienteAsociadoListComponent
+          .STORAGE_HISTORIAL,
+        JSON.stringify({
+          documento:
+            this.historialDocumento,
+
+          nombres:
+            this.historialNombres,
+
+          primerApellido:
+            this.historialPrimerApellido,
+
+          segundoApellido:
+            this.historialSegundoApellido
+        })
+      );
+
+    } catch (error) {
+
+      console.warn(
+        'No fue posible guardar el historial de filtros:',
+        error
+      );
+    }
+  }
+
+
+  // ========================================================
   // UTILIDADES
   // ========================================================
 
   nombreCompleto(
-    persona: DatosPersonales
+    persona: ExpedientePersonaBusqueda
   ): string {
+
+    const nombre =
+      String(
+        persona.nombreCompleto ?? ''
+      ).trim();
+
+    if (nombre) {
+      return nombre;
+    }
 
     return [
       persona.nombres,
@@ -386,59 +530,5 @@ implements OnInit {
         )
       )
       .join(' ');
-  }
-
-
-  descripcionTipoPersona(
-    tipoPersona:
-      | string
-      | null
-      | undefined
-  ): string {
-
-    const codigo =
-      String(tipoPersona ?? '')
-        .trim()
-        .toUpperCase();
-
-    switch (codigo) {
-
-      case '1':
-      case 'N':
-      case 'PN':
-      case 'NATURAL':
-        return 'Natural';
-
-      case '2':
-      case 'J':
-      case 'PJ':
-      case 'JURIDICA':
-      case 'JURÍDICA':
-        return 'Jurídica';
-
-      case '':
-        return '—';
-
-      default:
-        return codigo;
-    }
-  }
-
-  private normalizarTexto(
-    valor:
-      | string
-      | number
-      | null
-      | undefined
-  ): string {
-
-    return String(valor ?? '')
-      .trim()
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(
-        /[\u0300-\u036f]/g,
-        ''
-      );
   }
 }

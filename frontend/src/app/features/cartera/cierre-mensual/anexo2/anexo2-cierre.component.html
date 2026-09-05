@@ -1,0 +1,924 @@
+<div class="page">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <div class="page-header">
+
+    <div>
+
+      <h2>
+        Anexo 2 - Pérdida Esperada
+      </h2>
+
+      <p class="page-subtitle">
+        Procesamiento y consulta de los modelos de pérdida esperada
+        del cierre mensual de cartera.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJES -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="error"
+    class="alert alert--danger">
+
+    {{ error }}
+
+  </div>
+
+
+  <div
+    *ngIf="mensaje"
+    class="alert alert--success">
+
+    {{ mensaje }}
+
+  </div>
+
+
+  <div
+    *ngIf="cargando"
+    class="alert alert--info">
+
+    Cargando cierres mensuales...
+
+  </div>
+
+
+  <div
+    *ngIf="procesando"
+    class="alert alert--warning">
+
+    Procesando Anexo 2 / Pérdida Esperada.
+    Espere mientras se ejecutan los modelos PE...
+
+  </div>
+
+
+  <div
+    *ngIf="consultando"
+    class="alert alert--info">
+
+    Consultando información del modelo PE...
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- SELECCIÓN DEL CIERRE -->
+  <!-- ===================================================== -->
+
+  <section class="card">
+
+    <div class="card-header">
+
+      <div>
+
+        <h3>
+          Cierre de cartera
+        </h3>
+
+        <p>
+          Seleccione el cierre mensual que desea procesar
+          o consultar.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="form-grid">
+
+      <div class="form-field">
+
+        <label for="idCierreCartera">
+          Cierre mensual
+        </label>
+
+        <select
+          id="idCierreCartera"
+          name="idCierreCartera"
+          [(ngModel)]="idCierreSeleccionado"
+          (ngModelChange)="seleccionarCierre()"
+          [disabled]="cargando || procesando">
+
+          <option [ngValue]="null">
+            Seleccione...
+          </option>
+
+          <option
+            *ngFor="let cierre of cierres"
+            [ngValue]="cierre.idCierreCartera">
+
+            {{ cierre.fechaCorte }}
+            -
+            {{ descripcionEstado(cierre.estadoCierre) }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div
+        *ngIf="cierreSeleccionado"
+        class="cierre-info">
+
+        <div class="info-item">
+
+          <span class="info-label">
+            Fecha corte
+          </span>
+
+          <strong>
+            {{ cierreSeleccionado.fechaCorte }}
+          </strong>
+
+        </div>
+
+
+        <div class="info-item">
+
+          <span class="info-label">
+            Estado
+          </span>
+
+          <span
+            class="estado-badge"
+            [class.estado-badge--cerrado]="fotoEnFirme()"
+            [class.estado-badge--proceso]="!fotoEnFirme()">
+
+            {{
+              descripcionEstado(
+                cierreSeleccionado.estadoCierre
+              )
+            }}
+
+          </span>
+
+        </div>
+
+
+        <div class="info-item">
+
+          <span class="info-label">
+            Créditos
+          </span>
+
+          <strong>
+            {{
+            cierreSeleccionado.cantidadCreditos
+            | number:'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div
+      *ngIf="
+        cierreSeleccionado
+        && !fotoEnFirme()
+      "
+      class="alert alert--warning">
+
+      La fotografía del cierre debe estar
+      <strong>cerrada en firme</strong>
+      antes de ejecutar Anexo 2.
+
+    </div>
+
+
+    <div
+      *ngIf="
+        cierreSeleccionado
+        && fotoEnFirme()
+      "
+      class="alert alert--success">
+
+      La fotografía se encuentra cerrada en firme.
+      El cierre está disponible para procesamiento PE.
+
+    </div>
+
+
+    <div class="actions">
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="procesar()"
+        [disabled]="!puedeProcesar()">
+
+        <span *ngIf="!procesando">
+          Procesar Anexo 2
+        </span>
+
+        <span *ngIf="procesando">
+          Procesando...
+        </span>
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- RESULTADO DEL PROCESAMIENTO -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="tieneResultado()"
+    class="card">
+
+    <div class="card-header">
+
+      <div>
+
+        <h3>
+          Resultado del procesamiento
+        </h3>
+
+        <p>
+          Controles ejecutados por el motor de pérdida esperada.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div
+      *ngIf="resultado"
+      class="metric-grid">
+
+      <div class="metric-card">
+
+        <span>
+          Población PE
+        </span>
+
+        <strong>
+          {{ resultado.poblacion | number:'1.0-0' }}
+        </strong>
+
+      </div>
+
+
+      <div class="metric-card">
+
+        <span>
+          Registros de mora
+        </span>
+
+        <strong>
+          {{ resultado.moras | number:'1.0-0' }}
+        </strong>
+
+      </div>
+
+
+      <div class="metric-card">
+
+        <span>
+          Períodos
+        </span>
+
+        <strong>
+          {{ resultado.periodos }}
+        </strong>
+
+      </div>
+
+
+      <div class="metric-card">
+
+        <span>
+          Variables
+        </span>
+
+        <strong>
+          {{ resultado.variables | number:'1.0-0' }}
+        </strong>
+
+      </div>
+
+
+      <div class="metric-card">
+
+        <span>
+          Modelos calculados
+        </span>
+
+        <strong>
+          {{ resultado.modelosCalculados | number:'1.0-0' }}
+        </strong>
+
+      </div>
+
+
+      <div class="metric-card">
+
+        <span>
+          PI calculada
+        </span>
+
+        <strong>
+          {{ resultado.deteriorosCalculados | number:'1.0-0' }}
+        </strong>
+
+      </div>
+
+
+      <div class="metric-card">
+
+        <span>
+          VEA calculado
+        </span>
+
+        <strong>
+          {{ resultado.veaCalculados | number:'1.0-0' }}
+        </strong>
+
+      </div>
+
+
+      <div class="metric-card">
+
+        <span>
+          PDI / PE
+        </span>
+
+        <strong>
+          {{ resultado.perdidasCalculadas | number:'1.0-0' }}
+        </strong>
+
+      </div>
+
+
+      <div class="metric-card">
+
+        <span>
+          Homologados
+        </span>
+
+        <strong>
+          {{ resultado.homologados | number:'1.0-0' }}
+        </strong>
+
+      </div>
+
+
+      <div class="metric-card">
+
+        <span>
+          Persistidos
+        </span>
+
+        <strong>
+          {{
+          resultado.resultadosPersistidos
+          | number:'1.0-0'
+          }}
+        </strong>
+
+      </div>
+
+
+      <div class="metric-card">
+
+        <span>
+          Corte 40
+        </span>
+
+        <strong>
+          {{
+          resultado.corte40Valido
+          ? 'Correcto'
+          : 'No válido'
+          }}
+        </strong>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- MODELOS PE -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="
+      cierreSeleccionado
+      && fotoEnFirme()
+      && tieneModelos()
+    "
+    class="card">
+
+    <div class="card-header">
+
+      <div>
+
+        <h3>
+          Modelos PE
+        </h3>
+
+        <p>
+          Seleccione el modelo que desea consultar.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="form-grid">
+
+      <div class="form-field">
+
+        <label for="idModeloPe">
+          Modelo
+        </label>
+
+        <select
+          id="idModeloPe"
+          name="idModeloPe"
+          [(ngModel)]="idModeloSeleccionado"
+          (ngModelChange)="seleccionarModelo()"
+          [disabled]="consultando || procesando">
+
+          <option [ngValue]="null">
+            Seleccione...
+          </option>
+
+          <option
+            *ngFor="let idModelo of modelos"
+            [ngValue]="idModelo">
+
+            Modelo {{ idModelo }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- RESUMEN DEL MODELO -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="
+      idModeloSeleccionado
+      && resumen.length
+    "
+    class="card">
+
+    <div class="card-header">
+
+      <div>
+
+        <h3>
+          {{ nombreModeloSeleccionado() }}
+        </h3>
+
+        <p>
+          Resumen de resultados por calificación.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+
+        <tr>
+
+          <th>
+            Calificación
+          </th>
+
+          <th class="num">
+            Cantidad
+          </th>
+
+          <th class="num">
+            % Cantidad
+          </th>
+
+          <th class="num">
+            Saldo
+          </th>
+
+          <th class="num">
+            % Saldo
+          </th>
+
+          <th class="num">
+            Pérdida esperada
+          </th>
+
+          <th class="num">
+            % PE
+          </th>
+
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        <tr
+          *ngFor="let fila of resumen">
+
+          <td>
+
+            <span
+              class="calificacion"
+              [class.calificacion--a]="fila.calificacion === 'A'"
+              [class.calificacion--b]="fila.calificacion === 'B'"
+              [class.calificacion--c]="fila.calificacion === 'C'"
+              [class.calificacion--d]="fila.calificacion === 'D'"
+              [class.calificacion--e]="fila.calificacion === 'E'">
+
+              {{ fila.calificacion }}
+
+            </span>
+
+          </td>
+
+
+          <td class="num">
+            {{ fila.cantidadCreditos | number:'1.0-0' }}
+          </td>
+
+
+          <td class="num">
+            {{ fila.porcentajeCantidad | number:'1.2-2' }} %
+          </td>
+
+
+          <td class="num">
+            $ {{ fila.saldoCapital | number:'1.0-0' }}
+          </td>
+
+
+          <td class="num">
+            {{ fila.porcentajeSaldo | number:'1.2-2' }} %
+          </td>
+
+
+          <td class="num">
+            $ {{ fila.perdidaEsperada | number:'1.0-0' }}
+          </td>
+
+
+          <td class="num">
+            {{
+            fila.porcentajePerdidaEsperada
+            | number:'1.2-2'
+            }} %
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- RESULTADO DETALLADO -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="detalle.length"
+    class="card">
+
+    <div class="card-header">
+
+      <div>
+
+        <h3>
+          Resultado PE
+        </h3>
+
+        <p>
+          Resultado individual de los créditos incluidos
+          en el modelo seleccionado.
+        </p>
+
+      </div>
+
+
+      <div class="record-count">
+
+        {{ detalle.length | number:'1.0-0' }}
+        créditos
+
+      </div>
+
+    </div>
+
+
+    <div class="table-wrap table-wrap--wide">
+
+      <table>
+
+        <thead>
+
+        <tr>
+
+          <th>
+            Documento
+          </th>
+
+          <th>
+            Asociado
+          </th>
+
+          <th>
+            Pagaré
+          </th>
+
+          <th>
+            Línea
+          </th>
+
+          <th class="num">
+            Saldo capital
+          </th>
+
+          <th class="num">
+            Mora
+          </th>
+
+          <th>
+            Riesgo entrada
+          </th>
+
+          <th>
+            PE
+          </th>
+
+          <th>
+            Homologada
+          </th>
+
+          <th>
+            Contable
+          </th>
+
+          <th class="num">
+            PI
+          </th>
+
+          <th class="num">
+            PDI
+          </th>
+
+          <th class="num">
+            VEA
+          </th>
+
+          <th class="num">
+            Pérdida esperada
+          </th>
+
+          <th class="num">
+            Deterioro capital
+          </th>
+
+          <th class="num">
+            Deterioro intereses
+          </th>
+
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        <tr
+          *ngFor="let fila of detalle">
+
+          <td>
+            {{ fila.documento }}
+          </td>
+
+          <td>
+            {{ fila.nombreCompleto }}
+          </td>
+
+          <td>
+            {{ fila.pagareCartera }}
+          </td>
+
+          <td>
+            {{ fila.codigoLineaCredito }}
+            -
+            {{ fila.nombreLineaCredito }}
+          </td>
+
+          <td class="num">
+            $ {{ fila.saldoCapital | number:'1.0-0' }}
+          </td>
+
+          <td class="num">
+            {{ fila.diasMora }}
+          </td>
+
+          <td>
+            {{ fila.edadDeRiesgo }}
+          </td>
+
+          <td>
+            {{ fila.edadPe }}
+          </td>
+
+          <td>
+            {{ fila.edadHomologada }}
+          </td>
+
+          <td>
+
+            <span
+              class="calificacion"
+              [class.calificacion--a]="fila.edadContable === 'A'"
+              [class.calificacion--b]="fila.edadContable === 'B'"
+              [class.calificacion--c]="fila.edadContable === 'C'"
+              [class.calificacion--d]="fila.edadContable === 'D'"
+              [class.calificacion--e]="fila.edadContable === 'E'">
+
+              {{ fila.edadContable }}
+
+            </span>
+
+          </td>
+
+          <td class="num">
+            {{ fila.pi | number:'1.2-4' }}
+          </td>
+
+          <td class="num">
+            {{ fila.pdi | number:'1.2-4' }}
+          </td>
+
+          <td class="num">
+            $ {{ fila.vea | number:'1.0-0' }}
+          </td>
+
+          <td class="num">
+            $ {{ fila.perdidaEsperada | number:'1.0-0' }}
+          </td>
+
+          <td class="num">
+            $ {{ fila.deterioroCapital | number:'1.0-0' }}
+          </td>
+
+          <td class="num">
+            $ {{ fila.deterioroIntereses | number:'1.0-0' }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- INFORMACIÓN TÉCNICA DISPONIBLE -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="tieneInformacionModelo()"
+    class="card technical-summary">
+
+    <h3>
+      Información técnica
+    </h3>
+
+    <div class="technical-grid">
+
+      <div>
+
+        <span>
+          Resultado
+        </span>
+
+        <strong>
+          {{ detalle.length | number:'1.0-0' }}
+        </strong>
+
+      </div>
+
+
+      <div>
+
+        <span>
+          Hoja de trabajo
+        </span>
+
+        <strong>
+          {{ trabajo.length | number:'1.0-0' }}
+        </strong>
+
+      </div>
+
+
+      <div>
+
+        <span>
+          Histórico de mora
+        </span>
+
+        <strong>
+          {{ mora.length | number:'1.0-0' }}
+        </strong>
+
+      </div>
+
+
+      <div>
+
+        <span>
+          Resumen
+        </span>
+
+        <strong>
+          {{ resumen.length | number:'1.0-0' }}
+        </strong>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- SIN RESULTADOS PE -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="
+      cierreSeleccionado
+      && fotoEnFirme()
+      && !consultando
+      && !procesando
+      && !tieneModelos()
+    "
+    class="card empty-state">
+
+    <strong>
+      No existen resultados PE para este cierre.
+    </strong>
+
+    <p>
+      Puede ejecutar Anexo 2 para generar los modelos
+      de pérdida esperada.
+    </p>
+
+  </section>
+
+</div>

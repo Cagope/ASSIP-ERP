@@ -19,33 +19,24 @@
     <div class="f-row">
 
       <label for="documento">
-        Documento
+        Cédula
       </label>
 
       <input
         id="documento"
         type="text"
         name="documento"
+        list="historialDocumento"
         [(ngModel)]="filtros.documento"
         autocomplete="off"
         [disabled]="cargando">
 
-    </div>
-
-
-    <div class="f-row">
-
-      <label for="nombres">
-        Nombres
-      </label>
-
-      <input
-        id="nombres"
-        type="text"
-        name="nombres"
-        [(ngModel)]="filtros.nombres"
-        autocomplete="off"
-        [disabled]="cargando">
+      <datalist id="historialDocumento">
+        <option
+          *ngFor="let valor of historialDocumento"
+          [value]="valor">
+        </option>
+      </datalist>
 
     </div>
 
@@ -60,9 +51,17 @@
         id="primerApellido"
         type="text"
         name="primerApellido"
+        list="historialPrimerApellido"
         [(ngModel)]="filtros.primerApellido"
         autocomplete="off"
         [disabled]="cargando">
+
+      <datalist id="historialPrimerApellido">
+        <option
+          *ngFor="let valor of historialPrimerApellido"
+          [value]="valor">
+        </option>
+      </datalist>
 
     </div>
 
@@ -77,9 +76,42 @@
         id="segundoApellido"
         type="text"
         name="segundoApellido"
+        list="historialSegundoApellido"
         [(ngModel)]="filtros.segundoApellido"
         autocomplete="off"
         [disabled]="cargando">
+
+      <datalist id="historialSegundoApellido">
+        <option
+          *ngFor="let valor of historialSegundoApellido"
+          [value]="valor">
+        </option>
+      </datalist>
+
+    </div>
+
+
+    <div class="f-row">
+
+      <label for="nombres">
+        Nombres
+      </label>
+
+      <input
+        id="nombres"
+        type="text"
+        name="nombres"
+        list="historialNombres"
+        [(ngModel)]="filtros.nombres"
+        autocomplete="off"
+        [disabled]="cargando">
+
+      <datalist id="historialNombres">
+        <option
+          *ngFor="let valor of historialNombres"
+          [value]="valor">
+        </option>
+      </datalist>
 
     </div>
 
@@ -91,18 +123,14 @@
         class="btn btn--cancel"
         [disabled]="cargando"
         (click)="limpiar()">
-
         Limpiar
-
       </button>
 
       <button
         type="submit"
         class="btn btn--primary"
         [disabled]="cargando">
-
         Buscar
-
       </button>
 
     </div>
@@ -117,9 +145,7 @@
   <div
     *ngIf="error"
     class="error">
-
     {{ error }}
-
   </div>
 
 
@@ -130,18 +156,19 @@
   <div
     *ngIf="cargando"
     class="loading">
-
-    Cargando asociados...
-
+    Buscando asociados...
   </div>
 
 
   <!-- ===================================================== -->
-  <!-- TABLA DE RESULTADOS                                    -->
+  <!-- RESULTADOS                                             -->
   <!-- ===================================================== -->
 
   <div
-    *ngIf="!cargando && paginadas.length > 0"
+    *ngIf="
+      !cargando &&
+      paginadas.length > 0
+    "
     class="table-responsive">
 
     <table class="table table-hover table-sm">
@@ -151,7 +178,7 @@
       <tr>
 
         <th>
-          Documento
+          Cédula
         </th>
 
         <th>
@@ -167,7 +194,7 @@
         </th>
 
         <th>
-          Tipo de persona
+          Tipo documento
         </th>
 
         <th class="text-center">
@@ -187,15 +214,15 @@
           ">
 
         <td>
-          {{ persona.documento }}
+          {{ persona.documento || '—' }}
         </td>
 
         <td>
-          {{ persona.nombres }}
+          {{ persona.nombres || '—' }}
         </td>
 
         <td>
-          {{ persona.primerApellido }}
+          {{ persona.primerApellido || '—' }}
         </td>
 
         <td>
@@ -203,7 +230,11 @@
         </td>
 
         <td>
-          {{ descripcionTipoPersona(persona.tipoPersona) }}
+          {{
+          persona.nombreTipoDocumento ||
+          persona.tipoDocumento ||
+          '—'
+          }}
         </td>
 
         <td class="text-center">
@@ -212,9 +243,7 @@
             type="button"
             class="btn btn--primary btn-sm btn-gestionar"
             (click)="gestionar(persona)">
-
             Gestionar
-
           </button>
 
         </td>
@@ -229,17 +258,37 @@
 
 
   <!-- ===================================================== -->
-  <!-- SIN REGISTROS                                          -->
+  <!-- SIN RESULTADOS                                         -->
   <!-- ===================================================== -->
 
   <div
     *ngIf="
       !cargando &&
-      paginadas.length === 0
+      busquedaRealizada &&
+      resultados.length === 0 &&
+      !error
     "
     class="empty">
 
     No se encontraron asociados.
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- ESTADO INICIAL                                         -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="
+      !cargando &&
+      !busquedaRealizada &&
+      resultados.length === 0 &&
+      !error
+    "
+    class="empty empty--inicial">
+
+    Ingrese uno o varios criterios para buscar un asociado.
 
   </div>
 
@@ -251,7 +300,7 @@
   <div
     *ngIf="
       !cargando &&
-      filtradas.length > 0
+      resultados.length > tamanoPagina
     "
     class="pagination">
 
@@ -260,9 +309,7 @@
       class="btn btn-sm"
       [disabled]="pagina <= 1"
       (click)="cambiarPagina(pagina - 1)">
-
       Anterior
-
     </button>
 
     <span class="pagination-info">
@@ -272,8 +319,8 @@
 
       ·
 
-      {{ filtradas.length }}
-      registro{{ filtradas.length === 1 ? '' : 's' }}
+      {{ resultados.length }}
+      registro{{ resultados.length === 1 ? '' : 's' }}
 
     </span>
 
@@ -282,9 +329,7 @@
       class="btn btn-sm"
       [disabled]="pagina >= totalPaginas()"
       (click)="cambiarPagina(pagina + 1)">
-
       Siguiente
-
     </button>
 
   </div>

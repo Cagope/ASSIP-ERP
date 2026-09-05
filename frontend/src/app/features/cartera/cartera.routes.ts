@@ -60,6 +60,26 @@ import { CURACION_REINCIDENCIA_ROUTES } from './analisis/curacion-reincidencia/c
 // =============================
 import { CONCENTRACION_CARTERA_ROUTES } from './analisis/concentracion-cartera/concentracion-cartera.routes';
 
+// =============================
+// GARANTÍAS Y COBERTURA
+// =============================
+import { GARANTIAS_COBERTURA_ROUTES } from './analisis/garantias-cobertura/garantias-cobertura.routes';
+
+// =============================
+// RECIPROCIDAD DE APORTES
+// =============================
+import { RECIPROCIDAD_APORTES_ROUTES } from './analisis/reciprocidad-aportes/reciprocidad-aportes.routes';
+
+// =============================
+// CANCELACIÓN Y PREPAGO
+// =============================
+import { CANCELACION_PREPAGO_ROUTES } from './analisis/cancelacion-prepago/cancelacion-prepago.routes';
+
+// =============================
+// ROLL FORWARD
+// =============================
+import { ROLL_FORWARD_ROUTES } from './analisis/roll-forward/roll-forward.routes';
+
 export const CARTERA_ROUTES: Routes = [
 
   // =============================
@@ -158,6 +178,38 @@ export const CARTERA_ROUTES: Routes = [
   {
     path: 'analisis/concentracion-cartera',
     children: CONCENTRACION_CARTERA_ROUTES
+  },
+
+  // =============================
+  // GARANTÍAS Y COBERTURA
+  // =============================
+  {
+    path: 'analisis/garantias-cobertura',
+    children: GARANTIAS_COBERTURA_ROUTES
+  },
+
+  // =============================
+  // RECIPROCIDAD DE APORTES
+  // =============================
+  {
+    path: 'analisis/reciprocidad-aportes',
+    children: RECIPROCIDAD_APORTES_ROUTES
+  },
+
+  // =============================
+  // CANCELACIÓN Y PREPAGO
+  // =============================
+  {
+    path: 'analisis/cancelacion-prepago',
+    children: CANCELACION_PREPAGO_ROUTES
+  },
+
+  // =============================
+  // ROLL FORWARD
+  // =============================
+  {
+    path: 'analisis/roll-forward',
+    children: ROLL_FORWARD_ROUTES
   }
 
 ];

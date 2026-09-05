@@ -1,0 +1,529 @@
+.anexo1-cierre {
+  padding: 0;
+}
+
+
+// =========================================================
+// ENCABEZADO
+// =========================================================
+
+.page-title {
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    font-size: 0.82rem;
+    color: #6b7280;
+  }
+}
+
+
+// =========================================================
+// PANELES
+// =========================================================
+
+.panel {
+  margin-bottom: 1rem;
+
+  border: 1px solid #dfe3e8;
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  overflow: hidden;
+}
+
+.panel__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  padding: 0.8rem 0.9rem;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  strong {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  span {
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+}
+
+.panel__body {
+  padding: 0.9rem;
+}
+
+
+// =========================================================
+// SELECCIÓN DEL CIERRE
+// =========================================================
+
+.seleccion-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.8rem;
+}
+
+.field {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  label {
+    font-size: 0.76rem;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  select {
+    width: 100%;
+    min-height: 34px;
+
+    padding: 0.35rem 0.55rem;
+
+    border: 1px solid #cfd6dd;
+    border-radius: 5px;
+
+    background: #ffffff;
+    color: #111827;
+
+    font-size: 0.8rem;
+
+    outline: none;
+
+    &:focus {
+      border-color: #94a3b8;
+      box-shadow: 0 0 0 2px rgb(148 163 184 / 12%);
+    }
+
+    &:disabled {
+      background: #f3f4f6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.seleccion-actions {
+  display: flex;
+  align-items: flex-end;
+}
+
+
+// =========================================================
+// RESUMEN DEL CIERRE
+// =========================================================
+
+.resumen {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(140px, 1fr));
+
+  gap: 0.7rem;
+
+  margin-bottom: 0.9rem;
+}
+
+.resumen__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  padding: 0.65rem 0.7rem;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 5px;
+
+  background: #fafafa;
+
+  span {
+    font-size: 0.72rem;
+    color: #6b7280;
+  }
+
+  strong {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #111827;
+  }
+}
+
+
+// =========================================================
+// ESTADO DE LA FOTOGRAFÍA
+// =========================================================
+
+.estado {
+  display: inline-flex;
+  align-items: center;
+
+  width: fit-content;
+
+  padding: 0.16rem 0.45rem;
+
+  border-radius: 999px;
+
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+}
+
+.estado--firme {
+  background: #dcfce7;
+  color: #166534 !important;
+}
+
+.estado--abierta {
+  background: #fef3c7;
+  color: #92400e !important;
+}
+
+
+// =========================================================
+// AVISOS
+// =========================================================
+
+.notice {
+  margin-top: 0.8rem;
+
+  padding: 0.65rem 0.75rem;
+
+  border: 1px solid;
+  border-radius: 5px;
+
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.notice--warning {
+  border-color: #fde68a;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.notice--info {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1e40af;
+}
+
+
+// =========================================================
+// ACCIONES
+// =========================================================
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+
+  margin-top: 0.9rem;
+  padding-top: 0.8rem;
+
+  border-top: 1px solid #e5e7eb;
+}
+
+
+// =========================================================
+// BOTONES
+// =========================================================
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 32px;
+
+  padding: 0.35rem 0.7rem;
+
+  border: 1px solid transparent;
+  border-radius: 5px;
+
+  font-size: 0.72rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn--primary {
+  border-color: #79b9aa;
+  background: #79b9aa;
+  color: #ffffff;
+
+  &:hover:not(:disabled) {
+    border-color: #69aa9b;
+    background: #69aa9b;
+  }
+}
+
+.btn--secondary {
+  border-color: #cfd6dd;
+  background: #ffffff;
+  color: #1f2937;
+
+  &:hover:not(:disabled) {
+    background: #f8fafc;
+  }
+}
+
+
+// =========================================================
+// MENSAJES
+// =========================================================
+
+.alert {
+  margin-bottom: 0.8rem;
+
+  padding: 0.6rem 0.75rem;
+
+  border: 1px solid;
+  border-radius: 5px;
+
+  font-size: 0.78rem;
+
+  strong {
+    margin-left: 0.25rem;
+  }
+}
+
+.alert--error {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.alert--success {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+
+// =========================================================
+// CARGANDO / VACÍO
+// =========================================================
+
+.loading {
+  padding: 0.75rem 0;
+
+  text-align: center;
+
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+.empty {
+  padding: 1rem;
+
+  border: 1px dashed #d1d5db;
+  border-radius: 6px;
+
+  background: #fafafa;
+
+  text-align: center;
+
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+
+// =========================================================
+// PROCESANDO
+// =========================================================
+
+.processing {
+  padding: 0.9rem;
+
+  border: 1px solid #dbeafe;
+  border-radius: 6px;
+
+  background: #eff6ff;
+
+  text-align: center;
+
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #1e40af;
+}
+
+
+// =========================================================
+// RESULTADOS ANEXO 1
+// =========================================================
+
+.resultado-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(180px, 1fr));
+
+  gap: 0.8rem;
+}
+
+.resultado-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  min-height: 115px;
+
+  padding: 0.8rem;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+
+  background: #fafafa;
+}
+
+.resultado-card__label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.resultado-card__valor {
+  margin-top: 0.05rem;
+
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.resultado-card__detalle {
+  margin-top: auto;
+
+  font-size: 0.7rem;
+  line-height: 1.4;
+  color: #6b7280;
+}
+
+
+// =========================================================
+// CONTROL DEL RESULTADO
+// =========================================================
+
+.resultado-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  margin-top: 0.9rem;
+  padding-top: 0.8rem;
+
+  border-top: 1px solid #e5e7eb;
+}
+
+.resultado-control__contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+
+  span {
+    font-size: 0.7rem;
+    color: #6b7280;
+  }
+
+  strong {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #111827;
+  }
+}
+
+.resultado-control__ok {
+  display: inline-flex;
+  align-items: center;
+
+  width: fit-content;
+
+  padding: 0.16rem 0.45rem;
+
+  border-radius: 999px;
+
+  background: #dcfce7;
+
+  font-size: 0.67rem !important;
+  font-weight: 700 !important;
+  color: #166534 !important;
+}
+
+
+// =========================================================
+// RESPONSIVE
+// =========================================================
+
+@media (max-width: 1000px) {
+
+  .resumen {
+    grid-template-columns:
+      repeat(2, minmax(140px, 1fr));
+  }
+
+  .resultado-grid {
+    grid-template-columns:
+      repeat(2, minmax(180px, 1fr));
+  }
+}
+
+
+@media (max-width: 700px) {
+
+  .seleccion-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .seleccion-actions {
+    width: 100%;
+
+    .btn {
+      width: 100%;
+    }
+  }
+
+  .resumen {
+    grid-template-columns:
+      1fr;
+  }
+
+  .resultado-grid {
+    grid-template-columns:
+      1fr;
+  }
+
+  .resultado-control {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .actions {
+
+    .btn {
+      width: 100%;
+    }
+  }
+}

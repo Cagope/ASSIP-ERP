@@ -51,28 +51,26 @@ public class CierreMensualController {
     // =========================================================
     // EJECUTAR CIERRE MENSUAL
     //
-    // Ejemplo:
-    //
     // POST
     // /api/v1/cartera/cierre-mensual/ejecutar
-    //      ?fechaCorte=2026-05-31
+    //      ?fechaCorte=2026-08-31
     //
     // Este proceso:
     //
     // 1. crea / recupera la cabecera
-    // 2. genera la foto mensual
-    // 3. crea la base de cálculos comunes
-    // 4. valida cantidades
-    // 5. calcula saldo maestro de la foto
-    // 6. actualiza la cabecera
+    // 2. genera la fotografía mensual
+    // 3. genera el precierre de Hoja de Vida
+    // 4. crea la base de cálculos comunes
+    // 5. valida cantidades
+    // 6. calcula saldo maestro de la foto
+    // 7. actualiza la cabecera
     //
-    // NO ejecuta todavía:
-    // - edades
-    // - aportes
-    // - garantías
-    // - VEA
-    // - Anexo 1
-    // - Anexo 2
+    // Al terminar:
+    //
+    // estado_fotografia = E
+    //
+    // NO deja la fotografía en firme.
+    // NO cierra el cierre mensual general.
     // =========================================================
 
     @PostMapping("/ejecutar")
@@ -92,14 +90,12 @@ public class CierreMensualController {
     // =========================================================
     // REGENERAR FOTOGRAFÍA
     //
-    // Ejemplo:
-    //
     // POST
-    // /api/v1/cartera/cierre-mensual/3/regenerar
+    // /api/v1/cartera/cierre-mensual/{idCierreCartera}/regenerar
     //
     // REGLAS:
     //
-    // - solamente cierre estado P
+    // - permitida mientras estado_fotografia <> C
     // - conserva la cabecera
     // - conserva id_cierre_cartera
     // - elimina resultados base actuales
@@ -108,6 +104,10 @@ public class CierreMensualController {
     // - genera nuevamente resultados base
     // - recalcula cantidad de créditos
     // - recalcula saldo maestro
+    //
+    // Al terminar:
+    //
+    // estado_fotografia = E
     //
     // Si el proceso falla, la transacción del Service
     // revierte la regeneración.
@@ -133,15 +133,25 @@ public class CierreMensualController {
     //
     // REGLAS:
     //
-    // - solamente cierre estado P
+    // - estado_fotografia debe ser E
     // - la fotografía debe existir
     // - la base de resultados debe existir
-    // - cantidad foto = cantidad resultados
-    // - cambia estado_cierre de P a C
-    // - registra fecha_finalizacion
-    // - después de cerrar:
-    //      * ya no se puede regenerar la fotografía
-    //      * se habilitan los cálculos de cierre
+    // - créditos foto con saldo = resultados base
+    //
+    // ACTUALIZA:
+    //
+    // estado_fotografia = C
+    // fecha_fotografia_firme = CURRENT_TIMESTAMP
+    //
+    // NO ACTUALIZA:
+    //
+    // estado_cierre
+    // fecha_finalizacion
+    //
+    // Después de quedar en firme:
+    //
+    // - ya no se puede regenerar la fotografía
+    // - se habilita el proceso de Cálculos
     // =========================================================
 
     @PostMapping("/{idCierreCartera}/cerrar-fotografia")
@@ -157,7 +167,7 @@ public class CierreMensualController {
     }
 
     // =========================================================
-    // CONSULTAR SI EL CIERRE TIENE FOTO
+    // CONSULTAR SI EL CIERRE TIENE FOTOGRAFÍA
     // =========================================================
 
     @GetMapping("/{idCierreCartera}/foto/existe")
@@ -175,10 +185,8 @@ public class CierreMensualController {
     // =========================================================
     // PREPARAR BASE DE CÁLCULOS DE CIERRE HISTÓRICO
     //
-    // Ejemplo:
-    //
     // POST
-    // /api/v1/cartera/cierre-mensual/1/preparar-base-historica
+    // /api/v1/cartera/cierre-mensual/{idCierreCartera}/preparar-base-historica
     //
     // REGLAS:
     //

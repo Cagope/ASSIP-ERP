@@ -1,0 +1,595 @@
+<div class="anexo1-cierre">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <div class="page-title">
+
+    <h2>
+      Anexo 1
+    </h2>
+
+    <p>
+      Cálculo del deterioro de cartera mediante la metodología
+      establecida para Anexo 1.
+    </p>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJES -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="error"
+    class="alert alert--error">
+
+    {{ error }}
+
+  </div>
+
+
+  <div
+    *ngIf="mensaje"
+    class="alert"
+    [class.alert--success]="!procesando && !cerrandoAnexo1"
+    [class.alert--info]="procesando || cerrandoAnexo1">
+
+    {{ mensaje }}
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- SELECCIÓN DEL CIERRE -->
+  <!-- ===================================================== -->
+
+  <section class="panel">
+
+    <div class="panel__header">
+
+      <strong>
+        Seleccionar cierre
+      </strong>
+
+      <span>
+        Seleccione un cierre con Cálculos en firme
+        para ejecutar Anexo 1.
+      </span>
+
+    </div>
+
+
+    <div class="panel__body">
+
+      <div
+        *ngIf="cargando"
+        class="loading">
+
+        Cargando cierres mensuales...
+
+      </div>
+
+
+      <div
+        *ngIf="!cargando"
+        class="seleccion-row">
+
+        <div class="field">
+
+          <label for="idCierre">
+            Cierre mensual
+          </label>
+
+          <select
+            id="idCierre"
+            name="idCierre"
+            [(ngModel)]="idCierreSeleccionado"
+            (ngModelChange)="seleccionarCierre()">
+
+            <option [ngValue]="null">
+              Seleccione un cierre
+            </option>
+
+            <option
+              *ngFor="let cierre of cierres"
+              [ngValue]="cierre.idCierreCartera">
+
+              {{ cierre.fechaCorte }}
+              -
+              {{
+              cierre.estadoCalculos === 'C'
+              ? 'Cálculos en firme'
+              : 'Cálculos pendientes'
+              }}
+              -
+              {{
+              cierre.estadoAnexo1 === 'C'
+              ? 'Anexo 1 en firme'
+              : cierre.estadoAnexo1 === 'E'
+              ? 'Anexo 1 en proceso'
+              : 'Anexo 1 pendiente'
+              }}
+
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="seleccion-actions">
+
+          <button
+            type="button"
+            class="btn btn--secondary"
+            [disabled]="
+              cargando
+              || procesando
+              || cerrandoAnexo1
+            "
+            (click)="cargarCierres()">
+
+            ACTUALIZAR
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- CIERRE SELECCIONADO -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="cierreSeleccionado"
+    class="panel">
+
+    <div class="panel__header">
+
+      <strong>
+        Cierre seleccionado
+      </strong>
+
+      <span>
+        Estado de las etapas requeridas para ejecutar
+        y cerrar Anexo 1.
+      </span>
+
+    </div>
+
+
+    <div class="panel__body">
+
+      <!-- ================================================= -->
+      <!-- RESUMEN -->
+      <!-- ================================================= -->
+
+      <div class="resumen">
+
+        <div class="resumen__item">
+
+          <span>
+            Fecha de corte
+          </span>
+
+          <strong>
+            {{
+            formatearFecha(
+            cierreSeleccionado.fechaCorte
+            )
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="resumen__item">
+
+          <span>
+            Créditos
+          </span>
+
+          <strong>
+            {{
+            cierreSeleccionado.cantidadCreditos
+            | number:'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="resumen__item">
+
+          <span>
+            Saldo cartera
+          </span>
+
+          <strong>
+            {{
+            cierreSeleccionado.saldoCarteraMaestro
+            | number:'1.2-2'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="resumen__item">
+
+          <span>
+            Fotografía
+          </span>
+
+          <strong
+            class="estado"
+            [class.estado--firme]="fotoEnFirme()"
+            [class.estado--abierta]="!fotoEnFirme()">
+
+            {{
+            fotoEnFirme()
+            ? 'EN FIRME'
+            : 'PENDIENTE'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="resumen__item">
+
+          <span>
+            Cálculos
+          </span>
+
+          <strong
+            class="estado"
+            [class.estado--firme]="calculosEnFirme()"
+            [class.estado--abierta]="!calculosEnFirme()">
+
+            {{
+            calculosEnFirme()
+            ? 'EN FIRME'
+            : 'PENDIENTE'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="resumen__item">
+
+          <span>
+            Anexo 1
+          </span>
+
+          <strong
+            class="estado"
+            [class.estado--firme]="anexo1EnFirme()"
+            [class.estado--abierta]="anexo1Pendiente()"
+            [class.estado--proceso]="anexo1EnProceso()">
+
+            {{
+            anexo1EnFirme()
+            ? 'EN FIRME'
+            : anexo1EnProceso()
+            ? 'EN PROCESO'
+            : 'PENDIENTE'
+            }}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- BLOQUEOS -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="!fotoEnFirme()"
+        class="notice notice--warning">
+
+        La fotografía del cierre todavía no está en firme.
+
+      </div>
+
+
+      <div
+        *ngIf="fotoEnFirme() && !calculosEnFirme()"
+        class="notice notice--warning">
+
+        Los <strong>Cálculos</strong> deben estar cerrados
+        en firme antes de ejecutar Anexo 1.
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- ANEXO 1 EN FIRME -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="anexo1EnFirme()"
+        class="notice notice--info">
+
+        Anexo 1 se encuentra
+        <strong>cerrado en firme</strong>.
+
+        No se permiten nuevos recálculos para este cierre.
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- INFORMACIÓN DEL PROCESO -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="
+          fotoEnFirme()
+          && calculosEnFirme()
+          && !anexo1EnFirme()
+        "
+        class="notice notice--info">
+
+        El proceso aplicará:
+
+        <strong>
+          edad contable mediante alineamiento o ley de arrastre,
+          deterioro de capital y deterioro de intereses.
+        </strong>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- ACCIONES -->
+      <!-- ================================================= -->
+
+      <div class="actions">
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          [disabled]="!puedeProcesar()"
+          (click)="procesar()">
+
+          {{
+          procesando
+          ? 'PROCESANDO...'
+          : anexo1EnProceso()
+          ? 'RECALCULAR ANEXO 1'
+          : 'PROCESAR ANEXO 1'
+          }}
+
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          *ngIf="!anexo1EnFirme()"
+          [disabled]="!puedeCerrarAnexo1()"
+          (click)="cerrarAnexo1()">
+
+          {{
+          cerrandoAnexo1
+          ? 'CERRANDO...'
+          : 'CERRAR ANEXO 1 EN FIRME'
+          }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- PROCESANDO -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="procesando || cerrandoAnexo1"
+    class="panel">
+
+    <div class="panel__body">
+
+      <div class="processing">
+
+        {{
+        cerrandoAnexo1
+        ? 'Cerrando Anexo 1 en firme...'
+        : 'Procesando Anexo 1 para el cierre seleccionado...'
+        }}
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- RESULTADO DEL PROCESAMIENTO -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="tieneResultado() && resultado"
+    class="panel">
+
+    <div class="panel__header">
+
+      <strong>
+        Resultado del procesamiento
+      </strong>
+
+      <span>
+        Cantidad de registros actualizados por cada etapa
+        del proceso de Anexo 1.
+      </span>
+
+    </div>
+
+
+    <div class="panel__body">
+
+      <div class="resultado-grid">
+
+        <!-- EDADES CONTABLES -->
+
+        <div class="resultado-card">
+
+          <span class="resultado-card__label">
+            Edades contables
+          </span>
+
+          <strong class="resultado-card__valor">
+            {{
+            formatearEntero(
+            resultado.edadesContables
+            )
+            }}
+          </strong>
+
+          <span class="resultado-card__detalle">
+            Créditos procesados por alineamiento
+            o ley de arrastre.
+          </span>
+
+        </div>
+
+
+        <!-- DETERIORO CAPITAL -->
+
+        <div class="resultado-card">
+
+          <span class="resultado-card__label">
+            Deterioro de capital
+          </span>
+
+          <strong class="resultado-card__valor">
+            {{
+            formatearEntero(
+            resultado.deteriorosCapital
+            )
+            }}
+          </strong>
+
+          <span class="resultado-card__detalle">
+            Créditos con cálculo de deterioro
+            de capital.
+          </span>
+
+        </div>
+
+
+        <!-- DETERIORO INTERESES -->
+
+        <div class="resultado-card">
+
+          <span class="resultado-card__label">
+            Deterioro de intereses
+          </span>
+
+          <strong class="resultado-card__valor">
+            {{
+            formatearEntero(
+            resultado.deteriorosIntereses
+            )
+            }}
+          </strong>
+
+          <span class="resultado-card__detalle">
+            Créditos con cálculo de deterioro
+            de intereses.
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- CONTROL DEL RESULTADO -->
+      <!-- ================================================= -->
+
+      <div class="resultado-control">
+
+        <div class="resultado-control__contenido">
+
+          <span>
+            Cierre procesado
+          </span>
+
+          <strong>
+            {{
+            formatearFecha(
+            cierreSeleccionado?.fechaCorte
+            )
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="resultado-control__contenido">
+
+          <span>
+            Estado Anexo 1
+          </span>
+
+          <strong
+            class="resultado-control__ok">
+
+            {{
+            anexo1EnFirme()
+            ? 'EN FIRME'
+            : 'PROCESADO'
+            }}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- SIN CIERRE SELECCIONADO -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="
+      !cargando
+      &&
+      !cierreSeleccionado
+    "
+    class="empty">
+
+    Seleccione un cierre mensual para consultar
+    y ejecutar el proceso de Anexo 1.
+
+  </div>
+
+</div>

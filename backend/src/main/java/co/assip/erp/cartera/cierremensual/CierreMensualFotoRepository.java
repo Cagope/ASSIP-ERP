@@ -439,16 +439,13 @@ public class CierreMensualFotoRepository {
 
     }
 
-    // =========================================================
-    // GENERAR FOTO DE CRÉDITOS ACTIVOS
+    /// =========================================================
+    // CREAR BASE DE CÁLCULOS
     //
     // IMPORTANTE:
-    // - Solamente se fotografían créditos con saldo_actual > 0.
-    // - La foto queda autosuficiente.
-    // - Se conservan IDs solamente para trazabilidad.
-    // - Se congelan persona y descripciones de catálogos.
-    // - Aquí NO se calculan mora, edades, aportes,
-    //   garantías ni VEA.
+    // - solamente créditos fotografiados con saldo_actual > 0.
+    // - se crea una fila por crédito activo.
+    // - aquí todavía NO se ejecutan cálculos.
     // =========================================================
 
     public int crearResultadosBase(
@@ -589,6 +586,40 @@ public class CierreMensualFotoRepository {
     }
 
     // =========================================================
+// ELIMINAR GARANTÍAS DE RESULTADOS
+//
+// Debe ejecutarse antes de eliminar la base de resultados,
+// porque cierres_cartera_resultados_garantias depende de
+// cierres_cartera_resultados.
+// =========================================================
+
+    public int eliminarResultadosGarantias(
+            Integer idCierreCartera
+    ) {
+
+        String sql = """
+            DELETE FROM cartera.cierres_cartera_resultados_garantias g
+            USING cartera.cierres_cartera_resultados r
+            WHERE r.id_cierre_cartera_resultado =
+                  g.id_cierre_cartera_resultado
+              AND r.id_cierre_cartera =
+                  :idCierreCartera
+            """;
+
+        MapSqlParameterSource parametros =
+                new MapSqlParameterSource()
+                        .addValue(
+                                "idCierreCartera",
+                                idCierreCartera
+                        );
+
+        return jdbc.update(
+                sql,
+                parametros
+        );
+    }
+
+    // =========================================================
     // ELIMINAR BASE DE CÁLCULOS
     //
     // Para regenerar una foto.
@@ -649,7 +680,7 @@ public class CierreMensualFotoRepository {
     }
 
     // =========================================================
-// OBTENER SALDO TOTAL DE LA FOTO
+// OBTENER SALDO TOTAL DE CARTERA ACTIVA EN LA FOTO
 // =========================================================
 
     public java.math.BigDecimal obtenerSaldoCarteraFoto(
@@ -657,15 +688,16 @@ public class CierreMensualFotoRepository {
     ) {
 
         String sql = """
-            SELECT
-                COALESCE(
-                    SUM(f.saldo_actual),
-                    0
-                )
-            FROM cartera.cierres_cartera_creditos f
-            WHERE f.id_cierre_cartera =
-                  :idCierreCartera
-            """;
+        SELECT
+            COALESCE(
+                SUM(f.saldo_actual),
+                0
+            )
+        FROM cartera.cierres_cartera_creditos f
+        WHERE f.id_cierre_cartera =
+              :idCierreCartera
+          AND COALESCE(f.saldo_actual, 0) > 0
+        """;
 
         MapSqlParameterSource parametros =
                 new MapSqlParameterSource()
@@ -687,8 +719,8 @@ public class CierreMensualFotoRepository {
     }
 
     // =========================================================
-// CONTAR CRÉDITOS DE LA FOTO CON SALDO
-// =========================================================
+    // CONTAR CRÉDITOS DE LA FOTO CON SALDO
+    // =========================================================
 
     public int contarCreditosFotoConSaldo(
             Integer idCierreCartera

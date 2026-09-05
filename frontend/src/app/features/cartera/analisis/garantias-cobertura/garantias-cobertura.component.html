@@ -1,0 +1,242 @@
+<div class="garantias-cobertura">
+  <div class="encabezado">
+
+    <div class="encabezado__titulo">
+      <h2>Garantías y Cobertura</h2>
+      <p>
+        Análisis de suficiencia de los bienes que respaldan la cartera al corte.
+      </p>
+    </div>
+
+    <div class="encabezado__acciones">
+
+      <div class="corte-selector">
+        <label for="fechaCorte">
+          Seleccionar corte
+        </label>
+
+        <select
+          id="fechaCorte"
+          [(ngModel)]="fechaCorte"
+          (change)="cambiarCorte()">
+
+          <option
+            *ngFor="let corte of cortes"
+            [value]="corte">
+            {{ corte | date:'dd/MM/yyyy' }}
+          </option>
+
+        </select>
+      </div>
+
+      <button
+        type="button"
+        class="btn-exportar"
+        [disabled]="!fechaCorte || cargando"
+        (click)="exportarExcel()">
+
+        Exportar Excel
+
+      </button>
+
+    </div>
+
+  </div>
+
+  <div *ngIf="error" class="mensaje mensaje--error">{{ error }}</div>
+  <div *ngIf="cargando" class="mensaje">Cargando análisis...</div>
+
+  <ng-container *ngIf="!cargando && resumen">
+    <section class="kpis">
+      <article class="kpi">
+        <span>Bienes</span>
+        <strong>{{ resumen.cantidadBienes | number:'1.0-0' }}</strong>
+        <small>{{ resumen.bienesSuficientes }} suficientes / {{ resumen.bienesInsuficientes }} insuficientes</small>
+      </article>
+
+      <article class="kpi">
+        <span>Saldo respaldado por bienes</span>
+        <strong>{{ resumen.saldoCreditosConBien | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+        <small>{{ resumen.cantidadCreditosConBien }} créditos</small>
+      </article>
+
+      <article class="kpi kpi--ok">
+        <span>Cobertura efectiva</span>
+        <strong>{{ resumen.porcentajeCoberturaEfectiva | number:'1.2-4' }}%</strong>
+        <small>{{ resumen.coberturaEfectivaCreditos | currency:'COP':'symbol-narrow':'1.0-0' }}</small>
+      </article>
+
+      <article class="kpi" [class.kpi--alerta]="resumen.exposicionNoCubierta > 0">
+        <span>Exposición no cubierta</span>
+        <strong>{{ resumen.exposicionNoCubierta | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+        <small>{{ resumen.creditosCoberturaInsuficiente }} créditos · {{ resumen.porcentajeExposicionNoCubierta | number:'1.2-4' }}%</small>
+      </article>
+
+      <article class="kpi">
+        <span>Valor de los bienes</span>
+        <strong>{{ resumen.valorTotalBienes | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+        <small>Valor histórico al corte</small>
+      </article>
+
+      <article class="kpi">
+        <span>Créditos con múltiples bienes</span>
+        <strong>{{ resumen.creditosConMultiplesBienes | number:'1.0-0' }}</strong>
+        <small>Consolidación por crédito</small>
+      </article>
+    </section>
+
+    <section class="panel" *ngIf="creditosInsuficientes.length">
+      <div class="panel__titulo">
+        <div>
+          <h3>Alertas de cobertura</h3>
+          <p>Créditos cuya cobertura consolidada con bienes es insuficiente.</p>
+        </div>
+        <span class="contador contador--alerta">{{ creditosInsuficientes.length }}</span>
+      </div>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Pagaré</th>
+              <th>Asociado</th>
+              <th>Documento</th>
+              <th class="num">Saldo</th>
+              <th class="num">Garantías</th>
+              <th class="num">Cobertura</th>
+              <th class="num">No cubierto</th>
+              <th>Codeudor</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of creditosInsuficientes">
+              <td>{{ c.pagareCartera }}</td>
+              <td>{{ c.nombreCompleto }}</td>
+              <td>{{ c.documento }}</td>
+              <td class="num">{{ c.saldoCredito | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td class="num">{{ c.valorGarantiasAsignadas | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td class="num">{{ c.porcentajeCoberturaCredito | number:'1.2-4' }}%</td>
+              <td class="num fuerte-alerta">{{ c.exposicionNoCubierta | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td>
+                <span [class]="c.tieneCodeudorActual ? 'estado estado--ok' : 'estado estado--alerta'">
+                  {{ c.tieneCodeudorActual ? c.cantidadCodeudoresActual + ' codeudor(es)' : 'Sin codeudor' }}
+                </span>
+              </td>
+              <td>
+                <button type="button" class="btn-link" (click)="verDetalleCredito(c)">Ver bienes</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel__titulo panel__titulo--filtro">
+        <div>
+          <h3>Bienes en garantía</h3>
+          <p>Detalle de cobertura de cada bien frente a las obligaciones que respalda.</p>
+        </div>
+
+        <input
+          type="text"
+          [(ngModel)]="filtroBienes"
+          placeholder="Buscar matrícula, bien o estado">
+      </div>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Identificación</th>
+              <th>Tipo</th>
+              <th class="num">Valor bien</th>
+              <th class="num">Créditos</th>
+              <th class="num">Saldo respaldado</th>
+              <th class="num">Cobertura</th>
+              <th class="num">Margen</th>
+              <th class="num">Déficit</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let b of bienesFiltrados">
+              <td>{{ b.identificacionBien }}</td>
+              <td>{{ b.tipoBien }}</td>
+              <td class="num">{{ b.valorBienFechaCorte | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td class="num">{{ b.cantidadCreditosBien }}</td>
+              <td class="num">{{ b.saldoTotalCreditosBien | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td class="num">{{ b.porcentajeCoberturaBien | number:'1.2-4' }}%</td>
+              <td class="num">{{ b.margenCobertura | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td class="num" [class.fuerte-alerta]="b.deficitCobertura > 0">
+                {{ b.deficitCobertura | currency:'COP':'symbol-narrow':'1.0-0' }}
+              </td>
+              <td><span [class]="claseEstado(b.estadoCobertura)">{{ b.estadoCobertura }}</span></td>
+              <td><button type="button" class="btn-link" (click)="verDetalleBien(b)">Detalle</button></td>
+            </tr>
+            <tr *ngIf="!bienesFiltrados.length">
+              <td colspan="10" class="vacio">No hay bienes para el filtro seleccionado.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+
+  <div class="modal-backdrop" *ngIf="mostrarDetalle || cargandoDetalle" (click)="cerrarDetalle()">
+    <section class="modal" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <div>
+          <h3>Detalle de garantías</h3>
+          <p>{{ tituloDetalle }}</p>
+        </div>
+        <button type="button" class="cerrar" (click)="cerrarDetalle()">×</button>
+      </div>
+
+      <div *ngIf="cargandoDetalle" class="mensaje">Cargando detalle...</div>
+
+      <div class="tabla-wrap" *ngIf="!cargandoDetalle">
+        <table>
+          <thead>
+            <tr>
+              <th>Bien</th>
+              <th>Pagaré</th>
+              <th>Asociado</th>
+              <th class="num">Saldo crédito</th>
+              <th class="num">% en bien</th>
+              <th class="num">Valor asignado</th>
+              <th class="num">Mora</th>
+              <th>Riesgo</th>
+              <th class="num">Deterioro</th>
+              <th>Codeudor</th>
+              <th>Alerta</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let d of detalle">
+              <td>
+                <strong>{{ d.identificacionBien }}</strong>
+                <small>{{ d.estadoCobertura }} · {{ d.porcentajeCoberturaBien | number:'1.2-4' }}%</small>
+              </td>
+              <td>{{ d.pagareCartera }}</td>
+              <td>
+                {{ d.nombreCompleto }}
+                <small>{{ d.documento }}</small>
+              </td>
+              <td class="num">{{ d.saldoCredito | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td class="num">{{ d.porcentajeCreditoBien | number:'1.2-6' }}%</td>
+              <td class="num">{{ d.valorGarantiaCreditoBien | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td class="num">{{ d.diasMora }}</td>
+              <td>{{ d.edadContableResultado }}</td>
+              <td class="num">{{ d.deterioroTotal | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td>{{ d.tieneCodeudorActual ? d.cantidadCodeudoresActual : 'No' }}</td>
+              <td><span [class]="claseAlerta(d.alertaCobertura)">{{ d.alertaCobertura }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</div>

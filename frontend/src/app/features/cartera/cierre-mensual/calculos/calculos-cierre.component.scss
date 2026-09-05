@@ -1,0 +1,934 @@
+.calculos-cierre {
+  padding: 0;
+}
+
+
+// =========================================================
+// ENCABEZADO
+// =========================================================
+
+.page-title {
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    font-size: 0.82rem;
+    color: #6b7280;
+  }
+}
+
+
+// =========================================================
+// PANELES
+// =========================================================
+
+.panel {
+  margin-bottom: 1rem;
+
+  border: 1px solid #dfe3e8;
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  overflow: hidden;
+}
+
+.panel__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  padding: 0.8rem 0.9rem;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  strong {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  span {
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+}
+
+.panel__body {
+  padding: 0.9rem;
+}
+
+
+// =========================================================
+// SELECCIÓN DEL CIERRE
+// =========================================================
+
+.seleccion-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.8rem;
+}
+
+.field {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  label {
+    font-size: 0.76rem;
+    font-weight: 500;
+    color: #374151;
+  }
+
+  select {
+    width: 100%;
+    min-height: 34px;
+
+    padding: 0.35rem 0.55rem;
+
+    border: 1px solid #cfd6dd;
+    border-radius: 5px;
+
+    background: #ffffff;
+    color: #111827;
+
+    font-size: 0.8rem;
+
+    outline: none;
+
+    &:focus {
+      border-color: #94a3b8;
+      box-shadow: 0 0 0 2px rgb(148 163 184 / 12%);
+    }
+
+    &:disabled {
+      background: #f3f4f6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.seleccion-actions {
+  display: flex;
+  align-items: flex-end;
+}
+
+
+// =========================================================
+// RESUMEN DEL CIERRE
+// =========================================================
+
+.resumen {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(140px, 1fr));
+
+  gap: 0.7rem;
+
+  margin-bottom: 0.9rem;
+}
+
+.resumen__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  padding: 0.65rem 0.7rem;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 5px;
+
+  background: #fafafa;
+
+  span {
+    font-size: 0.72rem;
+    color: #6b7280;
+  }
+
+  strong {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #111827;
+  }
+}
+
+
+// =========================================================
+// ESTADO DE LA FOTOGRAFÍA
+// =========================================================
+
+.estado {
+  display: inline-flex;
+  align-items: center;
+
+  width: fit-content;
+
+  padding: 0.16rem 0.45rem;
+
+  border-radius: 999px;
+
+  font-size: 0.68rem !important;
+  font-weight: 700 !important;
+}
+
+.estado--firme {
+  background: #dcfce7;
+  color: #166534 !important;
+}
+
+.estado--abierta {
+  background: #fef3c7;
+  color: #92400e !important;
+}
+
+.estado--proceso {
+  background: #dbeafe;
+  color: #1d4ed8 !important;
+}
+
+.notice--success {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+// =========================================================
+// AVISOS
+// =========================================================
+
+.notice {
+  margin-top: 0.8rem;
+
+  padding: 0.65rem 0.75rem;
+
+  border: 1px solid;
+  border-radius: 5px;
+
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.notice--warning {
+  border-color: #fde68a;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+
+// =========================================================
+// ACCIONES
+// =========================================================
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+
+  margin-top: 0.9rem;
+  padding-top: 0.8rem;
+
+  border-top: 1px solid #e5e7eb;
+}
+
+// =========================================================
+// BOTONES
+// =========================================================
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 32px;
+
+  padding: 0.35rem 0.7rem;
+
+  border: 1px solid transparent;
+  border-radius: 5px;
+
+  font-size: 0.72rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn--primary {
+  border-color: #79b9aa;
+  background: #79b9aa;
+  color: #ffffff;
+
+  &:hover:not(:disabled) {
+    border-color: #69aa9b;
+    background: #69aa9b;
+  }
+}
+
+.btn--secondary {
+  border-color: #cfd6dd;
+  background: #ffffff;
+  color: #1f2937;
+
+  &:hover:not(:disabled) {
+    background: #f8fafc;
+  }
+}
+
+
+// =========================================================
+// MENSAJES
+// =========================================================
+
+.alert {
+  margin-bottom: 0.8rem;
+
+  padding: 0.6rem 0.75rem;
+
+  border: 1px solid;
+  border-radius: 5px;
+
+  font-size: 0.78rem;
+
+  strong {
+    margin-left: 0.25rem;
+  }
+}
+
+.alert--error {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.alert--success {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+
+// =========================================================
+// CARGANDO / VACÍO
+// =========================================================
+
+.loading {
+  padding: 0.75rem 0;
+
+  text-align: center;
+
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+.empty {
+  padding: 1rem;
+
+  border: 1px dashed #d1d5db;
+  border-radius: 6px;
+
+  background: #fafafa;
+
+  text-align: center;
+
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+
+// =========================================================
+// DISTRIBUCIÓN POR EDAD DE MORA
+// =========================================================
+
+.resumen-mora {
+  display: grid;
+  gap: 1rem;
+}
+
+.mora-grupo {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+
+  background: #ffffff;
+
+  overflow: hidden;
+}
+
+.mora-grupo__header {
+  display: flex;
+  align-items: center;
+
+  min-height: 36px;
+
+  padding: 0.55rem 0.75rem;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  background: #f8fafc;
+
+  strong {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+}
+
+
+// =========================================================
+// TABLA
+// =========================================================
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  font-size: 0.76rem;
+
+  thead {
+
+    th {
+      padding: 0.5rem 0.65rem;
+
+      border-bottom: 1px solid #dfe3e8;
+
+      background: #fafafa;
+
+      text-align: left;
+
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #4b5563;
+
+      white-space: nowrap;
+    }
+  }
+
+  tbody {
+
+    tr {
+      border-bottom: 1px solid #eef0f2;
+
+      &:last-child {
+        border-bottom: 0;
+      }
+
+      &:hover {
+        background: #fafafa;
+      }
+    }
+
+    td {
+      padding: 0.48rem 0.65rem;
+
+      color: #374151;
+
+      white-space: nowrap;
+    }
+  }
+}
+
+.text-right {
+  text-align: right !important;
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+
+// =========================================================
+// EDAD DE MORA
+// =========================================================
+
+.table tbody td:first-child {
+
+  strong {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 26px;
+    min-height: 22px;
+
+    padding: 0.1rem 0.4rem;
+
+    border: 1px solid #d1d5db;
+    border-radius: 999px;
+
+    background: #f9fafb;
+
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #374151;
+  }
+}
+
+
+// =========================================================
+// VALORES EN CERO
+// =========================================================
+
+.table tbody tr:has(td:nth-child(2)) {
+  transition: background 0.15s ease;
+}
+
+
+// =========================================================
+// CONTROL DEL PROCESO - ESTADO GENERAL
+// =========================================================
+
+.control-estado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  margin-bottom: 0.9rem;
+
+  padding: 0.7rem 0.8rem;
+
+  border: 1px solid;
+  border-radius: 6px;
+}
+
+.control-estado--ok {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.control-estado--error {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.control-estado__texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+
+  strong {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #111827;
+  }
+
+  span {
+    font-size: 0.72rem;
+    color: #6b7280;
+  }
+}
+
+.control-estado--ok {
+
+  .control-estado__texto {
+
+    strong {
+      color: #166534;
+    }
+  }
+}
+
+.control-estado--error {
+
+  .control-estado__texto {
+
+    strong {
+      color: #991b1b;
+    }
+  }
+}
+
+.control-estado__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 58px;
+
+  padding: 0.18rem 0.5rem;
+
+  border-radius: 999px;
+
+  font-size: 0.67rem;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.control-estado__badge--ok {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.control-estado__badge--error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+
+// =========================================================
+// CONTROL DEL PROCESO - TABLA
+// =========================================================
+
+.controles-tabla-wrap {
+  width: 100%;
+
+  margin-bottom: 1rem;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+
+  overflow-x: auto;
+}
+
+.controles-tabla {
+  margin: 0;
+
+  tbody {
+
+    td:first-child {
+      width: 70%;
+    }
+
+    td:nth-child(2) {
+      width: 15%;
+    }
+
+    td:nth-child(3) {
+      width: 15%;
+    }
+  }
+}
+
+
+// =========================================================
+// CONTROL DEL PROCESO - BADGES
+// =========================================================
+
+.control-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 52px;
+
+  padding: 0.14rem 0.4rem;
+
+  border-radius: 999px;
+
+  font-size: 0.65rem;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.control-badge--ok {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.control-badge--error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+
+// =========================================================
+// INFORMACIÓN DEL CÁLCULO
+// =========================================================
+
+.control-info {
+  padding-top: 0.9rem;
+
+  border-top: 1px solid #e5e7eb;
+}
+
+.control-info__title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+
+  margin-bottom: 0.65rem;
+
+  strong {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  span {
+    font-size: 0.72rem;
+    color: #6b7280;
+  }
+}
+
+.control-info__grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(160px, 1fr));
+
+  gap: 0.7rem;
+}
+
+.control-info__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  padding: 0.65rem 0.7rem;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 5px;
+
+  background: #fafafa;
+
+  span {
+    font-size: 0.72rem;
+    color: #6b7280;
+  }
+
+  strong {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #111827;
+  }
+}
+
+// =========================================================
+// APORTES Y GARANTÍAS
+// =========================================================
+
+.aportes-garantias {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 1rem;
+}
+
+
+// =========================================================
+// APORTES Y GARANTÍAS - GRUPO
+// =========================================================
+
+.aportes-garantias__grupo {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+
+  background: #ffffff;
+
+  overflow: hidden;
+}
+
+
+// =========================================================
+// APORTES Y GARANTÍAS - ENCABEZADO
+// =========================================================
+
+.aportes-garantias__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 0.8rem;
+
+  min-height: 48px;
+
+  padding: 0.6rem 0.75rem;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  background: #f8fafc;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  strong {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  span {
+    font-size: 0.7rem;
+    line-height: 1.35;
+    color: #6b7280;
+  }
+}
+
+
+// =========================================================
+// APORTES Y GARANTÍAS - INDICADORES
+// =========================================================
+
+.aportes-garantias__grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 0.65rem;
+
+  padding: 0.75rem;
+}
+
+
+// =========================================================
+// APORTES Y GARANTÍAS - INDICADOR
+// =========================================================
+
+.aportes-garantias__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  min-width: 0;
+
+  padding: 0.65rem 0.7rem;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 5px;
+
+  background: #fafafa;
+
+  span {
+    font-size: 0.7rem;
+    line-height: 1.35;
+    color: #6b7280;
+  }
+
+  strong {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #111827;
+
+    overflow-wrap: anywhere;
+  }
+}
+
+
+// =========================================================
+// APORTES Y GARANTÍAS - INDICADOR DESTACADO
+// =========================================================
+
+.aportes-garantias__item--destacado {
+  grid-column: 1 / -1;
+
+  background: #f8fafc;
+
+  strong {
+    font-size: 0.94rem;
+  }
+}
+
+// =========================================================
+// RESPONSIVE
+// =========================================================
+
+@media (max-width: 900px) {
+
+  .resumen {
+    grid-template-columns:
+      repeat(2, minmax(140px, 1fr));
+  }
+
+  .control-info__grid {
+    grid-template-columns:
+      repeat(2, minmax(140px, 1fr));
+  }
+
+  .aportes-garantias {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media (max-width: 640px) {
+
+  .seleccion-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .seleccion-actions {
+    justify-content: flex-end;
+  }
+
+  .resumen {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    justify-content: stretch;
+
+    .btn {
+      width: 100%;
+    }
+  }
+
+  .seleccion-actions {
+
+    .btn {
+      width: 100%;
+    }
+  }
+
+  .mora-grupo__header {
+    padding: 0.5rem 0.6rem;
+  }
+
+  .table {
+    min-width: 620px;
+  }
+
+  .control-estado {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .control-info__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .controles-tabla {
+    min-width: 620px;
+  }
+
+  .aportes-garantias__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .aportes-garantias__item--destacado {
+    grid-column: auto;
+  }
+
+}

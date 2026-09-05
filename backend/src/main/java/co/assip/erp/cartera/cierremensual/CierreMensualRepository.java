@@ -19,41 +19,64 @@ public class CierreMensualRepository {
     private final NamedParameterJdbcTemplate jdbc;
 
     // =========================================================
+    // SELECT BASE
+    // =========================================================
+
+    private static final String SELECT_BASE = """
+        SELECT
+            c.id_cierre_cartera,
+            c.fecha_corte,
+            c.estado_cierre,
+
+            c.saldo_cartera_maestro,
+            c.saldo_cartera_contable,
+            c.diferencia_cuadre,
+
+            c.cantidad_creditos,
+
+            c.fecha_inicio,
+            c.fecha_cuadre,
+
+            c.fecha_fotografia,
+            c.estado_fotografia,
+            c.fecha_fotografia_firme,
+
+            c.estado_calculos,
+            c.fecha_calculos_inicio,
+            c.fecha_calculos_firme,
+
+            c.estado_anexo1,
+            c.fecha_anexo1_inicio,
+            c.fecha_anexo1_firme,
+
+            c.estado_anexo2,
+            c.fecha_anexo2_inicio,
+            c.fecha_anexo2_firme,
+
+            c.fecha_finalizacion,
+
+            c.observaciones,
+
+            c.fk_seguridad_creacion,
+            c.fecha_creacion,
+            c.fk_seguridad_edicion,
+            c.fecha_edicion
+
+        FROM cartera.cierres_cartera c
+        """;
+
+    // =========================================================
     // LISTAR CIERRES
     // =========================================================
 
     public List<CierreMensualDTO> listar() {
 
-        String sql = """
-                SELECT
-                    c.id_cierre_cartera,
-                    c.fecha_corte,
-                    c.estado_cierre,
-
-                    c.saldo_cartera_maestro,
-                    c.saldo_cartera_contable,
-                    c.diferencia_cuadre,
-
-                    c.cantidad_creditos,
-
-                    c.fecha_inicio,
-                    c.fecha_cuadre,
-                    c.fecha_fotografia,
-                    c.fecha_finalizacion,
-
-                    c.observaciones,
-
-                    c.fk_seguridad_creacion,
-                    c.fecha_creacion,
-                    c.fk_seguridad_edicion,
-                    c.fecha_edicion
-
-                FROM cartera.cierres_cartera c
-
-                ORDER BY
-                    c.fecha_corte DESC,
-                    c.id_cierre_cartera DESC
-                """;
+        String sql = SELECT_BASE + """
+            
+            ORDER BY
+                c.fecha_corte DESC,
+                c.id_cierre_cartera DESC
+            """;
 
         return jdbc.query(
                 sql,
@@ -70,35 +93,11 @@ public class CierreMensualRepository {
             Integer idCierreCartera
     ) {
 
-        String sql = """
-                SELECT
-                    c.id_cierre_cartera,
-                    c.fecha_corte,
-                    c.estado_cierre,
-
-                    c.saldo_cartera_maestro,
-                    c.saldo_cartera_contable,
-                    c.diferencia_cuadre,
-
-                    c.cantidad_creditos,
-
-                    c.fecha_inicio,
-                    c.fecha_cuadre,
-                    c.fecha_fotografia,
-                    c.fecha_finalizacion,
-
-                    c.observaciones,
-
-                    c.fk_seguridad_creacion,
-                    c.fecha_creacion,
-                    c.fk_seguridad_edicion,
-                    c.fecha_edicion
-
-                FROM cartera.cierres_cartera c
-
-                WHERE c.id_cierre_cartera =
-                      :idCierreCartera
-                """;
+        String sql = SELECT_BASE + """
+            
+            WHERE c.id_cierre_cartera =
+                  :idCierreCartera
+            """;
 
         MapSqlParameterSource parametros =
                 new MapSqlParameterSource()
@@ -125,37 +124,13 @@ public class CierreMensualRepository {
             LocalDate fechaCorte
     ) {
 
-        String sql = """
-                SELECT
-                    c.id_cierre_cartera,
-                    c.fecha_corte,
-                    c.estado_cierre,
+        String sql = SELECT_BASE + """
+            
+            WHERE c.fecha_corte =
+                  :fechaCorte
 
-                    c.saldo_cartera_maestro,
-                    c.saldo_cartera_contable,
-                    c.diferencia_cuadre,
-
-                    c.cantidad_creditos,
-
-                    c.fecha_inicio,
-                    c.fecha_cuadre,
-                    c.fecha_fotografia,
-                    c.fecha_finalizacion,
-
-                    c.observaciones,
-
-                    c.fk_seguridad_creacion,
-                    c.fecha_creacion,
-                    c.fk_seguridad_edicion,
-                    c.fecha_edicion
-
-                FROM cartera.cierres_cartera c
-
-                WHERE c.fecha_corte =
-                      :fechaCorte
-
-                LIMIT 1
-                """;
+            LIMIT 1
+            """;
 
         MapSqlParameterSource parametros =
                 new MapSqlParameterSource()
@@ -184,39 +159,49 @@ public class CierreMensualRepository {
     ) {
 
         String sql = """
-                INSERT INTO cartera.cierres_cartera
-                (
-                    fecha_corte,
-                    estado_cierre,
+            INSERT INTO cartera.cierres_cartera
+            (
+                fecha_corte,
+                estado_cierre,
 
-                    saldo_cartera_maestro,
-                    saldo_cartera_contable,
+                saldo_cartera_maestro,
+                saldo_cartera_contable,
 
-                    cantidad_creditos,
+                cantidad_creditos,
 
-                    fecha_inicio,
+                fecha_inicio,
 
-                    fk_seguridad_creacion,
-                    fk_seguridad_edicion
-                )
-                VALUES
-                (
-                    :fechaCorte,
-                    'P',
+                estado_fotografia,
+                estado_calculos,
+                estado_anexo1,
+                estado_anexo2,
 
-                    0,
-                    0,
+                fk_seguridad_creacion,
+                fk_seguridad_edicion
+            )
+            VALUES
+            (
+                :fechaCorte,
+                'P',
 
-                    0,
+                0,
+                0,
 
-                    CURRENT_TIMESTAMP,
+                0,
 
-                    :idUsuario,
-                    :idUsuario
-                )
+                CURRENT_TIMESTAMP,
 
-                RETURNING id_cierre_cartera
-                """;
+                'P',
+                'P',
+                'P',
+                'P',
+
+                :idUsuario,
+                :idUsuario
+            )
+
+            RETURNING id_cierre_cartera
+            """;
 
         MapSqlParameterSource parametros =
                 new MapSqlParameterSource()
@@ -237,7 +222,7 @@ public class CierreMensualRepository {
     }
 
     // =========================================================
-    // ACTUALIZAR RESULTADO DE LA FOTO
+    // ACTUALIZAR RESULTADO DE LA FOTOGRAFÍA
     // =========================================================
 
     public int actualizarFoto(
@@ -247,23 +232,32 @@ public class CierreMensualRepository {
     ) {
 
         String sql = """
-                UPDATE cartera.cierres_cartera
+            UPDATE cartera.cierres_cartera
 
-                   SET cantidad_creditos =
-                           :cantidadCreditos,
+               SET cantidad_creditos =
+                       :cantidadCreditos,
 
-                       fecha_fotografia =
-                           CURRENT_TIMESTAMP,
+                   fecha_fotografia =
+                       CURRENT_TIMESTAMP,
 
-                       fk_seguridad_edicion =
-                           :idUsuario,
+                   estado_fotografia =
+                       'E',
 
-                       fecha_edicion =
-                           CURRENT_TIMESTAMP
+                   fecha_fotografia_firme =
+                       NULL,
 
-                 WHERE id_cierre_cartera =
-                       :idCierreCartera
-                """;
+                   fk_seguridad_edicion =
+                       :idUsuario,
+
+                   fecha_edicion =
+                       CURRENT_TIMESTAMP
+
+             WHERE id_cierre_cartera =
+                   :idCierreCartera
+
+               AND estado_fotografia <>
+                   'C'
+            """;
 
         MapSqlParameterSource parametros =
                 new MapSqlParameterSource()
@@ -298,26 +292,26 @@ public class CierreMensualRepository {
     ) {
 
         String sql = """
-                UPDATE cartera.cierres_cartera
+            UPDATE cartera.cierres_cartera
 
-                   SET saldo_cartera_maestro =
-                           :saldoCarteraMaestro,
+               SET saldo_cartera_maestro =
+                       :saldoCarteraMaestro,
 
-                       saldo_cartera_contable =
-                           :saldoCarteraContable,
+                   saldo_cartera_contable =
+                       :saldoCarteraContable,
 
-                       fecha_cuadre =
-                           CURRENT_TIMESTAMP,
+                   fecha_cuadre =
+                       CURRENT_TIMESTAMP,
 
-                       fk_seguridad_edicion =
-                           :idUsuario,
+                   fk_seguridad_edicion =
+                       :idUsuario,
 
-                       fecha_edicion =
-                           CURRENT_TIMESTAMP
+                   fecha_edicion =
+                       CURRENT_TIMESTAMP
 
-                 WHERE id_cierre_cartera =
-                       :idCierreCartera
-                """;
+             WHERE id_cierre_cartera =
+                   :idCierreCartera
+            """;
 
         MapSqlParameterSource parametros =
                 new MapSqlParameterSource()
@@ -345,13 +339,15 @@ public class CierreMensualRepository {
     }
 
     // =========================================================
-// CERRAR FOTOGRAFÍA EN FIRME
-//
-// P = En proceso / fotografía abierta
-// C = Cerrado / fotografía firme
-//
-// Solamente permite transición P -> C.
-// =========================================================
+    // CERRAR FOTOGRAFÍA EN FIRME
+    //
+    // estado_fotografia:
+    // P = Pendiente
+    // E = En proceso
+    // C = Cerrada / En firme
+    //
+    // Solamente permite E -> C.
+    // =========================================================
 
     public int finalizar(
             Integer idCierreCartera,
@@ -361,10 +357,10 @@ public class CierreMensualRepository {
         String sql = """
             UPDATE cartera.cierres_cartera
 
-               SET estado_cierre =
+               SET estado_fotografia =
                        'C',
 
-                   fecha_finalizacion =
+                   fecha_fotografia_firme =
                        CURRENT_TIMESTAMP,
 
                    fk_seguridad_edicion =
@@ -376,8 +372,8 @@ public class CierreMensualRepository {
              WHERE id_cierre_cartera =
                    :idCierreCartera
 
-               AND estado_cierre =
-                   'P'
+               AND estado_fotografia =
+                   'E'
             """;
 
         MapSqlParameterSource parametros =
@@ -398,132 +394,8 @@ public class CierreMensualRepository {
     }
 
     // =========================================================
-    // MAPPER
+    // ACTUALIZAR SALDO MAESTRO DE CARTERA
     // =========================================================
-
-    private CierreMensualDTO mapear(
-            ResultSet rs,
-            int rowNum
-    ) throws SQLException {
-
-        CierreMensualDTO dto =
-                new CierreMensualDTO();
-
-        dto.setIdCierreCartera(
-                rs.getInt(
-                        "id_cierre_cartera"
-                )
-        );
-
-        dto.setFechaCorte(
-                rs.getObject(
-                        "fecha_corte",
-                        LocalDate.class
-                )
-        );
-
-        dto.setEstadoCierre(
-                rs.getString(
-                        "estado_cierre"
-                )
-        );
-
-        dto.setSaldoCarteraMaestro(
-                rs.getBigDecimal(
-                        "saldo_cartera_maestro"
-                )
-        );
-
-        dto.setSaldoCarteraContable(
-                rs.getBigDecimal(
-                        "saldo_cartera_contable"
-                )
-        );
-
-        dto.setDiferenciaCuadre(
-                rs.getBigDecimal(
-                        "diferencia_cuadre"
-                )
-        );
-
-        dto.setCantidadCreditos(
-                rs.getInt(
-                        "cantidad_creditos"
-                )
-        );
-
-        if (rs.getTimestamp("fecha_inicio") != null) {
-            dto.setFechaInicio(
-                    rs.getTimestamp(
-                            "fecha_inicio"
-                    ).toLocalDateTime()
-            );
-        }
-
-        if (rs.getTimestamp("fecha_cuadre") != null) {
-            dto.setFechaCuadre(
-                    rs.getTimestamp(
-                            "fecha_cuadre"
-                    ).toLocalDateTime()
-            );
-        }
-
-        if (rs.getTimestamp("fecha_fotografia") != null) {
-            dto.setFechaFotografia(
-                    rs.getTimestamp(
-                            "fecha_fotografia"
-                    ).toLocalDateTime()
-            );
-        }
-
-        if (rs.getTimestamp("fecha_finalizacion") != null) {
-            dto.setFechaFinal(
-                    rs.getTimestamp(
-                            "fecha_finalizacion"
-                    ).toLocalDateTime()
-            );
-        }
-
-        dto.setObservaciones(
-                rs.getString(
-                        "observaciones"
-                )
-        );
-
-        dto.setFkSeguridadCreacion(
-                rs.getInt(
-                        "fk_seguridad_creacion"
-                )
-        );
-
-        if (rs.getTimestamp("fecha_creacion") != null) {
-            dto.setFechaCreacion(
-                    rs.getTimestamp(
-                            "fecha_creacion"
-                    ).toLocalDateTime()
-            );
-        }
-
-        dto.setFkSeguridadEdicion(
-                rs.getInt(
-                        "fk_seguridad_edicion"
-                )
-        );
-
-        if (rs.getTimestamp("fecha_edicion") != null) {
-            dto.setFechaEdicion(
-                    rs.getTimestamp(
-                            "fecha_edicion"
-                    ).toLocalDateTime()
-            );
-        }
-
-        return dto;
-    }
-
-    // =========================================================
-// ACTUALIZAR SALDO MAESTRO DE CARTERA
-// =========================================================
 
     public int actualizarSaldoCarteraMaestro(
             Integer idCierreCartera,
@@ -566,5 +438,468 @@ public class CierreMensualRepository {
                 sql,
                 parametros
         );
+    }
+
+    // =========================================================
+    // INICIAR ETAPA DE CÁLCULOS
+    //
+    // REQUISITOS:
+    // - fotografía cerrada en firme
+    // - cálculos todavía no cerrados en firme
+    //
+    // RESULTADO:
+    // estado_calculos = E
+    //
+    // fecha_calculos_inicio:
+    // - se registra solamente la primera vez
+    // - una reejecución conserva la fecha original
+    // =========================================================
+
+    public int iniciarCalculos(
+            Integer idCierreCartera,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+        UPDATE cartera.cierres_cartera
+
+           SET estado_calculos =
+                   'E',
+
+               fecha_calculos_inicio =
+                   COALESCE(
+                       fecha_calculos_inicio,
+                       CURRENT_TIMESTAMP
+                   ),
+
+               fk_seguridad_edicion =
+                   :idUsuario,
+
+               fecha_edicion =
+                   CURRENT_TIMESTAMP
+
+         WHERE id_cierre_cartera =
+               :idCierreCartera
+
+           AND estado_fotografia =
+               'C'
+
+           AND estado_calculos IN ('P', 'E')
+        """;
+
+        MapSqlParameterSource parametros =
+                new MapSqlParameterSource()
+                        .addValue(
+                                "idCierreCartera",
+                                idCierreCartera
+                        )
+                        .addValue(
+                                "idUsuario",
+                                idUsuario
+                        );
+
+        return jdbc.update(
+                sql,
+                parametros
+        );
+    }
+
+
+    // =========================================================
+    // CERRAR ETAPA DE CÁLCULOS EN FIRME
+    //
+    // REQUISITOS:
+    // - fotografía cerrada en firme
+    // - cálculos en proceso
+    //
+    // RESULTADO:
+    // estado_calculos = C
+    // fecha_calculos_firme = CURRENT_TIMESTAMP
+    //
+    // Solamente permite E -> C.
+    // =========================================================
+
+    public int cerrarCalculos(
+            Integer idCierreCartera,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+            UPDATE cartera.cierres_cartera
+
+               SET estado_calculos =
+                       'C',
+
+                   fecha_calculos_firme =
+                       CURRENT_TIMESTAMP,
+
+                   fk_seguridad_edicion =
+                       :idUsuario,
+
+                   fecha_edicion =
+                       CURRENT_TIMESTAMP
+
+             WHERE id_cierre_cartera =
+                   :idCierreCartera
+
+               AND estado_fotografia =
+                   'C'
+
+               AND estado_calculos =
+                   'E'
+            """;
+
+        MapSqlParameterSource parametros =
+                new MapSqlParameterSource()
+                        .addValue(
+                                "idCierreCartera",
+                                idCierreCartera
+                        )
+                        .addValue(
+                                "idUsuario",
+                                idUsuario
+                        );
+
+        return jdbc.update(
+                sql,
+                parametros
+        );
+    }
+
+    // =========================================================
+    // INICIAR ETAPA ANEXO 1
+    //
+    // REQUISITOS:
+    // - fotografía cerrada en firme
+    // - cálculos cerrados en firme
+    // - Anexo 1 todavía no cerrado en firme
+    //
+    // RESULTADO:
+    // estado_anexo1 = E
+    //
+    // fecha_anexo1_inicio:
+    // - se registra solamente la primera vez
+    // - una reejecución conserva la fecha original
+    // =========================================================
+
+    public int iniciarAnexo1(
+            Integer idCierreCartera,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+        UPDATE cartera.cierres_cartera
+
+           SET estado_anexo1 =
+               'E',
+
+               fecha_anexo1_inicio =
+                   COALESCE(
+                       fecha_anexo1_inicio,
+                       CURRENT_TIMESTAMP
+                   ),
+
+               fk_seguridad_edicion =
+                   :idUsuario,
+
+               fecha_edicion =
+                   CURRENT_TIMESTAMP
+
+         WHERE id_cierre_cartera =
+               :idCierreCartera
+
+           AND estado_fotografia =
+               'C'
+
+           AND estado_calculos =
+               'C'
+
+           AND estado_anexo1 IN ('P', 'E')
+        """;
+
+        MapSqlParameterSource parametros =
+                new MapSqlParameterSource()
+                        .addValue(
+                                "idCierreCartera",
+                                idCierreCartera
+                        )
+                        .addValue(
+                                "idUsuario",
+                                idUsuario
+                        );
+
+        return jdbc.update(
+                sql,
+                parametros
+        );
+    }
+
+
+    // =========================================================
+    // CERRAR ETAPA ANEXO 1 EN FIRME
+    //
+    // REQUISITOS:
+    // - cálculos cerrados en firme
+    // - Anexo 1 en proceso
+    //
+    // RESULTADO:
+    // estado_anexo1 = C
+    // fecha_anexo1_firme = CURRENT_TIMESTAMP
+    //
+    // Solamente permite E -> C.
+    // =========================================================
+
+    public int cerrarAnexo1(
+            Integer idCierreCartera,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+        UPDATE cartera.cierres_cartera
+
+           SET estado_anexo1 =
+               'C',
+
+               fecha_anexo1_firme =
+                   CURRENT_TIMESTAMP,
+
+               fk_seguridad_edicion =
+                   :idUsuario,
+
+               fecha_edicion =
+                   CURRENT_TIMESTAMP
+
+         WHERE id_cierre_cartera =
+               :idCierreCartera
+
+           AND estado_fotografia =
+               'C'
+
+           AND estado_calculos =
+               'C'
+
+           AND estado_anexo1 =
+               'E'
+        """;
+
+        MapSqlParameterSource parametros =
+                new MapSqlParameterSource()
+                        .addValue(
+                                "idCierreCartera",
+                                idCierreCartera
+                        )
+                        .addValue(
+                                "idUsuario",
+                                idUsuario
+                        );
+
+        return jdbc.update(
+                sql,
+                parametros
+        );
+    }
+
+    // =========================================================
+    // MAPPER
+    // =========================================================
+
+    private CierreMensualDTO mapear(
+            ResultSet rs,
+            int rowNum
+    ) throws SQLException {
+
+        CierreMensualDTO dto =
+                new CierreMensualDTO();
+
+        dto.setIdCierreCartera(
+                rs.getInt("id_cierre_cartera")
+        );
+
+        dto.setFechaCorte(
+                rs.getObject(
+                        "fecha_corte",
+                        LocalDate.class
+                )
+        );
+
+        dto.setEstadoCierre(
+                rs.getString("estado_cierre")
+        );
+
+        dto.setSaldoCarteraMaestro(
+                rs.getBigDecimal(
+                        "saldo_cartera_maestro"
+                )
+        );
+
+        dto.setSaldoCarteraContable(
+                rs.getBigDecimal(
+                        "saldo_cartera_contable"
+                )
+        );
+
+        dto.setDiferenciaCuadre(
+                rs.getBigDecimal(
+                        "diferencia_cuadre"
+                )
+        );
+
+        dto.setCantidadCreditos(
+                rs.getInt(
+                        "cantidad_creditos"
+                )
+        );
+
+        dto.setFechaInicio(
+                obtenerFecha(
+                        rs,
+                        "fecha_inicio"
+                )
+        );
+
+        dto.setFechaCuadre(
+                obtenerFecha(
+                        rs,
+                        "fecha_cuadre"
+                )
+        );
+
+        dto.setFechaFotografia(
+                obtenerFecha(
+                        rs,
+                        "fecha_fotografia"
+                )
+        );
+
+        dto.setEstadoFotografia(
+                rs.getString(
+                        "estado_fotografia"
+                )
+        );
+
+        dto.setFechaFotografiaFirme(
+                obtenerFecha(
+                        rs,
+                        "fecha_fotografia_firme"
+                )
+        );
+
+        dto.setEstadoCalculos(
+                rs.getString(
+                        "estado_calculos"
+                )
+        );
+
+        dto.setFechaCalculosInicio(
+                obtenerFecha(
+                        rs,
+                        "fecha_calculos_inicio"
+                )
+        );
+
+        dto.setFechaCalculosFirme(
+                obtenerFecha(
+                        rs,
+                        "fecha_calculos_firme"
+                )
+        );
+
+        dto.setEstadoAnexo1(
+                rs.getString(
+                        "estado_anexo1"
+                )
+        );
+
+        dto.setFechaAnexo1Inicio(
+                obtenerFecha(
+                        rs,
+                        "fecha_anexo1_inicio"
+                )
+        );
+
+        dto.setFechaAnexo1Firme(
+                obtenerFecha(
+                        rs,
+                        "fecha_anexo1_firme"
+                )
+        );
+
+        dto.setEstadoAnexo2(
+                rs.getString(
+                        "estado_anexo2"
+                )
+        );
+
+        dto.setFechaAnexo2Inicio(
+                obtenerFecha(
+                        rs,
+                        "fecha_anexo2_inicio"
+                )
+        );
+
+        dto.setFechaAnexo2Firme(
+                obtenerFecha(
+                        rs,
+                        "fecha_anexo2_firme"
+                )
+        );
+
+        dto.setFechaFinalizacion(
+                obtenerFecha(
+                        rs,
+                        "fecha_finalizacion"
+                )
+        );
+
+        dto.setObservaciones(
+                rs.getString(
+                        "observaciones"
+                )
+        );
+
+        dto.setFkSeguridadCreacion(
+                rs.getInt(
+                        "fk_seguridad_creacion"
+                )
+        );
+
+        dto.setFechaCreacion(
+                obtenerFecha(
+                        rs,
+                        "fecha_creacion"
+                )
+        );
+
+        dto.setFkSeguridadEdicion(
+                rs.getInt(
+                        "fk_seguridad_edicion"
+                )
+        );
+
+        dto.setFechaEdicion(
+                obtenerFecha(
+                        rs,
+                        "fecha_edicion"
+                )
+        );
+
+        return dto;
+    }
+
+    // =========================================================
+    // UTILIDAD FECHAS
+    // =========================================================
+
+    private java.time.LocalDateTime obtenerFecha(
+            ResultSet rs,
+            String columna
+    ) throws SQLException {
+
+        java.sql.Timestamp timestamp =
+                rs.getTimestamp(columna);
+
+        return timestamp != null
+                ? timestamp.toLocalDateTime()
+                : null;
     }
 }

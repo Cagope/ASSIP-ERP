@@ -26,7 +26,15 @@ export interface CierreMensualCartera {
 
   fechaCorte: string;
 
+  // =======================================================
+  // ESTADO GENERAL DEL CIERRE
+  // =======================================================
+
   estadoCierre: string;
+
+  // =======================================================
+  // VALORES DEL CIERRE
+  // =======================================================
 
   saldoCarteraMaestro: number;
 
@@ -36,13 +44,59 @@ export interface CierreMensualCartera {
 
   cantidadCreditos: number;
 
+  // =======================================================
+  // FECHAS GENERALES
+  // =======================================================
+
   fechaInicio: string | null;
 
   fechaCuadre: string | null;
 
   fechaFotografia: string | null;
 
-  fechaFinal: string | null;
+  fechaFinalizacion: string | null;
+
+  // =======================================================
+  // FOTOGRAFÍA
+  // =======================================================
+
+  estadoFotografia: string;
+
+  fechaFotografiaFirme: string | null;
+
+  // =======================================================
+  // CÁLCULOS
+  // =======================================================
+
+  estadoCalculos: string;
+
+  fechaCalculosInicio: string | null;
+
+  fechaCalculosFirme: string | null;
+
+  // =======================================================
+  // ANEXO 1
+  // =======================================================
+
+  estadoAnexo1: string;
+
+  fechaAnexo1Inicio: string | null;
+
+  fechaAnexo1Firme: string | null;
+
+  // =======================================================
+  // ANEXO 2
+  // =======================================================
+
+  estadoAnexo2: string;
+
+  fechaAnexo2Inicio: string | null;
+
+  fechaAnexo2Firme: string | null;
+
+  // =======================================================
+  // OTROS
+  // =======================================================
 
   observaciones: string | null;
 
@@ -50,7 +104,7 @@ export interface CierreMensualCartera {
 
   fechaCreacion: string | null;
 
-  fkSeguridadEdicion: number;
+  fkSeguridadEdicion: number | null;
 
   fechaEdicion: string | null;
 }
@@ -65,22 +119,12 @@ export interface CierreMensualCartera {
 })
 export class CierreMensualCarteraApi {
 
-  // =========================================================
-  // URL BASE
-  // =========================================================
-
   private readonly baseUrl =
     `${environment.apiUrl}/cartera/cierre-mensual`;
-
-
-  // =========================================================
-  // CONSTRUCTOR
-  // =========================================================
 
   constructor(
     private readonly http: HttpClient
   ) {}
-
 
   // =========================================================
   // LISTAR CIERRES
@@ -93,7 +137,6 @@ export class CierreMensualCarteraApi {
     );
 
   }
-
 
   // =========================================================
   // CONSULTAR CIERRE POR ID
@@ -109,12 +152,8 @@ export class CierreMensualCarteraApi {
 
   }
 
-
   // =========================================================
   // EJECUTAR CIERRE / GENERAR FOTO
-  //
-  // El cierre es GENERAL.
-  // No se envía agencia.
   // =========================================================
 
   ejecutar(
@@ -138,22 +177,10 @@ export class CierreMensualCarteraApi {
 
   }
 
-
   // =========================================================
   // REGENERAR FOTO
   //
-  // Solo aplica para cierres en estado P.
-  //
-  // Conserva:
-  // - id_cierre_cartera
-  // - fecha de corte
-  //
-  // Regenera:
-  // - foto de créditos
-  // - base de cálculos
-  // - cantidad de créditos
-  // - saldo maestro
-  // - fecha de fotografía
+  // Permitido mientras la fotografía no esté en firme.
   // =========================================================
 
   regenerar(
@@ -167,6 +194,20 @@ export class CierreMensualCarteraApi {
 
   }
 
+  // =========================================================
+  // CERRAR FOTOGRAFÍA EN FIRME
+  // =========================================================
+
+  cerrarFotografia(
+    idCierreCartera: number
+  ): Observable<CierreMensualCartera> {
+
+    return this.http.post<CierreMensualCartera>(
+      `${this.baseUrl}/${idCierreCartera}/cerrar-fotografia`,
+      null
+    );
+
+  }
 
   // =========================================================
   // CONSULTAR SI EL CIERRE YA TIENE FOTO

@@ -5,6 +5,12 @@ import co.assip.erp.cartera.cierremensual.dto.CierreMensualDTO;
 import co.assip.erp.seguridad.service.UsuarioSesionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import co.assip.erp.cartera.calculosprevios.dto.ResumenEdadMoraDTO;
+import co.assip.erp.cartera.calculosprevios.dto.ResumenControlesCalculosDTO;
+import co.assip.erp.cartera.calculosprevios.dto.ResumenAportesGarantiasDTO;
+import co.assip.erp.cartera.calculosprevios.dto.DetalleCalculosCierreDTO;
+
+import java.util.List;
 
 @Service
 @Transactional
@@ -30,7 +36,7 @@ public class CalculosPreviosService {
     // PROCESO ACTUAL:
     //
     // 1. Validar cierre.
-    // 2. Validar estado C.
+    // 2. Validar fotografía en firme y cálculos abiertos.
     // 3. Validar base de cálculos.
     // 4. Calcular días de mora.
     // 5. Calcular edad de mora.
@@ -83,15 +89,43 @@ public class CalculosPreviosService {
                         );
 
         // =====================================================
-        // 2. VALIDAR ESTADO DEL CIERRE
-        // =====================================================
+// 2. VALIDAR ESTADO DEL CIERRE
+// =====================================================
 
-        validarEstadoCerrado(
+        validarFotografiaEnFirme(
                 cierre
         );
 
+        validarCalculosNoCerrados(
+                cierre
+        );
+
+// =====================================================
+// 3. VALIDAR DEPENDENCIA DEL CIERRE DE DEPÓSITOS
+// =====================================================
+
+        validarCierreDepositosEnFirme(
+                cierre
+        );
+
+        int etapaIniciada =
+                cierreRepository.iniciarCalculos(
+                        idCierreCartera,
+                        idUsuario
+                );
+
+        if (etapaIniciada != 1) {
+
+            throw new IllegalStateException(
+                    "No fue posible iniciar la etapa de cálculos "
+                            + "del cierre "
+                            + idCierreCartera
+                            + "."
+            );
+        }
+
         // =====================================================
-        // 3. VALIDAR BASE DE CÁLCULOS
+        // VALIDAR BASE DE CÁLCULOS
         // =====================================================
 
         int cantidadResultados =
@@ -536,15 +570,43 @@ public class CalculosPreviosService {
                         );
 
         // =====================================================
-        // 2. VALIDAR ESTADO
-        // =====================================================
+// 2. VALIDAR ESTADO DEL CIERRE
+// =====================================================
 
-        validarEstadoCerrado(
+        validarFotografiaEnFirme(
                 cierre
         );
 
+        validarCalculosNoCerrados(
+                cierre
+        );
+
+// =====================================================
+// 3. VALIDAR DEPENDENCIA DEL CIERRE DE DEPÓSITOS
+// =====================================================
+
+        validarCierreDepositosEnFirme(
+                cierre
+        );
+
+        int etapaIniciada =
+                cierreRepository.iniciarCalculos(
+                        idCierreCartera,
+                        idUsuario
+                );
+
+        if (etapaIniciada != 1) {
+
+            throw new IllegalStateException(
+                    "No fue posible iniciar la etapa de cálculos "
+                            + "del cierre "
+                            + idCierreCartera
+                            + "."
+            );
+        }
+
         // =====================================================
-        // 3. VALIDAR BASE
+        // VALIDAR BASE DE CÁLCULOS
         // =====================================================
 
         int cantidadResultados =
@@ -632,20 +694,542 @@ public class CalculosPreviosService {
     }
 
     // =========================================================
-    // VALIDAR CIERRE CERRADO
+    // =========================================================
+    // OBTENER RESUMEN POR CLASIFICACIÓN Y EDAD DE MORA
     //
-    // C = fotografía cerrada en firme.
-    //
-    // Los cálculos previos definitivos solamente se ejecutan
-    // después de cerrar la fotografía.
+    // Consulta únicamente resultados ya persistidos.
+    // No ejecuta ni modifica cálculos.
     // =========================================================
 
-    private void validarEstadoCerrado(
+    @Transactional(readOnly = true)
+    public List<ResumenEdadMoraDTO> obtenerResumenEdadMora(
+            Integer idCierreCartera
+    ) {
+
+        validarIdCierre(
+                idCierreCartera
+        );
+
+        // =====================================================
+        // 1. VALIDAR EXISTENCIA DEL CIERRE
+        // =====================================================
+
+        cierreRepository
+                .buscarPorId(
+                        idCierreCartera
+                )
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "No existe el cierre de cartera: "
+                                        + idCierreCartera
+                        )
+                );
+
+        // =====================================================
+        // 2. VALIDAR BASE DE RESULTADOS
+        // =====================================================
+
+        int cantidadResultados =
+                repository.contarResultados(
+                        idCierreCartera
+                );
+
+        if (cantidadResultados <= 0) {
+
+            throw new IllegalStateException(
+                    "El cierre "
+                            + idCierreCartera
+                            + " no tiene resultados de cálculos "
+                            + "para consultar."
+            );
+        }
+
+        // =====================================================
+        // 3. CONSULTAR RESUMEN
+        // =====================================================
+
+        return repository.obtenerResumenEdadMora(
+                idCierreCartera
+        );
+    }
+
+    // =========================================================
+    // OBTENER RESUMEN DE APORTES Y GARANTÍAS
+    //
+    // Consulta únicamente resultados ya persistidos.
+    // No ejecuta ni modifica cálculos.
+    // =========================================================
+
+    @Transactional(readOnly = true)
+    public ResumenAportesGarantiasDTO obtenerResumenAportesGarantias(
+            Integer idCierreCartera
+    ) {
+
+        validarIdCierre(
+                idCierreCartera
+        );
+
+        // =====================================================
+        // 1. VALIDAR EXISTENCIA DEL CIERRE
+        // =====================================================
+
+        cierreRepository
+                .buscarPorId(
+                        idCierreCartera
+                )
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "No existe el cierre de cartera: "
+                                        + idCierreCartera
+                        )
+                );
+
+        // =====================================================
+        // 2. VALIDAR BASE DE RESULTADOS
+        // =====================================================
+
+        int cantidadResultados =
+                repository.contarResultados(
+                        idCierreCartera
+                );
+
+        if (cantidadResultados <= 0) {
+
+            throw new IllegalStateException(
+                    "El cierre "
+                            + idCierreCartera
+                            + " no tiene resultados de cálculos "
+                            + "para consultar."
+            );
+        }
+
+        // =====================================================
+        // 3. CONSULTAR RESUMEN
+        // =====================================================
+
+        return repository.obtenerResumenAportesGarantias(
+                idCierreCartera
+        );
+    }
+
+    // =========================================================
+    // OBTENER DETALLE COMPLETO DE CÁLCULOS DEL CIERRE
+    //
+    // Fuente para:
+    //
+    // - revisión operativa
+    // - auditoría del cierre
+    // - generación del Excel
+    //
+    // Consulta únicamente información ya persistida.
+    //
+    // NO recalcula información.
+    // NO modifica el cierre.
+    // =========================================================
+
+    @Transactional(readOnly = true)
+    public List<DetalleCalculosCierreDTO> obtenerDetalleCalculosCierre(
+            Integer idCierreCartera
+    ) {
+
+        validarIdCierre(
+                idCierreCartera
+        );
+
+        // =====================================================
+        // 1. VALIDAR EXISTENCIA DEL CIERRE
+        // =====================================================
+
+        cierreRepository
+                .buscarPorId(
+                        idCierreCartera
+                )
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "No existe el cierre de cartera: "
+                                        + idCierreCartera
+                        )
+                );
+
+        // =====================================================
+        // 2. VALIDAR BASE DE RESULTADOS
+        // =====================================================
+
+        int cantidadResultados =
+                repository.contarResultados(
+                        idCierreCartera
+                );
+
+        if (cantidadResultados <= 0) {
+
+            throw new IllegalStateException(
+                    "El cierre "
+                            + idCierreCartera
+                            + " no tiene resultados de cálculos "
+                            + "para consultar."
+            );
+        }
+
+        // =====================================================
+        // 3. CONSULTAR DETALLE COMPLETO
+        // =====================================================
+
+        List<DetalleCalculosCierreDTO> detalle =
+                repository.obtenerDetalleCalculosCierre(
+                        idCierreCartera
+                );
+
+        // =====================================================
+        // 4. VALIDAR CANTIDAD
+        // =====================================================
+
+        if (detalle.size()
+                != cantidadResultados) {
+
+            throw new IllegalStateException(
+                    "Inconsistencia al consultar el detalle "
+                            + "de cálculos del cierre "
+                            + idCierreCartera
+                            + ". Resultados esperados: "
+                            + cantidadResultados
+                            + ". Filas obtenidas: "
+                            + detalle.size()
+                            + "."
+            );
+        }
+
+        // =====================================================
+        // 5. RESPUESTA
+        // =====================================================
+
+        return detalle;
+    }
+
+    // =========================================================
+    // OBTENER RESUMEN DE CONTROLES DE CÁLCULOS
+    //
+    // Consulta únicamente resultados ya persistidos.
+    //
+    // NO recalcula información.
+    // NO modifica el cierre.
+    //
+    // procesoConsistente = true cuando todos los controles
+    // de integridad se encuentran en cero.
+    // =========================================================
+
+    @Transactional(readOnly = true)
+    public ResumenControlesCalculosDTO obtenerResumenControles(
+            Integer idCierreCartera
+    ) {
+
+        validarIdCierre(
+                idCierreCartera
+        );
+
+        // =====================================================
+        // 1. VALIDAR EXISTENCIA DEL CIERRE
+        // =====================================================
+
+        cierreRepository
+                .buscarPorId(
+                        idCierreCartera
+                )
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "No existe el cierre de cartera: "
+                                        + idCierreCartera
+                        )
+                );
+
+        // =====================================================
+        // 2. TOTAL DE RESULTADOS
+        // =====================================================
+
+        int cantidadResultados =
+                repository.contarResultados(
+                        idCierreCartera
+                );
+
+        if (cantidadResultados <= 0) {
+
+            throw new IllegalStateException(
+                    "El cierre "
+                            + idCierreCartera
+                            + " no tiene resultados de cálculos "
+                            + "para consultar."
+            );
+        }
+
+        // =====================================================
+        // 3. CONTROLES DE INTEGRIDAD
+        // =====================================================
+
+        int sinEdadMora =
+                repository.contarSinEdadMora(
+                        idCierreCartera
+                );
+
+        int diasMoraNegativos =
+                repository.contarDiasMoraNegativos(
+                        idCierreCartera
+                );
+
+        int edadesRiesgoInvalidas =
+                repository.contarEdadesRiesgoInvalidas(
+                        idCierreCartera
+                );
+
+        int edadesReestructuracionInvalidas =
+                repository.contarEdadesReestructuracionInvalidas(
+                        idCierreCartera
+                );
+
+        int noReestructuradosInconsistentes =
+                repository.contarNoReestructuradosInconsistentes(
+                        idCierreCartera
+                );
+
+        // =====================================================
+        // 4. INFORMACIÓN DEL CIERRE
+        // =====================================================
+
+        int cantidadReestructurados =
+                repository.contarReestructurados(
+                        idCierreCartera
+                );
+
+        int cantidadUnaSolaCuota =
+                repository.contarUnaSolaCuota(
+                        idCierreCartera
+                );
+
+        // =====================================================
+        // 5. ESTADO GENERAL DEL CONTROL
+        // =====================================================
+
+        boolean procesoConsistente =
+                sinEdadMora == 0
+                        && diasMoraNegativos == 0
+                        && edadesRiesgoInvalidas == 0
+                        && edadesReestructuracionInvalidas == 0
+                        && noReestructuradosInconsistentes == 0;
+
+        // =====================================================
+        // 6. RESPUESTA
+        // =====================================================
+
+        return new ResumenControlesCalculosDTO(
+
+                cantidadResultados,
+
+                sinEdadMora,
+
+                diasMoraNegativos,
+
+                edadesRiesgoInvalidas,
+
+                edadesReestructuracionInvalidas,
+
+                noReestructuradosInconsistentes,
+
+                cantidadReestructurados,
+
+                cantidadUnaSolaCuota,
+
+                procesoConsistente
+        );
+    }
+
+    // =========================================================
+    // CERRAR CÁLCULOS EN FIRME
+    //
+    // REQUISITOS:
+    // - fotografía cerrada en firme
+    // - cálculos en estado E
+    // - base de resultados existente
+    // - controles de integridad correctos
+    //
+    // RESULTADO:
+    // estado_calculos = C
+    // fecha_calculos_firme = CURRENT_TIMESTAMP
+    // =========================================================
+
+    public CierreMensualDTO cerrarCalculos(
+            Integer idCierreCartera
+    ) {
+
+        validarIdCierre(
+                idCierreCartera
+        );
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        // =====================================================
+        // 1. RECUPERAR CIERRE
+        // =====================================================
+
+        CierreMensualDTO cierre =
+                cierreRepository
+                        .buscarPorId(
+                                idCierreCartera
+                        )
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "No existe el cierre de cartera: "
+                                                + idCierreCartera
+                                )
+                        );
+
+        // =====================================================
+        // 2. VALIDAR FOTOGRAFÍA EN FIRME
+        // =====================================================
+
+        validarFotografiaEnFirme(
+                cierre
+        );
+
+        // =====================================================
+        // 3. VALIDAR ESTADO DE CÁLCULOS
+        // =====================================================
+
+        String estadoCalculos =
+                cierre.getEstadoCalculos();
+
+        if (estadoCalculos != null
+                && "C".equalsIgnoreCase(
+                estadoCalculos.trim()
+        )) {
+
+            throw new IllegalStateException(
+                    "Los cálculos del cierre "
+                            + idCierreCartera
+                            + " ya se encuentran cerrados en firme."
+            );
+        }
+
+        if (estadoCalculos == null
+                || !"E".equalsIgnoreCase(
+                estadoCalculos.trim()
+        )) {
+
+            throw new IllegalStateException(
+                    "Los cálculos del cierre "
+                            + idCierreCartera
+                            + " deben ejecutarse antes de "
+                            + "cerrarlos en firme."
+            );
+        }
+
+        // =====================================================
+        // 4. VALIDAR BASE DE RESULTADOS
+        // =====================================================
+
+        int cantidadResultados =
+                repository.contarResultados(
+                        idCierreCartera
+                );
+
+        if (cantidadResultados <= 0) {
+
+            throw new IllegalStateException(
+                    "El cierre "
+                            + idCierreCartera
+                            + " no tiene resultados de cálculos "
+                            + "para cerrar en firme."
+            );
+        }
+
+        // =====================================================
+        // 5. VALIDAR CONTROLES DE INTEGRIDAD
+        // =====================================================
+
+        int sinEdadMora =
+                repository.contarSinEdadMora(
+                        idCierreCartera
+                );
+
+        int diasMoraNegativos =
+                repository.contarDiasMoraNegativos(
+                        idCierreCartera
+                );
+
+        int edadesRiesgoInvalidas =
+                repository.contarEdadesRiesgoInvalidas(
+                        idCierreCartera
+                );
+
+        int edadesReestructuracionInvalidas =
+                repository.contarEdadesReestructuracionInvalidas(
+                        idCierreCartera
+                );
+
+        int noReestructuradosInconsistentes =
+                repository.contarNoReestructuradosInconsistentes(
+                        idCierreCartera
+                );
+
+        if (sinEdadMora > 0
+                || diasMoraNegativos > 0
+                || edadesRiesgoInvalidas > 0
+                || edadesReestructuracionInvalidas > 0
+                || noReestructuradosInconsistentes > 0) {
+
+            throw new IllegalStateException(
+                    "Los cálculos del cierre "
+                            + idCierreCartera
+                            + " presentan inconsistencias y "
+                            + "no pueden cerrarse en firme."
+            );
+        }
+
+        // =====================================================
+        // 6. CERRAR ETAPA
+        // =====================================================
+
+        int actualizados =
+                cierreRepository.cerrarCalculos(
+                        idCierreCartera,
+                        idUsuario
+                );
+
+        if (actualizados != 1) {
+
+            throw new IllegalStateException(
+                    "No fue posible cerrar en firme "
+                            + "los cálculos del cierre "
+                            + idCierreCartera
+                            + "."
+            );
+        }
+
+        // =====================================================
+        // 7. DEVOLVER CABECERA ACTUALIZADA
+        // =====================================================
+
+        return cierreRepository
+                .buscarPorId(
+                        idCierreCartera
+                )
+                .orElseThrow(() ->
+                        new IllegalStateException(
+                                "No fue posible recuperar el cierre "
+                                        + idCierreCartera
+                                        + " después de cerrar los cálculos."
+                        )
+                );
+    }
+
+    // =========================================================
+    // VALIDAR FOTOGRAFÍA EN FIRME
+    // =========================================================
+
+    private void validarFotografiaEnFirme(
             CierreMensualDTO cierre
     ) {
 
         String estado =
-                cierre.getEstadoCierre();
+                cierre.getEstadoFotografia();
 
         if (estado == null
                 || !"C".equalsIgnoreCase(
@@ -653,13 +1237,68 @@ public class CalculosPreviosService {
         )) {
 
             throw new IllegalStateException(
-                    "El cierre "
+                    "La fotografía del cierre "
                             + cierre.getIdCierreCartera()
-                            + " debe estar cerrado en firme "
-                            + "para ejecutar los cálculos previos."
+                            + " debe estar cerrada en firme "
+                            + "para ejecutar los cálculos."
             );
         }
     }
+
+    // =========================================================
+    // VALIDAR CÁLCULOS NO CERRADOS
+    //
+    // P = Pendiente
+    // E = En proceso
+    // C = Cerrados en firme
+    // =========================================================
+
+    private void validarCalculosNoCerrados(
+            CierreMensualDTO cierre
+    ) {
+
+        String estado =
+                cierre.getEstadoCalculos();
+
+        if (estado != null
+                && "C".equalsIgnoreCase(
+                estado.trim()
+        )) {
+
+            throw new IllegalStateException(
+                    "Los cálculos del cierre "
+                            + cierre.getIdCierreCartera()
+                            + " ya se encuentran cerrados en firme."
+            );
+        }
+    }
+
+    // =========================================================
+    // VALIDAR CIERRE DE DEPÓSITOS EN FIRME
+    // =========================================================
+
+    private void validarCierreDepositosEnFirme(
+            CierreMensualDTO cierre
+    ) {
+
+        boolean disponible =
+                repository.existeCierreDepositosEnFirme(
+                        cierre.getIdCierreCartera()
+                );
+
+        if (!disponible) {
+
+            throw new IllegalStateException(
+                    "El cierre de Depósitos del "
+                            + cierre.getFechaCorte()
+                            + " no se encuentra cerrado en firme. "
+                            + "No es posible ejecutar los cálculos "
+                            + "de Cartera hasta completar el cierre "
+                            + "de Depósitos."
+            );
+        }
+    }
+
 
     // =========================================================
     // VALIDAR ID CIERRE

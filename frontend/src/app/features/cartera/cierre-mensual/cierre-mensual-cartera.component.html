@@ -60,7 +60,11 @@
           name="fechaCorte"
           type="date"
           [(ngModel)]="fechaCorte"
-          [disabled]="ejecutando || regenerando">
+          [disabled]="
+            ejecutando
+            || regenerando
+            || cerrandoFotografia
+          ">
 
       </div>
 
@@ -87,7 +91,11 @@
               *ngIf="obtenerCierreFecha() as cierreFecha">
 
               Cierre existente -
-              {{ descripcionEstado(cierreFecha.estadoCierre) }}.
+              {{
+              fotografiaEnFirme(cierreFecha)
+              ? 'Fotografía en firme'
+              : 'Fotografía en proceso'
+              }}.
 
             </ng-container>
 
@@ -117,6 +125,7 @@
           [disabled]="
             ejecutando
             || regenerando
+            || cerrandoFotografia
             || cargando
             || !fechaCorte
             || existeCierreFecha()
@@ -145,6 +154,7 @@
           [disabled]="
             ejecutando
             || regenerando
+            || cerrandoFotografia
             || cargando
             || !puedeRegenerar(cierreFecha)
           ">
@@ -166,7 +176,11 @@
           type="button"
           class="btn btn--secondary"
           (click)="limpiar()"
-          [disabled]="ejecutando || regenerando">
+          [disabled]="
+            ejecutando
+            || regenerando
+            || cerrandoFotografia
+          ">
 
           Limpiar
 
@@ -182,6 +196,7 @@
           [disabled]="
             ejecutando
             || regenerando
+            || cerrandoFotografia
             || cargando
           ">
 
@@ -196,18 +211,26 @@
   </div>
 
 
-  <!-- ===================================================== -->
-  <!-- MENSAJES -->
-  <!-- ===================================================== -->
+  <!-- MENSAJE DE PROCESO -->
 
   <div
-    class="mensaje mensaje--ok"
-    *ngIf="mensaje">
+    class="mensaje mensaje--proceso"
+    *ngIf="regenerando">
 
     {{ mensaje }}
 
   </div>
 
+
+  <!-- MENSAJE DE ÉXITO -->
+
+  <div
+    class="mensaje mensaje--ok"
+    *ngIf="mensaje && !regenerando">
+
+    {{ mensaje }}
+
+  </div>
 
   <div
     class="mensaje mensaje--error"
@@ -242,19 +265,21 @@
       </div>
 
 
-      <!-- REGENERAR DESDE RESUMEN -->
+      <!-- ACCIONES DE LA FOTOGRAFÍA -->
 
-      <div
-        class="section-actions"
-        *ngIf="puedeRegenerar(cierre)">
+      <div class="section-actions">
+
+        <!-- REGENERAR -->
 
         <button
+          *ngIf="puedeRegenerar(cierre)"
           type="button"
           class="btn btn--warning btn-sm"
           (click)="regenerarFoto(cierre)"
           [disabled]="
             ejecutando
             || regenerando
+            || cerrandoFotografia
             || cargando
           ">
 
@@ -264,6 +289,34 @@
 
           <span *ngIf="regenerando">
             Regenerando...
+          </span>
+
+        </button>
+
+
+        <!-- CERRAR FOTOGRAFÍA EN FIRME -->
+
+        <button
+          *ngIf="
+            !fotografiaEnFirme(cierre)
+            && cierre.estadoFotografia === 'E'
+          "
+          type="button"
+          class="btn btn--primary btn-sm"
+          (click)="cerrarFotografia(cierre)"
+          [disabled]="
+            ejecutando
+            || regenerando
+            || cerrandoFotografia
+            || cargando
+          ">
+
+          <span *ngIf="!cerrandoFotografia">
+            Cerrar fotografía en firme
+          </span>
+
+          <span *ngIf="cerrandoFotografia">
+            Cerrando...
           </span>
 
         </button>
@@ -290,16 +343,20 @@
       </div>
 
 
-      <!-- ESTADO -->
+      <!-- ESTADO FOTOGRAFÍA -->
 
       <div class="resumen-item">
 
         <span class="resumen-label">
-          Estado
+          Estado fotografía
         </span>
 
         <strong>
-          {{ descripcionEstado(cierre.estadoCierre) }}
+          {{
+          fotografiaEnFirme(cierre)
+          ? 'En firme'
+          : 'En proceso'
+          }}
         </strong>
 
       </div>
@@ -332,6 +389,25 @@
           {{
           cierre.fechaFotografia
           ? formatearFechaHora(cierre.fechaFotografia)
+          : 'Pendiente'
+          }}
+        </strong>
+
+      </div>
+
+
+      <!-- FECHA FOTO EN FIRME -->
+
+      <div class="resumen-item">
+
+        <span class="resumen-label">
+          Fotografía en firme
+        </span>
+
+        <strong>
+          {{
+          cierre.fechaFotografiaFirme
+          ? formatearFechaHora(cierre.fechaFotografiaFirme)
           : 'Pendiente'
           }}
         </strong>
@@ -436,8 +512,8 @@
           type="button"
           class="cierre-detalle-tab"
           [class.cierre-detalle-tab--activo]="
-        seccionCierreActiva === 'procesamiento'
-      "
+            seccionCierreActiva === 'procesamiento'
+          "
           (click)="cambiarSeccionCierre('procesamiento')">
 
           Procesamiento
@@ -449,8 +525,8 @@
           type="button"
           class="cierre-detalle-tab"
           [class.cierre-detalle-tab--activo]="
-        seccionCierreActiva === 'validacion'
-      "
+            seccionCierreActiva === 'validacion'
+          "
           (click)="cambiarSeccionCierre('validacion')">
 
           Validaciones
@@ -462,8 +538,8 @@
           type="button"
           class="cierre-detalle-tab"
           [class.cierre-detalle-tab--activo]="
-        seccionCierreActiva === 'cuadre'
-      "
+            seccionCierreActiva === 'cuadre'
+          "
           (click)="cambiarSeccionCierre('cuadre')">
 
           Cuadre
@@ -586,7 +662,7 @@
           </th>
 
           <th class="center">
-            Estado
+            Estado fotografía
           </th>
 
           <th class="right">
@@ -595,6 +671,10 @@
 
           <th>
             Fotografía
+          </th>
+
+          <th>
+            En firme
           </th>
 
           <th class="right">
@@ -622,13 +702,13 @@
 
         <tr
           *ngFor="
-            let cierre of cierres;
-            trackBy: trackByCierre
-          "
+              let cierre of cierres;
+              trackBy: trackByCierre
+            "
           [class.row-selected]="
-            cierreSeleccionado?.idCierreCartera
-              === cierre.idCierreCartera
-          ">
+              cierreSeleccionado?.idCierreCartera
+                === cierre.idCierreCartera
+            ">
 
           <!-- FECHA -->
 
@@ -639,22 +719,26 @@
           </td>
 
 
-          <!-- ESTADO -->
+          <!-- ESTADO FOTOGRAFÍA -->
 
           <td class="center">
 
-            <span
-              class="badge"
-              [class.badge--proceso]="
-                cierre.estadoCierre === 'P'
-              "
-              [class.badge--cerrado]="
-                cierre.estadoCierre === 'C'
-              ">
+              <span
+                class="badge"
+                [class.badge--proceso]="
+                  cierre.estadoFotografia !== 'C'
+                "
+                [class.badge--cerrado]="
+                  cierre.estadoFotografia === 'C'
+                ">
 
-              {{ descripcionEstado(cierre.estadoCierre) }}
+                {{
+                  fotografiaEnFirme(cierre)
+                    ? 'En firme'
+                    : 'En proceso'
+                }}
 
-            </span>
+              </span>
 
           </td>
 
@@ -692,6 +776,21 @@
               Pendiente
 
             </ng-template>
+
+          </td>
+
+
+          <!-- FECHA EN FIRME -->
+
+          <td>
+
+            {{
+            cierre.fechaFotografiaFirme
+            ? formatearFechaHora(
+            cierre.fechaFotografiaFirme
+            )
+            : 'Pendiente'
+            }}
 
           </td>
 
@@ -748,7 +847,11 @@
                 type="button"
                 class="btn btn--secondary btn-sm"
                 (click)="seleccionarCierre(cierre)"
-                [disabled]="ejecutando || regenerando">
+                [disabled]="
+                    ejecutando
+                    || regenerando
+                    || cerrandoFotografia
+                  ">
 
                 Ver
 
@@ -761,26 +864,58 @@
                 class="btn btn--warning btn-sm"
                 (click)="regenerarFoto(cierre)"
                 [disabled]="
-                  ejecutando
-                  || regenerando
-                  || cargando
-                ">
+                    ejecutando
+                    || regenerando
+                    || cerrandoFotografia
+                    || cargando
+                  ">
 
-                <span *ngIf="
-                  !regenerando
-                  || cierreSeleccionado?.idCierreCartera
-                     !== cierre.idCierreCartera
-                ">
-                  Regenerar
-                </span>
+                  <span
+                    *ngIf="
+                      !regenerando
+                      || cierreSeleccionado?.idCierreCartera
+                         !== cierre.idCierreCartera
+                    ">
 
-                <span *ngIf="
-                  regenerando
-                  && cierreSeleccionado?.idCierreCartera
-                     === cierre.idCierreCartera
-                ">
-                  Procesando...
-                </span>
+                    Regenerar
+
+                  </span>
+
+                <span
+                  *ngIf="
+                      regenerando
+                      && cierreSeleccionado?.idCierreCartera
+                         === cierre.idCierreCartera
+                    ">
+
+                    Procesando...
+
+                  </span>
+
+              </button>
+
+
+              <button
+                *ngIf="
+                    cierre.estadoFotografia === 'E'
+                  "
+                type="button"
+                class="btn btn--primary btn-sm"
+                (click)="cerrarFotografia(cierre)"
+                [disabled]="
+                    ejecutando
+                    || regenerando
+                    || cerrandoFotografia
+                    || cargando
+                  ">
+
+                  <span *ngIf="!cerrandoFotografia">
+                    Cerrar
+                  </span>
+
+                <span *ngIf="cerrandoFotografia">
+                    Cerrando...
+                  </span>
 
               </button>
 

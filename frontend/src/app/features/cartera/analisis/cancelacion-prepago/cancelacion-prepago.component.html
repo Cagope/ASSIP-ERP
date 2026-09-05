@@ -1,0 +1,236 @@
+<div class="page">
+  <header class="cabecera">
+    <div>
+      <h1>Cancelación y Prepago</h1>
+      <p>Permanencia, salidas definitivas, prepagos y velocidad observada de amortización de la cartera.</p>
+    </div>
+    <div class="cabecera-acciones">
+      <span class="corte" *ngIf="fechaCorte">Corte {{ fechaCorte }}</span>
+      <button class="btn" type="button" (click)="exportarExcel()" [disabled]="!resumen || exportando">
+        {{ exportando ? 'Generando...' : 'Exportar Excel' }}
+      </button>
+    </div>
+  </header>
+
+  <section class="panel filtros-panel">
+    <div class="filtro">
+      <label>Corte</label>
+      <select [(ngModel)]="fechaCorte" (change)="cambiarCorte()">
+        <option *ngFor="let x of cortes" [value]="x">{{ x }}</option>
+      </select>
+    </div>
+    <div class="filtro">
+      <label>Línea de crédito</label>
+      <select [(ngModel)]="idLineaCredito">
+        <option [ngValue]="null">Todas</option>
+        <option *ngFor="let x of lineas" [ngValue]="x.idLineaCredito">{{ x.codigoLineaCredito }} - {{ x.nombreLineaCredito }}</option>
+      </select>
+    </div>
+    <div class="filtro">
+      <label>Resultado</label>
+      <select [(ngModel)]="clasificacion">
+        <option *ngFor="let x of clasificaciones" [value]="x.codigo">{{ x.descripcion }}</option>
+      </select>
+    </div>
+    <div class="filtro filtro-busqueda">
+      <label>Buscar</label>
+      <input type="text" [(ngModel)]="textoBusqueda" (ngModelChange)="pagina=1" placeholder="Documento, nombre o pagaré">
+    </div>
+    <div class="acciones">
+      <button class="btn primary" type="button" (click)="aplicarFiltros()" [disabled]="cargandoDetalle">Aplicar</button>
+      <button class="btn" type="button" (click)="limpiarFiltros()" [disabled]="cargandoDetalle">Limpiar</button>
+    </div>
+  </section>
+
+  <div class="estado-carga" *ngIf="cargando">Cargando análisis...</div>
+  <div class="estado-carga" *ngIf="cargandoDetalle">Actualizando detalle...</div>
+  <div class="error" *ngIf="error">{{ error }}</div>
+
+  <ng-container *ngIf="!cargando && resumen">
+    <section class="kpis">
+      <article>
+        <span>Saldo expuesto</span>
+        <strong>{{ moneda(resumen.saldoExpuesto) }}</strong>
+        <small>{{ resumen.creditosExpuestos | number:'1.0-0' }} créditos · {{ resumen.personasExpuestas | number:'1.0-0' }} asociados</small>
+      </article>
+      <article>
+        <span>Permanencia</span>
+        <strong>{{ pct(resumen.tasaPermanencia) }}</strong>
+        <small>{{ resumen.permanencias | number:'1.0-0' }} créditos</small>
+      </article>
+      <article>
+        <span>Salida definitiva</span>
+        <strong>{{ pct(resumen.tasaSalidaDefinitiva) }}</strong>
+        <small>{{ resumen.salidasDefinitivas | number:'1.0-0' }} créditos</small>
+      </article>
+      <article>
+        <span>Prepago</span>
+        <strong>{{ pct(resumen.tasaPrepagoPoblacion) }}</strong>
+        <small>{{ resumen.prepagos | number:'1.0-0' }} créditos · {{ moneda(resumen.saldoPrevioPrepagos) }}</small>
+      </article>
+      <article>
+        <span>Vida consumida</span>
+        <strong>{{ pct(resumen.porcentajeVidaConsumidaPromedio) }}</strong>
+        <small>{{ numero(resumen.vidaEfectivaPromedioDias / 30.4375, 1) }} meses efectivos</small>
+      </article>
+      <article>
+        <span>Amortización acelerada</span>
+        <strong>{{ pct(resumen.porcentajeAmortizacionAcelerada) }}</strong>
+        <small>{{ resumen.amortizacionesAceleradas | number:'1.0-0' }} períodos</small>
+      </article>
+    </section>
+
+    <section class="panel salida-panel">
+      <div class="titulo-seccion">
+        <div>
+          <h2>Composición de salidas</h2>
+          <p>La tasa de prepago se calcula sobre toda la población expuesta; la participación de prepago se calcula dentro de las salidas definitivas.</p>
+        </div>
+      </div>
+      <div class="mini-kpis">
+        <div><b>Prepago</b><span>{{ resumen.prepagos | number:'1.0-0' }}</span><small>{{ pct(resumen.participacionPrepagoCancelaciones) }} de salidas</small></div>
+        <div><b>Cancelación normal</b><span>{{ resumen.cancelacionesNormales | number:'1.0-0' }}</span><small>±30 días del vencimiento</small></div>
+        <div><b>Posterior al vencimiento</b><span>{{ resumen.cancelacionesPosteriores | number:'1.0-0' }}</span><small>Más de 30 días después</small></div>
+        <div><b>Ausencia temporal</b><span>{{ resumen.ausenciasTemporales | number:'1.0-0' }}</span><small>No se trata como cancelación</small></div>
+        <div><b>Velocidad amortización</b><span>{{ pct(resumen.velocidadAmortizacionPromedio) }}</span><small>Promedio observado por período</small></div>
+        <div><b>Anticipación prepago</b><span>{{ diasComoMeses(resumen.anticipacionPromedioPrepagoDias) }}</span><small>Promedio antes de fecha final</small></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="titulo-seccion">
+        <div>
+          <h2>Prepagos por anticipación</h2>
+          <p>Distribución de los {{ resumen.prepagos | number:'1.0-0' }} prepagos del corte.</p>
+        </div>
+      </div>
+      <div class="bandas">
+        <div><span>31–90 días</span><strong>{{ resumen.prepagos3190Dias | number:'1.0-0' }}</strong></div>
+        <div><span>3–6 meses</span><strong>{{ resumen.prepagos36Meses | number:'1.0-0' }}</strong></div>
+        <div><span>6–12 meses</span><strong>{{ resumen.prepagos612Meses | number:'1.0-0' }}</strong></div>
+        <div><span>1–2 años</span><strong>{{ resumen.prepagos12Anios | number:'1.0-0' }}</strong></div>
+        <div><span>2–5 años</span><strong>{{ resumen.prepagos25Anios | number:'1.0-0' }}</strong></div>
+        <div><span>Más de 5 años</span><strong>{{ resumen.prepagosMas5Anios | number:'1.0-0' }}</strong></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="titulo-seccion">
+        <div>
+          <h2>Comportamiento por línea de crédito</h2>
+          <p>Seleccione una línea para llevarla directamente al informe detallado.</p>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Línea</th><th>Expuestos</th><th>Saldo expuesto</th><th>Permanencia</th><th>Prepagos</th><th>Tasa prepago</th><th>Salidas</th><th>Particip. prepago</th><th>Vel. amort.</th><th>Vida consumida</th><th>Antic. prepago</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let x of lineas" [class.fila-seleccionada]="idLineaCredito===x.idLineaCredito">
+              <td><b>{{ x.codigoLineaCredito }}</b><br><small>{{ x.nombreLineaCredito }}</small></td>
+              <td class="num">{{ x.creditosExpuestos | number:'1.0-0' }}</td>
+              <td class="num">{{ moneda(x.saldoExpuesto) }}</td>
+              <td class="num">{{ pct(x.tasaPermanencia) }}</td>
+              <td class="num">{{ x.prepagos | number:'1.0-0' }}</td>
+              <td class="num">{{ pct(x.tasaPrepagoPoblacion) }}</td>
+              <td class="num">{{ x.salidasDefinitivas | number:'1.0-0' }}</td>
+              <td class="num">{{ pct(x.participacionPrepagoCancelaciones) }}</td>
+              <td class="num">{{ pct(x.velocidadAmortizacionPromedio) }}</td>
+              <td class="num">{{ pct(x.porcentajeVidaConsumidaPromedio) }}</td>
+              <td class="num">{{ diasComoMeses(x.anticipacionPromedioPrepagoDias) }}</td>
+              <td><button class="btn sm" type="button" (click)="seleccionarLinea(x)">Detalle</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="titulo-tabla">
+        <div>
+          <h2>Informe detallado de créditos</h2>
+          <p>{{ detalleFiltrado.length | number:'1.0-0' }} registros con los filtros actuales.</p>
+        </div>
+        <div class="tamano-pagina">
+          <label>Filas</label>
+          <select [(ngModel)]="tamanoPagina" (change)="cambiarTamanoPagina()">
+            <option [ngValue]="25">25</option><option [ngValue]="50">50</option><option [ngValue]="100">100</option><option [ngValue]="250">250</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="detalle">
+          <thead>
+            <tr>
+              <th>Documento / Asociado</th><th>Pagaré</th><th>Línea</th><th>Saldo corte</th><th>Saldo siguiente</th><th>Reducción</th><th>Resultado</th><th>Anticipación</th><th>Vida consumida</th><th>Mora</th><th>Edad</th><th>Deterioro</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let x of detallePagina">
+              <td><b>{{ x.documento }}</b><br>{{ x.nombreCompleto }}</td>
+              <td>{{ x.pagareCartera }}</td>
+              <td><b>{{ x.codigoLineaCredito }}</b><br><small>{{ x.nombreLineaCredito }}</small></td>
+              <td class="num">{{ moneda(x.saldoCorteAnterior) }}</td>
+              <td class="num">{{ x.saldoCorteSiguiente == null ? '—' : moneda(x.saldoCorteSiguiente) }}</td>
+              <td class="num">
+                <span [class]="claseAmortizacion(x.comportamientoAmortizacion)">{{ x.porcentajeReduccionSaldo == null ? '—' : pct(x.porcentajeReduccionSaldo) }}</span>
+                <small *ngIf="x.comportamientoAmortizacion">{{ x.comportamientoAmortizacion }}</small>
+              </td>
+              <td><span [class]="claseSalida(x.clasificacionSalida)">{{ x.clasificacionSalida }}</span></td>
+              <td>{{ x.diasAnticipacion == null ? '—' : (x.diasAnticipacion | number:'1.0-0') + ' días' }}<br><small>{{ x.rangoAnticipacion || '' }}</small></td>
+              <td class="num">{{ x.porcentajeVidaConsumida == null ? '—' : pct(x.porcentajeVidaConsumida) }}</td>
+              <td class="num">{{ x.diasMora | number:'1.0-0' }}</td>
+              <td class="centro">{{ x.edadContableResultado }}</td>
+              <td class="num">{{ moneda(x.deterioroTotal) }}</td>
+              <td><button class="btn sm" type="button" (click)="verHistoria(x)">Historia</button></td>
+            </tr>
+            <tr *ngIf="detalleFiltrado.length===0"><td colspan="13" class="sin-datos">No hay registros para los filtros seleccionados.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="paginador" *ngIf="detalleFiltrado.length">
+        <button class="btn sm" type="button" [disabled]="pagina<=1" (click)="pagina=pagina-1">Anterior</button>
+        <span>Página {{ pagina }} de {{ totalPaginas }}</span>
+        <button class="btn sm" type="button" [disabled]="pagina>=totalPaginas" (click)="pagina=pagina+1">Siguiente</button>
+      </div>
+    </section>
+
+    <div class="estado-carga" *ngIf="cargandoHistoria">Cargando historia del crédito...</div>
+
+    <section id="historia-credito" class="panel historia-panel" *ngIf="mostrarHistoria && creditoSeleccionado">
+      <div class="titulo-historia">
+        <div>
+          <h2>Historia del crédito {{ creditoSeleccionado.pagareCartera }}</h2>
+          <p>{{ creditoSeleccionado.documento }} · {{ creditoSeleccionado.nombreCompleto }} · {{ creditoSeleccionado.codigoLineaCredito }} - {{ creditoSeleccionado.nombreLineaCredito }}</p>
+        </div>
+        <div class="acciones">
+          <button class="btn" type="button" (click)="exportarHistoriaExcel()">Exportar historia</button>
+          <button class="btn" type="button" (click)="cerrarHistoria()">Cerrar</button>
+        </div>
+      </div>
+
+      <div class="credito-kpis">
+        <div><span>Clasificación final</span><strong [class]="claseSalida(creditoSeleccionado.clasificacionSalida)">{{ creditoSeleccionado.clasificacionSalida }}</strong></div>
+        <div><span>Saldo último corte</span><strong>{{ moneda(creditoSeleccionado.saldoCorteAnterior) }}</strong></div>
+        <div><span>Transiciones</span><strong>{{ creditoSeleccionado.cantidadTransiciones | number:'1.0-0' }}</strong></div>
+        <div><span>Velocidad promedio</span><strong>{{ pct(creditoSeleccionado.velocidadAmortizacionPromedio) }}</strong></div>
+        <div><span>Vida consumida</span><strong>{{ creditoSeleccionado.porcentajeVidaConsumida == null ? '—' : pct(creditoSeleccionado.porcentajeVidaConsumida) }}</strong></div>
+        <div><span>Anticipación</span><strong>{{ creditoSeleccionado.diasAnticipacion == null ? '—' : (creditoSeleccionado.diasAnticipacion | number:'1.0-0') + ' días' }}</strong></div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Corte</th><th>Siguiente</th><th>Saldo</th><th>Saldo siguiente</th><th>Reducción</th><th>% reducción</th><th>P75 línea</th><th>Comportamiento</th><th>Resultado</th><th>Mora</th><th>Edad</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let x of historiaCredito">
+              <td>{{ x.fechaCorte }}</td><td>{{ x.fechaCorteSiguiente }}</td><td class="num">{{ moneda(x.saldoCorteAnterior) }}</td><td class="num">{{ x.saldoCorteSiguiente == null ? '—' : moneda(x.saldoCorteSiguiente) }}</td><td class="num">{{ x.reduccionSaldo == null ? '—' : moneda(x.reduccionSaldo) }}</td><td class="num">{{ x.porcentajeReduccionSaldo == null ? '—' : pct(x.porcentajeReduccionSaldo) }}</td><td class="num">{{ x.percentil75ReduccionLinea == null ? '—' : pct(x.percentil75ReduccionLinea) }}</td><td><span [class]="claseAmortizacion(x.comportamientoAmortizacion)">{{ x.comportamientoAmortizacion || '—' }}</span></td><td><span [class]="claseSalida(x.clasificacionSalida)">{{ x.clasificacionSalida }}</span></td><td class="num">{{ x.diasMora }}</td><td class="centro">{{ x.edadContableResultado }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+</div>
