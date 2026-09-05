@@ -18,6 +18,12 @@ public record MoraAnexo2DTO(
         Integer idCarteraCredito,
         Integer idCierreCarteraCredito,
 
+        Integer idAgencia,
+
+        Integer idLineaCredito,
+        String codigoLineaCredito,
+        String nombreLineaCredito,
+
         String pagareCartera,
         String documento,
         String nombreCompleto,

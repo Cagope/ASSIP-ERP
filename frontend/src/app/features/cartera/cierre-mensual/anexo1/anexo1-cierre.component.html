@@ -170,7 +170,7 @@
     <div class="panel__body">
 
       <!-- ================================================= -->
-      <!-- RESUMEN -->
+      <!-- RESUMEN DEL CIERRE -->
       <!-- ================================================= -->
 
       <div class="resumen">
@@ -216,8 +216,9 @@
 
           <strong>
             {{
+            formatearMoneda(
             cierreSeleccionado.saldoCarteraMaestro
-            | number:'1.2-2'
+            )
             }}
           </strong>
 
@@ -350,7 +351,10 @@
 
         <strong>
           edad contable mediante alineamiento o ley de arrastre,
-          deterioro de capital y deterioro de intereses.
+          causación de intereses,
+          intereses contingentes,
+          deterioro de capital
+          y deterioro de intereses.
         </strong>
 
       </div>
@@ -378,6 +382,24 @@
 
         </button>
 
+        <button
+          type="button"
+          class="btn btn--secondary"
+          *ngIf="anexo1EnProceso() || anexo1EnFirme()"
+          [disabled]="
+            exportandoExcel
+            || procesando
+            || cerrandoAnexo1
+          "
+          (click)="exportarExcel()">
+
+          {{
+          exportandoExcel
+          ? 'GENERANDO EXCEL...'
+          : 'GENERAR EXCEL'
+          }}
+
+        </button>
 
         <button
           type="button"
@@ -427,7 +449,382 @@
 
 
   <!-- ===================================================== -->
-  <!-- RESULTADO DEL PROCESAMIENTO -->
+  <!-- CARGANDO RESUMEN -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="cargandoResumen"
+    class="panel">
+
+    <div class="panel__body">
+
+      <div class="loading">
+        Consultando resultados de Anexo 1...
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- RESUMEN ANEXO 1 -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="resumen && !cargandoResumen"
+    class="panel">
+
+    <div class="panel__header">
+
+      <strong>
+        Resumen Anexo 1
+      </strong>
+
+      <span>
+        Distribución de la cartera por edad contable.
+      </span>
+
+    </div>
+
+
+    <div class="panel__body">
+
+      <!-- ================================================= -->
+      <!-- CONTROL GENERAL -->
+      <!-- ================================================= -->
+
+      <div class="resumen">
+
+        <div class="resumen__item">
+
+          <span>
+            Fecha de corte
+          </span>
+
+          <strong>
+            {{
+            formatearFecha(
+            resumen.fechaCorte
+            )
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="resumen__item">
+
+          <span>
+            Total créditos
+          </span>
+
+          <strong>
+            {{
+            formatearEntero(
+            resumen.cantidadCreditos
+            )
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="resumen__item">
+
+          <span>
+            Saldo total de capital
+          </span>
+
+          <strong>
+            {{
+            formatearMoneda(
+            resumen.saldoCapital
+            )
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="resumen__item">
+
+          <span>
+            Estado Anexo 1
+          </span>
+
+          <strong
+            class="estado"
+            [class.estado--firme]="anexo1EnFirme()"
+            [class.estado--proceso]="anexo1EnProceso()"
+            [class.estado--abierta]="anexo1Pendiente()">
+
+            {{
+            anexo1EnFirme()
+            ? 'EN FIRME'
+            : anexo1EnProceso()
+            ? 'PROCESADO'
+            : 'PENDIENTE'
+            }}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- TABLA POR EDAD -->
+      <!-- ================================================= -->
+
+      <div class="resultado-seccion">
+
+        <div class="resultado-seccion__titulo">
+          Distribución por edad contable
+        </div>
+
+
+        <div class="tabla-wrap">
+
+          <table class="tabla-edades">
+
+            <thead>
+
+            <tr>
+
+              <th rowspan="2" class="col-edad">
+                Edad
+              </th>
+
+              <th rowspan="2" class="numero">
+                Créditos
+              </th>
+
+              <th rowspan="2" class="numero">
+                Saldo capital
+              </th>
+
+              <th colspan="3" class="grupo">
+                Coberturas
+              </th>
+
+              <th colspan="2" class="grupo">
+                Intereses causados
+              </th>
+
+              <th colspan="2" class="grupo">
+                Intereses contingentes
+              </th>
+
+              <th colspan="4" class="grupo">
+                Deterioro
+              </th>
+
+            </tr>
+
+
+            <tr>
+
+              <th class="numero">
+                Aportes
+              </th>
+
+              <th class="numero">
+                Garantías prorrateada
+              </th>
+
+              <th class="numero">
+                Garantías calculadas
+              </th>
+
+              <th class="numero">
+                Créditos
+              </th>
+
+              <th class="numero">
+                Valor mes
+              </th>
+
+              <th class="numero">
+                Créditos
+              </th>
+
+              <th class="numero">
+                Valor mes
+              </th>
+
+              <th class="numero">
+                Base capital
+              </th>
+
+              <th class="numero">
+                Capital
+              </th>
+
+              <th class="numero">
+                Intereses
+              </th>
+
+              <th class="numero">
+                Total
+              </th>
+
+            </tr>
+
+            </thead>
+
+
+            <tbody>
+
+            <tr
+              *ngFor="let edad of resumen.edades"
+              [class.fila-total]="edad.edadContable === 'TOTAL'">
+
+              <td class="col-edad">
+
+                <strong>
+                  {{ edad.edadContable }}
+                </strong>
+
+              </td>
+
+
+              <td class="numero">
+                {{
+                formatearEntero(
+                edad.cantidadCreditos
+                )
+                }}
+              </td>
+
+
+              <td class="numero">
+                {{
+                formatearMoneda(
+                edad.saldoCapital
+                )
+                }}
+              </td>
+
+
+              <td class="numero">
+                {{
+                formatearMoneda(
+                edad.valorAportesAplicados
+                )
+                }}
+              </td>
+
+
+              <td class="numero">
+                {{
+                formatearMoneda(
+                edad.valorGarantiasAsignadas
+                )
+                }}
+              </td>
+
+
+              <td class="numero">
+                {{
+                formatearMoneda(
+                edad.valorGarantiasReconocidas
+                )
+                }}
+              </td>
+
+
+              <td class="numero">
+                {{
+                formatearEntero(
+                edad.cantidadCreditosConInteresesCausados
+                )
+                }}
+              </td>
+
+
+              <td class="numero">
+                {{
+                formatearMoneda(
+                edad.valorInteresesCausadosMes
+                )
+                }}
+              </td>
+
+
+              <td class="numero">
+                {{
+                formatearEntero(
+                edad.cantidadCreditosConInteresesContingentes
+                )
+                }}
+              </td>
+
+
+              <td class="numero">
+                {{
+                formatearMoneda(
+                edad.valorInteresesContingentesMes
+                )
+                }}
+              </td>
+
+
+              <td class="numero">
+                {{
+                formatearMoneda(
+                edad.baseDeterioroCapital
+                )
+                }}
+              </td>
+
+
+              <td class="numero">
+                {{
+                formatearMoneda(
+                edad.deterioroCapital
+                )
+                }}
+              </td>
+
+
+              <td class="numero">
+                {{
+                formatearMoneda(
+                edad.deterioroIntereses
+                )
+                }}
+              </td>
+
+
+              <td class="numero">
+                <strong>
+                  {{
+                  formatearMoneda(
+                  edad.deterioroTotal
+                  )
+                  }}
+                </strong>
+              </td>
+
+            </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- RESULTADO DEL ÚLTIMO PROCESAMIENTO -->
   <!-- ===================================================== -->
 
   <section
@@ -441,8 +838,8 @@
       </strong>
 
       <span>
-        Cantidad de registros actualizados por cada etapa
-        del proceso de Anexo 1.
+        Cantidad de registros actualizados durante
+        la última ejecución de Anexo 1.
       </span>
 
     </div>
@@ -451,8 +848,6 @@
     <div class="panel__body">
 
       <div class="resultado-grid">
-
-        <!-- EDADES CONTABLES -->
 
         <div class="resultado-card">
 
@@ -476,7 +871,68 @@
         </div>
 
 
-        <!-- DETERIORO CAPITAL -->
+        <div class="resultado-card">
+
+          <span class="resultado-card__label">
+            Causación de intereses
+          </span>
+
+          <strong class="resultado-card__valor">
+            {{
+            formatearEntero(
+            resultado.causacionesIntereses
+            )
+            }}
+          </strong>
+
+          <span class="resultado-card__detalle">
+            Registros procesados para intereses causados.
+          </span>
+
+        </div>
+
+
+        <div class="resultado-card">
+
+          <span class="resultado-card__label">
+            Intereses contingentes
+          </span>
+
+          <strong class="resultado-card__valor">
+            {{
+            formatearEntero(
+            resultado.causacionesContingentes
+            )
+            }}
+          </strong>
+
+          <span class="resultado-card__detalle">
+            Registros procesados para intereses contingentes.
+          </span>
+
+        </div>
+
+
+        <div class="resultado-card">
+
+          <span class="resultado-card__label">
+            Intereses consolidados
+          </span>
+
+          <strong class="resultado-card__valor">
+            {{
+            formatearEntero(
+            resultado.interesesConsolidados
+            )
+            }}
+          </strong>
+
+          <span class="resultado-card__detalle">
+            Créditos con intereses consolidados.
+          </span>
+
+        </div>
+
 
         <div class="resultado-card">
 
@@ -493,14 +949,11 @@
           </strong>
 
           <span class="resultado-card__detalle">
-            Créditos con cálculo de deterioro
-            de capital.
+            Créditos procesados para deterioro de capital.
           </span>
 
         </div>
 
-
-        <!-- DETERIORO INTERESES -->
 
         <div class="resultado-card">
 
@@ -517,54 +970,8 @@
           </strong>
 
           <span class="resultado-card__detalle">
-            Créditos con cálculo de deterioro
-            de intereses.
+            Créditos procesados para deterioro de intereses.
           </span>
-
-        </div>
-
-      </div>
-
-
-      <!-- ================================================= -->
-      <!-- CONTROL DEL RESULTADO -->
-      <!-- ================================================= -->
-
-      <div class="resultado-control">
-
-        <div class="resultado-control__contenido">
-
-          <span>
-            Cierre procesado
-          </span>
-
-          <strong>
-            {{
-            formatearFecha(
-            cierreSeleccionado?.fechaCorte
-            )
-            }}
-          </strong>
-
-        </div>
-
-
-        <div class="resultado-control__contenido">
-
-          <span>
-            Estado Anexo 1
-          </span>
-
-          <strong
-            class="resultado-control__ok">
-
-            {{
-            anexo1EnFirme()
-            ? 'EN FIRME'
-            : 'PROCESADO'
-            }}
-
-          </strong>
 
         </div>
 
@@ -582,8 +989,7 @@
   <div
     *ngIf="
       !cargando
-      &&
-      !cierreSeleccionado
+      && !cierreSeleccionado
     "
     class="empty">
 

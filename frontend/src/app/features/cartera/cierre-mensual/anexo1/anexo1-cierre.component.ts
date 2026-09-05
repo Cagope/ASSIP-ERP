@@ -19,9 +19,13 @@ import {
 
 import {
   Anexo1CierreApi,
-  ResultadoAnexo1
+  ResultadoAnexo1,
+  ResumenAnexo1
 } from './anexo1-cierre.api';
 
+import {
+  Anexo1CierreExporterService
+} from './anexo1-cierre-exporter.service';
 
 @Component({
   selector: 'app-anexo1-cierre',
@@ -52,6 +56,8 @@ export class Anexo1CierreComponent implements OnInit {
   private readonly anexo1Api =
     inject(Anexo1CierreApi);
 
+  private readonly exporter =
+    inject(Anexo1CierreExporterService);
 
   // =========================================================
   // CIERRES
@@ -89,6 +95,15 @@ export class Anexo1CierreComponent implements OnInit {
   resultado:
     ResultadoAnexo1 | null = null;
 
+  // =========================================================
+  // RESUMEN ANEXO 1
+  // =========================================================
+
+  resumen:
+    ResumenAnexo1 | null = null;
+
+  cargandoResumen = false;
+  exportandoExcel = false;
 
   // =========================================================
   // INIT
@@ -186,15 +201,16 @@ export class Anexo1CierreComponent implements OnInit {
     this.resultado =
       null;
 
-
     if (!this.idCierreSeleccionado) {
 
       this.cierreSeleccionado =
         null;
 
+      this.resumen =
+        null;
+
       return;
     }
-
 
     this.cierreSeleccionado =
       this.cierres.find(
@@ -208,6 +224,16 @@ export class Anexo1CierreComponent implements OnInit {
           )
       )
       ?? null;
+
+    if (
+      this.cierreSeleccionado
+      &&
+      this.calculosEnFirme()
+    ) {
+
+      this.cargarResumen();
+
+    }
 
   }
 
@@ -403,35 +429,36 @@ export class Anexo1CierreComponent implements OnInit {
     const esRecalculo =
       this.anexo1EnProceso();
 
-
     const confirmar =
       window.confirm(
         esRecalculo
           ?
-          'Se recalculará Anexo 1 para el cierre seleccionado'
-          + this.descripcionFechaConfirmacion()
-          + '.\n\n'
-          + 'Se calculará nuevamente:\n'
-          + '- Edad contable / ley de arrastre\n'
-          + '- Deterioro de capital\n'
-          + '- Deterioro de intereses\n\n'
-          + '¿Desea continuar?'
+            'Se recalculará Anexo 1 para el cierre seleccionado'
+            + this.descripcionFechaConfirmacion()
+            + '.\n\n'
+            + 'Se calculará nuevamente:\n'
+            + '- Edad contable / ley de arrastre\n'
+            + '- Causación de intereses\n'
+            + '- Intereses contingentes\n'
+            + '- Deterioro de capital\n'
+            + '- Deterioro de intereses\n\n'
+            + '¿Desea continuar?'
           :
-          'Se ejecutará Anexo 1 para el cierre seleccionado'
-          + this.descripcionFechaConfirmacion()
-          + '.\n\n'
-          + 'El proceso calculará:\n'
-          + '- Edad contable / ley de arrastre\n'
-          + '- Deterioro de capital\n'
-          + '- Deterioro de intereses\n\n'
-          + '¿Desea continuar?'
+            'Se ejecutará Anexo 1 para el cierre seleccionado'
+            + this.descripcionFechaConfirmacion()
+            + '.\n\n'
+            + 'El proceso calculará:\n'
+            + '- Edad contable / ley de arrastre\n'
+            + '- Causación de intereses\n'
+            + '- Intereses contingentes\n'
+            + '- Deterioro de capital\n'
+            + '- Deterioro de intereses\n\n'
+            + '¿Desea continuar?'
       );
-
 
     if (!confirmar) {
       return;
     }
-
 
     this.procesando =
       true;
@@ -458,6 +485,8 @@ export class Anexo1CierreComponent implements OnInit {
 
           this.resultado =
             resultado ?? null;
+
+          this.cargarResumen();
 
           this.mensaje =
             'Anexo 1 procesado correctamente.';
@@ -602,6 +631,191 @@ export class Anexo1CierreComponent implements OnInit {
             this.obtenerMensajeError(
               err,
               'No fue posible cerrar Anexo 1 en firme.'
+            );
+
+        }
+
+      });
+
+  }
+
+  // =========================================================
+  // CARGAR RESUMEN ANEXO 1
+  // =========================================================
+
+  cargarResumen(): void {
+
+    if (!this.idCierreSeleccionado) {
+
+      this.resumen = null;
+
+      return;
+    }
+
+    this.cargandoResumen = true;
+
+    this.anexo1Api
+      .obtenerResumen(
+        this.idCierreSeleccionado
+      )
+      .subscribe({
+
+        next: (resumen) => {
+
+          this.resumen =
+            resumen ?? null;
+
+          this.cargandoResumen =
+            false;
+
+        },
+
+        error: (err) => {
+
+          this.resumen =
+            null;
+
+          this.cargandoResumen =
+            false;
+
+          this.error =
+            this.obtenerMensajeError(
+              err,
+              'No fue posible consultar el resumen de Anexo 1.'
+            );
+
+        }
+
+      });
+
+  }
+
+  // =========================================================
+  // EXPORTAR EXCEL ANEXO 1
+  // =========================================================
+
+  exportarExcel(): void {
+
+    this.limpiarMensajes();
+
+    if (!this.idCierreSeleccionado) {
+
+      this.error =
+        'Debe seleccionar un cierre de cartera.';
+
+      return;
+    }
+
+
+    if (!this.cierreSeleccionado) {
+
+      this.error =
+        'No fue posible identificar el cierre seleccionado.';
+
+      return;
+    }
+
+
+    if (!this.calculosEnFirme()) {
+
+      this.error =
+        'Los cálculos deben estar cerrados en firme antes de generar los archivos de Anexo 1.';
+
+      return;
+    }
+
+
+    if (
+      !this.anexo1EnProceso()
+      &&
+      !this.anexo1EnFirme()
+    ) {
+
+      this.error =
+        'Debe procesar Anexo 1 antes de generar los archivos Excel.';
+
+      return;
+    }
+
+
+    if (this.exportandoExcel) {
+      return;
+    }
+
+
+    this.exportandoExcel =
+      true;
+
+    this.mensaje =
+      'Generando archivos Excel de Anexo 1...';
+
+
+    const fechaCorte =
+      this.cierreSeleccionado.fechaCorte;
+
+
+    this.anexo1Api
+      .obtenerDetalle(
+        this.idCierreSeleccionado
+      )
+      .subscribe({
+
+        next: (detalle) => {
+
+          this.exportandoExcel =
+            false;
+
+
+          if (!detalle?.length) {
+
+            this.mensaje =
+              '';
+
+            this.error =
+              'El cierre no tiene detalle de Anexo 1 para exportar.';
+
+            return;
+          }
+
+
+          try {
+
+            this.exporter.exportar(
+              detalle,
+              fechaCorte
+            );
+
+            this.mensaje =
+              'Archivos Excel de Anexo 1 generados correctamente.';
+
+          } catch (err) {
+
+            this.mensaje =
+              '';
+
+            this.error =
+              this.obtenerMensajeError(
+                err,
+                'No fue posible generar los archivos Excel de Anexo 1.'
+              );
+
+          }
+
+        },
+
+
+        error: (err) => {
+
+          this.exportandoExcel =
+            false;
+
+          this.mensaje =
+            '';
+
+          this.error =
+            this.obtenerMensajeError(
+              err,
+              'No fue posible consultar el detalle de Anexo 1 para generar los archivos Excel.'
             );
 
         }
@@ -802,6 +1016,32 @@ export class Anexo1CierreComponent implements OnInit {
 
 
     return mensajeDefecto;
+
+  }
+
+  // =========================================================
+  // FORMATO MONEDA
+  // =========================================================
+
+  formatearMoneda(
+    valor:
+      number | null | undefined
+  ): string {
+
+    return new Intl.NumberFormat(
+      'es-CO',
+      {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }
+    )
+      .format(
+        Number(
+          valor ?? 0
+        )
+      );
 
   }
 

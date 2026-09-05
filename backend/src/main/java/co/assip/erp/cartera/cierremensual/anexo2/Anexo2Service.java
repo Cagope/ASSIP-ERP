@@ -1,16 +1,15 @@
 package co.assip.erp.cartera.cierremensual.anexo2;
 
 import co.assip.erp.cartera.cierremensual.CierreMensualRepository;
+import co.assip.erp.cartera.cierremensual.anexo2.dto.DetalleAnexo2DTO;
+import co.assip.erp.cartera.cierremensual.anexo2.dto.MoraAnexo2DTO;
+import co.assip.erp.cartera.cierremensual.anexo2.dto.ResumenAnexo2DTO;
+import co.assip.erp.cartera.cierremensual.anexo2.dto.TrabajoAnexo2DTO;
 import co.assip.erp.cartera.cierremensual.dto.CierreMensualDTO;
 import co.assip.erp.seguridad.service.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import co.assip.erp.cartera.cierremensual.anexo2.dto.DetalleAnexo2DTO;
-import co.assip.erp.cartera.cierremensual.anexo2.dto.MoraAnexo2DTO;
-import co.assip.erp.cartera.cierremensual.anexo2.dto.ResumenAnexo2DTO;
-import co.assip.erp.cartera.cierremensual.anexo2.dto.TrabajoAnexo2DTO;
 
 import java.util.List;
 
@@ -23,35 +22,24 @@ public class Anexo2Service {
     private final CierreMensualRepository cierreRepository;
     private final UsuarioSesionService usuarioSesionService;
 
+
     // =========================================================
     // PREPARAR / EJECUTAR ANEXO 2
     //
-    // Secuencia:
+    // Requisitos:
     //
-    // 1. validar cierre
-    // 2. obtener usuario de sesión
-    // 3. iniciar / reiniciar proceso PE
-    // 4. crear población PE
-    // 5. crear matriz histórica de 40 moras
-    // 6. crear variables PE
-    // 7. calcular Z, puntaje y calificación
-    // 8. calcular default, edad deterioro y PI
-    // 9. calcular VEA
-    // 10. calcular PDI y pérdida esperada
-    // 11. homologar y alinear
-    // 12. persistir resultados PE
-    // 13. finalizar proceso PE
+    // fotografía = C
+    // cálculos    = C
+    // Anexo 1     = C
+    // Anexo 2     = P o E
     //
-    // IMPORTANTE:
+    // El estado general del cierre permanece P.
     //
-    // - El cierre general debe estar en estado C.
-    // - El usuario NO llega desde el frontend.
-    // - El usuario se obtiene de la sesión autenticada.
-    // - Si cualquier etapa falla, la transacción completa
-    //   realiza rollback.
-    // - El proceso PE solamente queda FINALIZADO después
-    //   de persistir correctamente todos los resultados.
+    // Al iniciar:
     //
+    // estado_anexo2 = E
+    //
+    // NO se deja en firme desde este método.
     // =========================================================
 
     @Transactional
@@ -60,7 +48,7 @@ public class Anexo2Service {
     ) {
 
         // =====================================================
-        // 1. VALIDAR ID DEL CIERRE
+        // 1. VALIDAR ID
         // =====================================================
 
         validarIdCierre(
@@ -69,36 +57,43 @@ public class Anexo2Service {
 
 
         // =====================================================
-        // 2. VALIDAR CIERRE GENERAL
-        //
-        // C = fotografía cerrada en firme.
+        // 2. OBTENER CIERRE
         // =====================================================
 
-        validarCierreCerrado(
-                idCierreCartera
+        CierreMensualDTO cierre =
+                obtenerCierre(
+                        idCierreCartera
+                );
+
+
+        // =====================================================
+        // 3. VALIDAR DEPENDENCIAS
+        // =====================================================
+
+        validarDependenciasAnexo2(
+                cierre
         );
 
 
         // =====================================================
-        // 3. OBTENER USUARIO DE SESIÓN
-        //
-        // Nunca se recibe desde el frontend.
+        // 4. VALIDAR QUE ANEXO 2 PUEDA PROCESARSE
+        // =====================================================
+
+        validarAnexo2Procesable(
+                cierre
+        );
+
+
+        // =====================================================
+        // 5. OBTENER USUARIO DE SESIÓN
         // =====================================================
 
         Integer idUsuario =
-                usuarioSesionService.idUsuario();
-
-        if (idUsuario == null
-                || idUsuario <= 0) {
-
-            throw new IllegalStateException(
-                    "No fue posible identificar el usuario de sesión."
-            );
-        }
+                obtenerUsuarioSesion();
 
 
         // =====================================================
-        // 4. VALIDAR EXISTENCIA PARA MOTOR PE
+        // 6. VALIDAR EXISTENCIA DEL CIERRE PARA MOTOR PE
         // =====================================================
 
         if (!repository.existeCierre(
@@ -113,14 +108,33 @@ public class Anexo2Service {
 
 
         // =====================================================
-        // 5. INICIAR / REINICIAR PROCESO PE
+        // 7. INICIAR ETAPA ANEXO 2
         //
-        // El cierre general permanece C.
+        // P -> E
         //
-        // El proceso interno PE queda PROCESANDO.
-        //
-        // fk_seguridad_creacion se toma del usuario
-        // autenticado.
+        // Si ya estaba E, permite recalcular conservando
+        // fecha_anexo2_inicio.
+        // =====================================================
+
+        int etapaIniciada =
+                cierreRepository.iniciarAnexo2(
+                        idCierreCartera,
+                        idUsuario
+                );
+
+        if (etapaIniciada != 1) {
+
+            throw new IllegalStateException(
+                    "No fue posible iniciar la etapa de Anexo 2 "
+                            + "del cierre "
+                            + idCierreCartera
+                            + "."
+            );
+        }
+
+
+        // =====================================================
+        // 8. INICIAR / REINICIAR PROCESO PE INTERNO
         // =====================================================
 
         Integer idPeProceso =
@@ -129,9 +143,20 @@ public class Anexo2Service {
                         idUsuario
                 );
 
+        if (idPeProceso == null
+                || idPeProceso <= 0) {
+
+            throw new IllegalStateException(
+                    "No fue posible iniciar el proceso interno "
+                            + "de pérdida esperada para el cierre "
+                            + idCierreCartera
+                            + "."
+            );
+        }
+
 
         // =====================================================
-        // 6. CREAR POBLACIÓN ANEXO 2
+        // 9. CREAR POBLACIÓN ANEXO 2
         // =====================================================
 
         int poblacion =
@@ -148,7 +173,7 @@ public class Anexo2Service {
 
 
         // =====================================================
-        // 7. CREAR MATRIZ HISTÓRICA DE MORAS
+        // 10. CREAR MATRIZ HISTÓRICA DE MORAS
         // =====================================================
 
         long moras =
@@ -175,7 +200,7 @@ public class Anexo2Service {
 
 
         // =====================================================
-        // 8. VALIDAR MATRIZ DE MORAS
+        // 11. VALIDAR MATRIZ DE MORAS
         // =====================================================
 
         if (periodos != 40) {
@@ -226,67 +251,49 @@ public class Anexo2Service {
 
 
         // =====================================================
-        // 9. CREAR VARIABLES PE
+        // 12. CREAR VARIABLES PE
         // =====================================================
 
         int variables =
                 repository.crearVariablesTemporales();
 
-        if (variables != poblacion) {
-
-            throw new IllegalStateException(
-                    "La cantidad de variables PE no coincide "
-                            + "con la población. "
-                            + "Población: "
-                            + poblacion
-                            + ", variables: "
-                            + variables
-            );
-        }
+        validarCantidad(
+                "variables PE",
+                poblacion,
+                variables
+        );
 
 
         // =====================================================
-        // 10. Z, PUNTAJE Y CALIFICACIÓN DEL MODELO
+        // 13. Z, PUNTAJE Y CALIFICACIÓN
         // =====================================================
 
         int modelosCalculados =
                 repository.calcularZPuntajeCalificacion();
 
-        if (modelosCalculados != poblacion) {
-
-            throw new IllegalStateException(
-                    "La cantidad de créditos con modelo calculado "
-                            + "no coincide. "
-                            + "Población: "
-                            + poblacion
-                            + ", calculados: "
-                            + modelosCalculados
-            );
-        }
+        validarCantidad(
+                "créditos con modelo calculado",
+                poblacion,
+                modelosCalculados
+        );
 
 
         // =====================================================
-        // 11. DEFAULT, EDAD DE DETERIORO Y PI
+        // 14. DEFAULT, EDAD DE DETERIORO Y PI
         // =====================================================
 
         int deteriorosCalculados =
                 repository.calcularDefaultEdadDeterioroYPi();
 
-        if (deteriorosCalculados != poblacion) {
-
-            throw new IllegalStateException(
-                    "La cantidad de créditos con deterioro/PI "
-                            + "no coincide. "
-                            + "Población: "
-                            + poblacion
-                            + ", calculados: "
-                            + deteriorosCalculados
-            );
-        }
+        validarCantidad(
+                "créditos con deterioro/PI calculado",
+                poblacion,
+                deteriorosCalculados
+        );
 
 
         // =====================================================
-        // 12. CALCULAR VEA
+        // 15. VEA
         // =====================================================
 
         int veaCalculados =
@@ -294,64 +301,43 @@ public class Anexo2Service {
                         idCierreCartera
                 );
 
-        if (veaCalculados != poblacion) {
-
-            throw new IllegalStateException(
-                    "La cantidad de créditos con VEA calculado "
-                            + "no coincide. "
-                            + "Población: "
-                            + poblacion
-                            + ", calculados: "
-                            + veaCalculados
-            );
-        }
+        validarCantidad(
+                "créditos con VEA calculado",
+                poblacion,
+                veaCalculados
+        );
 
 
         // =====================================================
-        // 13. CALCULAR PDI Y PÉRDIDA ESPERADA
+        // 16. PDI Y PÉRDIDA ESPERADA
         // =====================================================
 
         int perdidasCalculadas =
                 repository.calcularPdiYPerdida();
 
-        if (perdidasCalculadas != poblacion) {
-
-            throw new IllegalStateException(
-                    "La cantidad de créditos con PDI/PE calculada "
-                            + "no coincide. "
-                            + "Población: "
-                            + poblacion
-                            + ", calculados: "
-                            + perdidasCalculadas
-            );
-        }
+        validarCantidad(
+                "créditos con PDI/pérdida esperada calculada",
+                poblacion,
+                perdidasCalculadas
+        );
 
 
         // =====================================================
-        // 14. HOMOLOGACIÓN Y ALINEACIÓN
+        // 17. HOMOLOGACIÓN Y ALINEACIÓN
         // =====================================================
 
         int homologados =
                 repository.calcularHomologacionYAlineacion();
 
-        if (homologados != poblacion) {
-
-            throw new IllegalStateException(
-                    "La cantidad de créditos homologados/alineados "
-                            + "no coincide. "
-                            + "Población: "
-                            + poblacion
-                            + ", calculados: "
-                            + homologados
-            );
-        }
+        validarCantidad(
+                "créditos homologados/alineados",
+                poblacion,
+                homologados
+        );
 
 
         // =====================================================
-        // 15. PERSISTIR RESULTADOS DEFINITIVOS PE
-        //
-        // El mismo usuario autenticado se utiliza para la
-        // auditoría de los resultados.
+        // 18. PERSISTIR RESULTADOS PE
         // =====================================================
 
         int resultadosPersistidos =
@@ -360,39 +346,24 @@ public class Anexo2Service {
                         idUsuario
                 );
 
-        if (resultadosPersistidos != poblacion) {
-
-            throw new IllegalStateException(
-                    "La cantidad de resultados PE persistidos "
-                            + "no coincide. "
-                            + "Población: "
-                            + poblacion
-                            + ", persistidos: "
-                            + resultadosPersistidos
-            );
-        }
+        validarCantidad(
+                "resultados PE persistidos",
+                poblacion,
+                resultadosPersistidos
+        );
 
 
         // =====================================================
-        // 16. FINALIZAR PROCESO PE
+        // 19. FINALIZAR PROCESO PE INTERNO
         //
-        // Solamente llegamos aquí si:
+        // IMPORTANTE:
         //
-        // - población válida
-        // - 40 períodos completos
-        // - variables completas
-        // - modelo calculado
-        // - PI calculada
-        // - VEA calculado
-        // - PDI calculada
-        // - pérdida esperada calculada
-        // - homologación completada
-        // - resultados persistidos
+        // Esto finaliza el proceso técnico PE.
         //
-        // Por tanto el proceso PE queda FINALIZADO.
+        // NO cierra todavía estado_anexo2.
         //
-        // Si este UPDATE falla, @Transactional revierte
-        // también toda la ejecución del Anexo 2.
+        // estado_anexo2 permanece E para revisión,
+        // Excel y comparación.
         // =====================================================
 
         repository.finalizarProceso(
@@ -401,7 +372,7 @@ public class Anexo2Service {
 
 
         // =====================================================
-        // 17. RESULTADO
+        // 20. RESULTADO
         // =====================================================
 
         return new ResultadoPreparacionAnexo2(
@@ -426,24 +397,72 @@ public class Anexo2Service {
 
 
     // =========================================================
-    // VALIDAR CIERRE CERRADO
+    // CERRAR ANEXO 2 EN FIRME
     //
-    // C = fotografía cerrada en firme.
+    // E -> C
     //
-    // Anexo 2 solamente puede ejecutarse después de:
-    //
-    // - cerrar la fotografía
-    // - intereses
-    // - seguros
-    // - alivios
-    // - cálculos previos
-    // - Anexo 1
-    //
+    // No modifica todavía estado_cierre general.
     // =========================================================
 
+    @Transactional
+    public void cerrar(
+            Integer idCierreCartera
+    ) {
+
+        validarIdCierre(
+                idCierreCartera
+        );
+
+        CierreMensualDTO cierre =
+                obtenerCierre(
+                        idCierreCartera
+                );
+
+        validarDependenciasAnexo2(
+                cierre
+        );
+
+        String estadoAnexo2 =
+                normalizarEstado(
+                        cierre.getEstadoAnexo2()
+                );
+
+        if (!"E".equals(
+                estadoAnexo2
+        )) {
+
+            throw new IllegalStateException(
+                    "El Anexo 2 del cierre "
+                            + idCierreCartera
+                            + " debe estar en proceso "
+                            + "antes de cerrarlo en firme."
+            );
+        }
+
+        Integer idUsuario =
+                obtenerUsuarioSesion();
+
+        int actualizados =
+                cierreRepository.cerrarAnexo2(
+                        idCierreCartera,
+                        idUsuario
+                );
+
+        if (actualizados != 1) {
+
+            throw new IllegalStateException(
+                    "No fue posible cerrar en firme el Anexo 2 "
+                            + "del cierre "
+                            + idCierreCartera
+                            + "."
+            );
+        }
+    }
+
+
     // =========================================================
-// CONSULTAS ANEXO 2
-// =========================================================
+    // CONSULTAS ANEXO 2
+    // =========================================================
 
     @Transactional(readOnly = true)
     public List<Integer> obtenerModelosDelCierre(
@@ -454,8 +473,13 @@ public class Anexo2Service {
                 idCierreCartera
         );
 
-        validarCierreCerrado(
-                idCierreCartera
+        CierreMensualDTO cierre =
+                obtenerCierre(
+                        idCierreCartera
+                );
+
+        validarAnexo2Consultable(
+                cierre
         );
 
         return consultaRepository.obtenerModelosDelCierre(
@@ -464,9 +488,9 @@ public class Anexo2Service {
     }
 
 
-// =========================================================
-// HOJA: RESULTADO
-// =========================================================
+    // =========================================================
+    // HOJA: RESULTADO
+    // =========================================================
 
     @Transactional(readOnly = true)
     public List<DetalleAnexo2DTO> obtenerDetalle(
@@ -479,8 +503,13 @@ public class Anexo2Service {
                 idModeloPe
         );
 
-        validarCierreCerrado(
-                idCierreCartera
+        CierreMensualDTO cierre =
+                obtenerCierre(
+                        idCierreCartera
+                );
+
+        validarAnexo2Consultable(
+                cierre
         );
 
         return consultaRepository.obtenerDetalle(
@@ -490,9 +519,9 @@ public class Anexo2Service {
     }
 
 
-// =========================================================
-// HOJA: HOJA_TRABAJO
-// =========================================================
+    // =========================================================
+    // HOJA: HOJA_TRABAJO
+    // =========================================================
 
     @Transactional(readOnly = true)
     public List<TrabajoAnexo2DTO> obtenerTrabajo(
@@ -505,8 +534,13 @@ public class Anexo2Service {
                 idModeloPe
         );
 
-        validarCierreCerrado(
-                idCierreCartera
+        CierreMensualDTO cierre =
+                obtenerCierre(
+                        idCierreCartera
+                );
+
+        validarAnexo2Consultable(
+                cierre
         );
 
         return consultaRepository.obtenerTrabajo(
@@ -516,9 +550,9 @@ public class Anexo2Service {
     }
 
 
-// =========================================================
-// HOJA: MORA
-// =========================================================
+    // =========================================================
+    // HOJA: MORA
+    // =========================================================
 
     @Transactional(readOnly = true)
     public List<MoraAnexo2DTO> obtenerMora(
@@ -531,8 +565,13 @@ public class Anexo2Service {
                 idModeloPe
         );
 
-        validarCierreCerrado(
-                idCierreCartera
+        CierreMensualDTO cierre =
+                obtenerCierre(
+                        idCierreCartera
+                );
+
+        validarAnexo2Consultable(
+                cierre
         );
 
         return consultaRepository.obtenerMora(
@@ -542,9 +581,9 @@ public class Anexo2Service {
     }
 
 
-// =========================================================
-// HOJA: RESUMEN
-// =========================================================
+    // =========================================================
+    // HOJA: RESUMEN
+    // =========================================================
 
     @Transactional(readOnly = true)
     public List<ResumenAnexo2DTO> obtenerResumen(
@@ -557,14 +596,170 @@ public class Anexo2Service {
                 idModeloPe
         );
 
-        validarCierreCerrado(
-                idCierreCartera
+        CierreMensualDTO cierre =
+                obtenerCierre(
+                        idCierreCartera
+                );
+
+        validarAnexo2Consultable(
+                cierre
         );
 
         return consultaRepository.obtenerResumen(
                 idCierreCartera,
                 idModeloPe
         );
+    }
+
+
+    // =========================================================
+    // OBTENER CIERRE
+    // =========================================================
+
+    private CierreMensualDTO obtenerCierre(
+            Integer idCierreCartera
+    ) {
+
+        return cierreRepository
+                .buscarPorId(
+                        idCierreCartera
+                )
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "No existe el cierre de cartera: "
+                                        + idCierreCartera
+                        )
+                );
+    }
+
+
+    // =========================================================
+    // VALIDAR DEPENDENCIAS DEL ANEXO 2
+    // =========================================================
+
+    private void validarDependenciasAnexo2(
+            CierreMensualDTO cierre
+    ) {
+
+        if (!"C".equals(
+                normalizarEstado(
+                        cierre.getEstadoFotografia()
+                )
+        )) {
+
+            throw new IllegalStateException(
+                    "La fotografía del cierre "
+                            + cierre.getIdCierreCartera()
+                            + " debe estar cerrada en firme "
+                            + "antes de ejecutar el Anexo 2."
+            );
+        }
+
+        if (!"C".equals(
+                normalizarEstado(
+                        cierre.getEstadoCalculos()
+                )
+        )) {
+
+            throw new IllegalStateException(
+                    "Los cálculos del cierre "
+                            + cierre.getIdCierreCartera()
+                            + " deben estar cerrados en firme "
+                            + "antes de ejecutar el Anexo 2."
+            );
+        }
+
+        if (!"C".equals(
+                normalizarEstado(
+                        cierre.getEstadoAnexo1()
+                )
+        )) {
+
+            throw new IllegalStateException(
+                    "El Anexo 1 del cierre "
+                            + cierre.getIdCierreCartera()
+                            + " debe estar cerrado en firme "
+                            + "antes de ejecutar el Anexo 2."
+            );
+        }
+    }
+
+
+    // =========================================================
+    // VALIDAR ANEXO 2 PROCESABLE
+    //
+    // P = pendiente
+    // E = en proceso / permite recalcular
+    // C = cerrado en firme / no permite recalcular
+    // =========================================================
+
+    private void validarAnexo2Procesable(
+            CierreMensualDTO cierre
+    ) {
+
+        String estado =
+                normalizarEstado(
+                        cierre.getEstadoAnexo2()
+                );
+
+        if ("C".equals(
+                estado
+        )) {
+
+            throw new IllegalStateException(
+                    "El Anexo 2 del cierre "
+                            + cierre.getIdCierreCartera()
+                            + " ya está cerrado en firme "
+                            + "y no puede recalcularse."
+            );
+        }
+
+        if (!"P".equals(estado)
+                && !"E".equals(estado)) {
+
+            throw new IllegalStateException(
+                    "El estado del Anexo 2 del cierre "
+                            + cierre.getIdCierreCartera()
+                            + " no permite ejecutar el proceso. "
+                            + "Estado actual: "
+                            + estado
+            );
+        }
+    }
+
+
+    // =========================================================
+    // VALIDAR ANEXO 2 CONSULTABLE
+    //
+    // Solo debe existir salida después de haber ejecutado
+    // el proceso al menos una vez.
+    //
+    // E = disponible para revisión
+    // C = cerrado en firme
+    // =========================================================
+
+    private void validarAnexo2Consultable(
+            CierreMensualDTO cierre
+    ) {
+
+        validarDependenciasAnexo2(
+                cierre
+        );
+
+        String estado =
+                normalizarEstado(
+                        cierre.getEstadoAnexo2()
+                );
+
+        if (!"E".equals(estado)
+                && !"C".equals(estado)) {
+
+            throw new IllegalStateException(
+                    "El Anexo 2 del cierre "
+                            + cierre.getIdCierreCartera()
+                            + " todavía no ha sido procesado."
+            );
+        }
     }
 
 
@@ -590,37 +785,68 @@ public class Anexo2Service {
         }
     }
 
-    private void validarCierreCerrado(
-            Integer idCierreCartera
+
+    // =========================================================
+    // VALIDAR CANTIDAD DE RESULTADOS
+    // =========================================================
+
+    private void validarCantidad(
+            String proceso,
+            int esperados,
+            int encontrados
     ) {
 
-        CierreMensualDTO cierre =
-                cierreRepository
-                        .buscarPorId(
-                                idCierreCartera
-                        )
-                        .orElseThrow(() ->
-                                new IllegalArgumentException(
-                                        "No existe el cierre de cartera: "
-                                                + idCierreCartera
-                                )
-                        );
-
-        String estado =
-                cierre.getEstadoCierre();
-
-        if (estado == null
-                || !"C".equalsIgnoreCase(
-                estado.trim()
-        )) {
+        if (encontrados != esperados) {
 
             throw new IllegalStateException(
-                    "El cierre "
-                            + idCierreCartera
-                            + " debe estar cerrado en firme "
-                            + "para ejecutar el Anexo 2."
+                    "La cantidad de "
+                            + proceso
+                            + " no coincide. "
+                            + "Esperados: "
+                            + esperados
+                            + ", encontrados: "
+                            + encontrados
             );
         }
+    }
+
+
+    // =========================================================
+    // USUARIO DE SESIÓN
+    // =========================================================
+
+    private Integer obtenerUsuarioSesion() {
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        if (idUsuario == null
+                || idUsuario <= 0) {
+
+            throw new IllegalStateException(
+                    "No fue posible identificar el usuario de sesión."
+            );
+        }
+
+        return idUsuario;
+    }
+
+
+    // =========================================================
+    // NORMALIZAR ESTADO
+    // =========================================================
+
+    private String normalizarEstado(
+            String estado
+    ) {
+
+        if (estado == null) {
+            return "";
+        }
+
+        return estado
+                .trim()
+                .toUpperCase();
     }
 
 

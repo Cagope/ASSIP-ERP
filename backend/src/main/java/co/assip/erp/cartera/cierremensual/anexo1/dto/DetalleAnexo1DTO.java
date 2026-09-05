@@ -20,6 +20,8 @@ public record DetalleAnexo1DTO(
         Integer idCierreCarteraCredito,
         Integer idCierreCarteraResultado,
         Integer idAgencia,
+        String codigoAgencia,
+        String nombreAgencia,
 
         Integer idDatosPersonal,
 
@@ -58,9 +60,6 @@ public record DetalleAnexo1DTO(
 
         // =====================================================
         // TIPO DE PERSONA
-        //
-        // Se obtiene de la fotografía de hoja de vida
-        // correspondiente a la fecha de corte.
         // =====================================================
 
         String tipoPersona,
@@ -84,7 +83,14 @@ public record DetalleAnexo1DTO(
 
         BigDecimal tasaNominalAnual,
 
+        // =====================================================
+        // CAUSACIÓN DE INTERESES
+        // =====================================================
+
+        BigDecimal valorInteresesCausadosMes,
         BigDecimal saldoInteresesCausados,
+
+        BigDecimal valorInteresesContingentesMes,
         BigDecimal saldoInteresesContingentes,
 
         // =====================================================
@@ -106,20 +112,7 @@ public record DetalleAnexo1DTO(
         BigDecimal valorGarantiasCredito,
 
         // =====================================================
-        // GARANTÍA RECONOCIDA PARA ANEXO 1
-        //
-        // porcentajeAplicacionGarantia:
-        // porcentaje reconocido según:
-        //
-        // - tipo de garantía
-        // - días de mora
-        // - vigencia
-        //
-        // valorGarantiaReconocida:
-        //
-        // valorGarantiasCredito
-        // * porcentajeAplicacionGarantia
-        // / 100
+        // GARANTÍAS CALCULADAS PARA ANEXO 1
         // =====================================================
 
         BigDecimal porcentajeAplicacionGarantia,
@@ -127,23 +120,6 @@ public record DetalleAnexo1DTO(
 
         // =====================================================
         // DETERIORO DE CAPITAL - ANEXO 1
-        //
-        // porcentajeDeterioroCapital:
-        // porcentaje normal o especial finalmente aplicado.
-        //
-        // baseDeterioroCapital:
-        //
-        // saldoCapital
-        // - valorAportesCredito
-        // - valorGarantiaReconocida
-        //
-        // con piso en cero.
-        //
-        // deterioroCapital:
-        //
-        // baseDeterioroCapital
-        // * porcentajeDeterioroCapital
-        // / 100
         // =====================================================
 
         BigDecimal porcentajeDeterioroCapital,
@@ -152,17 +128,6 @@ public record DetalleAnexo1DTO(
 
         // =====================================================
         // DETERIORO DE INTERESES - ANEXO 1
-        //
-        // porcentajeDeterioroIntereses:
-        // porcentaje normal o especial finalmente aplicado.
-        //
-        // deterioroIntereses:
-        //
-        // saldoInteresesCausados
-        // * porcentajeDeterioroIntereses
-        // / 100
-        //
-        // La garantía no disminuye la base de intereses.
         // =====================================================
 
         BigDecimal porcentajeDeterioroIntereses,

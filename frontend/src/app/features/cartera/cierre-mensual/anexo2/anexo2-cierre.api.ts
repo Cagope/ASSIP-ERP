@@ -155,6 +155,12 @@ export interface TrabajoAnexo2 {
   idCierreCarteraCredito: number;
   idDatosPersonal: number;
 
+  idAgencia: number;
+
+  idLineaCredito: number;
+  codigoLineaCredito: string;
+  nombreLineaCredito: string;
+
   pagareCartera: string;
   documento: string;
   nombreCompleto: string;
@@ -332,6 +338,12 @@ export interface MoraAnexo2 {
   idCarteraCredito: number;
   idCierreCarteraCredito: number;
 
+  idAgencia: number;
+
+  idLineaCredito: number;
+  codigoLineaCredito: string;
+  nombreLineaCredito: string;
+
   pagareCartera: string;
   documento: string;
   nombreCompleto: string;
@@ -402,6 +414,21 @@ export class Anexo2CierreApi {
 
     return this.http.post<ResultadoPreparacionAnexo2>(
       `${this.baseUrl}/${idCierreCartera}/preparar`,
+      {}
+    );
+  }
+
+
+  // =========================================================
+  // CERRAR ANEXO 2 EN FIRME
+  // =========================================================
+
+  cerrar(
+    idCierreCartera: number
+  ): Observable<void> {
+
+    return this.http.post<void>(
+      `${this.baseUrl}/${idCierreCartera}/cerrar`,
       {}
     );
   }

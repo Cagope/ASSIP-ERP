@@ -700,6 +700,148 @@ public class CierreMensualRepository {
     }
 
     // =========================================================
+// INICIAR ETAPA ANEXO 2
+//
+// REQUISITOS:
+// - fotografía cerrada en firme
+// - cálculos cerrados en firme
+// - Anexo 1 cerrado en firme
+// - Anexo 2 pendiente o en proceso
+//
+// RESULTADO:
+// estado_anexo2 = E
+//
+// fecha_anexo2_inicio:
+// - se registra solamente la primera vez
+// - una reejecución conserva la fecha original
+// =========================================================
+
+    public int iniciarAnexo2(
+            Integer idCierreCartera,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+        UPDATE cartera.cierres_cartera
+
+           SET estado_anexo2 =
+               'E',
+
+               fecha_anexo2_inicio =
+                   COALESCE(
+                       fecha_anexo2_inicio,
+                       CURRENT_TIMESTAMP
+                   ),
+
+               fk_seguridad_edicion =
+                   :idUsuario,
+
+               fecha_edicion =
+                   CURRENT_TIMESTAMP
+
+         WHERE id_cierre_cartera =
+               :idCierreCartera
+
+           AND estado_fotografia =
+               'C'
+
+           AND estado_calculos =
+               'C'
+
+           AND estado_anexo1 =
+               'C'
+
+           AND estado_anexo2 IN ('P', 'E')
+        """;
+
+        MapSqlParameterSource parametros =
+                new MapSqlParameterSource()
+                        .addValue(
+                                "idCierreCartera",
+                                idCierreCartera
+                        )
+                        .addValue(
+                                "idUsuario",
+                                idUsuario
+                        );
+
+        return jdbc.update(
+                sql,
+                parametros
+        );
+    }
+
+
+// =========================================================
+// CERRAR ETAPA ANEXO 2 EN FIRME
+//
+// REQUISITOS:
+// - fotografía cerrada en firme
+// - cálculos cerrados en firme
+// - Anexo 1 cerrado en firme
+// - Anexo 2 en proceso
+//
+// RESULTADO:
+// estado_anexo2 = C
+// fecha_anexo2_firme = CURRENT_TIMESTAMP
+//
+// Solamente permite E -> C.
+// =========================================================
+
+    public int cerrarAnexo2(
+            Integer idCierreCartera,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+        UPDATE cartera.cierres_cartera
+
+           SET estado_anexo2 =
+               'C',
+
+               fecha_anexo2_firme =
+                   CURRENT_TIMESTAMP,
+
+               fk_seguridad_edicion =
+                   :idUsuario,
+
+               fecha_edicion =
+                   CURRENT_TIMESTAMP
+
+         WHERE id_cierre_cartera =
+               :idCierreCartera
+
+           AND estado_fotografia =
+               'C'
+
+           AND estado_calculos =
+               'C'
+
+           AND estado_anexo1 =
+               'C'
+
+           AND estado_anexo2 =
+               'E'
+        """;
+
+        MapSqlParameterSource parametros =
+                new MapSqlParameterSource()
+                        .addValue(
+                                "idCierreCartera",
+                                idCierreCartera
+                        )
+                        .addValue(
+                                "idUsuario",
+                                idUsuario
+                        );
+
+        return jdbc.update(
+                sql,
+                parametros
+        );
+    }
+
+    // =========================================================
     // MAPPER
     // =========================================================
 

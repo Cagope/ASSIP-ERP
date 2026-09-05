@@ -2,6 +2,7 @@ package co.assip.erp.cartera.cierremensual.anexo1.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 public record ResumenAnexo1DTO(
 
@@ -13,51 +14,67 @@ public record ResumenAnexo1DTO(
         LocalDate fechaCorte,
 
         // =====================================================
-        // POBLACIÓN
+        // TOTAL GENERAL
         // =====================================================
 
         Integer cantidadCreditos,
-
         BigDecimal saldoCapital,
 
         // =====================================================
-        // CAUSACIÓN DE INTERESES
+        // DETALLE POR EDAD CONTABLE
+        // A, B, C, D, E y TOTAL
         // =====================================================
 
-        Integer cantidadCreditosConInteresesCausados,
-        BigDecimal valorInteresesCausadosMes,
-        BigDecimal saldoInteresesCausados,
-
-        Integer cantidadCreditosConInteresesContingentes,
-        BigDecimal valorInteresesContingentesMes,
-        BigDecimal saldoInteresesContingentes,
-
-        // =====================================================
-        // EDAD CONTABLE
-        // =====================================================
-
-        Integer cantidadEdadA,
-        Integer cantidadEdadB,
-        Integer cantidadEdadC,
-        Integer cantidadEdadD,
-        Integer cantidadEdadE,
-
-        // =====================================================
-        // COBERTURAS
-        // =====================================================
-
-        BigDecimal valorAportesAplicados,
-        BigDecimal valorGarantiasAsignadas,
-        BigDecimal valorGarantiasReconocidas,
-
-        // =====================================================
-        // DETERIORO
-        // =====================================================
-
-        BigDecimal baseDeterioroCapital,
-        BigDecimal deterioroCapital,
-        BigDecimal deterioroIntereses,
-        BigDecimal deterioroTotal
+        List<EdadAnexo1DTO> edades
 
 ) {
+
+    public record EdadAnexo1DTO(
+
+            // =================================================
+            // EDAD
+            // =================================================
+
+            String edadContable,
+
+            // =================================================
+            // POBLACIÓN
+            // =================================================
+
+            Integer cantidadCreditos,
+            BigDecimal saldoCapital,
+
+            // =================================================
+            // COBERTURAS
+            // =================================================
+
+            BigDecimal valorAportesAplicados,
+            BigDecimal valorGarantiasAsignadas,
+            BigDecimal valorGarantiasReconocidas,
+
+            // =================================================
+            // CAUSACIÓN
+            // =================================================
+
+            Integer cantidadCreditosConInteresesCausados,
+            BigDecimal valorInteresesCausadosMes,
+
+            // =================================================
+            // CONTINGENTES
+            // =================================================
+
+            Integer cantidadCreditosConInteresesContingentes,
+            BigDecimal valorInteresesContingentesMes,
+
+            // =================================================
+            // DETERIORO
+            // =================================================
+
+            BigDecimal baseDeterioroCapital,
+            BigDecimal deterioroCapital,
+            BigDecimal deterioroIntereses,
+            BigDecimal deterioroTotal
+
+    ) {
+    }
 }

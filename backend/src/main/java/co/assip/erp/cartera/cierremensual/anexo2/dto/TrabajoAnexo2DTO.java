@@ -12,6 +12,12 @@ public record TrabajoAnexo2DTO(
         Integer idCierreCarteraCredito,
         Integer idDatosPersonal,
 
+        Integer idAgencia,
+
+        Integer idLineaCredito,
+        String codigoLineaCredito,
+        String nombreLineaCredito,
+
         String pagareCartera,
         String documento,
         String nombreCompleto,

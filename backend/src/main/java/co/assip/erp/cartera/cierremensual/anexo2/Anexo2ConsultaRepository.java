@@ -338,6 +338,18 @@ public class Anexo2ConsultaRepository {
 
                     f.id_datos_personal
                         AS "idDatosPersonal",
+                        
+                    f.id_agencia
+                        AS "idAgencia",
+                
+                    f.id_linea_credito
+                        AS "idLineaCredito",
+                
+                    f.codigo_linea_credito
+                        AS "codigoLineaCredito",
+                
+                    f.nombre_linea_credito
+                        AS "nombreLineaCredito",
 
                     f.pagare_cartera
                         AS "pagareCartera",
@@ -721,6 +733,7 @@ public class Anexo2ConsultaRepository {
 
                 ORDER BY
                     f.documento,
+                    f.id_linea_credito,
                     f.pagare_cartera,
                     pe.id_cartera_credito
                 """;
@@ -758,136 +771,154 @@ public class Anexo2ConsultaRepository {
     ) {
 
         String sql = """
-                WITH parametros AS
-                (
-                    SELECT
-                        id_cierre_cartera,
-                        fecha_corte
-
-                    FROM cartera.cierres_cartera
-
-                    WHERE id_cierre_cartera = ?
-                ),
-
-                cierres_40 AS
-                (
-                    SELECT
-                        ch.id_cierre_cartera,
-                        ch.fecha_corte,
-
-                        ROW_NUMBER() OVER (
-                            ORDER BY ch.fecha_corte
-                        )::integer
-                            AS numero_periodo
-
-                    FROM cartera.cierres_cartera ch
-
-                    CROSS JOIN parametros p
-
-                    WHERE ch.fecha_corte BETWEEN
-                          (
-                              p.fecha_corte
-                              - INTERVAL '39 months'
-                          )::date
-                          AND p.fecha_corte
-                ),
-
-                poblacion AS
-                (
-                    SELECT
-                        pe.id_cierre_cartera,
-                        pe.id_cierre_cartera_credito,
-                        pe.id_cartera_credito,
-                        pe.id_modelo_pe,
-                        pe.nombre_modelo_pe,
-
-                        f.pagare_cartera,
-                        f.documento,
-
-                        TRIM(
-                            CONCAT_WS(
-                                ' ',
-                                NULLIF(TRIM(f.nombres), ''),
-                                NULLIF(TRIM(f.primer_apellido), ''),
-                                NULLIF(TRIM(f.segundo_apellido), '')
-                            )
-                        )
-                            AS nombre_completo
-
-                    FROM cartera.pe_resultados pe
-
-                    INNER JOIN cartera.cierres_cartera_creditos f
-                        ON f.id_cierre_cartera_credito =
-                           pe.id_cierre_cartera_credito
-
-                    WHERE pe.id_cierre_cartera = ?
-                      AND pe.id_modelo_pe = ?
-                )
-
+            WITH parametros AS
+            (
                 SELECT
-                    p.id_cierre_cartera
-                        AS "idCierreCartera",
+                    id_cierre_cartera,
+                    fecha_corte
 
-                    pc.fecha_corte
-                        AS "fechaCorte",
+                FROM cartera.cierres_cartera
 
-                    p.id_cartera_credito
-                        AS "idCarteraCredito",
+                WHERE id_cierre_cartera = ?
+            ),
 
-                    p.id_cierre_cartera_credito
-                        AS "idCierreCarteraCredito",
+            cierres_40 AS
+            (
+                SELECT
+                    ch.id_cierre_cartera,
+                    ch.fecha_corte,
 
-                    p.pagare_cartera
-                        AS "pagareCartera",
-
-                    p.documento
-                        AS "documento",
-
-                    p.nombre_completo
-                        AS "nombreCompleto",
-
-                    p.id_modelo_pe
-                        AS "idModeloPe",
-
-                    p.nombre_modelo_pe
-                        AS "nombreModeloPe",
-
-                    h.numero_periodo
-                        AS "periodo",
-
-                    h.fecha_corte
-                        AS "fechaReferencia",
-
-                    COALESCE(
-                        rh.dias_mora,
-                        0
+                    ROW_NUMBER() OVER (
+                        ORDER BY ch.fecha_corte
                     )::integer
-                        AS "diasMora"
+                        AS numero_periodo
 
-                FROM poblacion p
+                FROM cartera.cierres_cartera ch
 
-                INNER JOIN parametros pc
-                    ON pc.id_cierre_cartera =
-                       p.id_cierre_cartera
+                CROSS JOIN parametros p
 
-                CROSS JOIN cierres_40 h
+                WHERE ch.fecha_corte BETWEEN
+                      (
+                          p.fecha_corte
+                          - INTERVAL '39 months'
+                      )::date
+                      AND p.fecha_corte
+            ),
 
-                LEFT JOIN cartera.cierres_cartera_creditos fh
-                    ON fh.id_cierre_cartera =
-                       h.id_cierre_cartera
+            poblacion AS
+            (
+                SELECT
+                    pe.id_cierre_cartera,
+                    pe.id_cierre_cartera_credito,
+                    pe.id_cartera_credito,
+                    pe.id_modelo_pe,
+                    pe.nombre_modelo_pe,
 
-                   AND fh.id_cartera_credito =
-                       p.id_cartera_credito
+                    f.id_agencia,
+                    f.id_linea_credito,
+                    f.codigo_linea_credito,
+                    f.nombre_linea_credito,
 
-                LEFT JOIN cartera.cierres_cartera_resultados rh
-                    ON rh.id_cierre_cartera_credito =
-                       fh.id_cierre_cartera_credito
+                    f.pagare_cartera,
+                    f.documento,
 
-                ORDER BY
-                    p.documento,
-                    p.pagare_cartera,
-                    h.numero_periodo
-                """;
+                    TRIM(
+                        CONCAT_WS(
+                            ' ',
+                            NULLIF(TRIM(f.nombres), ''),
+                            NULLIF(TRIM(f.primer_apellido), ''),
+                            NULLIF(TRIM(f.segundo_apellido), '')
+                        )
+                    )
+                        AS nombre_completo
+
+                FROM cartera.pe_resultados pe
+
+                INNER JOIN cartera.cierres_cartera_creditos f
+                    ON f.id_cierre_cartera_credito =
+                       pe.id_cierre_cartera_credito
+
+                WHERE pe.id_cierre_cartera = ?
+                  AND pe.id_modelo_pe = ?
+            )
+
+            SELECT
+                p.id_cierre_cartera
+                    AS "idCierreCartera",
+
+                pc.fecha_corte
+                    AS "fechaCorte",
+
+                p.id_cartera_credito
+                    AS "idCarteraCredito",
+
+                p.id_cierre_cartera_credito
+                    AS "idCierreCarteraCredito",
+
+                p.id_agencia
+                    AS "idAgencia",
+
+                p.id_linea_credito
+                    AS "idLineaCredito",
+
+                p.codigo_linea_credito
+                    AS "codigoLineaCredito",
+
+                p.nombre_linea_credito
+                    AS "nombreLineaCredito",
+
+                p.pagare_cartera
+                    AS "pagareCartera",
+
+                p.documento
+                    AS "documento",
+
+                p.nombre_completo
+                    AS "nombreCompleto",
+
+                p.id_modelo_pe
+                    AS "idModeloPe",
+
+                p.nombre_modelo_pe
+                    AS "nombreModeloPe",
+
+                h.numero_periodo
+                    AS "periodo",
+
+                h.fecha_corte
+                    AS "fechaReferencia",
+
+                COALESCE(
+                    rh.dias_mora,
+                    0
+                )::integer
+                    AS "diasMora"
+
+            FROM poblacion p
+
+            INNER JOIN parametros pc
+                ON pc.id_cierre_cartera =
+                   p.id_cierre_cartera
+
+            CROSS JOIN cierres_40 h
+
+            LEFT JOIN cartera.cierres_cartera_creditos fh
+                ON fh.id_cierre_cartera =
+                   h.id_cierre_cartera
+
+               AND fh.id_cartera_credito =
+                   p.id_cartera_credito
+
+            LEFT JOIN cartera.cierres_cartera_resultados rh
+                ON rh.id_cierre_cartera_credito =
+                   fh.id_cierre_cartera_credito
+
+            ORDER BY
+                p.id_agencia,
+                p.id_linea_credito,
+                p.pagare_cartera,
+                h.numero_periodo
+            """;
 
         return jdbcTemplate.query(
                 sql,

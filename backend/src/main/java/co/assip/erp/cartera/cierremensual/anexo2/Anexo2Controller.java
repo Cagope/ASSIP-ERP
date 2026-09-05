@@ -17,13 +17,9 @@ public class Anexo2Controller {
 
     private final Anexo2Service service;
 
+
     // =========================================================
     // PREPARAR / EJECUTAR ANEXO 2
-    //
-    // El usuario se obtiene desde la sesión autenticada.
-    //
-    // POST
-    // /api/v1/cartera/anexo2/{idCierreCartera}/preparar
     // =========================================================
 
     @PostMapping("/{idCierreCartera}/preparar")
@@ -36,6 +32,23 @@ public class Anexo2Controller {
                         idCierreCartera
                 )
         );
+    }
+
+
+    // =========================================================
+    // CERRAR ANEXO 2 EN FIRME
+    // =========================================================
+
+    @PostMapping("/{idCierreCartera}/cerrar")
+    public ResponseEntity<Void> cerrar(
+            @PathVariable Integer idCierreCartera
+    ) {
+
+        service.cerrar(
+                idCierreCartera
+        );
+
+        return ResponseEntity.noContent().build();
     }
 
 

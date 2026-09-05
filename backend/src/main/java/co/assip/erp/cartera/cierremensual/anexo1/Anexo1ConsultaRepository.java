@@ -55,6 +55,8 @@ public class Anexo1ConsultaRepository {
                         f.id_cierre_cartera_credito,
                         r.id_cierre_cartera_resultado,
                         f.id_agencia,
+                        a.codigo_agencia,
+                        a.nombre_agencia,
 
                         f.id_datos_personal,
 
@@ -104,12 +106,22 @@ public class Anexo1ConsultaRepository {
                             f.tasa_nominal_anual,
                             0
                         ) AS tasa_nominal_anual,
-
+                        
+                        COALESCE(
+                            r.valor_intereses_causados_mes,
+                            0
+                        ) AS valor_intereses_causados_mes,
+    
                         COALESCE(
                             r.saldo_intereses_causados,
                             0
                         ) AS saldo_intereses_causados,
-
+    
+                        COALESCE(
+                            r.valor_intereses_contingentes_mes,
+                            0
+                        ) AS valor_intereses_contingentes_mes,
+    
                         COALESCE(
                             r.saldo_intereses_contingentes,
                             0
@@ -227,6 +239,10 @@ public class Anexo1ConsultaRepository {
                     INNER JOIN cartera.cierres_cartera c
                         ON c.id_cierre_cartera =
                            r.id_cierre_cartera
+                    
+                    INNER JOIN general.datos_agencias a
+                        ON a.id_agencia =
+                           f.id_agencia
 
                     /*
                      * FOTOGRAFÍA DE HOJA DE VIDA
@@ -447,6 +463,14 @@ public class Anexo1ConsultaRepository {
                                         Integer.class
                                 ),
 
+                                rs.getString(
+                                        "codigo_agencia"
+                                ),
+
+                                rs.getString(
+                                        "nombre_agencia"
+                                ),
+
                                 rs.getObject(
                                         "id_datos_personal",
                                         Integer.class
@@ -559,7 +583,7 @@ public class Anexo1ConsultaRepository {
                                 ),
 
                                 // =====================================
-                                // SALDOS
+                                // SALDOS DEL CRÉDITO
                                 // =====================================
 
                                 rs.getBigDecimal(
@@ -570,8 +594,20 @@ public class Anexo1ConsultaRepository {
                                         "tasa_nominal_anual"
                                 ),
 
+                                // =====================================
+                                // CAUSACIÓN DE INTERESES
+                                // =====================================
+
+                                rs.getBigDecimal(
+                                        "valor_intereses_causados_mes"
+                                ),
+
                                 rs.getBigDecimal(
                                         "saldo_intereses_causados"
+                                ),
+
+                                rs.getBigDecimal(
+                                        "valor_intereses_contingentes_mes"
                                 ),
 
                                 rs.getBigDecimal(
@@ -696,190 +732,152 @@ public class Anexo1ConsultaRepository {
     ) {
 
         String sql = """
-            WITH base AS
-            (
-                SELECT
-                    c.id_cierre_cartera,
-                    c.fecha_corte,
+        WITH base AS
+        (
+            SELECT
+                c.id_cierre_cartera,
+                c.fecha_corte,
 
-                    r.edad_contable,
+                COALESCE(
+                    NULLIF(TRIM(r.edad_contable), ''),
+                    'SIN EDAD'
+                ) AS edad_contable,
 
-                    COALESCE(
-                        r.saldo_actual,
-                        0
-                    ) AS saldo_capital,
+                COALESCE(r.saldo_actual, 0)
+                    AS saldo_capital,
 
-                    COALESCE(
-                        r.saldo_intereses_causados,
-                        0
-                    ) AS saldo_intereses_causados,
+                COALESCE(r.valor_intereses_causados_mes, 0)
+                    AS valor_intereses_causados_mes,
 
-                    COALESCE(
-                        r.valor_aportes_credito,
-                        0
-                    ) AS valor_aportes_credito,
+                COALESCE(r.saldo_intereses_causados, 0)
+                    AS saldo_intereses_causados,
 
-                    COALESCE(
-                        r.valor_garantias_credito,
-                        0
-                    ) AS valor_garantias_credito,
+                COALESCE(r.valor_intereses_contingentes_mes, 0)
+                    AS valor_intereses_contingentes_mes,
 
+                COALESCE(r.saldo_intereses_contingentes, 0)
+                    AS saldo_intereses_contingentes,
+
+                COALESCE(r.valor_aportes_credito, 0)
+                    AS valor_aportes_credito,
+
+                COALESCE(r.valor_garantias_credito, 0)
+                    AS valor_garantias_credito,
+
+                ROUND(
+                    COALESCE(r.valor_garantias_credito, 0)
+                    *
+                    COALESCE(pg.porcentaje_aplicacion, 0)
+                    / 100,
+                    0
+                ) AS valor_garantia_reconocida,
+
+                GREATEST(
+                    COALESCE(r.saldo_actual, 0)
+                    -
+                    COALESCE(r.valor_aportes_credito, 0)
+                    -
                     ROUND(
-                        COALESCE(
-                            r.valor_garantias_credito,
-                            0
-                        )
+                        COALESCE(r.valor_garantias_credito, 0)
                         *
-                        COALESCE(
-                            pg.porcentaje_aplicacion,
-                            0
-                        )
+                        COALESCE(pg.porcentaje_aplicacion, 0)
                         / 100,
                         0
-                    ) AS valor_garantia_reconocida,
+                    ),
+                    0
+                ) AS base_deterioro_capital,
 
-                    GREATEST(
-                        COALESCE(
-                            r.saldo_actual,
-                            0
-                        )
-                        -
-                        COALESCE(
-                            r.valor_aportes_credito,
-                            0
-                        )
-                        -
-                        ROUND(
-                            COALESCE(
-                                r.valor_garantias_credito,
-                                0
-                            )
-                            *
-                            COALESCE(
-                                pg.porcentaje_aplicacion,
-                                0
-                            )
-                            / 100,
-                            0
-                        ),
-                        0
-                    ) AS base_deterioro_capital,
+                COALESCE(r.deterioro_capital, 0)
+                    AS deterioro_capital,
 
-                    COALESCE(
-                        r.deterioro_capital,
-                        0
-                    ) AS deterioro_capital,
+                COALESCE(r.deterioro_intereses, 0)
+                    AS deterioro_intereses
 
-                    COALESCE(
-                        r.deterioro_intereses,
-                        0
-                    ) AS deterioro_intereses
+            FROM cartera.cierres_cartera_resultados r
 
-                FROM cartera.cierres_cartera_resultados r
+            INNER JOIN cartera.cierres_cartera_creditos f
+                ON f.id_cierre_cartera_credito =
+                   r.id_cierre_cartera_credito
 
-                INNER JOIN cartera.cierres_cartera_creditos f
-                    ON f.id_cierre_cartera_credito =
-                       r.id_cierre_cartera_credito
+            INNER JOIN cartera.cierres_cartera c
+                ON c.id_cierre_cartera =
+                   r.id_cierre_cartera
 
-                INNER JOIN cartera.cierres_cartera c
-                    ON c.id_cierre_cartera =
-                       r.id_cierre_cartera
+            LEFT JOIN LATERAL
+            (
+                SELECT
+                    p.porcentaje_aplicacion
 
-                /*
-                 * PORCENTAJE DE APLICACIÓN DE GARANTÍA
-                 *
-                 * Se selecciona según:
-                 *
-                 * - código de garantía
-                 * - días de mora
-                 * - vigencia a fecha de corte
-                 */
-                LEFT JOIN LATERAL
-                (
-                    SELECT
-                        p.porcentaje_aplicacion
+                FROM cartera.porcentajes_aplicacion_garantia p
 
-                    FROM cartera.porcentajes_aplicacion_garantia p
+                WHERE p.codigo_garantia_credito =
+                      f.codigo_garantia_credito
 
-                    WHERE p.codigo_garantia_credito =
-                          f.codigo_garantia_credito
+                  AND r.dias_mora <=
+                      p.dias_hasta
 
-                      AND r.dias_mora <=
-                          p.dias_hasta
+                  AND p.activo = true
 
-                      AND p.activo = true
+                  AND p.vigencia_desde <=
+                      c.fecha_corte
 
-                      AND p.vigencia_desde <=
-                          c.fecha_corte
+                  AND (
+                      p.vigencia_hasta IS NULL
+                      OR p.vigencia_hasta >= c.fecha_corte
+                  )
 
-                      AND (
-                           p.vigencia_hasta IS NULL
-                           OR p.vigencia_hasta >=
-                              c.fecha_corte
-                      )
+                ORDER BY
+                    p.dias_hasta
 
-                    ORDER BY
-                        p.dias_hasta
+                LIMIT 1
 
-                    LIMIT 1
+            ) pg ON true
 
-                ) pg ON true
+            WHERE r.id_cierre_cartera =
+                  :idCierreCartera
+        ),
 
-                WHERE r.id_cierre_cartera =
-                      :idCierreCartera
-            )
-
+        agrupado AS
+        (
             SELECT
                 id_cierre_cartera,
                 fecha_corte,
+                edad_contable,
 
                 COUNT(*)::integer
                     AS cantidad_creditos,
 
-                COALESCE(
-                    SUM(saldo_capital),
-                    0
-                ) AS saldo_capital,
+                COALESCE(SUM(saldo_capital), 0)
+                    AS saldo_capital,
 
-                COALESCE(
-                    SUM(saldo_intereses_causados),
-                    0
-                ) AS saldo_intereses_causados,
+                COALESCE(SUM(valor_aportes_credito), 0)
+                    AS valor_aportes_aplicados,
 
-                COUNT(*) FILTER (
-                    WHERE edad_contable = 'A'
-                )::integer AS cantidad_edad_a,
+                COALESCE(SUM(valor_garantias_credito), 0)
+                    AS valor_garantias_asignadas,
+
+                COALESCE(SUM(valor_garantia_reconocida), 0)
+                    AS valor_garantias_reconocidas,
 
                 COUNT(*) FILTER (
-                    WHERE edad_contable = 'B'
-                )::integer AS cantidad_edad_b,
-
-                COUNT(*) FILTER (
-                    WHERE edad_contable = 'C'
-                )::integer AS cantidad_edad_c,
-
-                COUNT(*) FILTER (
-                    WHERE edad_contable = 'D'
-                )::integer AS cantidad_edad_d,
-
-                COUNT(*) FILTER (
-                    WHERE edad_contable = 'E'
-                )::integer AS cantidad_edad_e,
+                    WHERE saldo_intereses_causados > 0
+                )::integer
+                    AS cantidad_creditos_intereses_causados,
 
                 COALESCE(
-                    SUM(valor_aportes_credito),
+                    SUM(valor_intereses_causados_mes),
                     0
-                ) AS valor_aportes_aplicados,
+                ) AS valor_intereses_causados_mes,
+
+                COUNT(*) FILTER (
+                    WHERE saldo_intereses_contingentes > 0
+                )::integer
+                    AS cantidad_creditos_intereses_contingentes,
 
                 COALESCE(
-                    SUM(valor_garantias_credito),
+                    SUM(valor_intereses_contingentes_mes),
                     0
-                ) AS valor_garantias_asignadas,
-
-                COALESCE(
-                    SUM(valor_garantia_reconocida),
-                    0
-                ) AS valor_garantias_reconocidas,
+                ) AS valor_intereses_contingentes_mes,
 
                 COALESCE(
                     SUM(base_deterioro_capital),
@@ -894,24 +892,135 @@ public class Anexo1ConsultaRepository {
                 COALESCE(
                     SUM(deterioro_intereses),
                     0
-                ) AS deterioro_intereses,
+                ) AS deterioro_intereses
+
+            FROM base
+
+            GROUP BY
+                id_cierre_cartera,
+                fecha_corte,
+                edad_contable
+        ),
+
+        total AS
+        (
+            SELECT
+                id_cierre_cartera,
+                fecha_corte,
+
+                'TOTAL'::text
+                    AS edad_contable,
+
+                COUNT(*)::integer
+                    AS cantidad_creditos,
+
+                COALESCE(SUM(saldo_capital), 0)
+                    AS saldo_capital,
+
+                COALESCE(SUM(valor_aportes_credito), 0)
+                    AS valor_aportes_aplicados,
+
+                COALESCE(SUM(valor_garantias_credito), 0)
+                    AS valor_garantias_asignadas,
+
+                COALESCE(SUM(valor_garantia_reconocida), 0)
+                    AS valor_garantias_reconocidas,
+
+                COUNT(*) FILTER (
+                    WHERE saldo_intereses_causados > 0
+                )::integer
+                    AS cantidad_creditos_intereses_causados,
+
+                COALESCE(
+                    SUM(valor_intereses_causados_mes),
+                    0
+                ) AS valor_intereses_causados_mes,
+
+                COUNT(*) FILTER (
+                    WHERE saldo_intereses_contingentes > 0
+                )::integer
+                    AS cantidad_creditos_intereses_contingentes,
+
+                COALESCE(
+                    SUM(valor_intereses_contingentes_mes),
+                    0
+                ) AS valor_intereses_contingentes_mes,
+
+                COALESCE(
+                    SUM(base_deterioro_capital),
+                    0
+                ) AS base_deterioro_capital,
 
                 COALESCE(
                     SUM(deterioro_capital),
                     0
-                )
-                +
+                ) AS deterioro_capital,
+
                 COALESCE(
                     SUM(deterioro_intereses),
                     0
-                ) AS deterioro_total
+                ) AS deterioro_intereses
 
             FROM base
 
             GROUP BY
                 id_cierre_cartera,
                 fecha_corte
-            """;
+        ),
+
+        salida AS
+        (
+            SELECT *
+            FROM agrupado
+
+            UNION ALL
+
+            SELECT *
+            FROM total
+        )
+
+        SELECT
+            id_cierre_cartera,
+            fecha_corte,
+            edad_contable,
+
+            cantidad_creditos,
+            saldo_capital,
+
+            valor_aportes_aplicados,
+            valor_garantias_asignadas,
+            valor_garantias_reconocidas,
+
+            cantidad_creditos_intereses_causados,
+            valor_intereses_causados_mes,
+
+            cantidad_creditos_intereses_contingentes,
+            valor_intereses_contingentes_mes,
+
+            base_deterioro_capital,
+            deterioro_capital,
+            deterioro_intereses,
+
+            deterioro_capital
+            +
+            deterioro_intereses
+                AS deterioro_total
+
+        FROM salida
+
+        ORDER BY
+            CASE edad_contable
+                WHEN 'A' THEN 1
+                WHEN 'B' THEN 2
+                WHEN 'C' THEN 3
+                WHEN 'D' THEN 4
+                WHEN 'E' THEN 5
+                WHEN 'SIN EDAD' THEN 6
+                WHEN 'TOTAL' THEN 7
+                ELSE 8
+            END,
+            edad_contable
+        """;
 
         MapSqlParameterSource parametros =
                 new MapSqlParameterSource()
@@ -920,88 +1029,113 @@ public class Anexo1ConsultaRepository {
                                 idCierreCartera
                         );
 
-        return jdbc.queryForObject(
+        record FilaResumen(
+                java.time.LocalDate fechaCorte,
+                ResumenAnexo1DTO.EdadAnexo1DTO edad
+        ) {
+        }
+
+        var filas = jdbc.query(
                 sql,
                 parametros,
                 (rs, rowNum) ->
-                        new ResumenAnexo1DTO(
-
-                                rs.getObject(
-                                        "id_cierre_cartera",
-                                        Integer.class
-                                ),
+                        new FilaResumen(
 
                                 rs.getObject(
                                         "fecha_corte",
                                         java.time.LocalDate.class
                                 ),
 
-                                rs.getObject(
-                                        "cantidad_creditos",
-                                        Integer.class
-                                ),
+                                new ResumenAnexo1DTO.EdadAnexo1DTO(
 
-                                rs.getBigDecimal(
-                                        "saldo_capital"
-                                ),
+                                        rs.getString(
+                                                "edad_contable"
+                                        ),
 
-                                rs.getBigDecimal(
-                                        "saldo_intereses_causados"
-                                ),
+                                        rs.getObject(
+                                                "cantidad_creditos",
+                                                Integer.class
+                                        ),
 
-                                rs.getObject(
-                                        "cantidad_edad_a",
-                                        Integer.class
-                                ),
+                                        rs.getBigDecimal(
+                                                "saldo_capital"
+                                        ),
 
-                                rs.getObject(
-                                        "cantidad_edad_b",
-                                        Integer.class
-                                ),
+                                        rs.getBigDecimal(
+                                                "valor_aportes_aplicados"
+                                        ),
 
-                                rs.getObject(
-                                        "cantidad_edad_c",
-                                        Integer.class
-                                ),
+                                        rs.getBigDecimal(
+                                                "valor_garantias_asignadas"
+                                        ),
 
-                                rs.getObject(
-                                        "cantidad_edad_d",
-                                        Integer.class
-                                ),
+                                        rs.getBigDecimal(
+                                                "valor_garantias_reconocidas"
+                                        ),
 
-                                rs.getObject(
-                                        "cantidad_edad_e",
-                                        Integer.class
-                                ),
+                                        rs.getObject(
+                                                "cantidad_creditos_intereses_causados",
+                                                Integer.class
+                                        ),
 
-                                rs.getBigDecimal(
-                                        "valor_aportes_aplicados"
-                                ),
+                                        rs.getBigDecimal(
+                                                "valor_intereses_causados_mes"
+                                        ),
 
-                                rs.getBigDecimal(
-                                        "valor_garantias_asignadas"
-                                ),
+                                        rs.getObject(
+                                                "cantidad_creditos_intereses_contingentes",
+                                                Integer.class
+                                        ),
 
-                                rs.getBigDecimal(
-                                        "valor_garantias_reconocidas"
-                                ),
+                                        rs.getBigDecimal(
+                                                "valor_intereses_contingentes_mes"
+                                        ),
 
-                                rs.getBigDecimal(
-                                        "base_deterioro_capital"
-                                ),
+                                        rs.getBigDecimal(
+                                                "base_deterioro_capital"
+                                        ),
 
-                                rs.getBigDecimal(
-                                        "deterioro_capital"
-                                ),
+                                        rs.getBigDecimal(
+                                                "deterioro_capital"
+                                        ),
 
-                                rs.getBigDecimal(
-                                        "deterioro_intereses"
-                                ),
+                                        rs.getBigDecimal(
+                                                "deterioro_intereses"
+                                        ),
 
-                                rs.getBigDecimal(
-                                        "deterioro_total"
+                                        rs.getBigDecimal(
+                                                "deterioro_total"
+                                        )
                                 )
                         )
+        );
+
+        if (filas.isEmpty()) {
+            return null;
+        }
+
+        var edades =
+                filas.stream()
+                        .map(FilaResumen::edad)
+                        .toList();
+
+        var total =
+                edades.stream()
+                        .filter(
+                                fila ->
+                                        "TOTAL".equals(
+                                                fila.edadContable()
+                                        )
+                        )
+                        .findFirst()
+                        .orElseThrow();
+
+        return new ResumenAnexo1DTO(
+                idCierreCartera,
+                filas.get(0).fechaCorte(),
+                total.cantidadCreditos(),
+                total.saldoCapital(),
+                edades
         );
     }
 }
