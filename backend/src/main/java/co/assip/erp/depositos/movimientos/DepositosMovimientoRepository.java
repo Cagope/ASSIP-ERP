@@ -23,12 +23,15 @@ public class DepositosMovimientoRepository {
 
         String sql = """
             SELECT
-                id_cuenta_ahorro,
-                saldo_actual_cuenta,
-                estado_cuenta_cuenta
-            FROM depositos.cuentas_ahorro
-            WHERE id_cuenta_ahorro = :idCuentaAhorro
-            FOR UPDATE
+                ca.id_cuenta_ahorro,
+                ca.saldo_actual_cuenta,
+                ca.estado_cuenta_cuenta,
+                COALESCE(ea.operativo, false) AS estado_operativo
+            FROM depositos.cuentas_ahorro ca
+            LEFT JOIN depositos.estados_ahorros ea
+                   ON ea.codigo_estado_ahorro = ca.estado_cuenta_cuenta
+            WHERE ca.id_cuenta_ahorro = :idCuentaAhorro
+            FOR UPDATE OF ca
         """;
 
         return jdbc.query(
@@ -52,12 +55,15 @@ public class DepositosMovimientoRepository {
 
         String sql = """
             SELECT
-                id_cuenta_ahorro,
-                saldo_actual_cuenta,
-                estado_cuenta_cuenta
-            FROM depositos.cuentas_ahorro
-            WHERE id_cuenta_ahorro IN (:ids)
-            FOR UPDATE
+                ca.id_cuenta_ahorro,
+                ca.saldo_actual_cuenta,
+                ca.estado_cuenta_cuenta,
+                COALESCE(ea.operativo, false) AS estado_operativo
+            FROM depositos.cuentas_ahorro ca
+            LEFT JOIN depositos.estados_ahorros ea
+                   ON ea.codigo_estado_ahorro = ca.estado_cuenta_cuenta
+            WHERE ca.id_cuenta_ahorro IN (:ids)
+            FOR UPDATE OF ca
         """;
 
         return jdbc.query(
@@ -81,7 +87,9 @@ public class DepositosMovimientoRepository {
         }
 
         if (nuevoSaldo.compareTo(BigDecimal.ZERO) < 0) {
-            throw new RuntimeException("No se puede actualizar una cuenta con saldo negativo.");
+            throw new RuntimeException(
+                    "No se puede actualizar una cuenta con saldo negativo."
+            );
         }
 
         String sql = """
@@ -101,7 +109,9 @@ public class DepositosMovimientoRepository {
         );
 
         if (updated <= 0) {
-            throw new RuntimeException("No fue posible actualizar el saldo de la cuenta.");
+            throw new RuntimeException(
+                    "No fue posible actualizar el saldo de la cuenta."
+            );
         }
     }
 
@@ -113,10 +123,13 @@ public class DepositosMovimientoRepository {
         validarUsuario(idUsuario);
 
         if (cuentas == null || cuentas.isEmpty()) {
-            throw new RuntimeException("No se recibieron cuentas para actualizar saldo.");
+            throw new RuntimeException(
+                    "No se recibieron cuentas para actualizar saldo."
+            );
         }
 
         cuentas.forEach(c -> {
+
             validarCuenta(c.idCuentaAhorro());
 
             if (c.saldoActual() == null) {
@@ -169,7 +182,9 @@ public class DepositosMovimientoRepository {
         );
 
         if (inserted <= 0) {
-            throw new RuntimeException("No fue posible registrar el extracto.");
+            throw new RuntimeException(
+                    "No fue posible registrar el extracto."
+            );
         }
     }
 
@@ -181,7 +196,9 @@ public class DepositosMovimientoRepository {
         validarUsuario(idUsuario);
 
         if (movimientos == null || movimientos.isEmpty()) {
-            throw new RuntimeException("No se recibieron extractos para registrar.");
+            throw new RuntimeException(
+                    "No se recibieron extractos para registrar."
+            );
         }
 
         movimientos.forEach(this::validarMovimiento);
@@ -196,6 +213,7 @@ public class DepositosMovimientoRepository {
     }
 
     private String insertExtractoSql() {
+
         return """
             INSERT INTO depositos.extractos_cuentas_ahorros (
                 id_cuenta_ahorro,
@@ -244,7 +262,12 @@ public class DepositosMovimientoRepository {
                 .addValue("valorDebito", nvl(dto.getValorDebito()))
                 .addValue("valorCredito", nvl(dto.getValorCredito()))
                 .addValue("modulo", trim(dto.getModulo()))
-                .addValue("tarjeta", isBlank(dto.getTarjeta()) ? TARJETA_NO : trim(dto.getTarjeta()))
+                .addValue(
+                        "tarjeta",
+                        isBlank(dto.getTarjeta())
+                                ? TARJETA_NO
+                                : trim(dto.getTarjeta())
+                )
                 .addValue("establecimiento", trim(dto.getEstablecimiento()))
                 .addValue("idUsuario", idUsuario);
     }
@@ -255,61 +278,86 @@ public class DepositosMovimientoRepository {
         return new CuentaSaldoDTO(
                 rs.getInt("id_cuenta_ahorro"),
                 nvl(rs.getBigDecimal("saldo_actual_cuenta")),
-                rs.getString("estado_cuenta_cuenta")
+                rs.getString("estado_cuenta_cuenta"),
+                rs.getBoolean("estado_operativo")
         );
     }
 
     private void validarMovimiento(DepositosMovimientoDTO dto) {
 
         if (dto == null) {
-            throw new RuntimeException("El movimiento de depósitos es obligatorio.");
+            throw new RuntimeException(
+                    "El movimiento de depósitos es obligatorio."
+            );
         }
 
         validarCuenta(dto.getIdCuentaAhorro());
 
         if (dto.getFechaMovimiento() == null) {
-            throw new RuntimeException("La fecha del movimiento es obligatoria.");
+            throw new RuntimeException(
+                    "La fecha del movimiento es obligatoria."
+            );
         }
 
         if (isBlank(dto.getTipoMovimiento())) {
-            throw new RuntimeException("El tipo de movimiento es obligatorio.");
+            throw new RuntimeException(
+                    "El tipo de movimiento es obligatorio."
+            );
         }
 
         if (isBlank(dto.getModulo())) {
-            throw new RuntimeException("El módulo es obligatorio.");
+            throw new RuntimeException(
+                    "El módulo es obligatorio."
+            );
         }
 
         BigDecimal debito = nvl(dto.getValorDebito());
         BigDecimal credito = nvl(dto.getValorCredito());
 
         if (debito.compareTo(BigDecimal.ZERO) < 0) {
-            throw new RuntimeException("No se permiten débitos negativos.");
+            throw new RuntimeException(
+                    "No se permiten débitos negativos."
+            );
         }
 
         if (credito.compareTo(BigDecimal.ZERO) < 0) {
-            throw new RuntimeException("No se permiten créditos negativos.");
+            throw new RuntimeException(
+                    "No se permiten créditos negativos."
+            );
         }
 
         if (debito.compareTo(BigDecimal.ZERO) <= 0
                 && credito.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new RuntimeException("El movimiento no tiene valor.");
+
+            throw new RuntimeException(
+                    "El movimiento no tiene valor."
+            );
         }
 
         if (debito.compareTo(BigDecimal.ZERO) > 0
                 && credito.compareTo(BigDecimal.ZERO) > 0) {
-            throw new RuntimeException("El movimiento no puede tener débito y crédito al mismo tiempo.");
+
+            throw new RuntimeException(
+                    "El movimiento no puede tener débito y crédito al mismo tiempo."
+            );
         }
     }
 
     private void validarCuenta(Integer idCuentaAhorro) {
+
         if (idCuentaAhorro == null) {
-            throw new RuntimeException("La cuenta de ahorro es obligatoria.");
+            throw new RuntimeException(
+                    "La cuenta de ahorro es obligatoria."
+            );
         }
     }
 
     private void validarUsuario(Integer idUsuario) {
+
         if (idUsuario == null) {
-            throw new RuntimeException("El usuario es obligatorio.");
+            throw new RuntimeException(
+                    "El usuario es obligatorio."
+            );
         }
     }
 
@@ -328,7 +376,8 @@ public class DepositosMovimientoRepository {
     public record CuentaSaldoDTO(
             Integer idCuentaAhorro,
             BigDecimal saldoActual,
-            String estadoCuenta
+            String estadoCuenta,
+            Boolean estadoOperativo
     ) {
     }
 }

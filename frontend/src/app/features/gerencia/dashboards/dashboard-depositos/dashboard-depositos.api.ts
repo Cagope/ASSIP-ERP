@@ -7,17 +7,23 @@ import { environment }
   from '../../../../../environments/environment';
 
 export interface DashboardDepositosResumen {
+
   totalAsociados: number;
   totalCuentas: number;
   saldoTotal: number;
+
   totalDebitos: number;
   totalCreditos: number;
+
   totalFormas: number;
+
   hombres: number;
   mujeres: number;
   juridicas: number;
+
   saldoAportes: number;
   saldoTac: number;
+
 }
 
 export interface DashboardDepositosForma {
@@ -44,6 +50,28 @@ export interface DashboardDepositosForma {
   variacionCuentas: number;
 
   porcentajeCrecimiento: number;
+
+}
+
+export interface DashboardDepositosTipoCaptacion {
+
+  codigoCaptacion: string;
+  descripcionCaptacion: string;
+
+  cuentasAnteriores: number;
+  saldoAnterior: number;
+
+  cuentasActuales: number;
+  saldoActual: number;
+
+  ingresosPeriodo: number;
+  egresosPeriodo: number;
+
+  variacionSaldo: number;
+  variacionCuentas: number;
+
+  porcentajeCrecimiento: number;
+  participacion: number;
 
 }
 
@@ -80,7 +108,11 @@ export interface DashboardDepositosResponse {
   resumen: DashboardDepositosResumen;
 
   formas: DashboardDepositosForma[];
+
+  tiposCaptacion: DashboardDepositosTipoCaptacion[];
+
   agencias: DashboardDepositosGrupo[];
+
   tendencia: DashboardDepositosTendencia[];
 
   fechaCorteAnterior: string;

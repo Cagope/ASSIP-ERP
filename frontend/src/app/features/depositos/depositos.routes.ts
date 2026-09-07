@@ -56,11 +56,15 @@ import { SALDOS_RANGOS_EDAD_ROUTES } from './informes/saldos-rangos-edad/saldos-
 
 import { ESTADISTICOS_ASOCIADOS_ROUTES } from './informes/estadisticos-asociados/estadisticos-asociados.routes';
 
+import { GMF_SEMANAL_ROUTES } from './informes/gmf-semanal/gmf-semanal.routes';
+
 import { DOCUMENTOS_SOPORTE_ROUTES } from './documentos-soporte/documentos-soporte.routes';
 
 import { DOCUMENTOS_SOPORTE_INFORME_ROUTES } from './informes/documentos-soporte/documentos-soporte.routes';
 
 import { MOVIMIENTO_CUENTA_AHORRO_ROUTES } from './movimientos/cuentas-ahorro/movimiento-cuenta-ahorro.routes';
+
+import { CONCENTRACION_DEPOSITOS_ROUTES } from './analisis/concentracion/concentracion-depositos.routes';
 
 export const DEPOSITOS_ROUTES: Routes = [
 
@@ -239,6 +243,18 @@ export const DEPOSITOS_ROUTES: Routes = [
   {
     path: 'movimientos/cuentas-ahorro',
     children: MOVIMIENTO_CUENTA_AHORRO_ROUTES
+  },
+
+  // Análisis — Concentración de Captaciones
+  {
+    path: 'analisis/concentracion',
+    children: CONCENTRACION_DEPOSITOS_ROUTES
+  },
+
+  // Informes — GMF Semanal
+  {
+    path: 'informes/gmf-semanal',
+    children: GMF_SEMANAL_ROUTES
   }
 
 ];

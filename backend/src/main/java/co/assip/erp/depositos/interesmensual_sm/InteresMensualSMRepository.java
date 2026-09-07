@@ -75,7 +75,7 @@ public class InteresMensualSMRepository {
                 SELECT
                     c.id_cuenta_ahorro,
                     COALESCE(
-                        SUM(e.valor_debito) - SUM(e.valor_credito),
+                        SUM(e.valor_credito) - SUM(e.valor_debito),
                         0
                     ) AS saldo_inicial
                 FROM cuenta c
@@ -126,7 +126,7 @@ public class InteresMensualSMRepository {
                     fecha_movimiento,
                     MAX(saldo_inicial) OVER (PARTITION BY id_cuenta_ahorro)
                     + SUM(
-                        COALESCE(valor_debito,0) - COALESCE(valor_credito,0)
+                        COALESCE(valor_credito,0) - COALESCE(valor_debito,0)
                       ) OVER (
                             PARTITION BY id_cuenta_ahorro
                             ORDER BY fecha_movimiento

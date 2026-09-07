@@ -17,8 +17,7 @@ public class DashboardCdatResponseDTO {
 
     private List<DashboardCdatGrupoDTO> tasas;
 
-    private List<DashboardCdatTendenciaDTO> tendencia;
-
     private List<DashboardCdatVencimientoDTO> vencimientos;
 
+    private List<DashboardCdatTendenciaDTO> tendencia;
 }

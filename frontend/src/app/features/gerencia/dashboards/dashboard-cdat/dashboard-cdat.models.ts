@@ -1,15 +1,10 @@
-export interface DashboardCdatRequest {
-  fechaCorte: string;
-}
-
 export interface DashboardCdatResumen {
   totalCdats: number;
   valorTotalCaptado: number;
   promedioTasa: number;
   promedioPlazo: number;
   vencen30Dias: number;
-  renovacionesMes: number;
-  cancelacionesMes: number;
+  totalAsociados: number;
 }
 
 export interface DashboardCdatAgencia {
@@ -27,12 +22,41 @@ export interface DashboardCdatGrupo {
   participacion: number;
 }
 
+export interface DashboardCdatVencimiento {
+  rango: string;
+  cantidad: number;
+  valorTotal: number;
+  participacion: number;
+}
+
+export interface DashboardCdatVencimientoDetalle {
+  idCuentaCdat: number;
+  codigoCdat: string;
+  agencia: string;
+
+  idDatosPersonal: number;
+  tipoDocumento: string;
+  documento: string;
+  nombreCompleto: string;
+
+  telefono: string;
+  celularUno: string;
+  celularDos: string;
+  correoPersonal: string;
+
+  fechaApertura: string | null;
+  fechaVencimiento: string | null;
+  diasParaVencer: number;
+  plazoMeses: number;
+  tasaNominalAnual: number;
+  saldoActual: number;
+}
+
 export interface DashboardCdatTendencia {
+  fechaCorte: string | null;
   periodo: string;
-  aperturas: number;
-  cancelaciones: number;
-  renovaciones: number;
-  captacionNeta: number;
+  cantidadCdats: number;
+  valorCaptado: number;
 }
 
 export interface DashboardCdatResponse {
@@ -40,18 +64,6 @@ export interface DashboardCdatResponse {
   agencias: DashboardCdatAgencia[];
   plazos: DashboardCdatGrupo[];
   tasas: DashboardCdatGrupo[];
-  tendencia: DashboardCdatTendencia[];
   vencimientos: DashboardCdatVencimiento[];
-}
-
-export interface DashboardCdatVencimiento {
-
-  rango: string;
-
-  cantidad: number;
-
-  valorTotal: number;
-
-  participacion: number;
-
+  tendencia: DashboardCdatTendencia[];
 }

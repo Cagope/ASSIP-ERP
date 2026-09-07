@@ -75,7 +75,7 @@ public class InteresDiarioSMRepository {
                 SELECT
                     c.id_cuenta_ahorro,
                     COALESCE(
-                        SUM(e.valor_debito) - SUM(e.valor_credito),
+                        SUM(e.valor_credito) - SUM(e.valor_debito),
                         0
                     ) AS saldo_al_dia_anterior
                 FROM cuenta c
@@ -92,7 +92,7 @@ public class InteresDiarioSMRepository {
                     e.hora_movimiento,
                     e.valor_debito::numeric,
                     e.valor_credito::numeric,
-                    (e.valor_debito - e.valor_credito) AS movimiento
+                    (e.valor_credito - e.valor_debito) AS movimiento
                 FROM depositos.extractos_cuentas_ahorros e
                 JOIN cuenta c
                   ON c.id_cuenta_ahorro = e.id_cuenta_ahorro

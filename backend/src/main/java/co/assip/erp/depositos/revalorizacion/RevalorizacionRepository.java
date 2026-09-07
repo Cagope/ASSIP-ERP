@@ -63,7 +63,7 @@ public class RevalorizacionRepository {
             SELECT
                 d.id_cuenta_ahorro,
                 e.fecha_movimiento,
-                SUM(e.valor_debito - e.valor_credito)
+                SUM(e.valor_credito - e.valor_debito)
                     OVER (
                         PARTITION BY d.id_cuenta_ahorro
                         ORDER BY e.fecha_movimiento
@@ -95,7 +95,7 @@ public class RevalorizacionRepository {
         saldo_inicial AS (
             SELECT
                 d.id_cuenta_ahorro,
-                COALESCE(SUM(e.valor_debito - e.valor_credito), 0) AS saldo_inicial
+                COALESCE(SUM(e.valor_credito - e.valor_debito), 0) AS saldo_inicial
             FROM datos d
             LEFT JOIN depositos.extractos_cuentas_ahorros e
                 ON e.id_cuenta_ahorro = d.id_cuenta_ahorro

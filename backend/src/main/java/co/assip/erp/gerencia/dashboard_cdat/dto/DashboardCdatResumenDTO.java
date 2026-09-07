@@ -13,16 +13,26 @@ public class DashboardCdatResumenDTO {
 
     private BigDecimal valorTotalCaptado;
 
+    /**
+     * Tasa nominal anual promedio,
+     * ponderada por saldo actual.
+     */
     private BigDecimal promedioTasa;
 
+    /**
+     * Plazo promedio expresado en meses.
+     */
     private BigDecimal promedioPlazo;
 
+    /**
+     * CDAT activos con vencimiento
+     * entre hoy y los próximos 30 días.
+     */
     private Integer vencen30Dias;
 
-    private Integer renovacionesMes;
-
-    private Integer cancelacionesMes;
-
+    /**
+     * Cantidad de asociados distintos
+     * con CDAT activos.
+     */
     private Integer totalAsociados;
-
 }

@@ -99,8 +99,8 @@ public class SaldosCorteRepository {
                     COALESCE(m.total_debitos, 0) AS total_debitos,
                     COALESCE(m.total_creditos, 0) AS total_creditos,
 
-                    COALESCE(m.total_debitos, 0)
-                    - COALESCE(m.total_creditos, 0) AS saldo_corte
+                    COALESCE(m.total_creditos, 0)
+                    - COALESCE(m.total_debitos, 0) AS saldo_corte
 
                 FROM depositos.cuentas_ahorro c
 
@@ -218,8 +218,8 @@ public class SaldosCorteRepository {
                     COALESCE(m.total_debitos, 0) AS total_debitos,
                     COALESCE(m.total_creditos, 0) AS total_creditos,
 
-                    COALESCE(m.total_debitos, 0)
-                    - COALESCE(m.total_creditos, 0) AS saldo_corte
+                    COALESCE(m.total_creditos, 0)
+                    - COALESCE(m.total_debitos, 0) AS saldo_corte
 
                 FROM depositos.cuentas_ahorro c
 

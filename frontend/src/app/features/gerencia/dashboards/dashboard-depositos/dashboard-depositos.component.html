@@ -55,28 +55,38 @@
 
   <ng-container *ngIf="resumen">
 
+    <!-- ===================================================== -->
+    <!-- KPI PRINCIPALES -->
+    <!-- ===================================================== -->
+
     <div class="kpis-grid">
 
       <div class="kpi-card kpi-card--main">
         <span>Total depósitos</span>
-        <strong>{{ resumen.saldoTotal | number:'1.2-2' }}</strong>
+        <strong>
+          {{ resumen.saldoTotal | number:'1.2-2' }}
+        </strong>
       </div>
 
       <div class="kpi-card">
         <span>Total cuentas</span>
-        <strong>{{ resumen.totalCuentas | number:'1.2-2' }}</strong>
+        <strong>
+          {{ resumen.totalCuentas | number:'1.0-0' }}
+        </strong>
       </div>
 
       <div class="kpi-card">
         <span>Aportes sociales</span>
-        <strong>{{ resumen.saldoAportes | number:'1.2-2' }}</strong>
+        <strong>
+          {{ resumen.saldoAportes | number:'1.2-2' }}
+        </strong>
       </div>
 
       <div class="kpi-card">
 
-  <span>
-    Total asociados
-  </span>
+        <span>
+          Total asociados
+        </span>
 
         <strong>
           {{
@@ -91,22 +101,31 @@
 
       <div class="kpi-card">
         <span>Hombres</span>
-        <strong>{{ resumen.hombres | number:'1.0-0' }}</strong>
+        <strong>
+          {{ resumen.hombres | number:'1.0-0' }}
+        </strong>
       </div>
 
       <div class="kpi-card">
         <span>Mujeres</span>
-        <strong>{{ resumen.mujeres | number:'1.0-0' }}</strong>
+        <strong>
+          {{ resumen.mujeres | number:'1.0-0' }}
+        </strong>
       </div>
 
       <div class="kpi-card">
         <span>Jurídicas</span>
-        <strong>{{ resumen.juridicas | number:'1.0-0' }}</strong>
+        <strong>
+          {{ resumen.juridicas | number:'1.0-0' }}
+        </strong>
       </div>
 
     </div>
 
-    <!-- FORMAS -->
+    <!-- ===================================================== -->
+    <!-- FORMAS DE AHORRO -->
+    <!-- ===================================================== -->
+
     <div class="card">
 
       <div class="section-header">
@@ -119,18 +138,18 @@
 
           <div class="section-subtitle">
 
-      <span>
-        Comparativo de cuentas y saldos por forma
-      </span>
+            <span>
+              Comparativo de cuentas y saldos por forma
+            </span>
 
             <span class="separator">
-        •
-      </span>
+              •
+            </span>
 
             <span class="badge-periodo">
-        Corte anterior:
-        {{ fechaCorteAnterior | date:'yyyy-MM-dd' }}
-      </span>
+              Corte anterior:
+              {{ fechaCorteAnterior | date:'yyyy-MM-dd' }}
+            </span>
 
           </div>
 
@@ -138,89 +157,420 @@
 
       </div>
 
-      <div class="table-container">
+      <div class="dashboard-section-grid">
 
-        <table class="data-table data-table--wide">
+        <!-- TABLA -->
 
-          <thead>
-          <tr>
-            <th class="sticky-col">Forma</th>
-            <th class="right">Cuentas<br>corte ant.</th>
-            <th class="right">Saldo<br>corte ant.</th>
-            <th class="right">Cuentas<br>actuales</th>
-            <th class="right">Saldo<br>actual</th>
-            <th class="right">Ingresos</th>
-            <th class="right">Egresos</th>
-            <th class="right">Variación<br>saldo</th>
-            <th class="right">% crec.</th>
-          </tr>
-          </thead>
+        <div class="table-container">
 
-          <tbody>
+          <table class="data-table data-table--wide">
 
-          <tr *ngFor="let f of formas">
+            <thead>
 
-            <td class="sticky-col forma-name">
-              {{ f.nombreForma }}
-            </td>
+            <tr>
 
-            <td class="right muted">
-              {{ f.cuentasAnteriores | number:'1.0-0' }}
-            </td>
+              <th class="sticky-col">
+                Forma
+              </th>
 
-            <td class="right muted">
-              $ {{ f.saldoAnterior | number:'1.2-2' }}
-            </td>
+              <th class="right">
+                Cuentas<br>corte ant.
+              </th>
 
-            <td class="right">
-              {{ f.cuentasActuales | number:'1.0-0' }}
-            </td>
+              <th class="right">
+                Saldo<br>corte ant.
+              </th>
 
-            <td class="right money">
-              $ {{ f.saldoActual | number:'1.2-2' }}
-            </td>
+              <th class="right">
+                Cuentas<br>actuales
+              </th>
 
-            <td class="right positive">
-              $ {{ f.ingresosPeriodo | number:'1.2-2' }}
-            </td>
+              <th class="right">
+                Saldo<br>actual
+              </th>
 
-            <td class="right negative">
-              $ {{ f.egresosPeriodo | number:'1.2-2' }}
-            </td>
+              <th class="right">
+                Ingresos
+              </th>
 
-            <td
-              class="right"
-              [class.positive]="f.variacionSaldo >= 0"
-              [class.negative]="f.variacionSaldo < 0">
+              <th class="right">
+                Egresos
+              </th>
 
-              <span *ngIf="f.variacionSaldo > 0">+</span>
-              $ {{ f.variacionSaldo | number:'1.2-2' }}
+              <th class="right">
+                Variación<br>saldo
+              </th>
 
-            </td>
+              <th class="right">
+                % crec.
+              </th>
 
-            <td
-              class="right percent-cell"
-              [class.positive]="f.porcentajeCrecimiento >= 0"
-              [class.negative]="f.porcentajeCrecimiento < 0">
+            </tr>
 
-              <span *ngIf="f.porcentajeCrecimiento > 0">▲</span>
-              <span *ngIf="f.porcentajeCrecimiento < 0">▼</span>
+            </thead>
 
-              {{ f.porcentajeCrecimiento | number:'1.2-2' }} %
+            <tbody>
 
-            </td>
+            <tr *ngFor="let f of formas">
 
-          </tr>
+              <td class="sticky-col forma-name">
+                {{ f.nombreForma }}
+              </td>
 
-          </tbody>
+              <td class="right muted">
+                {{ f.cuentasAnteriores | number:'1.0-0' }}
+              </td>
 
-        </table>
+              <td class="right muted">
+                $ {{ f.saldoAnterior | number:'1.2-2' }}
+              </td>
+
+              <td class="right">
+                {{ f.cuentasActuales | number:'1.0-0' }}
+              </td>
+
+              <td class="right money">
+                $ {{ f.saldoActual | number:'1.2-2' }}
+              </td>
+
+              <td class="right positive">
+                $ {{ f.ingresosPeriodo | number:'1.2-2' }}
+              </td>
+
+              <td class="right negative">
+                $ {{ f.egresosPeriodo | number:'1.2-2' }}
+              </td>
+
+              <td
+                class="right"
+                [class.positive]="f.variacionSaldo >= 0"
+                [class.negative]="f.variacionSaldo < 0">
+
+                <span *ngIf="f.variacionSaldo > 0">
+                  +
+                </span>
+
+                $ {{ f.variacionSaldo | number:'1.2-2' }}
+
+              </td>
+
+              <td
+                class="right percent-cell"
+                [class.positive]="f.porcentajeCrecimiento >= 0"
+                [class.negative]="f.porcentajeCrecimiento < 0">
+
+                <span *ngIf="f.porcentajeCrecimiento > 0">
+                  ▲
+                </span>
+
+                <span *ngIf="f.porcentajeCrecimiento < 0">
+                  ▼
+                </span>
+
+                {{ f.porcentajeCrecimiento | number:'1.2-2' }} %
+
+              </td>
+
+            </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+        <!-- GRÁFICA FORMAS -->
+
+        <div class="chart-panel">
+
+          <div class="chart-title">
+            Saldo actual por forma de ahorro
+          </div>
+
+          <div class="bar-chart">
+
+            <div
+              class="bar-chart-item"
+              *ngFor="let f of formas">
+
+              <div class="bar-value">
+                $ {{ formatearValor(f.saldoActual) }}
+              </div>
+
+              <div class="bar-area">
+
+                <div
+                  class="bar-column bar-column--forma"
+                  [style.height.px]="obtenerAlturaForma(f.saldoActual)">
+                </div>
+
+              </div>
+
+              <div
+                class="bar-label"
+                [title]="f.nombreForma">
+
+                {{ f.codigoForma }}
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="chart-note">
+            Valores expresados según saldo actual.
+          </div>
+
+        </div>
 
       </div>
 
     </div>
 
+    <!-- ===================================================== -->
+    <!-- RESUMEN POR TIPO DE CAPTACIÓN -->
+    <!-- ===================================================== -->
+
+    <div class="card">
+
+      <div class="section-header">
+
+        <div class="section-title-block">
+
+          <h3>
+            Resumen por tipo de captación
+          </h3>
+
+          <div class="section-subtitle">
+            Consolidado de aportes, ahorro a la vista,
+            contractual y permanente
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- TARJETAS -->
+
+      <div class="tipo-captacion-cards">
+
+        <div
+          class="tipo-captacion-card"
+          *ngFor="let t of tiposCaptacion">
+
+          <div class="tipo-captacion-card__header">
+
+            <span class="tipo-captacion-card__codigo">
+              {{ t.codigoCaptacion }}
+            </span>
+
+            <span class="tipo-captacion-card__participacion">
+              {{ t.participacion | number:'1.2-2' }} %
+            </span>
+
+          </div>
+
+          <div class="tipo-captacion-card__nombre">
+            {{ t.descripcionCaptacion }}
+          </div>
+
+          <div class="tipo-captacion-card__saldo">
+            $ {{ t.saldoActual | number:'1.2-2' }}
+          </div>
+
+          <div class="tipo-captacion-card__cuentas">
+            {{ t.cuentasActuales | number:'1.0-0' }}
+            cuentas
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="dashboard-section-grid dashboard-section-grid--tipos">
+
+        <!-- TABLA TIPOS -->
+
+        <div class="table-container">
+
+          <table class="data-table data-table--wide">
+
+            <thead>
+
+            <tr>
+
+              <th>
+                Tipo de captación
+              </th>
+
+              <th class="right">
+                Cuentas<br>corte ant.
+              </th>
+
+              <th class="right">
+                Saldo<br>corte ant.
+              </th>
+
+              <th class="right">
+                Cuentas<br>actuales
+              </th>
+
+              <th class="right">
+                Saldo<br>actual
+              </th>
+
+              <th class="right">
+                Ingresos
+              </th>
+
+              <th class="right">
+                Egresos
+              </th>
+
+              <th class="right">
+                Variación<br>saldo
+              </th>
+
+              <th class="right">
+                % crec.
+              </th>
+
+              <th class="right">
+                Participación
+              </th>
+
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            <tr *ngFor="let t of tiposCaptacion">
+
+              <td class="forma-name">
+                {{ t.descripcionCaptacion }}
+              </td>
+
+              <td class="right muted">
+                {{ t.cuentasAnteriores | number:'1.0-0' }}
+              </td>
+
+              <td class="right muted">
+                $ {{ t.saldoAnterior | number:'1.2-2' }}
+              </td>
+
+              <td class="right">
+                {{ t.cuentasActuales | number:'1.0-0' }}
+              </td>
+
+              <td class="right money">
+                $ {{ t.saldoActual | number:'1.2-2' }}
+              </td>
+
+              <td class="right positive">
+                $ {{ t.ingresosPeriodo | number:'1.2-2' }}
+              </td>
+
+              <td class="right negative">
+                $ {{ t.egresosPeriodo | number:'1.2-2' }}
+              </td>
+
+              <td
+                class="right"
+                [class.positive]="t.variacionSaldo >= 0"
+                [class.negative]="t.variacionSaldo < 0">
+
+                <span *ngIf="t.variacionSaldo > 0">
+                  +
+                </span>
+
+                $ {{ t.variacionSaldo | number:'1.2-2' }}
+
+              </td>
+
+              <td
+                class="right percent-cell"
+                [class.positive]="t.porcentajeCrecimiento >= 0"
+                [class.negative]="t.porcentajeCrecimiento < 0">
+
+                <span *ngIf="t.porcentajeCrecimiento > 0">
+                  ▲
+                </span>
+
+                <span *ngIf="t.porcentajeCrecimiento < 0">
+                  ▼
+                </span>
+
+                {{ t.porcentajeCrecimiento | number:'1.2-2' }} %
+
+              </td>
+
+              <td class="right money">
+                {{ t.participacion | number:'1.2-2' }} %
+              </td>
+
+            </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+        <!-- GRÁFICA TIPOS -->
+
+        <div class="chart-panel">
+
+          <div class="chart-title">
+            Saldo actual por tipo de captación
+          </div>
+
+          <div class="bar-chart">
+
+            <div
+              class="bar-chart-item"
+              *ngFor="let t of tiposCaptacion">
+
+              <div class="bar-value">
+                $ {{ formatearValor(t.saldoActual) }}
+              </div>
+
+              <div class="bar-area">
+
+                <div
+                  class="bar-column bar-column--tipo"
+                  [style.height.px]="obtenerAlturaTipoCaptacion(t.saldoActual)">
+                </div>
+
+              </div>
+
+              <div
+                class="bar-label bar-label--tipo"
+                [title]="t.descripcionCaptacion">
+
+                {{ t.codigoCaptacion }}
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <div class="chart-note">
+            Participación sobre el total de captaciones.
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ===================================================== -->
     <!-- AGENCIAS -->
+    <!-- ===================================================== -->
+
     <div class="card">
 
       <div class="section-header">
@@ -329,7 +679,10 @@
 
     </div>
 
+    <!-- ===================================================== -->
     <!-- TENDENCIA -->
+    <!-- ===================================================== -->
+
     <div class="card">
 
       <div class="section-header">
@@ -357,6 +710,7 @@
           <div class="trend-bars">
 
             <!-- APORTES -->
+
             <div class="trend-bar-block">
 
               <div class="trend-tooltip">
@@ -366,12 +720,12 @@
                 </strong>
 
                 <span>
-              {{ t.periodo }}
-            </span>
+                  {{ t.periodo }}
+                </span>
 
                 <span>
-              $ {{ formatearValor(t.saldoAportes) }}
-            </span>
+                  $ {{ formatearValor(t.saldoAportes) }}
+                </span>
 
               </div>
 
@@ -382,7 +736,8 @@
 
             </div>
 
-            <!-- DEPOSITOS -->
+            <!-- DEPÓSITOS -->
+
             <div class="trend-bar-block">
 
               <div class="trend-tooltip">
@@ -392,12 +747,12 @@
                 </strong>
 
                 <span>
-              {{ t.periodo }}
-            </span>
+                  {{ t.periodo }}
+                </span>
 
                 <span>
-              $ {{ formatearValor(t.saldoDepositos) }}
-            </span>
+                  $ {{ formatearValor(t.saldoDepositos) }}
+                </span>
 
               </div>
 

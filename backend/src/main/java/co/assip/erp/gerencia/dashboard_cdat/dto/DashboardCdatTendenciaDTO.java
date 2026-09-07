@@ -4,19 +4,17 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Getter
 @Builder
 public class DashboardCdatTendenciaDTO {
 
+    private LocalDate fechaCorte;
+
     private String periodo;
 
-    private Integer aperturas;
+    private Integer cantidadCdats;
 
-    private Integer cancelaciones;
-
-    private Integer renovaciones;
-
-    private BigDecimal captacionNeta;
-
+    private BigDecimal valorCaptado;
 }

@@ -1,0 +1,280 @@
+.page {
+  padding: 1rem;
+}
+
+.page-header {
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
+    color: #6b7280;
+  }
+}
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+/* =========================================================
+   FILTROS
+   ========================================================= */
+
+.filtros {
+  display: grid;
+  grid-template-columns:
+    170px
+    minmax(180px, 240px)
+    minmax(240px, 1fr)
+    auto;
+  gap: 14px;
+  align-items: end;
+}
+
+.f-row {
+  display: flex;
+  flex-direction: column;
+
+  label {
+    margin-bottom: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+  }
+
+  input,
+  select {
+    height: 34px;
+    padding: 4px 9px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 13px;
+  }
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.btn--primary {
+  background: #2563eb;
+  color: #fff;
+}
+
+.btn--secondary {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* =========================================================
+   RESUMEN
+   ========================================================= */
+
+.resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 1rem;
+}
+
+.indicador {
+  display: flex;
+  flex-direction: column;
+  min-height: 82px;
+  padding: 14px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  span {
+    margin-bottom: 7px;
+    font-size: 12px;
+    color: #6b7280;
+  }
+
+  strong {
+    font-size: 1.05rem;
+    color: #111827;
+  }
+}
+
+.indicador--principal {
+  border-width: 2px;
+}
+
+/* =========================================================
+   SECCIONES
+   ========================================================= */
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 3px 0 0;
+    font-size: 12px;
+    color: #6b7280;
+  }
+}
+
+/* =========================================================
+   TOP CONCENTRACIÓN
+   ========================================================= */
+
+.top-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.top-card {
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 7px;
+
+  span {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+  }
+
+  strong {
+    margin-top: 5px;
+    font-size: 1.3rem;
+    color: #111827;
+  }
+
+  small {
+    margin-top: 3px;
+    font-size: 12px;
+    color: #6b7280;
+  }
+}
+
+/* =========================================================
+   TABLAS
+   ========================================================= */
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+
+  th,
+  td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap;
+  }
+
+  thead th {
+    background: #f6f6f6;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  tbody tr:hover {
+    background: #f9fafb;
+  }
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.empty {
+  padding: 22px !important;
+  text-align: center;
+  color: #6b7280;
+}
+
+/* =========================================================
+   ESTADOS
+   ========================================================= */
+
+.estado {
+  padding: 18px 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.estado--error {
+  color: #b91c1c;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1100px) {
+  .filtros {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+  }
+
+  .resumen-grid,
+  .top-grid {
+    grid-template-columns: repeat(2, minmax(160px, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .filtros,
+  .resumen-grid,
+  .top-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    justify-content: flex-start;
+  }
+}

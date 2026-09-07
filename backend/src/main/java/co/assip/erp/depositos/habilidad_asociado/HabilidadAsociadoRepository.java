@@ -75,7 +75,7 @@ public class HabilidadAsociadoRepository {
         saldo_actual AS (
             SELECT
                 e.id_cuenta_ahorro,
-                SUM(e.valor_debito - e.valor_credito) AS saldo_hoy
+                SUM(e.valor_credito - e.valor_debito) AS saldo_hoy
             FROM depositos.extractos_cuentas_ahorros e
             GROUP BY e.id_cuenta_ahorro
         ),
@@ -90,7 +90,7 @@ public class HabilidadAsociadoRepository {
         movs AS (
             SELECT
                 e.id_cuenta_ahorro,
-                SUM(e.valor_debito - e.valor_credito) AS total_aportes
+                SUM(e.valor_credito - e.valor_debito) AS total_aportes
             FROM depositos.extractos_cuentas_ahorros e
             WHERE e.fecha_movimiento BETWEEN :fechaInicio AND :fechaFin
               AND e.tipo_movimiento NOT IN ('005','006')

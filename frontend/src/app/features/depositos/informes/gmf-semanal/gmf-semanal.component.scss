@@ -1,0 +1,74 @@
+@use '../informes-base';
+
+.filtros {
+  grid-template-columns:
+    165px
+    165px
+    minmax(190px, 1fr)
+    110px
+    minmax(220px, 1fr)
+    auto;
+}
+
+.resumen {
+  .cards {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.resumen-card {
+  .gmf-line {
+    margin-top: 6px;
+    text-align: right;
+    font-size: 12px;
+    font-weight: 600;
+    color: #4b5563;
+  }
+}
+
+.total-card {
+  border-left-color: #2563eb !important;
+  background: #eff6ff !important;
+}
+
+.tabla-detalle {
+  min-width: 2450px;
+
+  td {
+    white-space: nowrap;
+  }
+
+  td:nth-child(6) {
+    max-width: 320px;
+    white-space: normal;
+  }
+}
+
+.form-actions-result {
+  margin-top: 14px;
+}
+
+@media (max-width: 1350px) {
+  .filtros {
+    grid-template-columns:
+      165px
+      165px
+      1fr
+      110px;
+
+    .form-actions {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .resumen .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .filtros,
+  .resumen .cards {
+    grid-template-columns: 1fr;
+  }
+}

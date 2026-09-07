@@ -4,8 +4,8 @@ import { Observable, map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 
 import {
-  DashboardCdatRequest,
-  DashboardCdatResponse
+  DashboardCdatResponse,
+  DashboardCdatVencimientoDetalle
 } from './dashboard-cdat.models';
 
 @Injectable({
@@ -21,15 +21,27 @@ export class DashboardCdatApi {
   ) {
   }
 
-  consultar(
-    request: DashboardCdatRequest
-  ): Observable<DashboardCdatResponse> {
+  consultar(): Observable<DashboardCdatResponse> {
 
     return this.http
-      .post<DashboardCdatResponse>(`${this.url}/consultar`, request)
+      .get<DashboardCdatResponse>(`${this.url}/consultar`)
       .pipe(
         map(response => this.normalizar(response))
       );
+  }
+
+  consultarDetalleVencimientos(
+    rango: string
+  ): Observable<DashboardCdatVencimientoDetalle[]> {
+
+    return this.http.get<DashboardCdatVencimientoDetalle[]>(
+      `${this.url}/vencimientos/detalle`,
+      {
+        params: {
+          rango
+        }
+      }
+    );
   }
 
   private normalizar(
@@ -38,20 +50,51 @@ export class DashboardCdatApi {
 
     return {
       resumen: {
-        totalCdats: Number(response?.resumen?.totalCdats ?? 0),
-        valorTotalCaptado: Number(response?.resumen?.valorTotalCaptado ?? 0),
-        promedioTasa: Number(response?.resumen?.promedioTasa ?? 0),
-        promedioPlazo: Number(response?.resumen?.promedioPlazo ?? 0),
-        vencen30Dias: Number(response?.resumen?.vencen30Dias ?? 0),
-        renovacionesMes: Number(response?.resumen?.renovacionesMes ?? 0),
-        cancelacionesMes: Number(response?.resumen?.cancelacionesMes ?? 0)
+        totalCdats:
+          Number(response?.resumen?.totalCdats ?? 0),
+
+        valorTotalCaptado:
+          Number(response?.resumen?.valorTotalCaptado ?? 0),
+
+        promedioTasa:
+          Number(response?.resumen?.promedioTasa ?? 0),
+
+        promedioPlazo:
+          Number(response?.resumen?.promedioPlazo ?? 0),
+
+        vencen30Dias:
+          Number(response?.resumen?.vencen30Dias ?? 0),
+
+        totalAsociados:
+          Number(response?.resumen?.totalAsociados ?? 0)
       },
-      agencias: response?.agencias ?? [],
-      plazos: response?.plazos ?? [],
-      tasas: response?.tasas ?? [],
-      tendencia: response?.tendencia ?? [],
-      vencimientos: response?.vencimientos ?? []
+
+      agencias:
+        response?.agencias ?? [],
+
+      plazos:
+        response?.plazos ?? [],
+
+      tasas:
+        response?.tasas ?? [],
+
+      vencimientos:
+        response?.vencimientos ?? [],
+
+      tendencia:
+        (response?.tendencia ?? []).map(item => ({
+          fechaCorte:
+            item.fechaCorte ?? null,
+
+          periodo:
+            item.periodo ?? '',
+
+          cantidadCdats:
+            Number(item.cantidadCdats ?? 0),
+
+          valorCaptado:
+            Number(item.valorCaptado ?? 0)
+        }))
     };
   }
-
 }

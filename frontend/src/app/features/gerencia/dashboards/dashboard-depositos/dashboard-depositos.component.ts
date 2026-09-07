@@ -10,7 +10,8 @@ import {
   DashboardDepositosForma,
   DashboardDepositosGrupo,
   DashboardDepositosResumen,
-  DashboardDepositosTendencia
+  DashboardDepositosTendencia,
+  DashboardDepositosTipoCaptacion
 } from './dashboard-depositos.api';
 
 @Component({
@@ -38,6 +39,8 @@ export class DashboardDepositosComponent {
   resumen: DashboardDepositosResumen | null = null;
 
   formas: DashboardDepositosForma[] = [];
+
+  tiposCaptacion: DashboardDepositosTipoCaptacion[] = [];
 
   agencias: DashboardDepositosGrupo[] = [];
 
@@ -69,6 +72,9 @@ export class DashboardDepositosComponent {
       this.formas =
         response.formas || [];
 
+      this.tiposCaptacion =
+        response.tiposCaptacion || [];
+
       this.agencias =
         response.agencias || [];
 
@@ -77,7 +83,7 @@ export class DashboardDepositosComponent {
           .reverse();
 
       this.fechaCorteAnterior =
-        response.fechaCorteAnterior;
+        response.fechaCorteAnterior || '';
 
     } catch (err: any) {
 
@@ -94,13 +100,91 @@ export class DashboardDepositosComponent {
     }
   }
 
+  // =========================================================
+  // GRÁFICA POR FORMA DE AHORRO
+  // =========================================================
+
+  get maxSaldoFormas(): number {
+
+    if (!this.formas.length) {
+      return 1;
+    }
+
+    const maximo = Math.max(
+      ...this.formas.map(f =>
+        Number(f.saldoActual || 0)
+      )
+    );
+
+    return maximo > 0
+      ? maximo
+      : 1;
+  }
+
+  obtenerAlturaForma(
+    valor: number
+  ): number {
+
+    const saldo =
+      Math.max(
+        Number(valor || 0),
+        0
+      );
+
+    return (
+      saldo /
+      this.maxSaldoFormas
+    ) * 220;
+  }
+
+  // =========================================================
+  // GRÁFICA POR TIPO DE CAPTACIÓN
+  // =========================================================
+
+  get maxSaldoTiposCaptacion(): number {
+
+    if (!this.tiposCaptacion.length) {
+      return 1;
+    }
+
+    const maximo = Math.max(
+      ...this.tiposCaptacion.map(t =>
+        Number(t.saldoActual || 0)
+      )
+    );
+
+    return maximo > 0
+      ? maximo
+      : 1;
+  }
+
+  obtenerAlturaTipoCaptacion(
+    valor: number
+  ): number {
+
+    const saldo =
+      Math.max(
+        Number(valor || 0),
+        0
+      );
+
+    return (
+      saldo /
+      this.maxSaldoTiposCaptacion
+    ) * 220;
+  }
+
+  // =========================================================
+  // TENDENCIA HISTÓRICA
+  // =========================================================
+
   get maxSaldoTendencia(): number {
 
     if (!this.tendencia.length) {
       return 1;
     }
 
-    return Math.max(
+    const maximo = Math.max(
       ...this.tendencia.map(t =>
         Math.max(
           Number(t.saldoAportes || 0),
@@ -108,6 +192,10 @@ export class DashboardDepositosComponent {
         )
       )
     );
+
+    return maximo > 0
+      ? maximo
+      : 1;
   }
 
   obtenerAlturaAportes(
@@ -115,7 +203,13 @@ export class DashboardDepositosComponent {
   ): number {
 
     return (
-      (Number(valor || 0) / this.maxSaldoTendencia) * 220
+      (
+        Math.max(
+          Number(valor || 0),
+          0
+        ) /
+        this.maxSaldoTendencia
+      ) * 220
     );
   }
 
@@ -124,9 +218,19 @@ export class DashboardDepositosComponent {
   ): number {
 
     return (
-      (Number(valor || 0) / this.maxSaldoTendencia) * 220
+      (
+        Math.max(
+          Number(valor || 0),
+          0
+        ) /
+        this.maxSaldoTendencia
+      ) * 220
     );
   }
+
+  // =========================================================
+  // FORMATO
+  // =========================================================
 
   formatearValor(
     valor: number
@@ -143,20 +247,9 @@ export class DashboardDepositosComponent {
     );
   }
 
-  private obtenerUltimoDiaMesActual(): string {
-
-    const hoy = new Date();
-
-    const ultimoDia = new Date(
-      hoy.getFullYear(),
-      hoy.getMonth() + 1,
-      0
-    );
-
-    return ultimoDia
-      .toISOString()
-      .substring(0, 10);
-  }
+  // =========================================================
+  // EXPORTACIÓN
+  // =========================================================
 
   exportarExcel(): void {
 

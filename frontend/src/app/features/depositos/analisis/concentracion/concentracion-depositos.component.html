@@ -1,0 +1,627 @@
+<div class="page">
+
+  <!-- =======================================================
+       ENCABEZADO
+       ======================================================= -->
+  <div class="page-header">
+
+    <div>
+      <h2>Concentración de Captaciones</h2>
+
+      <p>
+        Análisis de la concentración de recursos por asociado
+        y forma de ahorro a una fecha de corte.
+      </p>
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       FILTROS
+       ======================================================= -->
+  <section class="card filtros">
+
+    <div class="f-row">
+      <label>Fecha de corte</label>
+
+      <input
+        type="date"
+        [(ngModel)]="fechaCorte"
+        [disabled]="cargando">
+    </div>
+
+
+    <div class="f-row">
+      <label>Agencia</label>
+
+      <select
+        [(ngModel)]="idAgencia"
+        (ngModelChange)="cambiarAgencia()"
+        [disabled]="cargando || cargandoCatalogos">
+
+        <option [ngValue]="0">
+          Todas
+        </option>
+
+        <option
+          *ngFor="let agencia of agencias; trackBy: trackByAgencia"
+          [ngValue]="agencia.idAgencia">
+          {{ agencia.nombreAgencia }}
+        </option>
+
+      </select>
+    </div>
+
+
+    <div class="f-row">
+      <label>Forma de ahorro</label>
+
+      <select
+        [(ngModel)]="idFormaAhorro"
+        [disabled]="cargando || cargandoCatalogos">
+
+        <option [ngValue]="0">
+          Todas
+        </option>
+
+        <option
+          *ngFor="let forma of formasAhorro; trackBy: trackByFormaCatalogo"
+          [ngValue]="forma.idFormaAhorro">
+          {{ forma.codigoForma }} - {{ forma.nombreForma }}
+        </option>
+
+      </select>
+    </div>
+
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        [disabled]="cargando || cargandoCatalogos"
+        (click)="consultar()">
+        Consultar
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        [disabled]="
+      cargando
+      || cargandoCatalogos
+      || !resultado
+    "
+        (click)="exportar()">
+        Exportar
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        [disabled]="cargando"
+        (click)="limpiar()">
+        Limpiar
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =======================================================
+       MENSAJES
+       ======================================================= -->
+  <div
+    *ngIf="cargandoCatalogos"
+    class="estado">
+    Cargando catálogos...
+  </div>
+
+  <div
+    *ngIf="cargando"
+    class="estado">
+    Consultando concentración...
+  </div>
+
+  <div
+    *ngIf="error"
+    class="estado estado--error">
+    {{ error }}
+  </div>
+
+
+  <!-- =======================================================
+       RESULTADOS
+       ======================================================= -->
+  <ng-container *ngIf="resumen && !cargando">
+
+
+    <!-- =====================================================
+         RESUMEN GENERAL
+         ===================================================== -->
+    <section class="resumen-grid">
+
+      <div class="indicador">
+        <span>Captaciones</span>
+
+        <strong>
+          {{
+          saldo(resumen.saldoCaptaciones)
+          | number:'1.0-0'
+          }}
+        </strong>
+      </div>
+
+
+      <div class="indicador">
+        <span>Aportes sociales</span>
+
+        <strong>
+          {{
+          saldo(resumen.saldoAportes)
+          | number:'1.0-0'
+          }}
+        </strong>
+      </div>
+
+
+      <div class="indicador indicador--principal">
+        <span>Total recursos</span>
+
+        <strong>
+          {{
+          saldo(resumen.saldoTotal)
+          | number:'1.0-0'
+          }}
+        </strong>
+      </div>
+
+
+      <div class="indicador">
+        <span>Cuentas</span>
+
+        <strong>
+          {{ resumen.cantidadCuentas | number }}
+        </strong>
+      </div>
+
+
+      <div class="indicador">
+        <span>Asociados</span>
+
+        <strong>
+          {{ resumen.cantidadAsociados | number }}
+        </strong>
+      </div>
+
+
+      <div class="indicador">
+        <span>Promedio por cuenta</span>
+
+        <strong>
+          {{
+          saldo(resumen.saldoPromedioPorCuenta)
+          | number:'1.0-0'
+          }}
+        </strong>
+      </div>
+
+
+      <div class="indicador">
+        <span>Promedio por asociado</span>
+
+        <strong>
+          {{
+          saldo(resumen.saldoPromedioPorAsociado)
+          | number:'1.0-0'
+          }}
+        </strong>
+      </div>
+
+
+      <div class="indicador">
+        <span>Mayor saldo asociado</span>
+
+        <strong>
+          {{
+          saldo(resumen.mayorSaldoAsociado)
+          | number:'1.0-0'
+          }}
+        </strong>
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         CONCENTRACIÓN TOP
+         ===================================================== -->
+    <section class="card">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Concentración por asociado</h3>
+
+          <p>
+            Participación acumulada de los principales
+            asociados sobre la población seleccionada.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="top-grid">
+
+        <!-- TOP 10 -->
+        <div class="top-card">
+
+          <span>Top 10</span>
+
+          <strong>
+            {{
+            porcentaje(
+            obtenerTop('TOP_10')?.porcentajeParticipacion
+            )
+            | number:'1.2-2'
+            }}%
+          </strong>
+
+          <small>
+            {{
+            saldo(
+            obtenerTop('TOP_10')?.saldo
+            )
+            | number:'1.0-0'
+            }}
+          </small>
+
+        </div>
+
+
+        <!-- TOP 20 -->
+        <div class="top-card">
+
+          <span>Top 20</span>
+
+          <strong>
+            {{
+            porcentaje(
+            obtenerTop('TOP_20')?.porcentajeParticipacion
+            )
+            | number:'1.2-2'
+            }}%
+          </strong>
+
+          <small>
+            {{
+            saldo(
+            obtenerTop('TOP_20')?.saldo
+            )
+            | number:'1.0-0'
+            }}
+          </small>
+
+        </div>
+
+
+        <!-- TOP 50 -->
+        <div class="top-card">
+
+          <span>Top 50</span>
+
+          <strong>
+            {{
+            porcentaje(
+            obtenerTop('TOP_50')?.porcentajeParticipacion
+            )
+            | number:'1.2-2'
+            }}%
+          </strong>
+
+          <small>
+            {{
+            saldo(
+            obtenerTop('TOP_50')?.saldo
+            )
+            | number:'1.0-0'
+            }}
+          </small>
+
+        </div>
+
+
+        <!-- RESTO -->
+        <div class="top-card">
+
+          <span>Resto</span>
+
+          <strong>
+            {{
+            porcentaje(
+            obtenerTop('RESTO')?.porcentajeParticipacion
+            )
+            | number:'1.2-2'
+            }}%
+          </strong>
+
+          <small>
+            {{
+            saldo(
+            obtenerTop('RESTO')?.saldo
+            )
+            | number:'1.0-0'
+            }}
+          </small>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         DISTRIBUCIÓN POR FORMA DE AHORRO
+         ===================================================== -->
+    <section
+      class="card"
+      *ngIf="formas.length > 0">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Distribución por forma de ahorro</h3>
+
+          <p>
+            Composición de los recursos incluidos
+            en el análisis.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="table-wrap">
+
+        <table class="table">
+
+          <thead>
+          <tr>
+            <th>Forma de ahorro</th>
+            <th class="text-right">
+              Cuentas
+            </th>
+            <th class="text-right">
+              Asociados
+            </th>
+            <th class="text-right">
+              Saldo
+            </th>
+            <th class="text-right">
+              Participación
+            </th>
+          </tr>
+          </thead>
+
+
+          <tbody>
+
+          <tr
+            *ngFor="
+                let forma of formas;
+                trackBy: trackByFormaResultado
+              ">
+
+            <td>
+              <strong>
+                {{ forma.codigoForma }}
+              </strong>
+
+              -
+              {{ forma.nombreForma }}
+            </td>
+
+
+            <td class="text-right">
+              {{ forma.cantidadCuentas | number }}
+            </td>
+
+
+            <td class="text-right">
+              {{ forma.cantidadAsociados | number }}
+            </td>
+
+
+            <td class="text-right">
+              {{
+              saldo(forma.saldo)
+              | number:'1.0-0'
+              }}
+            </td>
+
+
+            <td class="text-right">
+              {{
+              porcentaje(
+              forma.porcentajeParticipacion
+              )
+              | number:'1.2-2'
+              }}%
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         RANKING DE ASOCIADOS
+         ===================================================== -->
+    <section class="card">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Ranking de asociados</h3>
+
+          <p>
+            Saldo consolidado por asociado,
+            ordenado de mayor a menor.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="table-wrap">
+
+        <table class="table">
+
+          <thead>
+          <tr>
+
+            <th class="text-center">
+              #
+            </th>
+
+            <th>
+              Documento
+            </th>
+
+            <th>
+              Asociado
+            </th>
+
+            <th class="text-right">
+              Cuentas
+            </th>
+
+            <th class="text-right">
+              Saldo
+            </th>
+
+            <th class="text-right">
+              % Participación
+            </th>
+
+            <th class="text-right">
+              % Acumulado
+            </th>
+
+          </tr>
+          </thead>
+
+
+          <tbody>
+
+          <tr
+            *ngFor="
+                let asociado of asociados;
+                trackBy: trackByAsociado
+              ">
+
+            <td class="text-center">
+              {{ asociado.posicion }}
+            </td>
+
+
+            <td>
+              {{ asociado.documento }}
+            </td>
+
+
+            <td>
+              {{ asociado.nombreCompleto }}
+            </td>
+
+
+            <td class="text-right">
+              {{ asociado.cantidadCuentas | number }}
+            </td>
+
+
+            <td class="text-right">
+
+              <strong>
+                {{
+                saldo(asociado.saldo)
+                | number:'1.0-0'
+                }}
+              </strong>
+
+            </td>
+
+
+            <td class="text-right">
+              {{
+              porcentaje(
+              asociado.porcentajeParticipacion
+              )
+              | number:'1.2-2'
+              }}%
+            </td>
+
+
+            <td class="text-right">
+              {{
+              porcentaje(
+              asociado.porcentajeAcumulado
+              )
+              | number:'1.2-2'
+              }}%
+            </td>
+
+          </tr>
+
+
+          <tr *ngIf="asociados.length === 0">
+
+            <td
+              colspan="7"
+              class="empty">
+
+              No existen saldos para los filtros
+              seleccionados.
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+
+  <!-- =======================================================
+       SIN RESULTADOS
+       ======================================================= -->
+  <div
+    *ngIf="
+      consultado
+      && !cargando
+      && !resumen
+      && !error
+    "
+    class="estado">
+
+    No se encontraron resultados para los filtros seleccionados.
+
+  </div>
+
+</div>

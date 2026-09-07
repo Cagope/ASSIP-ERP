@@ -34,7 +34,7 @@ public class AportesRepositoryTemp {
             saldos AS (
                 SELECT
                     d.id_cuenta_ahorro,
-                    SUM(e.valor_debito - e.valor_credito) AS saldo
+                    SUM(e.valor_credito - e.valor_debito) AS saldo
                 FROM datos d
                 LEFT JOIN depositos.extractos_cuentas_ahorros e
                     ON e.id_cuenta_ahorro = d.id_cuenta_ahorro
@@ -45,7 +45,7 @@ public class AportesRepositoryTemp {
             reval AS (
                 SELECT
                     d.id_cuenta_ahorro,
-                    SUM(e.valor_debito) AS revalorizacion
+                    SUM(e.valor_credito) AS revalorizacion
                 FROM datos d
                 LEFT JOIN depositos.extractos_cuentas_ahorros e
                     ON e.id_cuenta_ahorro = d.id_cuenta_ahorro
@@ -69,7 +69,7 @@ public class AportesRepositoryTemp {
                 SELECT
                     d.id_cuenta_ahorro,
                     e.fecha_movimiento,
-                    SUM(e.valor_debito - e.valor_credito)
+                    SUM(e.valor_credito - e.valor_debito)
                         OVER (
                             PARTITION BY d.id_cuenta_ahorro
                             ORDER BY e.fecha_movimiento
@@ -83,7 +83,7 @@ public class AportesRepositoryTemp {
             saldo_inicial AS (
                 SELECT
                     d.id_cuenta_ahorro,
-                    COALESCE(SUM(e.valor_debito - e.valor_credito),0) AS saldo
+                    COALESCE(SUM(e.valor_credito - e.valor_debito),0) AS saldo
                 FROM datos d
                 LEFT JOIN depositos.extractos_cuentas_ahorros e
                     ON e.id_cuenta_ahorro = d.id_cuenta_ahorro

@@ -1,9 +1,9 @@
 package co.assip.erp.gerencia.dashboard_depositos.dto;
-import java.time.LocalDate;
 
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -13,9 +13,12 @@ public class DashboardDepositosResponseDTO {
     private DashboardDepositosResumenDTO resumen;
 
     private List<DashboardDepositosFormaDTO> formas;
+
+    private List<DashboardDepositosTipoCaptacionDTO> tiposCaptacion;
+
     private List<DashboardDepositosGrupoDTO> agencias;
+
     private List<DashboardDepositosTendenciaDTO> tendencia;
 
     private LocalDate fechaCorteAnterior;
-
 }

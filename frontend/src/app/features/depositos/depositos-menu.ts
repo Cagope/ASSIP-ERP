@@ -77,6 +77,22 @@ export const depositosMenu = {
     },
 
     // ======================================================
+    // ANÁLISIS
+    // ======================================================
+    {
+      label: 'Análisis',
+      children: [
+
+        {
+          label: 'Concentración de captaciones',
+          route: '/depositos/analisis/concentracion'
+        }
+
+      ]
+    },
+
+
+    // ======================================================
     // INFORMES
     // ======================================================
     {
@@ -212,6 +228,11 @@ export const depositosMenu = {
             {
               label: 'Documentos soporte',
               route: '/depositos/informes/documentos-soporte'
+            },
+
+            {
+              label: 'GMF semanal',
+              route: '/depositos/informes/gmf-semanal'
             }
 
           ]

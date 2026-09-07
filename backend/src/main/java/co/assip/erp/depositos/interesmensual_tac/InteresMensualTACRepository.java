@@ -75,7 +75,7 @@ public class InteresMensualTACRepository {
                 SELECT
                     c.id_cuenta_ahorro,
                     e.fecha_movimiento,
-                    SUM(e.valor_debito - e.valor_credito)
+                    SUM(e.valor_credito - e.valor_debito)
                         OVER (
                             PARTITION BY c.id_cuenta_ahorro
                             ORDER BY e.fecha_movimiento

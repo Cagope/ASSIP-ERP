@@ -25,6 +25,7 @@ public class CuentaMovimientoDTO {
     private Integer idFormaAhorro;
     private String codigoForma;
     private String nombreForma;
+    private String tipoCaptacionForma;
 
     private String codigoCuenta;
 
@@ -72,6 +73,10 @@ public class CuentaMovimientoDTO {
 
     public String getNombreForma() {
         return trim(nombreForma);
+    }
+
+    public String getTipoCaptacionForma() {
+        return trim(tipoCaptacionForma);
     }
 
     public String getCodigoCuenta() {

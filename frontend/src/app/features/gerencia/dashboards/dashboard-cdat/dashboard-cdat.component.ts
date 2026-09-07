@@ -1,38 +1,34 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 
 import { DashboardCdatApi } from './dashboard-cdat.api';
-import { DashboardCdatLineChartComponent } from './dashboard-cdat-line-chart.component';
-import { DashboardCdatDonutChartComponent } from './dashboard-cdat-donut-chart.component';
 
 import {
   DashboardCdatAgencia,
   DashboardCdatGrupo,
   DashboardCdatResumen,
   DashboardCdatTendencia,
-  DashboardCdatVencimiento
+  DashboardCdatVencimiento,
+  DashboardCdatVencimientoDetalle
 } from './dashboard-cdat.models';
 
 @Component({
   selector: 'app-dashboard-cdat',
   standalone: true,
   imports: [
-    CommonModule,
-    FormsModule,
-    DashboardCdatLineChartComponent,
-    DashboardCdatDonutChartComponent
+    CommonModule
   ],
   templateUrl: './dashboard-cdat.component.html',
   styleUrls: ['./dashboard-cdat.component.scss']
 })
 export class DashboardCdatComponent implements OnInit {
 
-  fechaCorte =
-    new Date().toISOString().substring(0, 10);
-
   cargando = false;
+  cargandoDetalle = false;
+
   error = '';
+
+  fechaActual = new Date();
 
   resumen: DashboardCdatResumen = {
     totalCdats: 0,
@@ -40,15 +36,17 @@ export class DashboardCdatComponent implements OnInit {
     promedioTasa: 0,
     promedioPlazo: 0,
     vencen30Dias: 0,
-    renovacionesMes: 0,
-    cancelacionesMes: 0
+    totalAsociados: 0
   };
 
   agencias: DashboardCdatAgencia[] = [];
   plazos: DashboardCdatGrupo[] = [];
   tasas: DashboardCdatGrupo[] = [];
-  tendencia: DashboardCdatTendencia[] = [];
   vencimientos: DashboardCdatVencimiento[] = [];
+  tendencia: DashboardCdatTendencia[] = [];
+
+  rangoSeleccionado = '';
+  detalleVencimientos: DashboardCdatVencimientoDetalle[] = [];
 
   constructor(
     private api: DashboardCdatApi
@@ -62,36 +60,172 @@ export class DashboardCdatComponent implements OnInit {
   consultar(): void {
 
     this.error = '';
-
-    if (!this.fechaCorte) {
-      this.error = 'Debe seleccionar una fecha de corte.';
-      return;
-    }
-
     this.cargando = true;
 
-    this.api.consultar({
-      fechaCorte: this.fechaCorte
-    }).subscribe({
+    this.api.consultar().subscribe({
       next: response => {
+
         this.resumen = response.resumen;
-        this.agencias = response.agencias;
-        this.plazos = response.plazos;
-        this.tasas = response.tasas;
-        this.tendencia = response.tendencia;
+
+        this.agencias =
+          response.agencias ?? [];
+
+        this.plazos =
+          response.plazos ?? [];
+
+        this.tasas =
+          response.tasas ?? [];
+
+        this.vencimientos =
+          response.vencimientos ?? [];
+
+        this.tendencia =
+          response.tendencia ?? [];
+
         this.cargando = false;
-        this.vencimientos = response.vencimientos;
       },
+
       error: err => {
+
         console.error(err);
-        this.error = 'No fue posible consultar el dashboard CDAT.';
+
+        this.error =
+          'No fue posible consultar el dashboard CDAT.';
+
         this.cargando = false;
       }
     });
   }
 
+  // =========================================================
+  // GRÁFICA COMPARATIVA 12 MESES
+  // =========================================================
+
+  alturaValor(item: DashboardCdatTendencia): number {
+
+    const maximo = Math.max(
+      ...this.tendencia.map(x => x.valorCaptado),
+      0
+    );
+
+    if (maximo <= 0) {
+      return 0;
+    }
+
+    return (item.valorCaptado / maximo) * 100;
+  }
+
+  alturaCantidad(item: DashboardCdatTendencia): number {
+
+    const maximo = Math.max(
+      ...this.tendencia.map(x => x.cantidadCdats),
+      0
+    );
+
+    if (maximo <= 0) {
+      return 0;
+    }
+
+    return (item.cantidadCdats / maximo) * 100;
+  }
+
+  periodoGrafica(periodo: string): string {
+
+    if (!periodo) {
+      return '';
+    }
+
+    const partes = periodo.split('-');
+
+    if (partes.length !== 2) {
+      return periodo;
+    }
+
+    const meses = [
+      'Ene',
+      'Feb',
+      'Mar',
+      'Abr',
+      'May',
+      'Jun',
+      'Jul',
+      'Ago',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dic'
+    ];
+
+    const anio = Number(partes[0]);
+    const mes = Number(partes[1]);
+
+    if (
+      !Number.isFinite(anio) ||
+      !Number.isFinite(mes) ||
+      mes < 1 ||
+      mes > 12
+    ) {
+      return periodo;
+    }
+
+    return `${meses[mes - 1]} ${String(anio).slice(-2)}`;
+  }
+
+  // =========================================================
+  // DETALLE DE VENCIMIENTOS
+  // =========================================================
+
+  verDetalleVencimiento(
+    vencimiento: DashboardCdatVencimiento
+  ): void {
+
+    if (!vencimiento?.rango) {
+      return;
+    }
+
+    this.rangoSeleccionado =
+      vencimiento.rango;
+
+    this.detalleVencimientos = [];
+
+    this.cargandoDetalle = true;
+
+    this.api.consultarDetalleVencimientos(
+      vencimiento.rango
+    ).subscribe({
+
+      next: detalle => {
+
+        this.detalleVencimientos =
+          detalle ?? [];
+
+        this.cargandoDetalle = false;
+      },
+
+      error: err => {
+
+        console.error(err);
+
+        this.error =
+          'No fue posible consultar el detalle de vencimientos.';
+
+        this.cargandoDetalle = false;
+      }
+    });
+  }
+
+  cerrarDetalleVencimiento(): void {
+
+    this.rangoSeleccionado = '';
+
+    this.detalleVencimientos = [];
+  }
+
+  // =========================================================
+  // NAVEGACIÓN
+  // =========================================================
+
   volver(): void {
     history.back();
   }
-
 }

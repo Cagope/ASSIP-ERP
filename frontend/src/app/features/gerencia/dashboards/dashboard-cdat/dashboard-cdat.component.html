@@ -1,371 +1,719 @@
 <div class="page">
 
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
   <div class="page-header">
 
     <div>
       <h2>Dashboard Ejecutivo CDAT</h2>
 
       <small>
-        Indicadores gerenciales y comportamiento de captación CDAT.
+        Posición actual de captaciones CDAT al
+        {{ fechaActual | date:'dd/MM/yyyy' }}.
       </small>
     </div>
 
-  </div>
-
-  <!-- FILTROS -->
-  <div class="card">
-
-    <div class="section-header">
-
-      <div>
-        <h3>Filtros</h3>
-
-        <small>
-          Consulte información ejecutiva consolidada.
-        </small>
-      </div>
-
-    </div>
-
-    <div class="filters-grid">
-
-      <div class="f-row">
-
-        <label>Fecha corte</label>
-
-        <input
-          type="date"
-          [(ngModel)]="fechaCorte">
-
-      </div>
-
-    </div>
-
-    <div class="form-actions">
-
-      <button
-        type="button"
-        class="btn btn--secondary"
-        (click)="volver()">
-
-        Volver
-
-      </button>
-
-      <button
-        type="button"
-        class="btn btn--primary"
-        (click)="consultar()"
-        [disabled]="cargando">
-
-        Consultar
-
-      </button>
-
-    </div>
+    <button
+      type="button"
+      class="btn btn--secondary"
+      (click)="volver()">
+      Volver
+    </button>
 
   </div>
 
+  <!-- ===================================================== -->
   <!-- ERROR -->
+  <!-- ===================================================== -->
+
   <div
     *ngIf="error"
     class="alert alert-error">
-
     {{ error }}
-
   </div>
 
+  <!-- ===================================================== -->
   <!-- CARGANDO -->
+  <!-- ===================================================== -->
+
   <div
     *ngIf="cargando"
     class="loading-box">
-
     Consultando dashboard ejecutivo CDAT...
-
   </div>
 
-  <!-- RESUMEN -->
-  <div
-    *ngIf="!cargando"
-    class="card">
+  <ng-container *ngIf="!cargando">
 
-    <div class="section-header">
+    <!-- =================================================== -->
+    <!-- RESUMEN EJECUTIVO -->
+    <!-- =================================================== -->
 
-      <div>
-        <h3>Resumen ejecutivo</h3>
+    <div class="card">
 
-        <small>
-          Indicadores principales de captación CDAT.
-        </small>
-      </div>
+      <div class="section-header">
 
-    </div>
+        <div>
+          <h3>Resumen ejecutivo</h3>
 
-    <div class="cards-grid">
-
-      <div class="stat-card">
-
-      <span class="stat-label">
-        Total CDAT
-      </span>
-
-        <span class="stat-value">
-        {{ resumen.totalCdats | number:'1.0-0' }}
-      </span>
-
-      </div>
-
-      <div class="stat-card">
-
-      <span class="stat-label">
-        Valor captado
-      </span>
-
-        <span class="stat-value">
-        $ {{ resumen.valorTotalCaptado | number:'1.0-0' }}
-      </span>
-
-      </div>
-
-      <div class="stat-card">
-
-      <span class="stat-label">
-        Promedio tasa
-      </span>
-
-        <span class="stat-value">
-        {{ resumen.promedioTasa | number:'1.2-2' }}%
-      </span>
-
-      </div>
-
-      <div class="stat-card">
-
-      <span class="stat-label">
-        Promedio plazo
-      </span>
-
-        <span class="stat-value">
-        {{ resumen.promedioPlazo | number:'1.0-0' }} meses
-      </span>
-
-      </div>
-
-      <div class="stat-card">
-
-      <span class="stat-label">
-        Vencen 30 días
-      </span>
-
-        <span class="stat-value">
-        {{ resumen.vencen30Dias | number:'1.0-0' }}
-      </span>
-
-      </div>
-
-      <div class="stat-card">
-
-      <span class="stat-label">
-        Renovaciones mes
-      </span>
-
-        <span class="stat-value">
-        {{ resumen.renovacionesMes | number:'1.0-0' }}
-      </span>
-
-      </div>
-
-      <div class="stat-card">
-
-      <span class="stat-label">
-        Cancelaciones mes
-      </span>
-
-        <span class="stat-value">
-        {{ resumen.cancelacionesMes | number:'1.0-0' }}
-      </span>
-
-      </div>
-
-    </div>
-
-  </div>
-
-  <!-- TENDENCIA GRÁFICA -->
-  <app-dashboard-cdat-line-chart
-    *ngIf="!cargando"
-    [data]="tendencia">
-  </app-dashboard-cdat-line-chart>
-
-
-  <!-- VENCIMIENTOS PRÓXIMOS -->
-  <div
-    *ngIf="!cargando"
-    class="card vencimientos-card">
-
-    <div class="section-header">
-
-      <div>
-        <h3>Vencimientos próximos</h3>
-
-        <small>
-          Exposición de CDAT próximos a vencer desde la fecha de corte.
-        </small>
-      </div>
-
-    </div>
-
-    <div class="vencimientos-grid">
-
-      <div
-        *ngFor="let v of vencimientos"
-        class="vencimiento-box">
-
-      <span class="vencimiento-rango">
-        {{ v.rango }}
-      </span>
-
-        <span class="vencimiento-cantidad">
-        {{ v.cantidad | number:'1.0-0' }}
-      </span>
-
-        <span class="vencimiento-label">
-        títulos
-      </span>
-
-        <div class="vencimiento-valor">
-          $ {{ v.valorTotal | number:'1.0-0' }}
+          <small>
+            Posición actual de los CDAT activos.
+          </small>
         </div>
 
-        <div class="vencimiento-bar">
+      </div>
+
+      <div class="cards-grid">
+
+        <div class="stat-card">
+          <span class="stat-label">
+            CDAT activos
+          </span>
+
+          <span class="stat-value">
+            {{ resumen.totalCdats | number:'1.0-0' }}
+          </span>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-label">
+            Asociados
+          </span>
+
+          <span class="stat-value">
+            {{ resumen.totalAsociados | number:'1.0-0' }}
+          </span>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-label">
+            Valor captado
+          </span>
+
+          <span class="stat-value">
+            $ {{ resumen.valorTotalCaptado | number:'1.0-0' }}
+          </span>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-label">
+            Tasa promedio ponderada
+          </span>
+
+          <span class="stat-value">
+            {{ resumen.promedioTasa | number:'1.2-2' }}%
+          </span>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-label">
+            Plazo promedio
+          </span>
+
+          <span class="stat-value">
+            {{ resumen.promedioPlazo | number:'1.2-2' }} meses
+          </span>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-label">
+            Vencen próximos 30 días
+          </span>
+
+          <span class="stat-value">
+            {{ resumen.vencen30Dias | number:'1.0-0' }}
+          </span>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- =================================================== -->
+    <!-- COMPARATIVA 12 MESES -->
+    <!-- =================================================== -->
+
+    <div class="card tendencia-card">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Evolución de captaciones CDAT</h3>
+
+          <small>
+            Comparativo de CDAT activos y valor captado
+            en los últimos 12 cierres mensuales.
+          </small>
+        </div>
+
+        <div class="tendencia-legend">
+
+          <span class="legend-item">
+            <span class="legend-box legend-box--valor"></span>
+            Salod CDATs
+          </span>
+
+          <span class="legend-item">
+            <span class="legend-box legend-box--cantidad"></span>
+            CDAT activos
+          </span>
+
+        </div>
+
+      </div>
+
+      <div
+        *ngIf="tendencia.length"
+        class="tendencia-chart">
+
+        <div class="tendencia-chart-body">
 
           <div
-            class="vencimiento-bar-fill"
-            [style.width.%]="v.participacion">
+            *ngFor="let t of tendencia"
+            class="tendencia-column">
+
+            <div class="tendencia-values">
+
+              <span class="tendencia-cantidad">
+                {{ t.cantidadCdats | number:'1.0-0' }}
+              </span>
+
+              <span class="tendencia-valor">
+                $ {{ t.valorCaptado / 1000000 | number:'1.0-0' }} M
+              </span>
+
+            </div>
+
+            <div class="tendencia-bars">
+
+              <div
+                class="tendencia-bar tendencia-bar--valor"
+                [style.height.%]="alturaValor(t)"
+                [title]="
+                  periodoGrafica(t.periodo)
+                  + ' - Valor captado: $ '
+                  + (t.valorCaptado | number:'1.0-0')
+                ">
+              </div>
+
+              <div
+                class="tendencia-bar tendencia-bar--cantidad"
+                [style.height.%]="alturaCantidad(t)"
+                [title]="
+                  periodoGrafica(t.periodo)
+                  + ' - CDAT activos: '
+                  + (t.cantidadCdats | number:'1.0-0')
+                ">
+              </div>
+
+            </div>
+
+            <div class="tendencia-periodo">
+              {{ periodoGrafica(t.periodo) }}
+            </div>
+
           </div>
 
         </div>
 
-        <div class="vencimiento-participacion">
-          {{ v.participacion | number:'1.2-2' }}% exposición
+      </div>
+
+      <div
+        *ngIf="!tendencia.length"
+        class="empty-row">
+        No hay cierres mensuales disponibles para mostrar la evolución.
+      </div>
+
+    </div>
+
+    <!-- =================================================== -->
+    <!-- VENCIMIENTOS -->
+    <!-- =================================================== -->
+
+    <div class="card vencimientos-card">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Próximos vencimientos</h3>
+
+          <small>
+            CDAT activos con vencimiento entre hoy y los próximos 30 días.
+            Seleccione un rango para consultar los asociados.
+          </small>
         </div>
 
       </div>
 
+      <div class="vencimientos-grid">
+
+        <button
+          *ngFor="let v of vencimientos"
+          type="button"
+          class="vencimiento-box"
+          [class.vencimiento-box--active]="rangoSeleccionado === v.rango"
+          (click)="verDetalleVencimiento(v)">
+
+          <span class="vencimiento-rango">
+            {{ v.rango }}
+          </span>
+
+          <span class="vencimiento-cantidad">
+            {{ v.cantidad | number:'1.0-0' }}
+          </span>
+
+          <span class="vencimiento-label">
+            títulos
+          </span>
+
+          <div class="vencimiento-valor">
+            $ {{ v.valorTotal | number:'1.0-0' }}
+          </div>
+
+          <div class="vencimiento-bar">
+            <div
+              class="vencimiento-bar-fill"
+              [style.width.%]="v.participacion">
+            </div>
+          </div>
+
+          <div class="vencimiento-participacion">
+            {{ v.participacion | number:'1.2-2' }}% exposición
+          </div>
+
+        </button>
+
+        <div
+          *ngIf="!vencimientos.length"
+          class="empty-vencimientos">
+          No hay vencimientos próximos para mostrar.
+        </div>
+
+      </div>
+
+      <!-- DETALLE -->
+
       <div
-        *ngIf="!vencimientos.length"
-        class="empty-vencimientos">
+        *ngIf="rangoSeleccionado"
+        class="vencimientos-detalle">
 
-        No hay vencimientos próximos para mostrar.
+        <div class="section-header detalle-header">
+
+          <div>
+            <h3>
+              Detalle - {{ rangoSeleccionado }}
+            </h3>
+
+            <small>
+              CDAT y datos de contacto para gestión del vencimiento.
+            </small>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn--secondary"
+            (click)="cerrarDetalleVencimiento()">
+            Cerrar
+          </button>
+
+        </div>
+
+        <div
+          *ngIf="cargandoDetalle"
+          class="loading-box">
+          Consultando vencimientos...
+        </div>
+
+        <div
+          *ngIf="!cargandoDetalle"
+          class="table-container">
+
+          <table class="data-table">
+
+            <thead>
+            <tr>
+              <th>CDAT</th>
+              <th>Documento</th>
+              <th>Asociado</th>
+              <th>Agencia</th>
+              <th>Vencimiento</th>
+              <th class="right">Días</th>
+              <th class="right">Plazo</th>
+              <th class="right">Tasa</th>
+              <th class="right">Saldo</th>
+              <th>Teléfono</th>
+              <th>Celular</th>
+              <th>Correo</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr *ngFor="let d of detalleVencimientos">
+
+              <td>
+                {{ d.codigoCdat }}
+              </td>
+
+              <td>
+                {{ d.documento }}
+              </td>
+
+              <td>
+                {{ d.nombreCompleto }}
+              </td>
+
+              <td>
+                {{ d.agencia }}
+              </td>
+
+              <td>
+                {{ d.fechaVencimiento | date:'dd/MM/yyyy' }}
+              </td>
+
+              <td class="right">
+                {{ d.diasParaVencer }}
+              </td>
+
+              <td class="right">
+                {{ d.plazoMeses }} meses
+              </td>
+
+              <td class="right">
+                {{ d.tasaNominalAnual | number:'1.2-2' }}%
+              </td>
+
+              <td class="right">
+                $ {{ d.saldoActual | number:'1.0-0' }}
+              </td>
+
+              <td>
+                {{ d.telefono || '-' }}
+              </td>
+
+              <td>
+                {{ d.celularUno || d.celularDos || '-' }}
+              </td>
+
+              <td>
+                {{ d.correoPersonal || '-' }}
+              </td>
+
+            </tr>
+
+            <tr *ngIf="!detalleVencimientos.length">
+              <td
+                colspan="12"
+                class="empty-row">
+                No hay CDAT en este rango de vencimiento.
+              </td>
+            </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
 
       </div>
 
     </div>
 
-  </div>
+    <!-- =================================================== -->
+    <!-- AGENCIAS -->
+    <!-- =================================================== -->
 
-  <!-- AGENCIAS -->
-  <div
-    *ngIf="!cargando"
-    class="card">
+    <div class="card">
 
-    <div class="section-header">
+      <div class="section-header">
 
-      <div>
-        <h3>Captación por agencias</h3>
+        <div>
+          <h3>Captación por agencias</h3>
 
-        <small>
-          Participación y comportamiento por agencia.
-        </small>
+          <small>
+            Distribución de los CDAT activos por agencia.
+          </small>
+        </div>
+
+      </div>
+
+      <div class="table-container">
+
+        <table class="data-table">
+
+          <thead>
+          <tr>
+            <th>Agencia</th>
+            <th class="right">Cantidad</th>
+            <th class="right">Valor total</th>
+            <th class="right">Tasa ponderada</th>
+            <th class="right">% participación</th>
+          </tr>
+          </thead>
+
+          <tbody>
+
+          <tr *ngFor="let a of agencias">
+
+            <td>
+              {{ a.agencia }}
+            </td>
+
+            <td class="right">
+              {{ a.cantidad | number:'1.0-0' }}
+            </td>
+
+            <td class="right">
+              $ {{ a.valorTotal | number:'1.0-0' }}
+            </td>
+
+            <td class="right">
+              {{ a.promedioTasa | number:'1.2-2' }}%
+            </td>
+
+            <td class="right">
+              {{ a.participacion | number:'1.2-2' }}%
+            </td>
+
+          </tr>
+
+          <tr *ngIf="!agencias.length">
+            <td
+              colspan="5"
+              class="empty-row">
+              No hay información para mostrar.
+            </td>
+          </tr>
+
+          </tbody>
+
+        </table>
+
       </div>
 
     </div>
 
-    <div class="table-container">
+    <!-- =================================================== -->
+    <!-- DISTRIBUCIONES -->
+    <!-- =================================================== -->
 
-      <table class="data-table">
+    <div class="double-grid">
 
-        <thead>
+      <!-- PLAZOS -->
 
-        <tr>
+      <div class="card">
 
-          <th>Agencia</th>
+        <div class="section-header">
+          <div>
+            <h3>Distribución por plazos</h3>
 
-          <th class="right">Cantidad</th>
+            <small>
+              Participación de los CDAT activos por rango de plazo.
+            </small>
+          </div>
+        </div>
 
-          <th class="right">Valor total</th>
+        <!-- GRÁFICO -->
 
-          <th class="right">Promedio tasa</th>
+        <div class="distribution-chart">
 
-          <th class="right">% participación</th>
+          <div
+            *ngFor="let p of plazos"
+            class="distribution-row">
 
-        </tr>
+            <div class="distribution-header">
+              <span>
+                {{ p.concepto }}
+              </span>
 
-        </thead>
+              <strong>
+                {{ p.participacion | number:'1.2-2' }}%
+              </strong>
+            </div>
 
-        <tbody>
+            <div class="distribution-track">
+              <div
+                class="distribution-fill"
+                [style.width.%]="p.participacion">
+              </div>
+            </div>
 
-        <tr *ngFor="let a of agencias">
+            <div class="distribution-detail">
+              <span>
+                {{ p.cantidad | number:'1.0-0' }} CDAT
+              </span>
 
-          <td>{{ a.agencia }}</td>
+              <span>
+                $ {{ p.valorTotal | number:'1.0-0' }}
+              </span>
+            </div>
 
-          <td class="right">
-            {{ a.cantidad | number:'1.0-0' }}
-          </td>
+          </div>
 
-          <td class="right">
-            $ {{ a.valorTotal | number:'1.0-0' }}
-          </td>
+        </div>
 
-          <td class="right">
-            {{ a.promedioTasa | number:'1.2-2' }}%
-          </td>
+        <!-- TABLA -->
 
-          <td class="right">
-            {{ a.participacion | number:'1.2-2' }}%
-          </td>
+        <div class="table-container">
 
-        </tr>
+          <table class="data-table">
 
-        <tr *ngIf="!agencias.length">
+            <thead>
+            <tr>
+              <th>Plazo</th>
+              <th class="right">Cantidad</th>
+              <th class="right">Valor</th>
+              <th class="right">Participación</th>
+            </tr>
+            </thead>
 
-          <td
-            colspan="5"
-            class="empty-row">
+            <tbody>
 
-            No hay información para mostrar.
+            <tr *ngFor="let p of plazos">
 
-          </td>
+              <td>
+                {{ p.concepto }}
+              </td>
 
-        </tr>
+              <td class="right">
+                {{ p.cantidad | number:'1.0-0' }}
+              </td>
 
-        </tbody>
+              <td class="right">
+                $ {{ p.valorTotal | number:'1.0-0' }}
+              </td>
 
-      </table>
+              <td class="right">
+                {{ p.participacion | number:'1.2-2' }}%
+              </td>
+
+            </tr>
+
+            <tr *ngIf="!plazos.length">
+              <td
+                colspan="4"
+                class="empty-row">
+                No hay información para mostrar.
+              </td>
+            </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+      <!-- TASAS -->
+
+      <div class="card">
+
+        <div class="section-header">
+          <div>
+            <h3>Distribución por tasas</h3>
+
+            <small>
+              Participación de los CDAT activos por rango de tasa.
+            </small>
+          </div>
+        </div>
+
+        <!-- GRÁFICO -->
+
+        <div class="distribution-chart">
+
+          <div
+            *ngFor="let t of tasas"
+            class="distribution-row">
+
+            <div class="distribution-header">
+              <span>
+                {{ t.concepto }}
+              </span>
+
+              <strong>
+                {{ t.participacion | number:'1.2-2' }}%
+              </strong>
+            </div>
+
+            <div class="distribution-track">
+              <div
+                class="distribution-fill"
+                [style.width.%]="t.participacion">
+              </div>
+            </div>
+
+            <div class="distribution-detail">
+              <span>
+                {{ t.cantidad | number:'1.0-0' }} CDAT
+              </span>
+
+              <span>
+                $ {{ t.valorTotal | number:'1.0-0' }}
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- TABLA -->
+
+        <div class="table-container">
+
+          <table class="data-table">
+
+            <thead>
+            <tr>
+              <th>Tasa</th>
+              <th class="right">Cantidad</th>
+              <th class="right">Valor</th>
+              <th class="right">Participación</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr *ngFor="let t of tasas">
+
+              <td>
+                {{ t.concepto }}
+              </td>
+
+              <td class="right">
+                {{ t.cantidad | number:'1.0-0' }}
+              </td>
+
+              <td class="right">
+                $ {{ t.valorTotal | number:'1.0-0' }}
+              </td>
+
+              <td class="right">
+                {{ t.participacion | number:'1.2-2' }}%
+              </td>
+
+            </tr>
+
+            <tr *ngIf="!tasas.length">
+              <td
+                colspan="4"
+                class="empty-row">
+                No hay información para mostrar.
+              </td>
+            </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
 
     </div>
 
-  </div>
-
-  <!-- DONUTS -->
-  <div
-    *ngIf="!cargando"
-    class="double-grid">
-
-    <!-- PLAZOS -->
-    <app-dashboard-cdat-donut-chart
-      titulo="Distribución por plazos"
-      subtitulo="Participación por rango de plazo."
-      [data]="plazos">
-    </app-dashboard-cdat-donut-chart>
-
-    <!-- TASAS -->
-    <app-dashboard-cdat-donut-chart
-      titulo="Distribución por tasas"
-      subtitulo="Participación por rango de tasas."
-      [data]="tasas">
-    </app-dashboard-cdat-donut-chart>
-
-  </div>
+  </ng-container>
 
 </div>
