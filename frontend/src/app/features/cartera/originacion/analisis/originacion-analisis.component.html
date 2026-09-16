@@ -1,0 +1,1020 @@
+<div class="page">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <div class="page-header">
+
+    <div>
+      <h2>Análisis de Crédito</h2>
+
+      <p>
+        Evaluación consolidada de capacidad de pago,
+        solvencia, centrales de riesgo, garantías
+        y hábito de pago.
+      </p>
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJES -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="error"
+    class="alert alert-error">
+    {{ error }}
+  </div>
+
+  <div
+    *ngIf="mensaje"
+    class="alert alert-success">
+    {{ mensaje }}
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CARGANDO -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="cargando"
+    class="card loading">
+
+    Cargando análisis de la solicitud...
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CONTENIDO -->
+  <!-- ===================================================== -->
+
+  <ng-container *ngIf="!cargando && resultado">
+
+
+    <!-- =================================================== -->
+    <!-- IDENTIFICACIÓN SOLICITUD -->
+    <!-- =================================================== -->
+
+    <section class="card">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Solicitud</h3>
+
+          <p>
+            Información general del crédito evaluado.
+          </p>
+        </div>
+
+        <span
+          class="estado-badge"
+          [ngClass]="claseResultadoSolicitud()">
+
+          {{
+            resultado.estadoAnalisisSolicitud
+              || 'PENDIENTE'
+          }}
+
+        </span>
+
+      </div>
+
+
+      <div class="info-grid">
+
+        <div class="info-item">
+          <span class="label">
+            Solicitud
+          </span>
+
+          <strong>
+            {{ resultado.numeroSolicitud || '—' }}
+          </strong>
+        </div>
+
+
+        <div class="info-item">
+          <span class="label">
+            Valor solicitado
+          </span>
+
+          <strong>
+            {{
+            resultado.valorSolicitado !== null
+            ? (resultado.valorSolicitado
+            | number:'1.0-0')
+            : '—'
+            }}
+          </strong>
+        </div>
+
+
+        <div class="info-item">
+          <span class="label">
+            Cuota proyectada
+          </span>
+
+          <strong>
+            {{
+            resultado.valorCuotaProyectada !== null
+            ? (resultado.valorCuotaProyectada
+            | number:'1.0-0')
+            : '—'
+            }}
+          </strong>
+        </div>
+
+
+        <div class="info-item">
+          <span class="label">
+            Modelo
+          </span>
+
+          <strong>
+            {{
+            resultado.versionModelo
+            || '—'
+            }}
+          </strong>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- RESULTADO GENERAL -->
+    <!-- =================================================== -->
+
+    <section class="card resultado-general">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Resultado de la evaluación</h3>
+
+          <p>
+            Resultado consolidado de todos los deudores
+            vinculados a la solicitud.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="resultado-grid">
+
+
+        <!-- PUNTAJE -->
+
+        <div class="resultado-box">
+
+          <span class="resultado-label">
+            Puntaje
+          </span>
+
+          <strong class="resultado-value">
+
+            {{
+            resultado.puntajeReferenciaSolicitud !== null
+            ? (resultado.puntajeReferenciaSolicitud
+            | number:'1.2-2')
+            : '—'
+            }}
+
+          </strong>
+
+          <span class="resultado-help">
+            Puntaje ponderado
+          </span>
+
+        </div>
+
+
+        <!-- PERFIL -->
+
+        <div class="resultado-box">
+
+          <span class="resultado-label">
+            Perfil de riesgo
+          </span>
+
+          <strong class="resultado-value resultado-texto">
+
+            {{
+            resultado.perfilRiesgoSolicitud
+            || 'Pendiente'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <!-- RECOMENDACIÓN -->
+
+        <div
+          class="resultado-box"
+          [ngClass]="claseResultadoSolicitud()">
+
+          <span class="resultado-label">
+            Recomendación
+          </span>
+
+          <strong class="resultado-value resultado-texto">
+
+            {{
+            resultado.recomendacionSolicitud
+            || 'PENDIENTE'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <!-- OTORGAMIENTO -->
+
+        <div class="resultado-box">
+
+          <span class="resultado-label">
+            Cumple otorgamiento
+          </span>
+
+          <strong class="resultado-value resultado-texto">
+
+            {{
+            textoCumple(
+            resultado.cumpleOtorgamientoSolicitud
+            )
+            }}
+
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div
+        *ngIf="resultado.motivoResultadoSolicitud"
+        class="resultado-motivo">
+
+        <span>
+          Resultado
+        </span>
+
+        <strong>
+          {{ resultado.motivoResultadoSolicitud }}
+        </strong>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- CONTROL DE COMPLETITUD -->
+    <!-- =================================================== -->
+
+    <section class="card">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Estado del análisis</h3>
+
+          <p>
+            Control de personas evaluadas y pendientes.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="metricas-grid">
+
+        <div class="metrica">
+          <span>Total personas</span>
+
+          <strong>
+            {{ resultado.cantidadPersonas }}
+          </strong>
+        </div>
+
+
+        <div class="metrica">
+          <span>Evaluadas</span>
+
+          <strong>
+            {{ resultado.cantidadPersonasEvaluadas }}
+          </strong>
+        </div>
+
+
+        <div class="metrica">
+          <span>Pendientes</span>
+
+          <strong>
+            {{ resultado.cantidadPersonasPendientes }}
+          </strong>
+        </div>
+
+
+        <div class="metrica">
+          <span>Análisis completo</span>
+
+          <strong>
+            {{
+            resultado.analisisSolicitudCompleto
+            ? 'Sí'
+            : 'No'
+            }}
+          </strong>
+        </div>
+
+      </div>
+
+
+      <div
+        *ngIf="resultado.detallePersonasPendientes"
+        class="pendientes-box">
+
+        <strong>
+          Información pendiente:
+        </strong>
+
+        <span>
+          {{ resultado.detallePersonasPendientes }}
+        </span>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- DEUDORES -->
+    <!-- =================================================== -->
+
+    <section class="card">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Deudores evaluados</h3>
+
+          <p>
+            Seleccione una persona para consultar
+            el detalle de su evaluación.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div
+        *ngIf="deudores.length === 0"
+        class="empty">
+
+        No existen deudores para evaluar.
+
+      </div>
+
+
+      <div
+        *ngIf="deudores.length > 0"
+        class="deudores-grid">
+
+        <button
+          *ngFor="let deudor of deudores"
+          type="button"
+          class="deudor-card"
+          [class.deudor-card--selected]="
+            deudorSeleccionado?.idSolicitudDeudor ===
+            deudor.idSolicitudDeudor
+          "
+          (click)="seleccionarDeudor(deudor)">
+
+
+          <div class="deudor-card-header">
+
+            <div>
+              <strong>
+                {{
+                descripcionTipoDeudor(
+                deudor.tipoDeudor
+                )
+                }}
+              </strong>
+
+              <span>
+                Orden {{ deudor.ordenDeudor }}
+              </span>
+            </div>
+
+
+            <span
+              class="estado-badge"
+              [ngClass]="claseResultadoDeudor(deudor)">
+
+              {{
+                deudor.analisisCompleto
+                  ? (
+                      deudor.recomendacion
+                      || 'EVALUADO'
+                    )
+                  : 'PENDIENTE'
+              }}
+
+            </span>
+
+          </div>
+
+
+          <div class="deudor-card-body">
+
+            <div>
+              <span>Puntaje</span>
+
+              <strong>
+                {{
+                deudor.puntajeTotal !== null
+                ? (deudor.puntajeTotal
+                | number:'1.2-2')
+                : '—'
+                }}
+              </strong>
+            </div>
+
+
+            <div>
+              <span>Perfil</span>
+
+              <strong>
+                {{
+                deudor.perfilRiesgo
+                || '—'
+                }}
+              </strong>
+            </div>
+
+
+            <div>
+              <span>Componentes</span>
+
+              <strong>
+                {{
+                deudor.cantidadComponentesEvaluados
+                }}
+                /
+                {{
+                deudor.cantidadComponentesObligatorios
+                }}
+              </strong>
+            </div>
+
+          </div>
+
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- RESULTADO DEL DEUDOR -->
+    <!-- =================================================== -->
+
+    <section
+      *ngIf="deudorSeleccionado"
+      class="card">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Resultado individual</h3>
+
+          <p>
+            {{
+            descripcionTipoDeudor(
+            deudorSeleccionado.tipoDeudor
+            )
+            }}
+          </p>
+        </div>
+
+        <span
+          class="estado-badge"
+          [ngClass]="
+            claseResultadoDeudor(
+              deudorSeleccionado
+            )
+          ">
+
+          {{
+            deudorSeleccionado.recomendacion
+              || 'PENDIENTE'
+          }}
+
+        </span>
+
+      </div>
+
+
+      <!-- INDICADORES -->
+
+      <div class="indicadores-grid">
+
+        <div class="indicador">
+
+          <span>
+            Capacidad de pago
+          </span>
+
+          <strong>
+            {{
+            deudorSeleccionado
+            .indicadorCapacidadPago !== null
+            ? (
+            deudorSeleccionado
+            .indicadorCapacidadPago
+            | number:'1.2-2'
+            ) + ' %'
+            : '—'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="indicador">
+
+          <span>
+            Endeudamiento
+          </span>
+
+          <strong>
+            {{
+            deudorSeleccionado
+            .indicadorEndeudamiento !== null
+            ? (
+            deudorSeleccionado
+            .indicadorEndeudamiento
+            | number:'1.2-2'
+            )
+            : '—'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="indicador">
+
+          <span>
+            Razón corriente
+          </span>
+
+          <strong>
+            {{
+            deudorSeleccionado
+            .indicadorRazonCorriente !== null
+            ? (
+            deudorSeleccionado
+            .indicadorRazonCorriente
+            | number:'1.2-2'
+            )
+            : '—'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="indicador">
+
+          <span>
+            Puntaje central
+          </span>
+
+          <strong>
+            {{
+            deudorSeleccionado
+            .puntajeCentralFuente !== null
+            ? (
+            deudorSeleccionado
+            .puntajeCentralFuente
+            | number:'1.0-0'
+            )
+            : 'Sin historial'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="indicador">
+
+          <span>
+            Mora máxima 24 meses
+          </span>
+
+          <strong>
+            {{
+            deudorSeleccionado
+            .moraMaxima24Meses !== null
+            ? (
+            deudorSeleccionado
+            .moraMaxima24Meses
+            | number:'1.0-0'
+            ) + ' días'
+            : '—'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="indicador indicador--destacado">
+
+          <span>
+            Puntaje total
+          </span>
+
+          <strong>
+            {{
+            deudorSeleccionado
+            .puntajeTotal !== null
+            ? (
+            deudorSeleccionado
+            .puntajeTotal
+            | number:'1.2-2'
+            )
+            : '—'
+            }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="resultado-individual">
+
+        <div>
+          <span>
+            Perfil
+          </span>
+
+          <strong>
+            {{
+            deudorSeleccionado.perfilRiesgo
+            || 'Pendiente'
+            }}
+          </strong>
+        </div>
+
+
+        <div>
+          <span>
+            Recomendación
+          </span>
+
+          <strong>
+            {{
+            deudorSeleccionado.recomendacion
+            || 'Pendiente'
+            }}
+          </strong>
+        </div>
+
+
+        <div>
+          <span>
+            Cumple otorgamiento
+          </span>
+
+          <strong>
+            {{
+            textoCumple(
+            deudorSeleccionado
+            .cumpleOtorgamiento
+            )
+            }}
+          </strong>
+        </div>
+
+      </div>
+
+
+      <div
+        *ngIf="deudorSeleccionado.motivoResultado"
+        class="resultado-motivo">
+
+        <span>
+          Motivo
+        </span>
+
+        <strong>
+          {{
+          deudorSeleccionado
+          .motivoResultado
+          }}
+        </strong>
+
+      </div>
+
+
+      <div
+        *ngIf="deudorSeleccionado.componentesPendientes"
+        class="pendientes-box">
+
+        <strong>
+          Componentes pendientes:
+        </strong>
+
+        <span>
+          {{
+            deudorSeleccionado
+              .componentesPendientes
+          }}
+        </span>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- COMPONENTES -->
+    <!-- =================================================== -->
+
+    <section
+      *ngIf="deudorSeleccionado"
+      class="card">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Criterios de evaluación</h3>
+
+          <p>
+            Detalle de los componentes utilizados
+            en el modelo de otorgamiento.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div
+        *ngIf="componentesSeleccionados.length === 0"
+        class="empty">
+
+        No existen componentes de análisis
+        para el deudor seleccionado.
+
+      </div>
+
+
+      <div
+        *ngIf="componentesSeleccionados.length > 0"
+        class="table-wrap">
+
+        <table class="table">
+
+          <thead>
+          <tr>
+            <th>Criterio</th>
+            <th class="text-center">
+              Ponderación
+            </th>
+            <th>
+              Valor evaluado
+            </th>
+            <th class="text-center">
+              Puntaje
+            </th>
+            <th class="text-center">
+              Ponderado
+            </th>
+            <th>
+              Resultado
+            </th>
+          </tr>
+          </thead>
+
+          <tbody>
+
+          <tr
+            *ngFor="
+                let componente
+                of componentesSeleccionados
+              ">
+
+            <!-- CRITERIO -->
+
+            <td>
+
+              <div class="criterio">
+
+                <strong>
+                  {{
+                  componente.nombreComponente
+                  }}
+                </strong>
+
+                <span>
+                    {{
+                      componente.codigoComponente
+                    }}
+                  </span>
+
+              </div>
+
+            </td>
+
+
+            <!-- PONDERACIÓN -->
+
+            <td class="text-center">
+
+              {{
+              componente.ponderacion !== null
+              ? (
+              componente.ponderacion
+              | number:'1.0-2'
+              ) + ' %'
+              : '—'
+              }}
+
+            </td>
+
+
+            <!-- VALOR -->
+
+            <td>
+
+              <ng-container
+                *ngIf="
+                    componente.valorNumericoComponente
+                      !== null;
+                    else valorTexto
+                  ">
+
+                {{
+                componente.valorNumericoComponente
+                | number:'1.2-4'
+                }}
+
+              </ng-container>
+
+
+              <ng-template #valorTexto>
+
+                {{
+                componente.valorTextoComponente
+                || '—'
+                }}
+
+              </ng-template>
+
+            </td>
+
+
+            <!-- PUNTAJE -->
+
+            <td class="text-center">
+
+              {{
+              componente.puntajeObtenido !== null
+              ? (
+              componente.puntajeObtenido
+              | number:'1.2-4'
+              )
+              : '—'
+              }}
+
+            </td>
+
+
+            <!-- PONDERADO -->
+
+            <td class="text-center">
+
+              <strong>
+                {{
+                componente.puntajePonderado !== null
+                ? (
+                componente.puntajePonderado
+                | number:'1.2-4'
+                )
+                : '—'
+                }}
+              </strong>
+
+            </td>
+
+
+            <!-- RESULTADO -->
+
+            <td>
+
+                <span
+                  class="estado-badge"
+                  [ngClass]="
+                    claseComponente(
+                      componente
+                    )
+                  ">
+
+                  {{
+                    textoEstadoComponente(
+                      componente
+                    )
+                  }}
+
+                </span>
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- PIE / ACCIONES -->
+    <!-- =================================================== -->
+
+    <div class="page-footer-actions">
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        [disabled]="cargando || guardando"
+        (click)="volver()">
+
+        Volver a central de riesgo
+
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="
+      cargando ||
+      guardando ||
+      !idSolicitudCredito
+    "
+        (click)="persistirAnalisis()">
+
+    <span *ngIf="!guardando">
+      Calcular y guardar análisis
+    </span>
+
+        <span *ngIf="guardando">
+      Procesando...
+    </span>
+
+      </button>
+
+    </div>
+
+  </ng-container>
+
+
+  <!-- ===================================================== -->
+  <!-- SIN RESULTADO -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="
+      !cargando &&
+      !resultado &&
+      !error
+    "
+    class="card empty">
+
+    No existe información disponible
+    para realizar el análisis.
+
+  </div>
+
+</div>

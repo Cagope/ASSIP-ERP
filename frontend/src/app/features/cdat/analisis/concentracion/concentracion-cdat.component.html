@@ -1,0 +1,988 @@
+<div class="page">
+
+  <!-- =====================================================
+       ENCABEZADO
+       ===================================================== -->
+  <header class="page-header">
+
+    <div>
+      <h2>Concentración de CDAT</h2>
+
+      <p>
+        Concentración de las captaciones CDAT por depositante
+        para una fecha de corte.
+      </p>
+    </div>
+
+    <div
+      class="corte"
+      *ngIf="filtros.fechaCorte">
+
+      Corte {{ filtros.fechaCorte }}
+
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       FILTROS
+       ===================================================== -->
+  <section class="card filtros">
+
+    <div class="f-row">
+
+      <label>
+        Fecha de corte
+      </label>
+
+      <select
+        [(ngModel)]="filtros.fechaCorte"
+        (change)="cambiarCorte()">
+
+        <option
+          *ngFor="
+            let corte of cortes;
+            trackBy: trackByCorte
+          "
+          [value]="corte">
+
+          {{ corte }}
+
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <div class="f-row">
+
+      <label>
+        Agencia
+      </label>
+
+      <select
+        [(ngModel)]="filtros.idAgencia">
+
+        <option [ngValue]="null">
+          Todas
+        </option>
+
+        <option
+          *ngFor="
+            let agencia of agencias;
+            trackBy: trackByAgencia
+          "
+          [ngValue]="agencia.idAgencia">
+
+          {{ agencia.nombreAgencia }}
+
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        [disabled]="cargando"
+        (click)="consultar()">
+
+        Consultar
+
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        [disabled]="cargando"
+        (click)="limpiar()">
+
+        Limpiar
+
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        [disabled]="
+          cargando
+          || !resumen
+          || ranking.length === 0
+        "
+        (click)="exportarInforme()">
+
+        Exportar Excel
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       ESTADOS
+       ===================================================== -->
+  <div
+    class="estado"
+    *ngIf="cargando">
+
+    Cargando análisis de concentración...
+
+  </div>
+
+
+  <div
+    class="estado estado--error"
+    *ngIf="error">
+
+    {{ error }}
+
+  </div>
+
+
+  <!-- =====================================================
+       RESULTADOS
+       ===================================================== -->
+  <ng-container
+    *ngIf="
+      !cargando
+      && resumen
+    ">
+
+
+    <!-- ===================================================
+         RESUMEN PRINCIPAL
+         =================================================== -->
+    <section class="resumen-grid">
+
+      <article
+        class="indicador indicador--principal">
+
+        <span>
+          Saldo captado
+        </span>
+
+        <strong>
+          {{ moneda(resumen.saldoTotal) }}
+        </strong>
+
+        <small>
+          {{
+          resumen.totalCdats
+          | number:'1.0-0'
+          }}
+          CDAT activos
+        </small>
+
+      </article>
+
+
+      <article class="indicador">
+
+        <span>
+          Depositantes
+        </span>
+
+        <strong>
+          {{
+          resumen.totalDepositantes
+          | number:'1.0-0'
+          }}
+        </strong>
+
+        <small>
+          Saldo promedio
+          {{ moneda(resumen.saldoPromedio) }}
+        </small>
+
+      </article>
+
+
+      <article class="indicador">
+
+        <span>
+          Tasa ponderada
+        </span>
+
+        <strong>
+          {{
+          decimal(
+          resumen.tasaPonderada
+          )
+          }}
+          %
+        </strong>
+
+        <small>
+          Ponderada por saldo
+        </small>
+
+      </article>
+
+
+      <article class="indicador">
+
+        <span>
+          Plazo ponderado
+        </span>
+
+        <strong>
+          {{
+          decimal(
+          resumen.plazoPonderadoMeses
+          )
+          }}
+          meses
+        </strong>
+
+        <small>
+          Ponderado por saldo
+        </small>
+
+      </article>
+
+    </section>
+
+
+    <!-- ===================================================
+         INDICADORES DE CONCENTRACIÓN
+         =================================================== -->
+    <section class="card">
+
+      <div class="section-header">
+
+        <div>
+
+          <h3>
+            Indicadores de concentración
+          </h3>
+
+          <p>
+            Participación acumulada de los principales
+            depositantes.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="concentracion-grid">
+
+        <article class="concentracion-card">
+
+          <span>
+            Top 10
+          </span>
+
+          <strong>
+            {{
+            porcentaje(
+            resumen.participacionTop10
+            )
+            }}
+          </strong>
+
+        </article>
+
+
+        <article class="concentracion-card">
+
+          <span>
+            Top 20
+          </span>
+
+          <strong>
+            {{
+            porcentaje(
+            resumen.participacionTop20
+            )
+            }}
+          </strong>
+
+        </article>
+
+
+        <article class="concentracion-card">
+
+          <span>
+            Top 50
+          </span>
+
+          <strong>
+            {{
+            porcentaje(
+            resumen.participacionTop50
+            )
+            }}
+          </strong>
+
+        </article>
+
+
+        <article class="concentracion-card">
+
+          <span>
+            HHI
+          </span>
+
+          <strong>
+            {{
+            resumen.hhi
+            | number:'1.2-2'
+            }}
+          </strong>
+
+          <small>
+            Índice de concentración
+          </small>
+
+        </article>
+
+
+        <article class="concentracion-card">
+
+          <span>
+            50% de captaciones
+          </span>
+
+          <strong>
+            {{
+            resumen.depositantesConcentran50
+            | number:'1.0-0'
+            }}
+          </strong>
+
+          <small>
+            depositantes
+          </small>
+
+        </article>
+
+
+        <article class="concentracion-card">
+
+          <span>
+            80% de captaciones
+          </span>
+
+          <strong>
+            {{
+            resumen.depositantesConcentran80
+            | number:'1.0-0'
+            }}
+          </strong>
+
+          <small>
+            depositantes
+          </small>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         RANKING DE DEPOSITANTES
+         =================================================== -->
+    <section class="card">
+
+      <div class="section-header">
+
+        <div>
+
+          <h3>
+            Ranking de depositantes
+          </h3>
+
+          <p>
+            Saldo consolidado de todos los CDAT activos
+            del depositante.
+          </p>
+
+        </div>
+
+        <span class="cantidad-registros">
+          {{
+            ranking.length
+            | number:'1.0-0'
+          }}
+          depositantes
+        </span>
+
+      </div>
+
+
+      <div class="table-wrap">
+
+        <table class="table">
+
+          <thead>
+
+          <tr>
+
+            <th class="text-center">
+              #
+            </th>
+
+            <th>
+              Documento
+            </th>
+
+            <th>
+              Depositante
+            </th>
+
+            <th class="text-right">
+              CDAT
+            </th>
+
+            <th class="text-right">
+              Saldo
+            </th>
+
+            <th class="text-right">
+              %
+            </th>
+
+            <th class="text-right">
+              % acumulado
+            </th>
+
+            <th class="text-right">
+              Tasa pond.
+            </th>
+
+            <th class="text-right">
+              Plazo pond.
+            </th>
+
+            <th class="text-center">
+              Detalle
+            </th>
+
+          </tr>
+
+          </thead>
+
+
+          <tbody>
+
+          <tr
+            *ngFor="
+                let depositante of rankingPagina;
+                trackBy: trackByDepositante
+              "
+            [class.row-selected]="
+                depositanteSeleccionado?.idDatosPersonal
+                === depositante.idDatosPersonal
+              ">
+
+            <td class="text-center">
+              {{ depositante.posicion }}
+            </td>
+
+
+            <td>
+              {{ depositante.documento }}
+            </td>
+
+
+            <td>
+
+              <strong>
+                {{ depositante.nombreCompleto }}
+              </strong>
+
+            </td>
+
+
+            <td class="text-right">
+
+              {{
+              depositante.cantidadCdats
+              | number:'1.0-0'
+              }}
+
+            </td>
+
+
+            <td class="text-right">
+
+              <strong>
+                {{
+                moneda(
+                depositante.saldoTotal
+                )
+                }}
+              </strong>
+
+            </td>
+
+
+            <td class="text-right">
+
+              {{
+              porcentaje(
+              depositante.participacion
+              )
+              }}
+
+            </td>
+
+
+            <td class="text-right">
+
+              {{
+              porcentaje(
+              depositante.participacionAcumulada
+              )
+              }}
+
+            </td>
+
+
+            <td class="text-right">
+
+              {{
+              decimal(
+              depositante.tasaPonderada
+              )
+              }}
+              %
+
+            </td>
+
+
+            <td class="text-right">
+
+              {{
+              decimal(
+              depositante.plazoPonderadoMeses
+              )
+              }}
+
+            </td>
+
+
+            <td class="text-center">
+
+              <button
+                type="button"
+                class="btn-detail"
+                (click)="verDetalle(depositante)">
+
+                Ver
+
+              </button>
+
+            </td>
+
+          </tr>
+
+
+          <tr
+            *ngIf="ranking.length === 0">
+
+            <td
+              colspan="10"
+              class="empty">
+
+              No existen CDAT para los filtros
+              seleccionados.
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <!-- =================================================
+           PAGINACIÓN
+           ================================================= -->
+      <div
+        class="paginacion"
+        *ngIf="ranking.length > porPagina">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          [disabled]="pagina <= 1"
+          (click)="anteriorPagina()">
+
+          Anterior
+
+        </button>
+
+
+        <span>
+
+          Página
+          {{ pagina }}
+          de
+          {{ totalPaginas }}
+
+        </span>
+
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          [disabled]="pagina >= totalPaginas"
+          (click)="siguientePagina()">
+
+          Siguiente
+
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         DETALLE DEL DEPOSITANTE
+         =================================================== -->
+    <section
+      class="card detalle-card"
+      *ngIf="depositanteSeleccionado">
+
+      <div class="section-header">
+
+        <div>
+
+          <h3>
+            Detalle de CDAT
+          </h3>
+
+          <p>
+
+            {{
+            depositanteSeleccionado.documento
+            }}
+
+            -
+
+            {{
+            depositanteSeleccionado.nombreCompleto
+            }}
+
+          </p>
+
+        </div>
+
+
+        <div class="detalle-actions">
+
+          <button
+            type="button"
+            class="btn btn--secondary"
+            [disabled]="
+              cargandoDetalle
+              || detalle.length === 0
+            "
+            (click)="exportarDetalle()">
+
+            Exportar detalle
+
+          </button>
+
+
+          <button
+            type="button"
+            class="btn btn--secondary"
+            (click)="limpiarDetalle()">
+
+            Cerrar
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           RESUMEN DEPOSITANTE
+           ================================================= -->
+      <div class="detalle-resumen">
+
+        <div>
+
+          <span>
+            CDAT
+          </span>
+
+          <strong>
+            {{
+            depositanteSeleccionado.cantidadCdats
+            | number:'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            Saldo consolidado
+          </span>
+
+          <strong>
+            {{
+            moneda(
+            depositanteSeleccionado.saldoTotal
+            )
+            }}
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            Participación
+          </span>
+
+          <strong>
+            {{
+            porcentaje(
+            depositanteSeleccionado.participacion
+            )
+            }}
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            Tasa ponderada
+          </span>
+
+          <strong>
+            {{
+            decimal(
+            depositanteSeleccionado.tasaPonderada
+            )
+            }}
+            %
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           ESTADOS DETALLE
+           ================================================= -->
+      <div
+        class="estado"
+        *ngIf="cargandoDetalle">
+
+        Cargando detalle...
+
+      </div>
+
+
+      <div
+        class="estado estado--error"
+        *ngIf="errorDetalle">
+
+        {{ errorDetalle }}
+
+      </div>
+
+
+      <!-- =================================================
+           TABLA DETALLE
+           ================================================= -->
+      <div
+        class="table-wrap"
+        *ngIf="
+          !cargandoDetalle
+          && detalle.length > 0
+        ">
+
+        <table class="table">
+
+          <thead>
+
+          <tr>
+
+            <th>
+              CDAT
+            </th>
+
+            <th>
+              Agencia
+            </th>
+
+            <th>
+              Apertura
+            </th>
+
+            <th>
+              Vencimiento
+            </th>
+
+            <th class="text-right">
+              Plazo meses
+            </th>
+
+            <th class="text-right">
+              Plazo días
+            </th>
+
+            <th class="text-right">
+              Tasa N.A.
+            </th>
+
+            <th class="text-right">
+              Valor apertura
+            </th>
+
+            <th class="text-right">
+              Saldo
+            </th>
+
+            <th class="text-right">
+              % depositante
+            </th>
+
+          </tr>
+
+          </thead>
+
+
+          <tbody>
+
+          <tr
+            *ngFor="
+                let item of detalle;
+                trackBy: trackByDetalle
+              ">
+
+            <td>
+
+              <strong>
+                {{ item.codigoCdat }}
+              </strong>
+
+            </td>
+
+
+            <td>
+              {{ item.nombreAgencia }}
+            </td>
+
+
+            <td>
+              {{ item.fechaApertura }}
+            </td>
+
+
+            <td>
+              {{ item.fechaVencimiento }}
+            </td>
+
+
+            <td class="text-right">
+
+              {{
+              item.plazoMeses
+              ?? '-'
+              }}
+
+            </td>
+
+
+            <td class="text-right">
+
+              {{
+              item.plazoDias
+              ?? '-'
+              }}
+
+            </td>
+
+
+            <td class="text-right">
+
+              {{
+              decimal(
+              item.tasaNominalAnual
+              )
+              }}
+              %
+
+            </td>
+
+
+            <td class="text-right">
+
+              {{
+              moneda(
+              item.valorApertura
+              )
+              }}
+
+            </td>
+
+
+            <td class="text-right">
+
+              <strong>
+                {{
+                moneda(
+                item.saldoActual
+                )
+                }}
+              </strong>
+
+            </td>
+
+
+            <td class="text-right">
+
+              {{
+              porcentaje(
+              item.participacionDepositante
+              )
+              }}
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</div>

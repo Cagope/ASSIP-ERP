@@ -1,6 +1,7 @@
 package co.assip.erp.cartera.catalogos;
 
 import co.assip.erp.cartera.catalogos.dto.CarteraCatalogoDTO;
+import co.assip.erp.cartera.catalogos.dto.FondoGarantiaCatalogoDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,6 +49,14 @@ public class CarteraCatalogosService {
 
     public List<CarteraCatalogoDTO> listarGarantiasCredito() {
         return repository.listarGarantiasCredito();
+    }
+
+    // =========================================================
+    // FONDOS DE GARANTÍAS
+    // =========================================================
+
+    public List<FondoGarantiaCatalogoDTO> listarFondosGarantias() {
+        return repository.listarFondosGarantias();
     }
 
     // =========================================================

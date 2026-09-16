@@ -1,0 +1,1081 @@
+<div class="page">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <div class="page-header">
+
+    <div>
+
+      <h2>Central de riesgo</h2>
+
+      <p class="page-subtitle">
+        Registre o actualice la información reportada por la central
+        de riesgo para el deudor principal y sus codeudores.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJES -->
+  <!-- ===================================================== -->
+
+  @if (mensajeError) {
+
+  <div class="alert alert-error">
+    {{ mensajeError }}
+  </div>
+
+  }
+
+
+  @if (mensajeExito) {
+
+  <div class="alert alert-success">
+    {{ mensajeExito }}
+  </div>
+
+  }
+
+
+  <!-- ===================================================== -->
+  <!-- CARGANDO -->
+  <!-- ===================================================== -->
+
+  @if (cargando) {
+
+  <div class="card loading-card">
+    Cargando información de central de riesgo...
+  </div>
+
+  } @else {
+
+
+  <!-- =================================================== -->
+  <!-- DEUDORES DE LA SOLICITUD -->
+  <!-- =================================================== -->
+
+  <div class="card">
+
+    <div class="card-header">
+
+      <div>
+
+        <h3>Deudores de la solicitud</h3>
+
+        <p>
+          Seleccione una persona para registrar o consultar
+          su información de central de riesgo.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    @if (registros.length === 0) {
+
+    <div class="empty-state">
+      No existen deudores disponibles para esta solicitud.
+    </div>
+
+    } @else {
+
+    <div class="table-wrap">
+
+      <table class="table">
+
+        <thead>
+
+        <tr>
+          <th>Orden</th>
+          <th>Tipo</th>
+          <th>Documento</th>
+          <th>Nombre</th>
+          <th>Estado</th>
+          <th>Central</th>
+          <th>Última actualización</th>
+          <th>Puntaje</th>
+          <th>Acción</th>
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        @for (
+        registro of registros;
+        track registro.idSolicitudDeudor
+        ) {
+
+        <tr
+          [class.row-selected]="
+                    registroSeleccionado?.idSolicitudDeudor ===
+                    registro.idSolicitudDeudor
+                  ">
+
+          <td>
+            {{ registro.ordenDeudor }}
+          </td>
+
+
+          <td>
+
+            {{
+            registro.tipoDeudor === 'P' ||
+            registro.tipoDeudor === 'PRINCIPAL'
+            ? 'PRINCIPAL'
+            : 'CODEUDOR'
+            }}
+
+          </td>
+
+
+          <td>
+            {{ registro.documento || '—' }}
+          </td>
+
+
+          <td>
+            {{ registro.nombreCompleto || '—' }}
+          </td>
+
+
+          <td>
+
+            @if (registro.idSolicitudDeudorCentral) {
+
+            <span class="status-badge status-badge--ok">
+                        Registrado
+                      </span>
+
+            } @else {
+
+            <span class="status-badge status-badge--pending">
+                        Pendiente
+                      </span>
+
+            }
+
+          </td>
+
+
+          <td>
+            {{ registro.nombreCentral || '—' }}
+          </td>
+
+
+          <td>
+
+            @if (registro.fechaFotografia) {
+
+            {{
+            registro.fechaFotografia
+            | date:'dd/MM/yyyy HH:mm'
+            }}
+
+            } @else {
+
+            —
+
+            }
+
+          </td>
+
+
+          <td>
+
+            @if (
+            registro.puntajeCentral !== null &&
+            registro.puntajeCentral !== undefined
+            ) {
+
+            {{ registro.puntajeCentral | number:'1.0-2' }}
+
+            } @else {
+
+            —
+
+            }
+
+          </td>
+
+
+          <td>
+
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary"
+              (click)="seleccionarRegistro(registro)"
+              [disabled]="guardando">
+
+              {{
+              registro.idSolicitudDeudorCentral
+              ? 'Ver / actualizar'
+              : 'Registrar'
+              }}
+
+            </button>
+
+          </td>
+
+        </tr>
+
+        }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    }
+
+  </div>
+
+
+  <!-- =================================================== -->
+  <!-- SIN DEUDOR SELECCIONADO -->
+  <!-- =================================================== -->
+
+  @if (!registroSeleccionado) {
+
+  <div class="card empty-state-main">
+
+    <h3>Central de riesgo</h3>
+
+    <p>
+      Seleccione un deudor de la tabla para registrar
+      o consultar su información.
+    </p>
+
+  </div>
+
+  } @else if (cargandoDetalle) {
+
+
+  <!-- ================================================= -->
+  <!-- CARGANDO DETALLE -->
+  <!-- ================================================= -->
+
+  <div class="card loading-card">
+    Cargando información del deudor...
+  </div>
+
+  } @else {
+
+
+  <!-- ================================================= -->
+  <!-- INFORMACIÓN DEL DEUDOR -->
+  <!-- ================================================= -->
+
+  <div class="card">
+
+    <div class="card-header card-header--between">
+
+      <div>
+
+        <h3>Información del deudor</h3>
+
+        <p>
+          Datos de identificación asociados a la solicitud.
+        </p>
+
+      </div>
+
+
+      <div
+        class="status-badge"
+        [class.status-badge--ok]="tieneRegistro"
+        [class.status-badge--pending]="!tieneRegistro">
+
+        {{
+        tieneRegistro
+        ? 'Registrado'
+        : 'Pendiente'
+        }}
+
+      </div>
+
+    </div>
+
+
+    <div class="info-grid">
+
+      <div class="info-item">
+
+            <span class="info-label">
+              Documento
+            </span>
+
+        <strong>
+          {{ registroSeleccionado.tipoDocumento || '' }}
+          {{ registroSeleccionado.documento || '—' }}
+        </strong>
+
+      </div>
+
+
+      <div class="info-item info-item--wide">
+
+            <span class="info-label">
+              Nombre
+            </span>
+
+        <strong>
+          {{ registroSeleccionado.nombreCompleto || '—' }}
+        </strong>
+
+      </div>
+
+
+      <div class="info-item">
+
+            <span class="info-label">
+              Tipo
+            </span>
+
+        <strong>
+
+          {{
+          registroSeleccionado.tipoDeudor === 'P' ||
+          registroSeleccionado.tipoDeudor === 'PRINCIPAL'
+          ? 'Deudor principal'
+          : 'Codeudor'
+          }}
+
+        </strong>
+
+      </div>
+
+
+      <div class="info-item">
+
+            <span class="info-label">
+              Orden
+            </span>
+
+        <strong>
+          {{ registroSeleccionado.ordenDeudor }}
+        </strong>
+
+      </div>
+
+
+      @if (detalleActual?.fechaEdicion) {
+
+      <div class="info-item">
+
+              <span class="info-label">
+                Última actualización
+              </span>
+
+        <strong>
+
+          {{
+          detalleActual?.fechaEdicion
+          | date:'dd/MM/yyyy HH:mm'
+          }}
+
+        </strong>
+
+      </div>
+
+      }
+
+    </div>
+
+  </div>
+
+
+  <!-- ================================================= -->
+  <!-- CONSULTA EN CENTRAL -->
+  <!-- ================================================= -->
+
+  <div class="card">
+
+    <div class="card-header">
+
+      <div>
+
+        <h3>Consulta en central de riesgo</h3>
+
+        <p>
+          Seleccione la central consultada y registre
+          la fecha correspondiente.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="consulta-central-grid">
+
+      <div class="field">
+
+        <label for="idCentralRiesgo">
+          Central de riesgo
+          <span class="required">*</span>
+        </label>
+
+        <select
+          id="idCentralRiesgo"
+          name="idCentralRiesgo"
+          [(ngModel)]="formulario.idCentralRiesgo"
+          [disabled]="guardando || cargandoCatalogos">
+
+          <option [ngValue]="0">
+            Seleccione...
+          </option>
+
+          @for (
+          central of centralesRiesgo;
+          track central.idCentralRiesgo
+          ) {
+
+          <option
+            [ngValue]="central.idCentralRiesgo">
+
+            {{ central.nombreCentral }}
+            {{ central.codigoCentral ? ' - ' + central.codigoCentral : '' }}
+
+          </option>
+
+          }
+
+        </select>
+
+
+        @if (cargandoCatalogos) {
+
+        <small class="field-help">
+          Cargando centrales disponibles...
+        </small>
+
+        }
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="fechaConsulta">
+          Fecha de consulta
+          <span class="required">*</span>
+        </label>
+
+        <input
+          id="fechaConsulta"
+          name="fechaConsulta"
+          type="date"
+          [(ngModel)]="formulario.fechaConsulta"
+          [max]="fechaMaximaConsulta"
+          [disabled]="guardando">
+
+      </div>
+
+    </div>
+
+
+    @if (centralSeleccionada) {
+
+    <div class="central-info">
+
+      <strong>
+        {{ centralSeleccionada.nombreCentral }}
+      </strong>
+
+
+      @if (centralSeleccionada.descripcion) {
+
+      <span>
+                {{ centralSeleccionada.descripcion }}
+              </span>
+
+      }
+
+
+      @if (centralSeleccionada.documentoCentral) {
+
+      <small>
+        Documento:
+        {{ centralSeleccionada.documentoCentral }}
+      </small>
+
+      }
+
+    </div>
+
+    }
+
+  </div>
+
+
+  <!-- ================================================= -->
+  <!-- OBLIGACIONES -->
+  <!-- ================================================= -->
+
+  <div class="card">
+
+    <div class="card-header">
+
+      <div>
+
+        <h3>Obligaciones reportadas</h3>
+
+        <p>
+          Valores consolidados reportados por la central.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="obligaciones-grid">
+
+      <div class="field">
+
+        <label for="valorInicialObligaciones">
+          Valor inicial obligaciones
+        </label>
+
+        <input
+          id="valorInicialObligaciones"
+          name="valorInicialObligaciones"
+          type="text"
+          inputmode="decimal"
+          numericFormat
+          class="input-number"
+          [(ngModel)]="formulario.valorInicialObligaciones"
+          [disabled]="guardando">
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="saldoActualObligaciones">
+          Saldo actual obligaciones
+        </label>
+
+        <input
+          id="saldoActualObligaciones"
+          name="saldoActualObligaciones"
+          type="text"
+          inputmode="decimal"
+          numericFormat
+          class="input-number"
+          [(ngModel)]="formulario.saldoActualObligaciones"
+          [disabled]="guardando">
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="valorCuotasMensuales">
+          Cuotas mensuales
+        </label>
+
+        <input
+          id="valorCuotasMensuales"
+          name="valorCuotasMensuales"
+          type="text"
+          inputmode="decimal"
+          numericFormat
+          class="input-number"
+          [(ngModel)]="formulario.valorCuotasMensuales"
+          [disabled]="guardando">
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ================================================= -->
+  <!-- CALIFICACIONES -->
+  <!-- ================================================= -->
+
+  <div class="card">
+
+    <div class="card-header">
+
+      <div>
+
+        <h3>Calificaciones reportadas</h3>
+
+        <p>
+          Cantidad de obligaciones clasificadas por categoría.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="calificaciones-grid">
+
+      <div class="field calificacion-field">
+
+        <label for="cantidadCalificacionA">
+          Calificación A
+        </label>
+
+        <input
+          id="cantidadCalificacionA"
+          name="cantidadCalificacionA"
+          type="number"
+          min="0"
+          step="1"
+          [(ngModel)]="formulario.cantidadCalificacionA"
+          [disabled]="guardando">
+
+      </div>
+
+
+      <div class="field calificacion-field">
+
+        <label for="cantidadCalificacionB">
+          Calificación B
+        </label>
+
+        <input
+          id="cantidadCalificacionB"
+          name="cantidadCalificacionB"
+          type="number"
+          min="0"
+          step="1"
+          [(ngModel)]="formulario.cantidadCalificacionB"
+          [disabled]="guardando">
+
+      </div>
+
+
+      <div class="field calificacion-field">
+
+        <label for="cantidadCalificacionC">
+          Calificación C
+        </label>
+
+        <input
+          id="cantidadCalificacionC"
+          name="cantidadCalificacionC"
+          type="number"
+          min="0"
+          step="1"
+          [(ngModel)]="formulario.cantidadCalificacionC"
+          [disabled]="guardando">
+
+      </div>
+
+
+      <div class="field calificacion-field">
+
+        <label for="cantidadCalificacionD">
+          Calificación D
+        </label>
+
+        <input
+          id="cantidadCalificacionD"
+          name="cantidadCalificacionD"
+          type="number"
+          min="0"
+          step="1"
+          [(ngModel)]="formulario.cantidadCalificacionD"
+          [disabled]="guardando">
+
+      </div>
+
+
+      <div class="field calificacion-field">
+
+        <label for="cantidadCalificacionE">
+          Calificación E
+        </label>
+
+        <input
+          id="cantidadCalificacionE"
+          name="cantidadCalificacionE"
+          type="number"
+          min="0"
+          step="1"
+          [(ngModel)]="formulario.cantidadCalificacionE"
+          [disabled]="guardando">
+
+      </div>
+
+
+      <div class="field calificacion-field">
+
+        <label for="cantidadCalificacionK">
+          Calificación K
+        </label>
+
+        <input
+          id="cantidadCalificacionK"
+          name="cantidadCalificacionK"
+          type="number"
+          min="0"
+          step="1"
+          [(ngModel)]="formulario.cantidadCalificacionK"
+          [disabled]="guardando">
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ================================================= -->
+  <!-- NOVEDADES -->
+  <!-- ================================================= -->
+
+  <div class="card">
+
+    <div class="card-header">
+
+      <div>
+
+        <h3>Novedades reportadas</h3>
+
+        <p>
+          Eventos relevantes identificados en la consulta.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="novedades-grid">
+
+      <div class="field">
+
+        <label for="cantidadReestructuraciones">
+          Reestructuraciones
+        </label>
+
+        <input
+          id="cantidadReestructuraciones"
+          name="cantidadReestructuraciones"
+          type="number"
+          min="0"
+          step="1"
+          [(ngModel)]="formulario.cantidadReestructuraciones"
+          [disabled]="guardando">
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="cantidadRefinanciaciones">
+          Refinanciaciones
+        </label>
+
+        <input
+          id="cantidadRefinanciaciones"
+          name="cantidadRefinanciaciones"
+          type="number"
+          min="0"
+          step="1"
+          [(ngModel)]="formulario.cantidadRefinanciaciones"
+          [disabled]="guardando">
+
+      </div>
+
+
+      <div class="field">
+
+        <label for="cantidadCuentasEmbargadas">
+          Cuentas embargadas
+        </label>
+
+        <input
+          id="cantidadCuentasEmbargadas"
+          name="cantidadCuentasEmbargadas"
+          type="number"
+          min="0"
+          step="1"
+          [(ngModel)]="formulario.cantidadCuentasEmbargadas"
+          [disabled]="guardando">
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ================================================= -->
+  <!-- RESULTADO -->
+  <!-- ================================================= -->
+
+  <div class="card">
+
+    <div class="card-header">
+
+      <div>
+
+        <h3>Resultado de la central</h3>
+
+        <p>
+          Puntaje, estado, clasificación cualitativa y observaciones
+          de la consulta.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div class="resultado-central-grid">
+
+      <!-- ================================================= -->
+      <!-- PUNTAJE -->
+      <!-- ================================================= -->
+
+      <div class="field">
+
+        <label for="puntajeCentral">
+          Puntaje
+        </label>
+
+        <input
+          id="puntajeCentral"
+          name="puntajeCentral"
+          type="text"
+          inputmode="decimal"
+          class="input-number"
+          [(ngModel)]="formulario.puntajeCentral"
+          [disabled]="
+            guardando ||
+            formulario.calificacionCentral === 'SIN_HISTORIAL'
+          ">
+
+        @if (
+        formulario.calificacionCentral === 'SIN_HISTORIAL'
+        ) {
+
+        <small class="field-help">
+          No aplica cuando la persona no tiene historial.
+        </small>
+
+        }
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- ESTADO DE LA CONSULTA -->
+      <!-- ================================================= -->
+
+      <div class="field">
+
+        <label for="calificacionCentral">
+          Estado de la consulta
+          <span class="required">*</span>
+        </label>
+
+        <select
+          id="calificacionCentral"
+          name="calificacionCentral"
+          [(ngModel)]="formulario.calificacionCentral"
+          (ngModelChange)="cambiarEstadoConsulta($event)"
+          [disabled]="guardando">
+
+          <option value="">
+            Seleccione...
+          </option>
+
+          <option value="CON_HISTORIAL">
+            Con historial
+          </option>
+
+          <option value="SIN_HISTORIAL">
+            Sin historial
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- CLASIFICACIÓN CUALITATIVA -->
+      <!-- ================================================= -->
+
+      <div class="field">
+
+        <label for="calificacionCualitativa">
+          Clasificación cualitativa
+          <span class="required">*</span>
+        </label>
+
+        <select
+          id="calificacionCualitativa"
+          name="calificacionCualitativa"
+          [(ngModel)]="formulario.calificacionCualitativa"
+          [disabled]="
+            guardando ||
+            formulario.calificacionCentral === 'SIN_HISTORIAL'
+          ">
+
+          @if (
+          formulario.calificacionCentral === 'SIN_HISTORIAL'
+          ) {
+
+          <option value="SIN HISTORIAL">
+            Sin historial
+          </option>
+
+          } @else {
+
+          <option value="">
+            Seleccione...
+          </option>
+
+          <option value="CON HISTORIAL - OK">
+            Con historial - OK
+          </option>
+
+          <option value="CON PERMANENCIAS">
+            Con permanencias
+          </option>
+
+          <option value="CON REPORTES">
+            Con reportes
+          </option>
+
+          }
+
+        </select>
+
+        @if (
+        formulario.calificacionCentral === 'SIN_HISTORIAL'
+        ) {
+
+        <small class="field-help">
+          Se asigna automáticamente según el estado de la consulta.
+        </small>
+
+        }
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- OBSERVACIONES -->
+      <!-- ================================================= -->
+
+      <div class="field field--full">
+
+        <label for="observacion">
+          Observaciones
+        </label>
+
+        <textarea
+          id="observacion"
+          name="observacion"
+          rows="4"
+          maxlength="500"
+          [(ngModel)]="formulario.observacion"
+          [disabled]="guardando"
+          placeholder="Registre observaciones relevantes de la consulta">
+        </textarea>
+
+        <small class="field-help field-help--right">
+          {{ formulario.observacion?.length || 0 }}/500
+        </small>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ================================================= -->
+  <!-- ACCIONES DEL REGISTRO -->
+  <!-- ================================================= -->
+
+  <div class="actions">
+
+    <div></div>
+
+
+    <div class="actions">
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="volver()"
+        [disabled]="guardando">
+
+        Volver a Financiero
+
+      </button>
+
+
+      <div class="actions-right">
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="guardar()"
+          [disabled]="
+        guardando ||
+        cargandoDetalle ||
+        cargandoCatalogos
+      ">
+
+          @if (guardando) {
+
+          Guardando...
+
+          } @else {
+
+          {{
+          tieneRegistro
+          ? 'Actualizar información'
+          : 'Guardar información'
+          }}
+
+          }
+
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-success"
+          (click)="continuar()"
+          [disabled]="
+        guardando ||
+        !puedeContinuar
+      ">
+
+          Continuar a Análisis
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  }
+
+  }
+
+</div>

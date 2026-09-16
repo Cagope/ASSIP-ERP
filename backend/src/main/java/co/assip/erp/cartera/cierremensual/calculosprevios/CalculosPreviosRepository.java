@@ -1496,6 +1496,28 @@ public class CalculosPreviosRepository {
                 ofb.id_bien
         ),
 
+        creditos_bienes_trazabilidad AS
+        (
+            SELECT
+                cb.id_cierre_cartera_credito,
+                cb.id_cierre_cartera,
+                cb.id_cartera_credito,
+                cb.saldo_actual,
+
+                cb.id_bien,
+
+                cb.id_obligacion_fiador,
+                cb.id_obligacion_fiador_bien,
+
+                ofb.id_bien_persona
+
+            FROM creditos_bienes cb
+
+            INNER JOIN cartera.obligaciones_fiadores_bienes ofb
+                ON ofb.id_obligacion_fiador_bien =
+                   cb.id_obligacion_fiador_bien
+        ),
+
         totales_bien AS
         (
             SELECT
@@ -1509,7 +1531,7 @@ public class CalculosPreviosRepository {
                     cb.saldo_actual
                 ) AS saldo_total_creditos_bien
 
-            FROM creditos_bienes cb
+            FROM creditos_bienes_trazabilidad cb
 
             GROUP BY
                 cb.id_bien
@@ -1577,6 +1599,7 @@ public class CalculosPreviosRepository {
 
                 cb.id_obligacion_fiador,
                 cb.id_obligacion_fiador_bien,
+                cb.id_bien_persona,
 
                 cb.id_bien,
 
@@ -1623,7 +1646,7 @@ public class CalculosPreviosRepository {
                     0
                 ) AS valor_garantia_credito_bien_base
 
-            FROM creditos_bienes cb
+            FROM creditos_bienes_trazabilidad cb
 
             INNER JOIN totales_bien tb
                 ON tb.id_bien =
@@ -1668,6 +1691,7 @@ public class CalculosPreviosRepository {
 
                 d.id_obligacion_fiador,
                 d.id_obligacion_fiador_bien,
+                d.id_bien_persona,
 
                 d.id_bien,
 
@@ -1708,6 +1732,7 @@ public class CalculosPreviosRepository {
             id_cierre_cartera_credito,
 
             id_bien,
+            id_bien_persona,
 
             id_obligacion_fiador,
             id_obligacion_fiador_bien,
@@ -1735,6 +1760,7 @@ public class CalculosPreviosRepository {
             d.id_cierre_cartera_credito,
 
             d.id_bien,
+            d.id_bien_persona,
 
             d.id_obligacion_fiador,
             d.id_obligacion_fiador_bien,

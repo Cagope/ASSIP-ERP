@@ -5,71 +5,152 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d0577d07-00ee-4562-af4b-c1a4484e8934" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/analisis/concentracion/ConcentracionDepositosController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/analisis/concentracion/ConcentracionDepositosRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/analisis/concentracion/ConcentracionDepositosService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/analisis/concentracion/dto/ConcentracionDepositosAgenciaDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/analisis/concentracion/dto/ConcentracionDepositosAsociadoDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/analisis/concentracion/dto/ConcentracionDepositosFormaDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/analisis/concentracion/dto/ConcentracionDepositosRequestDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/analisis/concentracion/dto/ConcentracionDepositosResponseDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/analisis/concentracion/dto/ConcentracionDepositosResumenDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/analisis/concentracion/dto/ConcentracionDepositosTopDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/informes/gmf_semanal/GmfSemanalController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/informes/gmf_semanal/GmfSemanalRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/informes/gmf_semanal/GmfSemanalService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/informes/gmf_semanal/dto/GmfSemanalItemDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/informes/gmf_semanal/dto/GmfSemanalRequestDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/informes/gmf_semanal/dto/GmfSemanalResponseDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/informes/gmf_semanal/dto/GmfSemanalResumenDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/movimientos/cuentas_ahorro/dto/ParametroGmfDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cdat/dto/DashboardCdatVencimientoDetalleDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_depositos/dto/DashboardDepositosTipoCaptacionDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/analisis/concentracion/concentracion-depositos-exporter.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/analisis/concentracion/concentracion-depositos.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/analisis/concentracion/concentracion-depositos.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/analisis/concentracion/concentracion-depositos.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/analisis/concentracion/concentracion-depositos.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/analisis/concentracion/concentracion-depositos.models.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/analisis/concentracion/concentracion-depositos.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/habilidad_asociado/HabilidadAsociadoRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/habilidad_asociado/HabilidadAsociadoRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/informes/saldos/SaldosCorteRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/informes/saldos/SaldosCorteRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/interesdiario_sm/InteresDiarioSMRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/interesdiario_sm/InteresDiarioSMRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/interesmensual_sm/InteresMensualSMRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/interesmensual_sm/InteresMensualSMRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/interesmensual_tac/InteresMensualTACRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/interesmensual_tac/InteresMensualTACRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/movimientos/DepositosMovimientoRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/movimientos/DepositosMovimientoRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/movimientos/DepositosMovimientoService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/movimientos/DepositosMovimientoService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/movimientos/cuentas_ahorro/MovimientoCuentaAhorroRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/movimientos/cuentas_ahorro/MovimientoCuentaAhorroRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/movimientos/cuentas_ahorro/dto/CuentaMovimientoDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/movimientos/cuentas_ahorro/dto/CuentaMovimientoDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/revalorizacion/RevalorizacionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/revalorizacion/RevalorizacionRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cdat/DashboardCdatController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cdat/DashboardCdatController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cdat/DashboardCdatRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cdat/DashboardCdatRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cdat/DashboardCdatService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cdat/DashboardCdatService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cdat/dto/DashboardCdatResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cdat/dto/DashboardCdatResponseDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cdat/dto/DashboardCdatResumenDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cdat/dto/DashboardCdatResumenDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cdat/dto/DashboardCdatTendenciaDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_cdat/dto/DashboardCdatTendenciaDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_depositos/DashboardDepositosRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_depositos/DashboardDepositosRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_depositos/dto/DashboardDepositosResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/gerencia/dashboard_depositos/dto/DashboardDepositosResponseDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/superintendencia/aportes/repository/AportesRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/superintendencia/aportes/repository/AportesRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/superintendencia/aportes/repository/AportesRepositoryTemp.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/superintendencia/aportes/repository/AportesRepositoryTemp.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/catalogos/Dto/FondoGarantiaCatalogoDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/analisis/SolicitudAnalisisController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/analisis/SolicitudAnalisisRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/analisis/SolicitudAnalisisService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/analisis/dto/SolicitudAnalisisComponenteDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/analisis/dto/SolicitudAnalisisDeudorDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/analisis/dto/SolicitudAnalisisPersistenciaDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/analisis/dto/SolicitudAnalisisResultadoDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/asociados/OriginacionAsociadoController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/asociados/OriginacionAsociadoRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/asociados/OriginacionAsociadoService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/asociados/dto/OriginacionAsociadoDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/bienes/SolicitudBienController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/bienes/SolicitudBienRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/bienes/SolicitudBienService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/bienes/dto/SolicitudBienCreditoRespaldadoDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/bienes/dto/SolicitudBienDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/bienes/dto/SolicitudBienSeleccionRequestDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/catalogos/OriginacionCatalogoController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/catalogos/OriginacionCatalogoRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/catalogos/dto/CentralRiesgoDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/catalogos/dto/ClasificacionCreditoDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/catalogos/dto/DestinoEconomicoDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/catalogos/dto/FormaPagoDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/catalogos/dto/GarantiaCreditoDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/catalogos/dto/LineaCreditoDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/catalogos/dto/ModalidadInteresDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/catalogos/dto/OriginacionCatalogoDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/catalogos/dto/SubgarantiaCreditoDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/catalogos/dto/TipoCuotaDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/centralriesgo/SolicitudCentralRiesgoController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/centralriesgo/SolicitudCentralRiesgoRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/centralriesgo/SolicitudCentralRiesgoService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/centralriesgo/dto/SolicitudCentralRiesgoDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/centralriesgo/dto/SolicitudCentralRiesgoDetalleDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/centralriesgo/dto/SolicitudCentralRiesgoGuardarRequestDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/contexto/OriginacionContextoController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/contexto/OriginacionContextoRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/contexto/OriginacionContextoService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/contexto/dto/OriginacionContextoDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/deudores/SolicitudDeudorController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/deudores/SolicitudDeudorRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/deudores/SolicitudDeudorService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/deudores/dto/SolicitudDeudorAgregarRequestDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/deudores/dto/SolicitudDeudorDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/deudores/dto/SolicitudDeudorDetalleDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/financiero/SolicitudFinancieroController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/financiero/SolicitudFinancieroRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/financiero/SolicitudFinancieroService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/financiero/dto/SolicitudFinancieroDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/financiero/dto/SolicitudFinancieroDetalleDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/financiero/dto/SolicitudFinancieroGuardarRequestDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/SolicitudCreditoController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/SolicitudCreditoRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/SolicitudCreditoService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/dto/SolicitudCrearRetomarRequestDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/dto/SolicitudCrearRetomarResponseDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/dto/SolicitudCreditoCrearRequestDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/dto/SolicitudCreditoDetalleDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/dto/SolicitudCreditoGuardarRequestDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/dto/SolicitudCreditoGuardarResponseDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/dto/SolicitudCreditoResumenDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/list/SolicitudListadoController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/list/SolicitudListadoRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/list/SolicitudListadoService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/list/dto/SolicitudListadoDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/tablaamortizacion/TablaAmortizacionController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/tablaamortizacion/TablaAmortizacionRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/tablaamortizacion/TablaAmortizacionService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/tablaamortizacion/dto/TablaAmortizacionDetalleDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/tablaamortizacion/dto/TablaAmortizacionRequestDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/tablaamortizacion/dto/TablaAmortizacionResponseDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cdat/analisis/concentracion/ConcentracionCdatController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cdat/analisis/concentracion/ConcentracionCdatRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cdat/analisis/concentracion/ConcentracionCdatService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cdat/analisis/concentracion/dto/ConcentracionCdatDepositanteDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cdat/analisis/concentracion/dto/ConcentracionCdatDetalleDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cdat/analisis/concentracion/dto/ConcentracionCdatResumenDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cdat/analisis/tasascondiciones/AnalisisTasasCdatController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cdat/analisis/tasascondiciones/AnalisisTasasCdatRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cdat/analisis/tasascondiciones/AnalisisTasasCdatService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cdat/analisis/tasascondiciones/dto/AnalisisTasasCdatCondicionDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cdat/analisis/tasascondiciones/dto/AnalisisTasasCdatCorteDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cdat/analisis/tasascondiciones/dto/AnalisisTasasCdatDetalleDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cdat/analisis/tasascondiciones/dto/AnalisisTasasCdatRangoSaldoDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cdat/analisis/tasascondiciones/dto/AnalisisTasasCdatResumenDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/financiero/CuotasFinancieras.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/financiero/TasasFinancieras.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/shared/financiero/dto/CuotaVariableResultado.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/analisis/originacion-analisis.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/analisis/originacion-analisis.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/analisis/originacion-analisis.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/analisis/originacion-analisis.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/analisis/originacion-analisis.models.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/central-riesgo/originacion-central-riesgo.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/central-riesgo/originacion-central-riesgo.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/central-riesgo/originacion-central-riesgo.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/central-riesgo/originacion-central-riesgo.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/central-riesgo/originacion-central-riesgo.models.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/contexto/originacion-contexto.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/contexto/originacion-contexto.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/contexto/originacion-contexto.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/contexto/originacion-contexto.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/contexto/originacion-contexto.models.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/deudores/originacion-deudores.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/deudores/originacion-deudores.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/deudores/originacion-deudores.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/deudores/originacion-deudores.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/deudores/originacion-deudores.models.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/financiero/originacion-financiero.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/financiero/originacion-financiero.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/financiero/originacion-financiero.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/financiero/originacion-financiero.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/financiero/originacion-financiero.models.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/originacion.routes.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/originacion-solicitud-state.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/originacion-solicitud.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/originacion-solicitud.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/originacion-solicitud.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/originacion-solicitud.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/originacion-solicitud.models.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cdat/analisis/concentracion/concentracion-cdat-exporter.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cdat/analisis/concentracion/concentracion-cdat.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cdat/analisis/concentracion/concentracion-cdat.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cdat/analisis/concentracion/concentracion-cdat.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cdat/analisis/concentracion/concentracion-cdat.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cdat/analisis/concentracion/concentracion-cdat.models.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cdat/analisis/concentracion/concentracion-cdat.routes.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cdat/analisis/tasas-condiciones/tasas-condiciones-cdat-exporter.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cdat/analisis/tasas-condiciones/tasas-condiciones-cdat.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cdat/analisis/tasas-condiciones/tasas-condiciones-cdat.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cdat/analisis/tasas-condiciones/tasas-condiciones-cdat.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cdat/analisis/tasas-condiciones/tasas-condiciones-cdat.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cdat/analisis/tasas-condiciones/tasas-condiciones-cdat.models.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cdat/analisis/tasas-condiciones/tasas-condiciones-cdat.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/AssipErpApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/AssipErpApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/catalogos/CarteraCatalogosController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/catalogos/CarteraCatalogosController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/catalogos/CarteraCatalogosRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/catalogos/CarteraCatalogosRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/catalogos/CarteraCatalogosService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/catalogos/CarteraCatalogosService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/calculosprevios/CalculosPreviosRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/calculosprevios/CalculosPreviosRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/hojavida/bienes/CierreHojaVidaBienesRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/cierremensual/hojavida/bienes/CierreHojaVidaBienesRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/depositos-menu.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/depositos-menu.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/depositos.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/depositos.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cdat/dashboard-cdat-donut-chart.component.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cdat/dashboard-cdat-donut-chart.component.scss" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cdat/dashboard-cdat-donut-chart.component.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cdat/dashboard-cdat-line-chart.component.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cdat/dashboard-cdat-line-chart.component.scss" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cdat/dashboard-cdat-line-chart.component.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cdat/dashboard-cdat.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cdat/dashboard-cdat.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cdat/dashboard-cdat.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cdat/dashboard-cdat.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cdat/dashboard-cdat.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cdat/dashboard-cdat.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cdat/dashboard-cdat.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cdat/dashboard-cdat.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cdat/dashboard-cdat.models.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-cdat/dashboard-cdat.models.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-depositos/dashboard-depositos.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-depositos/dashboard-depositos.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-depositos/dashboard-depositos.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-depositos/dashboard-depositos.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-depositos/dashboard-depositos.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-depositos/dashboard-depositos.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-depositos/dashboard-depositos.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/gerencia/dashboards/dashboard-depositos/dashboard-depositos.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/cartera-menu.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/cartera-menu.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/cartera.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/cartera.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cdat/cdat-menu.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cdat/cdat-menu.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cdat/cdat.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cdat/cdat.routes.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -113,11 +194,11 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\assip-erp\frontend\src\app\shared\financiero" />
+      <recent name="D:\assip-erp\frontend\src\app\features\cartera\originacion" />
       <recent name="D:\assip-erp\frontend\src\app\features\cartera\analisis\vector-comportamiento\actual" />
       <recent name="D:\assip-erp\frontend\src\app\features\cartera\consulta-creditos" />
       <recent name="D:\assip-erp\frontend\src\app\features\gerencia\expediente-asociado" />
-      <recent name="D:\assip-erp\frontend\src\app\features\gerencia\expediente-asociado\encabezado" />
-      <recent name="D:\assip-erp\frontend\src\app\features\depositos\informes" />
     </key>
   </component>
   <component name="TaskManager">

@@ -50,6 +50,26 @@ export const cdatMenu = {
     },
 
     // =============================
+    // ANÁLISIS
+    // =============================
+    {
+      label: 'Análisis',
+      children: [
+
+        {
+          label: 'Concentración CDAT',
+          route: '/cdat/analisis/concentracion'
+        },
+
+        {
+          label: 'Tasas y condiciones CDAT',
+          route: '/cdat/analisis/tasas-condiciones'
+        }
+
+      ]
+    },
+
+    // =============================
     // CONSULTAS / INFORMES
     // =============================
     {

@@ -1,0 +1,153 @@
+<div
+  class="tabla-overlay"
+  *ngIf="visible"
+  (click)="cerrar()">
+
+  <section
+    class="tabla-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="tabla-amortizacion-titulo"
+    (click)="$event.stopPropagation()">
+
+    <header class="tabla-header">
+      <div>
+        <h2 id="tabla-amortizacion-titulo">
+          {{ titulo }}
+        </h2>
+        <p>
+          Proyección financiera del crédito
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="btn-cerrar"
+        aria-label="Cerrar"
+        [disabled]="cargando"
+        (click)="cerrar()">
+        ×
+      </button>
+    </header>
+
+    <div
+      class="alert alert--error"
+      *ngIf="error">
+      {{ error }}
+    </div>
+
+    <div
+      class="estado-carga"
+      *ngIf="cargando">
+      Calculando tabla de amortización...
+    </div>
+
+    <ng-container *ngIf="resultado as r">
+
+      <div class="resumen-grid">
+        <div class="resumen-item">
+          <span>Valor crédito</span>
+          <strong>
+            {{ r.valorCredito | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </strong>
+        </div>
+
+        <div class="resumen-item">
+          <span>Tasa colocación</span>
+          <strong>{{ r.tasaColocacion | number:'1.2-4' }}%</strong>
+        </div>
+
+        <div class="resumen-item">
+          <span>Plazo</span>
+          <strong>{{ r.plazoMeses }} meses</strong>
+        </div>
+
+        <div class="resumen-item">
+          <span>Cuotas</span>
+          <strong>{{ r.cantidadCuotas }}</strong>
+        </div>
+
+        <div class="resumen-item">
+          <span>Cuota proyectada</span>
+          <strong>
+            {{ r.valorCuotaProyectada | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </strong>
+        </div>
+
+        <div class="resumen-item">
+          <span>Total intereses</span>
+          <strong>
+            {{ r.totalIntereses | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </strong>
+        </div>
+
+        <div class="resumen-item">
+          <span>Total seguros</span>
+          <strong>
+            {{ r.totalSeguros | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </strong>
+        </div>
+
+        <div class="resumen-item resumen-item--destacado">
+          <span>Total pagado</span>
+          <strong>
+            {{ r.totalPagado | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </strong>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="center">Cuota</th>
+              <th>Fecha de pago</th>
+              <th class="right">Abono a capital</th>
+              <th class="right">Intereses</th>
+              <th class="right">Seguros</th>
+              <th class="right">Saldo crédito</th>
+              <th class="right">Valor cuota</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let cuota of r.detalle">
+              <td class="center">
+                {{ cuota.numeroCuota }}
+              </td>
+              <td>
+                {{ cuota.fechaPago | date:'dd/MM/yyyy':'UTC' }}
+              </td>
+              <td class="right">
+                {{ cuota.abonoCapital | number:'1.0-0' }}
+              </td>
+              <td class="right">
+                {{ cuota.valorIntereses | number:'1.0-0' }}
+              </td>
+              <td class="right">
+                {{ cuota.valorSeguros | number:'1.0-0' }}
+              </td>
+              <td class="right">
+                {{ cuota.saldoCredito | number:'1.0-0' }}
+              </td>
+              <td class="right valor-cuota">
+                {{ cuota.valorCuota | number:'1.0-0' }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <footer class="tabla-footer">
+        <button
+          type="button"
+          class="btn btn--secondary"
+          [disabled]="cargando"
+          (click)="cerrar()">
+          Cerrar
+        </button>
+      </footer>
+
+    </ng-container>
+  </section>
+</div>

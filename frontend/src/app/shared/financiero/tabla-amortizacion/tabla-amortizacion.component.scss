@@ -1,0 +1,280 @@
+:host {
+  display: contents;
+}
+
+.tabla-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 1rem;
+
+  background: rgb(15 23 42 / 48%);
+}
+
+.tabla-modal {
+  display: flex;
+  flex-direction: column;
+
+  width: min(1180px, 96vw);
+  max-height: 92vh;
+
+  overflow: hidden;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+
+  background: #fff;
+
+  box-shadow: 0 20px 45px rgb(15 23 42 / 22%);
+}
+
+.tabla-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+
+  padding: 1rem 1.1rem;
+
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tabla-header h2 {
+  margin: 0;
+
+  color: #1f2937;
+
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.tabla-header p {
+  margin: 0.2rem 0 0;
+
+  color: #6b7280;
+
+  font-size: 0.78rem;
+}
+
+.btn-cerrar {
+  width: 32px;
+  height: 32px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+
+  background: #fff;
+
+  color: #4b5563;
+
+  font-size: 1.2rem;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.btn-cerrar:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.btn-cerrar:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+
+  padding: 0.9rem 1.1rem;
+}
+
+.resumen-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  padding: 0.65rem 0.75rem;
+
+  border: 1px solid #f3f4f6;
+  border-radius: 7px;
+
+  background: #f9fafb;
+}
+
+.resumen-item span {
+  color: #6b7280;
+
+  font-size: 0.7rem;
+}
+
+.resumen-item strong {
+  color: #111827;
+
+  font-size: 0.86rem;
+}
+
+.resumen-item--destacado {
+  border-color: #dbeafe;
+  background: #eff6ff;
+}
+
+.table-wrap {
+  margin: 0 1.1rem 1rem;
+
+  overflow: auto;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+table {
+  width: 100%;
+  min-width: 900px;
+
+  border-collapse: collapse;
+
+  font-size: 0.78rem;
+}
+
+thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+thead th {
+  padding: 0.65rem 0.7rem;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  background: #f9fafb;
+
+  color: #4b5563;
+
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+}
+
+tbody td {
+  padding: 0.58rem 0.7rem;
+
+  border-bottom: 1px solid #f3f4f6;
+
+  color: #374151;
+
+  white-space: nowrap;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+tbody tr:hover {
+  background: #f9fafb;
+}
+
+.center {
+  text-align: center !important;
+}
+
+.right {
+  text-align: right !important;
+}
+
+.valor-cuota {
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.tabla-footer {
+  display: flex;
+  justify-content: flex-end;
+
+  padding: 0.8rem 1.1rem;
+
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn {
+  border: none;
+  border-radius: 6px;
+
+  padding: 0.55rem 0.9rem;
+
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.btn--secondary {
+  border: 1px solid #d1d5db;
+
+  background: #fff;
+
+  color: #374151;
+}
+
+.btn--secondary:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.alert {
+  margin: 0.9rem 1.1rem 0;
+
+  padding: 0.7rem 0.85rem;
+
+  border-radius: 7px;
+
+  font-size: 0.8rem;
+}
+
+.alert--error {
+  border: 1px solid #fecaca;
+
+  background: #fef2f2;
+
+  color: #b91c1c;
+}
+
+.estado-carga {
+  padding: 2rem 1rem;
+
+  color: #6b7280;
+
+  text-align: center;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 900px) {
+  .resumen-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .tabla-overlay {
+    padding: 0;
+  }
+
+  .tabla-modal {
+    width: 100vw;
+    max-height: 100vh;
+    min-height: 100vh;
+
+    border: none;
+    border-radius: 0;
+  }
+
+  .resumen-grid {
+    grid-template-columns: 1fr;
+  }
+}

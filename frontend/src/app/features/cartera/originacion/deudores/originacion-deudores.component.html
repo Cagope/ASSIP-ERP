@@ -1,0 +1,657 @@
+<div class="page">
+
+  <!-- =======================================================
+       ENCABEZADO
+       ======================================================= -->
+
+  <app-header-actions
+    titulo="Originación de cartera - Deudores"
+    [mostrarNuevo]="false"
+    [mostrarImprimir]="false"
+    [mostrarExportar]="false">
+  </app-header-actions>
+
+
+  <!-- =======================================================
+       MENSAJES
+       ======================================================= -->
+
+  <div
+    *ngIf="error"
+    class="alert alert-error">
+    {{ error }}
+  </div>
+
+  <div
+    *ngIf="mensaje"
+    class="alert alert-success">
+    {{ mensaje }}
+  </div>
+
+
+  <!-- =======================================================
+       CARGANDO
+       ======================================================= -->
+
+  <div
+    *ngIf="cargandoSolicitud"
+    class="card estado-card">
+
+    Cargando solicitud...
+
+  </div>
+
+
+  <!-- =======================================================
+       SOLICITUD
+       ======================================================= -->
+
+  <ng-container *ngIf="solicitud && !cargandoSolicitud">
+
+    <!-- =====================================================
+     DEUDOR PRINCIPAL + SOLICITUD
+     ===================================================== -->
+
+    <section class="card">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Deudor principal</h3>
+
+          <p>
+            Titular de la solicitud.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div
+        *ngIf="cargandoDeudores"
+        class="estado-inline">
+        Consultando deudor principal...
+      </div>
+
+
+      <ng-container
+        *ngIf="!cargandoDeudores && deudorPrincipal">
+
+        <div class="principal-resumen">
+
+          <div class="principal-dato">
+            <span>Solicitud</span>
+            <strong>
+              {{ solicitud.numeroSolicitud || '-' }}
+            </strong>
+          </div>
+
+          <div class="principal-dato">
+            <span>Documento</span>
+            <strong>
+              {{ deudorPrincipal.tipoDocumento }}
+              {{ deudorPrincipal.documento }}
+            </strong>
+          </div>
+
+          <div class="principal-dato principal-nombre">
+            <span>Nombre</span>
+            <strong>
+              {{ deudorPrincipal.nombreCompleto }}
+            </strong>
+          </div>
+
+        </div>
+
+      </ng-container>
+
+
+      <div
+        *ngIf="
+      !cargandoDeudores
+      && !deudorPrincipal
+    "
+        class="empty">
+
+        No se encontró el deudor principal
+        de la solicitud.
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         CODEUDORES VINCULADOS
+         ===================================================== -->
+
+    <section class="card">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Codeudores</h3>
+
+          <p>
+            Personas actualmente vinculadas
+            como codeudores.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            cargandoDeudores
+            || mostrarBusquedaCodeudor
+          "
+          (click)="abrirBusquedaCodeudor()">
+
+          Agregar codeudor
+
+        </button>
+
+      </div>
+
+
+      <div
+        *ngIf="cargandoDeudores"
+        class="estado-inline">
+        Consultando codeudores...
+      </div>
+
+
+      <div
+        *ngIf="
+          !cargandoDeudores
+          && codeudores.length === 0
+        "
+        class="empty">
+
+        La solicitud no tiene codeudores vinculados.
+
+      </div>
+
+
+      <div
+        *ngIf="
+          !cargandoDeudores
+          && codeudores.length > 0
+        "
+        class="table-wrap">
+
+        <table class="table">
+
+          <thead>
+          <tr>
+            <th>Orden</th>
+            <th>Documento</th>
+            <th>Nombre</th>
+            <th class="text-center">
+              Tipo
+            </th>
+            <th class="text-center">
+              Acción
+            </th>
+          </tr>
+          </thead>
+
+          <tbody>
+
+          <tr
+            *ngFor="let codeudor of codeudores">
+
+            <td>
+              {{ codeudor.ordenDeudor }}
+            </td>
+
+            <td>
+              {{ codeudor.tipoDocumento }}
+              {{ codeudor.documento }}
+            </td>
+
+            <td>
+              <strong>
+                {{ codeudor.nombreCompleto }}
+              </strong>
+            </td>
+
+            <td class="text-center">
+                <span class="badge">
+                  CODEUDOR
+                </span>
+            </td>
+
+            <td class="text-center">
+
+              <div class="acciones-codeudor">
+
+                <button
+                  type="button"
+                  class="btn-action btn-action--contexto"
+                  [disabled]="cargandoContextoCodeudor"
+                  (click)="verContextoCodeudor(codeudor)">
+
+                  Ver contexto
+
+                </button>
+
+                <button
+                  type="button"
+                  class="btn-action btn-action--retirar"
+                  [disabled]="cargandoContextoCodeudor"
+                  (click)="retirarCodeudor(codeudor)">
+
+                  Retirar
+
+                </button>
+
+              </div>
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+    <!-- =====================================================
+     CONTEXTO CODEUDOR SELECCIONADO
+     ===================================================== -->
+
+    <div
+      *ngIf="
+    codeudorSeleccionado
+    && agenciaActiva
+  "
+      class="contexto-codeudor">
+
+      <div class="contexto-codeudor-actions">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="ocultarContextoCodeudor()">
+
+          Ocultar contexto
+
+        </button>
+
+      </div>
+
+      <app-originacion-contexto
+        [idDatosPersonalInput]="codeudorSeleccionado.idDatosPersonal"
+        [idAgenciaInput]="agenciaActiva.idAgencia"
+        [mostrarVolver]="false">
+      </app-originacion-contexto>
+
+    </div>
+
+
+    <!-- =====================================================
+         AGREGAR CODEUDOR
+         ===================================================== -->
+
+    <section
+      *ngIf="mostrarBusquedaCodeudor"
+      class="card card-codeudor">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Agregar codeudor</h3>
+
+          <p>
+            Busque una persona registrada y revise
+            sus condiciones antes de vincularla.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          [disabled]="
+            buscandoCodeudores
+            || cargandoContextoCandidato
+            || agregandoCodeudor
+          "
+          (click)="cancelarBusquedaCodeudor()">
+
+          Cancelar
+
+        </button>
+
+      </div>
+
+
+      <!-- ===============================================
+           FILTROS
+           =============================================== -->
+
+      <div class="filtros-grid">
+
+        <div class="form-field">
+
+          <label>
+            Documento
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="filtrosCodeudor.documento"
+            [disabled]="buscandoCodeudores">
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label>
+            Nombres
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="filtrosCodeudor.nombres"
+            [disabled]="buscandoCodeudores">
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label>
+            Primer apellido
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="filtrosCodeudor.primerApellido"
+            [disabled]="buscandoCodeudores">
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label>
+            Segundo apellido
+          </label>
+
+          <input
+            type="text"
+            [(ngModel)]="filtrosCodeudor.segundoApellido"
+            [disabled]="buscandoCodeudores">
+
+        </div>
+
+      </div>
+
+
+      <div class="acciones-busqueda">
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="buscandoCodeudores"
+          (click)="buscarCodeudor()">
+
+          {{
+          buscandoCodeudores
+          ? 'Buscando...'
+          : 'Buscar'
+          }}
+
+        </button>
+
+      </div>
+
+
+      <!-- ===============================================
+           RESULTADOS BÚSQUEDA
+           =============================================== -->
+
+      <div
+        *ngIf="
+          busquedaCodeudorRealizada
+          && personasEncontradas.length === 0
+        "
+        class="empty">
+
+        No se encontraron personas
+        con los criterios indicados.
+
+      </div>
+
+
+      <div
+        *ngIf="
+          personasEncontradas.length > 0
+          && !personaSeleccionada
+        "
+        class="table-wrap resultados-personas">
+
+        <table class="table">
+
+          <thead>
+          <tr>
+            <th>Documento</th>
+            <th>Nombre</th>
+            <th class="text-center">
+              Acción
+            </th>
+          </tr>
+          </thead>
+
+          <tbody>
+
+          <tr
+            *ngFor="let persona of personasEncontradas">
+
+            <td>
+              {{ persona.tipoDocumento }}
+              {{ persona.documento }}
+            </td>
+
+            <td>
+              <strong>
+                {{ persona.nombreCompleto }}
+              </strong>
+            </td>
+
+            <td class="text-center">
+
+              <button
+                type="button"
+                class="btn-link"
+                [disabled]="
+                    personaYaVinculada(
+                      persona.idDatosPersonal
+                    )
+                  "
+                (click)="seleccionarCandidato(persona)">
+
+                {{
+                personaYaVinculada(
+                persona.idDatosPersonal
+                )
+                ? 'Ya vinculado'
+                : 'Seleccionar'
+                }}
+
+              </button>
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <!-- ===============================================
+           PERSONA SELECCIONADA
+           =============================================== -->
+
+      <ng-container *ngIf="personaSeleccionada">
+
+        <div class="candidato-header">
+
+          <div>
+
+            <span class="persona-tipo">
+              POSIBLE CODEUDOR
+            </span>
+
+            <h4>
+              {{ personaSeleccionada.nombreCompleto }}
+            </h4>
+
+            <p>
+              {{ personaSeleccionada.tipoDocumento }}
+              {{ personaSeleccionada.documento }}
+            </p>
+
+          </div>
+
+          <button
+            type="button"
+            class="btn btn-secondary"
+            [disabled]="
+              cargandoContextoCandidato
+              || agregandoCodeudor
+            "
+            (click)="descartarCandidato()">
+
+            Cambiar persona
+
+          </button>
+
+        </div>
+
+
+        <!-- =============================================
+         CARGANDO CONTEXTO
+         ============================================= -->
+
+        <div
+          *ngIf="cargandoContextoCandidato"
+          class="estado-inline">
+
+          Consultando condiciones actuales
+          del posible codeudor...
+
+        </div>
+
+
+        <!-- =============================================
+     CONTEXTO INTEGRAL DEL CANDIDATO
+     ============================================= -->
+
+        <div
+          *ngIf="
+            !cargandoContextoCandidato
+            && contextoCandidato
+            && personaSeleccionada
+            && agenciaActiva
+          "
+          class="contexto-candidato">
+
+          <app-originacion-contexto
+            [idDatosPersonalInput]="personaSeleccionada.idDatosPersonal"
+            [idAgenciaInput]="agenciaActiva.idAgencia"
+            [mostrarVolver]="false">
+          </app-originacion-contexto>
+
+
+          <!-- =============================================
+               DECISIÓN
+               ============================================= -->
+
+          <div class="decision-codeudor">
+
+            <div>
+
+              <strong>
+                ¿Desea vincular esta persona
+                como codeudor?
+              </strong>
+
+              <p>
+                Revise las condiciones anteriores antes
+                de agregarla a la solicitud.
+              </p>
+
+            </div>
+
+
+            <div class="decision-actions">
+
+              <button
+                type="button"
+                class="btn btn-secondary"
+                [disabled]="agregandoCodeudor"
+                (click)="descartarCandidato()">
+
+                No agregar
+
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-primary"
+                [disabled]="agregandoCodeudor"
+                (click)="agregarCodeudor()">
+
+                {{
+                agregandoCodeudor
+                ? 'Agregando...'
+                : 'Agregar a la solicitud'
+                }}
+
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </ng-container>
+
+    </section>
+
+    <div class="actions-row actions-row--navigation">
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="volverSolicitud()">
+
+        Volver a solicitud
+
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="irABienes()">
+
+        Continuar a bienes
+
+      </button>
+
+    </div>
+
+  </ng-container>
+
+</div>

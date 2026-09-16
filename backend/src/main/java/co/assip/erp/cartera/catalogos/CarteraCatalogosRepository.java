@@ -1,6 +1,7 @@
 package co.assip.erp.cartera.catalogos;
 
 import co.assip.erp.cartera.catalogos.dto.CarteraCatalogoDTO;
+import co.assip.erp.cartera.catalogos.dto.FondoGarantiaCatalogoDTO;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 
@@ -183,6 +184,32 @@ public class CarteraCatalogosRepository {
         return jdbc
                 .sql(sql)
                 .query(CarteraCatalogoDTO.class)
+                .list();
+    }
+
+    // =========================================================
+// FONDOS DE GARANTÍAS
+// =========================================================
+
+    public List<FondoGarantiaCatalogoDTO> listarFondosGarantias() {
+
+        String sql = """
+            SELECT
+                id_fondo_garantia    AS "idFondoGarantia",
+                codigo_fondo         AS "codigoFondo",
+                nombre_fondo         AS "nombreFondo",
+                porcentaje_fondo     AS "porcentajeFondo",
+                activo
+            FROM cartera.fondos_garantias
+            WHERE activo = true
+            ORDER BY
+                codigo_fondo,
+                nombre_fondo
+            """;
+
+        return jdbc
+                .sql(sql)
+                .query(FondoGarantiaCatalogoDTO.class)
                 .list();
     }
 

@@ -11,6 +11,13 @@ import { CONSULTA_CREDITOS_ROUTES } from './consulta-creditos/consulta-creditos.
 import { CIERRE_MENSUAL_CARTERA_ROUTES } from './cierre-mensual/cierre-mensual-cartera.routes';
 
 // =============================
+// ORIGINACIÓN DE CARTERA
+// =============================
+import {
+  ORIGINACION_ROUTES
+} from './originacion/originacion.routes';
+
+// =============================
 // EVALUACIÓN DE CARTERA
 // =============================
 import { EVALUACION_CARTERA_ROUTES } from './evaluacion/evaluaciones/evaluacion-cartera.routes';
@@ -88,6 +95,14 @@ export const CARTERA_ROUTES: Routes = [
   {
     path: 'consulta-creditos',
     children: CONSULTA_CREDITOS_ROUTES
+  },
+
+  // =============================
+  // ORIGINACIÓN DE CARTERA
+  // =============================
+  {
+    path: 'originacion',
+    children: ORIGINACION_ROUTES
   },
 
   // =============================

@@ -1,0 +1,1047 @@
+<div class="page">
+
+  <!-- =====================================================
+       ENCABEZADO
+       ===================================================== -->
+
+  <div class="page-header">
+
+    <div>
+
+      <h2>
+        Análisis de Tasas y Condiciones de Captación CDAT
+      </h2>
+
+      <p>
+        Análisis de la estructura de captación por plazo,
+        amortización, tamaño del depósito y tasas reconocidas.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       FILTROS
+       ===================================================== -->
+
+  <div class="card">
+
+    <div class="filtros">
+
+      <!-- CORTE -->
+
+      <div class="f-row">
+
+        <label>
+          Corte
+        </label>
+
+        <select
+          [(ngModel)]="fechaCorte"
+          [disabled]="cargando || cortes.length === 0">
+
+          <option
+            *ngFor="
+              let corte of cortes;
+              trackBy: trackByCorte
+            "
+            [value]="corte.fechaCorte">
+
+            {{ corte.fechaCorte | date:'dd/MM/yyyy' }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- AGENCIA -->
+
+      <div class="f-row">
+
+        <label>
+          Agencia
+        </label>
+
+        <select
+          [(ngModel)]="idAgencia"
+          [disabled]="cargando || cargandoCatalogos">
+
+          <option [ngValue]="0">
+            Todas
+          </option>
+
+          <option
+            *ngFor="
+              let agencia of agencias;
+              trackBy: trackByAgencia
+            "
+            [ngValue]="agencia.idAgencia">
+
+            {{ agencia.nombreAgencia }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- PLAZO -->
+
+      <div class="f-row">
+
+        <label>
+          Plazo meses
+        </label>
+
+        <input
+          type="number"
+          min="0"
+          step="1"
+          [(ngModel)]="plazoMeses"
+          [disabled]="cargando"
+          placeholder="Todos">
+
+      </div>
+
+
+      <!-- AMORTIZACIÓN -->
+
+      <div class="f-row">
+
+        <label>
+          Amortización
+        </label>
+
+        <select
+          [(ngModel)]="amortizacion"
+          [disabled]="cargando">
+
+          <option value="">
+            Todas
+          </option>
+
+          <option
+            *ngFor="let item of amortizaciones"
+            [value]="item.codigo">
+
+            {{ item.nombre }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- RANGO -->
+
+      <div class="f-row">
+
+        <label>
+          Rango de saldo
+        </label>
+
+        <select
+          [(ngModel)]="rangoSaldo"
+          [disabled]="cargando">
+
+          <option value="">
+            Todos
+          </option>
+
+          <option
+            *ngFor="let item of rangosSaldo"
+            [value]="item.codigo">
+
+            {{ item.nombre }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- ACCIONES -->
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="consultar()"
+          [disabled]="cargando || !fechaCorte">
+
+          {{ cargando ? 'Consultando...' : 'Analizar' }}
+
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="exportar()"
+          [disabled]="cargando || !resumen">
+
+          Excel
+
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiar()"
+          [disabled]="cargando">
+
+          Limpiar
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       CORTE ANALIZADO
+       ===================================================== -->
+
+  <div
+    *ngIf="!cargando && resumen && fechaCorte"
+    class="corte-info">
+
+    <span>
+      Corte analizado
+    </span>
+
+    <strong>
+      {{ obtenerNombreCorte() }}
+    </strong>
+
+    <small>
+      {{ fechaCorte | date:'dd/MM/yyyy' }}
+    </small>
+
+  </div>
+
+
+  <!-- =====================================================
+       ESTADOS
+       ===================================================== -->
+
+  <div
+    *ngIf="cargando"
+    class="estado">
+
+    Consultando información...
+
+  </div>
+
+
+  <div
+    *ngIf="error"
+    class="estado estado--error">
+
+    {{ error }}
+
+  </div>
+
+
+  <!-- =====================================================
+       RESULTADOS
+       ===================================================== -->
+
+  <ng-container
+    *ngIf="!cargando && resumen">
+
+
+    <!-- ===================================================
+         INDICADORES
+         =================================================== -->
+
+    <div class="resumen-grid">
+
+      <div class="indicador indicador--principal">
+
+        <span>
+          Saldo captado
+        </span>
+
+        <strong>
+          {{
+          resumen.saldoTotal
+          | currency:'COP':'symbol-narrow':'1.0-0'
+          }}
+        </strong>
+
+      </div>
+
+
+      <div class="indicador">
+
+        <span>
+          CDAT
+        </span>
+
+        <strong>
+          {{
+          resumen.cantidadCdats
+          | number:'1.0-0'
+          }}
+        </strong>
+
+      </div>
+
+
+      <div class="indicador">
+
+        <span>
+          Depositantes
+        </span>
+
+        <strong>
+          {{
+          resumen.cantidadDepositantes
+          | number:'1.0-0'
+          }}
+        </strong>
+
+      </div>
+
+
+      <div class="indicador">
+
+        <span>
+          Saldo promedio
+        </span>
+
+        <strong>
+          {{
+          resumen.saldoPromedio
+          | currency:'COP':'symbol-narrow':'1.0-0'
+          }}
+        </strong>
+
+      </div>
+
+
+      <div class="indicador">
+
+        <span>
+          TNA ponderada
+        </span>
+
+        <strong>
+          {{
+          resumen.tasaNominalPonderada
+          | number:'1.2-2'
+          }} %
+        </strong>
+
+      </div>
+
+
+      <div class="indicador">
+
+        <span>
+          TEA ponderada
+        </span>
+
+        <strong>
+          {{
+          resumen.tasaEfectivaPonderada
+          | number:'1.2-2'
+          }} %
+        </strong>
+
+      </div>
+
+
+      <div class="indicador">
+
+        <span>
+          Plazo ponderado
+        </span>
+
+        <strong>
+          {{
+          resumen.plazoPonderadoMeses
+          | number:'1.2-2'
+          }}
+          meses
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         CONDICIONES DE CAPTACIÓN
+         =================================================== -->
+
+    <div class="card">
+
+      <div class="section-header">
+
+        <div>
+
+          <h3>
+            Condiciones de captación
+          </h3>
+
+          <p>
+            Distribución de los recursos por plazo y
+            modalidad de amortización.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- ===================================================
+           GRÁFICO - CONDICIONES DE CAPTACIÓN
+           =================================================== -->
+
+      <div
+        *ngIf="condiciones.length > 0"
+        class="chart-card">
+
+        <div class="chart-title">
+          Saldo captado por plazo y amortización
+        </div>
+
+        <div class="chart-subtitle">
+          Altura relativa según saldo captado.
+          Se muestra la TEA ponderada de cada grupo.
+        </div>
+
+
+        <div class="chart-columnas">
+
+          <div
+            *ngFor="
+              let item of condiciones;
+              trackBy: trackByCondicion
+            "
+            class="chart-columna">
+
+            <div class="chart-valor">
+
+              {{
+              item.saldoTotal / 1000000
+              | number:'1.0-0'
+              }}
+              MM
+
+            </div>
+
+
+            <div class="chart-tasa">
+
+              {{
+              item.tasaEfectivaPonderada
+              | number:'1.2-2'
+              }}
+              % TEA
+
+            </div>
+
+
+            <div class="chart-area">
+
+              <div
+                class="chart-barra"
+                [style.height.%]="obtenerAlturaCondicion(item)">
+              </div>
+
+            </div>
+
+
+            <div class="chart-etiqueta">
+
+              <strong>
+                {{ item.plazoMeses }} meses
+              </strong>
+
+              <span>
+                {{ item.nombreAmortizacion }}
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ===================================================
+           TABLA - CONDICIONES DE CAPTACIÓN
+           =================================================== -->
+
+      <div class="table-wrap">
+
+        <table class="table">
+
+          <thead>
+
+          <tr>
+
+            <th>
+              Plazo
+            </th>
+
+            <th>
+              Amortización
+            </th>
+
+            <th class="text-right">
+              CDAT
+            </th>
+
+            <th class="text-right">
+              Saldo
+            </th>
+
+            <th class="text-right">
+              Participación
+            </th>
+
+            <th class="text-right">
+              TNA ponderada
+            </th>
+
+            <th class="text-right">
+              TEA ponderada
+            </th>
+
+          </tr>
+
+          </thead>
+
+
+          <tbody>
+
+          <tr
+            *ngFor="
+                let item of condiciones;
+                trackBy: trackByCondicion
+              ">
+
+            <td>
+              {{ item.plazoMeses }} meses
+            </td>
+
+            <td>
+              {{ item.nombreAmortizacion }}
+            </td>
+
+            <td class="text-right">
+              {{
+              item.cantidadCdats
+              | number:'1.0-0'
+              }}
+            </td>
+
+            <td class="text-right">
+              {{
+              item.saldoTotal
+              | currency:'COP':'symbol-narrow':'1.0-0'
+              }}
+            </td>
+
+            <td class="text-right">
+              {{
+              item.participacionSaldo
+              | number:'1.2-2'
+              }} %
+            </td>
+
+            <td class="text-right">
+              {{
+              item.tasaNominalPonderada
+              | number:'1.2-2'
+              }} %
+            </td>
+
+            <td class="text-right">
+              {{
+              item.tasaEfectivaPonderada
+              | number:'1.2-2'
+              }} %
+            </td>
+
+          </tr>
+
+
+          <tr *ngIf="condiciones.length === 0">
+
+            <td
+              colspan="7"
+              class="empty">
+
+              No hay información para los filtros seleccionados.
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         TASAS POR TAMAÑO
+         =================================================== -->
+
+    <div class="card">
+
+      <div class="section-header">
+
+        <div>
+
+          <h3>
+            Tasas por tamaño de captación
+          </h3>
+
+          <p>
+            Comportamiento de las tasas según el saldo
+            individual de los CDAT.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <!-- ===================================================
+           GRÁFICO - TASAS POR TAMAÑO
+           =================================================== -->
+
+      <div
+        *ngIf="rangos.length > 0"
+        class="chart-card">
+
+        <div class="chart-title">
+          Participación y tasas por tamaño de captación
+        </div>
+
+        <div class="chart-subtitle">
+          Participación del saldo total y tasas efectivas
+          reconocidas por rango.
+        </div>
+
+
+        <div class="chart-rangos">
+
+          <div
+            *ngFor="
+              let item of rangos;
+              trackBy: trackByRango
+            "
+            class="chart-rango">
+
+            <div class="chart-rango-label">
+
+              {{ obtenerEtiquetaRango(item) }}
+
+            </div>
+
+
+            <div class="chart-rango-centro">
+
+              <div class="chart-rango-track">
+
+                <div
+                  class="chart-rango-barra"
+                  [style.width.%]="obtenerAnchoRango(item)">
+                </div>
+
+              </div>
+
+              <div class="chart-rango-datos">
+
+                <span>
+                  {{
+                    item.saldoTotal
+                    | currency:'COP':'symbol-narrow':'1.0-0'
+                  }}
+                </span>
+
+                <strong>
+                  {{
+                  item.participacionSaldo
+                  | number:'1.2-2'
+                  }} %
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <div class="chart-rango-tasas">
+
+              <strong>
+                {{
+                item.tasaEfectivaPonderada
+                | number:'1.2-2'
+                }} %
+              </strong>
+
+              <span>
+                TEA
+                {{
+                  item.tasaEfectivaMinima
+                  | number:'1.2-2'
+                }}
+                –
+                {{
+                  item.tasaEfectivaMaxima
+                  | number:'1.2-2'
+                }} %
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ===================================================
+           TABLA - TASAS POR TAMAÑO
+           =================================================== -->
+
+      <div class="table-wrap">
+
+        <table class="table">
+
+          <thead>
+
+          <tr>
+
+            <th>
+              Rango de saldo
+            </th>
+
+            <th class="text-right">
+              CDAT
+            </th>
+
+            <th class="text-right">
+              Saldo
+            </th>
+
+            <th class="text-right">
+              Participación
+            </th>
+
+            <th class="text-right">
+              TNA pond.
+            </th>
+
+            <th class="text-right">
+              TEA pond.
+            </th>
+
+            <th class="text-right">
+              TEA mín.
+            </th>
+
+            <th class="text-right">
+              TEA máx.
+            </th>
+
+          </tr>
+
+          </thead>
+
+
+          <tbody>
+
+          <tr
+            *ngFor="
+                let item of rangos;
+                trackBy: trackByRango
+              ">
+
+            <td>
+              {{ item.rangoSaldo }}
+            </td>
+
+            <td class="text-right">
+              {{
+              item.cantidadCdats
+              | number:'1.0-0'
+              }}
+            </td>
+
+            <td class="text-right">
+              {{
+              item.saldoTotal
+              | currency:'COP':'symbol-narrow':'1.0-0'
+              }}
+            </td>
+
+            <td class="text-right">
+              {{
+              item.participacionSaldo
+              | number:'1.2-2'
+              }} %
+            </td>
+
+            <td class="text-right">
+              {{
+              item.tasaNominalPonderada
+              | number:'1.2-2'
+              }} %
+            </td>
+
+            <td class="text-right">
+              {{
+              item.tasaEfectivaPonderada
+              | number:'1.2-2'
+              }} %
+            </td>
+
+            <td class="text-right">
+              {{
+              item.tasaEfectivaMinima
+              | number:'1.2-2'
+              }} %
+            </td>
+
+            <td class="text-right">
+              {{
+              item.tasaEfectivaMaxima
+              | number:'1.2-2'
+              }} %
+            </td>
+
+          </tr>
+
+
+          <tr *ngIf="rangos.length === 0">
+
+            <td
+              colspan="8"
+              class="empty">
+
+              No hay información para los filtros seleccionados.
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         DETALLE AUDITABLE
+         =================================================== -->
+
+    <div class="card">
+
+      <div class="section-header">
+
+        <div>
+
+          <h3>
+            Detalle auditable
+          </h3>
+
+          <p>
+            CDAT que conforman la población analizada
+            para el corte seleccionado.
+          </p>
+
+        </div>
+
+        <div class="section-total">
+
+          {{
+          detalle.length
+          | number:'1.0-0'
+          }}
+          registros
+
+        </div>
+
+      </div>
+
+
+      <div class="table-wrap table-wrap--detalle">
+
+        <table class="table">
+
+          <thead>
+
+          <tr>
+
+            <th>
+              CDAT
+            </th>
+
+            <th>
+              Documento
+            </th>
+
+            <th>
+              Depositante
+            </th>
+
+            <th>
+              Agencia
+            </th>
+
+            <th>
+              Apertura
+            </th>
+
+            <th>
+              Vencimiento
+            </th>
+
+            <th class="text-right">
+              Saldo
+            </th>
+
+            <th class="text-right">
+              Plazo
+            </th>
+
+            <th>
+              Amortización
+            </th>
+
+            <th class="text-right">
+              TNA
+            </th>
+
+            <th class="text-right">
+              TEA
+            </th>
+
+          </tr>
+
+          </thead>
+
+
+          <tbody>
+
+          <tr
+            *ngFor="
+                let item of detalle;
+                trackBy: trackByDetalle
+              ">
+
+            <td>
+              {{ item.codigoCdat }}
+            </td>
+
+            <td>
+              {{ item.documento }}
+            </td>
+
+            <td>
+              {{ item.nombreCompleto }}
+            </td>
+
+            <td>
+              {{ item.nombreAgencia }}
+            </td>
+
+            <td>
+              {{
+              item.fechaAperturaCdat
+              | date:'dd/MM/yyyy'
+              }}
+            </td>
+
+            <td>
+              {{
+              item.fechaVencimientoCdat
+              | date:'dd/MM/yyyy'
+              }}
+            </td>
+
+            <td class="text-right">
+              {{
+              item.saldoActualCdat
+              | currency:'COP':'symbol-narrow':'1.0-0'
+              }}
+            </td>
+
+            <td class="text-right">
+              {{ item.plazoMeses }}
+            </td>
+
+            <td>
+              {{ item.nombreAmortizacion }}
+            </td>
+
+            <td class="text-right">
+              {{
+              item.tasaNominalAnual
+              | number:'1.2-2'
+              }} %
+            </td>
+
+            <td class="text-right">
+              {{
+              item.tasaEfectivaAnual
+              | number:'1.2-2'
+              }} %
+            </td>
+
+          </tr>
+
+
+          <tr *ngIf="detalle.length === 0">
+
+            <td
+              colspan="11"
+              class="empty">
+
+              No hay CDAT para los filtros seleccionados.
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </ng-container>
+
+</div>

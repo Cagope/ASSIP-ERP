@@ -1,0 +1,1244 @@
+<div class="contexto-page">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO                                            -->
+  <!-- ===================================================== -->
+
+  <header class="page-header">
+
+    <div>
+
+      <h2>
+        Contexto para Originación de Cartera
+      </h2>
+
+      <p>
+        Información de apoyo para el análisis previo de la solicitud.
+      </p>
+
+    </div>
+
+    <button
+      *ngIf="mostrarVolver"
+      type="button"
+      class="btn btn--secondary"
+      (click)="volver()">
+
+      Volver a Originación
+
+    </button>
+
+  </header>
+
+
+  <!-- ===================================================== -->
+  <!-- ERROR GENERAL                                         -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="error"
+    class="alert alert--danger">
+
+    <div>
+
+      <strong>
+        No fue posible consultar el contexto
+      </strong>
+
+      <div>
+        {{ error }}
+      </div>
+
+    </div>
+
+    <button
+      *ngIf="idDatosPersonal > 0 && idAgencia > 0"
+      type="button"
+      class="btn btn--secondary"
+      [disabled]="cargando"
+      (click)="consultar()">
+
+      Reintentar
+
+    </button>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CARGANDO                                              -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="cargando && !contexto"
+    class="loading">
+
+    Consultando información del asociado...
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- CONTENIDO                                             -->
+  <!-- ===================================================== -->
+
+  <ng-container
+    *ngIf="contexto && asociado && !error">
+
+    <!-- =================================================== -->
+    <!-- ASOCIADO                                            -->
+    <!-- =================================================== -->
+
+    <section class="asociado-card">
+
+      <div class="asociado-principal">
+
+        <div class="asociado-nombre">
+          {{ asociado.nombreCompleto || 'Sin nombre' }}
+        </div>
+
+        <div class="asociado-documento">
+
+          {{ asociado.nombreTipoDocumento || asociado.tipoDocumento || 'Documento' }}
+
+          {{ asociado.documento || '—' }}
+
+        </div>
+
+      </div>
+
+
+      <div class="asociado-datos">
+
+        <div class="dato-resumen">
+
+          <span>
+            Agencia
+          </span>
+
+          <strong>
+            {{ agenciaActiva?.nombreAgencia || idAgencia }}
+          </strong>
+
+        </div>
+
+
+        <div class="dato-resumen">
+
+          <span>
+            Ocupación
+          </span>
+
+          <strong>
+            {{ contexto.informacionEconomica?.ocupacion || '—' }}
+          </strong>
+
+        </div>
+
+
+        <div class="dato-resumen">
+
+          <span>
+            Actividad
+          </span>
+
+          <strong>
+            {{ contexto.informacionEconomica?.nombreActividadEconomica || '—' }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- NAVEGACIÓN                                          -->
+    <!-- =================================================== -->
+
+    <section class="contexto-navegacion">
+
+      <button
+        type="button"
+        class="navegacion-item"
+        [class.navegacion-item--activo]="
+          esSeccionActiva('ECONOMICA')
+        "
+        (click)="seleccionarSeccion('ECONOMICA')">
+
+        Información económica
+
+      </button>
+
+
+      <button
+        type="button"
+        class="navegacion-item"
+        [class.navegacion-item--activo]="
+          esSeccionActiva('DEPOSITOS')
+        "
+        (click)="seleccionarSeccion('DEPOSITOS')">
+
+        Depósitos
+
+        <span class="contador">
+          {{ contexto.depositos.length }}
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="navegacion-item"
+        [class.navegacion-item--activo]="
+          esSeccionActiva('CARTERA')
+        "
+        (click)="seleccionarSeccion('CARTERA')">
+
+        Cartera actual
+
+        <span class="contador">
+          {{ contexto.carteraActual.length }}
+        </span>
+
+      </button>
+
+
+      <button
+        type="button"
+        class="navegacion-item"
+        [class.navegacion-item--activo]="
+          esSeccionActiva('VECTOR')
+        "
+        (click)="seleccionarSeccion('VECTOR')">
+
+        Vector de comportamiento
+
+      </button>
+
+
+      <button
+        type="button"
+        class="navegacion-item"
+        [class.navegacion-item--activo]="
+          esSeccionActiva('CODEUDAS')
+        "
+        (click)="seleccionarSeccion('CODEUDAS')">
+
+        Codeudas actuales
+
+        <span class="contador">
+          {{ contexto.codeudasActuales.length }}
+        </span>
+
+      </button>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- CONTENIDO DE PESTAÑAS                               -->
+    <!-- =================================================== -->
+
+    <main class="contexto-contenido">
+
+
+      <!-- ================================================= -->
+      <!-- INFORMACIÓN ECONÓMICA                             -->
+      <!-- ================================================= -->
+
+      <ng-container
+        *ngIf="esSeccionActiva('ECONOMICA')">
+
+        <section
+          *ngIf="contexto.informacionEconomica as info"
+          class="card">
+
+          <div class="card-header">
+
+            <div>
+
+              <h3>
+                Información económica
+              </h3>
+
+              <p>
+                Información financiera registrada del asociado.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="grid-info">
+
+            <div class="info-item">
+              <span>Actividad económica</span>
+              <strong>
+                {{ info.nombreActividadEconomica || '—' }}
+              </strong>
+            </div>
+
+            <div class="info-item">
+              <span>Sector económico</span>
+              <strong>
+                {{ info.nombreSectorEconomico || '—' }}
+              </strong>
+            </div>
+
+            <div class="info-item">
+              <span>Ocupación</span>
+              <strong>
+                {{ info.ocupacion || '—' }}
+              </strong>
+            </div>
+
+            <div class="info-item">
+              <span>Empresa</span>
+              <strong>
+                {{ info.empresa || '—' }}
+              </strong>
+            </div>
+
+          </div>
+
+
+          <div class="financial-grid">
+
+            <!-- INGRESOS -->
+
+            <section class="financial-block">
+
+              <h4>
+                Ingresos
+              </h4>
+
+              <div class="financial-row">
+                <span>Salario</span>
+                <strong>
+                  {{ info.valorSalario | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </strong>
+              </div>
+
+              <div class="financial-row">
+                <span>Pensión</span>
+                <strong>
+                  {{ info.valorPension | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </strong>
+              </div>
+
+              <div class="financial-row">
+                <span>Arrendamientos</span>
+                <strong>
+                  {{ info.ingresosArriendo | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </strong>
+              </div>
+
+              <div class="financial-row">
+                <span>Comisiones</span>
+                <strong>
+                  {{ info.ingresosComisiones | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </strong>
+              </div>
+
+              <div class="financial-row">
+                <span>Otros ingresos</span>
+                <strong>
+                  {{ info.otrosIngresos | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </strong>
+              </div>
+
+              <div class="financial-row financial-row--total">
+                <span>Total ingresos</span>
+                <strong>
+                  {{ info.totalIngresos | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </strong>
+              </div>
+
+            </section>
+
+
+            <!-- EGRESOS -->
+
+            <section class="financial-block">
+
+              <h4>
+                Egresos
+              </h4>
+
+              <div class="financial-row">
+                <span>Familiares</span>
+                <strong>
+                  {{ info.egresosFamiliares | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </strong>
+              </div>
+
+              <div class="financial-row">
+                <span>Arrendamientos</span>
+                <strong>
+                  {{ info.egresosArriendo | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </strong>
+              </div>
+
+              <div class="financial-row">
+                <span>Créditos</span>
+                <strong>
+                  {{ info.egresosCredito | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </strong>
+              </div>
+
+              <div class="financial-row">
+                <span>Otros egresos</span>
+                <strong>
+                  {{ info.otrosEgresos | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </strong>
+              </div>
+
+              <div class="financial-row financial-row--total">
+                <span>Total egresos</span>
+                <strong>
+                  {{ info.totalEgresos | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </strong>
+              </div>
+
+            </section>
+
+
+            <!-- PATRIMONIO -->
+
+            <section class="financial-block">
+
+              <h4>
+                Patrimonio
+              </h4>
+
+              <div class="financial-row">
+                <span>Total activos</span>
+                <strong>
+                  {{ info.totalActivos | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </strong>
+              </div>
+
+              <div class="financial-row">
+                <span>Total pasivos</span>
+                <strong>
+                  {{ info.totalPasivos | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </strong>
+              </div>
+
+              <div class="financial-row financial-row--total">
+                <span>Patrimonio</span>
+                <strong>
+                  {{ info.patrimonio | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </strong>
+              </div>
+
+            </section>
+
+          </div>
+
+
+          <div class="grid-info grid-info--footer">
+
+            <div class="info-item">
+              <span>Origen de fondos</span>
+              <strong>
+                {{ info.origenFondos || '—' }}
+              </strong>
+            </div>
+
+            <div class="info-item">
+              <span>Relación financiera</span>
+              <strong>
+                {{ info.relacionFinanciera || '—' }}
+              </strong>
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <section
+          *ngIf="!contexto.informacionEconomica"
+          class="empty">
+
+          No existe información económica registrada.
+
+        </section>
+
+      </ng-container>
+
+
+      <!-- ================================================= -->
+      <!-- DEPÓSITOS                                         -->
+      <!-- ================================================= -->
+
+      <ng-container
+        *ngIf="esSeccionActiva('DEPOSITOS')">
+
+        <section class="card">
+
+          <div class="card-header">
+
+            <div>
+
+              <h3>
+                Depósitos
+              </h3>
+
+              <p>
+                Aportes sociales y cuentas de ahorro del asociado.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div
+            *ngIf="contexto.depositos.length > 0"
+            class="table-wrap">
+
+            <table class="table">
+
+              <thead>
+
+              <tr>
+                <th>Forma</th>
+                <th>Cuenta</th>
+                <th>Apertura</th>
+                <th>Último movimiento</th>
+                <th class="text-right">Entradas último año</th>
+                <th class="text-right">Salidas último año</th>
+                <th class="text-right">Saldo</th>
+                <th>Estado</th>
+              </tr>
+
+              </thead>
+
+              <tbody>
+
+              <tr
+                *ngFor="let deposito of contexto.depositos">
+
+                <td>
+
+                  <strong>
+                    {{ deposito.codigoForma }}
+                  </strong>
+
+                  <div class="secondary">
+                    {{ deposito.nombreForma }}
+                  </div>
+
+                </td>
+
+                <td>
+                  {{ deposito.codigoCuenta || '—' }}
+                </td>
+
+                <td>
+                  {{ deposito.fechaApertura | date:'dd/MM/yyyy' }}
+                </td>
+
+                <td>
+                  {{
+                  deposito.fechaUltimoMovimiento
+                  ? (deposito.fechaUltimoMovimiento | date:'dd/MM/yyyy')
+                  : '—'
+                  }}
+                </td>
+
+                <td class="text-right">
+                  {{ deposito.entradasUltimoAno | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </td>
+
+                <td class="text-right">
+                  {{ deposito.salidasUltimoAno | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </td>
+
+                <td class="text-right">
+                  <strong>
+                    {{ deposito.saldo | currency:'COP':'symbol-narrow':'1.0-0' }}
+                  </strong>
+                </td>
+
+                <td>
+                    <span
+                      class="estado"
+                      [class.estado--activo]="deposito.activa"
+                      [class.estado--inactivo]="!deposito.activa">
+
+                      {{ deposito.nombreEstado || deposito.codigoEstado || '—' }}
+
+                    </span>
+                </td>
+
+              </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+
+          <div
+            *ngIf="contexto.depositos.length === 0"
+            class="empty">
+
+            El asociado no registra depósitos.
+
+          </div>
+
+        </section>
+
+      </ng-container>
+
+
+      <!-- ================================================= -->
+      <!-- CARTERA ACTUAL                                    -->
+      <!-- ================================================= -->
+
+      <ng-container
+        *ngIf="esSeccionActiva('CARTERA')">
+
+        <section class="card">
+
+          <div class="card-header">
+
+            <div>
+
+              <h3>
+                Cartera actual
+              </h3>
+
+              <p>
+                Créditos que actualmente presentan saldo.
+              </p>
+
+            </div>
+
+
+            <button
+              type="button"
+              class="btn btn--secondary btn--small"
+              (click)="alternarHistoricoCartera()">
+
+              {{
+              mostrarHistoricoCartera
+              ? 'Ocultar histórico'
+              : 'Ver histórico de créditos'
+              }}
+
+            </button>
+
+          </div>
+
+
+          <div
+            *ngIf="contexto.carteraActual.length > 0"
+            class="table-wrap">
+
+            <table class="table">
+
+              <thead>
+
+              <tr>
+                <th>Línea</th>
+                <th>Pagaré</th>
+                <th>Desembolso</th>
+                <th class="text-right">Saldo actual</th>
+                <th>Mora</th>
+                <th>Estado</th>
+              </tr>
+
+              </thead>
+
+              <tbody>
+
+              <tr
+                *ngFor="let credito of contexto.carteraActual">
+
+                <td>
+
+                  <strong>
+                    {{ credito.codigoLineaCredito }}
+                  </strong>
+
+                  <div class="secondary">
+                    {{ credito.nombreLineaCredito }}
+                  </div>
+
+                </td>
+
+                <td>
+                  {{ credito.pagareCartera }}
+                </td>
+
+                <td>
+                  {{ credito.fechaDesembolso | date:'dd/MM/yyyy' }}
+                </td>
+
+                <td class="text-right">
+                  <strong>
+                    {{ credito.saldoActual | currency:'COP':'symbol-narrow':'1.0-0' }}
+                  </strong>
+                </td>
+
+                <td>
+
+                    <span
+                      class="mora"
+                      [ngClass]="claseMora(credito.diasMora)">
+
+                      {{ textoMora(credito.diasMora) }}
+
+                    </span>
+
+                </td>
+
+                <td>
+                  {{ credito.nombreEstadoCartera || credito.codigoEstadoCartera || '—' }}
+                </td>
+
+              </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+
+          <div
+            *ngIf="contexto.carteraActual.length === 0"
+            class="empty">
+
+            El asociado no presenta créditos con saldo actual.
+
+          </div>
+
+
+          <!-- HISTÓRICO -->
+
+          <section
+            *ngIf="mostrarHistoricoCartera"
+            class="historico">
+
+            <h4>
+              Histórico de créditos
+            </h4>
+
+
+            <div
+              *ngIf="cargandoHistoricoCartera"
+              class="loading loading--inline">
+
+              Consultando histórico...
+
+            </div>
+
+
+            <div
+              *ngIf="errorHistoricoCartera"
+              class="alert alert--danger">
+
+              {{ errorHistoricoCartera }}
+
+            </div>
+
+
+            <div
+              *ngIf="
+                !cargandoHistoricoCartera &&
+                !errorHistoricoCartera &&
+                carteraHistorica.length > 0
+              "
+              class="table-wrap">
+
+              <table class="table table--compact">
+
+                <thead>
+
+                <tr>
+                  <th>Línea</th>
+                  <th>Pagaré</th>
+                  <th>Desembolso</th>
+                  <th class="text-right">Saldo actual</th>
+                  <th>Mora</th>
+                  <th>Estado</th>
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                <tr
+                  *ngFor="let credito of carteraHistorica">
+
+                  <td>
+                    {{ credito.codigoLineaCredito }}
+                    -
+                    {{ credito.nombreLineaCredito }}
+                  </td>
+
+                  <td>
+                    {{ credito.pagareCartera }}
+                  </td>
+
+                  <td>
+                    {{ credito.fechaDesembolso | date:'dd/MM/yyyy' }}
+                  </td>
+
+                  <td class="text-right">
+                    {{ credito.saldoActual | currency:'COP':'symbol-narrow':'1.0-0' }}
+                  </td>
+
+                  <td>
+                    {{ textoMora(credito.diasMora) }}
+                  </td>
+
+                  <td>
+                    {{ credito.nombreEstadoCartera || credito.codigoEstadoCartera || '—' }}
+                  </td>
+
+                </tr>
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </section>
+
+        </section>
+
+      </ng-container>
+
+
+      <!-- ================================================= -->
+      <!-- VECTOR                                            -->
+      <!-- ================================================= -->
+
+      <ng-container
+        *ngIf="esSeccionActiva('VECTOR')">
+
+        <section class="card">
+
+          <div class="card-header">
+
+            <div>
+
+              <h3>
+                Vector de comportamiento
+              </h3>
+
+              <p>
+                Comportamiento actual y hasta 12 cierres históricos por crédito.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div
+            *ngIf="cargandoVector"
+            class="loading loading--inline">
+
+            Consultando vector de comportamiento...
+
+          </div>
+
+
+          <div
+            *ngIf="errorVector"
+            class="alert alert--danger">
+
+            {{ errorVector }}
+
+          </div>
+
+
+          <ng-container
+            *ngIf="
+              !cargandoVector &&
+              !errorVector
+            ">
+
+            <article
+              *ngFor="let resumen of vectorResumenOrdenado()"
+              class="vector-card">
+
+              <header class="vector-header">
+
+                <div>
+
+                  <strong>
+                    {{ resumen.codigoLineaCredito }}
+                    -
+                    {{ resumen.nombreLineaCredito }}
+                  </strong>
+
+                  <span>
+                    Pagaré {{ resumen.pagareCartera }}
+                  </span>
+
+                </div>
+
+
+                <div class="vector-indicadores">
+
+                  <div>
+                    <span>Saldo</span>
+                    <strong>
+                      {{ resumen.saldoActualMaestro | currency:'COP':'symbol-narrow':'1.0-0' }}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Mora actual</span>
+                    <strong>
+                      {{ textoMora(resumen.moraUltimoCorte) }}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Mora máxima</span>
+                    <strong>
+                      {{ resumen.moraMaxima ?? 0 }} días
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Cortes observados</span>
+                    <strong>
+                      {{ resumen.cantidadCortesObservados ?? 0 }}
+                    </strong>
+                  </div>
+
+                </div>
+
+              </header>
+
+
+              <div class="vector-scroll">
+
+                <div
+                  *ngFor="
+                    let posicion of detalleVectorCredito(
+                      resumen.idCarteraCredito
+                    )
+                  "
+                  class="vector-posicion"
+                  [class.vector-posicion--actual]="
+                    posicion.tipoPosicion === 'ACTUAL'
+                  ">
+
+                  <div class="vector-periodo">
+                    {{ posicion.periodoVector }}
+                  </div>
+
+                  <div
+                    class="vector-mora"
+                    [ngClass]="
+                      claseMora(posicion.diasMora)
+                    ">
+
+                    {{ posicion.rangoMora || textoMora(posicion.diasMora) }}
+
+                  </div>
+
+                  <div class="vector-edades">
+
+                    <span>
+                      Mora
+                      <strong>
+                        {{ posicion.edadDeMoraResultado || '—' }}
+                      </strong>
+                    </span>
+
+                    <span>
+                      Riesgo
+                      <strong>
+                        {{ posicion.edadDeRiesgoResultado || '—' }}
+                      </strong>
+                    </span>
+
+                  </div>
+
+                  <div class="vector-saldo">
+                    {{
+                    posicion.saldoCreditoFechaCorte
+                    | currency:'COP':'symbol-narrow':'1.0-0'
+                    }}
+                  </div>
+
+                </div>
+
+              </div>
+
+            </article>
+
+
+            <div
+              *ngIf="
+                contexto.vectorResumen.length === 0
+              "
+              class="empty">
+
+              No existe información para el vector de comportamiento.
+
+            </div>
+
+          </ng-container>
+
+        </section>
+
+      </ng-container>
+
+
+      <!-- ================================================= -->
+      <!-- CODEUDAS                                          -->
+      <!-- ================================================= -->
+
+      <ng-container
+        *ngIf="esSeccionActiva('CODEUDAS')">
+
+        <section class="card">
+
+          <div class="card-header">
+
+            <div>
+
+              <h3>
+                Codeudas actuales
+              </h3>
+
+              <p>
+                Obligaciones vigentes de terceros respaldadas por el asociado.
+              </p>
+
+            </div>
+
+
+            <button
+              type="button"
+              class="btn btn--secondary btn--small"
+              (click)="alternarHistoricoCodeudas()">
+
+              {{
+              mostrarHistoricoCodeudas
+              ? 'Ocultar histórico'
+              : 'Ver histórico de codeudas'
+              }}
+
+            </button>
+
+          </div>
+
+
+          <div
+            *ngIf="contexto.codeudasActuales.length > 0"
+            class="table-wrap">
+
+            <table class="table">
+
+              <thead>
+
+              <tr>
+                <th>Línea</th>
+                <th>Pagaré</th>
+                <th>Deudor principal</th>
+                <th class="text-right">Saldo actual</th>
+                <th>Mora</th>
+                <th>Estado</th>
+              </tr>
+
+              </thead>
+
+              <tbody>
+
+              <tr
+                *ngFor="let codeuda of contexto.codeudasActuales">
+
+                <td>
+
+                  <strong>
+                    {{ codeuda.codigoLineaCredito }}
+                  </strong>
+
+                  <div class="secondary">
+                    {{ codeuda.nombreLineaCredito }}
+                  </div>
+
+                </td>
+
+                <td>
+                  {{ codeuda.pagareCartera }}
+                </td>
+
+                <td>
+
+                  <strong>
+                    {{ codeuda.deudorPrincipal || '—' }}
+                  </strong>
+
+                  <div class="secondary">
+                    {{ codeuda.documentoDeudorPrincipal || '' }}
+                  </div>
+
+                </td>
+
+                <td class="text-right">
+                  {{ codeuda.saldoActual | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </td>
+
+                <td>
+
+                    <span
+                      class="mora"
+                      [ngClass]="claseMora(codeuda.diasMora)">
+
+                      {{ textoMora(codeuda.diasMora) }}
+
+                    </span>
+
+                </td>
+
+                <td>
+                  {{ codeuda.nombreEstadoCartera || codeuda.codigoEstadoCartera || '—' }}
+                </td>
+
+              </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+
+          <div
+            *ngIf="contexto.codeudasActuales.length === 0"
+            class="empty">
+
+            El asociado no presenta codeudas vigentes.
+
+          </div>
+
+
+          <!-- HISTÓRICO -->
+
+          <section
+            *ngIf="mostrarHistoricoCodeudas"
+            class="historico">
+
+            <h4>
+              Histórico de codeudas
+            </h4>
+
+
+            <div
+              *ngIf="cargandoHistoricoCodeudas"
+              class="loading loading--inline">
+
+              Consultando histórico...
+
+            </div>
+
+
+            <div
+              *ngIf="errorHistoricoCodeudas"
+              class="alert alert--danger">
+
+              {{ errorHistoricoCodeudas }}
+
+            </div>
+
+
+            <div
+              *ngIf="
+                !cargandoHistoricoCodeudas &&
+                !errorHistoricoCodeudas &&
+                codeudasHistoricas.length > 0
+              "
+              class="table-wrap">
+
+              <table class="table table--compact">
+
+                <thead>
+
+                <tr>
+                  <th>Línea</th>
+                  <th>Pagaré</th>
+                  <th>Deudor principal</th>
+                  <th>Desembolso</th>
+                  <th class="text-right">Saldo</th>
+                  <th>Estado</th>
+                </tr>
+
+                </thead>
+
+                <tbody>
+
+                <tr
+                  *ngFor="let codeuda of codeudasHistoricas">
+
+                  <td>
+                    {{ codeuda.codigoLineaCredito }}
+                    -
+                    {{ codeuda.nombreLineaCredito }}
+                  </td>
+
+                  <td>
+                    {{ codeuda.pagareCartera }}
+                  </td>
+
+                  <td>
+
+                    {{ codeuda.deudorPrincipal || '—' }}
+
+                    <div class="secondary">
+                      {{ codeuda.documentoDeudorPrincipal || '' }}
+                    </div>
+
+                  </td>
+
+                  <td>
+                    {{ codeuda.fechaDesembolso | date:'dd/MM/yyyy' }}
+                  </td>
+
+                  <td class="text-right">
+                    {{ codeuda.saldoActual | currency:'COP':'symbol-narrow':'1.0-0' }}
+                  </td>
+
+                  <td>
+                    {{ codeuda.nombreEstadoCartera || codeuda.codigoEstadoCartera || '—' }}
+                  </td>
+
+                </tr>
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </section>
+
+        </section>
+
+      </ng-container>
+
+    </main>
+
+  </ng-container>
+
+</div>

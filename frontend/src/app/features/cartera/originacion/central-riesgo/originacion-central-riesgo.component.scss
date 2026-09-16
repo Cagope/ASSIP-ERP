@@ -1,0 +1,587 @@
+.page {
+  padding: 1rem;
+}
+
+
+// =========================================================
+// ENCABEZADO
+// =========================================================
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+}
+
+.page-subtitle {
+  margin: 0.35rem 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+
+// =========================================================
+// ALERTAS
+// =========================================================
+
+.alert {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.alert-error {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.alert-success {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+
+// =========================================================
+// TARJETAS
+// =========================================================
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.card-header {
+  margin-bottom: 1rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid #e5e7eb;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.3rem 0 0;
+    font-size: 0.82rem;
+    color: #6b7280;
+  }
+}
+
+.card-header--between {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+
+// =========================================================
+// TABLA DE DEUDORES
+// =========================================================
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+
+  th,
+  td {
+    padding: 0.65rem 0.7rem;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  th {
+    background: #f8fafc;
+    color: #374151;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  td {
+    color: #1f2937;
+  }
+
+  tbody tr:hover {
+    background: #f9fafb;
+  }
+}
+
+.row-selected {
+  background: #eff6ff !important;
+}
+
+
+// =========================================================
+// ESTADOS
+// =========================================================
+
+.status-badge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-badge--ok {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.status-badge--pending {
+  border: 1px solid #fde68a;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+
+// =========================================================
+// INFORMACIÓN DEL DEUDOR
+// =========================================================
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem 1rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+
+  strong {
+    font-size: 0.88rem;
+    color: #1f2937;
+    overflow-wrap: anywhere;
+  }
+}
+
+.info-item--wide {
+  grid-column: span 2;
+}
+
+.info-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+
+// =========================================================
+// FORMULARIOS
+// =========================================================
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.form-grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+
+  label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    min-width: 0;
+    padding: 0.58rem 0.7rem;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #1f2937;
+    font: inherit;
+    font-size: 0.85rem;
+    box-sizing: border-box;
+
+    &:focus {
+      outline: none;
+      border-color: #93c5fd;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    &:disabled {
+      background: #f3f4f6;
+      color: #6b7280;
+      cursor: not-allowed;
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 90px;
+  }
+}
+
+.field--full {
+  grid-column: 1 / -1;
+}
+
+.required {
+  color: #dc2626;
+}
+
+.field-help {
+  font-size: 0.72rem;
+  color: #6b7280;
+}
+
+.field-help--right {
+  text-align: right;
+}
+
+.input-number {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+// =========================================================
+// CONSULTA CENTRAL DE RIESGO
+// =========================================================
+
+.consulta-central-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr);
+  gap: 1rem;
+  align-items: end;
+}
+
+
+// =========================================================
+// OBLIGACIONES REPORTADAS
+// =========================================================
+
+.obligaciones-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.obligaciones-grid .input-number {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+// =========================================================
+// NOVEDADES REPORTADAS
+// =========================================================
+
+.novedades-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.novedades-grid input {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+// =========================================================
+// RESULTADO CENTRAL
+// =========================================================
+
+.resultado-central-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.resultado-central-grid .field--full {
+  grid-column: 1 / -1;
+}
+
+.resultado-central-grid #puntajeCentral {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+
+// =========================================================
+// INFORMACIÓN DE CENTRAL
+// =========================================================
+
+.central-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 1rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+
+  strong {
+    font-size: 0.88rem;
+    color: #1f2937;
+  }
+
+  span {
+    font-size: 0.8rem;
+    color: #475569;
+  }
+
+  small {
+    font-size: 0.72rem;
+    color: #64748b;
+  }
+}
+
+
+// =========================================================
+// CALIFICACIONES
+// =========================================================
+
+.calificaciones-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.calificacion-field {
+  input {
+    text-align: right;
+  }
+}
+
+
+// =========================================================
+// ESTADOS VACÍOS / CARGA
+// =========================================================
+
+.loading-card {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.empty-state {
+  padding: 1rem 0.4rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.empty-state-main {
+  padding: 2rem;
+  text-align: center;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.45rem 0 0;
+    color: #6b7280;
+    font-size: 0.85rem;
+  }
+}
+
+
+// =========================================================
+// BOTONES / ACCIONES
+// =========================================================
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.actions-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0.55rem 0.9rem;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.btn-sm {
+  min-height: 32px;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.76rem;
+}
+
+.btn-secondary {
+  border-color: #d1d5db;
+  background: #ffffff;
+  color: #374151;
+
+  &:hover:not(:disabled) {
+    background: #f9fafb;
+  }
+}
+
+.btn-primary {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+
+  &:hover:not(:disabled) {
+    background: #1d4ed8;
+  }
+}
+
+.btn-outline-primary {
+  border-color: #93c5fd;
+  background: #ffffff;
+  color: #1d4ed8;
+
+  &:hover:not(:disabled) {
+    background: #eff6ff;
+  }
+}
+
+.btn-success {
+  border-color: #16a34a;
+  background: #16a34a;
+  color: #ffffff;
+
+  &:hover:not(:disabled) {
+    background: #15803d;
+  }
+}
+
+
+// =========================================================
+// RESPONSIVE
+// =========================================================
+
+@media (max-width: 1200px) {
+
+  .info-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .calificaciones-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+
+@media (max-width: 992px) {
+
+  .info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .info-item--wide {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 640px) {
+
+  .page {
+    padding: 0.75rem;
+  }
+
+  .page-header,
+  .card-header--between,
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .info-grid,
+  .form-grid,
+  .form-grid--2,
+  .form-grid--3,
+  .calificaciones-grid,
+  .consulta-central-grid,
+  .obligaciones-grid,
+  .novedades-grid,
+  .resultado-central-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .resultado-central-grid .field--full {
+    grid-column: auto;
+  }
+
+  .actions-right {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}

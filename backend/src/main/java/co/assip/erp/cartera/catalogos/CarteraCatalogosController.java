@@ -4,6 +4,7 @@ import co.assip.erp.cartera.catalogos.dto.CarteraCatalogoDTO;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import co.assip.erp.cartera.catalogos.dto.FondoGarantiaCatalogoDTO;
 
 import java.util.List;
 
@@ -53,6 +54,15 @@ public class CarteraCatalogosController {
     @GetMapping("/garantias-credito")
     public List<CarteraCatalogoDTO> listarGarantiasCredito() {
         return service.listarGarantiasCredito();
+    }
+
+    // =========================================================
+    // FONDOS DE GARANTÍAS
+    // =========================================================
+
+    @GetMapping("/fondos-garantias")
+    public List<FondoGarantiaCatalogoDTO> listarFondosGarantias() {
+        return service.listarFondosGarantias();
     }
 
     // =========================================================

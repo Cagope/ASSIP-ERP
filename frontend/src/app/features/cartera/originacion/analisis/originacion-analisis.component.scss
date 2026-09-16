@@ -1,0 +1,684 @@
+.page {
+  padding: 1rem;
+}
+
+
+// =========================================================
+// ENCABEZADO
+// =========================================================
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.3rem 0 0;
+    font-size: 0.88rem;
+    color: #6b7280;
+  }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+
+// =========================================================
+// TARJETAS
+// =========================================================
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.65rem;
+}
+
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    font-size: 0.82rem;
+    color: #6b7280;
+  }
+}
+
+
+// =========================================================
+// INFORMACIÓN GENERAL
+// =========================================================
+
+.info-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.info-item {
+  min-width: 0;
+  padding: 0.75rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+
+  .label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+  }
+
+  strong {
+    display: block;
+    overflow: hidden;
+    font-size: 0.9rem;
+    color: #1f2937;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+
+// =========================================================
+// RESULTADO GENERAL
+// =========================================================
+
+.resultado-general {
+  border-left: 4px solid #64748b;
+}
+
+.resultado-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.resultado-box {
+  display: flex;
+  min-height: 105px;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.85rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.55rem;
+  text-align: center;
+}
+
+.resultado-label {
+  margin-bottom: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.resultado-value {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.resultado-texto {
+  font-size: 1rem;
+}
+
+.resultado-help {
+  margin-top: 0.25rem;
+  font-size: 0.72rem;
+  color: #9ca3af;
+}
+
+.resultado-motivo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+  padding: 0.7rem 0.8rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.45rem;
+  font-size: 0.82rem;
+
+  span {
+    color: #6b7280;
+  }
+
+  strong {
+    color: #374151;
+  }
+}
+
+
+// =========================================================
+// MÉTRICAS
+// =========================================================
+
+.metricas-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.metrica {
+  padding: 0.75rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  text-align: center;
+
+  span {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+
+  strong {
+    font-size: 1rem;
+    color: #1f2937;
+  }
+}
+
+
+// =========================================================
+// DEUDORES
+// =========================================================
+
+.deudores-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fit, minmax(280px, 1fr));
+  gap: 0.75rem;
+}
+
+.deudor-card {
+  width: 100%;
+  padding: 0.85rem;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 0.55rem;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+
+  &:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+}
+
+.deudor-card--selected {
+  background: #f8fafc;
+  border-color: #2563eb;
+  box-shadow:
+    0 0 0 1px rgba(37, 99, 235, 0.12);
+}
+
+.deudor-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.8rem;
+
+  > div {
+    min-width: 0;
+  }
+
+  strong {
+    display: block;
+    font-size: 0.88rem;
+    color: #1f2937;
+  }
+
+  span:not(.estado-badge) {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.72rem;
+    color: #6b7280;
+  }
+}
+
+.deudor-card-body {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+
+  > div {
+    min-width: 0;
+    padding: 0.5rem;
+    background: #f9fafb;
+    border-radius: 0.4rem;
+  }
+
+  span {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-size: 0.68rem;
+    color: #6b7280;
+  }
+
+  strong {
+    display: block;
+    overflow: hidden;
+    font-size: 0.8rem;
+    color: #1f2937;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+
+// =========================================================
+// INDICADORES DEL DEUDOR
+// =========================================================
+
+.indicadores-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.indicador {
+  padding: 0.75rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+
+  span {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.72rem;
+    color: #6b7280;
+  }
+
+  strong {
+    font-size: 0.95rem;
+    color: #1f2937;
+  }
+}
+
+.indicador--destacado {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+
+  strong {
+    font-size: 1.1rem;
+  }
+}
+
+
+// =========================================================
+// RESULTADO INDIVIDUAL
+// =========================================================
+
+.resultado-individual {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+
+  > div {
+    padding: 0.7rem 0.75rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.45rem;
+  }
+
+  span {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.72rem;
+    color: #6b7280;
+  }
+
+  strong {
+    display: block;
+    font-size: 0.85rem;
+    color: #1f2937;
+  }
+}
+
+
+// =========================================================
+// COMPONENTES / TABLA
+// =========================================================
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+}
+
+.table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+
+  thead {
+    background: #f6f6f6;
+  }
+
+  th {
+    padding: 0.65rem 0.7rem;
+    border-bottom: 1px solid #d1d5db;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #4b5563;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 0.65rem 0.7rem;
+    border-bottom: 1px solid #e5e7eb;
+    color: #374151;
+    vertical-align: middle;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  tbody tr:hover {
+    background: #f9fafb;
+  }
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+.criterio {
+  min-width: 180px;
+
+  strong {
+    display: block;
+    font-size: 0.8rem;
+    color: #1f2937;
+  }
+
+  span {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.67rem;
+    color: #9ca3af;
+  }
+}
+
+
+// =========================================================
+// ESTADOS
+// =========================================================
+
+.estado-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  padding: 0.28rem 0.55rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.estado--favorable {
+  color: #166534;
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.estado--desfavorable {
+  color: #991b1b;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.estado--pendiente {
+  color: #92400e;
+  background: #fffbeb;
+  border-color: #fde68a;
+}
+
+.estado--neutral {
+  color: #475569;
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+
+// =========================================================
+// INFORMACIÓN PENDIENTE
+// =========================================================
+
+.pendientes-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin-top: 0.85rem;
+  padding: 0.7rem 0.8rem;
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 0.45rem;
+  font-size: 0.8rem;
+
+  strong {
+    flex-shrink: 0;
+  }
+}
+
+
+// =========================================================
+// MENSAJES
+// =========================================================
+
+.alert {
+  margin-bottom: 1rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  font-size: 0.82rem;
+}
+
+.alert-success {
+  color: #166534;
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.alert-error {
+  color: #991b1b;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+
+// =========================================================
+// ESTADOS GENERALES
+// =========================================================
+
+.loading,
+.empty {
+  padding: 1.25rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+
+// =========================================================
+// BOTONES
+// =========================================================
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid transparent;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+}
+
+.btn-primary {
+  color: #ffffff;
+  background: #2563eb;
+  border-color: #2563eb;
+
+  &:hover:not(:disabled) {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+  }
+}
+
+.btn-secondary {
+  color: #374151;
+  background: #ffffff;
+  border-color: #d1d5db;
+
+  &:hover:not(:disabled) {
+    background: #f9fafb;
+  }
+}
+
+
+// =========================================================
+// ACCIONES INFERIORES
+// =========================================================
+
+.page-footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+  padding-bottom: 1rem;
+}
+
+
+// =========================================================
+// RESPONSIVE
+// =========================================================
+
+@media (max-width: 1100px) {
+
+  .info-grid,
+  .resultado-grid,
+  .metricas-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .indicadores-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+
+@media (max-width: 700px) {
+
+  .page {
+    padding: 0.75rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+  }
+
+  .header-actions {
+    width: 100%;
+
+    .btn {
+      flex: 1;
+    }
+  }
+
+  .info-grid,
+  .resultado-grid,
+  .metricas-grid,
+  .indicadores-grid,
+  .resultado-individual,
+  .deudor-card-body {
+    grid-template-columns: 1fr;
+  }
+
+  .section-header {
+    flex-direction: column;
+  }
+
+  .page-footer-actions {
+    flex-direction: column;
+
+    .btn {
+      width: 100%;
+    }
+  }
+
+  .pendientes-box,
+  .resultado-motivo {
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+}

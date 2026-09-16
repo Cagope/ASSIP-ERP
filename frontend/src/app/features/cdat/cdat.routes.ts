@@ -25,7 +25,20 @@ import { CAUSACION_MENSUAL_CDAT_ROUTES } from './causacion_mensual_cdat/causacio
 // =============================
 import { ESTADISTICOS_CDAT_ROUTES } from './informes/estadisticos-cdat/estadisticos-cdat.routes';
 
+// =============================
+// FECHAS CDAT
+// =============================
 import { FECHAS_CDAT_ROUTES } from './informes/fechas-cdat/fechas-cdat.routes';
+
+// =============================
+// ANÁLISIS - CONCENTRACIÓN CDAT
+// =============================
+import { CONCENTRACION_CDAT_ROUTES } from './analisis/concentracion/concentracion-cdat.routes';
+
+// =============================
+// ANÁLISIS - TASAS Y CONDICIONES CDAT
+// =============================
+import { TASAS_CONDICIONES_CDAT_ROUTES } from './analisis/tasas-condiciones/tasas-condiciones-cdat.routes';
 
 
 export const CDAT_ROUTES: Routes = [
@@ -93,16 +106,35 @@ export const CDAT_ROUTES: Routes = [
   },
 
   // =============================
-  // ESTADISTICOS CDAT
+  // ESTADÍSTICOS CDAT
   // =============================
   {
     path: 'informes/estadisticos-cdat',
     children: ESTADISTICOS_CDAT_ROUTES
   },
 
+  // =============================
+  // FECHAS CDAT
+  // =============================
   {
     path: 'informes/fechas-cdat',
     children: FECHAS_CDAT_ROUTES
+  },
+
+  // =============================
+  // ANÁLISIS - CONCENTRACIÓN CDAT
+  // =============================
+  {
+    path: 'analisis/concentracion',
+    children: CONCENTRACION_CDAT_ROUTES
+  },
+
+  // =============================
+  // ANÁLISIS - TASAS Y CONDICIONES CDAT
+  // =============================
+  {
+    path: 'analisis/tasas-condiciones',
+    children: TASAS_CONDICIONES_CDAT_ROUTES
   }
 
 ];

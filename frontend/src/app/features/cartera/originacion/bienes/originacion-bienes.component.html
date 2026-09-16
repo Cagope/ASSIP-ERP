@@ -1,0 +1,236 @@
+<div class="page originacion-bienes">
+
+  <div class="page-header">
+    <div>
+      <h2>Bienes de los participantes</h2>
+      <p class="page-subtitle">
+        Seleccione los bienes que intervienen en la solicitud. La información económica se toma de Hoja de Vida y de la cartera actual.
+      </p>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-error">{{ error }}</div>
+  <div *ngIf="mensaje" class="alert alert-success">{{ mensaje }}</div>
+
+  <div *ngIf="cargando" class="card loading-card">
+    Consultando bienes de los participantes...
+  </div>
+
+  <ng-container *ngIf="!cargando">
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <span>Bienes disponibles</span>
+        <strong>{{ bienes.length }}</strong>
+      </div>
+      <div class="summary-card">
+        <span>Seleccionados</span>
+        <strong>{{ cantidadSeleccionados }}</strong>
+      </div>
+      <div class="summary-card">
+        <span>Valor comercial</span>
+        <strong>{{ valorComercialTotal | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+      </div>
+      <div class="summary-card">
+        <span>Valor neto propiedad</span>
+        <strong>{{ valorNetoTotal | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+      </div>
+      <div class="summary-card">
+        <span>Créditos respaldados</span>
+        <strong>{{ valorCreditosRespaldadosTotal | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <h3>Bienes registrados</h3>
+          <p>
+            Los valores mostrados corresponden a la información vigente. Seleccionar un bien crea o actualiza la fotografía de la solicitud.
+          </p>
+        </div>
+      </div>
+
+      <div *ngIf="bienes.length === 0" class="empty">
+        Los participantes activos de la solicitud no tienen bienes registrados en Hoja de Vida.
+      </div>
+
+      <div *ngIf="bienes.length > 0" class="table-wrap">
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="text-center">Seleccionar</th>
+              <th>Participante</th>
+              <th>Bien</th>
+              <th class="text-right">% propiedad</th>
+              <th class="text-right">Valor comercial</th>
+              <th class="text-right">Gravamen</th>
+              <th class="text-right">Valor neto</th>
+              <th class="text-center">Créditos</th>
+              <th class="text-right">Saldo respaldado</th>
+              <th>Observación</th>
+              <th class="text-center">Detalle</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let bien of bienes; trackBy: trackByBienPersona"
+              [class.row-selected]="bien.seleccionado">
+
+              <td class="text-center">
+                <input
+                  type="checkbox"
+                  [checked]="bien.seleccionado"
+                  [disabled]="guardandoIdBienPersona !== null"
+                  (change)="cambiarSeleccion(bien, $any($event.target).checked)">
+              </td>
+
+              <td>
+                <div class="participant-name">{{ bien.nombreCompleto || '-' }}</div>
+                <div class="cell-secondary">
+                  {{ etiquetaTipoDeudor(bien.tipoDeudor) }} · {{ bien.tipoDocumento || '' }} {{ bien.documento || '' }}
+                </div>
+              </td>
+
+              <td>
+                <div class="asset-name">{{ bien.nombreTipoBien || bien.codigoTipoBien || '-' }}</div>
+                <div class="cell-secondary">{{ bien.descripcionGeneral || '-' }}</div>
+              </td>
+
+              <td class="text-right">
+                {{ bien.porcentajePropiedad | number:'1.0-2' }}%
+              </td>
+
+              <td class="text-right money">
+                {{ bien.valorComercial | currency:'COP':'symbol-narrow':'1.0-0' }}
+              </td>
+
+              <td class="text-right money">
+                {{ bien.valorGravamen | currency:'COP':'symbol-narrow':'1.0-0' }}
+              </td>
+
+              <td class="text-right money strong-money">
+                {{ bien.valorNetoPropiedad | currency:'COP':'symbol-narrow':'1.0-0' }}
+              </td>
+
+              <td class="text-center">
+                <span class="badge" [class.badge-info]="(bien.cantidadCreditosRespaldados || 0) > 0">
+                  {{ bien.cantidadCreditosRespaldados || 0 }}
+                </span>
+              </td>
+
+              <td class="text-right money">
+                {{ bien.valorCreditosRespaldados | currency:'COP':'symbol-narrow':'1.0-0' }}
+              </td>
+
+              <td>
+                <div class="observation-control">
+                  <input
+                    type="text"
+                    maxlength="500"
+                    [(ngModel)]="bien.observacion"
+                    [disabled]="!bien.seleccionado || guardandoIdBienPersona !== null"
+                    placeholder="Observación">
+                  <button
+                    *ngIf="bien.seleccionado"
+                    type="button"
+                    class="btn-icon"
+                    title="Guardar observación"
+                    [disabled]="guardandoIdBienPersona !== null"
+                    (click)="guardarObservacion(bien)">
+                    Guardar
+                  </button>
+                </div>
+              </td>
+
+              <td class="text-center">
+                <button
+                  type="button"
+                  class="btn-action"
+                  [disabled]="(bien.cantidadCreditosRespaldados || 0) === 0"
+                  (click)="verCreditosRespaldados(bien)">
+                  Ver créditos
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="actions-row actions-row--navigation">
+      <button type="button" class="btn btn-secondary" (click)="volver()">
+        Volver a deudores
+      </button>
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="validando || cargando || guardandoIdBienPersona !== null"
+        (click)="continuar()">
+        {{ validando ? 'Validando...' : 'Continuar a financiero' }}
+      </button>
+    </div>
+
+  </ng-container>
+
+  <div *ngIf="bienDetalle" class="modal-backdrop" (click)="cerrarCreditosRespaldados()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h3>Créditos respaldados</h3>
+          <p>
+            {{ bienDetalle.nombreTipoBien || bienDetalle.codigoTipoBien }} · {{ bienDetalle.descripcionGeneral || 'Bien' }}
+          </p>
+        </div>
+        <button type="button" class="modal-close" (click)="cerrarCreditosRespaldados()">×</button>
+      </div>
+
+      <div *ngIf="errorCreditos" class="alert alert-error">{{ errorCreditos }}</div>
+      <div *ngIf="cargandoCreditos" class="loading-block">Consultando créditos...</div>
+
+      <div *ngIf="!cargandoCreditos && !errorCreditos && creditosRespaldados.length === 0" class="empty">
+        El bien no tiene créditos con saldo actual respaldados.
+      </div>
+
+      <div *ngIf="!cargandoCreditos && creditosRespaldados.length > 0" class="table-wrap">
+        <table class="table detail-table">
+          <thead>
+            <tr>
+              <th>Pagaré</th>
+              <th>Titular</th>
+              <th>Desembolso</th>
+              <th class="text-right">Valor inicial</th>
+              <th class="text-right">Cuota</th>
+              <th class="text-right">Saldo actual</th>
+              <th>Garantía</th>
+              <th class="text-center">Tipo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let credito of creditosRespaldados; trackBy: trackByCredito">
+              <td>{{ credito.pagareCartera || '-' }}</td>
+              <td>
+                <div class="participant-name">{{ credito.nombreCompleto || '-' }}</div>
+                <div class="cell-secondary">{{ credito.documento || '-' }}</div>
+              </td>
+              <td>{{ credito.fechaDesembolso || '-' }}</td>
+              <td class="text-right money">{{ credito.valorInicialCredito | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td class="text-right money">{{ credito.valorCuota | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td class="text-right money strong-money">{{ credito.saldoActual | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td>{{ credito.descripcionGarantiaCredito || credito.codigoGarantiaCredito || '-' }}</td>
+              <td class="text-center">
+                <span class="badge" [class.badge-real]="credito.tipoGarantia === 'R'" [class.badge-personal]="credito.tipoGarantia === 'P'">
+                  {{ etiquetaTipoGarantia(credito.tipoGarantia) }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="cerrarCreditosRespaldados()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>

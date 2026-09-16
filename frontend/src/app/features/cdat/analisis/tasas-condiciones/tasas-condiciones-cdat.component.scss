@@ -1,0 +1,557 @@
+.page {
+  padding: 1rem;
+}
+
+// =========================================================
+// ENCABEZADO
+// =========================================================
+
+.page-header {
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
+    color: #6b7280;
+  }
+}
+
+
+// =========================================================
+// TARJETAS
+// =========================================================
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+
+// =========================================================
+// FILTROS
+// =========================================================
+
+.filtros {
+  display: grid;
+  grid-template-columns:
+    minmax(150px, 180px)
+    minmax(180px, 240px)
+    130px
+    minmax(160px, 200px)
+    minmax(210px, 260px)
+    auto;
+  gap: 14px;
+  align-items: end;
+}
+
+.f-row {
+  display: flex;
+  flex-direction: column;
+
+  label {
+    margin-bottom: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+  }
+
+  input,
+  select {
+    height: 34px;
+    padding: 4px 9px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 13px;
+    color: #374151;
+
+    &:focus {
+      outline: none;
+      border-color: #9ca3af;
+    }
+
+    &:disabled {
+      background: #f3f4f6;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+.btn--primary {
+  background: #2563eb;
+  color: #fff;
+}
+
+.btn--secondary {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+
+// =========================================================
+// CORTE ANALIZADO
+// =========================================================
+
+.corte-info {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: -2px 0 1rem;
+  padding: 0 2px;
+  font-size: 12px;
+  color: #6b7280;
+
+  span {
+    font-weight: 600;
+  }
+
+  strong {
+    font-size: 13px;
+    color: #374151;
+  }
+
+  small {
+    font-size: 11px;
+    color: #9ca3af;
+  }
+}
+
+
+// =========================================================
+// INDICADORES
+// =========================================================
+
+.resumen-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 1rem;
+}
+
+.indicador {
+  display: flex;
+  flex-direction: column;
+  min-height: 82px;
+  padding: 14px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  span {
+    margin-bottom: 7px;
+    font-size: 12px;
+    color: #6b7280;
+  }
+
+  strong {
+    font-size: 1.05rem;
+    color: #111827;
+  }
+}
+
+.indicador--principal {
+  border-width: 2px;
+}
+
+
+// =========================================================
+// ENCABEZADO DE SECCIONES
+// =========================================================
+
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 12px;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 3px 0 0;
+    font-size: 12px;
+    color: #6b7280;
+  }
+}
+
+.section-total {
+  padding-top: 2px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+// =========================================================
+// GRÁFICOS
+// =========================================================
+
+.chart-card {
+  margin-bottom: 1rem;
+  padding: 14px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.chart-title {
+  margin-bottom: 3px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.chart-subtitle {
+  margin-bottom: 14px;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+
+// =========================================================
+// GRÁFICO 1 - CONDICIONES
+// =========================================================
+
+.chart-columnas {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  min-height: 260px;
+  padding: 10px 4px 0;
+  overflow-x: auto;
+}
+
+.chart-columna {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1 0 90px;
+  min-width: 90px;
+}
+
+.chart-valor {
+  min-height: 32px;
+  margin-bottom: 6px;
+  font-size: 10px;
+  color: #6b7280;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.chart-area {
+  display: flex;
+  align-items: flex-end;
+  width: 44px;
+  height: 170px;
+  border-bottom: 1px solid #d1d5db;
+}
+
+.chart-barra {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  min-height: 4px;
+  padding-top: 5px;
+  background: #2563eb;
+  border-radius: 5px 5px 0 0;
+  transition: height 0.2s ease;
+
+  span {
+    font-size: 9px;
+    font-weight: 700;
+    color: #fff;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    white-space: nowrap;
+  }
+}
+
+.chart-etiqueta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-top: 7px;
+  text-align: center;
+
+  strong {
+    font-size: 10px;
+    color: #374151;
+  }
+
+  span {
+    font-size: 9px;
+    color: #6b7280;
+  }
+}
+
+
+// =========================================================
+// GRÁFICO 2 - RANGOS
+// =========================================================
+
+.chart-rangos {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chart-rango {
+  display: grid;
+  grid-template-columns:
+    minmax(180px, 260px)
+    1fr
+    150px;
+  gap: 12px;
+  align-items: center;
+}
+
+.chart-rango-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.chart-rango-centro {
+  min-width: 0;
+}
+
+.chart-rango-track {
+  width: 100%;
+  height: 15px;
+  overflow: hidden;
+  background: #e5e7eb;
+  border-radius: 999px;
+}
+
+.chart-rango-barra {
+  height: 100%;
+  min-width: 2px;
+  background: #2563eb;
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+.chart-rango-datos {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 3px;
+  font-size: 9px;
+  color: #6b7280;
+
+  strong {
+    color: #374151;
+  }
+}
+
+.chart-rango-tasas {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+
+  strong {
+    font-size: 12px;
+    color: #111827;
+  }
+
+  span {
+    margin-top: 2px;
+    font-size: 9px;
+    color: #6b7280;
+  }
+}
+
+// =========================================================
+// TABLAS
+// =========================================================
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table-wrap--detalle {
+  max-height: 520px;
+  overflow: auto;
+
+  thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+
+  th,
+  td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e5e7eb;
+    white-space: nowrap;
+  }
+
+  thead th {
+    background: #f6f6f6;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  tbody tr:hover {
+    background: #f9fafb;
+  }
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.empty {
+  padding: 22px !important;
+  text-align: center;
+  color: #6b7280;
+}
+
+
+// =========================================================
+// ESTADOS
+// =========================================================
+
+.estado {
+  padding: 18px 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.estado--error {
+  color: #b91c1c;
+}
+
+
+// =========================================================
+// RESPONSIVE
+// =========================================================
+
+@media (max-width: 1450px) {
+
+  .filtros {
+    grid-template-columns:
+      repeat(3, minmax(180px, 1fr));
+  }
+
+  .form-actions {
+    grid-column: 1 / -1;
+  }
+}
+
+
+@media (max-width: 1250px) {
+
+  .filtros {
+    grid-template-columns:
+      repeat(2, minmax(180px, 1fr));
+  }
+
+  .resumen-grid {
+    grid-template-columns:
+      repeat(3, minmax(160px, 1fr));
+  }
+}
+
+
+@media (max-width: 800px) {
+
+  .resumen-grid {
+    grid-template-columns:
+      repeat(2, minmax(160px, 1fr));
+  }
+
+  .chart-rango {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .chart-rango-tasas {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 650px) {
+
+  .filtros,
+  .resumen-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-wrap: wrap;
+  }
+
+  .section-header {
+    flex-direction: column;
+  }
+
+  .corte-info {
+    flex-wrap: wrap;
+  }
+
+  .chart-columnas {
+    min-height: 230px;
+  }
+
+  .chart-area {
+    height: 145px;
+  }
+
+  .chart-columna {
+    flex-basis: 80px;
+    min-width: 80px;
+  }
+
+}

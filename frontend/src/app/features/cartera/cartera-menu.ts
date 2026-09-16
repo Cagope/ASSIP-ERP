@@ -10,10 +10,17 @@ export const carteraMenu = {
     {
       label: 'Operación',
       children: [
+
+        {
+          label: 'Originación de Cartera',
+          route: '/cartera/originacion'
+        },
+
         {
           label: 'Consulta de Créditos',
           route: '/cartera/consulta-creditos'
         }
+
       ]
     },
 
@@ -24,9 +31,6 @@ export const carteraMenu = {
       label: 'Procesos',
       children: [
 
-        // =============================
-        // CIERRE MENSUAL
-        // =============================
         // =============================
         // CIERRE MENSUAL
         // =============================
@@ -93,14 +97,17 @@ export const carteraMenu = {
         {
           label: 'Vector de Comportamiento',
           children: [
+
             {
               label: 'Actual',
               route: '/cartera/analisis/vector-comportamiento'
             },
+
             {
               label: 'Por Corte',
               route: '/cartera/analisis/vector-comportamiento/corte'
             }
+
           ]
         },
 

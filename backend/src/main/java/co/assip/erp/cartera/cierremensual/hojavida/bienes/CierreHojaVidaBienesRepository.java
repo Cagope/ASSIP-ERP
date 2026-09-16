@@ -929,43 +929,45 @@ public class CierreHojaVidaBienesRepository {
     ) {
 
         String sql = """
-                INSERT INTO hoja_vida.cierres_hoja_vida_bienes_personas
-                (
-                    id_cierre_hoja_vida_bien,
-                    id_bien,
-                    id_datos_personal,
-                    porcentaje_propiedad,
+            INSERT INTO hoja_vida.cierres_hoja_vida_bienes_personas
+            (
+                id_cierre_hoja_vida_bien,
+                id_bien_persona,
+                id_bien,
+                id_datos_personal,
+                porcentaje_propiedad,
 
-                    fk_seguridad_creacion,
-                    fecha_creacion
-                )
+                fk_seguridad_creacion,
+                fecha_creacion
+            )
 
-                SELECT
-                    cb.id_cierre_hoja_vida_bien,
-                    cb.id_bien,
-                    bp.id_datos_personal,
+            SELECT
+                cb.id_cierre_hoja_vida_bien,
+                bp.id_bien_persona,
+                cb.id_bien,
+                bp.id_datos_personal,
 
-                    COALESCE(
-                        bp.porcentaje_propiedad,
-                        100
-                    ),
+                COALESCE(
+                    bp.porcentaje_propiedad,
+                    100
+                ),
 
-                    :idUsuario,
-                    CURRENT_TIMESTAMP
+                :idUsuario,
+                CURRENT_TIMESTAMP
 
-                FROM hoja_vida.cierres_hoja_vida_bienes cb
+            FROM hoja_vida.cierres_hoja_vida_bienes cb
 
-                INNER JOIN hoja_vida.bienes_personas bp
-                    ON bp.id_bien =
-                       cb.id_bien
+            INNER JOIN hoja_vida.bienes_personas bp
+                ON bp.id_bien =
+                   cb.id_bien
 
-                WHERE cb.id_cierre_hoja_vida =
-                      :idCierreHojaVida
+            WHERE cb.id_cierre_hoja_vida =
+                  :idCierreHojaVida
 
-                ORDER BY
-                    cb.id_bien,
-                    bp.id_datos_personal
-                """;
+            ORDER BY
+                cb.id_bien,
+                bp.id_datos_personal
+            """;
 
         MapSqlParameterSource parametros =
                 new MapSqlParameterSource()
@@ -983,7 +985,6 @@ public class CierreHojaVidaBienesRepository {
                 parametros
         );
     }
-
 
     // =========================================================
     // CONTAR RELACIONES BIEN - PERSONA ESPERADAS

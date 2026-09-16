@@ -1,0 +1,1780 @@
+<div class="page originacion-financiero">
+
+  <!-- =======================================================
+       ENCABEZADO
+       ======================================================= -->
+
+  <div class="page-header">
+
+    <div>
+
+      <h2>Información financiera</h2>
+
+      <p class="page-subtitle">
+        Registre o actualice la información financiera
+        del deudor principal y sus codeudores.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       MENSAJES
+       ======================================================= -->
+
+  <div
+    *ngIf="error"
+    class="alert alert-error">
+
+    {{ error }}
+
+  </div>
+
+
+  <div
+    *ngIf="mensaje"
+    class="alert alert-success">
+
+    {{ mensaje }}
+
+  </div>
+
+
+  <!-- =======================================================
+       CARGANDO
+       ======================================================= -->
+
+  <div
+    *ngIf="cargando"
+    class="card loading-card">
+
+    Consultando información financiera...
+
+  </div>
+
+
+  <!-- =======================================================
+       LISTADO DE DEUDORES
+       ======================================================= -->
+
+  <div
+    *ngIf="!cargando"
+    class="card">
+
+    <div class="card-header">
+
+      <div>
+
+        <h3>Deudores de la solicitud</h3>
+
+        <p>
+          Seleccione una persona para registrar
+          o consultar su información financiera.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div
+      *ngIf="financieros.length === 0"
+      class="empty">
+
+      No existen deudores activos
+      para esta solicitud.
+
+    </div>
+
+
+    <div
+      *ngIf="financieros.length > 0"
+      class="table-wrap">
+
+      <table class="table">
+
+        <thead>
+
+        <tr>
+
+          <th>Orden</th>
+          <th>Tipo</th>
+          <th>Documento</th>
+          <th>Nombre</th>
+          <th>Persona</th>
+          <th>Estado</th>
+          <th>Última actualización</th>
+          <th class="text-right">Patrimonio</th>
+          <th class="text-center">Acción</th>
+
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        <tr
+          *ngFor="let financiero of financieros"
+          [class.row-selected]="
+            deudorSeleccionado?.idSolicitudDeudor
+              === financiero.idSolicitudDeudor
+          ">
+
+          <td>
+            {{ financiero.ordenDeudor }}
+          </td>
+
+
+          <td>
+            {{ financiero.tipoDeudor || '-' }}
+          </td>
+
+
+          <td>
+            {{ financiero.documento || '-' }}
+          </td>
+
+
+          <td>
+            {{ financiero.nombreCompleto || '-' }}
+          </td>
+
+
+          <td>
+
+            <ng-container [ngSwitch]="financiero.tipoPersona">
+
+              <span *ngSwitchCase="'1'">
+                Natural
+              </span>
+
+              <span *ngSwitchCase="'2'">
+                Jurídica
+              </span>
+
+              <span *ngSwitchDefault>
+                -
+              </span>
+
+            </ng-container>
+
+          </td>
+
+
+          <td>
+
+            <span
+              *ngIf="tieneFotografia(financiero)"
+              class="badge badge-success">
+
+              Registrado
+
+            </span>
+
+
+            <span
+              *ngIf="!tieneFotografia(financiero)"
+              class="badge badge-warning">
+
+              Pendiente
+
+            </span>
+
+          </td>
+
+
+          <td>
+
+            <ng-container
+              *ngIf="
+                financiero.fechaFotografia;
+                else sinFecha
+              ">
+
+              {{
+              financiero.fechaFotografia
+              | date:'dd/MM/yyyy HH:mm'
+              }}
+
+            </ng-container>
+
+            <ng-template #sinFecha>
+              -
+            </ng-template>
+
+          </td>
+
+
+          <td class="text-right">
+
+            <ng-container
+              *ngIf="
+                financiero.patrimonioTotal !== null
+                && financiero.patrimonioTotal !== undefined;
+                else sinPatrimonio
+              ">
+
+              {{
+              financiero.patrimonioTotal
+              | number:'1.0-0'
+              }}
+
+            </ng-container>
+
+            <ng-template #sinPatrimonio>
+              -
+            </ng-template>
+
+          </td>
+
+
+          <td class="text-center">
+
+            <button
+              type="button"
+              class="btn-action"
+              (click)="seleccionarDeudor(financiero)">
+
+              {{
+              tieneFotografia(financiero)
+              ? 'Ver / actualizar'
+              : 'Registrar'
+              }}
+
+            </button>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       NAVEGACIÓN DEL PASO
+       ======================================================= -->
+
+  <div
+    *ngIf="!cargando && financieros.length > 0"
+    class="card">
+
+    <div class="card-header">
+
+      <div>
+
+        <h3>Continuar originación</h3>
+
+        <p *ngIf="puedeContinuarCentralRiesgo">
+          La información financiera está completa para todos
+          los deudores de la solicitud.
+        </p>
+
+        <p *ngIf="!puedeContinuarCentralRiesgo">
+          Complete la información financiera pendiente
+          antes de continuar a Central de riesgo.
+        </p>
+
+      </div>
+
+    </div>
+
+
+    <div
+      *ngIf="!puedeContinuarCentralRiesgo"
+      class="alert alert-warning">
+
+      <ng-container
+        *ngIf="cantidadFinancierosPendientes === 1; else variosPendientes">
+
+        Existe 1 deudor con información financiera pendiente.
+
+      </ng-container>
+
+      <ng-template #variosPendientes>
+
+        Existen
+        {{ cantidadFinancierosPendientes }}
+        deudores con información financiera pendiente.
+
+      </ng-template>
+
+    </div>
+
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        [disabled]="guardando"
+        (click)="volverBienes()">
+
+        Volver a bienes
+
+      </button>
+
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="
+          guardando
+          || cargandoDetalle
+          || !puedeContinuarCentralRiesgo
+        "
+        (click)="continuarCentralRiesgo()">
+
+        Continuar a Central de riesgo
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       EDICIÓN
+       ======================================================= -->
+
+  <ng-container
+    *ngIf="deudorSeleccionado">
+
+    <div class="card financiero-editor">
+
+
+      <!-- =====================================================
+           ENCABEZADO DEL DEUDOR
+           ===================================================== -->
+
+      <div class="card-header editor-header">
+
+        <div>
+
+          <h3>
+
+            {{
+            deudorSeleccionado.nombreCompleto
+            || 'Información financiera'
+            }}
+
+          </h3>
+
+
+          <p>
+
+            {{
+            deudorSeleccionado.tipoDocumento
+            || ''
+            }}
+
+            {{
+            deudorSeleccionado.documento
+            || ''
+            }}
+
+            ·
+
+            {{
+            deudorSeleccionado.tipoDeudor
+            || 'Deudor'
+            }}
+
+          </p>
+
+        </div>
+
+
+        <div class="editor-actions">
+
+          <span
+            *ngIf="tieneRegistroFinanciero"
+            class="badge badge-success">
+
+            Información registrada
+
+          </span>
+
+
+          <span
+            *ngIf="!tieneRegistroFinanciero"
+            class="badge badge-warning">
+
+            Información pendiente
+
+          </span>
+
+
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="cerrarEdicion()">
+
+            Cerrar
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- =====================================================
+           CARGANDO DETALLE
+           ===================================================== -->
+
+      <div
+        *ngIf="cargandoDetalle"
+        class="loading-block">
+
+        Cargando información financiera...
+
+      </div>
+
+
+      <!-- =====================================================
+           FORMULARIO
+           ===================================================== -->
+
+      <div
+        *ngIf="!cargandoDetalle"
+        class="form-financiero">
+
+
+        <!-- ===================================================
+             ESTADO GENERAL
+             =================================================== -->
+
+        <div class="form-section">
+
+          <div class="section-title">
+
+            <div>
+
+              <h4>Información del deudor</h4>
+
+            </div>
+
+          </div>
+
+
+          <div class="form-grid form-grid--3">
+
+            <div class="form-field">
+
+              <label>
+                Tipo de persona
+              </label>
+
+              <div class="readonly-field">
+
+                {{
+                esPersonaNatural
+                ? 'Persona natural'
+                : (
+                esPersonaJuridica
+                ? 'Persona jurídica'
+                : '-'
+                )
+                }}
+
+              </div>
+
+            </div>
+
+
+            <div class="form-field">
+
+              <label>
+                Estado
+              </label>
+
+              <div class="readonly-field">
+
+                {{
+                tieneRegistroFinanciero
+                ? 'Registrado'
+                : 'Pendiente'
+                }}
+
+              </div>
+
+            </div>
+
+
+            <div class="form-field">
+
+              <label>
+                Última actualización
+              </label>
+
+              <div class="readonly-field">
+
+                <ng-container
+                  *ngIf="
+                    detalleActual?.fechaFotografia;
+                    else sinActualizacion
+                  ">
+
+                  {{
+                  detalleActual?.fechaFotografia
+                  | date:'dd/MM/yyyy HH:mm'
+                  }}
+
+                </ng-container>
+
+                <ng-template #sinActualizacion>
+                  Sin registro
+                </ng-template>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================
+             SINCRONIZACIÓN HOJA DE VIDA
+             =================================================== -->
+
+        <div
+          *ngIf="detalleActual"
+          class="form-section">
+
+          <div class="section-title">
+
+            <div>
+
+              <h4>Hoja de Vida</h4>
+
+              <p>
+                Estado de la información compartida
+                entre la solicitud y Hoja de Vida.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div
+            *ngIf="sincronizadoHojaVida"
+            class="alert alert-success">
+
+            La información se encuentra sincronizada
+            con Hoja de Vida.
+
+          </div>
+
+
+          <div
+            *ngIf="!sincronizadoHojaVida"
+            class="alert alert-warning">
+
+            La información financiera de esta solicitud
+            no coincide con la información actual registrada
+            en Hoja de Vida.
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================
+             ACTIVIDAD ECONÓMICA
+             =================================================== -->
+
+        <div class="form-section">
+
+          <div class="section-title">
+
+            <div>
+
+              <h4>Actividad económica</h4>
+
+              <p>
+                Información registrada en Hoja de Vida
+                y utilizada para la solicitud de crédito.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="form-grid form-grid--2">
+
+
+            <!-- OCUPACIÓN -->
+
+            <div class="form-field">
+
+              <label for="codigoOcupacion">
+                Ocupación
+              </label>
+
+              <select
+                id="codigoOcupacion"
+                name="codigoOcupacion"
+                [(ngModel)]="
+                  formulario.codigoOcupacion
+                "
+                [disabled]="cargandoCatalogos">
+
+                <option value="">
+                  Seleccione...
+                </option>
+
+                <option
+                  *ngFor="let item of ocupaciones"
+                  [value]="item.codigo">
+
+                  {{ item.codigo }} - {{ item.nombre }}
+
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <!-- SECTOR ECONÓMICO -->
+
+            <div class="form-field">
+
+              <label for="codigoSectorEconomico">
+                Sector económico
+              </label>
+
+              <select
+                id="codigoSectorEconomico"
+                name="codigoSectorEconomico"
+                [(ngModel)]="
+                  formulario.codigoSectorEconomico
+                "
+                [disabled]="cargandoCatalogos">
+
+                <option value="">
+                  Seleccione...
+                </option>
+
+                <option
+                  *ngFor="
+                    let item of sectoresEconomicos
+                  "
+                  [value]="item.codigo">
+
+                  {{ item.codigo }} - {{ item.nombre }}
+
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <!-- ACTIVIDAD SES -->
+
+            <div class="form-field">
+
+              <label for="actividadSesBusqueda">
+                Actividad económica SES
+              </label>
+
+              <div class="catalog-search">
+
+                <input
+                  id="actividadSesBusqueda"
+                  name="actividadSesBusqueda"
+                  type="text"
+                  autocomplete="off"
+                  placeholder="Código o descripción"
+                  [(ngModel)]="filtroSes"
+                  [disabled]="cargandoCatalogos"
+                  (input)="
+                    formulario.codigoActividadSes = '';
+                    filtrarActividadesSes()
+                  ">
+
+                <div
+                  *ngIf="
+                    filtroSes
+                    && actividadesSesFiltradas.length > 0
+                    && !formulario.codigoActividadSes
+                  "
+                  class="catalog-options">
+
+                  <button
+                    *ngFor="
+                      let actividad
+                      of actividadesSesFiltradas
+                    "
+                    type="button"
+                    class="catalog-option"
+                    (click)="
+                      seleccionarActividadSes(
+                        actividad
+                      )
+                    ">
+
+                    <strong>
+                      {{ actividad.codigo }}
+                    </strong>
+
+                    <span>
+                      {{ actividad.nombre }}
+                    </span>
+
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+
+            <!-- ACTIVIDAD DIAN -->
+
+            <div class="form-field">
+
+              <label for="actividadDianBusqueda">
+                Actividad económica DIAN
+              </label>
+
+              <div class="catalog-search">
+
+                <input
+                  id="actividadDianBusqueda"
+                  name="actividadDianBusqueda"
+                  type="text"
+                  autocomplete="off"
+                  placeholder="Código o descripción"
+                  [(ngModel)]="filtroDian"
+                  [disabled]="cargandoCatalogos"
+                  (input)="
+                    formulario.codigoActividadDian = '';
+                    filtrarActividadesDian()
+                  ">
+
+                <div
+                  *ngIf="
+                    filtroDian
+                    && actividadesDianFiltradas.length > 0
+                    && !formulario.codigoActividadDian
+                  "
+                  class="catalog-options">
+
+                  <button
+                    *ngFor="
+                      let actividad
+                      of actividadesDianFiltradas
+                    "
+                    type="button"
+                    class="catalog-option"
+                    (click)="
+                      seleccionarActividadDian(
+                        actividad
+                      )
+                    ">
+
+                    <strong>
+                      {{ actividad.codigo }}
+                    </strong>
+
+                    <span>
+                      {{ actividad.nombre }}
+                    </span>
+
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================
+             PERSONA NATURAL
+             =================================================== -->
+
+        <ng-container
+          *ngIf="esPersonaNatural">
+
+
+          <!-- =================================================
+               INGRESOS NATURAL
+               ================================================= -->
+
+          <div class="form-section">
+
+            <div class="section-title">
+
+              <div>
+
+                <h4>Ingresos</h4>
+
+                <p>
+                  Valores mensuales declarados
+                  por la persona.
+                </p>
+
+              </div>
+
+
+              <div class="section-total">
+
+                <span>
+                  Total ingresos
+                </span>
+
+                <strong>
+
+                  {{
+                  totalIngresosNatural
+                  | number:'1.0-0'
+                  }}
+
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <div class="form-grid form-grid--3">
+
+              <div class="form-field">
+
+                <label for="valorSalario">
+                  Salario
+                </label>
+
+                <input
+                  id="valorSalario"
+                  name="valorSalario"
+                  type="text"
+                  numericFormat
+                  class="input-number"
+                  [(ngModel)]="
+                    formulario.valorSalario
+                  ">
+
+              </div>
+
+
+              <div class="form-field">
+
+                <label for="valorPension">
+                  Pensión
+                </label>
+
+                <input
+                  id="valorPension"
+                  name="valorPension"
+                  type="text"
+                  numericFormat
+                  class="input-number"
+                  [(ngModel)]="
+                    formulario.valorPension
+                  ">
+
+              </div>
+
+
+              <div class="form-field">
+
+                <label for="ingresoIndependiente">
+                  Ingreso independiente
+                </label>
+
+                <input
+                  id="ingresoIndependiente"
+                  name="ingresoIndependiente"
+                  type="text"
+                  numericFormat
+                  class="input-number"
+                  [(ngModel)]="
+                    formulario.ingresoIndependiente
+                  ">
+
+              </div>
+
+
+              <div class="form-field">
+
+                <label for="ingresosArriendo">
+                  Ingresos por arriendo
+                </label>
+
+                <input
+                  id="ingresosArriendo"
+                  name="ingresosArriendo"
+                  type="text"
+                  numericFormat
+                  class="input-number"
+                  [(ngModel)]="
+                    formulario.ingresosArriendo
+                  ">
+
+              </div>
+
+
+              <div class="form-field">
+
+                <label for="ingresosComisiones">
+                  Comisiones
+                </label>
+
+                <input
+                  id="ingresosComisiones"
+                  name="ingresosComisiones"
+                  type="text"
+                  numericFormat
+                  class="input-number"
+                  [(ngModel)]="
+                    formulario.ingresosComisiones
+                  ">
+
+              </div>
+
+
+              <div class="form-field">
+
+                <label for="otrosIngresos">
+                  Otros ingresos
+                </label>
+
+                <input
+                  id="otrosIngresos"
+                  name="otrosIngresos"
+                  type="text"
+                  numericFormat
+                  class="input-number"
+                  [(ngModel)]="
+                    formulario.otrosIngresos
+                  ">
+
+              </div>
+
+
+              <div
+                class="form-field form-field--full"
+                *ngIf="
+                  (formulario.otrosIngresos || 0) > 0
+                ">
+
+                <label for="comentarioOtrosIngresos">
+                  Descripción de otros ingresos
+                </label>
+
+                <input
+                  id="comentarioOtrosIngresos"
+                  name="comentarioOtrosIngresos"
+                  type="text"
+                  maxlength="100"
+                  [(ngModel)]="
+                    formulario.comentarioOtrosIngresos
+                  ">
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- =================================================
+               EGRESOS NATURAL
+               ================================================= -->
+
+          <div class="form-section">
+
+            <div class="section-title">
+
+              <div>
+
+                <h4>Egresos</h4>
+
+                <p>
+                  Gastos mensuales declarados.
+                </p>
+
+              </div>
+
+
+              <div class="section-total">
+
+                <span>
+                  Total egresos
+                </span>
+
+                <strong>
+
+                  {{
+                  totalEgresosNatural
+                  | number:'1.0-0'
+                  }}
+
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <div class="form-grid form-grid--3">
+
+              <div class="form-field">
+
+                <label for="egresosFamiliares">
+                  Gastos familiares
+                </label>
+
+                <input
+                  id="egresosFamiliares"
+                  name="egresosFamiliares"
+                  type="text"
+                  numericFormat
+                  class="input-number"
+                  [(ngModel)]="
+                    formulario.egresosFamiliares
+                  ">
+
+              </div>
+
+
+              <div class="form-field">
+
+                <label for="egresosArriendo">
+                  Arriendo
+                </label>
+
+                <input
+                  id="egresosArriendo"
+                  name="egresosArriendo"
+                  type="text"
+                  numericFormat
+                  class="input-number"
+                  [(ngModel)]="
+                    formulario.egresosArriendo
+                  ">
+
+              </div>
+
+
+              <div class="form-field">
+
+                <label for="egresosCredito">
+                  Obligaciones financieras
+                </label>
+
+                <input
+                  id="egresosCredito"
+                  name="egresosCredito"
+                  type="text"
+                  numericFormat
+                  class="input-number"
+                  [(ngModel)]="
+                    formulario.egresosCredito
+                  ">
+
+              </div>
+
+
+              <div class="form-field">
+
+                <label for="otrosEgresos">
+                  Otros egresos
+                </label>
+
+                <input
+                  id="otrosEgresos"
+                  name="otrosEgresos"
+                  type="text"
+                  numericFormat
+                  class="input-number"
+                  [(ngModel)]="
+                    formulario.otrosEgresos
+                  ">
+
+              </div>
+
+
+              <div
+                class="form-field form-field--full"
+                *ngIf="
+                  (formulario.otrosEgresos || 0) > 0
+                ">
+
+                <label for="comentarioOtrosEgresos">
+                  Descripción de otros egresos
+                </label>
+
+                <input
+                  id="comentarioOtrosEgresos"
+                  name="comentarioOtrosEgresos"
+                  type="text"
+                  maxlength="100"
+                  [(ngModel)]="
+                    formulario.comentarioOtrosEgresos
+                  ">
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- =================================================
+               DECLARACIÓN DE RENTA
+               ================================================= -->
+
+          <div class="form-section">
+
+            <div class="section-title">
+
+              <div>
+
+                <h4>Declaración de renta</h4>
+
+              </div>
+
+            </div>
+
+
+            <div class="form-grid form-grid--3">
+
+              <div class="form-field">
+
+                <label for="declaraRenta">
+                  Declara renta
+                </label>
+
+                <select
+                  id="declaraRenta"
+                  name="declaraRenta"
+                  [(ngModel)]="
+                    formulario.declaraRenta
+                  ">
+
+                  <option [ngValue]="false">
+                    No
+                  </option>
+
+                  <option [ngValue]="true">
+                    Sí
+                  </option>
+
+                </select>
+
+              </div>
+
+
+              <div
+                class="form-field"
+                *ngIf="formulario.declaraRenta">
+
+                <label for="anioDeclaracion">
+                  Año declaración
+                </label>
+
+                <input
+                  id="anioDeclaracion"
+                  name="anioDeclaracion"
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="4"
+                  autocomplete="off"
+                  placeholder="AAAA"
+                  [(ngModel)]="
+                    formulario.anioDeclaracion
+                  ">
+
+              </div>
+
+
+              <div
+                class="form-field"
+                *ngIf="formulario.declaraRenta">
+
+                <label for="fechaPresentacionDeclaracion">
+                  Fecha presentación
+                </label>
+
+                <input
+                  id="fechaPresentacionDeclaracion"
+                  name="fechaPresentacionDeclaracion"
+                  type="date"
+                  [(ngModel)]="
+                    formulario.fechaPresentacionDeclaracion
+                  ">
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </ng-container>
+
+
+        <!-- ===================================================
+             PERSONA JURÍDICA
+             =================================================== -->
+
+        <ng-container
+          *ngIf="esPersonaJuridica">
+
+
+          <!-- =================================================
+               INGRESOS JURÍDICA
+               ================================================= -->
+
+          <div class="form-section">
+
+            <div class="section-title">
+
+              <div>
+
+                <h4>Ingresos</h4>
+
+                <p>
+                  Información financiera
+                  de la persona jurídica.
+                </p>
+
+              </div>
+
+
+              <div class="section-total">
+
+                <span>
+                  Total ingresos
+                </span>
+
+                <strong>
+
+                  {{
+                  totalIngresosJuridica
+                  | number:'1.0-0'
+                  }}
+
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <div class="form-grid form-grid--3">
+
+              <div class="form-field">
+
+                <label for="ingresosOperacionales">
+                  Ingresos operacionales
+                </label>
+
+                <input
+                  id="ingresosOperacionales"
+                  name="ingresosOperacionales"
+                  type="text"
+                  numericFormat
+                  class="input-number"
+                  [(ngModel)]="
+                    formulario.ingresosOperacionales
+                  ">
+
+              </div>
+
+
+              <div class="form-field">
+
+                <label for="ingresosNoOperacionales">
+                  Ingresos no operacionales
+                </label>
+
+                <input
+                  id="ingresosNoOperacionales"
+                  name="ingresosNoOperacionales"
+                  type="text"
+                  numericFormat
+                  class="input-number"
+                  [(ngModel)]="
+                    formulario.ingresosNoOperacionales
+                  ">
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- =================================================
+               COSTOS Y GASTOS JURÍDICA
+               ================================================= -->
+
+          <div class="form-section">
+
+            <div class="section-title">
+
+              <div>
+
+                <h4>Costos y gastos</h4>
+
+              </div>
+
+
+              <div class="section-total">
+
+                <span>
+                  Total egresos
+                </span>
+
+                <strong>
+
+                  {{
+                  totalEgresosJuridica
+                  | number:'1.0-0'
+                  }}
+
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <div class="form-grid form-grid--3">
+
+              <div class="form-field">
+
+                <label for="costos">
+                  Costos
+                </label>
+
+                <input
+                  id="costos"
+                  name="costos"
+                  type="text"
+                  numericFormat
+                  class="input-number"
+                  [(ngModel)]="
+                    formulario.costos
+                  ">
+
+              </div>
+
+
+              <div class="form-field">
+
+                <label for="gastosOperacionales">
+                  Gastos operacionales
+                </label>
+
+                <input
+                  id="gastosOperacionales"
+                  name="gastosOperacionales"
+                  type="text"
+                  numericFormat
+                  class="input-number"
+                  [(ngModel)]="
+                    formulario.gastosOperacionales
+                  ">
+
+              </div>
+
+
+              <div class="form-field">
+
+                <label for="gastosFinancieros">
+                  Gastos financieros
+                </label>
+
+                <input
+                  id="gastosFinancieros"
+                  name="gastosFinancieros"
+                  type="text"
+                  numericFormat
+                  class="input-number"
+                  [(ngModel)]="
+                    formulario.gastosFinancieros
+                  ">
+
+              </div>
+
+
+              <div class="form-field">
+
+                <label for="otrosGastos">
+                  Otros gastos
+                </label>
+
+                <input
+                  id="otrosGastos"
+                  name="otrosGastos"
+                  type="text"
+                  numericFormat
+                  class="input-number"
+                  [(ngModel)]="
+                    formulario.otrosGastos
+                  ">
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- =================================================
+               RESULTADOS JURÍDICA
+               ================================================= -->
+
+          <div class="form-section">
+
+            <div class="section-title">
+
+              <h4>Resultados</h4>
+
+            </div>
+
+
+            <div class="form-grid form-grid--3">
+
+              <div class="form-field">
+
+                <label for="utilidadOperacional">
+                  Utilidad operacional
+                </label>
+
+                <input
+                  id="utilidadOperacional"
+                  name="utilidadOperacional"
+                  type="text"
+                  numericFormat
+                  class="input-number"
+                  [(ngModel)]="
+                    formulario.utilidadOperacional
+                  ">
+
+              </div>
+
+
+              <div class="form-field">
+
+                <label for="utilidadNeta">
+                  Utilidad neta
+                </label>
+
+                <input
+                  id="utilidadNeta"
+                  name="utilidadNeta"
+                  type="text"
+                  numericFormat
+                  class="input-number"
+                  [(ngModel)]="
+                    formulario.utilidadNeta
+                  ">
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </ng-container>
+
+
+        <!-- ===================================================
+             BALANCE
+             =================================================== -->
+
+        <div class="form-section">
+
+          <div class="section-title">
+
+            <div>
+
+              <h4>Balance</h4>
+
+            </div>
+
+
+            <div class="section-total">
+
+              <span>
+                Patrimonio
+              </span>
+
+              <strong>
+
+                {{
+                patrimonio
+                | number:'1.0-0'
+                }}
+
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <div class="form-grid form-grid--3">
+
+            <div class="form-field">
+
+              <label for="activoCorriente">
+                Activo corriente
+              </label>
+
+              <input
+                id="activoCorriente"
+                name="activoCorriente"
+                type="text"
+                numericFormat
+                class="input-number"
+                [(ngModel)]="
+                  formulario.activoCorriente
+                ">
+
+            </div>
+
+
+            <div class="form-field">
+
+              <label for="pasivoCorriente">
+                Pasivo corriente
+              </label>
+
+              <input
+                id="pasivoCorriente"
+                name="pasivoCorriente"
+                type="text"
+                numericFormat
+                class="input-number"
+                [(ngModel)]="
+                  formulario.pasivoCorriente
+                ">
+
+            </div>
+
+
+            <div class="form-field">
+
+              <label for="totalActivos">
+                Total activos
+              </label>
+
+              <input
+                id="totalActivos"
+                name="totalActivos"
+                type="text"
+                numericFormat
+                class="input-number"
+                [(ngModel)]="
+                  formulario.totalActivos
+                ">
+
+            </div>
+
+
+            <div class="form-field">
+
+              <label for="totalPasivos">
+                Total pasivos
+              </label>
+
+              <input
+                id="totalPasivos"
+                name="totalPasivos"
+                type="text"
+                numericFormat
+                class="input-number"
+                [(ngModel)]="
+                  formulario.totalPasivos
+                ">
+
+            </div>
+
+
+            <div class="form-field">
+
+              <label>
+                Patrimonio
+              </label>
+
+              <div class="readonly-field readonly-money">
+
+                {{
+                patrimonio
+                | number:'1.0-0'
+                }}
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================
+             INFORMACIÓN COMPLEMENTARIA
+             =================================================== -->
+
+        <div class="form-section">
+
+          <div class="section-title">
+
+            <h4>Información complementaria</h4>
+
+          </div>
+
+
+          <div class="form-grid form-grid--2">
+
+            <div class="form-field">
+
+              <label for="origenFondos">
+                Origen de fondos
+              </label>
+
+              <input
+                id="origenFondos"
+                name="origenFondos"
+                type="text"
+                maxlength="100"
+                [(ngModel)]="
+                  formulario.origenFondos
+                ">
+
+            </div>
+
+
+            <div class="form-field">
+
+              <label for="relacionFinanciera">
+                Relación financiera
+              </label>
+
+              <input
+                id="relacionFinanciera"
+                name="relacionFinanciera"
+                type="text"
+                maxlength="100"
+                [(ngModel)]="
+                  formulario.relacionFinanciera
+                ">
+
+            </div>
+
+
+            <div class="form-field">
+
+              <label for="deudaRelacionFinanciera">
+                Deuda relación financiera
+              </label>
+
+              <input
+                id="deudaRelacionFinanciera"
+                name="deudaRelacionFinanciera"
+                type="text"
+                numericFormat
+                class="input-number"
+                [(ngModel)]="
+                  formulario.deudaRelacionFinanciera
+                ">
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===================================================
+             TIPO NO DETERMINADO
+             =================================================== -->
+
+        <div
+          *ngIf="
+            !esPersonaNatural
+            && !esPersonaJuridica
+          "
+          class="alert alert-info">
+
+          No fue posible determinar el tipo de persona
+          registrado en Hoja de Vida.
+
+        </div>
+
+
+        <!-- ===================================================
+             ACCIONES
+             =================================================== -->
+
+        <div class="form-actions">
+
+          <button
+            type="button"
+            class="btn btn-secondary"
+            [disabled]="guardando"
+            (click)="cerrarEdicion()">
+
+            Cancelar
+
+          </button>
+
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="
+              guardando
+              || cargandoCatalogos
+            "
+            (click)="guardar()">
+
+            {{
+            guardando
+            ? 'Guardando...'
+            : (
+            tieneRegistroFinanciero
+            ? 'Actualizar información'
+            : 'Guardar información'
+            )
+            }}
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </ng-container>
+
+</div>

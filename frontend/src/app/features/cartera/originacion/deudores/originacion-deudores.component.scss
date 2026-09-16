@@ -1,0 +1,610 @@
+.page {
+  padding: 1rem;
+}
+
+
+// =========================================================
+// TARJETAS
+// =========================================================
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background: #ffffff;
+}
+
+.card-codeudor {
+  border-top: 3px solid #2563eb;
+}
+
+.estado-card {
+  color: #6b7280;
+  text-align: center;
+}
+
+
+// =========================================================
+// ENCABEZADOS DE SECCIÓN
+// =========================================================
+
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    font-size: 0.82rem;
+    color: #6b7280;
+  }
+}
+
+
+// =========================================================
+// MENSAJES
+// =========================================================
+
+.alert {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.alert-error {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.alert-success {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+
+// =========================================================
+// RESUMEN SOLICITUD
+// =========================================================
+
+.resumen-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.dato {
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.4rem;
+  background: #f9fafb;
+
+  strong {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.9rem;
+    color: #111827;
+  }
+}
+
+.dato-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+
+// =========================================================
+// PERSONA
+// =========================================================
+
+.persona-card {
+  padding: 0.9rem 1rem;
+  border: 1px solid #dbe3ec;
+  border-radius: 0.45rem;
+  background: #f9fafb;
+}
+
+.persona-principal {
+  margin-bottom: 1rem;
+}
+
+.persona-identificacion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  h4 {
+    margin: 0.25rem 0 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.2rem 0 0;
+    font-size: 0.8rem;
+    color: #6b7280;
+  }
+}
+
+.persona-tipo {
+  display: inline-block;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  background: #e8eef8;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+
+// =========================================================
+// CONTEXTO
+// =========================================================
+
+.contexto-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.contexto-card {
+  min-width: 0;
+  padding: 0.8rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.4rem;
+  background: #ffffff;
+}
+
+.contexto-title {
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid #f0f1f3;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.contexto-dato {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  font-size: 0.76rem;
+
+  span {
+    color: #6b7280;
+  }
+
+  strong {
+    color: #111827;
+    text-align: right;
+  }
+}
+
+.sin-informacion {
+  padding: 0.4rem 0;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+
+// =========================================================
+// ESTADOS
+// =========================================================
+
+.estado-inline {
+  padding: 0.75rem 0;
+  font-size: 0.82rem;
+  color: #6b7280;
+}
+
+.empty {
+  padding: 1.25rem;
+  border: 1px dashed #d1d5db;
+  border-radius: 0.4rem;
+  background: #fafafa;
+  text-align: center;
+  font-size: 0.82rem;
+  color: #6b7280;
+}
+
+
+// =========================================================
+// TABLAS
+// =========================================================
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+
+  th,
+  td {
+    padding: 0.6rem 0.7rem;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: middle;
+  }
+
+  th {
+    background: #f6f7f9;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #4b5563;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  tbody tr:hover {
+    background: #f9fafb;
+  }
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.18rem 0.45rem;
+  border-radius: 999px;
+  background: #eef2f7;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+
+// =========================================================
+// FILTROS CODEUDOR
+// =========================================================
+
+.filtros-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.form-field {
+  min-width: 0;
+
+  label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #4b5563;
+  }
+
+  input {
+    width: 100%;
+    min-height: 34px;
+    box-sizing: border-box;
+    padding: 0.4rem 0.55rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.35rem;
+    background: #ffffff;
+    font-size: 0.82rem;
+    color: #111827;
+    outline: none;
+
+    &:focus {
+      border-color: #9ca3af;
+      box-shadow: 0 0 0 2px rgb(0 0 0 / 4%);
+    }
+
+    &:disabled {
+      background: #f3f4f6;
+      color: #9ca3af;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.acciones-busqueda {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.8rem;
+}
+
+.resultados-personas {
+  margin-top: 1rem;
+}
+
+
+// =========================================================
+// CANDIDATO
+// =========================================================
+
+.candidato-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid #dbe3ec;
+  border-radius: 0.45rem;
+  background: #f9fafb;
+
+  h4 {
+    margin: 0.25rem 0 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.2rem 0 0;
+    font-size: 0.8rem;
+    color: #6b7280;
+  }
+}
+
+.contexto-candidato {
+  margin-top: 1rem;
+}
+
+
+// =========================================================
+// DECISIÓN CODEUDOR
+// =========================================================
+
+.decision-codeudor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid #dbe3ec;
+  border-radius: 0.45rem;
+  background: #f8fafc;
+
+  strong {
+    display: block;
+    font-size: 0.85rem;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.2rem 0 0;
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+}
+
+.decision-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+
+// =========================================================
+// BOTONES
+// =========================================================
+
+.btn {
+  min-height: 34px;
+  padding: 0.4rem 0.8rem;
+  border: 1px solid transparent;
+  border-radius: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+
+  &:hover:not(:disabled) {
+    background: #1d4ed8;
+  }
+}
+
+.btn-secondary {
+  border-color: #d1d5db;
+  background: #ffffff;
+  color: #374151;
+
+  &:hover:not(:disabled) {
+    background: #f3f4f6;
+  }
+}
+
+.btn-link {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #2563eb;
+  cursor: pointer;
+
+  &:disabled {
+    color: #9ca3af;
+    cursor: not-allowed;
+  }
+}
+
+.btn-danger-link {
+  color: #b91c1c;
+}
+
+
+// =========================================================
+// RESPONSIVE
+// =========================================================
+
+@media (max-width: 1200px) {
+
+  .contexto-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+
+  .resumen-grid,
+  .filtros-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .contexto-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+
+  .section-header,
+  .candidato-header,
+  .decision-codeudor {
+    flex-direction: column;
+  }
+
+  .resumen-grid,
+  .filtros-grid,
+  .contexto-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .decision-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+.principal-resumen {
+  display: grid;
+  grid-template-columns:
+    160px
+    220px
+    minmax(0, 1fr);
+  gap: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.4rem;
+  background: #f9fafb;
+}
+
+.principal-dato {
+  padding: 0.55rem 0.75rem;
+  border-right: 1px solid #e5e7eb;
+
+  &:last-child {
+    border-right: 0;
+  }
+
+  span {
+    display: block;
+    margin-bottom: 0.15rem;
+    font-size: 0.68rem;
+    color: #6b7280;
+  }
+
+  strong {
+    display: block;
+    font-size: 0.82rem;
+    color: #111827;
+  }
+}
+
+.principal-nombre {
+  min-width: 0;
+}
+
+.acciones-codeudor {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-action {
+  min-height: 28px;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.35rem;
+  background: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-action--contexto {
+  color: #2563eb;
+
+  &:hover:not(:disabled) {
+    background: #eff6ff;
+    border-color: #93c5fd;
+  }
+}
+
+.btn-action--retirar {
+  color: #b91c1c;
+
+  &:hover:not(:disabled) {
+    background: #fef2f2;
+    border-color: #fca5a5;
+  }
+}
+.contexto-codeudor-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+}
+
+// =========================================================
+// NAVEGACIÓN
+// =========================================================
+
+.actions-row--navigation {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
