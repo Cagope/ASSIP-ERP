@@ -21,6 +21,10 @@ import {
   SolicitudAnalisisResultado
 } from './originacion-analisis.models';
 
+import {
+  SolicitudEnviarAprobacionResponse,
+  SolicitudValidacionAprobacion
+} from '../solicitud/originacion-solicitud.models';
 
 @Injectable({
   providedIn: 'root'
@@ -33,6 +37,9 @@ export class OriginacionAnalisisApi {
 
   private readonly baseUrl =
     `${environment.apiUrl}/cartera/originacion/analisis`;
+
+  private readonly solicitudesUrl =
+    `${environment.apiUrl}/cartera/originacion/solicitudes`;
 
 
   // =========================================================
@@ -97,6 +104,37 @@ export class OriginacionAnalisisApi {
     return this.http.post<SolicitudAnalisisPersistencia>(
       `${this.baseUrl}/${idSolicitudCredito}/persistir`,
       {}
+    );
+  }
+
+  // =========================================================
+  // VALIDAR PARA APROBACIÓN
+  // =========================================================
+
+  validarParaAprobacion(
+    idSolicitudCredito: number
+  ): Observable<SolicitudValidacionAprobacion> {
+
+    return this.http.get<SolicitudValidacionAprobacion>(
+      `${this.solicitudesUrl}/${idSolicitudCredito}/validar-aprobacion`
+    );
+  }
+
+  // =========================================================
+  // ENVIAR A APROBACIÓN
+  // =========================================================
+
+  enviarAprobacion(
+    idSolicitudCredito: number,
+    conceptoAsesorAprobacion: string
+  ): Observable<SolicitudEnviarAprobacionResponse> {
+
+    return this.http.put<SolicitudEnviarAprobacionResponse>(
+      `${this.solicitudesUrl}/${idSolicitudCredito}/enviar-aprobacion`,
+      {
+        conceptoAsesorAprobacion:
+          conceptoAsesorAprobacion.trim()
+      }
     );
   }
 }

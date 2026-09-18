@@ -603,3 +603,161 @@ export interface FondoGarantia {
 
   activo: boolean;
 }
+
+// =========================================================
+// FINALIZAR SOLICITUD
+// =========================================================
+
+export interface SolicitudFinalizarRequest {
+
+  idSolicitudCredito: number;
+
+  /**
+   * 3 = NO VIABLE
+   * 4 = DESISTIDA
+   * 6 = ANULADA
+   */
+  idSolicitudResultado: number;
+
+  observacionFinal: string;
+}
+
+
+export interface SolicitudFinalizarResponse {
+
+  idSolicitudCredito: number;
+
+  numeroSolicitud: string;
+
+  idSolicitudResultado: number;
+
+  nombreResultado: string;
+
+  observacionFinal: string;
+
+  fechaUltimaGestion: string;
+}
+
+// =========================================================
+// VALIDAR PARA APROBACIÓN
+// =========================================================
+
+export interface SolicitudValidacionAprobacion {
+
+  idSolicitudCredito: number;
+
+  numeroSolicitud: string;
+
+  solicitudValida: boolean;
+
+  deudoresCompletos: boolean;
+
+  bienesCompletos: boolean;
+
+  financieroCompleto: boolean;
+
+  centralRiesgoCompleta: boolean;
+
+  analisisCompleto: boolean;
+
+  enteAprobadorDefinido: boolean;
+
+  puedeEnviarAprobacion: boolean;
+
+  mensaje: string;
+}
+
+
+// =========================================================
+// ENVIAR A APROBACIÓN
+// =========================================================
+
+export interface SolicitudEnviarAprobacionResponse {
+
+  idSolicitudCredito: number;
+
+  numeroSolicitud: string;
+
+  idSolicitudProceso: number;
+
+  nombreProceso: string;
+
+  idSolicitudResultado: number;
+
+  nombreResultado: string;
+
+  idEnteAprobacion: number;
+
+  nombreEnteAprobacion: string | null;
+
+  fechaUltimaGestion: string;
+}
+
+// =========================================================
+// PREVISUALIZAR ENTE APROBADOR
+// =========================================================
+
+export interface SolicitudEnteAprobadorPreviewRequest {
+
+  idAgencia: number;
+
+  idDatosPersonal: number;
+
+  codigoGarantiaCredito: string;
+
+  plazoSolicitado: number;
+
+  valorSolicitado: number;
+}
+
+
+export interface SolicitudEnteAprobadorPreview {
+
+  idEnteAprobacion: number | null;
+
+  nombreEnteAprobacion: string | null;
+
+  motivoAprobacion: string | null;
+
+  valorSolicitado: number | null;
+
+  valorSmmlvAplicado: number | null;
+
+  cantidadSmmlvSolicitada: number | null;
+
+  codigoGarantiaCredito: string | null;
+
+  descripcionGarantiaCredito: string | null;
+
+  tipoGarantia: string | null;
+
+  nombreTipoGarantia: string | null;
+
+  plazoSolicitado: number | null;
+
+  esDirectivo: boolean | null;
+
+  esPrivilegiado: boolean | null;
+
+  nombreTipoDirectivo: string | null;
+
+  nombreCalidadDirectivo: string | null;
+
+  nombreParentesco: string | null;
+
+  documentoDirectivo: string | null;
+
+  nombreDirectivo: string | null;
+
+  valorMinimoSmmlv: number | null;
+
+  valorTopeSmmlv: number | null;
+
+  valorTopePesos: number | null;
+
+  mensajeAprobacion: string | null;
+
+  detalleAprobacion: string | null;
+
+  justificacionEnteAprobacion: string | null;
+}

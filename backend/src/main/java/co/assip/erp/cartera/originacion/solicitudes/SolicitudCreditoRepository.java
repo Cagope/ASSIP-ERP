@@ -4,6 +4,7 @@ import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudCreditoDetalleD
 import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudCreditoGuardarRequestDTO;
 import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudCreditoGuardarResponseDTO;
 import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudCreditoResumenDTO;
+import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudEnteAprobadorPreviewDTO;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -115,6 +116,43 @@ public class SolicitudCreditoRepository {
         return obtenerUnico(
                 resultados,
                 "proceso activo INICIADA"
+        );
+    }
+
+    // =========================================================
+// PROCESO APROBACION
+// =========================================================
+
+    public CatalogoProceso obtenerProcesoAprobacion() {
+
+        String sql = """
+            SELECT
+                sp.id_solicitud_proceso,
+                sp.nombre_proceso
+            FROM cartera.solicitudes_procesos sp
+            WHERE UPPER(TRIM(sp.nombre_proceso)) = 'APROBACION'
+              AND sp.activo = true
+            ORDER BY sp.id_solicitud_proceso
+            """;
+
+        List<CatalogoProceso> resultados =
+                jdbc.query(
+                        sql,
+                        new MapSqlParameterSource(),
+                        (rs, rowNum) ->
+                                new CatalogoProceso(
+                                        rs.getInt(
+                                                "id_solicitud_proceso"
+                                        ),
+                                        rs.getString(
+                                                "nombre_proceso"
+                                        )
+                                )
+                );
+
+        return obtenerUnico(
+                resultados,
+                "proceso activo APROBACION"
         );
     }
 
@@ -603,59 +641,68 @@ public class SolicitudCreditoRepository {
             Integer idCuentaAportes,
             Integer idSolicitudProceso,
             Integer idSolicitudResultado,
+            Integer idFondoGarantia,
             Integer idUsuario
     ) {
 
         String sql = """
-                INSERT INTO cartera.solicitudes_creditos
-                (
-                    numero_solicitud,
-                    id_agencia,
-                    id_datos_personal,
+        INSERT INTO cartera.solicitudes_creditos
+        (
+            numero_solicitud,
+            id_agencia,
+            id_datos_personal,
 
-                    id_cuenta_aportes,
+            id_cuenta_aportes,
 
-                    fecha_inicio_solicitud,
-                    fecha_ultima_gestion,
+            id_fondo_garantia,
 
-                    id_solicitud_proceso,
-                    id_solicitud_resultado,
+            fecha_inicio_solicitud,
+            fecha_ultima_gestion,
 
-                    activo,
+            id_solicitud_proceso,
+            id_solicitud_resultado,
 
-                    fk_seguridad_creacion,
-                    fecha_creacion,
+            id_asesor,
 
-                    fk_seguridad_edicion,
-                    fecha_edicion
-                )
-                VALUES
-                (
-                    :numeroSolicitud,
-                    :idAgencia,
-                    :idDatosPersonal,
+            activo,
 
-                    :idCuentaAportes,
+            fk_seguridad_creacion,
+            fecha_creacion,
 
-                    CURRENT_TIMESTAMP,
-                    CURRENT_TIMESTAMP,
+            fk_seguridad_edicion,
+            fecha_edicion
+        )
+        VALUES
+        (
+            :numeroSolicitud,
+            :idAgencia,
+            :idDatosPersonal,
 
-                    :idSolicitudProceso,
-                    :idSolicitudResultado,
+            :idCuentaAportes,
 
-                    true,
+            :idFondoGarantia,
 
-                    :idUsuario,
-                    CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP,
 
-                    :idUsuario,
-                    CURRENT_TIMESTAMP
-                )
+            :idSolicitudProceso,
+            :idSolicitudResultado,
 
-                RETURNING
-                    id_solicitud_credito,
-                    fecha_ultima_gestion
-                """;
+            :idUsuario,
+
+            true,
+
+            :idUsuario,
+            CURRENT_TIMESTAMP,
+
+            :idUsuario,
+            CURRENT_TIMESTAMP
+        )
+
+        RETURNING
+            id_solicitud_credito,
+            fecha_ultima_gestion
+        """;
 
         return jdbc.queryForObject(
                 sql,
@@ -675,6 +722,10 @@ public class SolicitudCreditoRepository {
                         .addValue(
                                 "idCuentaAportes",
                                 idCuentaAportes
+                        )
+                        .addValue(
+                                "idFondoGarantia",
+                                idFondoGarantia
                         )
                         .addValue(
                                 "idSolicitudProceso",
@@ -699,7 +750,6 @@ public class SolicitudCreditoRepository {
                         )
         );
     }
-
 
     // =========================================================
     // BLOQUEAR SOLICITUD PARA GUARDAR
@@ -936,6 +986,583 @@ public class SolicitudCreditoRepository {
         }
 
         return Optional.ofNullable(
+                resultados.get(0)
+        );
+    }
+
+    // =========================================================
+    // PREVISUALIZAR ENTE APROBADOR
+    // =========================================================
+
+    public Optional<SolicitudEnteAprobadorPreviewDTO>
+    previsualizarEnteAprobador(
+            Integer idDatosPersonal,
+            String codigoGarantiaCredito,
+            Integer plazoSolicitado,
+            BigDecimal valorSolicitado,
+            BigDecimal valorSmmlvAplicado,
+            BigDecimal cantidadSmmlvSolicitada
+    ) {
+
+        String sql = """
+        WITH base AS
+        (
+            SELECT
+                :idDatosPersonal::integer
+                    AS id_datos_personal,
+
+                TRIM(:codigoGarantiaCredito)
+                    AS codigo_garantia_credito,
+
+                gc.descripcion_garantia_credito,
+                gc.tipo_garantia,
+
+                :plazoSolicitado::integer
+                    AS plazo_solicitado,
+
+                :valorSolicitado::numeric
+                    AS valor_solicitado,
+
+                :valorSmmlvAplicado::numeric
+                    AS valor_smmlv_aplicado,
+
+                :cantidadSmmlvSolicitada::numeric
+                    AS cantidad_smmlv_solicitada
+
+            FROM cartera.garantias_creditos gc
+
+            WHERE gc.codigo_garantia_credito =
+                  TRIM(:codigoGarantiaCredito)
+
+              AND gc.activo = true
+        ),
+
+        directivo_actual AS
+        (
+            SELECT DISTINCT ON (d.id_datos_personal)
+                d.id_datos_personal,
+                d.id_directivo,
+                d.codigo_tipo_directivo,
+                td.nombre_tipo_directivo,
+                d.calidad_directivo,
+
+                CASE
+                    WHEN d.calidad_directivo = '1'
+                        THEN 'Principal'
+                    WHEN d.calidad_directivo = '2'
+                        THEN 'Suplente'
+                    ELSE d.calidad_directivo
+                END AS nombre_calidad_directivo
+
+            FROM general.directivos d
+
+            LEFT JOIN catalogos.tipos_directivos td
+                ON td.codigo_tipo_directivo =
+                   d.codigo_tipo_directivo
+
+            WHERE d.estado_directivo = '1'
+              AND d.fecha_retiro IS NULL
+
+            ORDER BY
+                d.id_datos_personal,
+                d.id_directivo
+        ),
+
+        privilegiado_actual AS
+        (
+            SELECT DISTINCT ON (p.id_datos_personal)
+                p.id_datos_personal,
+                p.id_privilegiado,
+                p.codigo_parentesco,
+                pa.nombre_parentesco,
+
+                d.id_directivo,
+
+                dp.documento
+                    AS documento_directivo,
+
+                COALESCE(
+                    NULLIF(
+                        TRIM(dp.nombre_completo_nombres),
+                        ''
+                    ),
+                    NULLIF(
+                        TRIM(
+                            concat_ws(
+                                ' ',
+                                dp.nombres,
+                                dp.primer_apellido,
+                                dp.segundo_apellido
+                            )
+                        ),
+                        ''
+                    )
+                ) AS nombre_directivo,
+
+                d.codigo_tipo_directivo,
+                td.nombre_tipo_directivo,
+                d.calidad_directivo,
+
+                CASE
+                    WHEN d.calidad_directivo = '1'
+                        THEN 'Principal'
+                    WHEN d.calidad_directivo = '2'
+                        THEN 'Suplente'
+                    ELSE d.calidad_directivo
+                END AS nombre_calidad_directivo
+
+            FROM general.privilegiados p
+
+            INNER JOIN general.directivos d
+                ON d.id_directivo =
+                   p.id_directivo
+
+            LEFT JOIN catalogos.parentescos pa
+                ON pa.codigo_parentesco =
+                   p.codigo_parentesco
+
+            LEFT JOIN catalogos.tipos_directivos td
+                ON td.codigo_tipo_directivo =
+                   d.codigo_tipo_directivo
+
+            LEFT JOIN reporting.vw_datos_personales_operativa dp
+                ON dp.id_datos_personal =
+                   d.id_datos_personal
+
+            WHERE d.estado_directivo = '1'
+              AND d.fecha_retiro IS NULL
+
+            ORDER BY
+                p.id_datos_personal,
+                p.id_privilegiado
+        ),
+
+        resultado AS
+        (
+            SELECT
+                b.*,
+
+                da.id_directivo IS NOT NULL
+                    AS es_directivo,
+
+                pa.id_privilegiado IS NOT NULL
+                    AS es_privilegiado,
+
+                da.nombre_tipo_directivo
+                    AS nombre_tipo_directivo_asociado,
+
+                da.nombre_calidad_directivo
+                    AS nombre_calidad_directivo_asociado,
+
+                pa.nombre_parentesco,
+                pa.documento_directivo,
+                pa.nombre_directivo,
+
+                pa.nombre_tipo_directivo
+                    AS nombre_tipo_directivo_relacionado,
+
+                pa.nombre_calidad_directivo
+                    AS nombre_calidad_directivo_relacionado,
+
+                CASE
+                    WHEN da.id_directivo IS NOT NULL
+                        THEN 3
+
+                    WHEN pa.id_privilegiado IS NOT NULL
+                        THEN 3
+
+                    ELSE regla.id_ente_aprobacion
+                END AS id_ente_aprobacion,
+
+                CASE
+                    WHEN da.id_directivo IS NOT NULL
+                        THEN 'DIRECTIVO'
+
+                    WHEN pa.id_privilegiado IS NOT NULL
+                        THEN 'PRIVILEGIADO'
+
+                    ELSE 'CUANTIA'
+                END AS motivo_aprobacion,
+
+                CASE
+                    WHEN da.id_directivo IS NOT NULL
+                      OR pa.id_privilegiado IS NOT NULL
+                        THEN NULL
+
+                    ELSE regla.valor_minimo_smmlv
+                END AS valor_minimo_smmlv,
+
+                CASE
+                    WHEN da.id_directivo IS NOT NULL
+                      OR pa.id_privilegiado IS NOT NULL
+                        THEN NULL
+
+                    ELSE regla.valor_maximo_smmlv
+                END AS valor_tope_smmlv
+
+            FROM base b
+
+            LEFT JOIN directivo_actual da
+                ON da.id_datos_personal =
+                   b.id_datos_personal
+
+            LEFT JOIN privilegiado_actual pa
+                ON pa.id_datos_personal =
+                   b.id_datos_personal
+
+            LEFT JOIN LATERAL
+            (
+                SELECT
+                    r.id_ente_aprobacion,
+                    r.valor_minimo_smmlv,
+                    r.valor_maximo_smmlv
+
+                FROM cartera.entes_aprobacion_reglas r
+
+                WHERE r.activo = true
+                  AND r.privilegiado = false
+
+                  AND r.tipo_garantia =
+                      b.tipo_garantia
+
+                  AND b.cantidad_smmlv_solicitada
+                      BETWEEN r.valor_minimo_smmlv
+                          AND r.valor_maximo_smmlv
+
+                  AND
+                  (
+                      r.plazo_minimo IS NULL
+                      OR b.plazo_solicitado >=
+                         r.plazo_minimo
+                  )
+
+                  AND
+                  (
+                      r.plazo_maximo IS NULL
+                      OR b.plazo_solicitado <=
+                         r.plazo_maximo
+                  )
+
+                ORDER BY
+                    r.id_ente_aprobacion,
+                    r.id_ente_aprobacion_regla
+
+                LIMIT 1
+
+            ) regla ON true
+        )
+
+        SELECT
+            r.id_ente_aprobacion,
+            ea.nombre_ente_aprobacion,
+
+            r.motivo_aprobacion,
+
+            r.valor_solicitado,
+            r.valor_smmlv_aplicado,
+            r.cantidad_smmlv_solicitada,
+
+            r.codigo_garantia_credito,
+            r.descripcion_garantia_credito,
+            r.tipo_garantia,
+
+            CASE
+                WHEN r.tipo_garantia = 'P'
+                    THEN 'Personal'
+                WHEN r.tipo_garantia = 'R'
+                    THEN 'Real'
+                ELSE r.tipo_garantia
+            END AS nombre_tipo_garantia,
+
+            r.plazo_solicitado,
+
+            r.es_directivo,
+            r.es_privilegiado,
+
+            CASE
+                WHEN r.es_directivo
+                    THEN r.nombre_tipo_directivo_asociado
+                WHEN r.es_privilegiado
+                    THEN r.nombre_tipo_directivo_relacionado
+                ELSE NULL
+            END AS nombre_tipo_directivo,
+
+            CASE
+                WHEN r.es_directivo
+                    THEN r.nombre_calidad_directivo_asociado
+                WHEN r.es_privilegiado
+                    THEN r.nombre_calidad_directivo_relacionado
+                ELSE NULL
+            END AS nombre_calidad_directivo,
+
+            r.nombre_parentesco,
+            r.documento_directivo,
+            r.nombre_directivo,
+
+            r.valor_minimo_smmlv,
+            r.valor_tope_smmlv,
+
+            CASE
+                WHEN r.valor_tope_smmlv IS NOT NULL
+                 AND r.valor_smmlv_aplicado IS NOT NULL
+                    THEN ROUND(
+                        r.valor_tope_smmlv *
+                        r.valor_smmlv_aplicado,
+                        0
+                    )
+                ELSE NULL
+            END AS valor_tope_pesos,
+
+            CASE
+                WHEN r.id_ente_aprobacion IS NULL
+                    THEN
+                        'No existe una regla de aprobación aplicable'
+
+                WHEN r.es_directivo
+                    THEN
+                        'El asociado es directivo'
+
+                WHEN r.es_privilegiado
+                    THEN
+                        'El asociado es '
+                        || COALESCE(
+                            LOWER(r.nombre_parentesco),
+                            'persona relacionada'
+                        )
+                        || ' del directivo '
+                        || COALESCE(
+                            r.nombre_directivo,
+                            'sin identificar'
+                        )
+
+                ELSE
+                    'Ente determinado por cuantía y tipo de garantía'
+            END AS mensaje_aprobacion,
+
+            CASE
+                WHEN r.es_directivo
+                    THEN concat_ws(
+                        ' - ',
+                        r.nombre_tipo_directivo_asociado,
+                        r.nombre_calidad_directivo_asociado
+                    )
+
+                WHEN r.es_privilegiado
+                    THEN concat_ws(
+                        ' - ',
+                        r.nombre_tipo_directivo_relacionado,
+                        r.nombre_calidad_directivo_relacionado
+                    )
+
+                WHEN r.id_ente_aprobacion IS NOT NULL
+                    THEN
+                        'Cantidad solicitada: '
+                        || ROUND(
+                            r.cantidad_smmlv_solicitada,
+                            2
+                        )
+                        || ' SMMLV'
+                        || ' | Tope reglamentario: '
+                        || ROUND(
+                            r.valor_tope_smmlv,
+                            2
+                        )
+                        || ' SMMLV'
+                        || ' | Tipo de garantía: '
+                        || CASE
+                               WHEN r.tipo_garantia = 'P'
+                                   THEN 'Personal'
+                               WHEN r.tipo_garantia = 'R'
+                                   THEN 'Real'
+                               ELSE COALESCE(
+                                   r.tipo_garantia,
+                                   'Sin definir'
+                               )
+                           END
+
+                ELSE NULL
+            END AS detalle_aprobacion,
+
+            CASE
+                WHEN r.es_directivo
+                    THEN
+                        'Ente aprobador: '
+                        || COALESCE(
+                            ea.nombre_ente_aprobacion,
+                            'Consejo de administración'
+                        )
+                        || '. El asociado es directivo activo de la entidad'
+                        || CASE
+                               WHEN r.nombre_tipo_directivo_asociado IS NOT NULL
+                                 OR r.nombre_calidad_directivo_asociado IS NOT NULL
+                                   THEN
+                                       ', con calidad de '
+                                       || concat_ws(
+                                           ' - ',
+                                           r.nombre_tipo_directivo_asociado,
+                                           r.nombre_calidad_directivo_asociado
+                                       )
+                               ELSE ''
+                           END
+                        || '. Por su condición de directivo, la solicitud debe ser aprobada por '
+                        || COALESCE(
+                            ea.nombre_ente_aprobacion,
+                            'Consejo de administración'
+                        )
+                        || ', independientemente de la cuantía.'
+
+                WHEN r.es_privilegiado
+                    THEN
+                        'Ente aprobador: '
+                        || COALESCE(
+                            ea.nombre_ente_aprobacion,
+                            'Consejo de administración'
+                        )
+                        || '. El asociado es '
+                        || COALESCE(
+                            LOWER(r.nombre_parentesco),
+                            'persona relacionada'
+                        )
+                        || ' del directivo '
+                        || COALESCE(
+                            r.nombre_directivo,
+                            'sin identificar'
+                        )
+                        || CASE
+                               WHEN r.nombre_tipo_directivo_relacionado IS NOT NULL
+                                 OR r.nombre_calidad_directivo_relacionado IS NOT NULL
+                                   THEN
+                                       ', '
+                                       || concat_ws(
+                                           ' - ',
+                                           r.nombre_tipo_directivo_relacionado,
+                                           r.nombre_calidad_directivo_relacionado
+                                       )
+                               ELSE ''
+                           END
+                        || '. Por su relación con un directivo activo, la solicitud debe ser aprobada por '
+                        || COALESCE(
+                            ea.nombre_ente_aprobacion,
+                            'Consejo de administración'
+                        )
+                        || ', independientemente de la cuantía.'
+
+                WHEN r.id_ente_aprobacion IS NOT NULL
+                    THEN
+                        'Ente aprobador: '
+                        || ea.nombre_ente_aprobacion
+                        || '. Valor solicitado: $'
+                        || to_char(
+                            r.valor_solicitado,
+                            'FM999G999G999G999G990'
+                        )
+                        || ', equivalente a '
+                        || to_char(
+                            r.cantidad_smmlv_solicitada,
+                            'FM999G999G990D00'
+                        )
+                        || ' SMMLV'
+                        || '. Garantía: '
+                        || CASE
+                               WHEN r.tipo_garantia = 'P'
+                                   THEN 'Personal'
+                               WHEN r.tipo_garantia = 'R'
+                                   THEN 'Real'
+                               ELSE COALESCE(
+                                   r.tipo_garantia,
+                                   'Sin definir'
+                               )
+                           END
+                        || '. Tope reglamentario de '
+                        || ea.nombre_ente_aprobacion
+                        || ' para garantía '
+                        || CASE
+                               WHEN r.tipo_garantia = 'P'
+                                   THEN 'Personal'
+                               WHEN r.tipo_garantia = 'R'
+                                   THEN 'Real'
+                               ELSE COALESCE(
+                                   r.tipo_garantia,
+                                   'Sin definir'
+                               )
+                           END
+                        || ': '
+                        || to_char(
+                            r.valor_tope_smmlv,
+                            'FM999G999G990D00'
+                        )
+                        || ' SMMLV'
+                        || ', equivalente a $'
+                        || to_char(
+                            ROUND(
+                                r.valor_tope_smmlv *
+                                r.valor_smmlv_aplicado,
+                                0
+                            ),
+                            'FM999G999G999G999G990'
+                        )
+                        || '. La solicitud se encuentra dentro del límite de aprobación de '
+                        || ea.nombre_ente_aprobacion
+                        || '.'
+
+                ELSE
+                    'No fue posible determinar el ente aprobador para la solicitud.'
+            END AS justificacion_ente_aprobacion
+
+        FROM resultado r
+
+        LEFT JOIN cartera.entes_aprobacion ea
+            ON ea.id_ente_aprobacion =
+               r.id_ente_aprobacion
+
+           AND ea.activo = true
+        """;
+
+        List<SolicitudEnteAprobadorPreviewDTO> resultados =
+                jdbc.query(
+                        sql,
+                        new MapSqlParameterSource()
+                                .addValue(
+                                        "idDatosPersonal",
+                                        idDatosPersonal
+                                )
+                                .addValue(
+                                        "codigoGarantiaCredito",
+                                        codigoGarantiaCredito
+                                )
+                                .addValue(
+                                        "plazoSolicitado",
+                                        plazoSolicitado
+                                )
+                                .addValue(
+                                        "valorSolicitado",
+                                        valorSolicitado
+                                )
+                                .addValue(
+                                        "valorSmmlvAplicado",
+                                        valorSmmlvAplicado
+                                )
+                                .addValue(
+                                        "cantidadSmmlvSolicitada",
+                                        cantidadSmmlvSolicitada
+                                ),
+                        BeanPropertyRowMapper.newInstance(
+                                SolicitudEnteAprobadorPreviewDTO.class
+                        )
+                );
+
+        if (resultados.isEmpty()) {
+            return Optional.empty();
+        }
+
+        if (resultados.size() > 1) {
+            throw new IllegalStateException(
+                    "Se encontró más de un resultado al previsualizar "
+                            + "el ente aprobador."
+            );
+        }
+
+        return Optional.of(
                 resultados.get(0)
         );
     }
@@ -2067,10 +2694,537 @@ public class SolicitudCreditoRepository {
         return resultados.get(0);
     }
 
+    // =========================================================
+// CONTEXTO PARA ENVIAR A APROBACION
+// =========================================================
+
+    public Optional<SolicitudEnviarAprobacionContexto> buscarParaEnviarAprobacion(
+            Integer idSolicitudCredito
+    ) {
+
+        String sql = """
+        SELECT
+            sc.id_solicitud_credito,
+            sc.numero_solicitud,
+            sc.id_solicitud_proceso,
+            sc.id_solicitud_resultado,
+            sr.nombre_resultado,
+            sr.es_final,
+            sc.id_ente_aprobacion,
+            ea.nombre_ente_aprobacion,
+            sc.id_linea_credito,
+            sc.codigo_clasificacion_credito,
+            sc.codigo_garantia_credito,
+            sc.id_fondo_garantia,
+            sc.valor_solicitado,
+            sc.plazo_solicitado,
+            sc.id_condicion_inicial,
+            sc.id_tasa_colocacion_detalle
+
+        FROM cartera.solicitudes_creditos sc
+
+        INNER JOIN cartera.solicitudes_resultados sr
+            ON sr.id_solicitud_resultado =
+               sc.id_solicitud_resultado
+        
+        LEFT JOIN cartera.entes_aprobacion ea
+            ON ea.id_ente_aprobacion =
+               sc.id_ente_aprobacion
+
+        WHERE sc.id_solicitud_credito =
+              :idSolicitudCredito
+
+          AND sc.activo = true
+
+        FOR UPDATE OF sc
+        """;
+
+        List<SolicitudEnviarAprobacionContexto> resultados =
+                jdbc.query(
+                        sql,
+                        new MapSqlParameterSource()
+                                .addValue(
+                                        "idSolicitudCredito",
+                                        idSolicitudCredito
+                                ),
+                        (rs, rowNum) ->
+                                new SolicitudEnviarAprobacionContexto(
+                                        rs.getInt("id_solicitud_credito"),
+                                        rs.getString("numero_solicitud"),
+                                        rs.getInt("id_solicitud_proceso"),
+                                        rs.getInt("id_solicitud_resultado"),
+                                        rs.getString("nombre_resultado"),
+                                        rs.getBoolean("es_final"),
+                                        rs.getObject(
+                                                "id_ente_aprobacion",
+                                                Integer.class
+                                        ),
+                                        rs.getString(
+                                                "nombre_ente_aprobacion"
+                                        ),
+                                        rs.getObject(
+                                                "id_linea_credito",
+                                                Integer.class
+                                        ),
+                                        rs.getString(
+                                                "codigo_clasificacion_credito"
+                                        ),
+                                        rs.getString(
+                                                "codigo_garantia_credito"
+                                        ),
+                                        rs.getObject(
+                                                "id_fondo_garantia",
+                                                Integer.class
+                                        ),
+                                        rs.getBigDecimal(
+                                                "valor_solicitado"
+                                        ),
+                                        rs.getObject(
+                                                "plazo_solicitado",
+                                                Integer.class
+                                        ),
+                                        rs.getObject(
+                                                "id_condicion_inicial",
+                                                Integer.class
+                                        ),
+                                        rs.getObject(
+                                                "id_tasa_colocacion_detalle",
+                                                Integer.class
+                                        )
+                                )
+                );
+
+        return resultados.stream().findFirst();
+    }
+
+    // =========================================================
+    // VALIDAR ETAPAS PARA ENVIAR A APROBACIÓN
+    // =========================================================
+
+    public ValidacionEtapasAprobacion validarEtapasParaAprobacion(
+            Integer idSolicitudCredito
+    ) {
+
+        String sql = """
+            SELECT
+                (
+                    SELECT COUNT(*)::integer
+                    FROM cartera.solicitudes_deudores sd
+                    WHERE sd.id_solicitud_credito =
+                          :idSolicitudCredito
+                      AND sd.activo = true
+                ) AS cantidad_deudores,
+
+                (
+                    SELECT COUNT(*)::integer
+                    FROM cartera.solicitudes_deudores sd
+                    WHERE sd.id_solicitud_credito =
+                          :idSolicitudCredito
+                      AND sd.activo = true
+                      AND EXISTS (
+                          SELECT 1
+                          FROM cartera.solicitudes_deudores_financieros sf
+                          WHERE sf.id_solicitud_deudor =
+                                sd.id_solicitud_deudor
+                      )
+                ) AS cantidad_financieros,
+
+                (
+                    SELECT COUNT(*)::integer
+                    FROM cartera.solicitudes_deudores sd
+                    WHERE sd.id_solicitud_credito =
+                          :idSolicitudCredito
+                      AND sd.activo = true
+                      AND EXISTS (
+                          SELECT 1
+                          FROM cartera.solicitudes_deudores_centrales sc
+                          WHERE sc.id_solicitud_deudor =
+                                sd.id_solicitud_deudor
+                            AND sc.activo = true
+                      )
+                ) AS cantidad_centrales,
+
+                (
+                    SELECT COUNT(*)::integer
+                    FROM cartera.solicitudes_deudores sd
+                    WHERE sd.id_solicitud_credito =
+                          :idSolicitudCredito
+                      AND sd.activo = true
+                      AND EXISTS (
+                          SELECT 1
+                          FROM cartera.solicitudes_analisis sa
+                          WHERE sa.id_solicitud_deudor =
+                                sd.id_solicitud_deudor
+                            AND sa.id_solicitud_credito =
+                                sd.id_solicitud_credito
+                      )
+                ) AS cantidad_analisis
+            """;
+
+        return jdbc.queryForObject(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue(
+                                "idSolicitudCredito",
+                                idSolicitudCredito
+                        ),
+                (rs, rowNum) ->
+                        new ValidacionEtapasAprobacion(
+                                rs.getInt("cantidad_deudores"),
+                                rs.getInt("cantidad_financieros"),
+                                rs.getInt("cantidad_centrales"),
+                                rs.getInt("cantidad_analisis")
+                        )
+        );
+    }
+
+    // =========================================================
+    // VALIDAR BIENES PARA ENVIAR A APROBACIÓN
+    // =========================================================
+
+    public boolean validarBienesParaAprobacion(
+            Integer idSolicitudCredito
+    ) {
+
+        String sql = """
+            SELECT
+                CASE
+                    WHEN TRIM(UPPER(gc.tipo_garantia)) = 'P'
+                        THEN true
+
+                    WHEN TRIM(UPPER(gc.tipo_garantia)) = 'R'
+                        THEN EXISTS (
+                            SELECT 1
+                            FROM cartera.solicitudes_deudores sd
+
+                            INNER JOIN cartera.solicitudes_deudores_bienes sdb
+                                ON sdb.id_solicitud_deudor =
+                                   sd.id_solicitud_deudor
+
+                            WHERE sd.id_solicitud_credito =
+                                  sc.id_solicitud_credito
+
+                              AND sd.activo = true
+                              AND sdb.activo = true
+                        )
+
+                    ELSE false
+                END AS bienes_completos
+
+            FROM cartera.solicitudes_creditos sc
+
+            INNER JOIN cartera.garantias_creditos gc
+                ON gc.codigo_garantia_credito =
+                   sc.codigo_garantia_credito
+
+            WHERE sc.id_solicitud_credito =
+                  :idSolicitudCredito
+
+              AND sc.activo = true
+            """;
+
+        List<Boolean> resultados =
+                jdbc.query(
+                        sql,
+                        new MapSqlParameterSource()
+                                .addValue(
+                                        "idSolicitudCredito",
+                                        idSolicitudCredito
+                                ),
+                        (rs, rowNum) ->
+                                rs.getBoolean(
+                                        "bienes_completos"
+                                )
+                );
+
+        if (resultados.isEmpty()) {
+            return false;
+        }
+
+        if (resultados.size() > 1) {
+            throw new IllegalStateException(
+                    "Se encontró más de una garantía para validar los bienes de la solicitud "
+                            + idSolicitudCredito
+                            + "."
+            );
+        }
+
+        return Boolean.TRUE.equals(
+                resultados.get(0)
+        );
+    }
+
+    // =========================================================
+    // ENVIAR SOLICITUD A APROBACIÓN
+    // =========================================================
+
+    public LocalDateTime enviarAprobacion(
+            Integer idSolicitudCredito,
+            Integer idSolicitudProcesoAprobacion,
+            String conceptoAsesorAprobacion,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+            UPDATE cartera.solicitudes_creditos
+            SET
+                id_solicitud_proceso =
+                    :idSolicitudProcesoAprobacion,
+
+                concepto_asesor_aprobacion =
+                    TRIM(:conceptoAsesorAprobacion),
+
+                fecha_fin_documentacion =
+                    CURRENT_TIMESTAMP,
+
+                fecha_ultima_gestion =
+                    CURRENT_TIMESTAMP,
+
+                fk_seguridad_edicion =
+                    :idUsuario,
+
+                fecha_edicion =
+                    CURRENT_TIMESTAMP
+
+            WHERE id_solicitud_credito =
+                  :idSolicitudCredito
+
+              AND activo = true
+
+            RETURNING
+                fecha_ultima_gestion
+            """;
+
+        List<LocalDateTime> resultados =
+                jdbc.query(
+                        sql,
+                        new MapSqlParameterSource()
+                                .addValue(
+                                        "idSolicitudCredito",
+                                        idSolicitudCredito
+                                )
+                                .addValue(
+                                        "idSolicitudProcesoAprobacion",
+                                        idSolicitudProcesoAprobacion
+                                )
+                                .addValue(
+                                        "conceptoAsesorAprobacion",
+                                        conceptoAsesorAprobacion
+                                )
+                                .addValue(
+                                        "idUsuario",
+                                        idUsuario
+                                ),
+                        (rs, rowNum) ->
+                                rs.getTimestamp(
+                                        "fecha_ultima_gestion"
+                                ).toLocalDateTime()
+                );
+
+        return obtenerUnico(
+                resultados,
+                "enviar la solicitud a aprobación"
+        );
+    }
+
+    // =========================================================
+    // FINALIZAR SOLICITUD
+    // =========================================================
+
+    public Optional<SolicitudFinalizarContexto> buscarParaFinalizar(
+            Integer idSolicitudCredito
+    ) {
+
+        String sql = """
+            SELECT
+                sc.id_solicitud_credito,
+                sc.numero_solicitud,
+                sc.id_solicitud_proceso,
+                sc.id_solicitud_resultado,
+                sr.nombre_resultado,
+                sr.es_final
+
+            FROM cartera.solicitudes_creditos sc
+
+            INNER JOIN cartera.solicitudes_resultados sr
+                ON sr.id_solicitud_resultado =
+                   sc.id_solicitud_resultado
+
+            WHERE sc.id_solicitud_credito =
+                  :idSolicitudCredito
+
+              AND sc.activo = true
+
+            FOR UPDATE OF sc
+            """;
+
+        List<SolicitudFinalizarContexto> resultados =
+                jdbc.query(
+                        sql,
+                        new MapSqlParameterSource()
+                                .addValue(
+                                        "idSolicitudCredito",
+                                        idSolicitudCredito
+                                ),
+                        (rs, rowNum) ->
+                                new SolicitudFinalizarContexto(
+                                        rs.getInt(
+                                                "id_solicitud_credito"
+                                        ),
+                                        rs.getString(
+                                                "numero_solicitud"
+                                        ),
+                                        rs.getInt(
+                                                "id_solicitud_proceso"
+                                        ),
+                                        rs.getInt(
+                                                "id_solicitud_resultado"
+                                        ),
+                                        rs.getString(
+                                                "nombre_resultado"
+                                        ),
+                                        rs.getBoolean(
+                                                "es_final"
+                                        )
+                                )
+                );
+
+        return resultados.stream().findFirst();
+    }
+
+
+    public Optional<CatalogoResultado> buscarResultadoFinalActivo(
+            Integer idSolicitudResultado
+    ) {
+
+        String sql = """
+            SELECT
+                sr.id_solicitud_resultado,
+                sr.nombre_resultado
+
+            FROM cartera.solicitudes_resultados sr
+
+            WHERE sr.id_solicitud_resultado =
+                  :idSolicitudResultado
+
+              AND sr.es_final = true
+              AND sr.activo = true
+            """;
+
+        List<CatalogoResultado> resultados =
+                jdbc.query(
+                        sql,
+                        new MapSqlParameterSource()
+                                .addValue(
+                                        "idSolicitudResultado",
+                                        idSolicitudResultado
+                                ),
+                        (rs, rowNum) ->
+                                new CatalogoResultado(
+                                        rs.getInt(
+                                                "id_solicitud_resultado"
+                                        ),
+                                        rs.getString(
+                                                "nombre_resultado"
+                                        )
+                                )
+                );
+
+        return resultados.stream().findFirst();
+    }
+
+
+    public int finalizarSolicitud(
+            Integer idSolicitudCredito,
+            Integer idSolicitudResultado,
+            String observacionFinal,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+            UPDATE cartera.solicitudes_creditos
+            SET
+                id_solicitud_resultado =
+                    :idSolicitudResultado,
+
+                observacion_final =
+                    :observacionFinal,
+
+                fecha_ultima_gestion =
+                    CURRENT_TIMESTAMP,
+
+                fk_seguridad_edicion =
+                    :idUsuario,
+
+                fecha_edicion =
+                    CURRENT_TIMESTAMP
+
+            WHERE id_solicitud_credito =
+                  :idSolicitudCredito
+
+              AND activo = true
+            """;
+
+        return jdbc.update(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue(
+                                "idSolicitudCredito",
+                                idSolicitudCredito
+                        )
+                        .addValue(
+                                "idSolicitudResultado",
+                                idSolicitudResultado
+                        )
+                        .addValue(
+                                "observacionFinal",
+                                observacionFinal
+                        )
+                        .addValue(
+                                "idUsuario",
+                                idUsuario
+                        )
+        );
+    }
+
 
     // =========================================================
     // RECORDS INTERNOS
     // =========================================================
+
+    public record ValidacionEtapasAprobacion(
+            Integer cantidadDeudores,
+            Integer cantidadFinancieros,
+            Integer cantidadCentrales,
+            Integer cantidadAnalisis
+    ) {
+
+        public boolean deudoresCompletos() {
+            return cantidadDeudores != null
+                    && cantidadDeudores > 0;
+        }
+
+        public boolean financieroCompleto() {
+            return deudoresCompletos()
+                    && cantidadDeudores.equals(
+                    cantidadFinancieros
+            );
+        }
+
+        public boolean centralRiesgoCompleta() {
+            return deudoresCompletos()
+                    && cantidadDeudores.equals(
+                    cantidadCentrales
+            );
+        }
+
+        public boolean analisisCompleto() {
+            return deudoresCompletos()
+                    && cantidadDeudores.equals(
+                    cantidadAnalisis
+            );
+        }
+    }
 
     public record CatalogoProceso(
             Integer idSolicitudProceso,
@@ -2081,6 +3235,26 @@ public class SolicitudCreditoRepository {
     public record CatalogoResultado(
             Integer idSolicitudResultado,
             String nombreResultado
+    ) {
+    }
+
+    public record SolicitudEnviarAprobacionContexto(
+            Integer idSolicitudCredito,
+            String numeroSolicitud,
+            Integer idSolicitudProceso,
+            Integer idSolicitudResultado,
+            String nombreResultado,
+            boolean resultadoFinal,
+            Integer idEnteAprobacion,
+            String nombreEnteAprobacion,
+            Integer idLineaCredito,
+            String codigoClasificacionCredito,
+            String codigoGarantiaCredito,
+            Integer idFondoGarantia,
+            java.math.BigDecimal valorSolicitado,
+            Integer plazoSolicitado,
+            Integer idCondicionInicial,
+            Integer idTasaColocacionDetalle
     ) {
     }
 
@@ -2169,6 +3343,16 @@ public class SolicitudCreditoRepository {
             String codigoFondo,
             String nombreFondo,
             BigDecimal porcentajeFondo
+    ) {
+    }
+
+    public record SolicitudFinalizarContexto(
+            Integer idSolicitudCredito,
+            String numeroSolicitud,
+            Integer idSolicitudProceso,
+            Integer idSolicitudResultado,
+            String nombreResultado,
+            Boolean resultadoFinal
     ) {
     }
 

@@ -30,6 +30,9 @@ import {
   SolicitudAnalisisResultado
 } from './originacion-analisis.models';
 
+import {
+  SolicitudValidacionAprobacion
+} from '../solicitud/originacion-solicitud.models';
 
 @Component({
   selector: 'app-originacion-analisis',
@@ -93,6 +96,17 @@ export class OriginacionAnalisisComponent
   resultadoPersistencia:
     SolicitudAnalisisPersistencia | null = null;
 
+  // =========================================================
+  // APROBACIÓN
+  // =========================================================
+
+  conceptoAsesorAprobacion = '';
+
+  validacionAprobacion:
+    SolicitudValidacionAprobacion | null = null;
+
+  validandoAprobacion = false;
+  enviandoAprobacion = false;
 
   // =========================================================
   // ESTADOS
@@ -460,6 +474,162 @@ export class OriginacionAnalisisComponent
 
     return this.resultado
       ?.cumpleOtorgamientoSolicitud === true;
+  }
+
+  // =========================================================
+  // CONCEPTO DEL ASESOR
+  // =========================================================
+
+  actualizarConceptoAsesor(
+    valor: string
+  ): void {
+
+    this.conceptoAsesorAprobacion =
+      valor ?? '';
+
+    this.validacionAprobacion = null;
+  }
+
+
+  get conceptoAsesorValido(): boolean {
+
+    const concepto =
+      this.conceptoAsesorAprobacion.trim();
+
+    return (
+      concepto.length > 0 &&
+      concepto.length <= 1000
+    );
+  }
+
+
+  // =========================================================
+  // VALIDAR EXPEDIENTE PARA APROBACIÓN
+  // =========================================================
+
+  validarParaAprobacion(): void {
+
+    if (!this.idSolicitudCredito) {
+
+      this.error =
+        'No se encontró una solicitud de crédito activa.';
+
+      return;
+    }
+
+    if (this.validandoAprobacion) {
+      return;
+    }
+
+    this.validandoAprobacion = true;
+
+    this.error = '';
+    this.mensaje = '';
+    this.validacionAprobacion = null;
+
+    this.api
+      .validarParaAprobacion(
+        this.idSolicitudCredito
+      )
+      .subscribe({
+
+        next: validacion => {
+
+          this.validacionAprobacion =
+            validacion;
+
+          this.validandoAprobacion = false;
+
+          this.mensaje =
+            validacion.mensaje;
+        },
+
+        error: error => {
+
+          this.validandoAprobacion = false;
+
+          this.error =
+            this.obtenerMensajeError(
+              error,
+              'No fue posible validar el expediente para aprobación.'
+            );
+        }
+      });
+  }
+
+
+  // =========================================================
+  // ENVIAR A APROBACIÓN
+  // =========================================================
+
+  enviarAprobacion(): void {
+
+    if (!this.idSolicitudCredito) {
+
+      this.error =
+        'No se encontró una solicitud de crédito activa.';
+
+      return;
+    }
+
+    if (!this.conceptoAsesorValido) {
+
+      this.error =
+        'El concepto del asesor es obligatorio y no puede superar los 1000 caracteres.';
+
+      return;
+    }
+
+    if (
+      !this.validacionAprobacion
+        ?.puedeEnviarAprobacion
+    ) {
+
+      this.error =
+        'Primero debe validar el expediente y confirmar que está completo.';
+
+      return;
+    }
+
+    if (this.enviandoAprobacion) {
+      return;
+    }
+
+    this.enviandoAprobacion = true;
+
+    this.error = '';
+    this.mensaje = '';
+
+    this.api
+      .enviarAprobacion(
+        this.idSolicitudCredito,
+        this.conceptoAsesorAprobacion
+      )
+      .subscribe({
+
+        next: respuesta => {
+
+          this.enviandoAprobacion = false;
+
+          this.mensaje =
+            `Solicitud ${respuesta.numeroSolicitud} enviada a ${respuesta.nombreEnteAprobacion ?? 'aprobación'}.`;
+
+          this.router.navigate([
+            '/cartera/originacion'
+          ]);
+        },
+
+        error: error => {
+
+          this.enviandoAprobacion = false;
+
+          this.error =
+            this.obtenerMensajeError(
+              error,
+              'No fue posible enviar la solicitud a aprobación.'
+            );
+        }
+      });
   }
 
 

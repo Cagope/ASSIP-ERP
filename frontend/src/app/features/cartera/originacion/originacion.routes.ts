@@ -2,22 +2,36 @@ import {
   Routes
 } from '@angular/router';
 
-import {
-  OriginacionSolicitudComponent
-} from './solicitud/originacion-solicitud.component';
-
 
 export const ORIGINACION_ROUTES:
   Routes = [
 
   // =========================================================
-  // ORIGINACIÓN
+  // BANDEJA DE SOLICITUDES
   // =========================================================
 
   {
     path: '',
-    component:
-      OriginacionSolicitudComponent
+    loadComponent: () =>
+      import(
+        './solicitud/list/solicitud-list.component'
+      ).then(
+        m => m.SolicitudListComponent
+      )
+  },
+
+  // =========================================================
+  // SOLICITUD
+  // =========================================================
+
+  {
+    path: 'solicitud',
+    loadComponent: () =>
+      import(
+        './solicitud/originacion-solicitud.component'
+      ).then(
+        m => m.OriginacionSolicitudComponent
+      )
   },
 
   // =========================================================

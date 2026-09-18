@@ -6,26 +6,29 @@
 
   <app-header-actions
     titulo="Originación de Cartera"
-    [mostrarNuevo]="true"
+    [mostrarNuevo]="false"
     [mostrarImprimir]="false"
-    [mostrarExportar]="false"
-    (nuevo)="nuevaOperacion()">
+    [mostrarExportar]="false">
   </app-header-actions>
 
 
   <!-- ===================================================== -->
-  <!-- CONTEXTO DE AGENCIA                                   -->
+  <!-- CONTEXTO DE LA SOLICITUD                              -->
   <!-- ===================================================== -->
 
   <section class="context-card">
 
     <div>
-      <span class="context-label">
-        Agencia activa
-      </span>
+    <span class="context-label">
+      Agencia
+    </span>
 
       <strong>
-        {{ nombreAgenciaActiva || 'Sin agencia seleccionada' }}
+        {{
+        solicitud
+        ? solicitud.nombreAgencia
+        : (nombreAgenciaActiva || 'Sin agencia seleccionada')
+        }}
       </strong>
     </div>
 
@@ -34,9 +37,9 @@
       *ngIf="solicitud"
       class="context-solicitud">
 
-      <span class="context-label">
-        Solicitud
-      </span>
+    <span class="context-label">
+      Solicitud
+    </span>
 
       <strong>
         {{ solicitud.numeroSolicitud }}
@@ -46,16 +49,65 @@
 
 
     <div
-      *ngIf="solicitud"
+      *ngIf="asociadoSeleccionado && solicitud"
       class="context-solicitud">
 
-      <span class="context-label">
-        Proceso
+    <span class="context-label">
+      Documento
+    </span>
+
+      <strong>
+        {{ asociadoSeleccionado.documento }}
+      </strong>
+
+    </div>
+
+
+    <div
+      *ngIf="asociadoSeleccionado && solicitud"
+      class="context-solicitud">
+
+    <span class="context-label">
+      Solicitante
+    </span>
+
+      <strong>
+        {{ asociadoSeleccionado.nombreCompleto }}
+      </strong>
+
+    </div>
+
+
+    <div
+      *ngIf="asociadoSeleccionado && solicitud"
+      class="context-solicitud">
+
+    <span class="context-label">
+      Actualización
+    </span>
+
+      <strong
+        [class.solicitante-compacto__alerta]="
+        asociadoSeleccionado.informacionActualizada === false
+      ">
+
+        {{
+        asociadoSeleccionado.fechaActualizacion
+        ? (
+        asociadoSeleccionado.fechaActualizacion
+        | date:'dd/MM/yyyy'
+        )
+        : '-'
+        }}
+
+        <span
+          *ngIf="
+          asociadoSeleccionado.informacionActualizada === false
+        ">
+        ⚠
       </span>
 
-      <span class="badge badge--info">
-        {{ solicitud.nombreProceso }}
-      </span>
+      </strong>
 
     </div>
 
@@ -64,13 +116,54 @@
       *ngIf="solicitud"
       class="context-solicitud">
 
-      <span class="context-label">
-        Resultado
-      </span>
+    <span class="context-label">
+      Proceso
+    </span>
+
+      <span class="badge badge--info">
+      {{ solicitud.nombreProceso }}
+    </span>
+
+    </div>
+
+
+    <div
+      *ngIf="solicitud"
+      class="context-solicitud">
+
+    <span class="context-label">
+      Resultado
+    </span>
 
       <span class="badge">
-        {{ solicitud.nombreResultado }}
-      </span>
+      {{ solicitud.nombreResultado }}
+    </span>
+
+    </div>
+
+    <div
+      *ngIf="asociadoSeleccionado && solicitud"
+      class="context-actions">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        [disabled]="cargandoSolicitud || guardandoCredito"
+        (click)="verContextoAsociado()">
+
+        Ver contexto
+
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        [disabled]="cargandoSolicitud || guardandoCredito"
+        (click)="regresarAlListado()">
+
+        Regresar al listado
+
+      </button>
 
     </div>
 
@@ -119,21 +212,25 @@
 
     <div class="step">
       <span>3</span>
-      <strong>Financiero</strong>
+      <strong>Bienes</strong>
     </div>
 
     <div class="step">
       <span>4</span>
-      <strong>Central de riesgo</strong>
+      <strong>Financiero</strong>
     </div>
 
     <div class="step">
       <span>5</span>
+      <strong>Central de riesgo</strong>
+    </div>
+
+    <div class="step">
+      <span>6</span>
       <strong>Análisis</strong>
     </div>
 
   </section>
-
 
   <!-- ===================================================== -->
   <!-- BÚSQUEDA DEL ASOCIADO                                 -->
@@ -881,96 +978,8 @@
     </div>
 
   </section>
-  <!-- ===================================================== -->
-  <!-- SOLICITANTE - RESUMEN COMPACTO                        -->
-  <!-- ===================================================== -->
-
-  <section
-    *ngIf="asociadoSeleccionado && solicitud"
-    class="solicitante-compacto">
-
-    <div class="solicitante-compacto__datos">
-
-      <div>
-      <span>
-        Documento
-      </span>
-
-        <strong>
-          {{ asociadoSeleccionado.documento }}
-        </strong>
-      </div>
 
 
-      <div class="solicitante-compacto__nombre">
-      <span>
-        Solicitante
-      </span>
-
-        <strong>
-          {{ asociadoSeleccionado.nombreCompleto }}
-        </strong>
-      </div>
-
-
-      <div>
-      <span>
-        Actualización
-      </span>
-
-        <strong
-          [class.solicitante-compacto__alerta]="
-          asociadoSeleccionado.informacionActualizada === false
-        ">
-
-          {{
-          asociadoSeleccionado.fechaActualizacion
-          ? (
-          asociadoSeleccionado.fechaActualizacion
-          | date:'dd/MM/yyyy'
-          )
-          : '-'
-          }}
-
-          <span
-            *ngIf="
-            asociadoSeleccionado.informacionActualizada === false
-          ">
-          ⚠
-        </span>
-
-        </strong>
-      </div>
-
-    </div>
-
-
-    <div class="solicitante-compacto__acciones">
-
-      <button
-        type="button"
-        class="btn btn--secondary"
-        [disabled]="cargandoSolicitud || guardandoCredito"
-        (click)="verContextoAsociado()">
-
-        Ver contexto
-
-      </button>
-
-
-      <button
-        type="button"
-        class="btn btn--secondary"
-        [disabled]="cargandoSolicitud || guardandoCredito"
-        (click)="buscarOtroAsociado()">
-
-        Buscar otro asociado
-
-      </button>
-
-    </div>
-
-  </section>
 
   <!-- ===================================================== -->
   <!-- DATOS DEL CRÉDITO                                     -->
@@ -1114,7 +1123,8 @@
           id="garantia"
           [(ngModel)]="formulario.codigoGarantiaCredito"
           name="garantia"
-          [disabled]="!solicitudEditable || guardandoCredito">
+          [disabled]="!solicitudEditable || guardandoCredito"
+          (ngModelChange)="previsualizarEnteAprobador()">
 
           <option value="">
             Seleccione
@@ -1138,7 +1148,6 @@
         </small>
 
       </div>
-
 
       <!-- ================================================= -->
       <!-- SUBGARANTÍA                                      -->
@@ -1372,10 +1381,10 @@
           class="input-number"
           [(ngModel)]="formulario.plazoSolicitado"
           name="plazo"
-          [disabled]="!solicitudEditable || guardandoCredito">
+          [disabled]="!solicitudEditable || guardandoCredito"
+          (ngModelChange)="previsualizarEnteAprobador()">
 
       </div>
-
 
       <!-- ================================================= -->
       <!-- VALOR SOLICITADO                                 -->
@@ -1394,10 +1403,10 @@
           numericFormat
           class="input-number"
           [(ngModel)]="formulario.valorSolicitado"
-          [disabled]="!solicitudEditable || guardandoCredito">
+          [disabled]="!solicitudEditable || guardandoCredito"
+          (ngModelChange)="previsualizarEnteAprobador()">
 
       </div>
-
 
       <!-- ================================================= -->
       <!-- OBSERVACIÓN                                      -->
@@ -1424,10 +1433,260 @@
 
 
     <!-- =================================================== -->
-    <!-- GUARDAR                                            -->
+    <!-- PREVISUALIZACIÓN ENTE APROBADOR                    -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="consultandoEnteAprobador"
+      class="ente-aprobador">
+
+      <div class="ente-aprobador__encabezado">
+
+        <div>
+          <span class="ente-aprobador__etiqueta">
+            ENTE APROBADOR
+          </span>
+
+          <strong class="ente-aprobador__nombre">
+            Consultando...
+          </strong>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div
+      *ngIf="!consultandoEnteAprobador && enteAprobadorPreview"
+      class="ente-aprobador">
+
+      <div class="ente-aprobador__encabezado">
+
+        <div>
+
+          <span class="ente-aprobador__etiqueta">
+            ENTE APROBADOR
+          </span>
+
+          <strong class="ente-aprobador__nombre">
+            {{ enteAprobadorPreview.nombreEnteAprobacion || '-' }}
+          </strong>
+
+        </div>
+
+        <span
+          *ngIf="enteAprobadorPreview.motivoAprobacion"
+          class="ente-aprobador__motivo">
+
+          {{ enteAprobadorPreview.motivoAprobacion }}
+
+        </span>
+
+      </div>
+
+
+      <!-- DIRECTIVO -->
+
+      <div
+        *ngIf="enteAprobadorPreview.esDirectivo === true"
+        class="ente-aprobador__alerta">
+
+        <strong>
+          El asociado es directivo activo de la entidad.
+        </strong>
+
+        <span>
+
+          {{
+            enteAprobadorPreview.nombreTipoDirectivo
+            || 'Directivo'
+          }}
+
+          <ng-container
+            *ngIf="enteAprobadorPreview.nombreCalidadDirectivo">
+
+            -
+            {{ enteAprobadorPreview.nombreCalidadDirectivo }}
+
+          </ng-container>
+
+        </span>
+
+        <p *ngIf="enteAprobadorPreview.mensajeAprobacion">
+          {{ enteAprobadorPreview.mensajeAprobacion }}
+        </p>
+
+      </div>
+
+
+      <!-- PRIVILEGIADO -->
+
+      <div
+        *ngIf="
+          enteAprobadorPreview.esPrivilegiado === true
+          && enteAprobadorPreview.esDirectivo !== true
+        "
+        class="ente-aprobador__alerta">
+
+        <strong>
+          Relación con directivo activo
+        </strong>
+
+        <span>
+          El asociado es
+          <strong>
+            {{ enteAprobadorPreview.nombreParentesco || 'persona relacionada' }}
+          </strong>
+          del directivo
+          <strong>
+            {{ enteAprobadorPreview.nombreDirectivo || '-' }}
+          </strong>.
+        </span>
+
+        <p *ngIf="enteAprobadorPreview.mensajeAprobacion">
+          {{ enteAprobadorPreview.mensajeAprobacion }}
+        </p>
+
+      </div>
+
+
+      <!-- DATOS DE LA OPERACIÓN -->
+
+      <div class="ente-aprobador__datos">
+
+        <div>
+
+          <span>
+            Valor solicitado
+          </span>
+
+          <strong>
+            {{
+            enteAprobadorPreview.valorSolicitado
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            Cantidad solicitada
+          </span>
+
+          <strong>
+            {{
+            enteAprobadorPreview.cantidadSmmlvSolicitada
+            | number:'1.2-2'
+            }}
+            SMMLV
+          </strong>
+
+        </div>
+
+
+        <div>
+
+          <span>
+            Tipo de garantía
+          </span>
+
+          <strong>
+            {{ enteAprobadorPreview.nombreTipoGarantia || '-' }}
+          </strong>
+
+        </div>
+
+
+        <div
+          *ngIf="
+            enteAprobadorPreview.motivoAprobacion === 'CUANTIA'
+            && enteAprobadorPreview.valorTopeSmmlv !== null
+          ">
+
+          <span>
+            Tope reglamentario
+          </span>
+
+          <strong>
+            {{
+            enteAprobadorPreview.valorTopeSmmlv
+            | number:'1.2-2'
+            }}
+            SMMLV
+          </strong>
+
+        </div>
+
+
+        <div
+          *ngIf="
+            enteAprobadorPreview.motivoAprobacion === 'CUANTIA'
+            && enteAprobadorPreview.valorTopePesos !== null
+          ">
+
+          <span>
+            Equivalente del tope
+          </span>
+
+          <strong>
+            {{
+            enteAprobadorPreview.valorTopePesos
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- JUSTIFICACIÓN -->
+
+      <div
+        *ngIf="
+          enteAprobadorPreview.detalleAprobacion
+          && enteAprobadorPreview.esDirectivo !== true
+          && enteAprobadorPreview.esPrivilegiado !== true
+        "
+        class="ente-aprobador__justificacion">
+
+        <span>
+          Justificación de aprobación
+        </span>
+
+        <strong>
+          {{ enteAprobadorPreview.detalleAprobacion }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- ACCIONES PREVIAS                                   -->
     <!-- =================================================== -->
 
     <div class="actions-row">
+
+      <button
+        *ngIf="!solicitud"
+        type="button"
+        class="btn btn--secondary"
+        [disabled]="
+          !puedeGenerarTablaAmortizacion
+          || guardandoCredito
+          || cargandoCatalogos
+        "
+        (click)="abrirTablaAmortizacion()">
+
+        Tabla de amortización
+
+      </button>
 
       <button
         type="button"
@@ -2069,27 +2328,177 @@
 
     </div>
 
-    <div class="actions-row actions-row--navigation">
+    <!-- =================================================== -->
+    <!-- ACCIONES DE LA SOLICITUD                            -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="!mostrandoFinalizacion"
+      class="actions-row actions-row--navigation">
+
+      <button
+        type="button"
+        class="btn btn--danger"
+        [disabled]="
+          !solicitud
+          || solicitud.resultadoFinal === true
+          || finalizandoSolicitud
+        "
+        (click)="abrirFinalizacion()">
+
+        Finalizar solicitud
+
+      </button>
+
 
       <button
         type="button"
         class="btn btn--secondary"
-        [disabled]="!puedeGenerarTablaAmortizacion"
+        [disabled]="
+          !puedeGenerarTablaAmortizacion
+          || finalizandoSolicitud
+        "
         (click)="abrirTablaAmortizacion()">
 
         Tabla de amortización
 
       </button>
 
+
       <button
         type="button"
         class="btn btn--primary"
-        [disabled]="!solicitud"
+        [disabled]="
+          !solicitud
+          || solicitud.resultadoFinal === true
+          || finalizandoSolicitud
+        "
         (click)="irADeudores()">
 
         Continuar a deudores
 
       </button>
+
+    </div>
+
+    <!-- =================================================== -->
+    <!-- FINALIZAR SOLICITUD                                 -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="mostrandoFinalizacion"
+      class="finalizacion-solicitud">
+
+      <div class="finalizacion-solicitud__header">
+
+        <div>
+
+          <strong>
+            Finalizar solicitud
+          </strong>
+
+          <p>
+            Esta acción cerrará definitivamente la solicitud
+            y no permitirá continuar con la originación.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="finalizacion-solicitud__form">
+
+        <div class="f-row">
+
+          <label for="resultadoFinalizacion">
+            Resultado *
+          </label>
+
+          <select
+            id="resultadoFinalizacion"
+            name="resultadoFinalizacion"
+            [(ngModel)]="idResultadoFinalizacion"
+            [disabled]="finalizandoSolicitud">
+
+            <option [ngValue]="null">
+              Seleccione
+            </option>
+
+            <option [ngValue]="3">
+              No viable
+            </option>
+
+            <option [ngValue]="4">
+              Desistida
+            </option>
+
+            <option [ngValue]="6">
+              Anulada
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="f-row f-row--full">
+
+          <label for="observacionFinal">
+            Observación final *
+          </label>
+
+          <textarea
+            id="observacionFinal"
+            name="observacionFinal"
+            rows="4"
+            maxlength="1000"
+            [(ngModel)]="observacionFinal"
+            [disabled]="finalizandoSolicitud"
+            placeholder="Indique el motivo de la finalización">
+          </textarea>
+
+          <small>
+            {{ observacionFinal.length }}/1000
+          </small>
+
+        </div>
+
+      </div>
+
+
+      <div class="actions-row">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          [disabled]="finalizandoSolicitud"
+          (click)="cancelarFinalizacion()">
+
+          Cancelar
+
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn--danger"
+          [disabled]="
+            finalizandoSolicitud
+            || !idResultadoFinalizacion
+            || !observacionFinal.trim()
+          "
+          (click)="finalizarSolicitud()">
+
+          {{
+          finalizandoSolicitud
+          ? 'Finalizando...'
+          : 'Confirmar finalización'
+          }}
+
+        </button>
+
+      </div>
 
     </div>
 

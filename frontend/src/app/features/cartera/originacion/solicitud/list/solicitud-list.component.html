@@ -1,0 +1,475 @@
+<div class="page solicitud-list-page">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <div class="page-header">
+
+    <div>
+      <h2>Solicitudes de crédito</h2>
+
+      <p class="page-subtitle">
+        Consulta y seguimiento de solicitudes en originación de cartera.
+      </p>
+    </div>
+
+    <div class="page-header__actions">
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="nuevaSolicitud()">
+        Nueva solicitud
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- FILTROS -->
+  <!-- ===================================================== -->
+
+  <section class="card">
+
+    <div class="card-header">
+
+      <div>
+        <h3>Filtros de búsqueda</h3>
+
+        <p>
+          Consulte por solicitud, identificación, solicitante,
+          proceso o estado.
+        </p>
+      </div>
+
+    </div>
+
+
+    <form
+      class="filters"
+      (submit)="alPresionarEnter($event)">
+
+      <div class="form-field">
+
+        <label for="numeroSolicitud">
+          N.º solicitud
+        </label>
+
+        <input
+          id="numeroSolicitud"
+          name="numeroSolicitud"
+          type="text"
+          autocomplete="off"
+          placeholder="Número de solicitud"
+          [(ngModel)]="filtros.numeroSolicitud">
+
+      </div>
+
+
+      <div class="form-field">
+
+        <label for="documento">
+          Documento
+        </label>
+
+        <input
+          id="documento"
+          name="documento"
+          type="text"
+          autocomplete="off"
+          placeholder="Identificación"
+          [(ngModel)]="filtros.documento">
+
+      </div>
+
+
+      <div class="form-field form-field--wide">
+
+        <label for="nombreSolicitante">
+          Solicitante
+        </label>
+
+        <input
+          id="nombreSolicitante"
+          name="nombreSolicitante"
+          type="text"
+          autocomplete="off"
+          placeholder="Nombre o apellido"
+          [(ngModel)]="filtros.nombreSolicitante">
+
+      </div>
+
+
+      <div class="form-field">
+
+        <label for="idSolicitudProceso">
+          Proceso
+        </label>
+
+        <select
+          id="idSolicitudProceso"
+          name="idSolicitudProceso"
+          [(ngModel)]="filtros.idSolicitudProceso">
+
+          <option [ngValue]="null">
+            Todos
+          </option>
+
+          <option [ngValue]="1">
+            INICIADA
+          </option>
+
+          <option [ngValue]="2">
+            DOCUMENTACIÓN
+          </option>
+
+          <option [ngValue]="3">
+            APROBACIÓN
+          </option>
+
+          <option [ngValue]="4">
+            DESEMBOLSO
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="form-field">
+
+        <label for="idSolicitudResultado">
+          Estado
+        </label>
+
+        <select
+          id="idSolicitudResultado"
+          name="idSolicitudResultado"
+          [(ngModel)]="filtros.idSolicitudResultado">
+
+          <option [ngValue]="null">
+            Todos
+          </option>
+
+          <option [ngValue]="1">
+            EN CURSO
+          </option>
+
+          <option [ngValue]="2">
+            DESEMBOLSADA
+          </option>
+
+          <option [ngValue]="3">
+            NO VIABLE
+          </option>
+
+          <option [ngValue]="4">
+            DESISTIDA
+          </option>
+
+          <option [ngValue]="5">
+            VENCIDA
+          </option>
+
+          <option [ngValue]="6">
+            ANULADA
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="filters__actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          [disabled]="cargando"
+          (click)="limpiarFiltros()">
+          Limpiar
+        </button>
+
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="cargando">
+          {{ cargando ? 'Consultando...' : 'Buscar' }}
+        </button>
+
+      </div>
+
+    </form>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- RESULTADOS -->
+  <!-- ===================================================== -->
+
+  <section class="card">
+
+    <div class="card-header card-header--results">
+
+      <div>
+        <h3>Solicitudes</h3>
+
+        <p *ngIf="!cargando && !error">
+          {{ solicitudes.length }}
+          {{ solicitudes.length === 1 ? 'solicitud encontrada' : 'solicitudes encontradas' }}
+        </p>
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- CARGANDO -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="cargando"
+      class="state-message">
+
+      Consultando solicitudes...
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- ERROR -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="!cargando && error"
+      class="state-message state-message--error">
+
+      {{ error }}
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- SIN RESULTADOS -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="!cargando && !error && solicitudes.length === 0"
+      class="state-message state-message--empty">
+
+      No se encontraron solicitudes con los filtros seleccionados.
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- TABLA -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="!cargando && !error && solicitudes.length > 0"
+      class="table-wrap">
+
+      <table class="table">
+
+        <thead>
+
+        <tr>
+          <th>Agencia</th>
+          <th>Solicitud</th>
+          <th>Fecha</th>
+          <th>Documento</th>
+          <th>Solicitante</th>
+          <th>Asesor</th>
+          <th>Proceso</th>
+          <th>Estado</th>
+          <th class="text-right">Valor solicitado</th>
+          <th class="text-center">Acción</th>
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        <tr
+          *ngFor="
+              let solicitud of solicitudes;
+              trackBy: trackBySolicitud
+            ">
+
+          <!-- AGENCIA -->
+
+          <td>
+
+            <div class="agency-cell">
+              <strong>
+                {{ solicitud.codigoAgencia }}
+              </strong>
+
+              <span>
+                  {{ solicitud.nombreAgencia }}
+                </span>
+            </div>
+
+          </td>
+
+
+          <!-- SOLICITUD -->
+
+          <td>
+
+            <strong class="solicitud-number">
+              {{ solicitud.numeroSolicitud }}
+            </strong>
+
+          </td>
+
+
+          <!-- FECHA -->
+
+          <td class="nowrap">
+
+            {{
+            solicitud.fechaInicioSolicitud
+            | date:'dd/MM/yyyy'
+            }}
+
+            <span class="date-time">
+                {{
+                  solicitud.fechaInicioSolicitud
+                    | date:'HH:mm'
+                }}
+              </span>
+
+          </td>
+
+
+          <!-- DOCUMENTO -->
+
+          <td class="nowrap">
+
+              <span
+                *ngIf="solicitud.tipoDocumento"
+                class="document-type">
+                {{ solicitud.tipoDocumento }}
+              </span>
+
+            {{ solicitud.documento || '—' }}
+
+          </td>
+
+
+          <!-- SOLICITANTE -->
+
+          <td class="applicant-cell">
+
+            {{ solicitud.nombreSolicitante || '—' }}
+
+          </td>
+
+
+          <!-- ASESOR -->
+
+          <td>
+
+            <div class="advisor-cell">
+
+                <span>
+                  {{ solicitud.nombreAsesor || '—' }}
+                </span>
+
+              <small *ngIf="solicitud.usuarioAsesor">
+                {{ solicitud.usuarioAsesor }}
+              </small>
+
+            </div>
+
+          </td>
+
+
+          <!-- PROCESO -->
+
+          <td>
+
+              <span class="badge badge--process">
+                {{ solicitud.nombreProceso }}
+              </span>
+
+          </td>
+
+
+          <!-- ESTADO -->
+
+          <td>
+
+              <span
+                class="badge"
+                [class.badge--active]="solicitud.idSolicitudResultado === 1"
+                [class.badge--success]="solicitud.idSolicitudResultado === 2"
+                [class.badge--danger]="solicitud.idSolicitudResultado === 3"
+                [class.badge--muted]="
+                  solicitud.idSolicitudResultado === 4
+                  || solicitud.idSolicitudResultado === 5
+                  || solicitud.idSolicitudResultado === 6
+                ">
+
+                {{ solicitud.nombreResultado }}
+
+              </span>
+
+          </td>
+
+
+          <!-- VALOR -->
+
+          <td class="text-right nowrap">
+
+            <strong *ngIf="solicitud.valorSolicitado != null">
+              {{
+              solicitud.valorSolicitado
+              | currency:'COP':'symbol-narrow':'1.0-0'
+              }}
+            </strong>
+
+            <span *ngIf="solicitud.valorSolicitado == null">
+                —
+              </span>
+
+          </td>
+
+
+          <!-- ACCIÓN -->
+
+          <td class="text-center">
+
+            <button
+              type="button"
+              class="btn btn--small btn--secondary"
+              (click)="abrirSolicitud(solicitud)">
+
+              {{
+              solicitud.idSolicitudResultado === 1
+              ? 'Continuar'
+              : 'Consultar'
+              }}
+
+            </button>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</div>

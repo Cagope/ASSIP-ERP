@@ -959,7 +959,136 @@
 
 
     <!-- =================================================== -->
-    <!-- PIE / ACCIONES -->
+    <!-- CIERRE DEL ANÁLISIS / ENVÍO A APROBACIÓN -->
+    <!-- =================================================== -->
+
+    <section
+      *ngIf="analisisCompleto"
+      class="card">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Concepto del asesor</h3>
+
+          <p>
+            Registre el concepto final de la solicitud antes
+            de presentarla al ente aprobador.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label for="conceptoAsesorAprobacion">
+          Concepto para aprobación
+          <span aria-hidden="true">*</span>
+        </label>
+
+        <textarea
+          id="conceptoAsesorAprobacion"
+          class="form-control"
+          rows="5"
+          maxlength="1000"
+          [value]="conceptoAsesorAprobacion"
+          [disabled]="
+            validandoAprobacion ||
+            enviandoAprobacion
+          "
+          (input)="
+            actualizarConceptoAsesor(
+              $any($event.target).value
+            )
+          "
+          placeholder="Registre el concepto del asesor sobre la solicitud evaluada.">
+        </textarea>
+
+        <div class="field-help">
+          {{
+          conceptoAsesorAprobacion.length
+          }}
+          / 1000 caracteres
+        </div>
+
+      </div>
+
+
+      <!-- =============================================== -->
+      <!-- RESULTADO DE VALIDACIÓN -->
+      <!-- =============================================== -->
+
+      <div
+        *ngIf="validacionAprobacion"
+        class="resultado-motivo">
+
+        <span>
+          Validación del expediente
+        </span>
+
+        <strong>
+          {{ validacionAprobacion.mensaje }}
+        </strong>
+
+      </div>
+
+
+      <!-- =============================================== -->
+      <!-- ACCIONES DE APROBACIÓN -->
+      <!-- =============================================== -->
+
+      <div class="page-footer-actions">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          [disabled]="
+            validandoAprobacion ||
+            enviandoAprobacion ||
+            !idSolicitudCredito
+          "
+          (click)="validarParaAprobacion()">
+
+          <span *ngIf="!validandoAprobacion">
+            Validar expediente
+          </span>
+
+          <span *ngIf="validandoAprobacion">
+            Validando...
+          </span>
+
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="
+            enviandoAprobacion ||
+            validandoAprobacion ||
+            !conceptoAsesorValido ||
+            !validacionAprobacion?.puedeEnviarAprobacion
+          "
+          (click)="enviarAprobacion()">
+
+          <span *ngIf="!enviandoAprobacion">
+            Enviar a aprobación
+          </span>
+
+          <span *ngIf="enviandoAprobacion">
+            Enviando...
+          </span>
+
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- PIE / ACCIONES DEL ANÁLISIS -->
     <!-- =================================================== -->
 
     <div class="page-footer-actions">
@@ -967,7 +1096,12 @@
       <button
         type="button"
         class="btn btn-secondary"
-        [disabled]="cargando || guardando"
+        [disabled]="
+          cargando ||
+          guardando ||
+          validandoAprobacion ||
+          enviandoAprobacion
+        "
         (click)="volver()">
 
         Volver a central de riesgo
@@ -979,19 +1113,21 @@
         type="button"
         class="btn btn-primary"
         [disabled]="
-      cargando ||
-      guardando ||
-      !idSolicitudCredito
-    "
+          cargando ||
+          guardando ||
+          validandoAprobacion ||
+          enviandoAprobacion ||
+          !idSolicitudCredito
+        "
         (click)="persistirAnalisis()">
 
-    <span *ngIf="!guardando">
-      Calcular y guardar análisis
-    </span>
+        <span *ngIf="!guardando">
+          Calcular y guardar análisis
+        </span>
 
         <span *ngIf="guardando">
-      Procesando...
-    </span>
+          Procesando...
+        </span>
 
       </button>
 

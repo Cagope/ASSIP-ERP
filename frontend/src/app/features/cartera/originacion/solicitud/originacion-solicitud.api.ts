@@ -32,6 +32,12 @@ import {
   SolicitudCreditoGuardarRequest,
   SolicitudCreditoGuardarResponse,
   SolicitudCreditoResumen,
+  SolicitudFinalizarRequest,
+  SolicitudFinalizarResponse,
+  SolicitudValidacionAprobacion,
+  SolicitudEnviarAprobacionResponse,
+  SolicitudEnteAprobadorPreviewRequest,
+  SolicitudEnteAprobadorPreview,
   SubgarantiaCredito,
   TipoCuota
 } from './originacion-solicitud.models';
@@ -193,6 +199,56 @@ export class OriginacionSolicitudApi {
     );
   }
 
+  // =========================================================
+  // SOLICITUD
+  // PREVISUALIZAR ENTE APROBADOR
+  // =========================================================
+
+  previsualizarEnteAprobador(
+    request: SolicitudEnteAprobadorPreviewRequest
+  ): Observable<SolicitudEnteAprobadorPreview> {
+
+    return this.http.post<SolicitudEnteAprobadorPreview>(
+      `${this.solicitudesUrl}/preview-ente-aprobador`,
+      request
+    );
+  }
+
+  // =========================================================
+  // SOLICITUD
+  // CONSULTAR TASA PARA SIMULACIÓN
+  // =========================================================
+
+  consultarTasaSimulacion(
+    idLineaCredito: number,
+    codigoGarantiaCredito: string,
+    amortizacionCapital: number,
+    plazoSolicitado: number
+  ): Observable<number> {
+
+    const params = new HttpParams()
+      .set(
+        'idLineaCredito',
+        idLineaCredito.toString()
+      )
+      .set(
+        'codigoGarantiaCredito',
+        codigoGarantiaCredito
+      )
+      .set(
+        'amortizacionCapital',
+        amortizacionCapital.toString()
+      )
+      .set(
+        'plazoSolicitado',
+        plazoSolicitado.toString()
+      );
+
+    return this.http.get<number>(
+      `${this.solicitudesUrl}/tasa-simulacion`,
+      { params }
+    );
+  }
 
   // =========================================================
   // SOLICITUD
@@ -223,6 +279,52 @@ export class OriginacionSolicitudApi {
       SolicitudCreditoDetalle
     >(
       `${this.solicitudesUrl}/${idSolicitudCredito}`
+    );
+  }
+
+  // =========================================================
+  // SOLICITUD
+  // FINALIZAR
+  // =========================================================
+
+  finalizarSolicitud(
+    request: SolicitudFinalizarRequest
+  ): Observable<SolicitudFinalizarResponse> {
+
+    return this.http.put<SolicitudFinalizarResponse>(
+      `${this.solicitudesUrl}/finalizar`,
+      request
+    );
+
+  }
+
+  // =========================================================
+  // SOLICITUD
+  // VALIDAR PARA APROBACIÓN
+  // =========================================================
+
+  validarParaAprobacion(
+    idSolicitudCredito: number
+  ): Observable<SolicitudValidacionAprobacion> {
+
+    return this.http.get<SolicitudValidacionAprobacion>(
+      `${this.solicitudesUrl}/${idSolicitudCredito}/validar-aprobacion`
+    );
+  }
+
+
+  // =========================================================
+  // SOLICITUD
+  // ENVIAR A APROBACIÓN
+  // =========================================================
+
+  enviarAprobacion(
+    idSolicitudCredito: number
+  ): Observable<SolicitudEnviarAprobacionResponse> {
+
+    return this.http.put<SolicitudEnviarAprobacionResponse>(
+      `${this.solicitudesUrl}/${idSolicitudCredito}/enviar-aprobacion`,
+      null
     );
   }
 
@@ -262,7 +364,6 @@ export class OriginacionSolicitudApi {
       `${this.catalogosUrl}/destinos-economicos`
     );
   }
-
 
   listarGarantias():
     Observable<GarantiaCredito[]> {
@@ -337,5 +438,4 @@ export class OriginacionSolicitudApi {
       `${this.catalogosUrl}/centrales-riesgo`
     );
   }
-
 }

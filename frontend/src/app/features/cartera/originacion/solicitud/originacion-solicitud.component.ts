@@ -41,6 +41,7 @@ import {
 } from './originacion-solicitud-state.service';
 
 import {
+  ActivatedRoute,
   Router
 } from '@angular/router';
 
@@ -71,10 +72,10 @@ import {
   SolicitudCreditoGuardarRequest,
   SolicitudCreditoGuardarResponse,
   SolicitudCreditoResumen,
+  SolicitudEnteAprobadorPreview,
   SubgarantiaCredito,
   TipoCuota
 } from './originacion-solicitud.models';
-
 
 interface FormularioCredito {
 
@@ -232,6 +233,15 @@ export class OriginacionSolicitudComponent
     SolicitudCreditoGuardarResponse | null = null;
 
   // =========================================================
+  // PREVISUALIZACIÓN ENTE APROBADOR
+  // =========================================================
+
+  enteAprobadorPreview:
+    SolicitudEnteAprobadorPreview | null = null;
+
+    consultandoEnteAprobador = false;
+
+  // =========================================================
   // CONTEXTO RESUMIDO DEL ASOCIADO
   // =========================================================
 
@@ -242,15 +252,24 @@ export class OriginacionSolicitudComponent
 
   reciprocidadSimulada = 50;
 
+  // =========================================================
+  // FINALIZAR SOLICITUD
+  // =========================================================
+
+  mostrandoFinalizacion = false;
+
+  finalizandoSolicitud = false;
+
+  idResultadoFinalizacion: number | null = null;
+
+  observacionFinal = '';
 
   // =========================================================
   // MENSAJES
   // =========================================================
 
   error = '';
-
   mensaje = '';
-
 
   // =========================================================
   // CONSTRUCTOR
@@ -264,6 +283,7 @@ export class OriginacionSolicitudComponent
       SessionService,
 
     private readonly router: Router,
+    private readonly route: ActivatedRoute,
 
     private readonly stateService:
       OriginacionSolicitudStateService,
@@ -283,12 +303,125 @@ export class OriginacionSolicitudComponent
     this.agenciaActiva =
       this.session.getAgenciaActiva();
 
-    this.restaurarEstadoNavegacion();
+    const idSolicitudCredito =
+      Number(
+        this.route.snapshot.queryParamMap.get(
+          'idSolicitudCredito'
+        )
+      );
+
+    const idDatosPersonal =
+      Number(
+        this.route.snapshot.queryParamMap.get(
+          'idDatosPersonal'
+        )
+      );
+
+    const idAgencia =
+      Number(
+        this.route.snapshot.queryParamMap.get(
+          'idAgencia'
+        )
+      );
+
+    const vieneDesdeBandeja =
+      idSolicitudCredito > 0
+      && idDatosPersonal > 0
+      && idAgencia > 0;
+
+    if (vieneDesdeBandeja) {
+
+      this.stateService.limpiar();
+
+      this.cargarAsociadoDesdeBandeja(
+        idSolicitudCredito,
+        idDatosPersonal,
+        idAgencia
+      );
+
+    } else {
+
+      this.restaurarEstadoNavegacion();
+    }
 
     this.cargarCatalogos();
 
   }
 
+  private cargarAsociadoDesdeBandeja(
+    idSolicitudCredito: number,
+    idDatosPersonal: number,
+    idAgencia: number
+  ): void {
+
+    this.cargandoSolicitud = true;
+    this.error = '';
+    this.mensaje = '';
+
+    this.api
+      .buscarAsociadoPorId(
+        idDatosPersonal,
+        idAgencia
+      )
+      .subscribe({
+
+        next: asociado => {
+
+          this.asociadoSeleccionado =
+            asociado;
+
+          this.api
+            .crearRetomar({
+              idSolicitudCredito,
+              idAgencia,
+              idDatosPersonal
+            })
+            .subscribe({
+
+              next: respuesta => {
+
+                this.mensaje =
+                  `Solicitud ${respuesta.numeroSolicitud} retomada correctamente.`;
+
+                this.cargarDetalleSolicitud(
+                  respuesta.idSolicitudCredito
+                );
+
+              },
+
+              error: error => {
+
+                this.cargandoSolicitud =
+                  false;
+
+                this.error =
+                  this.obtenerMensajeError(
+                    error,
+                    'No fue posible retomar la solicitud.'
+                  );
+
+              }
+
+            });
+
+        },
+
+        error: error => {
+
+          this.cargandoSolicitud =
+            false;
+
+          this.error =
+            this.obtenerMensajeError(
+              error,
+              'No fue posible cargar el asociado de la solicitud.'
+            );
+
+        }
+
+      });
+
+  }
 
   // =========================================================
   // CATÁLOGOS
@@ -542,6 +675,9 @@ export class OriginacionSolicitudComponent
       null;
 
     this.resultadoGuardado =
+      null;
+
+    this.enteAprobadorPreview =
       null;
 
     this.formulario =
@@ -1163,6 +1299,93 @@ export class OriginacionSolicitudComponent
   }
 
   // =========================================================
+  // PREVISUALIZAR ENTE APROBADOR
+  // =========================================================
+
+  previsualizarEnteAprobador(): void {
+
+    const idAgencia =
+      Number(
+        this.agenciaActiva?.idAgencia
+      );
+
+    const idDatosPersonal =
+      Number(
+        this.asociadoSeleccionado?.idDatosPersonal
+      );
+
+    const codigoGarantiaCredito =
+      this.normalizarTexto(
+        this.formulario.codigoGarantiaCredito
+      );
+
+    const plazoSolicitado =
+      Number(
+        this.formulario.plazoSolicitado
+      );
+
+    const valorSolicitado =
+      Number(
+        this.formulario.valorSolicitado
+      );
+
+    if (
+      !Number.isInteger(idAgencia)
+      || idAgencia <= 0
+      || !Number.isInteger(idDatosPersonal)
+      || idDatosPersonal <= 0
+      || !codigoGarantiaCredito
+      || !Number.isInteger(plazoSolicitado)
+      || plazoSolicitado <= 0
+      || !Number.isFinite(valorSolicitado)
+      || valorSolicitado <= 0
+    ) {
+
+      this.enteAprobadorPreview = null;
+
+      return;
+    }
+
+    this.consultandoEnteAprobador = true;
+
+    this.api
+      .previsualizarEnteAprobador({
+
+        idAgencia,
+
+        idDatosPersonal,
+
+        codigoGarantiaCredito,
+
+        plazoSolicitado,
+
+        valorSolicitado
+
+      })
+      .subscribe({
+
+        next: respuesta => {
+
+          this.enteAprobadorPreview =
+            respuesta;
+
+          this.consultandoEnteAprobador =
+            false;
+        },
+
+        error: () => {
+
+          this.enteAprobadorPreview =
+            null;
+
+          this.consultandoEnteAprobador =
+            false;
+        }
+
+      });
+  }
+
+  // =========================================================
   // VALIDAR FORMULARIO
   // =========================================================
 
@@ -1332,6 +1555,9 @@ export class OriginacionSolicitudComponent
     this.resultadoGuardado =
       null;
 
+    this.enteAprobadorPreview =
+      null;
+
     this.contextoAsociado = null;
 
     this.reciprocidadSimulada = 50;
@@ -1376,6 +1602,146 @@ export class OriginacionSolicitudComponent
     );
   }
 
+  // =========================================================
+  // FINALIZAR SOLICITUD
+  // =========================================================
+
+  abrirFinalizacion(): void {
+
+    if (
+      !this.solicitud
+      || this.solicitud.resultadoFinal === true
+      || this.solicitud.activo === false
+      || this.finalizandoSolicitud
+    ) {
+      return;
+    }
+
+    this.idResultadoFinalizacion = null;
+
+    this.observacionFinal = '';
+
+    this.error = '';
+
+    this.mensaje = '';
+
+    this.mostrandoFinalizacion = true;
+  }
+
+  cancelarFinalizacion(): void {
+
+    if (this.finalizandoSolicitud) {
+      return;
+    }
+
+    this.mostrandoFinalizacion = false;
+
+    this.idResultadoFinalizacion = null;
+
+    this.observacionFinal = '';
+
+    this.error = '';
+
+    this.mensaje = '';
+  }
+
+  finalizarSolicitud(): void {
+
+    if (
+      !this.solicitud
+      || this.finalizandoSolicitud
+    ) {
+      return;
+    }
+
+    const idResultado =
+      Number(this.idResultadoFinalizacion);
+
+    if (
+      ![3, 4, 6].includes(idResultado)
+    ) {
+
+      this.error =
+        'Seleccione el resultado de la finalización.';
+
+      return;
+    }
+
+    const observacion =
+      this.normalizarTexto(
+        this.observacionFinal
+      );
+
+    if (!observacion) {
+
+      this.error =
+        'Ingrese la observación final de la solicitud.';
+
+      return;
+    }
+
+    if (observacion.length > 1000) {
+
+      this.error =
+        'La observación final no puede superar los 1000 caracteres.';
+
+      return;
+    }
+
+    this.error = '';
+
+    this.mensaje = '';
+
+    this.finalizandoSolicitud = true;
+
+    this.api
+      .finalizarSolicitud({
+
+        idSolicitudCredito:
+          this.solicitud.idSolicitudCredito,
+
+        idSolicitudResultado:
+          idResultado,
+
+        observacionFinal:
+          observacion
+
+      })
+      .subscribe({
+
+        next: respuesta => {
+
+          this.finalizandoSolicitud = false;
+
+          this.mostrandoFinalizacion = false;
+
+          this.idResultadoFinalizacion = null;
+
+          this.observacionFinal = '';
+
+          this.stateService.limpiar();
+
+          this.mensaje =
+            `Solicitud ${respuesta.numeroSolicitud} finalizada como ${respuesta.nombreResultado}.`;
+
+          this.router.navigate([
+            '/cartera/originacion'
+          ]);
+        },
+
+        error: error => {
+
+          this.finalizandoSolicitud = false;
+
+          this.error =
+            this.obtenerMensajeError(
+              error,
+              'No fue posible finalizar la solicitud.'
+            );
+        }
+
+      });
+  }
 
   // =========================================================
   // ESTADO DE NAVEGACIÓN
@@ -1685,78 +2051,193 @@ export class OriginacionSolicitudComponent
 
   get puedeGenerarTablaAmortizacion(): boolean {
 
-    const solicitud =
-      this.solicitud;
+    // =======================================================
+    // SOLICITUD YA GUARDADA
+    // =======================================================
 
-    if (!solicitud) {
-      return false;
+    if (this.solicitud) {
+
+      const modalidad =
+        this.obtenerModalidadSolicitud(
+          this.solicitud
+        );
+
+      return (
+        Number(this.solicitud.valorSolicitado) > 0
+        && Number(this.solicitud.tasaColocacionAplicada) > 0
+        && Number(this.solicitud.plazoSolicitado) > 0
+        && Number(this.solicitud.amortizacionCapital) > 0
+        && !!this.solicitud.codigoTipoCuota
+        && !!this.solicitud.tipoModalidadInteres
+        && modalidad !== null
+        && Number(modalidad.periodoMeses) > 0
+      );
     }
 
+
+    // =======================================================
+    // SIMULACIÓN ANTES DE GRABAR
+    // =======================================================
+
     const modalidad =
-      this.obtenerModalidadSolicitud(
-        solicitud
-      );
+      this.obtenerModalidadSeleccionada();
 
     return (
-      Number(solicitud.valorSolicitado) > 0
-      && Number(solicitud.tasaColocacionAplicada) > 0
-      && Number(solicitud.plazoSolicitado) > 0
-      && Number(solicitud.amortizacionCapital) > 0
-      && !!solicitud.codigoTipoCuota
-      && !!solicitud.tipoModalidadInteres
+      Number(this.formulario.idLineaCredito) > 0
+      && !!this.formulario.codigoGarantiaCredito
+      && Number(this.formulario.amortizacionCapital) > 0
+      && Number(this.formulario.plazoSolicitado) > 0
+      && Number(this.formulario.valorSolicitado) > 0
+      && !!this.formulario.codigoTipoCuota
       && modalidad !== null
       && Number(modalidad.periodoMeses) > 0
+      && !!modalidad.tipoModalidad
     );
-
   }
 
 
   abrirTablaAmortizacion(): void {
 
-    const solicitud =
-      this.solicitud;
+    // =======================================================
+    // SOLICITUD YA GUARDADA
+    // =======================================================
 
-    if (!solicitud) {
-      this.error =
-        'No existe una solicitud para generar la tabla de amortización.';
+    if (this.solicitud) {
+
+      const modalidad =
+        this.obtenerModalidadSolicitud(
+          this.solicitud
+        );
+
+      if (!modalidad) {
+
+        this.error =
+          'No fue posible determinar la periodicidad de intereses de la solicitud.';
+
+        return;
+      }
+
+      this.abrirTablaAmortizacionConDatos(
+        Number(this.solicitud.valorSolicitado),
+        Number(this.solicitud.tasaColocacionAplicada),
+        Number(this.solicitud.plazoSolicitado),
+        Number(this.solicitud.amortizacionCapital),
+        Number(modalidad.periodoMeses),
+        this.solicitud.tipoModalidadInteres ?? '',
+        this.solicitud.codigoTipoCuota ?? ''
+      );
+
       return;
     }
+
+
+    // =======================================================
+    // SIMULACIÓN ANTES DE GRABAR
+    // =======================================================
 
     const modalidad =
-      this.obtenerModalidadSolicitud(
-        solicitud
-      );
+      this.obtenerModalidadSeleccionada();
 
     if (!modalidad) {
+
       this.error =
-        'No fue posible determinar la periodicidad de intereses de la solicitud.';
+        'Seleccione la modalidad de interés para generar la tabla de amortización.';
+
       return;
     }
 
-    const valorCredito =
+    const idLineaCredito =
       Number(
-        solicitud.valorSolicitado
+        this.formulario.idLineaCredito
       );
 
-    const tasaColocacion =
-      Number(
-        solicitud.tasaColocacionAplicada
+    const codigoGarantiaCredito =
+      this.normalizarTexto(
+        this.formulario.codigoGarantiaCredito
       );
 
-    const plazoMeses =
+    const amortizacionCapital =
       Number(
-        solicitud.plazoSolicitado
+        this.formulario.amortizacionCapital
       );
 
-    const amortizacionCapitalMeses =
+    const plazoSolicitado =
       Number(
-        solicitud.amortizacionCapital
+        this.formulario.plazoSolicitado
       );
 
-    const periodoInteresMeses =
+    const valorSolicitado =
       Number(
-        modalidad.periodoMeses
+        this.formulario.valorSolicitado
       );
+
+    if (
+      !Number.isInteger(idLineaCredito)
+      || idLineaCredito <= 0
+      || !codigoGarantiaCredito
+      || !Number.isInteger(amortizacionCapital)
+      || amortizacionCapital <= 0
+      || !Number.isInteger(plazoSolicitado)
+      || plazoSolicitado <= 0
+      || !Number.isFinite(valorSolicitado)
+      || valorSolicitado <= 0
+      || !this.formulario.codigoTipoCuota
+      || Number(modalidad.periodoMeses) <= 0
+      || !modalidad.tipoModalidad
+    ) {
+
+      this.error =
+        'Complete los datos financieros requeridos para generar la tabla de amortización.';
+
+      return;
+    }
+
+    this.error = '';
+
+    this.api
+      .consultarTasaSimulacion(
+        idLineaCredito,
+        codigoGarantiaCredito,
+        amortizacionCapital,
+        plazoSolicitado
+      )
+      .subscribe({
+
+        next: tasaColocacion => {
+
+          this.abrirTablaAmortizacionConDatos(
+            valorSolicitado,
+            Number(tasaColocacion),
+            plazoSolicitado,
+            amortizacionCapital,
+            Number(modalidad.periodoMeses),
+            modalidad.tipoModalidad,
+            this.formulario.codigoTipoCuota
+          );
+        },
+
+        error: error => {
+
+          this.error =
+            this.obtenerMensajeError(
+              error,
+              'No fue posible determinar la tasa de colocación para la simulación.'
+            );
+        }
+
+      });
+  }
+
+
+  private abrirTablaAmortizacionConDatos(
+    valorCredito: number,
+    tasaColocacion: number,
+    plazoMeses: number,
+    amortizacionCapitalMeses: number,
+    periodoInteresMeses: number,
+    tipoModalidadInteres: string,
+    codigoTipoCuota: string
+  ): void {
 
     if (
       !Number.isFinite(valorCredito)
@@ -1769,11 +2250,13 @@ export class OriginacionSolicitudComponent
       || amortizacionCapitalMeses <= 0
       || !Number.isInteger(periodoInteresMeses)
       || periodoInteresMeses <= 0
-      || !solicitud.codigoTipoCuota
-      || !solicitud.tipoModalidadInteres
+      || !tipoModalidadInteres
+      || !codigoTipoCuota
     ) {
+
       this.error =
-        'La solicitud no tiene completos los datos financieros requeridos para generar la tabla de amortización.';
+        'No están completos los datos financieros requeridos para generar la tabla de amortización.';
+
       return;
     }
 
@@ -1801,11 +2284,8 @@ export class OriginacionSolicitudComponent
         amortizacionCapitalMeses,
         periodoInteresMeses,
 
-        tipoModalidadInteres:
-          solicitud.tipoModalidadInteres,
-
-        codigoTipoCuota:
-          solicitud.codigoTipoCuota,
+        tipoModalidadInteres,
+        codigoTipoCuota,
 
         fechaDesembolso,
         fechaPrimeraCuotaCapital,
@@ -1820,9 +2300,7 @@ export class OriginacionSolicitudComponent
 
     this.tablaAmortizacion
       ?.abrir(request);
-
   }
-
 
   private obtenerModalidadSolicitud(
     solicitud: SolicitudCreditoDetalle
@@ -2162,6 +2640,15 @@ export class OriginacionSolicitudComponent
         }
 
       });
+  }
+
+  regresarAlListado(): void {
+
+    this.stateService.limpiar();
+
+    this.router.navigate([
+      '/cartera/originacion'
+    ]);
   }
 
 }

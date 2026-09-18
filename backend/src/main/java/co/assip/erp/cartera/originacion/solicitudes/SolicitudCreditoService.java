@@ -7,6 +7,13 @@ import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudCreditoDetalleD
 import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudCreditoGuardarRequestDTO;
 import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudCreditoGuardarResponseDTO;
 import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudCreditoResumenDTO;
+import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudFinalizarRequestDTO;
+import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudFinalizarResponseDTO;
+import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudValidacionAprobacionDTO;
+import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudEnviarAprobacionResponseDTO;
+import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudEnviarAprobacionRequestDTO;
+import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudEnteAprobadorPreviewRequestDTO;
+import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudEnteAprobadorPreviewDTO;
 import co.assip.erp.seguridad.service.UsuarioSesionService;
 import co.assip.erp.shared.financiero.CuotasFinancieras;
 import co.assip.erp.shared.financiero.TasasFinancieras;
@@ -58,6 +65,7 @@ public class SolicitudCreditoService {
                         null,
                         request.getIdAgencia(),
                         request.getIdDatosPersonal(),
+                        request.getIdFondoGarantia(),
                         idUsuario
                 );
 
@@ -150,14 +158,22 @@ public class SolicitudCreditoService {
 
 
     // =========================================================
-    // CREAR / RETOMAR SOLICITUD
-    // =========================================================
+// RETOMAR SOLICITUD EXISTENTE
+// =========================================================
 
     public SolicitudCrearRetomarResponseDTO crearRetomar(
             SolicitudCrearRetomarRequestDTO request
     ) {
 
         validarCrearRetomar(request);
+
+        if (request.getIdSolicitudCredito() == null
+                || request.getIdSolicitudCredito() <= 0) {
+
+            throw new IllegalArgumentException(
+                    "Para retomar una solicitud debe indicar una solicitud existente."
+            );
+        }
 
         usuarioSesionService.validarAgencia(
                 request.getIdAgencia()
@@ -170,15 +186,16 @@ public class SolicitudCreditoService {
                 request.getIdSolicitudCredito(),
                 request.getIdAgencia(),
                 request.getIdDatosPersonal(),
+                null,
                 idUsuario
         );
     }
-
 
     private SolicitudCrearRetomarResponseDTO crearRetomarInterno(
             Integer idSolicitudCredito,
             Integer idAgencia,
             Integer idDatosPersonal,
+            Integer idFondoGarantia,
             Integer idUsuario
     ) {
 
@@ -465,6 +482,7 @@ public class SolicitudCreditoService {
                         idCuentaAportes,
                         procesoIniciada.idSolicitudProceso(),
                         resultadoEnCurso.idSolicitudResultado(),
+                        idFondoGarantia,
                         idUsuario
                 );
 
@@ -614,8 +632,8 @@ public class SolicitudCreditoService {
                         );
 
         // ---------------------------------------------------------
-// FONDO DE GARANTÍAS
-// ---------------------------------------------------------
+        // FONDO DE GARANTÍAS
+        // ---------------------------------------------------------
 
         SolicitudCreditoRepository.FondoGarantiaAplicable fondoGarantia =
                 repository.buscarFondoGarantia(
@@ -963,6 +981,117 @@ public class SolicitudCreditoService {
         return respuesta;
     }
 
+    // =========================================================
+    // PREVISUALIZAR ENTE APROBADOR
+    // =========================================================
+
+    @Transactional(readOnly = true)
+    public SolicitudEnteAprobadorPreviewDTO previsualizarEnteAprobador(
+            SolicitudEnteAprobadorPreviewRequestDTO request
+    ) {
+
+        if (request == null) {
+            throw new IllegalArgumentException(
+                    "La información para previsualizar el ente aprobador es obligatoria."
+            );
+        }
+
+        if (request.getIdAgencia() == null
+                || request.getIdAgencia() <= 0) {
+
+            throw new IllegalArgumentException(
+                    "La agencia es obligatoria."
+            );
+        }
+
+        if (request.getIdDatosPersonal() == null
+                || request.getIdDatosPersonal() <= 0) {
+
+            throw new IllegalArgumentException(
+                    "El asociado es obligatorio."
+            );
+        }
+
+        if (esVacio(request.getCodigoGarantiaCredito())) {
+            throw new IllegalArgumentException(
+                    "La garantía del crédito es obligatoria."
+            );
+        }
+
+        if (request.getPlazoSolicitado() == null
+                || request.getPlazoSolicitado() <= 0) {
+
+            throw new IllegalArgumentException(
+                    "El plazo solicitado debe ser mayor que cero."
+            );
+        }
+
+        if (request.getValorSolicitado() == null
+                || request.getValorSolicitado()
+                .compareTo(BigDecimal.ZERO) <= 0) {
+
+            throw new IllegalArgumentException(
+                    "El valor solicitado debe ser mayor que cero."
+            );
+        }
+
+        usuarioSesionService.validarAgencia(
+                request.getIdAgencia()
+        );
+
+        if (!repository.existePersona(
+                request.getIdDatosPersonal()
+        )) {
+
+            throw new IllegalArgumentException(
+                    "La persona "
+                            + request.getIdDatosPersonal()
+                            + " no existe en hoja de vida."
+            );
+        }
+
+        repository.buscarTipoGarantia(
+                        request.getCodigoGarantiaCredito()
+                )
+                .orElseThrow(
+                        () ->
+                                new IllegalArgumentException(
+                                        "La garantía "
+                                                + request.getCodigoGarantiaCredito()
+                                                + " no existe o se encuentra inactiva."
+                                )
+                );
+
+        BigDecimal valorSmmlv =
+                obtenerSmmlvValido(
+                        request.getIdAgencia()
+                );
+
+        BigDecimal cantidadSmmlv =
+                request.getValorSolicitado()
+                        .divide(
+                                valorSmmlv,
+                                4,
+                                RoundingMode.HALF_UP
+                        );
+
+        return repository.previsualizarEnteAprobador(
+                        request.getIdDatosPersonal(),
+                        request.getCodigoGarantiaCredito(),
+                        request.getPlazoSolicitado(),
+                        request.getValorSolicitado(),
+                        valorSmmlv,
+                        cantidadSmmlv
+                )
+                .orElseThrow(
+                        () ->
+                                new IllegalStateException(
+                                        "No fue posible determinar la previsualización "
+                                                + "del ente aprobador."
+                                )
+                );
+    }
+
 
     // =========================================================
     // LISTAR SOLICITUDES
@@ -1034,6 +1163,449 @@ public class SolicitudCreditoService {
         return solicitud;
     }
 
+    // =========================================================
+    // FINALIZAR SOLICITUD
+    // =========================================================
+
+    public SolicitudFinalizarResponseDTO finalizarSolicitud(
+            SolicitudFinalizarRequestDTO request
+    ) {
+
+        validarFinalizarSolicitud(request);
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        SolicitudCreditoRepository.SolicitudFinalizarContexto solicitud =
+                repository.buscarParaFinalizar(
+                                request.getIdSolicitudCredito()
+                        )
+                        .orElseThrow(
+                                () -> new IllegalArgumentException(
+                                        "La solicitud "
+                                                + request.getIdSolicitudCredito()
+                                                + " no existe o se encuentra inactiva."
+                                )
+                        );
+
+        if (Boolean.TRUE.equals(
+                solicitud.resultadoFinal()
+        )) {
+
+            throw new IllegalStateException(
+                    "La solicitud "
+                            + solicitud.numeroSolicitud()
+                            + " ya tiene un resultado final: "
+                            + solicitud.nombreResultado()
+                            + "."
+            );
+        }
+
+        SolicitudCreditoRepository.CatalogoResultado resultado =
+                repository.buscarResultadoFinalActivo(
+                                request.getIdSolicitudResultado()
+                        )
+                        .orElseThrow(
+                                () -> new IllegalArgumentException(
+                                        "El resultado seleccionado no existe, "
+                                                + "se encuentra inactivo o no es un resultado final."
+                                )
+                        );
+
+        // Por ahora solamente permitimos estas tres formas
+        // de finalizar desde el proceso de originación.
+        if (!Set.of(
+                "NO VIABLE",
+                "DESISTIDA",
+                "ANULADA"
+        ).contains(resultado.nombreResultado())) {
+            throw new IllegalArgumentException(
+                    "Desde originación la solicitud solamente puede "
+                            + "finalizarse como NO VIABLE, DESISTIDA o ANULADA."
+            );
+        }
+
+        String observacionFinal =
+                request.getObservacionFinal().trim();
+
+        int actualizados =
+                repository.finalizarSolicitud(
+                        solicitud.idSolicitudCredito(),
+                        resultado.idSolicitudResultado(),
+                        observacionFinal,
+                        idUsuario
+                );
+
+        if (actualizados != 1) {
+
+            throw new IllegalStateException(
+                    "No fue posible finalizar la solicitud "
+                            + solicitud.numeroSolicitud()
+                            + "."
+            );
+        }
+
+        return SolicitudFinalizarResponseDTO.builder()
+                .idSolicitudCredito(
+                        solicitud.idSolicitudCredito()
+                )
+                .numeroSolicitud(
+                        solicitud.numeroSolicitud()
+                )
+                .idSolicitudResultado(
+                        resultado.idSolicitudResultado()
+                )
+                .nombreResultado(
+                        resultado.nombreResultado()
+                )
+                .observacionFinal(
+                        observacionFinal
+                )
+                .fechaUltimaGestion(
+                        java.time.LocalDateTime.now()
+                )
+                .build();
+    }
+
+    // =========================================================
+    // VALIDAR SOLICITUD PARA ENVIAR A APROBACIÓN
+    // =========================================================
+
+    @Transactional
+    public SolicitudValidacionAprobacionDTO validarParaAprobacion(
+            Integer idSolicitudCredito
+    ) {
+
+        validarIdSolicitudCredito(
+                idSolicitudCredito
+        );
+
+        // ---------------------------------------------------------
+        // SOLICITUD
+        // ---------------------------------------------------------
+
+        SolicitudCreditoRepository.SolicitudEnviarAprobacionContexto
+                solicitud =
+                repository.buscarParaEnviarAprobacion(
+                                idSolicitudCredito
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "La solicitud "
+                                                        + idSolicitudCredito
+                                                        + " no existe o se encuentra inactiva."
+                                        )
+                        );
+
+        // ---------------------------------------------------------
+        // VALIDAR AGENCIA
+        // ---------------------------------------------------------
+
+        SolicitudCreditoDetalleDTO detalle =
+                repository.buscarPorId(
+                                idSolicitudCredito
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "No fue posible consultar la solicitud "
+                                                        + idSolicitudCredito
+                                                        + "."
+                                        )
+                        );
+
+        usuarioSesionService.validarAgencia(
+                detalle.getIdAgencia()
+        );
+
+        // ---------------------------------------------------------
+        // ESTADO ACTUAL
+        // ---------------------------------------------------------
+
+        boolean solicitudEnCurso =
+                !solicitud.resultadoFinal()
+                        && solicitud.nombreResultado() != null
+                        && "EN CURSO".equalsIgnoreCase(
+                        solicitud.nombreResultado().trim()
+                );
+
+        // ---------------------------------------------------------
+        // DATOS DEL CRÉDITO
+        // ---------------------------------------------------------
+
+        boolean solicitudCompleta =
+                solicitudEnCurso
+                        && solicitud.idLineaCredito() != null
+                        && !esVacio(
+                        solicitud.codigoClasificacionCredito()
+                )
+                        && !esVacio(
+                        solicitud.codigoGarantiaCredito()
+                )
+                        && solicitud.idFondoGarantia() != null
+                        && solicitud.valorSolicitado() != null
+                        && solicitud.valorSolicitado()
+                        .compareTo(BigDecimal.ZERO) > 0
+                        && solicitud.plazoSolicitado() != null
+                        && solicitud.plazoSolicitado() > 0
+                        && solicitud.idCondicionInicial() != null
+                        && solicitud.idTasaColocacionDetalle() != null;
+
+        // ---------------------------------------------------------
+        // DEUDORES / FINANCIERO / CENTRAL / ANÁLISIS
+        // ---------------------------------------------------------
+
+        SolicitudCreditoRepository.ValidacionEtapasAprobacion
+                etapas =
+                repository.validarEtapasParaAprobacion(
+                        idSolicitudCredito
+                );
+
+        boolean deudoresCompletos =
+                etapas != null
+                        && etapas.deudoresCompletos();
+
+        boolean financieroCompleto =
+                etapas != null
+                        && etapas.financieroCompleto();
+
+        boolean centralRiesgoCompleta =
+                etapas != null
+                        && etapas.centralRiesgoCompleta();
+
+        boolean analisisCompleto =
+                etapas != null
+                        && etapas.analisisCompleto();
+
+        // ---------------------------------------------------------
+        // BIENES
+        // ---------------------------------------------------------
+
+        boolean bienesCompletos =
+                repository.validarBienesParaAprobacion(
+                        idSolicitudCredito
+                );
+
+        // ---------------------------------------------------------
+        // ENTE APROBADOR
+        // ---------------------------------------------------------
+
+        boolean enteAprobadorDefinido =
+                solicitud.idEnteAprobacion() != null
+                        && solicitud.idEnteAprobacion() > 0;
+
+        // ---------------------------------------------------------
+        // RESULTADO
+        // ---------------------------------------------------------
+
+        boolean puedeEnviarAprobacion =
+                solicitudCompleta
+                        && deudoresCompletos
+                        && bienesCompletos
+                        && financieroCompleto
+                        && centralRiesgoCompleta
+                        && analisisCompleto
+                        && enteAprobadorDefinido;
+
+        String mensaje;
+
+        if (!solicitudEnCurso) {
+
+            mensaje =
+                    "La solicitud no se encuentra EN CURSO.";
+
+        } else if (!solicitudCompleta) {
+
+            mensaje =
+                    "La información de la solicitud de crédito no está completa.";
+
+        } else if (!deudoresCompletos) {
+
+            mensaje =
+                    "La solicitud no tiene deudores activos correctamente registrados.";
+
+        } else if (!bienesCompletos) {
+
+            mensaje =
+                    "La información de bienes requerida para la garantía no está completa.";
+
+        } else if (!financieroCompleto) {
+
+            mensaje =
+                    "La información financiera no está completa para todos los deudores.";
+
+        } else if (!centralRiesgoCompleta) {
+
+            mensaje =
+                    "La información de central de riesgo no está completa para todos los deudores.";
+
+        } else if (!analisisCompleto) {
+
+            mensaje =
+                    "El análisis no está completo para todos los deudores.";
+
+        } else if (!enteAprobadorDefinido) {
+
+            mensaje =
+                    "La solicitud no tiene un ente aprobador definido.";
+
+        } else {
+
+            mensaje =
+                    "La solicitud está completa y puede enviarse a aprobación.";
+        }
+
+        return new SolicitudValidacionAprobacionDTO(
+                solicitud.idSolicitudCredito(),
+                solicitud.numeroSolicitud(),
+                solicitudCompleta,
+                deudoresCompletos,
+                bienesCompletos,
+                financieroCompleto,
+                centralRiesgoCompleta,
+                analisisCompleto,
+                enteAprobadorDefinido,
+                puedeEnviarAprobacion,
+                mensaje
+        );
+    }
+
+    // =========================================================
+    // ENVIAR SOLICITUD A APROBACIÓN
+    // =========================================================
+
+    public SolicitudEnviarAprobacionResponseDTO enviarAprobacion(
+            Integer idSolicitudCredito,
+            SolicitudEnviarAprobacionRequestDTO request
+    ) {
+
+        validarIdSolicitudCredito(
+                idSolicitudCredito
+        );
+
+        // ---------------------------------------------------------
+        // CONCEPTO DEL ASESOR
+        // ---------------------------------------------------------
+
+        if (request == null
+                || esVacio(request.getConceptoAsesorAprobacion())) {
+
+            throw new IllegalArgumentException(
+                    "El concepto del asesor para enviar la solicitud a aprobación es obligatorio."
+            );
+        }
+
+        String conceptoAsesorAprobacion =
+                request.getConceptoAsesorAprobacion().trim();
+
+        if (conceptoAsesorAprobacion.length() > 1000) {
+
+            throw new IllegalArgumentException(
+                    "El concepto del asesor no puede superar los 1000 caracteres."
+            );
+        }
+
+        // ---------------------------------------------------------
+        // VALIDAR EXPEDIENTE
+        // ---------------------------------------------------------
+
+        SolicitudValidacionAprobacionDTO validacion =
+                validarParaAprobacion(
+                        idSolicitudCredito
+                );
+
+        if (!validacion.isPuedeEnviarAprobacion()) {
+
+            throw new IllegalStateException(
+                    validacion.getMensaje()
+            );
+        }
+
+        // ---------------------------------------------------------
+        // BLOQUEAR Y RECUPERAR SOLICITUD
+        // ---------------------------------------------------------
+
+        SolicitudCreditoRepository.SolicitudEnviarAprobacionContexto
+                solicitud =
+                repository.buscarParaEnviarAprobacion(
+                                idSolicitudCredito
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "La solicitud "
+                                                        + idSolicitudCredito
+                                                        + " no existe o se encuentra inactiva."
+                                        )
+                        );
+
+        if (solicitud.resultadoFinal()
+                || solicitud.nombreResultado() == null
+                || !"EN CURSO".equalsIgnoreCase(
+                solicitud.nombreResultado().trim()
+        )) {
+
+            throw new IllegalStateException(
+                    "La solicitud "
+                            + solicitud.numeroSolicitud()
+                            + " ya no se encuentra EN CURSO."
+            );
+        }
+
+        if (solicitud.idEnteAprobacion() == null
+                || solicitud.idEnteAprobacion() <= 0) {
+
+            throw new IllegalStateException(
+                    "La solicitud "
+                            + solicitud.numeroSolicitud()
+                            + " no tiene un ente aprobador definido."
+            );
+        }
+
+        // ---------------------------------------------------------
+        // PROCESO APROBACIÓN
+        // ---------------------------------------------------------
+
+        SolicitudCreditoRepository.CatalogoProceso
+                procesoAprobacion =
+                repository.obtenerProcesoAprobacion();
+
+        // ---------------------------------------------------------
+        // USUARIO
+        // ---------------------------------------------------------
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        // ---------------------------------------------------------
+        // CAMBIAR PROCESO + GUARDAR CONCEPTO
+        // ---------------------------------------------------------
+
+        java.time.LocalDateTime fechaGestion =
+                repository.enviarAprobacion(
+                        solicitud.idSolicitudCredito(),
+                        procesoAprobacion.idSolicitudProceso(),
+                        conceptoAsesorAprobacion,
+                        idUsuario
+                );
+
+        // ---------------------------------------------------------
+        // RESPUESTA
+        // ---------------------------------------------------------
+
+        return new SolicitudEnviarAprobacionResponseDTO(
+                solicitud.idSolicitudCredito(),
+                solicitud.numeroSolicitud(),
+                procesoAprobacion.idSolicitudProceso(),
+                procesoAprobacion.nombreProceso(),
+                solicitud.idSolicitudResultado(),
+                solicitud.nombreResultado(),
+                solicitud.idEnteAprobacion(),
+                solicitud.nombreEnteAprobacion(),
+                fechaGestion
+        );
+    }
 
     // =========================================================
     // VALIDACIONES - CREAR SOLICITUD
@@ -1492,6 +2064,46 @@ public class SolicitudCreditoService {
         }
     }
 
+    private void validarFinalizarSolicitud(
+            SolicitudFinalizarRequestDTO request
+    ) {
+
+        if (request == null) {
+
+            throw new IllegalArgumentException(
+                    "Los datos para finalizar la solicitud son obligatorios."
+            );
+        }
+
+        validarIdSolicitudCredito(
+                request.getIdSolicitudCredito()
+        );
+
+        if (request.getIdSolicitudResultado() == null
+                || request.getIdSolicitudResultado() <= 0) {
+
+            throw new IllegalArgumentException(
+                    "El resultado final de la solicitud es obligatorio."
+            );
+        }
+
+        if (esVacio(
+                request.getObservacionFinal()
+        )) {
+
+            throw new IllegalArgumentException(
+                    "La observación final de la solicitud es obligatoria."
+            );
+        }
+
+        if (request.getObservacionFinal().trim().length() > 1000) {
+
+            throw new IllegalArgumentException(
+                    "La observación final no puede superar los 1000 caracteres."
+            );
+        }
+    }
+
     private BigDecimal obtenerSmmlvValido(
             Integer idAgencia
     ) {
@@ -1677,6 +2289,69 @@ public class SolicitudCreditoService {
         }
 
         return condiciones.get(0);
+    }
+
+    // =========================================================
+// CONSULTAR TASA PARA SIMULACIÓN
+// =========================================================
+
+    @Transactional(readOnly = true)
+    public BigDecimal consultarTasaColocacionSimulacion(
+            Integer idLineaCredito,
+            String codigoGarantiaCredito,
+            Integer amortizacionCapital,
+            Integer plazoSolicitado
+    ) {
+
+        if (idLineaCredito == null || idLineaCredito <= 0) {
+            throw new IllegalArgumentException(
+                    "La línea de crédito es obligatoria."
+            );
+        }
+
+        if (codigoGarantiaCredito == null
+                || codigoGarantiaCredito.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "La garantía es obligatoria."
+            );
+        }
+
+        if (amortizacionCapital == null
+                || amortizacionCapital <= 0) {
+
+            throw new IllegalArgumentException(
+                    "La amortización de capital debe ser mayor que cero."
+            );
+        }
+
+        if (plazoSolicitado == null
+                || plazoSolicitado <= 0) {
+
+            throw new IllegalArgumentException(
+                    "El plazo solicitado debe ser mayor que cero."
+            );
+        }
+
+        String tipoGarantia =
+                repository.buscarTipoGarantia(
+                                codigoGarantiaCredito.trim()
+                        )
+                        .orElseThrow(
+                                () -> new IllegalStateException(
+                                        "La garantía seleccionada no existe o no está activa."
+                                )
+                        );
+
+        SolicitudCreditoRepository.TasaAplicable tasa =
+                obtenerTasaColocacionAplicable(
+                        idLineaCredito,
+                        tipoGarantia,
+                        amortizacionCapital,
+                        plazoSolicitado
+                );
+
+        return tasa.tasaColocacion();
     }
 
     private SolicitudCreditoRepository.TasaAplicable

@@ -516,6 +516,66 @@
   }
 }
 
+// =========================================================
+// CONCEPTO DEL ASESOR
+// =========================================================
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+
+    span {
+      color: #b91c1c;
+    }
+  }
+}
+
+.form-control {
+  width: 100%;
+  min-height: 120px;
+  padding: 0.7rem 0.8rem;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 0.45rem;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: #1f2937;
+  resize: vertical;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow:
+      0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    background: #f9fafb;
+    color: #6b7280;
+  }
+}
+
+.field-help {
+  font-size: 0.72rem;
+  color: #6b7280;
+  text-align: right;
+}
 
 // =========================================================
 // MENSAJES
