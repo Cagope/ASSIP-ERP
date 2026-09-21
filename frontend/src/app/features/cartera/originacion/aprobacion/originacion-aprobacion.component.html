@@ -1,0 +1,1296 @@
+<div class="page originacion-aprobacion">
+
+  <!-- =====================================================
+       ENCABEZADO
+       ===================================================== -->
+
+  <div class="page-header">
+
+    <div>
+
+      <h2>
+        Aprobación de solicitudes de crédito
+      </h2>
+
+      <p class="page-subtitle">
+        Gestión de decisiones de Gerencia,
+        Comité y Consejo de Administración.
+      </p>
+
+    </div>
+
+    <div class="header-actions">
+
+      <button
+        type="button"
+        class="btn btn-outline-primary"
+        (click)="recargarBandeja()"
+        [disabled]="cargandoBandeja || registrandoDecision">
+
+        {{ cargandoBandeja
+        ? 'Actualizando...'
+        : 'Actualizar bandeja' }}
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       MENSAJES
+       ===================================================== -->
+
+  <div
+    *ngIf="error"
+    class="alert alert-danger"
+    role="alert">
+
+    {{ error }}
+
+  </div>
+
+  <div
+    *ngIf="mensaje"
+    class="alert alert-success"
+    role="status">
+
+    {{ mensaje }}
+
+  </div>
+
+
+  <!-- =====================================================
+       BANDEJA DE APROBACIÓN
+       ===================================================== -->
+
+  <div
+    class="card"
+    *ngIf="!solicitudSeleccionada">
+
+    <div class="card-header">
+
+      <div>
+
+        <h3>
+          Bandeja de aprobación
+        </h3>
+
+        <p>
+          Solicitudes asignadas al usuario autenticado.
+        </p>
+
+      </div>
+
+      <div class="section-total">
+
+        <span>
+          Solicitudes
+        </span>
+
+        <strong>
+          {{ solicitudesFiltradas.length }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- FILTRO -->
+
+    <div class="filtros">
+
+      <div class="form-field">
+
+        <label for="filtroAprobacion">
+          Buscar solicitud
+        </label>
+
+        <input
+          id="filtroAprobacion"
+          type="search"
+          class="form-control"
+          [(ngModel)]="filtro"
+          placeholder="Solicitud, documento, asociado, agencia o línea de crédito">
+
+      </div>
+
+    </div>
+
+
+    <!-- CARGANDO -->
+
+    <div
+      class="loading"
+      *ngIf="cargandoBandeja">
+
+      Consultando solicitudes pendientes de aprobación...
+
+    </div>
+
+
+    <!-- SIN SOLICITUDES -->
+
+    <div
+      class="empty"
+      *ngIf="
+        !cargandoBandeja &&
+        solicitudesFiltradas.length === 0
+      ">
+
+      No se encontraron solicitudes
+      pendientes de aprobación.
+
+    </div>
+
+
+    <!-- TABLA -->
+
+    <div
+      class="table-wrap"
+      *ngIf="
+        !cargandoBandeja &&
+        solicitudesFiltradas.length > 0
+      ">
+
+      <table class="table table-hover">
+
+        <thead>
+
+        <tr>
+
+          <th>
+            Solicitud
+          </th>
+
+          <th>
+            Asociado
+          </th>
+
+          <th>
+            Agencia
+          </th>
+
+          <th>
+            Línea de crédito
+          </th>
+
+          <th class="text-end">
+            Valor solicitado
+          </th>
+
+          <th>
+            Ente actual
+          </th>
+
+          <th>
+            Ente final
+          </th>
+
+          <th>
+            Última gestión
+          </th>
+
+          <th class="text-center">
+            Acción
+          </th>
+
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr
+          *ngFor="
+              let solicitud of solicitudesFiltradas;
+              trackBy: trackBySolicitud
+            ">
+
+          <td>
+
+            <strong>
+              {{ solicitud.numeroSolicitud }}
+            </strong>
+
+            <small class="d-block text-muted">
+
+              {{
+              solicitud.fechaInicioSolicitud
+              ? (solicitud.fechaInicioSolicitud | date:'dd/MM/yyyy')
+              : 'Sin fecha'
+              }}
+
+            </small>
+
+          </td>
+
+
+          <td>
+
+            <strong>
+              {{ solicitud.nombreCompleto }}
+            </strong>
+
+            <small class="d-block text-muted">
+
+              {{ solicitud.tipoDocumento }}
+              {{ solicitud.documento }}
+
+            </small>
+
+          </td>
+
+
+          <td>
+
+            {{ solicitud.nombreAgencia }}
+
+          </td>
+
+
+          <td>
+
+            {{ solicitud.nombreLineaCredito }}
+
+          </td>
+
+
+          <td class="text-end">
+
+            <strong>
+
+              {{
+              solicitud.valorSolicitado
+              | currency:'COP':'symbol':'1.0-0'
+              }}
+
+            </strong>
+
+          </td>
+
+
+          <td>
+
+              <span class="badge bg-primary">
+
+                {{
+                  solicitud.idEnteActual === ENTES_APROBACION.GERENCIA
+                  ? 'Gerencia'
+                  : solicitud.idEnteActual === ENTES_APROBACION.COMITE
+                    ? 'Comité'
+                    : solicitud.idEnteActual === ENTES_APROBACION.CONSEJO
+                      ? 'Consejo'
+                      : 'Sin asignar'
+                }}
+
+              </span>
+
+          </td>
+
+
+          <td>
+
+            {{ solicitud.nombreEnteFinal }}
+
+          </td>
+
+
+          <td>
+
+            {{
+            solicitud.fechaUltimaGestion
+            ? (solicitud.fechaUltimaGestion | date:'dd/MM/yyyy HH:mm')
+            : 'Sin gestión'
+            }}
+
+          </td>
+
+
+          <td class="text-center">
+
+            <button
+              type="button"
+              class="btn btn-sm btn-primary"
+              (click)="seleccionarSolicitud(solicitud)">
+
+              Gestionar
+
+            </button>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       DETALLE DE SOLICITUD
+       ===================================================== -->
+
+  <ng-container *ngIf="solicitudSeleccionada as solicitud">
+
+
+    <!-- ENCABEZADO DETALLE -->
+
+    <div class="card">
+
+      <div class="card-header">
+
+        <div>
+
+          <h3>
+
+            Solicitud
+            {{ solicitud.numeroSolicitud }}
+
+          </h3>
+
+          <p>
+
+            {{ solicitud.nombreCompleto }}
+
+            ·
+
+            {{ solicitud.tipoDocumento }}
+            {{ solicitud.documento }}
+
+          </p>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          (click)="cerrarDetalle()"
+          [disabled]="
+            cargandoDetalle ||
+            registrandoDecision
+          ">
+
+          Volver a bandeja
+
+        </button>
+
+      </div>
+
+
+      <!-- RESUMEN -->
+
+      <div class="form-grid form-grid--4">
+
+        <div class="form-field">
+
+          <label>
+            Agencia
+          </label>
+
+          <strong>
+            {{ solicitud.nombreAgencia }}
+          </strong>
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label>
+            Línea de crédito
+          </label>
+
+          <strong>
+            {{ solicitud.nombreLineaCredito }}
+          </strong>
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label>
+            Valor solicitado
+          </label>
+
+          <strong>
+
+            {{
+            solicitud.valorSolicitado
+            | currency:'COP':'symbol':'1.0-0'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label>
+            Plazo solicitado
+          </label>
+
+          <strong>
+
+            {{
+            solicitud.plazoSolicitado != null
+            ? solicitud.plazoSolicitado + ' meses'
+            : 'Sin información'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label>
+            Tasa de colocación
+          </label>
+
+          <strong>
+
+            {{
+            solicitud.tasaColocacionAplicada != null
+            ? (
+            solicitud.tasaColocacionAplicada
+            | number:'1.2-4'
+            ) + ' %'
+            : 'Sin información'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label>
+            Cuota proyectada
+          </label>
+
+          <strong>
+
+            {{
+            solicitud.valorCuotaProyectada
+            | currency:'COP':'symbol':'1.0-0'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label>
+            Garantía
+          </label>
+
+          <strong>
+
+            {{
+            solicitud.nombreGarantiaCredito
+            || 'Sin información'
+            }}
+
+          </strong>
+
+        </div>
+
+
+        <div class="form-field">
+
+          <label>
+            Ente de aprobación actual
+          </label>
+
+          <strong>
+            {{ nombreEnteActual }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ===================================================
+         CARGANDO DETALLE
+         =================================================== -->
+
+    <div
+      class="card loading"
+      *ngIf="cargandoDetalle">
+
+      Consultando información de la solicitud...
+
+    </div>
+
+
+    <ng-container *ngIf="!cargandoDetalle">
+
+
+      <!-- =================================================
+           HISTORIAL DE ACTUACIONES
+           ================================================= -->
+
+      <div class="card">
+
+        <div class="card-header">
+
+          <div>
+
+            <h3>
+              Historial de aprobación
+            </h3>
+
+            <p>
+              Decisiones registradas durante el proceso.
+            </p>
+
+          </div>
+
+          <div class="section-total">
+
+            <span>
+              Actuaciones
+            </span>
+
+            <strong>
+              {{ historial.length }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="empty"
+          *ngIf="historial.length === 0">
+
+          La solicitud no registra
+          actuaciones anteriores.
+
+        </div>
+
+
+        <div
+          class="table-wrap"
+          *ngIf="historial.length > 0">
+
+          <table class="table table-hover">
+
+            <thead>
+
+            <tr>
+
+              <th>
+                Fecha
+              </th>
+
+              <th>
+                Ente
+              </th>
+
+              <th>
+                Decisión
+              </th>
+
+              <th>
+                Responsable
+              </th>
+
+              <th>
+                Acta
+              </th>
+
+              <th>
+                Concepto
+              </th>
+
+              <th class="text-center">
+                Consulta
+              </th>
+
+            </tr>
+
+            </thead>
+
+            <tbody>
+
+            <tr
+              *ngFor="
+                  let actuacion of historial;
+                  trackBy: trackByActuacion
+                "
+              [class.table-active]="
+                  actuacionSeleccionada?.idSolicitudAprobacion ===
+                  actuacion.idSolicitudAprobacion
+                ">
+
+              <td>
+
+                {{
+                actuacion.fechaDecision
+                | date:'dd/MM/yyyy HH:mm'
+                }}
+
+              </td>
+
+
+              <td>
+
+                {{ actuacion.nombreEnteAprobacion }}
+
+              </td>
+
+
+              <td>
+
+                  <span
+                    class="badge"
+                    [ngClass]="{
+
+                      'bg-success':
+                        actuacion.codigoDecision ===
+                        DECISIONES_APROBACION.APROBADA,
+
+                      'bg-danger':
+                        actuacion.codigoDecision ===
+                        DECISIONES_APROBACION.NO_VIABLE,
+
+                      'bg-warning text-dark':
+                        actuacion.codigoDecision ===
+                        DECISIONES_APROBACION.SOLICITA_AJUSTES
+
+                    }">
+
+                    {{ actuacion.nombreDecision }}
+
+                  </span>
+
+              </td>
+
+
+              <td>
+
+                {{ actuacion.nombreUsuarioDecision }}
+
+              </td>
+
+
+              <td>
+
+                <ng-container
+                  *ngIf="actuacion.numeroActa; else sinActa">
+
+                  {{ actuacion.numeroActa }}
+
+                  <small
+                    class="d-block text-muted"
+                    *ngIf="actuacion.fechaActa">
+
+                    {{
+                    actuacion.fechaActa
+                    | date:'dd/MM/yyyy'
+                    }}
+
+                  </small>
+
+                </ng-container>
+
+                <ng-template #sinActa>
+
+                  —
+
+                </ng-template>
+
+              </td>
+
+
+              <td>
+
+                {{ actuacion.concepto }}
+
+              </td>
+
+
+              <td class="text-center">
+
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary"
+                  (click)="seleccionarActuacion(actuacion)"
+                  [disabled]="cargandoFotosHistoricas">
+
+                  Ver fotografía
+
+                </button>
+
+              </td>
+
+            </tr>
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           REGISTRO DE DECISIÓN
+           ================================================= -->
+
+      <div class="card">
+
+        <div class="card-header">
+
+          <div>
+
+            <h3>
+              Registrar decisión
+            </h3>
+
+            <p>
+
+              Actuación correspondiente a
+
+              <strong>
+                {{ nombreEnteActual }}
+              </strong>
+
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div class="alert alert-info">
+
+          La decisión será registrada con el usuario
+          autenticado y quedará incorporada al
+          historial de aprobación de la solicitud.
+
+        </div>
+
+
+        <!-- FORMULARIO -->
+
+        <div class="form-grid form-grid--2">
+
+
+          <!-- DECISIÓN -->
+
+          <div class="form-field">
+
+            <label for="decisionAprobacion">
+
+              Decisión
+              <span class="required">*</span>
+
+            </label>
+
+            <select
+              id="decisionAprobacion"
+              class="form-select"
+              [(ngModel)]="idAprobacionDecision"
+              [disabled]="registrandoDecision">
+
+              <option [ngValue]="null">
+
+                Seleccione una decisión
+
+              </option>
+
+              <option
+                *ngFor="let decision of decisiones"
+                [ngValue]="decision.idAprobacionDecision">
+
+                {{ decision.nombreDecision }}
+
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- ENTE -->
+
+          <div class="form-field">
+
+            <label>
+              Ente responsable
+            </label>
+
+            <input
+              type="text"
+              class="form-control"
+              [value]="nombreEnteActual"
+              readonly>
+
+          </div>
+
+
+          <!-- ACTA -->
+
+          <div
+            class="form-field"
+            *ngIf="requiereActa">
+
+            <label for="numeroActaAprobacion">
+
+              Número de acta
+              <span class="required">*</span>
+
+            </label>
+
+            <input
+              id="numeroActaAprobacion"
+              type="text"
+              class="form-control"
+              [(ngModel)]="numeroActa"
+              [disabled]="registrandoDecision"
+              placeholder="Número de acta">
+
+          </div>
+
+
+          <!-- FECHA ACTA -->
+
+          <div
+            class="form-field"
+            *ngIf="requiereActa">
+
+            <label for="fechaActaAprobacion">
+
+              Fecha del acta
+              <span class="required">*</span>
+
+            </label>
+
+            <input
+              id="fechaActaAprobacion"
+              type="date"
+              class="form-control"
+              [(ngModel)]="fechaActa"
+              [disabled]="registrandoDecision">
+
+          </div>
+
+
+          <!-- CONCEPTO -->
+
+          <div class="form-field form-field--full">
+
+            <label for="conceptoAprobacion">
+
+              Concepto de aprobación
+              <span class="required">*</span>
+
+            </label>
+
+            <textarea
+              id="conceptoAprobacion"
+              class="form-control"
+              rows="5"
+              [(ngModel)]="concepto"
+              [disabled]="registrandoDecision"
+              placeholder="Registre el concepto que sustenta la decisión adoptada.">
+            </textarea>
+
+            <small class="text-muted">
+
+              El concepto quedará registrado
+              en el historial de actuaciones.
+
+            </small>
+
+          </div>
+
+        </div>
+
+
+        <!-- ACCIONES -->
+
+        <div class="form-actions">
+
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="limpiarFormularioDecision()"
+            [disabled]="registrandoDecision">
+
+            Limpiar
+
+          </button>
+
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="registrarDecision()"
+            [disabled]="
+              !formularioDecisionValido ||
+              registrandoDecision ||
+              cargandoDetalle
+            ">
+
+            {{
+            registrandoDecision
+            ? 'Registrando decisión...'
+            : 'Registrar decisión'
+            }}
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           FOTOGRAFÍAS DE LA SOLICITUD
+           ================================================= -->
+
+      <div class="card">
+
+        <div class="card-header">
+
+          <div>
+
+            <h3>
+              Información para aprobación
+            </h3>
+
+            <p>
+
+              {{
+              actuacionSeleccionada
+              ? 'Información conservada en la actuación seleccionada.'
+              : 'Información actual de la solicitud de crédito.'
+              }}
+
+            </p>
+
+          </div>
+
+
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            *ngIf="actuacionSeleccionada"
+            (click)="mostrarFotosActuales()">
+
+            Volver a información actual
+
+          </button>
+
+        </div>
+
+
+        <!-- AVISO HISTÓRICO -->
+
+        <div
+          class="alert alert-info"
+          *ngIf="actuacionSeleccionada as actuacion">
+
+          <strong>
+            Consulta histórica
+          </strong>
+
+          <div>
+
+            {{ actuacion.nombreEnteAprobacion }}
+
+            ·
+
+            {{ actuacion.nombreDecision }}
+
+            ·
+
+            {{
+            actuacion.fechaDecision
+            | date:'dd/MM/yyyy HH:mm'
+            }}
+
+          </div>
+
+          <div>
+
+            Responsable:
+            {{ actuacion.nombreUsuarioDecision }}
+
+          </div>
+
+        </div>
+
+
+        <!-- CARGANDO FOTOGRAFÍA -->
+
+        <div
+          class="loading"
+          *ngIf="cargandoFotosHistoricas">
+
+          Consultando fotografía histórica...
+
+        </div>
+
+
+        <!-- NAVEGACIÓN -->
+
+        <div
+          class="section-tabs"
+          *ngIf="!cargandoFotosHistoricas">
+
+          <button
+            type="button"
+            [class.active]="seccionActiva === 'solicitud'"
+            (click)="seleccionarSeccion('solicitud')">
+
+            Solicitud
+
+          </button>
+
+
+          <button
+            type="button"
+            [class.active]="seccionActiva === 'deudores'"
+            (click)="seleccionarSeccion('deudores')">
+
+            Deudores
+
+          </button>
+
+
+          <button
+            type="button"
+            [class.active]="seccionActiva === 'financiero'"
+            (click)="seleccionarSeccion('financiero')">
+
+            Información financiera
+
+          </button>
+
+
+          <button
+            type="button"
+            [class.active]="seccionActiva === 'bienes'"
+            (click)="seleccionarSeccion('bienes')">
+
+            Bienes
+
+          </button>
+
+
+          <button
+            type="button"
+            [class.active]="seccionActiva === 'central'"
+            (click)="seleccionarSeccion('central')">
+
+            Central de riesgo
+
+          </button>
+
+
+          <button
+            type="button"
+            [class.active]="seccionActiva === 'analisis'"
+            (click)="seleccionarSeccion('analisis')">
+
+            Análisis de crédito
+
+          </button>
+
+        </div>
+
+
+        <!-- =================================================
+             CONTENIDO DE FOTOGRAFÍAS
+             ================================================= -->
+
+        <ng-container *ngIf="!cargandoFotosHistoricas">
+
+
+          <ng-container *ngIf="fotosVisibles as fotos">
+
+
+            <!-- SOLICITUD -->
+
+            <div
+              class="foto-section"
+              *ngIf="seccionActiva === 'solicitud'">
+
+              <h4>
+                Información de la solicitud
+              </h4>
+
+              <div
+                class="empty"
+                *ngIf="!fotos.fotoSolicitud">
+
+                No existe fotografía de la solicitud.
+
+              </div>
+
+              <app-aprobacion-solicitud *ngIf="fotos.fotoSolicitud" [foto]="fotos.fotoSolicitud" [deudores]="fotos.fotoDeudores"></app-aprobacion-solicitud>
+
+            </div>
+
+
+            <!-- DEUDORES -->
+
+            <div
+              class="foto-section"
+              *ngIf="seccionActiva === 'deudores'">
+
+              <h4>
+                Deudores de la solicitud
+              </h4>
+
+              <div
+                class="empty"
+                *ngIf="!fotos.fotoDeudores?.length">
+
+                No existe información de deudores.
+
+              </div>
+
+              <app-aprobacion-deudores *ngIf="fotos.fotoDeudores?.length" [foto]="fotos.fotoDeudores" [deudores]="fotos.fotoDeudores"></app-aprobacion-deudores>
+
+            </div>
+
+
+            <!-- FINANCIERO -->
+
+            <div
+              class="foto-section"
+              *ngIf="seccionActiva === 'financiero'">
+
+              <h4>
+                Información financiera
+              </h4>
+
+              <div
+                class="empty"
+                *ngIf="!fotos.fotoFinanciero?.length">
+
+                No existe información financiera.
+
+              </div>
+
+              <app-aprobacion-financiero *ngIf="fotos.fotoFinanciero?.length" [foto]="fotos.fotoFinanciero" [deudores]="fotos.fotoDeudores"></app-aprobacion-financiero>
+
+            </div>
+
+
+            <!-- BIENES -->
+
+            <div
+              class="foto-section"
+              *ngIf="seccionActiva === 'bienes'">
+
+              <h4>
+                Bienes y patrimonio
+              </h4>
+
+              <div
+                class="empty"
+                *ngIf="!fotos.fotoBienes?.length">
+
+                No existe información de bienes.
+
+              </div>
+
+              <app-aprobacion-bienes *ngIf="fotos.fotoBienes?.length" [foto]="fotos.fotoBienes" [deudores]="fotos.fotoDeudores"></app-aprobacion-bienes>
+
+            </div>
+
+
+            <!-- CENTRAL DE RIESGO -->
+
+            <div
+              class="foto-section"
+              *ngIf="seccionActiva === 'central'">
+
+              <h4>
+                Información de centrales de riesgo
+              </h4>
+
+              <div
+                class="empty"
+                *ngIf="!fotos.fotoCentralRiesgo?.length">
+
+                No existe información de centrales de riesgo.
+
+              </div>
+
+              <app-aprobacion-central-riesgo *ngIf="fotos.fotoCentralRiesgo?.length" [foto]="fotos.fotoCentralRiesgo" [deudores]="fotos.fotoDeudores"></app-aprobacion-central-riesgo>
+
+            </div>
+
+
+            <!-- ANÁLISIS -->
+
+            <div
+              class="foto-section"
+              *ngIf="seccionActiva === 'analisis'">
+
+              <h4>
+                Análisis de crédito
+              </h4>
+
+              <div
+                class="empty"
+                *ngIf="!fotos.fotoAnalisis?.length">
+
+                No existe información de análisis.
+
+              </div>
+
+              <app-aprobacion-analisis *ngIf="fotos.fotoAnalisis?.length" [foto]="fotos.fotoAnalisis" [deudores]="fotos.fotoDeudores"></app-aprobacion-analisis>
+
+            </div>
+
+
+          </ng-container>
+
+
+          <div
+            class="empty"
+            *ngIf="!fotosVisibles">
+
+            No existe información disponible
+            para la consulta seleccionada.
+
+          </div>
+
+
+        </ng-container>
+
+      </div>
+
+
+    </ng-container>
+
+  </ng-container>
+
+</div>

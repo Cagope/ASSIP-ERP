@@ -1,0 +1,23 @@
+// Diseño coherente con los módulos de originación ASSIP ERP.
+:host { display: block; min-width: 0; }
+.page { padding: 1rem; min-width: 0; color: #1f2937; font-size: .85rem; }
+.page-header, .card-header, .acciones { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.page-header { align-items: flex-start; margin-bottom: 1rem; h2 { margin: 0; font-size: 1.35rem; font-weight: 700; } p { margin: .3rem 0 0; color: #6b7280; } }
+.card { margin-bottom: 1rem; padding: 1rem; background: #fff; border: 1px solid #e5e7eb; border-radius: .65rem; min-width: 0; }
+.card-header { margin-bottom: 1rem; padding-bottom: .8rem; border-bottom: 1px solid #e5e7eb; h3 { margin: 0; font-size: 1rem; font-weight: 700; } }
+.consulta { max-width: 550px; label { display: block; margin-bottom: .45rem; font-weight: 600; } }
+.consulta-acciones { display: flex; gap: .65rem; align-items: center; input { max-width: 220px; } }
+.datos-grid, .form-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
+.datos-grid > div { min-width: 0; }
+small { display: block; color: #6b7280; margin-bottom: .3rem; font-size: .78rem; }
+strong { display: block; overflow-wrap: anywhere; font-weight: 650; }
+.form-field { min-width: 0; label { display: block; font-weight: 650; margin-bottom: .3rem; } small { min-height: 1rem; } }
+.form-control, .form-select { width: 100%; min-width: 0; }
+.concepto { margin-top: 1rem; padding: .8rem; border-radius: .5rem; background: #f8fafc; border: 1px solid #e5e7eb; p { margin: .4rem 0 0; white-space: pre-wrap; overflow-wrap: anywhere; } }
+.nota { color: #6b7280; margin: .7rem 0; }
+.badge { display: inline-block; padding: .35rem .6rem; border-radius: .5rem; background: #eef2ff; color: #3730a3; font-size: .76rem; }
+.badge-warning { background: #fffbeb; color: #92400e; }
+.acciones { justify-content: flex-end; margin-bottom: 1.2rem; }
+.estado { text-align: center; color: #6b7280; }
+@media (max-width: 1000px) { .datos-grid, .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .datos-grid, .form-grid { grid-template-columns: 1fr; } .page-header, .acciones { align-items: stretch; flex-direction: column; } }

@@ -173,6 +173,27 @@ export class SolicitudListComponent implements OnInit {
   }
 
   // =========================================================
+  // NAVEGACIÓN A FORMALIZACIÓN
+  // =========================================================
+
+  abrirFormalizacion(
+    solicitud: SolicitudListado
+  ): void {
+
+    if (
+      solicitud.idSolicitudProceso !== 4
+      || !solicitud.idSolicitudCredito
+    ) {
+      return;
+    }
+
+    void this.router.navigate([
+      '/cartera/originacion/formalizacion',
+      solicitud.idSolicitudCredito
+    ]);
+  }
+
+  // =========================================================
   // EVENTOS
   // =========================================================
 

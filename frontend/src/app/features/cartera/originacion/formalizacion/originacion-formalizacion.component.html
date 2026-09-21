@@ -1,0 +1,95 @@
+<div class="page originacion-formalizacion">
+  <div class="page-header">
+    <div>
+      <h2>Formalización de crédito</h2>
+      <p>Registro de las condiciones definitivas conforme a la decisión del ente aprobador.</p>
+    </div>
+    <button type="button" class="btn btn-outline-secondary" (click)="volver()">Volver a solicitudes</button>
+  </div>
+
+  <section class="card consulta">
+    <label for="idFormalizacion">Identificador de solicitud</label>
+    <div class="consulta-acciones">
+      <input id="idFormalizacion" class="form-control" type="number" min="1"
+        [(ngModel)]="idBusqueda" (keyup.enter)="buscar()" placeholder="ID de solicitud">
+      <button type="button" class="btn btn-outline-primary" (click)="buscar()" [disabled]="cargando">Consultar</button>
+    </div>
+  </section>
+
+  <div *ngIf="error" class="alert alert-danger" role="alert">{{ error }}</div>
+  <div *ngIf="mensaje" class="alert alert-success" role="status">{{ mensaje }}</div>
+  <div *ngIf="cargando" class="card estado">Consultando formalización...</div>
+
+  <ng-container *ngIf="detalle as d">
+    <section class="card">
+      <div class="card-header"><h3>Solicitud y asociado</h3><span class="badge">{{ d.nombreProceso }} · {{ d.nombreResultado }}</span></div>
+      <div class="datos-grid">
+        <div><small>Solicitud</small><strong>{{ d.numeroSolicitud }}</strong></div>
+        <div><small>Asociado</small><strong>{{ d.nombreCompleto || '—' }}</strong></div>
+        <div><small>Documento</small><strong>{{ d.tipoDocumento }} {{ d.documento }}</strong></div>
+        <div><small>Agencia</small><strong>{{ d.nombreAgencia }}</strong></div>
+        <div><small>Línea</small><strong>{{ d.nombreLineaCredito || '—' }}</strong></div>
+        <div><small>Garantía</small><strong>{{ d.nombreGarantiaCredito || '—' }}</strong></div>
+        <div><small>Fondo de garantía</small><strong>{{ d.nombreFondoGarantia || '—' }}</strong></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header"><h3>Decisión del ente aprobador</h3></div>
+      <div class="datos-grid">
+        <div><small>Ente (código)</small><strong>{{ d.idEnteAprobacion ?? '—' }}</strong></div>
+        <div><small>Fecha de decisión</small><strong>{{ d.fechaDecision ? (d.fechaDecision | date:'dd/MM/yyyy HH:mm') : '—' }}</strong></div>
+        <div><small>Número de acta</small><strong>{{ d.numeroActa || 'Pendiente' }}</strong></div>
+        <div><small>Fecha del acta</small><strong>{{ d.fechaActa ? (d.fechaActa | date:'dd/MM/yyyy') : 'Pendiente' }}</strong></div>
+      </div>
+      <div class="concepto"><small>Concepto y recomendaciones</small><p>{{ d.observacionesAprobacion || 'Sin observaciones registradas.' }}</p></div>
+      <p class="nota">El acta puede incorporarse posteriormente en aprobación; no bloquea la formalización.</p>
+    </section>
+
+    <section class="card">
+      <div class="card-header"><h3>Condiciones originales y definitivas</h3><span *ngIf="d.condicionesModificadas" class="badge badge-warning">Condiciones modificadas</span></div>
+      <p class="nota">Se cargan los datos solicitados o la última formalización guardada. Modifique únicamente lo necesario.</p>
+      <div class="form-grid">
+        <div class="form-field"><label for="valorFormalizado">Valor definitivo</label><small>Solicitado: {{ d.valorSolicitado | number:'1.2-2' }}</small>
+          <input id="valorFormalizado" class="form-control" type="number" min="0.01" step="0.01" [(ngModel)]="formulario.valorFormalizado" [disabled]="!editable"></div>
+        <div class="form-field"><label for="plazoFormalizado">Plazo definitivo (meses)</label><small>Solicitado: {{ d.plazoSolicitado ?? '—' }}</small>
+          <input id="plazoFormalizado" class="form-control" type="number" min="1" step="1" [(ngModel)]="formulario.plazoFormalizado" [disabled]="!editable"></div>
+        <div class="form-field"><label for="formaPago">Forma de pago</label><small>Original: {{ d.codigoFormaPago || '—' }}</small>
+          <select id="formaPago" class="form-select" [(ngModel)]="formulario.codigoFormaPagoFormalizada" [disabled]="!editable">
+            <option value="">Seleccione</option><option *ngFor="let f of formasPago" [value]="f.codigoFormaPago">{{ f.descripcionFormaPago }}</option>
+          </select></div>
+        <div class="form-field"><label for="modalidad">Periodicidad y modalidad de intereses</label><small>Original: {{ d.periodoCodigoInteres }} / {{ d.tipoModalidadInteres }}</small>
+          <select id="modalidad" class="form-select" [ngModel]="formulario.periodoCodigoInteresFormalizado + '|' + formulario.tipoModalidadInteresFormalizado"
+            (ngModelChange)="formulario.periodoCodigoInteresFormalizado = $event.split('|')[0]; formulario.tipoModalidadInteresFormalizado = $event.split('|')[1] || ''" [disabled]="!editable">
+            <option value="|">Seleccione</option><option *ngFor="let m of modalidadesInteres" [value]="m.periodoCodigo + '|' + m.tipoModalidad">{{ m.descripcionModalidadInteres }} ({{ m.periodoMeses }} mes/es)</option>
+          </select></div>
+        <div class="form-field"><label for="amortizacion">Amortización de capital (meses)</label><small>Original: {{ d.amortizacionCapital ?? '—' }}</small>
+          <input id="amortizacion" class="form-control" type="number" min="1" step="1" [(ngModel)]="formulario.amortizacionCapitalFormalizada" [disabled]="!editable"></div>
+        <div class="form-field"><label for="tipoCuota">Tipo de cuota</label><small>Original: {{ d.codigoTipoCuota || '—' }}</small>
+          <select id="tipoCuota" class="form-select" [(ngModel)]="formulario.codigoTipoCuotaFormalizada" [disabled]="!editable">
+            <option value="">Seleccione</option><option *ngFor="let t of tiposCuota" [value]="t.codigoTipoCuota">{{ t.descripcionTipoCuota }}</option>
+          </select></div>
+        <div class="form-field"><label for="tasaNominal">Tasa nominal definitiva</label><small>Original: {{ d.tasaColocacionAplicada ?? '—' }}</small>
+          <input id="tasaNominal" class="form-control" type="number" min="0" step="0.0001" [(ngModel)]="formulario.tasaNominalFormalizada" [disabled]="!editable"></div>
+      </div>
+      <p class="nota">Los periodos de gracia de capital e intereses se mantienen en 0 y no se capturan.</p>
+      <div *ngIf="editable && cambiosPendientes" class="alert alert-info">Hay diferencias frente a las condiciones originales. Guarde para recalcular la TEA y la cuota definitivas.</div>
+    </section>
+
+    <section class="card">
+      <div class="card-header"><h3>Resultado financiero guardado</h3></div>
+      <div class="datos-grid">
+        <div><small>Tasa efectiva anual</small><strong>{{ d.tasaEfectivaAnualFormalizada != null ? (d.tasaEfectivaAnualFormalizada | number:'1.4-4') : 'Pendiente de guardar' }}</strong></div>
+        <div><small>Cuota definitiva</small><strong>{{ d.valorCuotaFormalizada != null ? (d.valorCuotaFormalizada | number:'1.2-2') : 'Pendiente de guardar' }}</strong></div>
+        <div><small>Formalización finalizada</small><strong>{{ d.fechaFinFormalizacion ? (d.fechaFinFormalizacion | date:'dd/MM/yyyy HH:mm') : 'No' }}</strong></div>
+      </div>
+      <p class="nota" *ngIf="hayEdicionSinGuardar">Los resultados anteriores corresponden al último guardado; hay cambios pendientes de guardar.</p>
+    </section>
+
+    <div class="acciones" *ngIf="editable">
+      <button type="button" class="btn btn-primary" (click)="guardar()" [disabled]="guardando || finalizando">{{ guardando ? 'Guardando...' : 'Guardar formalización' }}</button>
+      <button type="button" class="btn btn-success" (click)="finalizar()" [disabled]="guardando || finalizando || d.valorFormalizado == null || hayEdicionSinGuardar">{{ finalizando ? 'Finalizando...' : 'Finalizar formalización' }}</button>
+    </div>
+    <div class="alert alert-info" *ngIf="!editable">La solicitud está en modo consulta; no se pueden modificar las condiciones en este estado.</div>
+  </ng-container>
+</div>

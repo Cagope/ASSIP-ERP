@@ -182,7 +182,6 @@
 
   </div>
 
-
   <div
     *ngIf="mensaje"
     class="alert alert--success">
@@ -191,6 +190,61 @@
 
   </div>
 
+
+  <!-- ===================================================== -->
+  <!-- VALIDACIÓN DE VIGENCIA DE HOJA DE VIDA                -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="asociadoSeleccionado && consultandoVigenciaHojaVida"
+    class="alert alert--warning">
+
+    Consultando la vigencia de la información del asociado...
+
+  </div>
+
+
+  <div
+    *ngIf="
+      asociadoSeleccionado
+      && !consultandoVigenciaHojaVida
+      && vigenciaHojaVida?.vigente === false
+    "
+    class="alert alert--error">
+
+    <strong>
+      No es posible continuar con la originación de cartera.
+    </strong>
+
+    <p>
+      El asociado
+      <strong>{{ asociadoSeleccionado.nombreCompleto }}</strong>
+      debe actualizar su Hoja de Vida antes de iniciar o continuar
+      la solicitud de crédito.
+    </p>
+
+    <p>
+      <strong>Última actualización:</strong>
+
+      {{
+      vigenciaHojaVida?.fechaActualizacion
+      ? (vigenciaHojaVida?.fechaActualizacion | date:'dd/MM/yyyy')
+      : 'Sin fecha registrada'
+      }}
+
+      <br>
+
+      <strong>Plazo máximo permitido:</strong>
+      {{ vigenciaHojaVida?.diasMaximos }} días.
+    </p>
+
+    <p>
+      La solicitud no se rechaza ni se cancela.
+      El proceso podrá retomarse una vez se actualice
+      la información del asociado.
+    </p>
+
+  </div>
 
   <!-- ===================================================== -->
   <!-- PASOS                                                 -->
@@ -671,7 +725,8 @@
 
     <div
       *ngIf="
-        asociadoSeleccionado.informacionActualizada === false
+        !consultandoVigenciaHojaVida
+        && vigenciaHojaVida?.vigente === false
       "
       class="alerta-actualizacion">
 
@@ -682,52 +737,37 @@
       <div class="alerta-actualizacion__contenido">
 
         <strong>
-          Información del asociado desactualizada
+          Hoja de Vida desactualizada
         </strong>
 
         <span>
-
-          La última actualización fue el
+          La última actualización registrada fue:
 
           <strong>
             {{
-              asociadoSeleccionado.fechaActualizacion
+              vigenciaHojaVida?.fechaActualizacion
                 ? (
-                    asociadoSeleccionado.fechaActualizacion
+                    vigenciaHojaVida?.fechaActualizacion
                     | date:'dd/MM/yyyy'
                   )
-                : 'sin fecha registrada'
+                : 'Sin fecha registrada'
             }}
           </strong>.
+        </span>
 
-          Han transcurrido
+        <span>
+          El plazo máximo permitido para la actualización
+          es de
 
           <strong>
-            {{
-              asociadoSeleccionado.diasSinActualizacion
-                !== null
-                && asociadoSeleccionado.diasSinActualizacion
-                !== undefined
-                ? asociadoSeleccionado.diasSinActualizacion
-                : '-'
-            }}
-            días
-          </strong>.
+            {{ vigenciaHojaVida?.diasMaximos }} días.
+          </strong>
+        </span>
 
-          El máximo permitido es
-
-          <strong>
-            {{
-              asociadoSeleccionado.diasMaximoActualizacion
-                !== null
-                && asociadoSeleccionado.diasMaximoActualizacion
-                !== undefined
-                ? asociadoSeleccionado.diasMaximoActualizacion
-                : '-'
-            }}
-            días
-          </strong>.
-
+        <span>
+          Para continuar con la originación de cartera,
+          el asociado debe actualizar previamente su
+          información en Hoja de Vida.
         </span>
 
       </div>
@@ -964,12 +1004,18 @@
       <button
         type="button"
         class="btn btn--primary"
-        [disabled]="cargandoSolicitud"
+        [disabled]="
+          cargandoSolicitud
+          || consultandoVigenciaHojaVida
+          || vigenciaHojaVida?.vigente !== true
+        "
         (click)="crearRetomarSolicitud()">
 
         {{
         cargandoSolicitud
         ? 'Procesando...'
+        : consultandoVigenciaHojaVida
+        ? 'Validando información...'
         : 'Retomar solicitud'
         }}
 
@@ -978,8 +1024,6 @@
     </div>
 
   </section>
-
-
 
   <!-- ===================================================== -->
   <!-- DATOS DEL CRÉDITO                                     -->
@@ -1666,7 +1710,6 @@
 
     </div>
 
-
     <!-- =================================================== -->
     <!-- ACCIONES PREVIAS                                   -->
     <!-- =================================================== -->
@@ -1681,6 +1724,8 @@
           !puedeGenerarTablaAmortizacion
           || guardandoCredito
           || cargandoCatalogos
+          || consultandoVigenciaHojaVida
+          || vigenciaHojaVida?.vigente !== true
         "
         (click)="abrirTablaAmortizacion()">
 
@@ -1688,14 +1733,17 @@
 
       </button>
 
+
       <button
         type="button"
         class="btn btn--primary"
         [disabled]="
-      !solicitudEditable
-      || guardandoCredito
-      || cargandoCatalogos
-    "
+          !solicitudEditable
+          || guardandoCredito
+          || cargandoCatalogos
+          || consultandoVigenciaHojaVida
+          || vigenciaHojaVida?.vigente !== true
+        "
         (click)="guardarCredito()">
 
         {{
@@ -1705,6 +1753,8 @@
         ? 'Guardando...'
         : 'Creando solicitud...'
         )
+        : consultandoVigenciaHojaVida
+        ? 'Validando información...'
         : (
         solicitud
         ? 'Guardar cambios'
@@ -2340,10 +2390,10 @@
         type="button"
         class="btn btn--danger"
         [disabled]="
-          !solicitud
-          || solicitud.resultadoFinal === true
-          || finalizandoSolicitud
-        "
+      !solicitud
+      || solicitud.resultadoFinal === true
+      || finalizandoSolicitud
+    "
         (click)="abrirFinalizacion()">
 
         Finalizar solicitud
@@ -2355,12 +2405,46 @@
         type="button"
         class="btn btn--secondary"
         [disabled]="
-          !puedeGenerarTablaAmortizacion
-          || finalizandoSolicitud
-        "
+      !puedeGenerarTablaAmortizacion
+      || finalizandoSolicitud
+    "
         (click)="abrirTablaAmortizacion()">
 
         Tabla de amortización
+
+      </button>
+
+
+      <!-- EXPEDIENTE INTEGRAL PARA ANÁLISIS -->
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        [disabled]="
+      !solicitud
+      || cargandoSolicitud
+      || guardandoCredito
+    "
+        (click)="generarExpedientePdf()">
+
+        Generar expediente PDF
+
+      </button>
+
+
+      <!-- COMPROMISOS Y AUTORIZACIONES PARA FIRMAS -->
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        [disabled]="
+      !solicitud
+      || cargandoSolicitud
+      || guardandoCredito
+    "
+        (click)="generarCompromisosPdf()">
+
+        Compromisos y autorizaciones
 
       </button>
 
@@ -2369,10 +2453,10 @@
         type="button"
         class="btn btn--primary"
         [disabled]="
-          !solicitud
-          || solicitud.resultadoFinal === true
-          || finalizandoSolicitud
-        "
+      !solicitud
+      || solicitud.resultadoFinal === true
+      || finalizandoSolicitud
+    "
         (click)="irADeudores()">
 
         Continuar a deudores

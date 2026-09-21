@@ -168,42 +168,14 @@ public class SolicitudDeudorService {
         Integer idUsuario =
                 usuarioSesionService.idUsuario();
 
-        /*
-         * Si la persona estuvo anteriormente vinculada y fue
-         * retirada, reutilizamos el registro histórico en lugar
-         * de crear un duplicado.
-         *
-         * Sus fotografías operativas se reinician.
-         */
-        Optional<Integer> deudorInactivo =
-                repository.buscarInactivoPorPersona(
+        // Un codeudor retirado se vincula nuevamente con un registro nuevo.
+        Integer idSolicitudDeudor =
+                repository.insertarCodeudor(
                         request.getIdSolicitudCredito(),
-                        request.getIdDatosPersonal()
+                        request.getIdDatosPersonal(),
+                        ordenDeudor,
+                        idUsuario
                 );
-
-        Integer idSolicitudDeudor;
-
-        if (deudorInactivo.isPresent()) {
-
-            idSolicitudDeudor =
-                    deudorInactivo.get();
-
-            repository.reactivarCodeudor(
-                    idSolicitudDeudor,
-                    ordenDeudor,
-                    idUsuario
-            );
-
-        } else {
-
-            idSolicitudDeudor =
-                    repository.insertarCodeudor(
-                            request.getIdSolicitudCredito(),
-                            request.getIdDatosPersonal(),
-                            ordenDeudor,
-                            idUsuario
-                    );
-        }
 
         return repository.buscarPorId(
                         idSolicitudDeudor
@@ -269,24 +241,15 @@ public class SolicitudDeudorService {
                 idAgencia
         );
 
-        Integer idUsuario =
-                usuarioSesionService.idUsuario();
-
-        /*
-         * No borramos físicamente información histórica.
-         *
-         * Primero desactivamos las fotografías dependientes y
-         * finalmente el codeudor.
-         */
-        repository.desactivarDependencias(
-                idSolicitudDeudor,
-                idUsuario
+        // Eliminación definitiva de las dependencias con NO ACTION.
+        // Análisis, detalles y garantías se eliminan por ON DELETE CASCADE.
+        repository.eliminarDependencias(
+                idSolicitudDeudor
         );
 
         boolean retirado =
-                repository.desactivarCodeudor(
-                        idSolicitudDeudor,
-                        idUsuario
+                repository.eliminarCodeudor(
+                        idSolicitudDeudor
                 );
 
         if (!retirado) {

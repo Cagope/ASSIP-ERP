@@ -13,6 +13,7 @@ import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudEnviarAprobacio
 import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudEnviarAprobacionRequestDTO;
 import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudEnteAprobadorPreviewRequestDTO;
 import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudEnteAprobadorPreviewDTO;
+import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudValidacionAprobacionDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -125,6 +126,25 @@ public class SolicitudCreditoController {
         );
     }
 
+    // =========================================================
+    // CONSULTAR VIGENCIA DE HOJA DE VIDA
+    // =========================================================
+
+    @GetMapping("/vigencia-hoja-vida")
+    public ResponseEntity<SolicitudCreditoRepository.VigenciaHojaVida>
+    consultarVigenciaHojaVida(
+            @RequestParam Integer idDatosPersonal,
+            @RequestParam Integer idAgencia
+    ) {
+
+        return ResponseEntity.ok(
+                service.consultarVigenciaHojaVida(
+                        idDatosPersonal,
+                        idAgencia
+                )
+        );
+    }
+
 
     // =========================================================
     // CONSULTAR SOLICITUD POR ID
@@ -153,6 +173,22 @@ public class SolicitudCreditoController {
 
         return ResponseEntity.ok(
                 service.finalizarSolicitud(request)
+        );
+    }
+
+    // =========================================================
+    // VALIDAR PARA APROBACIÓN
+    // =========================================================
+
+    @GetMapping("/{idSolicitudCredito}/validar-aprobacion")
+    public ResponseEntity<SolicitudValidacionAprobacionDTO> validarParaAprobacion(
+            @PathVariable Integer idSolicitudCredito
+    ) {
+
+        return ResponseEntity.ok(
+                service.validarParaAprobacion(
+                        idSolicitudCredito
+                )
         );
     }
 

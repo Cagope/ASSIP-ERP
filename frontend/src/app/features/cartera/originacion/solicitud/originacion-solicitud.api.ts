@@ -15,6 +15,7 @@ import {
   environment
 } from '../../../../../environments/environment';
 
+
 import {
   CentralRiesgoCatalogo,
   ClasificacionCredito,
@@ -39,7 +40,8 @@ import {
   SolicitudEnteAprobadorPreviewRequest,
   SolicitudEnteAprobadorPreview,
   SubgarantiaCredito,
-  TipoCuota
+  TipoCuota,
+  VigenciaHojaVida
 } from './originacion-solicitud.models';
 
 @Injectable({
@@ -59,6 +61,9 @@ export class OriginacionSolicitudApi {
 
   private readonly catalogosUrl =
     `${environment.apiUrl}/cartera/originacion/catalogos`;
+
+  private readonly impresionUrl =
+    `${environment.apiUrl}/cartera/originacion/impresion`;
 
 
   // =========================================================
@@ -142,6 +147,24 @@ export class OriginacionSolicitudApi {
     );
   }
 
+  // =========================================================
+  // CONSULTAR VIGENCIA DE HOJA DE VIDA
+  // =========================================================
+
+  consultarVigenciaHojaVida(
+    idDatosPersonal: number,
+    idAgencia: number
+  ): Observable<VigenciaHojaVida> {
+
+    const params = new HttpParams()
+      .set('idDatosPersonal', idDatosPersonal.toString())
+      .set('idAgencia', idAgencia.toString());
+
+    return this.http.get<VigenciaHojaVida>(
+      `${this.solicitudesUrl}/vigencia-hoja-vida`,
+      { params }
+    );
+  }
 
   // =========================================================
   // SOLICITUD
@@ -438,4 +461,21 @@ export class OriginacionSolicitudApi {
       `${this.catalogosUrl}/centrales-riesgo`
     );
   }
+
+  // =========================================================
+  // IMPRESIÓN DEL EXPEDIENTE DE SOLICITUD
+  // =========================================================
+
+  generarExpedientePdf(
+    idSolicitudCredito: number
+  ): Observable<Blob> {
+
+    return this.http.get(
+      `${this.impresionUrl}/${idSolicitudCredito}/expediente/pdf`,
+      {
+        responseType: 'blob'
+      }
+    );
+  }
+
 }

@@ -131,8 +131,13 @@
           </option>
 
           <option [ngValue]="4">
+            FORMALIZACIÓN
+          </option>
+
+          <option [ngValue]="5">
             DESEMBOLSO
           </option>
+
 
         </select>
 
@@ -448,6 +453,21 @@
           <td class="text-center">
 
             <button
+              *ngIf="
+      solicitud.idSolicitudProceso === 4
+      && solicitud.idSolicitudResultado === 1
+    "
+              type="button"
+              class="btn btn--small btn--primary"
+              (click)="abrirFormalizacion(solicitud)">
+              Formalizar
+            </button>
+
+            <button
+              *ngIf="
+                solicitud.idSolicitudProceso !== 4
+                || solicitud.idSolicitudResultado !== 1
+              "
               type="button"
               class="btn btn--small btn--secondary"
               (click)="abrirSolicitud(solicitud)">

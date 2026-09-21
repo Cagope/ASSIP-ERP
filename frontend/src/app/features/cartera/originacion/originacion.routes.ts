@@ -116,6 +116,44 @@ export const ORIGINACION_ROUTES:
       ).then(
         m => m.OriginacionAnalisisComponent
       )
+  },
+
+  // =========================================================
+  // APROBACIÓN DE CARTERA
+  // =========================================================
+
+  {
+    path: 'aprobacion',
+    loadComponent: () =>
+      import(
+        './aprobacion/originacion-aprobacion.component'
+      ).then(
+        m => m.OriginacionAprobacionComponent
+      )
+  },
+
+  // =========================================================
+  // FORMALIZACIÓN DE CARTERA - ENTRADA DESDE EL MENÚ
+  // =========================================================
+
+  {
+    path: 'formalizacion',
+    redirectTo: '',
+    pathMatch: 'full'
+  },
+
+  // =========================================================
+  // FORMALIZACIÓN DE CARTERA - SOLICITUD SELECCIONADA
+  // =========================================================
+
+  {
+    path: 'formalizacion/:idSolicitudCredito',
+    loadComponent: () =>
+      import(
+        './formalizacion/originacion-formalizacion.component'
+      ).then(
+        m => m.OriginacionFormalizacionComponent
+      )
   }
 
 ];

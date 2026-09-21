@@ -53,10 +53,17 @@ import {
   OriginacionContexto
 } from '../contexto/originacion-contexto.models';
 
-
 import {
   NumericFormatDirective
 } from '../../../../shared/utils/numeric-format.directive';
+
+import {
+  OriginacionExpedientePrintService
+} from '../impresion/originacion-expediente-print.service';
+
+import {
+  OriginacionCompromisosPrintService
+} from '../impresion/originacion-compromisos-print.service';
 
 import {
   ClasificacionCredito,
@@ -67,6 +74,7 @@ import {
   LineaCredito,
   ModalidadInteres,
   OriginacionAsociado,
+  VigenciaHojaVida,
   SolicitudCreditoCrearRequest,
   SolicitudCreditoDetalle,
   SolicitudCreditoGuardarRequest,
@@ -163,6 +171,18 @@ export class OriginacionSolicitudComponent
 
   asociadoSeleccionado:
     OriginacionAsociado | null = null;
+
+  // =========================================================
+  // VIGENCIA DE HOJA DE VIDA
+  // =========================================================
+
+  vigenciaHojaVida: VigenciaHojaVida | null = null;
+
+  consultandoVigenciaHojaVida = false;
+
+  errorVigenciaHojaVida = '';
+
+  private secuenciaConsultaVigencia = 0;
 
 
   // =========================================================
@@ -289,7 +309,13 @@ export class OriginacionSolicitudComponent
       OriginacionSolicitudStateService,
 
     private readonly contextoApi:
-      OriginacionContextoApi
+      OriginacionContextoApi,
+
+    private readonly expedientePrintService:
+      OriginacionExpedientePrintService,
+
+    private readonly compromisosPrintService:
+      OriginacionCompromisosPrintService
 
   ) {}
 
@@ -370,57 +396,68 @@ export class OriginacionSolicitudComponent
           this.asociadoSeleccionado =
             asociado;
 
-          this.api
-            .crearRetomar({
-              idSolicitudCredito,
-              idAgencia,
-              idDatosPersonal
-            })
-            .subscribe({
+          this.consultarVigenciaAsociado(
+            idDatosPersonal,
+            idAgencia,
 
-              next: respuesta => {
+            // Hoja de vida vigente
+            () => {
 
-                this.mensaje =
-                  `Solicitud ${respuesta.numeroSolicitud} retomada correctamente.`;
+              this.api
+                .crearRetomar({
+                  idSolicitudCredito,
+                  idAgencia,
+                  idDatosPersonal
+                })
+                .subscribe({
 
-                this.cargarDetalleSolicitud(
-                  respuesta.idSolicitudCredito
-                );
+                  next: respuesta => {
 
-              },
+                    this.mensaje =
+                      `Solicitud ${respuesta.numeroSolicitud} retomada correctamente.`;
 
-              error: error => {
+                    this.cargarDetalleSolicitud(
+                      respuesta.idSolicitudCredito
+                    );
+                  },
 
-                this.cargandoSolicitud =
-                  false;
+                  error: error => {
 
-                this.error =
-                  this.obtenerMensajeError(
-                    error,
-                    'No fue posible retomar la solicitud.'
-                  );
+                    this.cargandoSolicitud = false;
 
-              }
+                    this.error =
+                      this.obtenerMensajeError(
+                        error,
+                        'No fue posible retomar la solicitud.'
+                      );
+                  }
 
-            });
+                });
+            },
 
+            // Hoja de vida vencida o consulta fallida
+            () => {
+
+              this.cargandoSolicitud = false;
+
+              this.error =
+                this.errorVigenciaHojaVida;
+            }
+          );
         },
 
         error: error => {
 
-          this.cargandoSolicitud =
-            false;
+          this.cargandoSolicitud = false;
 
           this.error =
             this.obtenerMensajeError(
               error,
               'No fue posible cargar el asociado de la solicitud.'
             );
-
         }
 
       });
-
   }
 
   // =========================================================
@@ -654,8 +691,7 @@ export class OriginacionSolicitudComponent
   // =========================================================
 
   seleccionarAsociado(
-    asociado:
-      OriginacionAsociado
+    asociado: OriginacionAsociado
   ): void {
 
     if (
@@ -687,9 +723,20 @@ export class OriginacionSolicitudComponent
       '';
 
     this.error = '';
+
     this.mensaje = '';
 
     this.cargarContextoResumido();
+
+    const idAgencia =
+      Number(
+        this.agenciaActiva?.idAgencia
+      );
+
+    this.consultarVigenciaAsociado(
+      asociado.idDatosPersonal,
+      idAgencia
+    );
 
     this.buscarSolicitudActiva();
 
@@ -721,6 +768,157 @@ export class OriginacionSolicitudComponent
       idDatosPersonal
     ]);
 
+  }
+
+  // =========================================================
+  // CONSULTAR VIGENCIA DE HOJA DE VIDA
+  // =========================================================
+
+  private consultarVigenciaAsociado(
+    idDatosPersonal: number,
+    idAgencia: number,
+    alEstarVigente?: () => void,
+    alNoEstarVigente?: () => void
+  ): void {
+
+    const secuencia =
+      ++this.secuenciaConsultaVigencia;
+
+    this.vigenciaHojaVida = null;
+
+    this.errorVigenciaHojaVida = '';
+
+    this.consultandoVigenciaHojaVida = true;
+
+    if (
+      !Number.isInteger(idDatosPersonal)
+      || idDatosPersonal <= 0
+      || !Number.isInteger(idAgencia)
+      || idAgencia <= 0
+    ) {
+
+      this.consultandoVigenciaHojaVida = false;
+
+      this.errorVigenciaHojaVida =
+        'No fue posible identificar al asociado o su agencia.';
+
+      alNoEstarVigente?.();
+
+      return;
+    }
+
+    this.api
+      .consultarVigenciaHojaVida(
+        idDatosPersonal,
+        idAgencia
+      )
+      .subscribe({
+
+        next: vigencia => {
+
+          if (
+            secuencia !==
+            this.secuenciaConsultaVigencia
+          ) {
+            return;
+          }
+
+          this.vigenciaHojaVida =
+            vigencia;
+
+          this.consultandoVigenciaHojaVida =
+            false;
+
+          if (vigencia.vigente === true) {
+
+            alEstarVigente?.();
+
+            return;
+          }
+
+          this.errorVigenciaHojaVida =
+            this.mensajeHojaVidaNoVigente(
+              vigencia
+            );
+
+          alNoEstarVigente?.();
+
+        },
+
+        error: error => {
+
+          if (
+            secuencia !==
+            this.secuenciaConsultaVigencia
+          ) {
+            return;
+          }
+
+          this.consultandoVigenciaHojaVida =
+            false;
+
+          this.errorVigenciaHojaVida =
+            this.obtenerMensajeError(
+              error,
+              'No fue posible verificar la actualización de la hoja de vida.'
+            );
+
+          alNoEstarVigente?.();
+
+        }
+
+      });
+  }
+
+
+  // =========================================================
+  // MENSAJE DE HOJA DE VIDA NO VIGENTE
+  // =========================================================
+
+  private mensajeHojaVidaNoVigente(
+    vigencia: VigenciaHojaVida
+  ): string {
+
+    const fecha =
+      vigencia.fechaActualizacion
+        ? vigencia.fechaActualizacion
+            .split('-')
+            .reverse()
+            .join('/')
+        : 'SIN REGISTRO';
+
+    return (
+      'La hoja de vida del asociado no está vigente. '
+      + `Última actualización: ${fecha}. `
+      + `Plazo máximo permitido: ${vigencia.diasMaximos} días. `
+      + 'Actualice la hoja de vida antes de continuar con la solicitud.'
+    );
+  }
+
+
+  // =========================================================
+  // VALIDAR VIGENCIA PARA CONTINUAR
+  // =========================================================
+
+  private validarVigenciaParaContinuar():
+    boolean {
+
+    if (
+      this.vigenciaHojaVida?.vigente === true
+      && !this.consultandoVigenciaHojaVida
+    ) {
+      return true;
+    }
+
+    this.error =
+      this.errorVigenciaHojaVida
+      || (
+        this.consultandoVigenciaHojaVida
+          ? 'Espere mientras se verifica la vigencia de la hoja de vida.'
+          : 'La hoja de vida debe estar vigente para continuar.'
+      );
+
+    return false;
   }
 
   // =========================================================
@@ -842,6 +1040,10 @@ export class OriginacionSolicitudComponent
       || !this.solicitudExistente
       || this.cargandoSolicitud
     ) {
+      return;
+    }
+
+    if (!this.validarVigenciaParaContinuar()) {
       return;
     }
 
@@ -1059,6 +1261,10 @@ export class OriginacionSolicitudComponent
       !this.asociadoSeleccionado
       || this.guardandoCredito
     ) {
+      return;
+    }
+
+    if (!this.validarVigenciaParaContinuar()) {
       return;
     }
 
@@ -1543,6 +1749,14 @@ export class OriginacionSolicitudComponent
 
     this.asociados = [];
 
+    ++this.secuenciaConsultaVigencia;
+
+    this.vigenciaHojaVida = null;
+
+    this.consultandoVigenciaHojaVida = false;
+
+    this.errorVigenciaHojaVida = '';
+
     this.asociadoSeleccionado =
       null;
 
@@ -1788,7 +2002,6 @@ export class OriginacionSolicitudComponent
     });
   }
 
-
   private restaurarEstadoNavegacion(): void {
 
     const estado =
@@ -1825,7 +2038,13 @@ export class OriginacionSolicitudComponent
       estado.asociadoSeleccionado;
 
     if (this.asociadoSeleccionado) {
+
       this.cargarContextoResumido();
+
+      this.consultarVigenciaAsociado(
+        this.asociadoSeleccionado.idDatosPersonal,
+        idAgenciaActiva
+      );
     }
 
     this.solicitudExistente =
@@ -1920,6 +2139,13 @@ export class OriginacionSolicitudComponent
   }
 
   get solicitudEditable(): boolean {
+
+    if (
+      this.consultandoVigenciaHojaVida
+      || this.vigenciaHojaVida?.vigente !== true
+    ) {
+      return false;
+    }
 
     if (this.solicitud) {
 
@@ -2649,6 +2875,86 @@ export class OriginacionSolicitudComponent
     this.router.navigate([
       '/cartera/originacion'
     ]);
+  }
+
+  // =========================================================
+  // GENERAR EXPEDIENTE IMPRIMIBLE DESDE ANGULAR
+  // =========================================================
+
+  generarExpedientePdf(): void {
+
+    const idSolicitudCredito =
+      this.solicitud?.idSolicitudCredito;
+
+    if (!idSolicitudCredito) {
+
+      this.error =
+        'Debe seleccionar una solicitud guardada para generar el expediente.';
+
+      return;
+    }
+
+    this.error = '';
+
+    this.expedientePrintService
+      .imprimirSolicitud(idSolicitudCredito)
+      .subscribe({
+
+        next: () => {
+          // El documento se presenta en una nueva ventana.
+        },
+
+        error: error => {
+
+          this.error =
+            error instanceof Error
+              ? error.message
+              : 'No fue posible generar el expediente.';
+
+        }
+
+      });
+
+  }
+
+  // =========================================================
+  // IMPRIMIR COMPROMISOS Y AUTORIZACIONES
+  // =========================================================
+
+  generarCompromisosPdf(): void {
+
+    const idSolicitudCredito =
+      this.solicitud?.idSolicitudCredito;
+
+    if (!idSolicitudCredito) {
+
+      this.error =
+        'Debe seleccionar una solicitud guardada para imprimir los compromisos y autorizaciones.';
+
+      return;
+    }
+
+    this.error = '';
+
+    this.compromisosPrintService
+      .imprimirSolicitud(idSolicitudCredito)
+      .subscribe({
+
+        next: () => {
+          // El documento se presenta en una nueva ventana.
+        },
+
+        error: error => {
+
+          this.error =
+            error instanceof Error
+              ? error.message
+              : 'No fue posible generar los compromisos y autorizaciones.';
+
+        }
+
+      });
+
   }
 
 }

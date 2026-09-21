@@ -35,6 +35,16 @@ export interface OriginacionAsociado {
   informacionActualizada: boolean | null;
 }
 
+// =========================================================
+// VIGENCIA DE HOJA DE VIDA
+// =========================================================
+
+export interface VigenciaHojaVida {
+  fechaActualizacion: string | null;
+  diasMaximos: number;
+  vigente: boolean;
+}
+
 
 // =========================================================
 // CREAR SOLICITUD + GUARDAR DATOS DEL CRÉDITO

@@ -1,0 +1,11 @@
+<div class="expediente"><p class="intro">Personas vinculadas a la obligación. El titular solicita el crédito; los codeudores participan según lo registrado en el expediente.</p>
+  <div *ngIf="!items.length" class="empty">No hay deudores registrados en esta fotografía.</div>
+  <section class="person" *ngFor="let p of items; let i=index"><div class="person-head"><strong>{{ valor(p,'nombre_completo') }}</strong><span class="tag">{{ rol(p) }} · {{ i+1 }}</span></div>
+  <div class="body grid"><div class="datum"><span>Identificación</span><strong>{{ valor(p,'tipo_documento') }} {{ valor(p,'documento') }}</strong></div>
+  <div class="datum"><span>Saldo de cartera al inicio</span><strong>{{ dinero(p,'saldo_cartera_inicio') }}</strong></div>
+  <div class="datum"><span>Días de mora al inicio</span><strong>{{ valor(p,'dias_mora_inicio') }}</strong></div>
+  <div class="datum"><span>Validación de mora al inicio</span><strong>{{ estado(p,'cumple_mora_inicio') }}</strong></div>
+  <div class="datum"><span>Saldo de cartera en validación</span><strong>{{ dinero(p,'saldo_cartera_validacion') }}</strong></div>
+  <div class="datum"><span>Días de mora en validación</span><strong>{{ valor(p,'dias_mora_validacion') }}</strong></div>
+  <div class="datum"><span>Validación de mora posterior</span><strong>{{ estado(p,'cumple_mora_validacion') }}</strong></div></div></section>
+  <div class="note">“No registrado” y “No evaluado” no equivalen a cero ni a cumplimiento.</div></div>

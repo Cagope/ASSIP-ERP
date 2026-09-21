@@ -17,6 +17,16 @@ export const carteraMenu = {
         },
 
         {
+          label: 'Aprobación de Cartera',
+          route: '/cartera/originacion/aprobacion'
+        },
+
+        {
+          label: 'Formalización de Cartera',
+          route: '/cartera/originacion/formalizacion'
+        },
+
+        {
           label: 'Consulta de Créditos',
           route: '/cartera/consulta-creditos'
         }

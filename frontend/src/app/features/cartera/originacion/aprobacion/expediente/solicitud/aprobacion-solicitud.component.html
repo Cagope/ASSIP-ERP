@@ -1,0 +1,40 @@
+<div class="expediente" *ngIf="foto; else vacio">
+  <p class="intro">Condiciones registradas para la solicitud de crédito. Los valores corresponden a la fotografía consultada.</p>
+  <div class="hero">
+    <div class="metric"><span>Valor solicitado</span><strong>{{ dinero(actual,'valor_solicitado') }}</strong></div>
+    <div class="metric"><span>Cuota proyectada</span><strong>{{ dinero(actual,'valor_cuota_proyectada') }}</strong></div>
+    <div class="metric"><span>Plazo solicitado</span><strong>{{ valor(actual,'plazo_solicitado') }} meses</strong></div>
+  </div>
+  <section class="block"><h4>¿Qué crédito se solicita?</h4><div class="body grid">
+    <div class="datum"><span>Número de solicitud</span><strong>{{ valor(actual,'numero_solicitud') }}</strong></div>
+    <div class="datum"><span>Fecha de solicitud</span><strong>{{ fecha(actual,'fecha_inicio_solicitud') }}</strong></div>
+    <div class="datum"><span>Línea de crédito</span><strong>{{ valor(actual,'nombre_linea_credito') }}</strong></div>
+    <div class="datum"><span>Clasificación</span><strong>{{ valor(actual,'nombre_clasificacion_credito') }}</strong></div>
+    <div class="datum"><span>Destino económico registrado</span><strong>{{ valor(actual,'nombre_destino_economico') }}</strong></div>
+    <div class="datum"><span>Estado del trámite</span><strong>{{ valor(actual,'nombre_resultado') }}</strong></div>
+  </div></section>
+  <section class="block"><h4>¿Cómo se pagaría?</h4><div class="body grid">
+    <div class="datum"><span>Tasa de colocación aplicada</span><strong>{{ porcentaje(actual,'tasa_colocacion_aplicada',4) }}</strong></div>
+    <div class="datum"><span>Tasa efectiva anual</span><strong>{{ porcentaje(actual,'tasa_efectiva_anual',4) }}</strong></div>
+    <div class="datum"><span>Modalidad de interés</span><strong>{{ valor(actual,'nombre_modalidad_interes') }}</strong></div>
+    <div class="datum"><span>Tipo de cuota</span><strong>{{ valor(actual,'nombre_tipo_cuota') }}</strong></div>
+    <div class="datum"><span>Forma de pago</span><strong>{{ valor(actual,'nombre_forma_pago') }}</strong></div>
+    <div class="datum"><span>Periodicidad registrada (meses)</span><strong>{{ valor(actual,'periodo_meses') }}</strong></div>
+    <div class="datum"><span>Gracia de capital</span><strong>{{ valor(actual,'meses_gracia_capital') }} meses</strong></div>
+    <div class="datum"><span>Gracia de intereses</span><strong>{{ valor(actual,'meses_gracia_interes') }} meses</strong></div>
+  </div></section>
+  <section class="block"><h4>¿Qué respaldo se propone?</h4><div class="body grid">
+    <div class="datum"><span>Garantía registrada</span><strong>{{ valor(actual,'nombre_garantia_credito') }}</strong></div>
+    <div class="datum"><span>Subgarantía registrada</span><strong>{{ valor(actual,'nombre_subgarantia') }}</strong></div>
+    <div class="datum"><span>Fondo de garantías</span><strong>{{ valor(actual,'nombre_fondo_garantia') }}</strong></div>
+    <div class="datum"><span>Valor del fondo</span><strong>{{ dinero(actual,'valor_fondo_garantia') }}</strong></div>
+  </div><div class="body subtle">La garantía registrada no acredita por sí sola su constitución o disponibilidad.</div></section>
+  <section class="block"><h4>Aportes del asociado</h4><div class="body grid">
+    <div class="datum"><span>Aportes al inicio</span><strong>{{ dinero(actual,'valor_aportes_inicio') }}</strong></div>
+    <div class="datum"><span>Aportes requeridos</span><strong>{{ dinero(actual,'valor_aportes_requerido') }}</strong></div>
+    <div class="datum"><span>Cupo máximo registrado por aportes</span><strong>{{ dinero(actual,'cupo_maximo_por_aportes') }}</strong></div>
+    <div class="datum"><span>Validación inicial de aportes</span><strong>{{ estado(actual,'cumple_aportes_inicio') }}</strong></div>
+    <div class="datum"><span>Validación posterior de aportes</span><strong>{{ estado(actual,'cumple_aportes_validacion') }}</strong></div>
+  </div></section>
+  <section class="block"><h4>Observaciones del asesor</h4><div class="body"><div class="note">{{ valor(actual,'observacion_asesor') }}</div></div></section>
+</div><ng-template #vacio><div class="empty">No hay fotografía de la solicitud disponible.</div></ng-template>

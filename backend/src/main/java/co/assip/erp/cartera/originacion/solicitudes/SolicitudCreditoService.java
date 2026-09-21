@@ -20,12 +20,15 @@ import co.assip.erp.shared.financiero.TasasFinancieras;
 import co.assip.erp.shared.financiero.dto.CuotaVariableResultado;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import co.assip.erp.cartera.originacion.analisis.SolicitudAnalisisService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @Transactional
@@ -33,13 +36,16 @@ public class SolicitudCreditoService {
 
     private final SolicitudCreditoRepository repository;
     private final UsuarioSesionService usuarioSesionService;
+    private final SolicitudAnalisisService solicitudAnalisisService;
 
     public SolicitudCreditoService(
             SolicitudCreditoRepository repository,
-            UsuarioSesionService usuarioSesionService
+            UsuarioSesionService usuarioSesionService,
+            SolicitudAnalisisService solicitudAnalisisService
     ) {
         this.repository = repository;
         this.usuarioSesionService = usuarioSesionService;
+        this.solicitudAnalisisService = solicitudAnalisisService;
     }
 
 
@@ -158,8 +164,8 @@ public class SolicitudCreditoService {
 
 
     // =========================================================
-// RETOMAR SOLICITUD EXISTENTE
-// =========================================================
+    // RETOMAR SOLICITUD EXISTENTE
+    // =========================================================
 
     public SolicitudCrearRetomarResponseDTO crearRetomar(
             SolicitudCrearRetomarRequestDTO request
@@ -213,6 +219,11 @@ public class SolicitudCreditoService {
                             + " no existe en hoja de vida."
             );
         }
+
+        validarVigenciaHojaVida(
+                idDatosPersonal,
+                idAgencia
+        );
 
 
         // ---------------------------------------------------------
@@ -602,6 +613,11 @@ public class SolicitudCreditoService {
                                         )
                         );
 
+        validarVigenciaHojaVida(
+                solicitud.idDatosPersonal(),
+                solicitud.idAgencia()
+        );
+
         if (Boolean.TRUE.equals(
                 solicitud.resultadoFinal()
         )) {
@@ -750,36 +766,42 @@ public class SolicitudCreditoService {
                         ? condicion.factorReciprocidadAportes()
                         : null;
 
-        BigDecimal cupoMaximo =
-                null;
-
-        BigDecimal aportesRequerido =
-                null;
-
-        Boolean cumpleAportes =
-                null;
+        BigDecimal cupoMaximo = null;
+        BigDecimal aportesRequerido = null;
+        Boolean cumpleAportes = null;
 
         if (factorAportes != null
                 && factorAportes.signum() > 0
                 && valorAportesInicio != null) {
 
+            // Cartera propia vigente del asociado.
+            BigDecimal saldoActualCartera =
+                    repository.buscarSaldoActualCartera(
+                            solicitud.idDatosPersonal()
+                    );
+
+            // Cartera proyectada al otorgar el nuevo crédito.
+            BigDecimal carteraProyectada =
+                    saldoActualCartera.add(
+                            request.getValorSolicitado()
+                    );
+
+            // Cupo total respaldado por los aportes iniciales.
             cupoMaximo =
                     valorAportesInicio
-                            .multiply(
-                                    factorAportes
-                            )
+                            .multiply(factorAportes)
                             .setScale(
                                     2,
                                     RoundingMode.HALF_UP
                             );
 
+            // Aportes necesarios para respaldar toda la cartera proyectada.
             aportesRequerido =
-                    request.getValorSolicitado()
-                            .divide(
-                                    factorAportes,
-                                    2,
-                                    RoundingMode.HALF_UP
-                            );
+                    carteraProyectada.divide(
+                            factorAportes,
+                            2,
+                            RoundingMode.HALF_UP
+                    );
 
             cumpleAportes =
                     valorAportesInicio.compareTo(
@@ -1475,6 +1497,7 @@ public class SolicitudCreditoService {
     // ENVIAR SOLICITUD A APROBACIÓN
     // =========================================================
 
+    @Transactional
     public SolicitudEnviarAprobacionResponseDTO enviarAprobacion(
             Integer idSolicitudCredito,
             SolicitudEnviarAprobacionRequestDTO request
@@ -1503,22 +1526,6 @@ public class SolicitudCreditoService {
 
             throw new IllegalArgumentException(
                     "El concepto del asesor no puede superar los 1000 caracteres."
-            );
-        }
-
-        // ---------------------------------------------------------
-        // VALIDAR EXPEDIENTE
-        // ---------------------------------------------------------
-
-        SolicitudValidacionAprobacionDTO validacion =
-                validarParaAprobacion(
-                        idSolicitudCredito
-                );
-
-        if (!validacion.isPuedeEnviarAprobacion()) {
-
-            throw new IllegalStateException(
-                    validacion.getMensaje()
             );
         }
 
@@ -1553,6 +1560,25 @@ public class SolicitudCreditoService {
             );
         }
 
+        SolicitudCreditoDetalleDTO detalleVigencia =
+                repository.buscarPorId(idSolicitudCredito)
+                        .orElseThrow(
+                                () -> new IllegalArgumentException(
+                                        "No fue posible consultar la solicitud "
+                                                + idSolicitudCredito
+                                                + "."
+                                )
+                        );
+
+        usuarioSesionService.validarAgencia(
+                detalleVigencia.getIdAgencia()
+        );
+
+        validarVigenciaHojaVida(
+                detalleVigencia.getIdDatosPersonal(),
+                detalleVigencia.getIdAgencia()
+        );
+
         if (solicitud.idEnteAprobacion() == null
                 || solicitud.idEnteAprobacion() <= 0) {
 
@@ -1560,6 +1586,51 @@ public class SolicitudCreditoService {
                     "La solicitud "
                             + solicitud.numeroSolicitud()
                             + " no tiene un ente aprobador definido."
+            );
+        }
+
+        // ---------------------------------------------------------
+        // VALIDAR INFORMACIÓN PREVIA AL ANÁLISIS
+        // ---------------------------------------------------------
+
+        SolicitudValidacionAprobacionDTO validacionPrevia =
+                validarParaAprobacion(
+                        idSolicitudCredito
+                );
+
+        if (!validacionPrevia.isSolicitudValida()
+                || !validacionPrevia.isDeudoresCompletos()
+                || !validacionPrevia.isBienesCompletos()
+                || !validacionPrevia.isFinancieroCompleto()
+                || !validacionPrevia.isCentralRiesgoCompleta()
+                || !validacionPrevia.isEnteAprobadorDefinido()) {
+
+            throw new IllegalStateException(
+                    validacionPrevia.getMensaje()
+            );
+        }
+
+        // ---------------------------------------------------------
+        // RECALCULAR Y PERSISTIR ANÁLISIS VIGENTE
+        // ---------------------------------------------------------
+
+        solicitudAnalisisService.persistirAnalisis(
+                idSolicitudCredito
+        );
+
+        // ---------------------------------------------------------
+        // VALIDAR EXPEDIENTE CON EL ANÁLISIS ACTUALIZADO
+        // ---------------------------------------------------------
+
+        SolicitudValidacionAprobacionDTO validacion =
+                validarParaAprobacion(
+                        idSolicitudCredito
+                );
+
+        if (!validacion.isPuedeEnviarAprobacion()) {
+
+            throw new IllegalStateException(
+                    validacion.getMensaje()
             );
         }
 
@@ -2102,6 +2173,80 @@ public class SolicitudCreditoService {
                     "La observación final no puede superar los 1000 caracteres."
             );
         }
+    }
+
+    // =========================================================
+    // VALIDAR VIGENCIA DE HOJA DE VIDA
+    // =========================================================
+
+    private void validarVigenciaHojaVida(
+            Integer idDatosPersonal,
+            Integer idAgencia
+    ) {
+
+        SolicitudCreditoRepository.VigenciaHojaVida vigencia =
+                repository.consultarVigenciaHojaVida(
+                        idDatosPersonal,
+                        idAgencia
+                );
+
+        if (vigencia.vigente()) {
+            return;
+        }
+
+        LocalDate fechaActualizacion =
+                vigencia.fechaActualizacion();
+
+        String fechaTexto =
+                fechaActualizacion == null
+                        ? "SIN REGISTRO"
+                        : fechaActualizacion.format(
+                        DateTimeFormatter.ofPattern(
+                                "dd/MM/yyyy"
+                        )
+                );
+
+        throw new IllegalStateException(
+                "La información del asociado se encuentra desactualizada. "
+                        + "Última actualización: "
+                        + fechaTexto
+                        + ". Vigencia máxima permitida: "
+                        + vigencia.diasMaximos()
+                        + " días. "
+                        + "Debe actualizar la hoja de vida antes de continuar "
+                        + "con la solicitud de crédito."
+        );
+    }
+
+    // =========================================================
+    // CONSULTAR VIGENCIA DE HOJA DE VIDA
+    // =========================================================
+
+    @Transactional(readOnly = true)
+    public SolicitudCreditoRepository.VigenciaHojaVida
+    consultarVigenciaHojaVida(
+            Integer idDatosPersonal,
+            Integer idAgencia
+    ) {
+
+        if (idDatosPersonal == null || idDatosPersonal <= 0) {
+            throw new IllegalArgumentException(
+                    "Debe indicar un asociado válido."
+            );
+        }
+
+        if (idAgencia == null || idAgencia <= 0) {
+            throw new IllegalArgumentException(
+                    "Debe indicar una agencia válida."
+            );
+        }
+
+        usuarioSesionService.validarAgencia(idAgencia);
+
+        return repository.consultarVigenciaHojaVida(
+                idDatosPersonal,
+                idAgencia
+        );
     }
 
     private BigDecimal obtenerSmmlvValido(

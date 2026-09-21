@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDate;
 
 @Repository
 public class SolicitudCreditoRepository {
@@ -79,6 +80,85 @@ public class SolicitudCreditoRepository {
                 );
 
         return Boolean.TRUE.equals(existe);
+    }
+
+    // =========================================================
+// VIGENCIA DE ACTUALIZACIÓN DE HOJA DE VIDA
+// =========================================================
+
+    public VigenciaHojaVida consultarVigenciaHojaVida(
+            Integer idDatosPersonal,
+            Integer idAgencia
+    ) {
+
+        String sql = """
+            SELECT
+                dp.fecha_actualizacion,
+                p.valor_parametro AS dias_maximos,
+                (
+                    dp.fecha_actualizacion IS NOT NULL
+                    AND dp.fecha_actualizacion
+                        + p.valor_parametro::integer >= CURRENT_DATE
+                ) AS vigente
+            FROM hoja_vida.datos_personales dp
+            CROSS JOIN general.parametros p
+            WHERE dp.id_datos_personal = :idDatosPersonal
+              AND p.id_agencia = :idAgencia
+              AND p.codigo_parametro = 121
+            """;
+
+        List<VigenciaHojaVida> resultados =
+                jdbc.query(
+                        sql,
+                        new MapSqlParameterSource()
+                                .addValue(
+                                        "idDatosPersonal",
+                                        idDatosPersonal
+                                )
+                                .addValue(
+                                        "idAgencia",
+                                        idAgencia
+                                ),
+                        (rs, rowNum) ->
+                                new VigenciaHojaVida(
+                                        rs.getObject(
+                                                "fecha_actualizacion",
+                                                LocalDate.class
+                                        ),
+                                        rs.getInt(
+                                                "dias_maximos"
+                                        ),
+                                        rs.getBoolean(
+                                                "vigente"
+                                        )
+                                )
+                );
+
+        if (resultados.size() != 1) {
+
+            throw new IllegalStateException(
+                    "No se pudo determinar la vigencia de la hoja de vida. "
+                            + "Verifique el parámetro 121 para la agencia "
+                            + idAgencia
+                            + " y la existencia del asociado "
+                            + idDatosPersonal
+                            + "."
+            );
+        }
+
+        VigenciaHojaVida resultado = resultados.get(0);
+
+        if (resultado.diasMaximos() <= 0) {
+
+            throw new IllegalStateException(
+                    "El parámetro 121 debe tener un valor mayor que cero "
+                            + "para la agencia "
+                            + idAgencia
+                            + "."
+            );
+        }
+
+        return resultado;
     }
 
 
@@ -1609,6 +1689,45 @@ public class SolicitudCreditoRepository {
         return Optional.ofNullable(
                 resultados.get(0)
         );
+    }
+
+    // =========================================================
+// SALDO ACTUAL DE CARTERA DEL ASOCIADO
+// =========================================================
+
+    public BigDecimal buscarSaldoActualCartera(
+            Integer idDatosPersonal
+    ) {
+
+        String sql = """
+            SELECT
+                COALESCE(
+                    SUM(cc.saldo_actual),
+                    0
+                ) AS saldo_actual_cartera
+
+            FROM cartera.carteras_creditos cc
+
+            WHERE cc.id_datos_personal =
+                  :idDatosPersonal
+
+              AND cc.saldo_actual > 0
+            """;
+
+        BigDecimal saldo =
+                jdbc.queryForObject(
+                        sql,
+                        new MapSqlParameterSource()
+                                .addValue(
+                                        "idDatosPersonal",
+                                        idDatosPersonal
+                                ),
+                        BigDecimal.class
+                );
+
+        return saldo != null
+                ? saldo
+                : BigDecimal.ZERO;
     }
 
 
@@ -3587,6 +3706,13 @@ public class SolicitudCreditoRepository {
         );
 
         return Boolean.TRUE.equals(existe);
+    }
+
+    public record VigenciaHojaVida(
+            LocalDate fechaActualizacion,
+            int diasMaximos,
+            boolean vigente
+    ) {
     }
 
 }

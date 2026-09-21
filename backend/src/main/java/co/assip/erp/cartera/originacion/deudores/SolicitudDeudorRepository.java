@@ -181,21 +181,6 @@ public class SolicitudDeudorRepository {
 
 
     // =========================================================
-    // SQL - DEUDOR INACTIVO POR PERSONA
-    // =========================================================
-
-    private static final String SQL_BUSCAR_INACTIVO_POR_PERSONA = """
-            SELECT sd.id_solicitud_deudor
-            FROM cartera.solicitudes_deudores sd
-            WHERE sd.id_solicitud_credito = :idSolicitudCredito
-              AND sd.id_datos_personal = :idDatosPersonal
-              AND sd.activo = false
-            ORDER BY sd.id_solicitud_deudor DESC
-            LIMIT 1
-            """;
-
-
-    // =========================================================
     // SQL - SIGUIENTE ORDEN
     // =========================================================
 
@@ -245,88 +230,41 @@ public class SolicitudDeudorRepository {
 
 
     // =========================================================
-    // SQL - REACTIVAR CODEUDOR
+    // SQL - ELIMINAR BIENES
     // =========================================================
 
-    private static final String SQL_REACTIVAR_CODEUDOR = """
-            UPDATE cartera.solicitudes_deudores
-            SET
-                tipo_deudor = :tipoDeudor,
-                orden_deudor = :ordenDeudor,
-
-                saldo_cartera_inicio = NULL,
-                dias_mora_inicio = NULL,
-                cumple_mora_inicio = NULL,
-
-                saldo_cartera_validacion = NULL,
-                dias_mora_validacion = NULL,
-                cumple_mora_validacion = NULL,
-
-                activo = true,
-
-                fk_seguridad_edicion = :idUsuario,
-                fecha_edicion = CURRENT_TIMESTAMP
-
-            WHERE id_solicitud_deudor =
-                  :idSolicitudDeudor
-            """;
-
-
-    // =========================================================
-    // SQL - DESACTIVAR BIENES
-    // =========================================================
-
-    private static final String SQL_DESACTIVAR_BIENES = """
-            UPDATE cartera.solicitudes_deudores_bienes
-            SET
-                activo = false,
-                fk_seguridad_edicion = :idUsuario,
-                fecha_edicion = CURRENT_TIMESTAMP
+    private static final String SQL_ELIMINAR_BIENES = """
+            DELETE FROM cartera.solicitudes_deudores_bienes
             WHERE id_solicitud_deudor = :idSolicitudDeudor
-              AND activo = true
             """;
 
 
     // =========================================================
-    // SQL - DESACTIVAR CENTRALES
+    // SQL - ELIMINAR CENTRALES
     // =========================================================
 
-    private static final String SQL_DESACTIVAR_CENTRALES = """
-            UPDATE cartera.solicitudes_deudores_centrales
-            SET
-                activo = false,
-                fk_seguridad_edicion = :idUsuario,
-                fecha_edicion = CURRENT_TIMESTAMP
+    private static final String SQL_ELIMINAR_CENTRALES = """
+            DELETE FROM cartera.solicitudes_deudores_centrales
             WHERE id_solicitud_deudor = :idSolicitudDeudor
-              AND activo = true
             """;
 
 
     // =========================================================
-    // SQL - DESACTIVAR FINANCIERO
+    // SQL - ELIMINAR FINANCIERO
     // =========================================================
 
-    private static final String SQL_DESACTIVAR_FINANCIERO = """
-            UPDATE cartera.solicitudes_deudores_financieros
-            SET
-                activo = false,
-                fk_seguridad_edicion = :idUsuario,
-                fecha_edicion = CURRENT_TIMESTAMP
+    private static final String SQL_ELIMINAR_FINANCIERO = """
+            DELETE FROM cartera.solicitudes_deudores_financieros
             WHERE id_solicitud_deudor = :idSolicitudDeudor
-              AND activo = true
             """;
 
 
     // =========================================================
-    // SQL - DESACTIVAR CODEUDOR
+    // SQL - ELIMINAR CODEUDOR
     // =========================================================
 
-    private static final String SQL_DESACTIVAR_CODEUDOR = """
-            UPDATE cartera.solicitudes_deudores
-            SET
-                activo = false,
-                fk_seguridad_edicion = :idUsuario,
-                fecha_edicion = CURRENT_TIMESTAMP
+    private static final String SQL_ELIMINAR_CODEUDOR = """
+            DELETE FROM cartera.solicitudes_deudores
             WHERE id_solicitud_deudor = :idSolicitudDeudor
               AND activo = true
               AND UPPER(TRIM(tipo_deudor)) = :tipoCodeudor
@@ -522,35 +460,6 @@ public class SolicitudDeudorRepository {
 
 
     // =========================================================
-    // BUSCAR INACTIVO POR PERSONA
-    // =========================================================
-
-    public Optional<Integer> buscarInactivoPorPersona(
-            Integer idSolicitudCredito,
-            Integer idDatosPersonal
-    ) {
-
-        MapSqlParameterSource parametros =
-                parametrosSolicitudPersona(
-                        idSolicitudCredito,
-                        idDatosPersonal
-                );
-
-        List<Integer> resultados =
-                jdbc.query(
-                        SQL_BUSCAR_INACTIVO_POR_PERSONA,
-                        parametros,
-                        (rs, rowNum) ->
-                                rs.getInt(
-                                        "id_solicitud_deudor"
-                                )
-                );
-
-        return resultados.stream().findFirst();
-    }
-
-
-    // =========================================================
     // SIGUIENTE ORDEN
     // =========================================================
 
@@ -621,94 +530,45 @@ public class SolicitudDeudorRepository {
 
 
     // =========================================================
-    // REACTIVAR CODEUDOR
+    // ELIMINAR DEPENDENCIAS
     // =========================================================
 
-    public void reactivarCodeudor(
-            Integer idSolicitudDeudor,
-            Integer ordenDeudor,
-            Integer idUsuario
+    public void eliminarDependencias(
+            Integer idSolicitudDeudor
     ) {
 
         MapSqlParameterSource parametros =
                 new MapSqlParameterSource()
-                        .addValue(
-                                "idSolicitudDeudor",
-                                idSolicitudDeudor
-                        )
-                        .addValue(
-                                "tipoDeudor",
-                                TIPO_CODEUDOR
-                        )
-                        .addValue(
-                                "ordenDeudor",
-                                ordenDeudor
-                        )
-                        .addValue(
-                                "idUsuario",
-                                idUsuario
-                        );
-
-        int actualizados =
-                jdbc.update(
-                        SQL_REACTIVAR_CODEUDOR,
-                        parametros
-                );
-
-        if (actualizados != 1) {
-            throw new IllegalStateException(
-                    "No fue posible reactivar el codeudor."
-            );
-        }
-    }
-
-
-    // =========================================================
-    // DESACTIVAR DEPENDENCIAS
-    // =========================================================
-
-    public void desactivarDependencias(
-            Integer idSolicitudDeudor,
-            Integer idUsuario
-    ) {
-
-        MapSqlParameterSource parametros =
-                parametrosEdicion(
-                        idSolicitudDeudor,
-                        idUsuario
-                );
+                        .addValue("idSolicitudDeudor", idSolicitudDeudor);
 
         jdbc.update(
-                SQL_DESACTIVAR_BIENES,
+                SQL_ELIMINAR_BIENES,
                 parametros
         );
 
         jdbc.update(
-                SQL_DESACTIVAR_CENTRALES,
+                SQL_ELIMINAR_CENTRALES,
                 parametros
         );
 
         jdbc.update(
-                SQL_DESACTIVAR_FINANCIERO,
+                SQL_ELIMINAR_FINANCIERO,
                 parametros
         );
     }
 
 
     // =========================================================
-    // DESACTIVAR CODEUDOR
+    // ELIMINAR CODEUDOR
     // =========================================================
 
-    public boolean desactivarCodeudor(
-            Integer idSolicitudDeudor,
-            Integer idUsuario
+    public boolean eliminarCodeudor(
+            Integer idSolicitudDeudor
     ) {
 
         MapSqlParameterSource parametros =
-                parametrosEdicion(
-                        idSolicitudDeudor,
-                        idUsuario
-                )
+                new MapSqlParameterSource()
+                        .addValue("idSolicitudDeudor", idSolicitudDeudor)
                         .addValue(
                                 "tipoCodeudor",
                                 TIPO_CODEUDOR
@@ -716,7 +576,7 @@ public class SolicitudDeudorRepository {
 
         int actualizados =
                 jdbc.update(
-                        SQL_DESACTIVAR_CODEUDOR,
+                        SQL_ELIMINAR_CODEUDOR,
                         parametros
                 );
 
@@ -744,19 +604,4 @@ public class SolicitudDeudorRepository {
                 );
     }
 
-    private MapSqlParameterSource parametrosEdicion(
-            Integer idSolicitudDeudor,
-            Integer idUsuario
-    ) {
-
-        return new MapSqlParameterSource()
-                .addValue(
-                        "idSolicitudDeudor",
-                        idSolicitudDeudor
-                )
-                .addValue(
-                        "idUsuario",
-                        idUsuario
-                );
-    }
 }

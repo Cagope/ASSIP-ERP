@@ -1,0 +1,1043 @@
+// =========================================================
+// ASSIP ERP
+// ORIGINACIÓN DE CARTERA - APROBACIÓN
+// =========================================================
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+
+// =========================================================
+// PÁGINA
+// =========================================================
+
+.page {
+  padding: 1rem;
+  min-width: 0;
+}
+
+.originacion-aprobacion {
+  color: #1f2937;
+  font-size: 0.85rem;
+}
+
+
+// =========================================================
+// ENCABEZADO PRINCIPAL
+// =========================================================
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+
+    color: #1f2937;
+
+    font-size: 1.35rem;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0.3rem 0 0;
+
+    color: #6b7280;
+
+    font-size: 0.88rem;
+    line-height: 1.45;
+  }
+}
+
+.page-subtitle {
+  color: #6b7280;
+  font-size: 0.88rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+
+  gap: 0.5rem;
+
+  flex-shrink: 0;
+}
+
+
+// =========================================================
+// TARJETAS
+// =========================================================
+
+.card {
+  min-width: 0;
+
+  margin-bottom: 1rem;
+  padding: 1rem;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 0.65rem;
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  margin-bottom: 1rem;
+  padding: 0 0 0.85rem;
+
+  background: transparent;
+
+  border: 0;
+  border-bottom: 1px solid #e5e7eb;
+
+  > div {
+    min-width: 0;
+  }
+
+  h3 {
+    margin: 0;
+
+    color: #1f2937;
+
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+
+    color: #6b7280;
+
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+}
+
+
+// =========================================================
+// CONTADOR DE SOLICITUDES / ACTUACIONES
+// =========================================================
+
+.section-total {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+
+  gap: 0.15rem;
+
+  flex-shrink: 0;
+
+  span {
+    color: #6b7280;
+
+    font-size: 0.7rem;
+    font-weight: 600;
+
+    text-transform: uppercase;
+  }
+
+  strong {
+    color: #1d4ed8;
+
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+}
+
+
+// =========================================================
+// FILTROS
+// =========================================================
+
+.filtros {
+  display: flex;
+  align-items: flex-end;
+
+  gap: 0.75rem;
+
+  margin-bottom: 1rem;
+}
+
+.filtros .form-field {
+  flex: 1;
+
+  max-width: 650px;
+}
+
+
+// =========================================================
+// FORMULARIOS
+// =========================================================
+
+.form-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 0.85rem;
+}
+
+.form-grid--2 {
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+}
+
+.form-grid--3 {
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+}
+
+.form-grid--4 {
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+
+  gap: 0.35rem;
+
+  min-width: 0;
+
+  label {
+    color: #6b7280;
+
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  strong {
+    display: block;
+
+    min-width: 0;
+
+    color: #1f2937;
+
+    font-size: 0.88rem;
+    font-weight: 700;
+
+    overflow-wrap: anywhere;
+  }
+
+  small {
+    color: #9ca3af;
+
+    font-size: 0.72rem;
+    line-height: 1.4;
+  }
+}
+
+.form-field--full {
+  grid-column: 1 / -1;
+}
+
+.required {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+
+// =========================================================
+// CAMPOS DE CAPTURA
+// =========================================================
+
+.form-control,
+.form-select {
+  width: 100%;
+  min-width: 0;
+
+  padding: 0.55rem 0.7rem;
+
+  background: #ffffff;
+
+  border: 1px solid #d1d5db;
+  border-radius: 0.45rem;
+
+  box-sizing: border-box;
+
+  color: #1f2937;
+
+  font-family: inherit;
+  font-size: 0.84rem;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:focus {
+    outline: none;
+
+    border-color: #2563eb;
+
+    box-shadow:
+      0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  &:disabled {
+    background: #f3f4f6;
+
+    color: #9ca3af;
+
+    cursor: not-allowed;
+  }
+
+  &[readonly] {
+    background: #f9fafb;
+
+    color: #4b5563;
+  }
+}
+
+textarea.form-control {
+  min-height: 120px;
+
+  resize: vertical;
+
+  line-height: 1.5;
+}
+
+input[type='search'] {
+  appearance: none;
+}
+
+input[type='date'] {
+  min-height: 36px;
+}
+
+
+// =========================================================
+// BOTONES
+// =========================================================
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.4rem;
+
+  padding: 0.5rem 0.85rem;
+
+  border: 1px solid transparent;
+  border-radius: 0.45rem;
+
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  line-height: 1.3;
+
+  text-align: center;
+  text-decoration: none;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:disabled {
+    opacity: 0.55;
+
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+  }
+}
+
+.btn-primary {
+  background: #2563eb;
+
+  border-color: #2563eb;
+
+  color: #ffffff;
+
+  &:hover:not(:disabled) {
+    background: #1d4ed8;
+
+    border-color: #1d4ed8;
+  }
+}
+
+.btn-outline-primary {
+  background: #ffffff;
+
+  border-color: #2563eb;
+
+  color: #1d4ed8;
+
+  &:hover:not(:disabled) {
+    background: #eff6ff;
+  }
+}
+
+.btn-outline-secondary {
+  background: #ffffff;
+
+  border-color: #d1d5db;
+
+  color: #374151;
+
+  &:hover:not(:disabled) {
+    background: #f3f4f6;
+  }
+}
+
+.btn-sm {
+  padding: 0.35rem 0.6rem;
+
+  font-size: 0.74rem;
+}
+
+
+// =========================================================
+// TABLAS
+// =========================================================
+
+.table-wrap {
+  width: 100%;
+
+  overflow-x: auto;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+}
+
+.table {
+  width: 100%;
+
+  min-width: 950px;
+
+  margin-bottom: 0;
+
+  border-collapse: collapse;
+
+  font-size: 0.8rem;
+
+  thead {
+    background: #f6f6f6;
+  }
+
+  th {
+    padding: 0.7rem;
+
+    border-bottom: 1px solid #d1d5db;
+
+    color: #4b5563;
+
+    font-size: 0.72rem;
+    font-weight: 700;
+
+    text-align: left;
+
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 0.7rem;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    color: #374151;
+
+    vertical-align: middle;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  tbody tr:hover {
+    background: #f9fafb;
+  }
+
+  td strong {
+    color: #1f2937;
+
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  td small {
+    margin-top: 0.15rem;
+
+    color: #6b7280;
+
+    font-size: 0.7rem;
+  }
+
+  td .btn {
+    white-space: nowrap;
+  }
+}
+
+.table-active {
+  background: #eff6ff !important;
+
+  td {
+    background: #eff6ff !important;
+  }
+}
+
+
+// =========================================================
+// ALINEACIÓN DE VALORES
+// =========================================================
+
+.text-end {
+  text-align: right !important;
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+.text-muted {
+  color: #6b7280 !important;
+}
+
+.d-block {
+  display: block !important;
+}
+
+
+// =========================================================
+// INSIGNIAS / ESTADOS
+// =========================================================
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  max-width: 100%;
+
+  padding: 0.3rem 0.55rem;
+
+  border: 1px solid transparent;
+  border-radius: 999px;
+
+  font-size: 0.7rem;
+  font-weight: 700;
+
+  line-height: 1.2;
+
+  text-align: center;
+
+  white-space: normal;
+}
+
+.bg-primary {
+  background: #eff6ff !important;
+
+  border-color: #bfdbfe;
+
+  color: #1d4ed8 !important;
+}
+
+.bg-success {
+  background: #f0fdf4 !important;
+
+  border-color: #bbf7d0;
+
+  color: #166534 !important;
+}
+
+.bg-danger {
+  background: #fef2f2 !important;
+
+  border-color: #fecaca;
+
+  color: #991b1b !important;
+}
+
+.bg-warning {
+  background: #fffbeb !important;
+
+  border-color: #fde68a;
+
+  color: #92400e !important;
+}
+
+
+// =========================================================
+// MENSAJES
+// =========================================================
+
+.alert {
+  margin-bottom: 1rem;
+
+  padding: 0.75rem 0.9rem;
+
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.alert-danger {
+  background: #fef2f2;
+
+  border-color: #fecaca;
+
+  color: #991b1b;
+}
+
+.alert-success {
+  background: #f0fdf4;
+
+  border-color: #bbf7d0;
+
+  color: #166534;
+}
+
+.alert-info {
+  background: #eff6ff;
+
+  border-color: #bfdbfe;
+
+  color: #1e40af;
+
+  strong {
+    display: block;
+
+    margin-bottom: 0.3rem;
+
+    font-weight: 700;
+  }
+}
+
+
+// =========================================================
+// ESTADOS DE CARGA / SIN INFORMACIÓN
+// =========================================================
+
+.loading,
+.empty {
+  padding: 1.5rem 1rem;
+
+  text-align: center;
+
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.loading {
+  color: #2563eb;
+
+  background: #f8fafc;
+
+  border: 1px dashed #bfdbfe;
+  border-radius: 0.5rem;
+}
+
+.empty {
+  color: #6b7280;
+
+  background: #f9fafb;
+
+  border: 1px dashed #e5e7eb;
+  border-radius: 0.5rem;
+}
+
+
+// =========================================================
+// NAVEGACIÓN DE FOTOGRAFÍAS
+// =========================================================
+
+.section-tabs {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 0.4rem;
+
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0.55rem 0.8rem;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e7eb;
+    border-radius: 0.45rem;
+
+    color: #4b5563;
+
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
+
+    &:hover {
+      background: #f9fafb;
+
+      border-color: #cbd5e1;
+
+      color: #1f2937;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #2563eb;
+      outline-offset: 2px;
+    }
+
+    &.active {
+      background: #eff6ff;
+
+      border-color: #93c5fd;
+
+      color: #1d4ed8;
+
+      font-weight: 700;
+    }
+  }
+}
+
+
+// =========================================================
+// FOTOGRAFÍAS
+// =========================================================
+
+.foto-section {
+  min-width: 0;
+
+  h4 {
+    margin: 0 0 0.85rem;
+
+    padding-bottom: 0.6rem;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    color: #1f2937;
+
+    font-size: 0.92rem;
+    font-weight: 700;
+  }
+}
+
+
+// =========================================================
+// INFORMACIÓN ESTRUCTURADA
+// FOTOGRAFÍAS ACTUALES E HISTÓRICAS
+// =========================================================
+
+.foto-json {
+  width: 100%;
+  max-height: 650px;
+
+  margin: 0;
+  padding: 1rem;
+
+  overflow: auto;
+
+  background: #f8fafc;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+
+  box-sizing: border-box;
+
+  color: #334155;
+
+  font-family:
+    Consolas,
+    'Courier New',
+    monospace;
+
+  font-size: 0.76rem;
+  line-height: 1.6;
+
+  tab-size: 2;
+
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+
+// =========================================================
+// RESUMEN DE SOLICITUD
+// =========================================================
+
+.originacion-aprobacion {
+
+  .card > .form-grid {
+    margin-top: 0.25rem;
+  }
+
+  .card > .form-grid--4 {
+
+    .form-field {
+      padding: 0.7rem 0.8rem;
+
+      background: #f9fafb;
+
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+
+      label {
+        font-size: 0.7rem;
+
+        text-transform: uppercase;
+      }
+
+      strong {
+        font-size: 0.88rem;
+      }
+    }
+  }
+}
+
+
+// =========================================================
+// FORMULARIO DE DECISIÓN
+// =========================================================
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  flex-wrap: wrap;
+
+  gap: 0.65rem;
+
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+
+  border-top: 1px solid #e5e7eb;
+}
+
+
+// =========================================================
+// INDICADORES DE DECISIÓN
+// =========================================================
+
+.decision--aprobada {
+  background: #f0fdf4;
+
+  border-color: #bbf7d0;
+
+  color: #166534;
+}
+
+.decision--no-viable {
+  background: #fef2f2;
+
+  border-color: #fecaca;
+
+  color: #991b1b;
+}
+
+.decision--ajustes {
+  background: #fffbeb;
+
+  border-color: #fde68a;
+
+  color: #92400e;
+}
+
+.decision--pendiente {
+  background: #eff6ff;
+
+  border-color: #bfdbfe;
+
+  color: #1d4ed8;
+}
+
+
+// =========================================================
+// RESPONSIVE - PANTALLAS MEDIANAS
+// =========================================================
+
+@media (max-width: 1200px) {
+
+  .form-grid--4 {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .form-grid--3 {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+// =========================================================
+// RESPONSIVE - TABLET
+// =========================================================
+
+@media (max-width: 900px) {
+
+  .page-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+  }
+
+  .card-header {
+    flex-wrap: wrap;
+  }
+
+  .section-total {
+    align-items: flex-start;
+  }
+
+  .form-grid,
+  .form-grid--2,
+  .form-grid--3,
+  .form-grid--4 {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .section-tabs {
+    gap: 0.35rem;
+
+    button {
+      font-size: 0.74rem;
+    }
+  }
+
+}
+
+
+// =========================================================
+// RESPONSIVE - MÓVIL
+// =========================================================
+
+@media (max-width: 600px) {
+
+  .page {
+    padding: 0.65rem;
+  }
+
+  .page-header {
+
+    h2 {
+      font-size: 1.15rem;
+    }
+
+    p {
+      font-size: 0.8rem;
+    }
+  }
+
+  .card {
+    padding: 0.8rem;
+  }
+
+  .card-header {
+    align-items: stretch;
+    flex-direction: column;
+
+    h3 {
+      font-size: 0.92rem;
+    }
+  }
+
+  .header-actions {
+    width: 100%;
+
+    .btn {
+      width: 100%;
+    }
+  }
+
+  .filtros {
+    flex-direction: column;
+    align-items: stretch;
+
+    .form-field {
+      width: 100%;
+      max-width: none;
+    }
+  }
+
+  .form-grid,
+  .form-grid--2,
+  .form-grid--3,
+  .form-grid--4 {
+    grid-template-columns: 1fr;
+  }
+
+  .form-field--full {
+    grid-column: auto;
+  }
+
+  .section-tabs {
+    display: grid;
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    button {
+      width: 100%;
+
+      padding: 0.6rem 0.4rem;
+
+      font-size: 0.72rem;
+    }
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+
+    .btn {
+      width: 100%;
+    }
+  }
+
+  .foto-json {
+    padding: 0.7rem;
+
+    font-size: 0.7rem;
+  }
+
+  .table {
+    font-size: 0.74rem;
+
+    th,
+    td {
+      padding: 0.55rem;
+    }
+  }
+
+}

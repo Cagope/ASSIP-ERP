@@ -5,30 +5,48 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d0577d07-00ee-4562-af4b-c1a4484e8934" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/dto/SolicitudEnteAprobadorPreviewDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/dto/SolicitudEnteAprobadorPreviewRequestDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/dto/SolicitudEnviarAprobacionRequestDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/dto/SolicitudEnviarAprobacionResponseDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/dto/SolicitudFinalizarRequestDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/dto/SolicitudFinalizarResponseDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/dto/SolicitudValidacionAprobacionDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/list/solicitud-list.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/list/solicitud-list.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/list/solicitud-list.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/list/solicitud-list.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/list/solicitud-list.models.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/aprobacion/SolicitudAprobacionController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/aprobacion/SolicitudAprobacionRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/aprobacion/SolicitudAprobacionService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/aprobacion/dto/SolicitudAprobacionActuacionDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/aprobacion/dto/SolicitudAprobacionBandejaDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/aprobacion/dto/SolicitudAprobacionDecisionDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/aprobacion/dto/SolicitudAprobacionDecisionRequestDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/aprobacion/dto/SolicitudAprobacionDecisionResponseDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/aprobacion/dto/SolicitudAprobacionDetalleDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/aprobacion/dto/SolicitudAprobacionFotosDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/desembolso/SolicitudDesembolsoController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/desembolso/SolicitudDesembolsoRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/desembolso/SolicitudDesembolsoService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/formalizacion/SolicitudFormalizacionController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/formalizacion/SolicitudFormalizacionRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/formalizacion/SolicitudFormalizacionService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/formalizacion/dto/SolicitudFormalizacionDetalleDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/formalizacion/dto/SolicitudFormalizacionGuardarRequestDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/impresion/OriginacionExpedientePdfService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/impresion/OriginacionImpresionController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/impresion/OriginacionImpresionService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/aprobacion/originacion-aprobacion.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/aprobacion/originacion-aprobacion.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/aprobacion/originacion-aprobacion.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/aprobacion/originacion-aprobacion.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/aprobacion/originacion-aprobacion.models.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/impresion/originacion-expediente-print.document.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/impresion/originacion-expediente-print.models.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/impresion/originacion-expediente-print.service.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/impresion/originacion-expediente-print.styles.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/deudores/SolicitudDeudorRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/deudores/SolicitudDeudorRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/deudores/SolicitudDeudorService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/deudores/SolicitudDeudorService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/SolicitudCreditoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/SolicitudCreditoController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/SolicitudCreditoRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/SolicitudCreditoRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/SolicitudCreditoService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/solicitudes/SolicitudCreditoService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/originacion/analisis/originacion-analisis.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/analisis/originacion-analisis.api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/originacion/analisis/originacion-analisis.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/analisis/originacion-analisis.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/originacion/analisis/originacion-analisis.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/analisis/originacion-analisis.component.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/originacion/analisis/originacion-analisis.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/analisis/originacion-analisis.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/cartera-menu.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/cartera-menu.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/features/cartera/originacion/originacion.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/originacion.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/list/solicitud-list.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/list/solicitud-list.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/list/solicitud-list.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/list/solicitud-list.component.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/originacion-solicitud.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/originacion-solicitud.api.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/originacion-solicitud.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/originacion-solicitud.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/originacion-solicitud.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/originacion-solicitud.component.scss" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/originacion-solicitud.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/originacion-solicitud.component.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/originacion-solicitud.models.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/solicitud/originacion-solicitud.models.ts" afterDir="false" />
     </list>
