@@ -126,4 +126,13 @@ public class SolicitudFormalizacionDetalleDTO {
 
     private LocalDateTime fechaFinAprobacion;
     private LocalDateTime fechaFinFormalizacion;
+
+    // =========================================================
+    // PAGARÉ GENERADO
+    // =========================================================
+
+    private Integer idCarteraCredito;
+    private String pagareCartera;
+    private String codigoEstadoCartera;
+
 }

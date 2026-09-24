@@ -23,6 +23,11 @@ public class SolicitudAnalisisDeudorDTO {
     private Integer idSolicitudDeudor;
     private Integer idDatosPersonal;
 
+    // Identificación del participante
+    private String tipoDocumento;
+    private String documento;
+    private String nombreCompleto;
+
     private String tipoDeudor;
     private Integer ordenDeudor;
 

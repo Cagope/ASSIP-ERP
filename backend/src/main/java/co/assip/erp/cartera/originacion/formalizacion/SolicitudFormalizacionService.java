@@ -25,16 +25,20 @@ public class SolicitudFormalizacionService {
 
     private final SolicitudFormalizacionRepository repository;
 
+    private final SolicitudFormalizacionValidacionService validacionService;
+
     private final SolicitudCreditoRepository solicitudCreditoRepository;
 
     private final UsuarioSesionService usuarioSesionService;
 
     public SolicitudFormalizacionService(
             SolicitudFormalizacionRepository repository,
+            SolicitudFormalizacionValidacionService validacionService,
             SolicitudCreditoRepository solicitudCreditoRepository,
             UsuarioSesionService usuarioSesionService
     ) {
         this.repository = repository;
+        this.validacionService = validacionService;
         this.solicitudCreditoRepository = solicitudCreditoRepository;
         this.usuarioSesionService = usuarioSesionService;
     }
@@ -95,6 +99,27 @@ public class SolicitudFormalizacionService {
         validarProcesoFormalizacion(solicitud);
 
         validarCondiciones(request);
+
+        var validacion = validacionService.validar(
+                idSolicitudCredito,
+                request
+        );
+
+        if (!validacion.puedeContinuar()) {
+
+            String detalle = validacion.bloqueos()
+                    .stream()
+                    .map(
+                            SolicitudFormalizacionValidacionService
+                                    .BloqueoFormalizacion::mensaje
+                    )
+                    .collect(java.util.stream.Collectors.joining("; "));
+
+            throw new IllegalStateException(
+                    "No es posible guardar la formalización. "
+                            + detalle
+            );
+        }
 
         // =====================================================
         // PERIODO DE INTERESES
@@ -233,7 +258,10 @@ public class SolicitudFormalizacionService {
     //
     // Proceso 4 -> Proceso 5
     //
-    // El crédito todavía no se constituye.
+    // El crédito ya debe estar constituido en estado P.
+    // Finalizar únicamente traslada la solicitud
+    // del proceso 4 - FORMALIZACIÓN
+    // al proceso 5 - DESEMBOLSO.
     // =========================================================
 
     @Transactional
@@ -607,5 +635,221 @@ public class SolicitudFormalizacionService {
 
         return valor == null
                 || valor.isBlank();
+    }
+
+    // =========================================================
+// GENERAR PAGARÉ
+// =========================================================
+
+    @Transactional
+    public SolicitudFormalizacionDetalleDTO generarPagare(
+            Integer idSolicitudCredito
+    ) {
+
+        validarIdSolicitud(idSolicitudCredito);
+
+        Integer idUsuario = usuarioSesionService.idUsuario();
+
+        // 1. Bloquear solicitud para impedir generación simultánea.
+
+        var contexto = repository.bloquearParaGenerarPagare(
+                idSolicitudCredito
+        ).orElseThrow(
+                () -> new IllegalArgumentException(
+                        "No existe la solicitud de crédito "
+                                + idSolicitudCredito
+                )
+        );
+
+        // 2. Verificar estado y responsable.
+
+        if (!Objects.equals(
+                contexto.idSolicitudProceso(),
+                PROCESO_FORMALIZACION
+        )) {
+            throw new IllegalStateException(
+                    "La solicitud no se encuentra en Formalización."
+            );
+        }
+
+        if (!Objects.equals(
+                contexto.idSolicitudResultado(),
+                RESULTADO_APROBADA
+        )) {
+            throw new IllegalStateException(
+                    "La solicitud no tiene resultado aprobado."
+            );
+        }
+
+        if (!Objects.equals(
+                contexto.idAsesor(),
+                idUsuario
+        )) {
+            throw new IllegalStateException(
+                    "La solicitud pertenece a otro asesor."
+            );
+        }
+
+        if (contexto.formalizacionFinalizada()) {
+            throw new IllegalStateException(
+                    "La formalización ya fue finalizada."
+            );
+        }
+
+        if (contexto.idCarteraCredito() != null) {
+            throw new IllegalStateException(
+                    "La solicitud ya tiene un crédito generado. "
+                            + "Utilice la opción Reimprimir pagaré."
+            );
+        }
+
+        // 3. Consultar condiciones definitivas guardadas.
+
+        SolicitudFormalizacionDetalleDTO solicitud =
+                consultar(idSolicitudCredito);
+
+        validarFormalizacionCompleta(solicitud);
+
+        // =====================================================
+        // 4. REVALIDAR CONDICIONES DEFINITIVAS GUARDADAS
+        // =====================================================
+
+        SolicitudFormalizacionGuardarRequestDTO condicionesGuardadas =
+                SolicitudFormalizacionGuardarRequestDTO.builder()
+
+                        .valorFormalizado(
+                                solicitud.getValorFormalizado()
+                        )
+
+                        .plazoFormalizado(
+                                solicitud.getPlazoFormalizado()
+                        )
+
+                        .codigoFormaPagoFormalizada(
+                                solicitud.getCodigoFormaPagoFormalizada()
+                        )
+
+                        .periodoCodigoInteresFormalizado(
+                                solicitud.getPeriodoCodigoInteresFormalizado()
+                        )
+
+                        .tipoModalidadInteresFormalizado(
+                                solicitud.getTipoModalidadInteresFormalizado()
+                        )
+
+                        .amortizacionCapitalFormalizada(
+                                solicitud.getAmortizacionCapitalFormalizada()
+                        )
+
+                        .codigoTipoCuotaFormalizada(
+                                solicitud.getCodigoTipoCuotaFormalizada()
+                        )
+
+                        .mesesGraciaCapitalFormalizados(
+                                solicitud.getMesesGraciaCapitalFormalizados()
+                        )
+
+                        .mesesGraciaInteresFormalizados(
+                                solicitud.getMesesGraciaInteresFormalizados()
+                        )
+
+                        .tasaNominalFormalizada(
+                                solicitud.getTasaNominalFormalizada()
+                        )
+
+                        .build();
+
+        var validacion = validacionService.validar(
+                idSolicitudCredito,
+                condicionesGuardadas
+        );
+
+        if (!validacion.puedeContinuar()) {
+
+            String detalle = validacion.bloqueos()
+                    .stream()
+                    .map(
+                            SolicitudFormalizacionValidacionService
+                                    .BloqueoFormalizacion::mensaje
+                    )
+                    .collect(
+                            java.util.stream.Collectors.joining("; ")
+                    );
+
+            throw new IllegalStateException(
+                    "No es posible generar el pagaré. "
+                            + detalle
+            );
+        }
+
+        // =====================================================
+        // VERIFICAR CONSISTENCIA DE LA TEA GUARDADA
+        // =====================================================
+
+        if (validacion.tasa() == null
+                || validacion.tasa().tasaEfectivaAnual() == null
+                || solicitud.getTasaEfectivaAnualFormalizada()
+                .compareTo(
+                        validacion.tasa().tasaEfectivaAnual()
+                ) != 0) {
+
+            throw new IllegalStateException(
+                    "La tasa efectiva anual guardada no coincide "
+                            + "con las condiciones definitivas. "
+                            + "Revise y guarde nuevamente la formalización."
+            );
+        }
+
+        // 5. Obtener consecutivo 605.
+
+        Long consecutivo = repository.siguienteConsecutivoPagare(
+                contexto.idAgencia(),
+                idUsuario
+        );
+
+        String pagareCartera = consecutivo.toString();
+
+        // 6. Bloquear si el pagaré ya existe en la agencia.
+
+        if (repository.existePagareEnAgencia(
+                contexto.idAgencia(),
+                pagareCartera
+        )) {
+
+            throw new IllegalStateException(
+                    "El pagaré "
+                            + pagareCartera
+                            + " ya existe en la agencia "
+                            + contexto.idAgencia()
+                            + ". Revise el parámetro 605. "
+                            + "No se generó el crédito."
+            );
+        }
+
+        // 7. Constituir crédito pendiente de desembolso.
+
+        Integer idCarteraCredito =
+                repository.insertarCreditoDesdeFormalizacion(
+                        idSolicitudCredito,
+                        pagareCartera,
+                        idUsuario
+                );
+
+        // 8. Vincular crédito con solicitud.
+
+        int vinculados = repository.vincularCreditoGenerado(
+                idSolicitudCredito,
+                idCarteraCredito,
+                idUsuario
+        );
+
+        if (vinculados != 1) {
+            throw new IllegalStateException(
+                    "No fue posible vincular el crédito generado "
+                            + "con la solicitud."
+            );
+        }
+
+        return consultar(idSolicitudCredito);
     }
 }

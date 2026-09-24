@@ -25,11 +25,28 @@ public class SolicitudDesembolsoController {
     // - Mora en obligaciones propias.
     // - Mora en obligaciones donde figuran como codeudores.
     // - Aportes vigentes y reciprocidad.
+    // - Créditos simultáneos según la línea solicitada.
+    //
+    // Créditos simultáneos:
+    //
+    // - Si la línea permite simultaneidad, no genera bloqueo.
+    // - Si no la permite, bloquea por créditos vigentes
+    //   de otras líneas.
+    // - Si encuentra créditos vigentes de la misma línea,
+    //   genera alerta de posible novación.
     //
     // Actualiza:
     //
     // - Validación de mora por deudor/codeudor.
     // - Validación de aportes de la solicitud.
+    //
+    // Devuelve:
+    //
+    // - Resultado general.
+    // - Bloqueos.
+    // - Alertas.
+    // - Detalle de mora.
+    // - Resultado de aportes.
     //
     // NO asigna pagaré.
     // NO constituye crédito.

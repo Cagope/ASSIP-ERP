@@ -169,15 +169,19 @@ public class SolicitudCreditoDetalleDTO {
 
 
     // =========================================================
-    // TASA Y CUOTA PROYECTADA
-    // =========================================================
+// TASA Y CUOTAS
+// =========================================================
 
     private Integer idTasaColocacionDetalle;
 
     private BigDecimal tasaColocacionAplicada;
     private BigDecimal tasaEfectivaAnual;
 
+    // Cuota correspondiente a las condiciones contractuales
     private BigDecimal valorCuotaProyectada;
+
+    // Primera cuota mensual simulada para capacidad de pago
+    private BigDecimal valorPrimeraCuotaAnalisis;
 
     // =========================================================
     // ENTE APROBADOR

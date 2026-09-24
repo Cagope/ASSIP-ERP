@@ -21,6 +21,7 @@ import co.assip.erp.shared.financiero.dto.CuotaVariableResultado;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import co.assip.erp.cartera.originacion.analisis.SolicitudAnalisisService;
+import co.assip.erp.shared.financiero.CuotaMensualAnalisis;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -224,6 +225,7 @@ public class SolicitudCreditoService {
                 idDatosPersonal,
                 idAgencia
         );
+
 
 
         // ---------------------------------------------------------
@@ -629,6 +631,14 @@ public class SolicitudCreditoService {
             );
         }
 
+        // ---------------------------------------------------------
+        // CRÉDITOS SIMULTÁNEOS SEGÚN LA LÍNEA SELECCIONADA
+        // ---------------------------------------------------------
+
+        validarCreditosSimultaneos(
+                solicitud.idDatosPersonal(),
+                request.getIdLineaCredito()
+        );
 
         // ---------------------------------------------------------
         // TIPO DE GARANTÍA
@@ -914,6 +924,18 @@ public class SolicitudCreditoService {
                     cuotaVariable.valorCuotaRegular();
         }
 
+        // ---------------------------------------------------------
+        // PRIMERA CUOTA MENSUAL PARA ANÁLISIS
+        // ---------------------------------------------------------
+
+        BigDecimal valorPrimeraCuotaAnalisis =
+                CuotaMensualAnalisis.calcularPrimeraCuota(
+                        request.getValorSolicitado(),
+                        request.getPlazoSolicitado(),
+                        tasa.tasaColocacion(),
+                        codigoTipoCuota
+                );
+
 
         // ---------------------------------------------------------
         // FOTOGRAFÍA A PERSISTIR
@@ -968,6 +990,8 @@ public class SolicitudCreditoService {
                         tasaEfectivaAnual,
 
                         valorCuotaProyectada,
+
+                        valorPrimeraCuotaAnalisis,
 
                         fondoGarantia.idFondoGarantia(),
 
@@ -1492,6 +1516,48 @@ public class SolicitudCreditoService {
                 mensaje
         );
     }
+
+    // =========================================================
+    // VALIDAR CRÉDITOS SIMULTÁNEOS
+    // =========================================================
+
+    private void validarCreditosSimultaneos(
+            Integer idDatosPersonal,
+            Integer idLineaCredito
+    ) {
+
+        SolicitudCreditoRepository.ValidacionCreditosSimultaneos
+                validacion =
+                repository.consultarCreditosSimultaneos(
+                        idDatosPersonal,
+                        idLineaCredito
+                );
+
+        if (validacion.permitido()) {
+            return;
+        }
+
+        String pagares = validacion.creditosActivos()
+                .stream()
+                .map(
+                        SolicitudCreditoRepository.CreditoActivoConSaldo
+                                ::pagareCartera
+                )
+                .distinct()
+                .collect(
+                        java.util.stream.Collectors.joining(", ")
+                );
+
+        throw new IllegalArgumentException(
+                "No es posible solicitar la línea "
+                        + validacion.nombreLineaCredito()
+                        + " porque el asociado tiene créditos activos "
+                        + "con saldo pendiente. Pagaré(s): "
+                        + pagares
+                        + "."
+        );
+    }
+
 
     // =========================================================
     // ENVIAR SOLICITUD A APROBACIÓN

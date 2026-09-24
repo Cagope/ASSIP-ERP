@@ -8,10 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Service
 public class SolicitudDesembolsoService {
@@ -48,7 +46,8 @@ public class SolicitudDesembolsoService {
     // 4. Consulta todas las obligaciones en mora.
     // 5. Actualiza la validación de mora por persona.
     // 6. Consulta y actualiza los aportes vigentes.
-    // 7. Devuelve todos los bloqueos encontrados.
+    // 7. Verifica créditos simultáneos y genera alertas de posible novación.
+    // 8. Devuelve bloqueos y alertas por separado.
     //
     // NO asigna pagaré.
     // NO constituye crédito.
@@ -79,6 +78,9 @@ public class SolicitudDesembolsoService {
                 );
 
         List<BloqueoDesembolso> bloqueos =
+                new ArrayList<>();
+
+        List<AlertaDesembolso> alertas =
                 new ArrayList<>();
 
         // =====================================================
@@ -160,7 +162,18 @@ public class SolicitudDesembolsoService {
                 );
 
         // =====================================================
-        // 7. RESULTADO GENERAL
+        // 7. VALIDAR CRÉDITOS SIMULTÁNEOS
+        // =====================================================
+
+        validarCreditosSimultaneos(
+                idSolicitudCredito,
+                solicitud,
+                bloqueos,
+                alertas
+        );
+
+        // =====================================================
+        // 8. RESULTADO GENERAL
         // =====================================================
 
         boolean puedeContinuar =
@@ -171,6 +184,9 @@ public class SolicitudDesembolsoService {
                         ? "La solicitud cumple las validaciones "
                         + "finales y puede continuar con la "
                         + "constitución del crédito."
+                        + (alertas.isEmpty()
+                        ? ""
+                        : " Revise las alertas informativas antes de continuar.")
 
                         : "La solicitud presenta condiciones "
                         + "que impiden continuar con el "
@@ -188,8 +204,86 @@ public class SolicitudDesembolsoService {
                 bloqueos.size(),
                 List.copyOf(bloqueos),
                 List.copyOf(bloqueosMora),
-                resultadoAportes
+                resultadoAportes,
+                alertas.size(),
+                List.copyOf(alertas)
         );
+    }
+
+    // =========================================================
+    // CRÉDITOS SIMULTÁNEOS DEL TITULAR
+    //
+    // Solo aplica cuando la línea solicitada NO permite
+    // simultaneidad. Otras líneas bloquean; la misma línea
+    // genera alerta de posible novación, sin presumirla.
+    // Las alertas no modifican puedeContinuar.
+    // =========================================================
+
+    private void validarCreditosSimultaneos(
+            Integer idSolicitudCredito,
+            SolicitudDesembolsoRepository.SolicitudDesembolsoDatos solicitud,
+            List<BloqueoDesembolso> bloqueos,
+            List<AlertaDesembolso> alertas
+    ) {
+        SolicitudDesembolsoRepository.LineaSimultaneidadDatos linea =
+                repository.consultarLineaSimultaneidad(
+                        idSolicitudCredito
+                ).orElse(null);
+
+        if (linea == null || linea.idLineaCredito() == null
+                || solicitud.idLineaCredito() == null
+                || !solicitud.idLineaCredito().equals(linea.idLineaCredito())) {
+            bloqueos.add(new BloqueoDesembolso(
+                    "LINEA_SIMULTANEIDAD",
+                    "No fue posible verificar la parametrización de "
+                            + "simultaneidad de la línea solicitada."
+            ));
+            return;
+        }
+
+        if (linea.permiteCreditosSimultaneos()) {
+            return;
+        }
+
+        List<SolicitudDesembolsoRepository.CreditoVigenteTitularDatos> vigentes =
+                repository.consultarCreditosVigentesTitular(
+                        idSolicitudCredito
+                );
+
+        for (SolicitudDesembolsoRepository.CreditoVigenteTitularDatos credito
+                : vigentes) {
+
+            String detalle = "Pagaré: "
+                    + textoSeguro(credito.pagareCartera())
+                    + ". Línea: "
+                    + textoSeguro(credito.nombreLineaCredito())
+                    + ". Agencia: "
+                    + credito.idAgencia()
+                    + ". Saldo actual: $"
+                    + valorSeguro(credito.saldoActual()).toPlainString()
+                    + ".";
+
+            if (linea.idLineaCredito().equals(credito.idLineaCredito())) {
+                alertas.add(new AlertaDesembolso(
+                        "POSIBLE_NOVACION",
+                        "El titular tiene un crédito vigente de la misma "
+                                + "línea. " + detalle
+                                + " Podría corresponder a una novación; "
+                                + "verifique la operación antes de constituir "
+                                + "el nuevo crédito. Esta alerta no confirma "
+                                + "que exista una novación."
+                ));
+            } else {
+                bloqueos.add(new BloqueoDesembolso(
+                        "CREDITOS_SIMULTANEOS",
+                        "La línea solicitada "
+                                + textoSeguro(linea.nombreLineaCredito())
+                                + " no permite créditos simultáneos y el "
+                                + "titular tiene otra obligación vigente. "
+                                + detalle
+                ));
+            }
+        }
     }
 
     // =========================================================
@@ -953,7 +1047,11 @@ public class SolicitudDesembolsoService {
 
             List<BloqueoMora> bloqueosMora,
 
-            ResultadoAportes aportes
+            ResultadoAportes aportes,
+
+            int cantidadAlertas,
+
+            List<AlertaDesembolso> alertas
 
     ) {
     }
@@ -968,6 +1066,16 @@ public class SolicitudDesembolsoService {
 
             String mensaje
 
+    ) {
+    }
+
+    // =========================================================
+    // ALERTA INFORMATIVA (NO BLOQUEANTE)
+    // =========================================================
+
+    public record AlertaDesembolso(
+            String tipo,
+            String mensaje
     ) {
     }
 

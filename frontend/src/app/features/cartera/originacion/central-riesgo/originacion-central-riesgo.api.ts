@@ -35,7 +35,7 @@ export class OriginacionCentralRiesgoApi {
     `${environment.apiUrl}/cartera/originacion/central-riesgo`;
 
   private readonly catalogoUrl =
-    `${environment.apiUrl}/cartera/originacion/catalogos/centrales-riesgo`;
+    `${environment.apiUrl}/cartera/catalogos/centrales-riesgo`;
 
 
   // =========================================================

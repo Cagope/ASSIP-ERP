@@ -261,12 +261,12 @@ export class OriginacionAnalisisComponent
 
     /*
      * Primera carga:
-     * seleccionamos el primer deudor según el orden
-     * recibido del backend.
+     * mostramos la bandeja de participantes.
+     * El detalle se abrirá cuando el usuario seleccione
+     * expresamente un deudor.
      */
-    this.seleccionarDeudor(
-      this.deudores[0]
-    );
+    this.deudorSeleccionado = null;
+    this.componentesSeleccionados = [];
   }
 
 
@@ -293,6 +293,19 @@ export class OriginacionAnalisisComponent
             a.ordenComponente -
             b.ordenComponente
         );
+  }
+
+  // =========================================================
+  // VOLVER A LA BANDEJA DE PARTICIPANTES
+  // =========================================================
+
+  volverABandeja(): void {
+
+    this.deudorSeleccionado = null;
+    this.componentesSeleccionados = [];
+
+    this.error = '';
+    this.mensaje = '';
   }
 
 
@@ -580,6 +593,14 @@ export class OriginacionAnalisisComponent
       return;
     }
 
+    if (!this.analisisCompleto || !this.solicitudViable) {
+
+      this.error =
+        'Todos los participantes deben tener su análisis completo y cumplir las condiciones de otorgamiento antes de enviar la solicitud a aprobación.';
+
+      return;
+    }
+
     if (
       !this.validacionAprobacion
         ?.puedeEnviarAprobacion
@@ -796,6 +817,22 @@ export class OriginacionAnalisisComponent
 
     return componente.estadoComponente
       || 'Pendiente';
+  }
+
+
+  // =========================================================
+  // INDICADOR VISUAL DE RIESGO (ESCALA 0 A 100)
+  // =========================================================
+
+  posicionIndicadorRiesgo(
+    puntaje: number | null | undefined
+  ): number {
+
+    if (puntaje === null || puntaje === undefined || !Number.isFinite(puntaje)) {
+      return 0;
+    }
+
+    return Math.min(100, Math.max(0, puntaje));
   }
 
 

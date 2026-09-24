@@ -1,4 +1,4 @@
-package co.assip.erp.cartera.originacion.catalogos.dto;
+package co.assip.erp.cartera.catalogos.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +12,12 @@ import lombok.NoArgsConstructor;
 public class ModalidadInteresDTO {
 
     private String periodoCodigo;
+
     private String tipoModalidad;
+
     private String descripcionModalidadInteres;
+
     private Integer periodoMeses;
+
+    private Boolean activo;
 }

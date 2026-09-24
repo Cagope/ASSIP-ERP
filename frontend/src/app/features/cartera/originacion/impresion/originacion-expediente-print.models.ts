@@ -1,3 +1,5 @@
+import type { SolicitudReferenciaListado, SolicitudReferenciaPersonal } from '../referencias/originacion-referencias.models';
+
 import type {
   SolicitudAprobacionFotos,
   SolicitudAprobacionActuacion
@@ -217,6 +219,10 @@ export interface OriginacionExpedientePrintData {
   // -------------------------------------------------------
 
   personas: OriginacionExpedientePersona[];
+
+  // Referencias vigentes de la solicitud; no son fotografía histórica.
+  referencias: SolicitudReferenciaPersonal[];
+  procesoReferencias: SolicitudReferenciaListado | null;
 
   // -------------------------------------------------------
   // Opciones de impresión

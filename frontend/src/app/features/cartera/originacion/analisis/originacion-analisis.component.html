@@ -10,9 +10,9 @@
       <h2>Análisis de Crédito</h2>
 
       <p>
-        Evaluación consolidada de capacidad de pago,
-        solvencia, centrales de riesgo, garantías
-        y hábito de pago.
+        Evaluación individual de los participantes de la solicitud,
+        considerando capacidad de pago, solvencia, centrales de riesgo,
+        garantías y hábito de pago.
       </p>
     </div>
 
@@ -150,137 +150,6 @@
 
 
     <!-- =================================================== -->
-    <!-- RESULTADO GENERAL -->
-    <!-- =================================================== -->
-
-    <section class="card resultado-general">
-
-      <div class="section-header">
-
-        <div>
-          <h3>Resultado de la evaluación</h3>
-
-          <p>
-            Resultado consolidado de todos los deudores
-            vinculados a la solicitud.
-          </p>
-        </div>
-
-      </div>
-
-
-      <div class="resultado-grid">
-
-
-        <!-- PUNTAJE -->
-
-        <div class="resultado-box">
-
-          <span class="resultado-label">
-            Puntaje
-          </span>
-
-          <strong class="resultado-value">
-
-            {{
-            resultado.puntajeReferenciaSolicitud !== null
-            ? (resultado.puntajeReferenciaSolicitud
-            | number:'1.2-2')
-            : '—'
-            }}
-
-          </strong>
-
-          <span class="resultado-help">
-            Puntaje ponderado
-          </span>
-
-        </div>
-
-
-        <!-- PERFIL -->
-
-        <div class="resultado-box">
-
-          <span class="resultado-label">
-            Perfil de riesgo
-          </span>
-
-          <strong class="resultado-value resultado-texto">
-
-            {{
-            resultado.perfilRiesgoSolicitud
-            || 'Pendiente'
-            }}
-
-          </strong>
-
-        </div>
-
-
-        <!-- RECOMENDACIÓN -->
-
-        <div
-          class="resultado-box"
-          [ngClass]="claseResultadoSolicitud()">
-
-          <span class="resultado-label">
-            Recomendación
-          </span>
-
-          <strong class="resultado-value resultado-texto">
-
-            {{
-            resultado.recomendacionSolicitud
-            || 'PENDIENTE'
-            }}
-
-          </strong>
-
-        </div>
-
-
-        <!-- OTORGAMIENTO -->
-
-        <div class="resultado-box">
-
-          <span class="resultado-label">
-            Cumple otorgamiento
-          </span>
-
-          <strong class="resultado-value resultado-texto">
-
-            {{
-            textoCumple(
-            resultado.cumpleOtorgamientoSolicitud
-            )
-            }}
-
-          </strong>
-
-        </div>
-
-      </div>
-
-
-      <div
-        *ngIf="resultado.motivoResultadoSolicitud"
-        class="resultado-motivo">
-
-        <span>
-          Resultado
-        </span>
-
-        <strong>
-          {{ resultado.motivoResultadoSolicitud }}
-        </strong>
-
-      </div>
-
-    </section>
-
-
-    <!-- =================================================== -->
     <!-- CONTROL DE COMPLETITUD -->
     <!-- =================================================== -->
 
@@ -364,12 +233,14 @@
     <!-- DEUDORES -->
     <!-- =================================================== -->
 
-    <section class="card">
+    <section
+      *ngIf="!deudorSeleccionado"
+      class="card">
 
       <div class="section-header">
 
         <div>
-          <h3>Deudores evaluados</h3>
+          <h3>Participantes de la solicitud</h3>
 
           <p>
             Seleccione una persona para consultar
@@ -397,29 +268,25 @@
           *ngFor="let deudor of deudores"
           type="button"
           class="deudor-card"
-          [class.deudor-card--selected]="
-            deudorSeleccionado?.idSolicitudDeudor ===
-            deudor.idSolicitudDeudor
-          "
           (click)="seleccionarDeudor(deudor)">
 
 
           <div class="deudor-card-header">
 
             <div>
+
               <strong>
-                {{
-                descripcionTipoDeudor(
-                deudor.tipoDeudor
-                )
-                }}
+                {{ deudor.nombreCompleto || 'Nombre no disponible' }}
               </strong>
 
               <span>
-                Orden {{ deudor.ordenDeudor }}
+                {{ descripcionTipoDeudor(deudor.tipoDeudor) }}
+                ·
+                {{ deudor.tipoDocumento || 'Documento' }}
+                {{ deudor.documento || 'No disponible' }}
               </span>
-            </div>
 
+            </div>
 
             <span
               class="estado-badge"
@@ -483,6 +350,12 @@
 
           </div>
 
+          <div class="deudor-card-action">
+            <span class="btn btn-secondary">
+              Ver detalle
+            </span>
+          </div>
+
         </button>
 
       </div>
@@ -504,13 +377,21 @@
           <h3>Resultado individual</h3>
 
           <p>
-            {{
-            descripcionTipoDeudor(
-            deudorSeleccionado.tipoDeudor
-            )
-            }}
+            {{ deudorSeleccionado.nombreCompleto || 'Nombre no disponible' }}
+            ·
+            {{ deudorSeleccionado.tipoDocumento || 'Documento' }}
+            {{ deudorSeleccionado.documento || 'No disponible' }}
           </p>
         </div>
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="volverABandeja()">
+
+          Volver a la bandeja
+
+        </button>
 
         <span
           class="estado-badge"
@@ -526,6 +407,78 @@
           }}
 
         </span>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- PERFIL DE RIESGO - RESUMEN VISUAL -->
+      <!-- ================================================= -->
+
+      <div class="perfil-riesgo-panel">
+
+        <div class="perfil-riesgo-titulo">
+          PERFIL DE RIESGO
+        </div>
+
+        <div class="perfil-riesgo-contenido">
+
+          <div class="perfil-riesgo-datos">
+
+            <div class="perfil-riesgo-fila">
+              <span>NOMBRE</span>
+              <strong>
+                {{ deudorSeleccionado.nombreCompleto || 'No disponible' }}
+              </strong>
+            </div>
+
+            <div class="perfil-riesgo-fila perfil-riesgo-fila--perfil">
+              <span>PERFIL GENERAL</span>
+              <strong [ngClass]="{
+                'perfil-riesgo-bajo': deudorSeleccionado.perfilRiesgo === 'BAJO',
+                'perfil-riesgo-medio': deudorSeleccionado.perfilRiesgo === 'MEDIO',
+                'perfil-riesgo-alto': deudorSeleccionado.perfilRiesgo === 'ALTO'
+              }">
+                {{ deudorSeleccionado.perfilRiesgo ? 'PERFIL ' + deudorSeleccionado.perfilRiesgo : 'PENDIENTE' }}
+              </strong>
+            </div>
+
+            <div class="perfil-riesgo-fila">
+              <span>RECOMENDACIÓN AUTOMÁTICA</span>
+              <strong>
+                {{ deudorSeleccionado.recomendacion || 'Pendiente' }}
+              </strong>
+            </div>
+
+          </div>
+
+          <div class="perfil-riesgo-medidor">
+
+            <div
+              class="perfil-riesgo-barra"
+              role="img"
+              [attr.aria-label]="deudorSeleccionado.puntajeTotal !== null
+                ? 'Puntaje de riesgo: ' + deudorSeleccionado.puntajeTotal + ' sobre 100'
+                : 'Puntaje de riesgo pendiente'">
+
+              <span
+                *ngIf="deudorSeleccionado.puntajeTotal !== null"
+                class="perfil-riesgo-marcador"
+                [style.left.%]="posicionIndicadorRiesgo(deudorSeleccionado.puntajeTotal)">
+              </span>
+
+            </div>
+
+            <div class="perfil-riesgo-valor">
+              <ng-container *ngIf="deudorSeleccionado.puntajeTotal !== null; else puntajePendiente">
+                {{ deudorSeleccionado.puntajeTotal | number:'1.0-2' }}%
+              </ng-container>
+              <ng-template #puntajePendiente>—</ng-template>
+            </div>
+
+          </div>
+
+        </div>
 
       </div>
 
@@ -963,7 +916,7 @@
     <!-- =================================================== -->
 
     <section
-      *ngIf="analisisCompleto"
+      *ngIf="analisisCompleto && !deudorSeleccionado"
       class="card">
 
       <div class="section-header">

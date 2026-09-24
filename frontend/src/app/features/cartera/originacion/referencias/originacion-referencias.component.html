@@ -1,0 +1,196 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h2>Referencias personales</h2>
+      <p>Gestión independiente de referencias para el solicitante y sus codeudores.</p>
+    </div>
+    <button *ngIf="solicitud" type="button" class="btn btn-secondary" (click)="volverBandeja()">Volver a solicitudes</button>
+  </header>
+
+  <div *ngIf="error" class="alert alert-error" role="alert">{{ error }}</div>
+  <div *ngIf="mensaje" class="alert alert-success" role="status">{{ mensaje }}</div>
+
+  <ng-container *ngIf="!solicitud">
+    <section class="card">
+      <div class="section-header"><div><h3>Solicitudes en curso</h3><p>Busque por número, documento, nombre o estado de referencias.</p></div></div>
+      <form class="filters" (ngSubmit)="buscar()">
+        <label>Número de solicitud<input name="numeroSolicitud" [(ngModel)]="filtros.numeroSolicitud" autocomplete="off" placeholder="Número de solicitud"></label>
+        <label>Documento<input name="documento" [(ngModel)]="filtros.documento" autocomplete="off" placeholder="Cédula o NIT"></label>
+        <label>Solicitante<input name="nombreSolicitante" [(ngModel)]="filtros.nombreSolicitante" placeholder="Nombre o apellido"></label>
+        <label>Estado<select name="estadoReferencias" [(ngModel)]="filtros.estadoReferencias"><option value="">Todos</option><option value="PENDIENTE">Pendiente</option><option value="EN_PROCESO">En proceso</option><option value="CERRADO">Cerrado</option></select></label>
+        <div class="filter-actions"><button class="btn btn-primary" type="submit" [disabled]="cargando">Buscar</button><button class="btn btn-secondary" type="button" (click)="limpiarFiltros()" [disabled]="cargando">Limpiar</button></div>
+      </form>
+    </section>
+    <section class="card">
+      <div class="section-header"><h3>Bandeja de solicitudes</h3><span class="muted">{{ solicitudes.length }} registro(s)</span></div>
+      <p *ngIf="cargando" class="loading">Consultando solicitudes...</p>
+      <div *ngIf="!cargando" class="table-wrap">
+        <table class="table"><thead><tr><th>Solicitud</th><th>Documento</th><th>Solicitante</th><th>Agencia</th><th>Línea</th><th>Valor solicitado</th><th>Estado</th><th>Referencias</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let item of solicitudes">
+              <td>{{ item.numeroSolicitud }}</td><td>{{ item.documento }}</td><td>{{ item.nombreSolicitante }}</td><td>{{ item.nombreAgencia }}</td><td>{{ item.nombreLineaCredito || '—' }}</td>
+              <td class="number">{{ item.valorSolicitado | number:'1.0-0' }}</td>
+              <td><span class="badge" [ngClass]="claseEstado(item.estadoReferencias)">{{ item.estadoReferencias }}</span></td><td class="number">{{ item.cantidadReferencias }}</td>
+              <td><button type="button" class="btn btn-small btn-primary" (click)="seleccionarSolicitud(item)">Gestionar</button></td>
+            </tr>
+            <tr *ngIf="solicitudes.length === 0"><td colspan="9" class="empty">No se encontraron solicitudes.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+
+  <ng-container *ngIf="solicitud as s">
+    <section class="card">
+      <div class="section-header"><div><h3>Solicitud {{ s.numeroSolicitud }}</h3><p>{{ s.nombreSolicitante }} · {{ s.tipoDocumento }} {{ s.documento }}</p></div><span class="badge" [ngClass]="claseEstado(s.estadoReferencias)">{{ s.estadoReferencias }}</span></div>
+      <div class="info-grid">
+        <div class="info-item"><span>Agencia</span><strong>{{ s.nombreAgencia }}</strong></div>
+        <div class="info-item"><span>Línea de crédito</span><strong>{{ s.nombreLineaCredito || '—' }}</strong></div>
+        <div class="info-item"><span>Valor solicitado</span><strong>{{ s.valorSolicitado | number:'1.0-0' }}</strong></div>
+        <div class="info-item"><span>Referencias activas</span><strong>{{ s.cantidadReferencias }}</strong></div>
+      </div>
+      <div *ngIf="s.estadoReferencias === 'PENDIENTE'" class="actions"><button class="btn btn-primary" type="button" (click)="iniciar()" [disabled]="ocupado">Iniciar gestión</button><span class="muted">También puede registrar directamente la primera referencia.</span></div>
+      <div *ngIf="s.estadoReferencias === 'CERRADO'" class="closed-box"><strong>Gestión cerrada: {{ s.tipoCierre }}</strong><p>{{ s.observacionCierre || 'Sin observaciones adicionales.' }}</p><small>Fecha: {{ s.fechaCierre | date:'dd/MM/yyyy HH:mm' }} · Usuario: {{ s.fkSeguridadCierre }}</small></div>
+    </section>
+
+    <p *ngIf="cargandoDetalle" class="card loading">Cargando participantes y referencias...</p>
+    <ng-container *ngIf="!cargandoDetalle">
+      <section class="card">
+        <div class="section-header"><div><h3>Participantes</h3><p>Seleccione el principal o codeudor para gestionar sus referencias.</p></div></div>
+        <div class="participant-grid">
+          <button *ngFor="let p of participantes" type="button" class="participant" [class.participant--selected]="participante?.idSolicitudDeudor === p.idSolicitudDeudor" (click)="seleccionarParticipante(p)">
+            <span class="participant-type">{{ p.tipoDeudor }}</span><strong>{{ p.nombreCompleto }}</strong><small>{{ p.tipoDocumento }} {{ p.documento }}</small>
+            <span class="participant-counts">{{ p.cantidadReferencias }} referencias · {{ p.cantidadContactadas }} contactadas · {{ p.cantidadNoContactadas }} no contactadas · {{ p.cantidadPendientes }} pendientes</span>
+          </button>
+        </div>
+        <p *ngIf="participantes.length === 0" class="empty">La solicitud no tiene participantes activos.</p>
+      </section>
+
+      <ng-container *ngIf="participante as p">
+        <section class="card">
+          <div class="section-header"><div><h3>Referencias de {{ p.nombreCompleto }}</h3><p>Puede registrar una o varias referencias; no se exige un número mínimo.</p></div></div>
+          <div class="table-wrap"><table class="table"><thead><tr><th>Referencia</th><th>Celular</th><th>Fijo</th><th>Estado</th><th>Última gestión</th><th>Acciones</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let ref of referenciasParticipante">
+                <td>{{ ref.nombreCompleto }}</td><td>{{ ref.telefonoCelular || '—' }}</td><td>{{ ref.telefonoFijo || '—' }}</td>
+                <td><span class="badge" [ngClass]="claseEstado(estadoReferencia(ref))">{{ estadoReferencia(ref) }}</span></td>
+                <td>{{ ref.fechaHoraLlamada ? (ref.fechaHoraLlamada | date:'dd/MM/yyyy HH:mm') : 'Pendiente' }}</td>
+                <td class="row-actions"><button type="button" class="btn btn-small btn-secondary" (click)="abrirEntrevista(ref)" [disabled]="!editable || ocupado">Entrevista</button><button type="button" class="btn btn-small btn-secondary" (click)="editarContacto(ref)" [disabled]="!editable || ocupado">Editar</button><button type="button" class="btn btn-small btn-danger" (click)="eliminar(ref)" [disabled]="!editable || ocupado">Desactivar</button></td>
+              </tr>
+              <tr *ngIf="referenciasParticipante.length === 0"><td colspan="6" class="empty">No hay referencias registradas para este participante.</td></tr>
+            </tbody>
+          </table></div>
+        </section>
+
+        <section *ngIf="editable" class="card">
+          <div class="section-header"><div><h3>{{ referenciaEditando ? 'Editar referencia' : 'Nueva referencia personal' }}</h3><p>Registre nombre y al menos un teléfono.</p></div></div>
+          <form (ngSubmit)="guardarContacto()">
+            <div class="form-grid">
+              <label>Nombre completo <span class="required">*</span><input name="nombreCompleto" [(ngModel)]="contacto.nombreCompleto" maxlength="200" required></label>
+              <label>Teléfono celular<input name="telefonoCelular" [(ngModel)]="contacto.telefonoCelular" maxlength="30" type="tel"></label>
+              <label>Teléfono fijo<input name="telefonoFijo" [(ngModel)]="contacto.telefonoFijo" maxlength="30" type="tel"></label>
+            </div>
+            <div class="actions"><button type="submit" class="btn btn-primary" [disabled]="ocupado">{{ referenciaEditando ? 'Guardar cambios' : 'Registrar referencia' }}</button><button type="button" class="btn btn-secondary" (click)="cancelarContacto()" [disabled]="ocupado">Limpiar / cancelar</button></div>
+          </form>
+        </section>
+
+        <section *ngIf="referenciaEntrevistando as ref" class="card interview-card">
+          <div class="section-header">
+            <div><h3>Entrevista: {{ ref.nombreCompleto }}</h3><p>Marque las respuestas durante la llamada. El concepto se construye automáticamente y puede editarse.</p></div>
+            <button type="button" class="btn btn-secondary" (click)="cancelarEntrevista()">Cerrar formulario</button>
+          </div>
+
+          <fieldset class="interview-question">
+            <legend>Medio de contacto</legend>
+            <div class="choice-grid">
+              <label *ngFor="let m of medios" class="choice" [class.choice--selected]="entrevista.medioEntrevista === m.valor">
+                <input type="radio" name="medioEntrevista" [value]="m.valor" [(ngModel)]="entrevista.medioEntrevista" [disabled]="!editable">
+                <span>{{ m.texto }}</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="interview-question">
+            <legend>¿Se logró establecer comunicación?</legend>
+            <div class="choice-grid">
+              <label class="choice" [class.choice--selected]="entrevista.contactoEstablecido === true">
+                <input type="radio" name="contactoEstablecido" [checked]="entrevista.contactoEstablecido === true" (change)="entrevista.contactoEstablecido = true; cambiarResultadoContacto()" [disabled]="!editable">
+                <span>Sí, contacto establecido</span>
+              </label>
+              <label class="choice" [class.choice--selected]="entrevista.contactoEstablecido === false">
+                <input type="radio" name="contactoEstablecido" [checked]="entrevista.contactoEstablecido === false" (change)="entrevista.contactoEstablecido = false; cambiarResultadoContacto()" [disabled]="!editable">
+                <span>No se logró contacto</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <ng-container *ngIf="entrevista.contactoEstablecido && editable">
+            <h4>Preguntas de la entrevista</h4>
+
+            <fieldset class="interview-question">
+              <legend>¿Qué relación tiene con el participante?</legend>
+              <div class="choice-grid">
+                <label *ngFor="let x of opcionesRelacion" class="choice" [class.choice--selected]="respuestas.relacion === x">
+                  <input type="radio" name="relacion" [value]="x" [(ngModel)]="respuestas.relacion" (ngModelChange)="seleccionarRespuesta()">
+                  <span>{{ x }}</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="interview-question">
+              <legend>¿Hace cuánto tiempo conoce al participante?</legend>
+              <div class="choice-grid">
+                <label *ngFor="let x of opcionesTiempo" class="choice" [class.choice--selected]="respuestas.tiempo === x">
+                  <input type="radio" name="tiempo" [value]="x" [(ngModel)]="respuestas.tiempo" (ngModelChange)="seleccionarRespuesta()">
+                  <span>{{ x }}</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="interview-question">
+              <legend>¿Cómo describe el cumplimiento de sus compromisos?</legend>
+              <div class="choice-grid">
+                <label *ngFor="let x of opcionesCumplimiento" class="choice" [class.choice--selected]="respuestas.cumplimiento === x">
+                  <input type="radio" name="cumplimiento" [value]="x" [(ngModel)]="respuestas.cumplimiento" (ngModelChange)="seleccionarRespuesta()">
+                  <span>{{ x }}</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <fieldset class="interview-question">
+              <legend>¿Qué concepto personal tiene del participante?</legend>
+              <div class="choice-grid">
+                <label *ngFor="let x of opcionesComportamiento" class="choice" [class.choice--selected]="respuestas.comportamiento === x">
+                  <input type="radio" name="comportamiento" [value]="x" [(ngModel)]="respuestas.comportamiento" (ngModelChange)="seleccionarRespuesta()">
+                  <span>{{ x }}</span>
+                </label>
+              </div>
+            </fieldset>
+
+            <label>Observaciones adicionales
+              <textarea name="observaciones" rows="2" [(ngModel)]="respuestas.observaciones" (ngModelChange)="seleccionarRespuesta()" placeholder="Opcional"></textarea>
+            </label>
+            <div class="actions">
+              <button type="button" class="btn btn-secondary" (click)="regenerarConcepto()">Regenerar concepto con las respuestas</button>
+              <span class="muted" *ngIf="conceptoEditadoManualmente">El concepto fue editado; las selecciones no sobrescribirán su texto.</span>
+            </div>
+          </ng-container>
+
+          <label>Concepto o resultado de la gestión
+            <textarea name="conceptoReferencia" rows="5" [(ngModel)]="entrevista.conceptoReferencia" (ngModelChange)="editarConcepto()" [disabled]="!editable" placeholder="Concepto de la persona contactada o resultado del intento de contacto."></textarea>
+          </label>
+          <div class="actions" *ngIf="editable">
+            <button type="button" class="btn btn-primary" (click)="guardarEntrevista()" [disabled]="ocupado">Guardar entrevista</button>
+          </div>
+        </section>
+      </ng-container>
+
+      <section *ngIf="editable" class="card close-card">
+        <div class="section-header"><div><h3>Cerrar gestión de referencias</h3><p>El cierre es definitivo. Puede cerrar sin referencias con justificación.</p></div></div>
+        <div class="info-grid"><div class="info-item"><span>Tipo de cierre</span><strong>{{ referencias.length ? 'CON REFERENCIAS' : 'SIN REFERENCIAS' }}</strong></div><div class="info-item"><span>Referencias activas</span><strong>{{ referencias.length }}</strong></div></div>
+        <label>Observación de cierre <span *ngIf="referencias.length === 0" class="required">*</span><textarea name="observacionCierre" rows="3" [(ngModel)]="observacionCierre" placeholder="Describa la gestión realizada o justifique el cierre sin referencias."></textarea></label>
+        <div class="actions"><button type="button" class="btn btn-primary" (click)="cerrar()" [disabled]="ocupado">Cerrar gestión definitivamente</button></div>
+      </section>
+    </ng-container>
+  </ng-container>
+</div>

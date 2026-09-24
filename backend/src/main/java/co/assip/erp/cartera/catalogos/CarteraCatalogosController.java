@@ -1,10 +1,20 @@
 package co.assip.erp.cartera.catalogos;
 
 import co.assip.erp.cartera.catalogos.dto.CarteraCatalogoDTO;
+import co.assip.erp.cartera.catalogos.dto.CentralRiesgoDTO;
+import co.assip.erp.cartera.catalogos.dto.ClasificacionCreditoDTO;
+import co.assip.erp.cartera.catalogos.dto.DestinoEconomicoDTO;
+import co.assip.erp.cartera.catalogos.dto.FondoGarantiaCatalogoDTO;
+import co.assip.erp.cartera.catalogos.dto.FormaPagoDTO;
+import co.assip.erp.cartera.catalogos.dto.GarantiaCreditoDTO;
+import co.assip.erp.cartera.catalogos.dto.LineaCreditoDTO;
+import co.assip.erp.cartera.catalogos.dto.ModalidadInteresDTO;
+import co.assip.erp.cartera.catalogos.dto.SubgarantiaCreditoDTO;
+import co.assip.erp.cartera.catalogos.dto.TipoCuotaDTO;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import co.assip.erp.cartera.catalogos.dto.FondoGarantiaCatalogoDTO;
 
 import java.util.List;
 
@@ -29,6 +39,11 @@ public class CarteraCatalogosController {
         return service.listarLineasCredito();
     }
 
+    @GetMapping("/lineas-credito/detalle")
+    public List<LineaCreditoDTO> listarLineasCreditoDetalle() {
+        return service.listarLineasCreditoDetalle(true);
+    }
+
     // =========================================================
     // EDADES DE RIESGO
     // =========================================================
@@ -47,6 +62,20 @@ public class CarteraCatalogosController {
         return service.listarClasificacionesCredito();
     }
 
+    @GetMapping("/clasificaciones-credito/detalle")
+    public List<ClasificacionCreditoDTO> listarClasificacionesCreditoDetalle() {
+        return service.listarClasificacionesCreditoDetalle(true);
+    }
+
+    // =========================================================
+    // DESTINOS ECONÓMICOS
+    // =========================================================
+
+    @GetMapping("/destinos-economicos")
+    public List<DestinoEconomicoDTO> listarDestinosEconomicos() {
+        return service.listarDestinosEconomicosDetalle(true);
+    }
+
     // =========================================================
     // GARANTÍAS DE CRÉDITO
     // =========================================================
@@ -54,6 +83,20 @@ public class CarteraCatalogosController {
     @GetMapping("/garantias-credito")
     public List<CarteraCatalogoDTO> listarGarantiasCredito() {
         return service.listarGarantiasCredito();
+    }
+
+    @GetMapping("/garantias-credito/detalle")
+    public List<GarantiaCreditoDTO> listarGarantiasCreditoDetalle() {
+        return service.listarGarantiasCreditoDetalle(true);
+    }
+
+    // =========================================================
+    // SUBGARANTÍAS DE CRÉDITO
+    // =========================================================
+
+    @GetMapping("/subgarantias")
+    public List<SubgarantiaCreditoDTO> listarSubgarantiasCredito() {
+        return service.listarSubgarantiasCreditoDetalle(true);
     }
 
     // =========================================================
@@ -92,4 +135,35 @@ public class CarteraCatalogosController {
         return service.listarFormasPago();
     }
 
+    @GetMapping("/formas-pago/detalle")
+    public List<FormaPagoDTO> listarFormasPagoDetalle() {
+        return service.listarFormasPagoDetalle(true);
+    }
+
+    // =========================================================
+    // MODALIDADES DE INTERÉS
+    // =========================================================
+
+    @GetMapping("/modalidades-interes")
+    public List<ModalidadInteresDTO> listarModalidadesIntereses() {
+        return service.listarModalidadesInteresesDetalle(true);
+    }
+
+    // =========================================================
+    // TIPOS DE CUOTA
+    // =========================================================
+
+    @GetMapping("/tipos-cuota")
+    public List<TipoCuotaDTO> listarTiposCuotas() {
+        return service.listarTiposCuotasDetalle(true);
+    }
+
+    // =========================================================
+    // CENTRALES DE RIESGO
+    // =========================================================
+
+    @GetMapping("/centrales-riesgo")
+    public List<CentralRiesgoDTO> listarCentralesRiesgo() {
+        return service.listarCentralesRiesgoDetalle(true);
+    }
 }

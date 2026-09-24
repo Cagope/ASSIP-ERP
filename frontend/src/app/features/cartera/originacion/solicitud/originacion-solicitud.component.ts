@@ -2083,6 +2083,41 @@ export class OriginacionSolicitudComponent
   // GETTERS
   // =========================================================
 
+  // =========================================================
+  // LÍNEA DE CRÉDITO SELECCIONADA
+  // =========================================================
+
+  get lineaCreditoSeleccionada(): LineaCredito | null {
+
+    const idLineaCredito =
+      Number(this.formulario.idLineaCredito);
+
+    if (
+      !Number.isInteger(idLineaCredito)
+      || idLineaCredito <= 0
+    ) {
+      return null;
+    }
+
+    return this.lineasCredito.find(
+      linea =>
+        linea.idLineaCredito === idLineaCredito
+    ) ?? null;
+  }
+
+
+  // =========================================================
+  // ADVERTENCIA DE CRÉDITOS SIMULTÁNEOS
+  // =========================================================
+
+  get mostrarAdvertenciaCreditosSimultaneos(): boolean {
+
+    return (
+      this.lineaCreditoSeleccionada
+        ?.permiteCreditosSimultaneos === false
+    );
+  }
+
   get garantiaSeleccionada(): GarantiaCredito | null {
 
     const codigo =

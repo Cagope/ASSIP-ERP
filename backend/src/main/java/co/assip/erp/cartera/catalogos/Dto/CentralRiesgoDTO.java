@@ -1,4 +1,4 @@
-package co.assip.erp.cartera.originacion.catalogos.dto;
+package co.assip.erp.cartera.catalogos.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,8 +12,14 @@ import lombok.NoArgsConstructor;
 public class CentralRiesgoDTO {
 
     private Integer idCentralRiesgo;
+
     private String codigoCentral;
+
     private String documentoCentral;
+
     private String nombreCentral;
+
     private String descripcion;
+
+    private Boolean activo;
 }

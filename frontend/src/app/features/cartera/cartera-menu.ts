@@ -4,28 +4,46 @@ export const carteraMenu = {
 
   items: [
 
-    // =============================
+    // =========================================================
     // OPERACIÓN
-    // =============================
+    // =========================================================
     {
       label: 'Operación',
       children: [
 
+        // =====================================================
+        // FÁBRICA DE CRÉDITOS
+        // =====================================================
         {
-          label: 'Originación de Cartera',
-          route: '/cartera/originacion'
+          label: 'Fábrica de Créditos',
+          children: [
+
+            {
+              label: 'Originación de Cartera',
+              route: '/cartera/originacion'
+            },
+
+            {
+              label: 'Referencias Personales',
+              route: '/cartera/originacion/referencias'
+            },
+
+            {
+              label: 'Aprobación de Cartera',
+              route: '/cartera/originacion/aprobacion'
+            },
+
+            {
+              label: 'Formalización de Cartera',
+              route: '/cartera/originacion/formalizacion'
+            }
+
+          ]
         },
 
-        {
-          label: 'Aprobación de Cartera',
-          route: '/cartera/originacion/aprobacion'
-        },
-
-        {
-          label: 'Formalización de Cartera',
-          route: '/cartera/originacion/formalizacion'
-        },
-
+        // =====================================================
+        // CONSULTA DE CRÉDITOS
+        // =====================================================
         {
           label: 'Consulta de Créditos',
           route: '/cartera/consulta-creditos'
@@ -34,16 +52,16 @@ export const carteraMenu = {
       ]
     },
 
-    // =============================
+    // =========================================================
     // PROCESOS
-    // =============================
+    // =========================================================
     {
       label: 'Procesos',
       children: [
 
-        // =============================
+        // =====================================================
         // CIERRE MENSUAL
-        // =============================
+        // =====================================================
         {
           label: 'Cierre Mensual',
           children: [
@@ -71,9 +89,9 @@ export const carteraMenu = {
           ]
         },
 
-        // =============================
+        // =====================================================
         // EVALUACIÓN DE CARTERA
-        // =============================
+        // =====================================================
         {
           label: 'Evaluación de Cartera',
           children: [
@@ -94,16 +112,16 @@ export const carteraMenu = {
       ]
     },
 
-    // =============================
+    // =========================================================
     // ANÁLISIS DE CARTERA
-    // =============================
+    // =========================================================
     {
       label: 'Análisis de Cartera',
       children: [
 
-        // =============================
+        // =====================================================
         // VECTOR DE COMPORTAMIENTO
-        // =============================
+        // =====================================================
         {
           label: 'Vector de Comportamiento',
           children: [
@@ -121,81 +139,81 @@ export const carteraMenu = {
           ]
         },
 
-        // =============================
+        // =====================================================
         // MORA TEMPRANA
-        // =============================
+        // =====================================================
         {
           label: 'Mora Temprana',
           route: '/cartera/analisis/mora-temprana'
         },
 
-        // =============================
+        // =====================================================
         // RIESGO Y DETERIORO
-        // =============================
+        // =====================================================
         {
           label: 'Riesgo y Deterioro',
           route: '/cartera/analisis/riesgo-deterioro'
         },
 
-        // =============================
+        // =====================================================
         // CONCENTRACIÓN DE CARTERA
-        // =============================
+        // =====================================================
         {
           label: 'Concentración de Cartera',
           route: '/cartera/analisis/concentracion-cartera'
         },
 
-        // =============================
+        // =====================================================
         // GARANTÍAS Y COBERTURA
-        // =============================
+        // =====================================================
         {
           label: 'Garantías y Cobertura',
           route: '/cartera/analisis/garantias-cobertura'
         },
 
-        // =============================
+        // =====================================================
         // RECIPROCIDAD DE APORTES
-        // =============================
+        // =====================================================
         {
           label: 'Reciprocidad de Aportes',
           route: '/cartera/analisis/reciprocidad-aportes'
         },
 
-        // =============================
+        // =====================================================
         // MATRIZ DE RODAMIENTO
-        // =============================
+        // =====================================================
         {
           label: 'Matriz de Rodamiento',
           route: '/cartera/analisis/matriz-rodamiento'
         },
 
-        // =============================
+        // =====================================================
         // ANÁLISIS DE COSECHAS
-        // =============================
+        // =====================================================
         {
           label: 'Análisis de Cosechas',
           route: '/cartera/analisis/cosechas'
         },
 
-        // =============================
+        // =====================================================
         // CURACIÓN Y REINCIDENCIA
-        // =============================
+        // =====================================================
         {
           label: 'Curación y Reincidencia',
           route: '/cartera/analisis/curacion-reincidencia'
         },
 
-        // =============================
+        // =====================================================
         // CANCELACIÓN Y PREPAGO
-        // =============================
+        // =====================================================
         {
           label: 'Cancelación y Prepago',
           route: '/cartera/analisis/cancelacion-prepago'
         },
 
-        // =============================
+        // =====================================================
         // ROLL FORWARD
-        // =============================
+        // =====================================================
         {
           label: 'Roll Forward',
           route: '/cartera/analisis/roll-forward'
@@ -204,9 +222,9 @@ export const carteraMenu = {
       ]
     },
 
-    // =============================
+    // =========================================================
     // INFORMES
-    // =============================
+    // =========================================================
     {
       label: 'Informes',
       children: [

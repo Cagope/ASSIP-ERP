@@ -429,6 +429,8 @@ export interface SolicitudCreditoDetalle {
 
   valorCuotaProyectada: number | null;
 
+  valorPrimeraCuotaAnalisis: number | null;
+
   // Ente aprobador
 
   idEnteAprobacion: number | null;
@@ -531,6 +533,10 @@ export interface LineaCredito {
   nombreLineaCredito: string;
 
   esUtilizacionCupoTarjeta: boolean;
+
+  permiteCreditosSimultaneos: boolean;
+
+  activo: boolean;
 }
 
 export interface ClasificacionCredito {

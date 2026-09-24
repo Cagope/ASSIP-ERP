@@ -258,6 +258,14 @@ public class SolicitudDeudorRepository {
             WHERE id_solicitud_deudor = :idSolicitudDeudor
             """;
 
+    // =========================================================
+    // SQL - ELIMINAR REFERENCIAS PERSONALES
+    // =========================================================
+
+    private static final String SQL_ELIMINAR_REFERENCIAS = """
+            DELETE FROM cartera.solicitudes_referencias_personales
+            WHERE id_solicitud_deudor = :idSolicitudDeudor
+            """;
 
     // =========================================================
     // SQL - ELIMINAR CODEUDOR
@@ -553,6 +561,11 @@ public class SolicitudDeudorRepository {
 
         jdbc.update(
                 SQL_ELIMINAR_FINANCIERO,
+                parametros
+        );
+
+        jdbc.update(
+                SQL_ELIMINAR_REFERENCIAS,
                 parametros
         );
     }

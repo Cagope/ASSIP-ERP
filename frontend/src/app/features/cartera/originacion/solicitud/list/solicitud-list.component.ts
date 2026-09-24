@@ -141,19 +141,45 @@ export class SolicitudListComponent implements OnInit {
   }
 
 
+  // =========================================================
+  // NAVEGACIÓN SEGÚN EL PROCESO DE LA SOLICITUD
+  // =========================================================
+
   abrirSolicitud(
     solicitud: SolicitudListado
   ): void {
 
+    if (!solicitud?.idSolicitudCredito) {
+      return;
+    }
+
+    // =======================================================
+    // FORMALIZACIÓN - PROCESO 4
+    // =======================================================
+
+    if (solicitud.idSolicitudProceso === 4) {
+
+      void this.router.navigate([
+        '/cartera/originacion/formalizacion',
+        solicitud.idSolicitudCredito
+      ]);
+
+      return;
+    }
+
+    // =======================================================
+    // SOLICITUD Y DEMÁS PROCESOS
+    // Conservamos la navegación existente.
+    // =======================================================
+
     if (
-      !solicitud?.idSolicitudCredito
-      || !solicitud.idDatosPersonal
+      !solicitud.idDatosPersonal
       || !solicitud.idAgencia
     ) {
       return;
     }
 
-    this.router.navigate(
+    void this.router.navigate(
       [
         '/cartera/originacion/solicitud'
       ],

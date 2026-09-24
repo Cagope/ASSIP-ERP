@@ -1696,4 +1696,95 @@ export const ORIGINACION_EXPEDIENTE_PRINT_STYLES = `
 
   }
 
+
+  /* Perfil de riesgo: reproducción imprimible del medidor del análisis. */
+  .expediente-riesgo {
+    margin: 14px 0 8px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .expediente-riesgo__titulo {
+    padding: 7px 10px;
+    background: #f3f4f6;
+    border-bottom: 1px solid #cbd5e1;
+    text-align: center;
+    font-weight: 800;
+    font-size: 11px;
+  }
+  .expediente-riesgo__contenido {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+  }
+  .expediente-riesgo__datos { border-right: 1px solid #cbd5e1; }
+  .expediente-riesgo__fila {
+    display: grid;
+    grid-template-columns: 35% 65%;
+    min-height: 42px;
+    border-bottom: 1px solid #cbd5e1;
+  }
+  .expediente-riesgo__fila:last-child { border-bottom: 0; }
+  .expediente-riesgo__fila span {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 6px;
+    background: #f3f4f6;
+    border-right: 1px solid #cbd5e1;
+    font-weight: 700;
+    font-size: 9px;
+    text-align: right;
+  }
+  .expediente-riesgo__fila strong {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    text-align: center;
+    font-size: 10px;
+    overflow-wrap: anywhere;
+  }
+  .expediente-riesgo__perfil { background: #f0fdf4; font-size: 15px !important; }
+  .expediente-riesgo--bajo { color: #059669; }
+  .expediente-riesgo--medio { color: #a16207; }
+  .expediente-riesgo--alto { color: #b91c1c; }
+  .expediente-riesgo__medidor {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    padding: 12px;
+  }
+  .expediente-riesgo__barra {
+    position: relative;
+    height: 48px;
+    margin: 7px 7px 0;
+    background: linear-gradient(to right,
+      #00aa55 0%, #00aa55 20%,
+      #92d050 20%, #92d050 40%,
+      #ffff00 40%, #ffff00 60%,
+      #ffc000 60%, #ffc000 80%,
+      #c00000 80%, #c00000 100%);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .expediente-riesgo__marcador {
+    position: absolute;
+    top: -7px;
+    bottom: -7px;
+    width: 10px;
+    background: #111;
+    transform: translateX(-50%);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .expediente-riesgo__valor {
+    margin-top: 8px;
+    font-size: 30px;
+    font-weight: 800;
+    line-height: 1.1;
+    text-align: right;
+  }
+
 `;

@@ -1,4 +1,4 @@
-package co.assip.erp.cartera.originacion.catalogos.dto;
+package co.assip.erp.cartera.catalogos.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +12,10 @@ import lombok.NoArgsConstructor;
 public class GarantiaCreditoDTO {
 
     private String codigoGarantiaCredito;
+
     private String descripcionGarantiaCredito;
+
     private String tipoGarantia;
+
+    private Boolean activo;
 }

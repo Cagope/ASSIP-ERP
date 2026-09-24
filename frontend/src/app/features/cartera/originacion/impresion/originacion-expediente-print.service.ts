@@ -1,3 +1,5 @@
+import { OriginacionReferenciasApi } from '../referencias/originacion-referencias.api';
+
 import {
   Injectable
 } from '@angular/core';
@@ -78,7 +80,10 @@ export class OriginacionExpedientePrintService {
       OriginacionSolicitudApi,
 
     private readonly expedienteAsociadoApi:
-      ExpedienteAsociadoApi
+      ExpedienteAsociadoApi,
+
+    private readonly referenciasApi:
+      OriginacionReferenciasApi
 
   ) {}
 
@@ -296,7 +301,17 @@ export class OriginacionExpedientePrintService {
             actuaciones:
               this.aprobacionApi.listarHistorial(
                 idSolicitudCredito
-              )
+              ),
+
+            // Las referencias pertenecen a la gestión actual.
+            // No se incorporan a impresiones de actuaciones históricas.
+            referencias: idSolicitudAprobacion === null
+              ? this.referenciasApi.listarReferencias(idSolicitudCredito)
+              : of([]),
+
+            procesoReferencias: idSolicitudAprobacion === null
+              ? this.referenciasApi.consultarSolicitud(idSolicitudCredito)
+              : of(null)
 
           })
           .pipe(
@@ -436,6 +451,10 @@ export class OriginacionExpedientePrintService {
                     actuaciones,
 
                     personas,
+
+                    referencias: resultado.referencias,
+
+                    procesoReferencias: resultado.procesoReferencias,
 
                     opciones:
 

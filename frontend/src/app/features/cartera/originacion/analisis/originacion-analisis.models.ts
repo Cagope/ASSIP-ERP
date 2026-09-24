@@ -88,6 +88,11 @@ export interface SolicitudAnalisisDeudor {
   idSolicitudDeudor: number;
   idDatosPersonal: number;
 
+  // Identificación del participante
+  tipoDocumento: string | null;
+  documento: string | null;
+  nombreCompleto: string | null;
+
   tipoDeudor: string;
   ordenDeudor: number;
 

@@ -1084,11 +1084,36 @@
 
         </select>
 
+        <!-- =============================================== -->
+        <!-- ADVERTENCIA DE CRÉDITOS SIMULTÁNEOS             -->
+        <!-- =============================================== -->
+
+        <div
+          *ngIf="mostrarAdvertenciaCreditosSimultaneos"
+          class="alert alert--warning"
+          role="status">
+
+          <strong>
+            Esta línea de crédito no permite créditos simultáneos.
+          </strong>
+
+          <p>
+            Si el asociado tiene créditos activos con saldo pendiente,
+            no podrá solicitar esta línea.
+          </p>
+
+          <p>
+            Al crear o guardar la solicitud, el sistema verificará
+            esta condición e informará los pagarés correspondientes
+            si existe una restricción.
+          </p>
+
+        </div>
+
       </div>
 
-
       <!-- ================================================= -->
-      <!-- CLASIFICACIÓN                                    -->
+      <!-- CLASIFICACIÓN                                    -->                                    -->
       <!-- ================================================= -->
 
       <div class="f-row">
@@ -1847,6 +1872,27 @@
           solicitud.valorCuotaProyectada !== null
           ? (
           solicitud.valorCuotaProyectada
+          | currency:'COP':'symbol-narrow':'1.0-0'
+          )
+          : '-'
+          }}
+        </strong>
+
+      </div>
+
+      <!-- PRIMERA CUOTA MENSUAL PARA ANÁLISIS -->
+
+      <div class="metric">
+
+        <span>
+          Primera cuota para análisis
+        </span>
+
+        <strong>
+          {{
+          solicitud.valorPrimeraCuotaAnalisis != null
+          ? (
+          solicitud.valorPrimeraCuotaAnalisis
           | currency:'COP':'symbol-narrow':'1.0-0'
           )
           : '-'

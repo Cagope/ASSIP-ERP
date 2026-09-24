@@ -1,23 +1,367 @@
-// Diseño coherente con los módulos de originación ASSIP ERP.
-:host { display: block; min-width: 0; }
-.page { padding: 1rem; min-width: 0; color: #1f2937; font-size: .85rem; }
-.page-header, .card-header, .acciones { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-.page-header { align-items: flex-start; margin-bottom: 1rem; h2 { margin: 0; font-size: 1.35rem; font-weight: 700; } p { margin: .3rem 0 0; color: #6b7280; } }
-.card { margin-bottom: 1rem; padding: 1rem; background: #fff; border: 1px solid #e5e7eb; border-radius: .65rem; min-width: 0; }
-.card-header { margin-bottom: 1rem; padding-bottom: .8rem; border-bottom: 1px solid #e5e7eb; h3 { margin: 0; font-size: 1rem; font-weight: 700; } }
-.consulta { max-width: 550px; label { display: block; margin-bottom: .45rem; font-weight: 600; } }
-.consulta-acciones { display: flex; gap: .65rem; align-items: center; input { max-width: 220px; } }
-.datos-grid, .form-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
-.datos-grid > div { min-width: 0; }
-small { display: block; color: #6b7280; margin-bottom: .3rem; font-size: .78rem; }
-strong { display: block; overflow-wrap: anywhere; font-weight: 650; }
-.form-field { min-width: 0; label { display: block; font-weight: 650; margin-bottom: .3rem; } small { min-height: 1rem; } }
-.form-control, .form-select { width: 100%; min-width: 0; }
-.concepto { margin-top: 1rem; padding: .8rem; border-radius: .5rem; background: #f8fafc; border: 1px solid #e5e7eb; p { margin: .4rem 0 0; white-space: pre-wrap; overflow-wrap: anywhere; } }
-.nota { color: #6b7280; margin: .7rem 0; }
-.badge { display: inline-block; padding: .35rem .6rem; border-radius: .5rem; background: #eef2ff; color: #3730a3; font-size: .76rem; }
-.badge-warning { background: #fffbeb; color: #92400e; }
-.acciones { justify-content: flex-end; margin-bottom: 1.2rem; }
-.estado { text-align: center; color: #6b7280; }
-@media (max-width: 1000px) { .datos-grid, .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 600px) { .datos-grid, .form-grid { grid-template-columns: 1fr; } .page-header, .acciones { align-items: stretch; flex-direction: column; } }
+// =========================================================
+// FORMALIZACIÓN DE CRÉDITO - ASSIP ERP
+// =========================================================
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.page {
+  padding: 1rem;
+  min-width: 0;
+  color: #1f2937;
+  font-size: 0.85rem;
+}
+
+
+// =========================================================
+// ENCABEZADO
+// =========================================================
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.3rem 0 0;
+    color: #6b7280;
+    font-size: 0.88rem;
+  }
+}
+
+
+// =========================================================
+// TARJETAS
+// =========================================================
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  min-width: 0;
+
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.65rem;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  margin-bottom: 1rem;
+  padding: 0 0 0.8rem;
+
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #e5e7eb;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+}
+
+
+// =========================================================
+// CONSULTA DE SOLICITUD
+// =========================================================
+
+.consulta {
+  max-width: 550px;
+
+  label {
+    display: block;
+    margin-bottom: 0.45rem;
+    font-weight: 600;
+  }
+}
+
+.consulta-acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+
+  input {
+    max-width: 220px;
+  }
+
+  button {
+    white-space: nowrap;
+  }
+}
+
+
+// =========================================================
+// DATOS INFORMATIVOS
+// =========================================================
+
+.datos-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+
+  > div {
+    min-width: 0;
+  }
+}
+
+small {
+  display: block;
+  margin-bottom: 0.3rem;
+  color: #6b7280;
+  font-size: 0.78rem;
+}
+
+strong {
+  display: block;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+
+// =========================================================
+// FORMULARIO DE CONDICIONES DEFINITIVAS
+// =========================================================
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.form-field {
+  min-width: 0;
+
+  label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-weight: 650;
+    color: #374151;
+  }
+
+  small {
+    min-height: 1rem;
+  }
+}
+
+.form-control,
+.form-select {
+  width: 100%;
+  min-width: 0;
+  font-size: 0.85rem;
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  background: #f3f4f6;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+
+// =========================================================
+// CONCEPTO DEL ENTE APROBADOR
+// =========================================================
+
+.concepto {
+  margin-top: 1rem;
+  padding: 0.8rem;
+
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+
+  p {
+    margin: 0.4rem 0 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+  }
+}
+
+
+// =========================================================
+// NOTAS
+// =========================================================
+
+.nota {
+  margin: 0.7rem 0;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+
+// =========================================================
+// INDICADORES
+// =========================================================
+
+.badge {
+  display: inline-block;
+  padding: 0.35rem 0.6rem;
+
+  background: #eef2ff;
+  color: #3730a3;
+
+  border-radius: 0.5rem;
+
+  font-size: 0.76rem;
+  font-weight: 600;
+  line-height: 1.3;
+
+  white-space: normal;
+  text-align: center;
+}
+
+.badge-warning {
+  background: #fffbeb;
+  color: #92400e;
+}
+
+
+// =========================================================
+// MENSAJES DE VALIDACIÓN
+// =========================================================
+
+.alert {
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.alert-success {
+  border-color: #bbf7d0;
+}
+
+.alert-warning {
+  border-color: #fde68a;
+}
+
+.alert-danger {
+  border-color: #fecaca;
+}
+
+.alert-info {
+  border-color: #bfdbfe;
+}
+
+
+// =========================================================
+// ESTADO DE CARGA
+// =========================================================
+
+.estado {
+  text-align: center;
+  color: #6b7280;
+}
+
+
+// =========================================================
+// ACCIONES DEL PROCESO
+//
+// Validar
+// Guardar
+// Generar pagaré
+// Finalizar formalización
+// =========================================================
+
+.acciones {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+
+  margin-bottom: 1.2rem;
+
+  button {
+    min-width: 155px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+
+// =========================================================
+// ADAPTACIÓN A PANTALLAS MEDIANAS
+// =========================================================
+
+@media (max-width: 1000px) {
+
+  .datos-grid,
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .acciones {
+    justify-content: flex-start;
+  }
+
+}
+
+
+// =========================================================
+// ADAPTACIÓN A MÓVILES
+// =========================================================
+
+@media (max-width: 600px) {
+
+  .page {
+    padding: 0.75rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .datos-grid,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .consulta-acciones {
+    flex-direction: column;
+    align-items: stretch;
+
+    input {
+      max-width: none;
+    }
+  }
+
+  .acciones {
+    flex-direction: column;
+    align-items: stretch;
+
+    button {
+      width: 100%;
+      min-width: 0;
+    }
+  }
+
+}

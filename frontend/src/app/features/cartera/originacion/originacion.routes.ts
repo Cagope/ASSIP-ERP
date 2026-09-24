@@ -119,6 +119,20 @@ export const ORIGINACION_ROUTES:
   },
 
   // =========================================================
+  // REFERENCIAS PERSONALES
+  // =========================================================
+
+  {
+    path: 'referencias',
+    loadComponent: () =>
+      import(
+        './referencias/originacion-referencias.component'
+      ).then(
+        m => m.OriginacionReferenciasComponent
+      )
+  },
+
+  // =========================================================
   // APROBACIÓN DE CARTERA
   // =========================================================
 

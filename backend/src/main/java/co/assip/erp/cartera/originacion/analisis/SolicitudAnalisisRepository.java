@@ -58,46 +58,67 @@ public class SolicitudAnalisisRepository {
     // =========================================================
 
     private static final String SQL_RESULTADOS_DEUDORES = """
-            SELECT
-                id_solicitud_credito,
-                numero_solicitud,
-                id_solicitud_deudor,
-                id_datos_personal,
-                tipo_deudor,
-                orden_deudor,
-                id_solicitud_modelo,
-                version_modelo,
-                nombre_modelo,
-                cantidad_componentes_obligatorios,
-                cantidad_componentes_evaluados,
-                cantidad_componentes_pendientes,
-                analisis_completo,
-                componentes_pendientes,
-                indicador_capacidad_pago,
-                indicador_endeudamiento,
-                indicador_razon_corriente,
-                puntaje_central_fuente,
-                mora_maxima_24_meses,
-                puntaje_capacidad_pago,
-                puntaje_endeudamiento,
-                puntaje_razon_corriente,
-                puntaje_central_cuantitativo,
-                puntaje_central_cualitativo,
-                puntaje_garantia,
-                puntaje_habito_pago_interno,
-                puntaje_total,
-                sin_capacidad_pago,
-                perfil_riesgo,
-                recomendacion,
-                cumple_otorgamiento,
-                motivo_resultado
-            FROM cartera.vw_solicitudes_analisis_resultado_deudor
-            WHERE id_solicitud_credito = :idSolicitudCredito
-            ORDER BY
-                orden_deudor,
-                id_solicitud_deudor
-            """;
+        SELECT
+            rd.id_solicitud_credito,
+            rd.numero_solicitud,
+            rd.id_solicitud_deudor,
+            rd.id_datos_personal,
 
+            dp.tipo_documento,
+            dp.documento,
+
+            NULLIF(
+                TRIM(
+                    CONCAT_WS(
+                        ' ',
+                        NULLIF(TRIM(dp.nombres), ''),
+                        NULLIF(TRIM(dp.primer_apellido), ''),
+                        NULLIF(TRIM(dp.segundo_apellido), '')
+                    )
+                ),
+                ''
+            ) AS nombre_completo,
+
+            rd.tipo_deudor,
+            rd.orden_deudor,
+            rd.id_solicitud_modelo,
+            rd.version_modelo,
+            rd.nombre_modelo,
+            rd.cantidad_componentes_obligatorios,
+            rd.cantidad_componentes_evaluados,
+            rd.cantidad_componentes_pendientes,
+            rd.analisis_completo,
+            rd.componentes_pendientes,
+            rd.indicador_capacidad_pago,
+            rd.indicador_endeudamiento,
+            rd.indicador_razon_corriente,
+            rd.puntaje_central_fuente,
+            rd.mora_maxima_24_meses,
+            rd.puntaje_capacidad_pago,
+            rd.puntaje_endeudamiento,
+            rd.puntaje_razon_corriente,
+            rd.puntaje_central_cuantitativo,
+            rd.puntaje_central_cualitativo,
+            rd.puntaje_garantia,
+            rd.puntaje_habito_pago_interno,
+            rd.puntaje_total,
+            rd.sin_capacidad_pago,
+            rd.perfil_riesgo,
+            rd.recomendacion,
+            rd.cumple_otorgamiento,
+            rd.motivo_resultado
+
+        FROM cartera.vw_solicitudes_analisis_resultado_deudor rd
+
+        LEFT JOIN hoja_vida.datos_personales dp
+            ON dp.id_datos_personal = rd.id_datos_personal
+
+        WHERE rd.id_solicitud_credito = :idSolicitudCredito
+
+        ORDER BY
+            rd.orden_deudor,
+            rd.id_solicitud_deudor
+        """;
 
     // =========================================================
     // COMPONENTES

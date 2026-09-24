@@ -1,4 +1,4 @@
-package co.assip.erp.cartera.originacion.desembolso;
+package co.assip.erp.cartera.originacion.formalizacion;
 
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class SolicitudDesembolsoRepository {
+public class SolicitudFormalizacionValidacionRepository {
 
     private final NamedParameterJdbcTemplate jdbc;
 
-    public SolicitudDesembolsoRepository(
+    public SolicitudFormalizacionValidacionRepository(
             NamedParameterJdbcTemplate jdbc
     ) {
         this.jdbc = jdbc;
@@ -50,7 +50,7 @@ public class SolicitudDesembolsoRepository {
     // =========================================================
     // SOLICITUD CON BLOQUEO TRANSACCIONAL
     //
-    // Se utilizará al constituir definitivamente el crédito.
+    // Se utilizará al generar el pagaré, dentro de la transacción.
     // =========================================================
 
     private static final String SQL_BLOQUEAR_SOLICITUD = """
@@ -306,7 +306,7 @@ public class SolicitudDesembolsoRepository {
             """;
 
     // =========================================================
-// APORTES ACTUALES Y RECIPROCIDAD PARA DESEMBOLSO
+// APORTES ACTUALES Y RECIPROCIDAD PARA FORMALIZACIÓN
 //
 // Recalcula los aportes requeridos sobre:
 // cartera propia vigente + valor formalizado.
@@ -325,11 +325,11 @@ public class SolicitudDesembolsoRepository {
 
             CASE
                 WHEN sc.factor_reciprocidad_aportes_aplicado > 0
-                 AND sc.valor_formalizado > 0
+                 AND CAST(:valorFormalizado AS numeric) > 0
                 THEN ROUND(
                     (
                         COALESCE(cartera.saldo_actual_cartera, 0)
-                        + sc.valor_formalizado
+                        + CAST(:valorFormalizado AS numeric)
                     )
                     / sc.factor_reciprocidad_aportes_aplicado,
                     2
@@ -452,7 +452,7 @@ public class SolicitudDesembolsoRepository {
 
               AND activo = true
 
-              AND id_solicitud_proceso = 5
+              AND id_solicitud_proceso = 4
 
               AND id_solicitud_resultado = 1
 
@@ -501,7 +501,7 @@ public class SolicitudDesembolsoRepository {
 
                     AND sc.activo = true
 
-                    AND sc.id_solicitud_proceso = 5
+                    AND sc.id_solicitud_proceso = 4
 
                     AND sc.id_solicitud_resultado = 1
 
@@ -513,7 +513,7 @@ public class SolicitudDesembolsoRepository {
     // CONSULTAR SOLICITUD
     // =========================================================
 
-    public Optional<SolicitudDesembolsoDatos> buscarSolicitud(
+    public Optional<SolicitudValidacionDatos> buscarSolicitud(
             Integer idSolicitudCredito
     ) {
         return consultarSolicitud(
@@ -526,7 +526,7 @@ public class SolicitudDesembolsoRepository {
     // BLOQUEAR SOLICITUD
     // =========================================================
 
-    public Optional<SolicitudDesembolsoDatos> bloquearSolicitud(
+    public Optional<SolicitudValidacionDatos> bloquearSolicitud(
             Integer idSolicitudCredito
     ) {
         return consultarSolicitud(
@@ -535,19 +535,19 @@ public class SolicitudDesembolsoRepository {
         );
     }
 
-    private Optional<SolicitudDesembolsoDatos> consultarSolicitud(
+    private Optional<SolicitudValidacionDatos> consultarSolicitud(
             String sql,
             Integer idSolicitudCredito
     ) {
 
-        List<SolicitudDesembolsoDatos> resultados =
+        List<SolicitudValidacionDatos> resultados =
                 jdbc.query(
                         sql,
                         parametrosSolicitud(
                                 idSolicitudCredito
                         ),
                         (rs, rowNum) ->
-                                new SolicitudDesembolsoDatos(
+                                new SolicitudValidacionDatos(
                                         rs.getInt(
                                                 "id_solicitud_credito"
                                         ),
@@ -697,18 +697,19 @@ public class SolicitudDesembolsoRepository {
     // CONSULTAR APORTES
     // =========================================================
 
-    public Optional<AportesDesembolsoDatos> consultarAportes(
-            Integer idSolicitudCredito
+    public Optional<AportesValidacionDatos> consultarAportes(
+            Integer idSolicitudCredito,
+            BigDecimal valorFormalizado
     ) {
 
-        List<AportesDesembolsoDatos> resultados =
+        List<AportesValidacionDatos> resultados =
                 jdbc.query(
                         SQL_APORTES,
                         parametrosSolicitud(
                                 idSolicitudCredito
-                        ),
+                        ).addValue("valorFormalizado", valorFormalizado),
                         (rs, rowNum) ->
-                                new AportesDesembolsoDatos(
+                                new AportesValidacionDatos(
                                         rs.getInt(
                                                 "id_solicitud_credito"
                                         ),
@@ -847,6 +848,30 @@ public class SolicitudDesembolsoRepository {
     }
 
     // =========================================================
+    // TASA EFECTIVA MÁXIMA LEGAL POR AGENCIA (631)
+    // =========================================================
+
+    public Optional<BigDecimal> consultarTasaMaximaLegal(Integer idAgencia) {
+        final String sql = """
+            SELECT p.valor_parametro::numeric
+            FROM general.parametros p
+            WHERE p.id_agencia = :idAgencia
+              AND p.codigo_parametro = 631
+            """;
+
+        List<BigDecimal> valores = jdbc.query(
+                sql,
+                new MapSqlParameterSource().addValue("idAgencia", idAgencia),
+                (rs, rowNum) -> rs.getBigDecimal(1)
+        );
+
+        if (valores.size() != 1) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(valores.get(0));
+    }
+
+    // =========================================================
     // PARÁMETROS
     // =========================================================
 
@@ -865,7 +890,7 @@ public class SolicitudDesembolsoRepository {
     // REGISTROS INTERNOS
     // =========================================================
 
-    public record SolicitudDesembolsoDatos(
+    public record SolicitudValidacionDatos(
 
             Integer idSolicitudCredito,
 
@@ -942,7 +967,7 @@ public class SolicitudDesembolsoRepository {
     ) {
     }
 
-    public record AportesDesembolsoDatos(
+    public record AportesValidacionDatos(
 
             Integer idSolicitudCredito,
 

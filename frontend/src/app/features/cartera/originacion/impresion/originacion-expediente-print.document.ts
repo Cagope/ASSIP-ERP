@@ -136,8 +136,70 @@ export class OriginacionExpedientePrintDocument {
         ${this.renderBienes(individual)}
         ${this.renderCentralRiesgo(individual, false)}
         ${this.renderComportamientoCrediticio(deudor)}
+        ${this.renderReferencias(data, deudor)}
         ${this.renderAnalisis(individual, false)}
       </section>
+    `;
+  }
+
+  // =========================================================
+  // REFERENCIAS PERSONALES DEL PARTICIPANTE
+  // Fuente: gestión vigente de referencias de la solicitud.
+  // No forma parte de las fotografías de aprobación.
+  // =========================================================
+
+  private renderReferencias(
+    data: OriginacionExpedientePrintData,
+    deudor: Registro
+  ): string {
+    if (data.modo !== 'SOLICITUD') {
+      return '';
+    }
+
+    const idDeudor = deudor['id_solicitud_deudor'];
+    const referencias = (data.referencias || []).filter(ref =>
+      ref.activo &&
+      idDeudor != null &&
+      String(ref.idSolicitudDeudor) === String(idDeudor)
+    );
+
+    const estado = data.procesoReferencias?.estadoReferencias ?? 'PENDIENTE';
+    const cierre = data.procesoReferencias?.tipoCierre;
+    const observacion = data.procesoReferencias?.observacionCierre;
+
+    const contenido = referencias.length
+      ? referencias.map((ref, index) => `
+        <section class="expediente-persona">
+          <div class="expediente-persona__encabezado">
+            Referencia ${index + 1} — ${this.esc(ref.nombreCompleto)}
+          </div>
+          ${this.campos({
+            telefono_celular: ref.telefonoCelular,
+            telefono_fijo: ref.telefonoFijo,
+            medio_entrevista: ref.medioEntrevista,
+            fecha_hora_llamada: ref.fechaHoraLlamada,
+            contacto_establecido: ref.contactoEstablecido === null
+              ? 'Pendiente'
+              : ref.contactoEstablecido ? 'Sí' : 'No'
+          }, [
+            { titulo: 'Celular', clave: 'telefono_celular' },
+            { titulo: 'Teléfono fijo', clave: 'telefono_fijo' },
+            { titulo: 'Medio de entrevista', clave: 'medio_entrevista' },
+            { titulo: 'Fecha de llamada', clave: 'fecha_hora_llamada', tipo: 'fecha' },
+            { titulo: 'Contacto establecido', clave: 'contacto_establecido' }
+          ])}
+          <div><strong>Concepto de la referencia:</strong></div>
+          <p>${this.esc(ref.conceptoReferencia || 'Sin concepto registrado.')}</p>
+        </section>
+      `).join('')
+      : this.nota('El participante no registra referencias personales activas.');
+
+    return `
+      ${this.titulo('Referencias personales')}
+      <p><strong>Estado de gestión:</strong> ${this.esc(estado)}</p>
+      ${cierre ? `<p><strong>Tipo de cierre:</strong> ${this.esc(cierre)}</p>` : ''}
+      ${observacion ? `<p><strong>Observación de cierre:</strong> ${this.esc(observacion)}</p>` : ''}
+      ${contenido}
     `;
   }
 
@@ -1601,6 +1663,8 @@ export class OriginacionExpedientePrintDocument {
 
           ])}
 
+          ${this.renderPerfilRiesgoGrafico(item)}
+
         </section>
       `).join('');
 
@@ -1614,6 +1678,61 @@ export class OriginacionExpedientePrintDocument {
         'modelo registrado. La recomendación no sustituye ' +
         'la decisión del ente de aprobación.'
       )}
+    `;
+  }
+
+
+  // =========================================================
+  // PERFIL DE RIESGO - MISMA ESCALA VISUAL DEL FRONT (0 A 100)
+  // El puntaje, perfil y recomendación provienen del análisis guardado.
+  // =========================================================
+
+  private renderPerfilRiesgoGrafico(item: Registro): string {
+    const bruto = item['puntaje_total'];
+    const puntaje = bruto === null || bruto === undefined || bruto === ''
+      ? null
+      : Number(bruto);
+    const valido = puntaje !== null && Number.isFinite(puntaje);
+    const posicion = valido
+      ? Math.min(100, Math.max(0, puntaje))
+      : null;
+    const perfil = String(item['perfil_riesgo'] ?? '').toUpperCase();
+    const clasePerfil = perfil === 'BAJO' || perfil === 'MEDIO' || perfil === 'ALTO'
+      ? ` expediente-riesgo--${perfil.toLowerCase()}`
+      : '';
+    const recomendacion = item['recomendacion'] ?? 'Pendiente';
+    const nombre = item['nombre_completo'] ?? item['nombre_solicitante'] ?? 'Participante evaluado';
+
+    return `
+      <div class="expediente-riesgo">
+        <div class="expediente-riesgo__titulo">PERFIL DE RIESGO</div>
+        <div class="expediente-riesgo__contenido">
+          <div class="expediente-riesgo__datos">
+            <div class="expediente-riesgo__fila">
+              <span>NOMBRE</span><strong>${this.esc(nombre)}</strong>
+            </div>
+            <div class="expediente-riesgo__fila">
+              <span>PERFIL GENERAL</span>
+              <strong class="expediente-riesgo__perfil${clasePerfil}">
+                ${this.esc(perfil ? `PERFIL ${perfil}` : 'PENDIENTE')}
+              </strong>
+            </div>
+            <div class="expediente-riesgo__fila">
+              <span>RECOMENDACIÓN</span><strong>${this.esc(recomendacion)}</strong>
+            </div>
+          </div>
+          <div class="expediente-riesgo__medidor">
+            <div class="expediente-riesgo__barra">
+              ${posicion === null ? '' : `
+                <div class="expediente-riesgo__marcador" style="left: ${posicion}%"></div>
+              `}
+            </div>
+            <div class="expediente-riesgo__valor">
+              ${valido ? `${this.esc(this.numeroFormatter.format(puntaje))}%` : '—'}
+            </div>
+          </div>
+        </div>
+      </div>
     `;
   }
 

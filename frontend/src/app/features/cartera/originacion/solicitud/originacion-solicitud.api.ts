@@ -60,7 +60,7 @@ export class OriginacionSolicitudApi {
     `${environment.apiUrl}/cartera/originacion/asociados`;
 
   private readonly catalogosUrl =
-    `${environment.apiUrl}/cartera/originacion/catalogos`;
+    `${environment.apiUrl}/cartera/catalogos`;
 
   private readonly impresionUrl =
     `${environment.apiUrl}/cartera/originacion/impresion`;
@@ -362,10 +362,9 @@ export class OriginacionSolicitudApi {
     return this.http.get<
       LineaCredito[]
     >(
-      `${this.catalogosUrl}/lineas-credito`
+      `${this.catalogosUrl}/lineas-credito/detalle`
     );
   }
-
 
   listarClasificacionesCredito():
     Observable<ClasificacionCredito[]> {
@@ -373,7 +372,7 @@ export class OriginacionSolicitudApi {
     return this.http.get<
       ClasificacionCredito[]
     >(
-      `${this.catalogosUrl}/clasificaciones-credito`
+      `${this.catalogosUrl}/clasificaciones-credito/detalle`
     );
   }
 
@@ -391,10 +390,8 @@ export class OriginacionSolicitudApi {
   listarGarantias():
     Observable<GarantiaCredito[]> {
 
-    return this.http.get<
-      GarantiaCredito[]
-    >(
-      `${this.catalogosUrl}/garantias`
+    return this.http.get<GarantiaCredito[]>(
+      `${this.catalogosUrl}/garantias-credito/detalle`
     );
   }
 
@@ -425,7 +422,7 @@ export class OriginacionSolicitudApi {
     return this.http.get<
       FormaPago[]
     >(
-      `${this.catalogosUrl}/formas-pago`
+      `${this.catalogosUrl}/formas-pago/detalle`
     );
   }
 

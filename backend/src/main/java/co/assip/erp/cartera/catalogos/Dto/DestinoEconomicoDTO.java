@@ -1,4 +1,4 @@
-package co.assip.erp.cartera.originacion.catalogos.dto;
+package co.assip.erp.cartera.catalogos.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,5 +12,8 @@ import lombok.NoArgsConstructor;
 public class DestinoEconomicoDTO {
 
     private String codigoDestinoEconomico;
+
     private String descripcionDestinoEconomico;
+
+    private Boolean activo;
 }

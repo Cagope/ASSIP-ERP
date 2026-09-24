@@ -161,6 +161,88 @@ public class SolicitudCreditoRepository {
         return resultado;
     }
 
+    // =========================================================
+    // VALIDACIÓN DE CRÉDITOS SIMULTÁNEOS POR LÍNEA
+    // =========================================================
+
+    public ValidacionCreditosSimultaneos consultarCreditosSimultaneos(
+            Integer idDatosPersonal,
+            Integer idLineaCredito
+    ) {
+
+        String sql = """
+        SELECT
+            lc.id_linea_credito,
+            lc.nombre_linea_credito,
+            lc.permite_creditos_simultaneos,
+
+            cc.pagare_cartera,
+            cc.saldo_actual
+
+        FROM cartera.lineas_creditos lc
+
+        LEFT JOIN cartera.carteras_creditos cc
+            ON cc.id_datos_personal = :idDatosPersonal
+           AND cc.codigo_estado_cartera = 'A'
+           AND cc.saldo_actual <> 0
+
+        WHERE lc.id_linea_credito = :idLineaCredito
+          AND lc.activo = true
+
+        ORDER BY
+            cc.pagare_cartera
+        """;
+
+        List<CreditoSimultaneoFila> filas = jdbc.query(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue(
+                                "idDatosPersonal",
+                                idDatosPersonal
+                        )
+                        .addValue(
+                                "idLineaCredito",
+                                idLineaCredito
+                        ),
+                (rs, rowNum) -> new CreditoSimultaneoFila(
+                        rs.getInt("id_linea_credito"),
+                        rs.getString("nombre_linea_credito"),
+                        rs.getBoolean("permite_creditos_simultaneos"),
+                        rs.getString("pagare_cartera"),
+                        rs.getBigDecimal("saldo_actual")
+                )
+        );
+
+        if (filas.isEmpty()) {
+            throw new IllegalStateException(
+                    "La línea de crédito seleccionada no existe "
+                            + "o no se encuentra activa."
+            );
+        }
+
+        CreditoSimultaneoFila linea = filas.get(0);
+
+        List<CreditoActivoConSaldo> creditos = filas.stream()
+                .filter(fila -> fila.pagareCartera() != null)
+                .map(fila -> new CreditoActivoConSaldo(
+                        fila.pagareCartera(),
+                        fila.saldoActual()
+                ))
+                .toList();
+
+        boolean permitido =
+                linea.permiteCreditosSimultaneos()
+                        || creditos.isEmpty();
+
+        return new ValidacionCreditosSimultaneos(
+                linea.idLineaCredito(),
+                linea.nombreLineaCredito(),
+                linea.permiteCreditosSimultaneos(),
+                permitido,
+                creditos
+        );
+    }
+
 
     // =========================================================
     // PROCESO INICIADA
@@ -2136,6 +2218,8 @@ public class SolicitudCreditoRepository {
                         valor_cuota_proyectada =
                             :valorCuotaProyectada,
 
+                        valor_primera_cuota_analisis =
+                            :valorPrimeraCuotaAnalisis,
 
                         observacion_asesor =
                             NULLIF(
@@ -2425,6 +2509,10 @@ public class SolicitudCreditoRepository {
                                 "valorCuotaProyectada",
                                 calculo.valorCuotaProyectada()
                         )
+                        .addValue(
+                                "valorPrimeraCuotaAnalisis",
+                                calculo.valorPrimeraCuotaAnalisis()
+                        )
 
                         .addValue(
                                 "idUsuario",
@@ -2670,7 +2758,7 @@ public class SolicitudCreditoRepository {
                 v.tasa_colocacion_aplicada,
                 v.tasa_efectiva_anual,
                 v.valor_cuota_proyectada,
-
+                sc.valor_primera_cuota_analisis,
 
                 -- =====================================================
                 -- ENTE APROBADOR
@@ -2744,10 +2832,14 @@ public class SolicitudCreditoRepository {
 
                 v.activo
 
-            FROM cartera.vw_solicitudes_creditos v
+                FROM cartera.vw_solicitudes_creditos v
+                
+                INNER JOIN cartera.solicitudes_creditos sc
+                    ON sc.id_solicitud_credito =
+                       v.id_solicitud_credito
 
-            LEFT JOIN cartera.vw_solicitudes_ente_aprobacion ea
-                ON ea.id_solicitud_credito =
+                LEFT JOIN cartera.vw_solicitudes_ente_aprobacion ea
+                 ON ea.id_solicitud_credito =
                    v.id_solicitud_credito
 
             WHERE v.id_solicitud_credito =
@@ -3449,6 +3541,7 @@ public class SolicitudCreditoRepository {
             BigDecimal tasaColocacionAplicada,
             BigDecimal tasaEfectivaAnual,
             BigDecimal valorCuotaProyectada,
+            BigDecimal valorPrimeraCuotaAnalisis,
 
             Integer idFondoGarantia,
             BigDecimal porcentajeFondoAplicado,
@@ -3712,6 +3805,34 @@ public class SolicitudCreditoRepository {
             LocalDate fechaActualizacion,
             int diasMaximos,
             boolean vigente
+    ) {
+    }
+
+    // =========================================================
+// CRÉDITOS SIMULTÁNEOS
+// =========================================================
+
+    private record CreditoSimultaneoFila(
+            Integer idLineaCredito,
+            String nombreLineaCredito,
+            boolean permiteCreditosSimultaneos,
+            String pagareCartera,
+            BigDecimal saldoActual
+    ) {
+    }
+
+    public record CreditoActivoConSaldo(
+            String pagareCartera,
+            BigDecimal saldoActual
+    ) {
+    }
+
+    public record ValidacionCreditosSimultaneos(
+            Integer idLineaCredito,
+            String nombreLineaCredito,
+            boolean permiteCreditosSimultaneos,
+            boolean permitido,
+            List<CreditoActivoConSaldo> creditosActivos
     ) {
     }
 
