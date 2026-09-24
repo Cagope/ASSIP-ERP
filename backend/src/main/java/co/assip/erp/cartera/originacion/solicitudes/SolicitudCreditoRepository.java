@@ -363,36 +363,44 @@ public class SolicitudCreditoRepository {
     // =========================================================
 
     // =========================================================
-// CUENTA OPERATIVA DE APORTES
-// =========================================================
+    // CUENTA OPERATIVA DE APORTES
+    // =========================================================
 
     public CuentaAportesResumen buscarCuentaAportes(
             Integer idDatosPersonal
     ) {
 
         String sql = """
-            SELECT
-                COUNT(*)::integer AS cantidad,
-                CASE
-                    WHEN COUNT(*) = 1
-                    THEN MIN(ca.id_cuenta_ahorro)
-                    ELSE NULL
-                END AS id_cuenta_aportes
-            FROM depositos.cuentas_ahorro ca
+        SELECT
+            COUNT(*)::integer AS cantidad,
 
-            INNER JOIN depositos.formas_ahorro fa
-                ON fa.id_forma_ahorro =
-                   ca.id_forma_ahorro
+            CASE
+                WHEN COUNT(*) = 1
+                THEN MIN(ca.id_cuenta_ahorro)
+                ELSE NULL
+            END AS id_cuenta_aportes,
 
-            INNER JOIN depositos.estados_ahorros ea
-                ON TRIM(ea.codigo_estado_ahorro) =
-                   TRIM(ca.estado_cuenta_cuenta)
+            CASE
+                WHEN COUNT(*) = 1
+                THEN MIN(ca.id_agencia)
+                ELSE NULL
+            END AS id_agencia
 
-            WHERE ca.id_datos_personal = :idDatosPersonal
-              AND TRIM(fa.codigo_forma) = '01'
-              AND TRIM(fa.tipo_captacion_forma) = '1'
-              AND ea.operativo = true
-            """;
+        FROM depositos.cuentas_ahorro ca
+
+        INNER JOIN depositos.formas_ahorro fa
+            ON fa.id_forma_ahorro =
+               ca.id_forma_ahorro
+
+        INNER JOIN depositos.estados_ahorros ea
+            ON TRIM(ea.codigo_estado_ahorro) =
+               TRIM(ca.estado_cuenta_cuenta)
+
+        WHERE ca.id_datos_personal = :idDatosPersonal
+          AND TRIM(fa.codigo_forma) = '01'
+          AND TRIM(fa.tipo_captacion_forma) = '1'
+          AND ea.operativo = true
+        """;
 
         return jdbc.queryForObject(
                 sql,
@@ -404,8 +412,14 @@ public class SolicitudCreditoRepository {
                 (rs, rowNum) ->
                         new CuentaAportesResumen(
                                 rs.getInt("cantidad"),
+
                                 rs.getObject(
                                         "id_cuenta_aportes",
+                                        Integer.class
+                                ),
+
+                                rs.getObject(
+                                        "id_agencia",
                                         Integer.class
                                 )
                         )
@@ -3471,7 +3485,8 @@ public class SolicitudCreditoRepository {
 
     public record CuentaAportesResumen(
             Integer cantidad,
-            Integer idCuentaAportes
+            Integer idCuentaAportes,
+            Integer idAgencia
     ) {
     }
 

@@ -84,4 +84,11 @@ public class SolicitudFormalizacionGuardarRequestDTO {
     @DecimalMin(value = "0.0000", inclusive = true)
     @Digits(integer = 5, fraction = 4)
     private BigDecimal tasaNominalFormalizada;
+
+    // =========================================================
+    // CONCEPTO FINAL DE FORMALIZACIÓN
+    // =========================================================
+
+    @Size(max = 1000)
+    private String conceptoFormalizacion;
 }

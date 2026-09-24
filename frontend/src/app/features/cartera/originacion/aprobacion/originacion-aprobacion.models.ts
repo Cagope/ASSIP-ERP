@@ -5,7 +5,7 @@
 
 
 // =========================================================
-// BANDEJA DE APROBACIÓN
+// BANDEJA DE APROBACIÓN Y GESTIÓN DEL ASESOR
 // =========================================================
 
 export interface SolicitudAprobacionBandeja {
@@ -47,7 +47,12 @@ export interface SolicitudAprobacionBandeja {
   idEnteFinal: number;
   nombreEnteFinal: string;
 
-  idEnteActual: number;
+  idEnteActual: number | null;
+
+  // Concepto vigente para gestión del asesor
+  ultimaDecision: string | null;
+  idUltimaAprobacion: number | null;
+  idEnteUltimaActuacion: number | null;
 
 }
 
@@ -103,13 +108,6 @@ export interface SolicitudAprobacionActuacion {
 
 // =========================================================
 // FOTOGRAFÍAS DE APROBACIÓN
-//
-// Se utiliza tanto para consultar las fotografías actuales
-// como para consultar las fotografías históricas de una
-// actuación específica.
-//
-// Los contenidos JSON conservan la estructura original
-// generada por PostgreSQL.
 // =========================================================
 
 export interface SolicitudAprobacionFotos {
@@ -141,6 +139,22 @@ export interface SolicitudAprobacionDecisionRequest {
 
   numeroActa: string | null;
   fechaActa: string | null;
+
+}
+
+
+// =========================================================
+// GESTIONAR CONCEPTO VIGENTE - ASESOR
+// =========================================================
+
+export type SolicitudAprobacionAccionAsesor =
+  | 'RETOMAR'
+  | 'FORMALIZAR'
+  | 'CERRAR';
+
+export interface SolicitudAprobacionGestionConceptoRequest {
+
+  accion: SolicitudAprobacionAccionAsesor;
 
 }
 

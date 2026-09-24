@@ -1,10 +1,11 @@
-package co.assip.erp.cartera.originacion.formalizacion;
+    package co.assip.erp.cartera.originacion.formalizacion;
 
 import co.assip.erp.cartera.originacion.formalizacion.dto.SolicitudFormalizacionDetalleDTO;
 import co.assip.erp.cartera.originacion.formalizacion.dto.SolicitudFormalizacionGuardarRequestDTO;
 import co.assip.erp.cartera.originacion.solicitudes.SolicitudCreditoRepository;
 
 import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.cartera.originacion.formalizacion.dto.SolicitudFormalizacionBandejaDTO;
 
 import co.assip.erp.shared.financiero.CuotasFinancieras;
 import co.assip.erp.shared.financiero.TasasFinancieras;
@@ -16,6 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
+import java.util.List;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 @Service
 public class SolicitudFormalizacionService {
@@ -44,6 +48,24 @@ public class SolicitudFormalizacionService {
     }
 
     // =========================================================
+    // BANDEJA DE FORMALIZACIÓN
+    //
+    // Consulta las solicitudes aprobadas pendientes de
+    // formalización asignadas al asesor autenticado.
+    //
+    // No modifica información.
+    // =========================================================
+
+    @Transactional(readOnly = true)
+    public List<SolicitudFormalizacionBandejaDTO> listarBandeja() {
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        return repository.listarBandeja(idUsuario);
+    }
+
+    // =========================================================
     // CONSULTAR SOLICITUD PARA FORMALIZACIÓN
     //
     // No modifica información.
@@ -64,6 +86,44 @@ public class SolicitudFormalizacionService {
                                         + idSolicitudCredito
                         )
                 );
+    }
+
+    // =========================================================
+    // SIMULACIÓN FINANCIERA (SIN PERSISTENCIA)
+    // =========================================================
+
+    @Transactional(readOnly = true)
+    public ResultadoSimulacionFinanciera simular(
+            Integer idSolicitudCredito,
+            SolicitudFormalizacionGuardarRequestDTO request
+    ) {
+        validarIdSolicitud(idSolicitudCredito);
+
+        if (request == null) {
+            throw new IllegalArgumentException(
+                    "Debe indicar las condiciones para simular."
+            );
+        }
+
+        SolicitudFormalizacionDetalleDTO solicitud =
+                consultar(idSolicitudCredito);
+
+        validarProcesoFormalizacion(solicitud);
+
+        if (solicitud.getIdCarteraCredito() != null) {
+            throw new IllegalStateException(
+                    "El crédito ya fue constituido y sus condiciones no son editables."
+            );
+        }
+
+        validarCondiciones(request);
+        return calcularResultadoFinanciero(request);
+    }
+
+    public record ResultadoSimulacionFinanciera(
+            BigDecimal tasaEfectivaAnual,
+            BigDecimal valorCuota
+    ) {
     }
 
     // =========================================================
@@ -121,87 +181,12 @@ public class SolicitudFormalizacionService {
             );
         }
 
-        // =====================================================
-        // PERIODO DE INTERESES
-        //
-        // Se reutiliza el catálogo y la consulta existente
-        // del módulo de solicitudes.
-        // =====================================================
+        // Reutiliza exactamente el cálculo financiero de la simulación.
+        ResultadoSimulacionFinanciera simulacion =
+                calcularResultadoFinanciero(request);
 
-        Integer periodoMeses =
-                solicitudCreditoRepository.buscarPeriodoMeses(
-                                request.getPeriodoCodigoInteresFormalizado(),
-                                request.getTipoModalidadInteresFormalizado()
-                        )
-                        .orElseThrow(
-                                () -> new IllegalArgumentException(
-                                        "La modalidad de intereses seleccionada "
-                                                + "no existe o está inactiva."
-                                )
-                        );
-
-        if (periodoMeses <= 0) {
-            throw new IllegalArgumentException(
-                    "La modalidad de intereses no tiene "
-                            + "un período válido."
-            );
-        }
-
-        // =====================================================
-        // VALIDACIÓN DE CUOTA FIJA
-        //
-        // Misma regla utilizada en SolicitudCreditoService.
-        // =====================================================
-
-        String codigoTipoCuota =
-                request.getCodigoTipoCuotaFormalizada().trim();
-
-        if ("1".equals(codigoTipoCuota)
-                && !Objects.equals(
-                request.getAmortizacionCapitalFormalizada(),
-                periodoMeses
-        )) {
-
-            throw new IllegalArgumentException(
-                    "Para cuota fija, la periodicidad del pago "
-                            + "de intereses debe ser igual a la "
-                            + "amortización de capital."
-            );
-        }
-
-        // =====================================================
-        // TASA EFECTIVA ANUAL DEFINITIVA
-        // =====================================================
-
-        BigDecimal tasaEfectivaAnual =
-                TasasFinancieras.tasaEfectivaAnual(
-                        request.getTasaNominalFormalizada(),
-                        periodoMeses
-                );
-
-        if (tasaEfectivaAnual == null) {
-            throw new IllegalStateException(
-                    "No fue posible calcular la tasa efectiva anual."
-            );
-        }
-
-        tasaEfectivaAnual =
-                tasaEfectivaAnual.setScale(
-                        4,
-                        RoundingMode.HALF_UP
-                );
-
-        // =====================================================
-        // CUOTA DEFINITIVA
-        //
-        // Se conserva la misma metodología de originación.
-        // =====================================================
-
-        BigDecimal valorCuota =
-                calcularCuota(
-                        request,
-                        periodoMeses
-                );
+        BigDecimal tasaEfectivaAnual = simulacion.tasaEfectivaAnual();
+        BigDecimal valorCuota = simulacion.valorCuota();
 
         // =====================================================
         // IDENTIFICAR CAMBIOS
@@ -215,6 +200,29 @@ public class SolicitudFormalizacionService {
                         solicitud,
                         request
                 );
+
+        // Si cambian las condiciones aprobadas, el concepto es obligatorio.
+        String concepto = request.getConceptoFormalizacion();
+        if (concepto != null) {
+            concepto = concepto.trim();
+            request.setConceptoFormalizacion(
+                    concepto.isEmpty() ? null : concepto
+            );
+        }
+
+        if (concepto != null && concepto.length() > 1000) {
+            throw new IllegalArgumentException(
+                    "El concepto de formalización no puede superar 1000 caracteres."
+            );
+        }
+
+        if (condicionesModificadas
+                && (concepto == null || concepto.isBlank())) {
+            throw new IllegalArgumentException(
+                    "Debe justificar los cambios frente a las condiciones aprobadas "
+                            + "en el concepto de formalización."
+            );
+        }
 
         // =====================================================
         // AUDITORÍA
@@ -296,6 +304,63 @@ public class SolicitudFormalizacionService {
         }
 
         return consultar(idSolicitudCredito);
+    }
+
+    // =========================================================
+    // CÁLCULO FINANCIERO COMÚN: SIMULACIÓN Y GUARDADO
+    // =========================================================
+
+    private ResultadoSimulacionFinanciera calcularResultadoFinanciero(
+            SolicitudFormalizacionGuardarRequestDTO request
+    ) {
+        Integer periodoMeses =
+                solicitudCreditoRepository.buscarPeriodoMeses(
+                        request.getPeriodoCodigoInteresFormalizado(),
+                        request.getTipoModalidadInteresFormalizado()
+                ).orElseThrow(() -> new IllegalArgumentException(
+                        "La modalidad de intereses seleccionada no existe o está inactiva."
+                ));
+
+        if (periodoMeses <= 0) {
+            throw new IllegalArgumentException(
+                    "La modalidad de intereses no tiene un período válido."
+            );
+        }
+
+        if ("1".equals(request.getCodigoTipoCuotaFormalizada().trim())
+                && !Objects.equals(
+                request.getAmortizacionCapitalFormalizada(),
+                periodoMeses
+        )) {
+            throw new IllegalArgumentException(
+                    "Para cuota fija, la periodicidad del pago de intereses "
+                            + "debe ser igual a la amortización de capital."
+            );
+        }
+
+        BigDecimal tasaEfectivaAnual =
+                TasasFinancieras.tasaEfectivaAnual(
+                        request.getTasaNominalFormalizada(),
+                        periodoMeses
+                );
+
+        if (tasaEfectivaAnual == null) {
+            throw new IllegalStateException(
+                    "No fue posible calcular la tasa efectiva anual."
+            );
+        }
+
+        tasaEfectivaAnual = tasaEfectivaAnual.setScale(
+                4,
+                RoundingMode.HALF_UP
+        );
+
+        BigDecimal valorCuota = calcularCuota(request, periodoMeses);
+
+        return new ResultadoSimulacionFinanciera(
+                tasaEfectivaAnual,
+                valorCuota
+        );
     }
 
     // =========================================================
@@ -638,15 +703,76 @@ public class SolicitudFormalizacionService {
     }
 
     // =========================================================
+    // PROPUESTA DE PAGARÉ (SOLO CONSULTA)
+    // =========================================================
+
+    @Transactional(readOnly = true)
+    public PropuestaPagare consultarPropuestaPagare(
+            Integer idSolicitudCredito
+    ) {
+        validarIdSolicitud(idSolicitudCredito);
+
+        Integer idUsuario = usuarioSesionService.idUsuario();
+        SolicitudFormalizacionDetalleDTO solicitud = consultar(idSolicitudCredito);
+        validarProcesoFormalizacion(solicitud);
+        validarFormalizacionCompleta(solicitud);
+
+        if (solicitud.getIdCarteraCredito() != null) {
+            throw new IllegalStateException(
+                    "La solicitud ya tiene un crédito generado. Utilice Reimprimir pagaré."
+            );
+        }
+
+        boolean asignadaAlAsesor = repository.listarBandeja(idUsuario)
+                .stream()
+                .anyMatch(item -> Objects.equals(
+                        item.getIdSolicitudCredito(), idSolicitudCredito
+                ));
+
+        if (!asignadaAlAsesor) {
+            throw new IllegalStateException(
+                    "La solicitud no está asignada al asesor autenticado."
+            );
+        }
+
+        Long consecutivoProvisional =
+                repository.consultarConsecutivoProvisionalPagare(
+                        solicitud.getIdAgencia()
+                );
+
+        return new PropuestaPagare(
+                consecutivoProvisional.toString(),
+                LocalDate.now(ZoneId.of("America/Bogota")),
+                solicitud.getNombreCompleto(),
+                solicitud.getValorFormalizado()
+        );
+    }
+
+    public record PropuestaPagare(
+            String pagareProvisional,
+            LocalDate fechaSugerida,
+            String nombreCompleto,
+            BigDecimal valorFormalizado
+    ) {
+    }
+
+    // =========================================================
 // GENERAR PAGARÉ
 // =========================================================
 
     @Transactional
     public SolicitudFormalizacionDetalleDTO generarPagare(
-            Integer idSolicitudCredito
+            Integer idSolicitudCredito,
+            LocalDate fechaPagare
     ) {
 
         validarIdSolicitud(idSolicitudCredito);
+
+        if (fechaPagare == null) {
+            throw new IllegalArgumentException(
+                    "Debe seleccionar la fecha del pagaré."
+            );
+        }
 
         Integer idUsuario = usuarioSesionService.idUsuario();
 
@@ -832,6 +958,7 @@ public class SolicitudFormalizacionService {
                 repository.insertarCreditoDesdeFormalizacion(
                         idSolicitudCredito,
                         pagareCartera,
+                        fechaPagare,
                         idUsuario
                 );
 

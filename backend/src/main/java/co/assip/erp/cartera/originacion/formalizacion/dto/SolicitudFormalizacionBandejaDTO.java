@@ -1,4 +1,4 @@
-package co.assip.erp.cartera.originacion.aprobacion.dto;
+package co.assip.erp.cartera.originacion.formalizacion.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,24 +8,20 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-public class SolicitudAprobacionBandejaDTO {
+public class SolicitudFormalizacionBandejaDTO {
 
     // =========================================================
-    // SOLICITUD
+    // IDENTIFICACIÓN DE LA SOLICITUD
     // =========================================================
 
     private Integer idSolicitudCredito;
     private String numeroSolicitud;
-
-    private LocalDateTime fechaInicioSolicitud;
-    private LocalDateTime fechaUltimaGestion;
 
     // =========================================================
     // AGENCIA
     // =========================================================
 
     private Integer idAgencia;
-    private String codigoAgencia;
     private String nombreAgencia;
 
     // =========================================================
@@ -38,40 +34,50 @@ public class SolicitudAprobacionBandejaDTO {
     private String nombreCompleto;
 
     // =========================================================
-    // CRÉDITO SOLICITADO
+    // LÍNEA DE CRÉDITO
     // =========================================================
 
     private Integer idLineaCredito;
-    private String codigoLineaCredito;
     private String nombreLineaCredito;
+
+    // =========================================================
+    // CONDICIONES SOLICITADAS
+    // =========================================================
 
     private BigDecimal valorSolicitado;
     private Integer plazoSolicitado;
-    private BigDecimal tasaColocacionAplicada;
-    private BigDecimal valorCuotaProyectada;
 
     // =========================================================
-    // GARANTÍA
+    // CONDICIONES DEFINITIVAS
     // =========================================================
 
-    private String codigoGarantiaCredito;
-    private String nombreGarantiaCredito;
-    private String tipoGarantia;
+    private BigDecimal valorFormalizado;
+    private Integer plazoFormalizado;
 
     // =========================================================
-    // APROBACIÓN
+    // FECHAS DE CONTROL
     // =========================================================
 
-    private Integer idEnteFinal;
-    private String nombreEnteFinal;
-
-    private Integer idEnteActual;
+    private LocalDateTime fechaFinAprobacion;
+    private LocalDateTime fechaUltimaGestion;
 
     // =========================================================
-    // CONCEPTO VIGENTE PARA GESTIÓN DEL ASESOR
+    // CONTROL DE FORMALIZACIÓN
     // =========================================================
 
-    private String ultimaDecision;
-    private Integer idUltimaAprobacion;
-    private Integer idEnteUltimaActuacion;
+    private Boolean condicionesModificadas;
+
+    // =========================================================
+    // CRÉDITO Y PAGARÉ
+    // =========================================================
+
+    private Integer idCarteraCredito;
+    private String pagareCartera;
+
+    // =========================================================
+    // ESTADO PARA LA BANDEJA
+    // =========================================================
+
+    private String estadoFormalizacion;
+
 }

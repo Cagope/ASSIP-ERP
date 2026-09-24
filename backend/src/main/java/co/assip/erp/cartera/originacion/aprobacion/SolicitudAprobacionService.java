@@ -44,7 +44,6 @@ public class SolicitudAprobacionService {
         return repository.listarBandeja(idUsuario);
     }
 
-
     // =========================================================
     // CATÁLOGO DE DECISIONES
     // =========================================================
@@ -434,9 +433,29 @@ public class SolicitudAprobacionService {
                 );
 
         // -----------------------------------------------------
-        // 9. La actuación queda registrada.
-        // La vista determina si continúa otro ente o si
-        // corresponde gestionar el concepto al asesor.
+        // 9. TRASLADO AUTOMÁTICO A FORMALIZACIÓN
+        // -----------------------------------------------------
+
+        if ("APROBADA".equals(codigoDecision)
+                && idEnteActual.equals(idEnteFinal)) {
+
+            int actualizados = repository.enviarAFormalizacion(
+                    idSolicitudCredito,
+                    idUsuario
+            );
+
+            if (actualizados != 1) {
+
+                throw new IllegalStateException(
+                        "La aprobación definitiva fue registrada, "
+                                + "pero no fue posible trasladar la solicitud "
+                                + "a Formalización."
+                );
+            }
+        }
+
+        // -----------------------------------------------------
+        // 10. RETORNAR ACTUACIÓN REGISTRADA
         // -----------------------------------------------------
 
         return idActuacion;

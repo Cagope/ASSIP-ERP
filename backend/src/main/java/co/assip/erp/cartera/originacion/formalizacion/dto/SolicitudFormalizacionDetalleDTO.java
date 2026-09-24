@@ -119,6 +119,12 @@ public class SolicitudFormalizacionDetalleDTO {
     private BigDecimal valorCuotaFormalizada;
 
     // =========================================================
+    // CONCEPTO FINAL DE FORMALIZACIÓN
+    // =========================================================
+
+    private String conceptoFormalizacion;
+
+    // =========================================================
     // CONTROL DE FORMALIZACIÓN
     // =========================================================
 

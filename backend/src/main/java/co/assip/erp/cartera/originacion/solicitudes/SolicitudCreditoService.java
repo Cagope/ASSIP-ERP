@@ -221,13 +221,6 @@ public class SolicitudCreditoService {
             );
         }
 
-        validarVigenciaHojaVida(
-                idDatosPersonal,
-                idAgencia
-        );
-
-
-
         // ---------------------------------------------------------
         // CATÁLOGOS
         // ---------------------------------------------------------
@@ -251,6 +244,50 @@ public class SolicitudCreditoService {
                         idDatosPersonal
                 );
 
+        // ---------------------------------------------------------
+        // AGENCIA DE LA CUENTA OPERATIVA DE APORTES
+        // ---------------------------------------------------------
+
+        if (aportes == null
+                || aportes.cantidad() == null
+                || aportes.cantidad() == 0) {
+
+            throw new IllegalStateException(
+                    "La persona "
+                            + idDatosPersonal
+                            + " no tiene una cuenta operativa de APORTES SOCIALES."
+            );
+        }
+
+        if (aportes.cantidad() > 1) {
+
+            throw new IllegalStateException(
+                    "La persona "
+                            + idDatosPersonal
+                            + " tiene más de una cuenta operativa de APORTES SOCIALES."
+            );
+        }
+
+        if (aportes.idCuentaAportes() == null
+                || aportes.idAgencia() == null
+                || aportes.idAgencia() <= 1) {
+
+            throw new IllegalStateException(
+                    "La cuenta de aportes de la persona "
+                            + idDatosPersonal
+                            + " no tiene una agencia operativa válida."
+            );
+        }
+
+        Integer idAgenciaAportes = aportes.idAgencia();
+
+        // La agencia financiera siempre corresponde a la cuenta de aportes.
+        idAgencia = idAgenciaAportes;
+
+        validarVigenciaHojaVida(
+                idDatosPersonal,
+                idAgencia
+        );
 
         // =========================================================
         // RETOMAR
@@ -272,17 +309,29 @@ public class SolicitudCreditoService {
                                             )
                             );
 
-            if (!solicitud.idAgencia().equals(
-                    idAgencia
-            )
-                    || !solicitud.idDatosPersonal().equals(
+            if (!solicitud.idDatosPersonal().equals(
                     idDatosPersonal
             )) {
 
                 throw new IllegalArgumentException(
                         "La solicitud "
                                 + idSolicitudCredito
-                                + " no corresponde a la agencia y asociado indicados."
+                                + " no corresponde al asociado indicado."
+                );
+            }
+
+            if (!solicitud.idAgencia().equals(
+                    idAgenciaAportes
+            )) {
+
+                throw new IllegalStateException(
+                        "La solicitud "
+                                + idSolicitudCredito
+                                + " pertenece a la agencia "
+                                + solicitud.idAgencia()
+                                + ", pero la cuenta de aportes del asociado pertenece a la agencia "
+                                + idAgenciaAportes
+                                + ". Debe corregirse esta inconsistencia antes de continuar."
                 );
             }
 
@@ -397,30 +446,6 @@ public class SolicitudCreditoService {
                     )
 
                     .build();
-        }
-
-
-        // =========================================================
-        // CREAR NUEVA SOLICITUD
-        // =========================================================
-
-        if (aportes.cantidad() == null
-                || aportes.cantidad() == 0) {
-
-            throw new IllegalStateException(
-                    "La persona "
-                            + idDatosPersonal
-                            + " no tiene una cuenta operativa de APORTES SOCIALES."
-            );
-        }
-
-        if (aportes.cantidad() > 1) {
-
-            throw new IllegalStateException(
-                    "La persona "
-                            + idDatosPersonal
-                            + " tiene más de una cuenta operativa de APORTES SOCIALES."
-            );
         }
 
 
@@ -578,9 +603,17 @@ public class SolicitudCreditoService {
                                         )
                         );
 
-        usuarioSesionService.validarAgencia(
-                solicitud.getIdAgencia()
-        );
+        // El usuario debe estar autenticado y tener agencias asignadas.
+        // La agencia financiera del crédito proviene de la cuenta de aportes.
+
+        if (!usuarioSesionService.tieneAccesoTotal()
+                && (usuarioSesionService.agencias() == null
+                || usuarioSesionService.agencias().isEmpty())) {
+
+            throw new SecurityException(
+                    "El usuario no tiene agencias autorizadas para gestionar solicitudes."
+            );
+        }
 
         Integer idUsuario =
                 usuarioSesionService.idUsuario();
@@ -1108,9 +1141,37 @@ public class SolicitudCreditoService {
                                 )
                 );
 
+        // ---------------------------------------------------------
+// AGENCIA DE LA CUENTA OPERATIVA DE APORTES
+// ---------------------------------------------------------
+
+        SolicitudCreditoRepository.CuentaAportesResumen aportes =
+                repository.buscarCuentaAportes(
+                        request.getIdDatosPersonal()
+                );
+
+        if (aportes == null
+                || aportes.cantidad() == null
+                || aportes.cantidad() != 1
+                || aportes.idCuentaAportes() == null
+                || aportes.idAgencia() == null
+                || aportes.idAgencia() <= 1) {
+
+            throw new IllegalStateException(
+                    "No fue posible determinar una cuenta operativa de aportes "
+                            + "con agencia válida para el asociado "
+                            + request.getIdDatosPersonal()
+                            + "."
+            );
+        }
+
+        // ---------------------------------------------------------
+        // SMMLV DE LA AGENCIA DEL ASOCIADO
+        // ---------------------------------------------------------
+
         BigDecimal valorSmmlv =
                 obtenerSmmlvValido(
-                        request.getIdAgencia()
+                        aportes.idAgencia()
                 );
 
         BigDecimal cantidadSmmlv =
@@ -1889,9 +1950,28 @@ public class SolicitudCreditoService {
         // 4. SMMLV DE LA AGENCIA
         // =========================================================
 
+        SolicitudCreditoRepository.CuentaAportesResumen aportes =
+                repository.buscarCuentaAportes(
+                        request.getIdDatosPersonal()
+                );
+
+        if (aportes == null
+                || aportes.cantidad() == null
+                || aportes.cantidad() != 1
+                || aportes.idAgencia() == null
+                || aportes.idAgencia() <= 1) {
+
+            throw new IllegalStateException(
+                    "No fue posible determinar una cuenta operativa de aportes "
+                            + "con agencia válida para el asociado "
+                            + request.getIdDatosPersonal()
+                            + "."
+            );
+        }
+
         BigDecimal valorSmmlv =
                 obtenerSmmlvValido(
-                        request.getIdAgencia()
+                        aportes.idAgencia()
                 );
 
         BigDecimal cantidadSmmlv =

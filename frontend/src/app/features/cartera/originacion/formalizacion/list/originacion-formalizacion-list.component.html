@@ -1,0 +1,142 @@
+<div class="page">
+
+  <header class="page-header">
+
+    <div>
+      <h2>Formalización de Cartera</h2>
+
+      <p>
+        Solicitudes aprobadas pendientes de formalizar.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-outline-primary"
+      [disabled]="cargando"
+      (click)="cargar()">
+
+      Actualizar
+
+    </button>
+
+  </header>
+
+  <section class="card">
+
+    <div
+      *ngIf="cargando"
+      class="mensaje">
+
+      Consultando solicitudes...
+
+    </div>
+
+    <div
+      *ngIf="error"
+      class="mensaje error">
+
+      {{ error }}
+
+    </div>
+
+    <div
+      *ngIf="!cargando && !error && solicitudes.length === 0"
+      class="mensaje">
+
+      No tiene solicitudes pendientes de formalización.
+
+    </div>
+
+    <div
+      *ngIf="!cargando && !error && solicitudes.length > 0"
+      class="table-wrap">
+
+      <table class="table table-hover">
+
+        <thead>
+
+        <tr>
+          <th>Solicitud</th>
+          <th>Documento</th>
+          <th>Asociado</th>
+          <th>Línea</th>
+          <th>Valor solicitado</th>
+          <th>Valor formalizado</th>
+          <th>Estado</th>
+          <th>Pagaré</th>
+          <th>Acción</th>
+        </tr>
+
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let solicitud of solicitudes">
+
+          <td>
+            {{ solicitud.numeroSolicitud }}
+          </td>
+
+          <td>
+            {{ solicitud.documento || '—' }}
+          </td>
+
+          <td>
+            {{ solicitud.nombreCompleto || '—' }}
+          </td>
+
+          <td>
+            {{ solicitud.nombreLineaCredito || '—' }}
+          </td>
+
+          <td>
+            {{ solicitud.valorSolicitado | number:'1.0-0' }}
+          </td>
+
+          <td>
+            {{
+            solicitud.valorFormalizado != null
+            ? (solicitud.valorFormalizado | number:'1.0-0')
+            : '—'
+            }}
+          </td>
+
+          <td>
+              <span class="estado">
+                {{
+                  descripcionEstado(
+                    solicitud.estadoFormalizacion
+                  )
+                }}
+              </span>
+          </td>
+
+          <td>
+            {{ solicitud.pagareCartera || '—' }}
+          </td>
+
+          <td>
+
+            <button
+              type="button"
+              class="btn btn-primary btn-sm"
+              (click)="abrirFormalizacion(solicitud)">
+
+              Formalizar
+
+            </button>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</div>

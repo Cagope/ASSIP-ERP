@@ -19,7 +19,8 @@ import {
   SolicitudAprobacionBandeja,
   SolicitudAprobacionDecision,
   SolicitudAprobacionDecisionRequest,
-  SolicitudAprobacionFotos
+  SolicitudAprobacionFotos,
+  SolicitudAprobacionGestionConceptoRequest
 } from './originacion-aprobacion.models';
 
 
@@ -47,6 +48,7 @@ export class OriginacionAprobacionApi {
 
   // =========================================================
   // BANDEJA DEL USUARIO AUTENTICADO
+  // ENTES APROBADORES
   // =========================================================
 
   listarBandeja(): Observable<SolicitudAprobacionBandeja[]> {
@@ -55,7 +57,6 @@ export class OriginacionAprobacionApi {
       `${this.baseUrl}/bandeja`
     );
   }
-
 
   // =========================================================
   // CATÁLOGO DE DECISIONES
@@ -124,6 +125,23 @@ export class OriginacionAprobacionApi {
 
     return this.http.post<number>(
       `${this.baseUrl}/${idSolicitudCredito}/decision`,
+      request
+    );
+  }
+
+
+  // =========================================================
+  // GESTIONAR CONCEPTO VIGENTE - ASESOR
+  // RETOMAR / FORMALIZAR / CERRAR
+  // =========================================================
+
+  gestionarConcepto(
+    idSolicitudCredito: number,
+    request: SolicitudAprobacionGestionConceptoRequest
+  ): Observable<void> {
+
+    return this.http.post<void>(
+      `${this.baseUrl}/${idSolicitudCredito}/gestionar-concepto`,
       request
     );
   }

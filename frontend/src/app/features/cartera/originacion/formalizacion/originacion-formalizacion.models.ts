@@ -100,6 +100,12 @@ export interface SolicitudFormalizacionDetalle {
   valorCuotaFormalizada: number | null;
 
   // =======================================================
+  // CONCEPTO FINAL DE FORMALIZACIÓN
+  // =======================================================
+
+  conceptoFormalizacion: string | null;
+
+  // =======================================================
   // CONTROL DE FORMALIZACIÓN
   // =======================================================
 
@@ -110,9 +116,6 @@ export interface SolicitudFormalizacionDetalle {
 
   // =======================================================
   // PAGARÉ GENERADO
-  //
-  // Se reciben después de constituir el crédito.
-  // Antes de generar el pagaré pueden ser null.
   // =======================================================
 
   idCarteraCredito: number | null;
@@ -123,14 +126,10 @@ export interface SolicitudFormalizacionDetalle {
 
 
 // =========================================================
-// GUARDAR CONDICIONES DE FORMALIZACIÓN
+// GUARDAR / VALIDAR / SIMULAR CONDICIONES
 //
 // Backend:
 // SolicitudFormalizacionGuardarRequestDTO
-//
-// Este mismo modelo se utiliza para:
-// - Validar condiciones digitadas.
-// - Guardar condiciones definitivas.
 // =========================================================
 
 export interface SolicitudFormalizacionGuardarRequest {
@@ -149,5 +148,111 @@ export interface SolicitudFormalizacionGuardarRequest {
   mesesGraciaInteresFormalizados: number;
 
   tasaNominalFormalizada: number;
+
+  conceptoFormalizacion: string | null;
+
+}
+
+
+// =========================================================
+// RESULTADO DE SIMULACIÓN FINANCIERA
+//
+// Backend:
+// SolicitudFormalizacionService.ResultadoSimulacionFinanciera
+//
+// La cuota se calcula sin guardar condiciones.
+// =========================================================
+
+export interface SolicitudFormalizacionSimulacion {
+
+  tasaEfectivaAnual: number;
+  valorCuota: number;
+
+}
+
+
+// =========================================================
+// BANDEJA DE FORMALIZACIÓN
+//
+// Backend:
+// SolicitudFormalizacionBandejaDTO
+// =========================================================
+
+export type EstadoFormalizacion =
+  | 'PENDIENTE'
+  | 'CONDICIONES_GUARDADAS'
+  | 'PAGARE_GENERADO';
+
+export interface SolicitudFormalizacionBandeja {
+
+  // =======================================================
+  // IDENTIFICACIÓN DE LA SOLICITUD
+  // =======================================================
+
+  idSolicitudCredito: number;
+  numeroSolicitud: string;
+
+  // =======================================================
+  // AGENCIA
+  // =======================================================
+
+  idAgencia: number;
+  nombreAgencia: string;
+
+  // =======================================================
+  // ASOCIADO
+  // =======================================================
+
+  idDatosPersonal: number;
+  tipoDocumento: string | null;
+  documento: string | null;
+  nombreCompleto: string | null;
+
+  // =======================================================
+  // LÍNEA DE CRÉDITO
+  // =======================================================
+
+  idLineaCredito: number | null;
+  nombreLineaCredito: string | null;
+
+  // =======================================================
+  // CONDICIONES SOLICITADAS
+  // =======================================================
+
+  valorSolicitado: number | null;
+  plazoSolicitado: number | null;
+
+  // =======================================================
+  // CONDICIONES DEFINITIVAS
+  // =======================================================
+
+  valorFormalizado: number | null;
+  plazoFormalizado: number | null;
+
+  // =======================================================
+  // FECHAS DE CONTROL
+  // =======================================================
+
+  fechaFinAprobacion: string | null;
+  fechaUltimaGestion: string | null;
+
+  // =======================================================
+  // CONTROL DE FORMALIZACIÓN
+  // =======================================================
+
+  condicionesModificadas: boolean | null;
+
+  // =======================================================
+  // CRÉDITO Y PAGARÉ
+  // =======================================================
+
+  idCarteraCredito: number | null;
+  pagareCartera: string | null;
+
+  // =======================================================
+  // ESTADO DE LA BANDEJA
+  // =======================================================
+
+  estadoFormalizacion: EstadoFormalizacion;
 
 }

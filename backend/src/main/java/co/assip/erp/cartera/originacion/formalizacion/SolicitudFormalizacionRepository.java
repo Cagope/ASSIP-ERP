@@ -7,10 +7,12 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
+import co.assip.erp.cartera.originacion.formalizacion.dto.SolicitudFormalizacionBandejaDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDate;
 
 @Repository
 public class SolicitudFormalizacionRepository {
@@ -23,10 +25,104 @@ public class SolicitudFormalizacionRepository {
                     SolicitudFormalizacionDetalleDTO.class
             );
 
+    private static final BeanPropertyRowMapper<SolicitudFormalizacionBandejaDTO>
+            BANDEJA_MAPPER =
+            BeanPropertyRowMapper.newInstance(
+                    SolicitudFormalizacionBandejaDTO.class
+            );
+
     public SolicitudFormalizacionRepository(
             NamedParameterJdbcTemplate jdbc
     ) {
         this.jdbc = jdbc;
+    }
+
+    // =========================================================
+// BANDEJA DE FORMALIZACIÓN
+//
+// Solicitudes aprobadas pendientes de formalizar.
+// Incluye solicitudes con pagaré generado que todavía
+// no han sido trasladadas a Desembolso.
+// =========================================================
+
+    public List<SolicitudFormalizacionBandejaDTO> listarBandeja(
+            Integer idUsuario
+    ) {
+
+        String sql = """
+        SELECT
+            s.id_solicitud_credito,
+            v.numero_solicitud,
+
+            s.id_agencia,
+            v.nombre_agencia,
+
+            s.id_datos_personal,
+            v.tipo_documento,
+            v.documento,
+            v.nombre_completo,
+
+            s.id_linea_credito,
+            v.nombre_linea_credito,
+
+            v.valor_solicitado,
+            v.plazo_solicitado,
+
+            s.valor_formalizado,
+            s.plazo_formalizado,
+
+            s.fecha_fin_aprobacion,
+            s.fecha_ultima_gestion,
+
+            s.condiciones_modificadas,
+
+            s.id_cartera_credito,
+            cc.pagare_cartera,
+
+            CASE
+                WHEN s.id_cartera_credito IS NOT NULL
+                    THEN 'PAGARE_GENERADO'
+
+                WHEN s.valor_formalizado IS NOT NULL
+                    THEN 'CONDICIONES_GUARDADAS'
+
+                ELSE 'PENDIENTE'
+            END AS estado_formalizacion
+
+        FROM cartera.solicitudes_creditos s
+
+        INNER JOIN cartera.vw_solicitudes_creditos v
+            ON v.id_solicitud_credito =
+               s.id_solicitud_credito
+
+        LEFT JOIN cartera.carteras_creditos cc
+            ON cc.id_cartera_credito =
+               s.id_cartera_credito
+
+        WHERE s.activo = true
+
+          AND s.id_solicitud_proceso = 4
+
+          AND s.id_solicitud_resultado = 1
+
+          AND s.fecha_fin_formalizacion IS NULL
+
+          AND s.id_asesor = :idUsuario
+
+        ORDER BY
+            s.fecha_fin_aprobacion DESC NULLS LAST,
+            s.id_solicitud_credito DESC
+        """;
+
+        return jdbc.query(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue(
+                                "idUsuario",
+                                idUsuario
+                        ),
+                BANDEJA_MAPPER
+        );
     }
 
     // =========================================================
@@ -118,6 +214,7 @@ public class SolicitudFormalizacionRepository {
                 s.tasa_nominal_formalizada,
                 s.tasa_efectiva_anual_formalizada,
                 s.valor_cuota_formalizada,
+                s.concepto_formalizacion,
 
                 -- =====================================================
                 -- CONTROL
@@ -242,6 +339,9 @@ public class SolicitudFormalizacionRepository {
                 condiciones_modificadas =
                     :condicionesModificadas,
 
+                concepto_formalizacion =
+                    :conceptoFormalizacion,
+
                 -- =====================================================
                 -- AUDITORÍA
                 -- =====================================================
@@ -343,6 +443,11 @@ public class SolicitudFormalizacionRepository {
                         )
 
                         .addValue(
+                                "conceptoFormalizacion",
+                                request.getConceptoFormalizacion()
+                        )
+
+                        .addValue(
                                 "idUsuario",
                                 idUsuario
                         );
@@ -432,6 +537,11 @@ public class SolicitudFormalizacionRepository {
               AND valor_cuota_formalizada IS NOT NULL
 
               AND condiciones_modificadas IS NOT NULL
+
+              AND (
+                  condiciones_modificadas = false
+                  OR NULLIF(BTRIM(concepto_formalizacion), '') IS NOT NULL
+              )
                 
               AND id_cartera_credito IS NOT NULL
 
@@ -539,6 +649,58 @@ public class SolicitudFormalizacionRepository {
         }
 
         return resultados.stream().findFirst();
+    }
+
+
+    // =========================================================
+    // VISTA PREVIA DEL CONSECUTIVO PAGARÉ - PARÁMETRO 605
+    //
+    // No reserva ni incrementa el parámetro.
+    // El número definitivo se obtiene al grabar mediante
+    // siguienteConsecutivoPagare(), dentro de la transacción.
+    // =========================================================
+
+    public Long consultarConsecutivoProvisionalPagare(
+            Integer idAgencia
+    ) {
+
+        String sql = """
+            SELECT COALESCE(p.valor_parametro, 0) + 1
+            FROM general.parametros p
+            WHERE p.id_agencia = :idAgencia
+              AND p.codigo_parametro = 605
+            """;
+
+        List<BigDecimal> resultados = jdbc.query(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idAgencia", idAgencia),
+                (rs, rowNum) -> rs.getBigDecimal(1)
+        );
+
+        if (resultados.size() != 1
+                || resultados.get(0) == null) {
+            throw new IllegalStateException(
+                    "No se pudo consultar el consecutivo provisional del pagaré. "
+                            + "Revise el parámetro 605 de la agencia "
+                            + idAgencia + "."
+            );
+        }
+
+        try {
+            long consecutivo = resultados.get(0).longValueExact();
+            if (consecutivo <= 0) {
+                throw new ArithmeticException("Consecutivo no positivo");
+            }
+            return consecutivo;
+        } catch (ArithmeticException ex) {
+            throw new IllegalStateException(
+                    "El parámetro 605 de la agencia "
+                            + idAgencia
+                            + " no permite calcular un consecutivo entero positivo.",
+                    ex
+            );
+        }
     }
 
 
@@ -719,6 +881,7 @@ public class SolicitudFormalizacionRepository {
     public Integer insertarCreditoDesdeFormalizacion(
             Integer idSolicitudCredito,
             String pagareCartera,
+            LocalDate fechaPagare,
             Integer idUsuario
     ) {
 
@@ -807,7 +970,7 @@ public class SolicitudFormalizacionRepository {
             s.tasa_nominal_formalizada,
             s.tasa_efectiva_anual_formalizada,
 
-            CURRENT_DATE,
+            :fechaPagare,
             CURRENT_DATE,
 
             :idUsuario,
@@ -857,6 +1020,11 @@ public class SolicitudFormalizacionRepository {
 
           AND s.condiciones_modificadas IS NOT NULL
 
+          AND (
+              s.condiciones_modificadas = false
+              OR NULLIF(BTRIM(s.concepto_formalizacion), '') IS NOT NULL
+          )
+
         RETURNING id_cartera_credito
         """;
 
@@ -870,6 +1038,10 @@ public class SolicitudFormalizacionRepository {
                         .addValue(
                                 "pagareCartera",
                                 pagareCartera
+                        )
+                        .addValue(
+                                "fechaPagare",
+                                fechaPagare
                         )
                         .addValue(
                                 "idUsuario",

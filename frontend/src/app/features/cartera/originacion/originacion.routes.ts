@@ -152,8 +152,12 @@ export const ORIGINACION_ROUTES:
 
   {
     path: 'formalizacion',
-    redirectTo: '',
-    pathMatch: 'full'
+    loadComponent: () =>
+      import(
+        './formalizacion/list/originacion-formalizacion-list.component'
+      ).then(
+        m => m.OriginacionFormalizacionListComponent
+      )
   },
 
   // =========================================================

@@ -175,7 +175,7 @@
     <!-- DECISIÓN DEL ENTE APROBADOR -->
     <!-- =================================================== -->
 
-    <section class="card">
+    <section class="card card-aprobacion">
 
       <div class="card-header">
         <h3>Decisión del ente aprobador</h3>
@@ -252,7 +252,7 @@
     <!-- CONDICIONES ORIGINALES Y DEFINITIVAS -->
     <!-- =================================================== -->
 
-    <section class="card">
+    <section class="card card-condiciones">
 
       <div class="card-header">
 
@@ -297,19 +297,20 @@
             Valor definitivo
           </label>
 
-          <small>
-            Solicitado:
-            {{ d.valorSolicitado | number:'1.2-2' }}
-          </small>
-
           <input
             id="valorFormalizado"
             class="form-control"
-            type="number"
-            min="0.01"
-            step="0.01"
+            type="text"
+            inputmode="decimal"
+            numericFormat
             [(ngModel)]="formulario.valorFormalizado"
             [disabled]="!editable || procesando">
+
+          <small class="referencia-original">
+            Solicitado:
+            {{ d.valorSolicitado != null ? (d.valorSolicitado | currency:'COP':'symbol-narrow':'1.2-2':'es-CO') : '—' }}
+          </small>
+
 
         </div>
 
@@ -322,11 +323,6 @@
             Plazo definitivo (meses)
           </label>
 
-          <small>
-            Solicitado:
-            {{ d.plazoSolicitado ?? '—' }}
-          </small>
-
           <input
             id="plazoFormalizado"
             class="form-control"
@@ -335,6 +331,11 @@
             step="1"
             [(ngModel)]="formulario.plazoFormalizado"
             [disabled]="!editable || procesando">
+
+          <small class="referencia-original">
+            Solicitado:
+            {{ d.plazoSolicitado ?? '—' }}
+          </small>
 
         </div>
 
@@ -346,11 +347,6 @@
           <label for="formaPago">
             Forma de pago
           </label>
-
-          <small>
-            Original:
-            {{ d.codigoFormaPago || '—' }}
-          </small>
 
           <select
             id="formaPago"
@@ -372,6 +368,11 @@
 
           </select>
 
+          <small class="referencia-original">
+            Original:
+            {{ d.codigoFormaPago || '—' }}
+          </small>
+
         </div>
 
 
@@ -382,13 +383,6 @@
           <label for="modalidad">
             Periodicidad y modalidad de intereses
           </label>
-
-          <small>
-            Original:
-            {{ d.periodoCodigoInteres || '—' }}
-            /
-            {{ d.tipoModalidadInteres || '—' }}
-          </small>
 
           <select
             id="modalidad"
@@ -422,6 +416,13 @@
 
           </select>
 
+          <small class="referencia-original">
+            Original:
+            {{ d.periodoCodigoInteres || '—' }}
+            /
+            {{ d.tipoModalidadInteres || '—' }}
+          </small>
+
         </div>
 
 
@@ -433,19 +434,26 @@
             Amortización de capital (meses)
           </label>
 
-          <small>
+          <select
+            id="amortizacion"
+            class="form-select"
+            [(ngModel)]="formulario.amortizacionCapitalFormalizada"
+            [disabled]="!editable || procesando">
+
+            <option [ngValue]="0">Seleccione</option>
+            <option [ngValue]="1">1 mes</option>
+            <option [ngValue]="2">2 meses</option>
+            <option [ngValue]="3">3 meses</option>
+            <option [ngValue]="6">6 meses</option>
+            <option [ngValue]="12">12 meses</option>
+            <option [ngValue]="18">18 meses</option>
+
+          </select>
+
+          <small class="referencia-original">
             Original:
             {{ d.amortizacionCapital ?? '—' }}
           </small>
-
-          <input
-            id="amortizacion"
-            class="form-control"
-            type="number"
-            min="1"
-            step="1"
-            [(ngModel)]="formulario.amortizacionCapitalFormalizada"
-            [disabled]="!editable || procesando">
 
         </div>
 
@@ -457,11 +465,6 @@
           <label for="tipoCuota">
             Tipo de cuota
           </label>
-
-          <small>
-            Original:
-            {{ d.codigoTipoCuota || '—' }}
-          </small>
 
           <select
             id="tipoCuota"
@@ -483,6 +486,11 @@
 
           </select>
 
+          <small class="referencia-original">
+            Original:
+            {{ d.codigoTipoCuota || '—' }}
+          </small>
+
         </div>
 
 
@@ -494,11 +502,6 @@
             Tasa nominal definitiva
           </label>
 
-          <small>
-            Original:
-            {{ d.tasaColocacionAplicada ?? '—' }}
-          </small>
-
           <input
             id="tasaNominal"
             class="form-control"
@@ -508,17 +511,38 @@
             [(ngModel)]="formulario.tasaNominalFormalizada"
             [disabled]="!editable || procesando">
 
+          <small class="referencia-original">
+            Original:
+            {{ d.tasaColocacionAplicada ?? '—' }}
+          </small>
+
         </div>
 
       </div>
 
 
-      <p class="nota">
-
-        Los periodos de gracia de capital e intereses
-        se mantienen en 0 y no se capturan en esta pantalla.
-
-      </p>
+      <!-- CONCEPTO DEL ASESOR DE FORMALIZACIÓN -->
+      <div class="concepto-formalizacion">
+        <label for="conceptoFormalizacion">
+          Concepto final del asesor de formalización
+          <span class="concepto-requerido" *ngIf="editable && cambiosPendientes">*</span>
+        </label>
+        <small class="concepto-ayuda">
+          Registre la justificación de las condiciones definitivas.
+          Es obligatorio cuando se modifican las condiciones originales.
+        </small>
+        <textarea
+          id="conceptoFormalizacion"
+          class="form-control"
+          rows="3"
+          maxlength="1000"
+          [(ngModel)]="formulario.conceptoFormalizacion"
+          [disabled]="!editable || procesando"
+          placeholder="Concepto y observaciones de la formalización"></textarea>
+        <small class="concepto-ayuda">
+          {{ (formulario.conceptoFormalizacion || '').length }} / 1000 caracteres
+        </small>
+      </div>
 
 
       <div
@@ -526,8 +550,8 @@
         class="alert alert-info">
 
         Hay diferencias frente a las condiciones originales.
-        La validación comprobará las condiciones definitivas
-        antes de permitir guardarlas.
+        El concepto del asesor debe justificar las condiciones
+        definitivas antes de guardarlas.
 
       </div>
 
@@ -537,7 +561,7 @@
         class="alert alert-info">
 
         Existen cambios frente a la última formalización
-        guardada. Debe validar y guardar nuevamente
+        guardada. Debe guardar nuevamente
         antes de generar el pagaré.
 
       </div>
@@ -590,7 +614,7 @@
 
         {{
         v.puedeContinuar
-        ? 'Las condiciones cambiaron después de validar. Ejecute nuevamente la validación.'
+        ? 'Las condiciones cambiaron. La validación se actualizará automáticamente.'
         : 'La formalización presenta bloqueos que deben resolverse antes de guardar.'
         }}
 
@@ -599,10 +623,10 @@
 
       <div
         *ngIf="v.bloqueos && v.bloqueos.length > 0"
-        class="alert alert-danger">
+        class="alert alert-danger validacion-bloqueos">
 
         <div *ngFor="let bloqueo of v.bloqueos">
-          {{ bloqueo }}
+          {{ bloqueo.mensaje }}
         </div>
 
       </div>
@@ -629,6 +653,49 @@
 
       </div>
 
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- SIMULACIÓN FINANCIERA ACTUAL -->
+    <!-- =================================================== -->
+
+    <section class="card simulacion-financiera" *ngIf="editable">
+      <div class="card-header">
+        <h3>Resultado financiero de las condiciones digitadas</h3>
+        <span class="badge" *ngIf="simulando || validando">
+          {{ simulando ? 'Calculando...' : 'Validando...' }}
+        </span>
+      </div>
+
+      <div class="datos-grid" *ngIf="simulacionVigente && simulacion as s">
+        <div>
+          <small>Tasa efectiva anual calculada</small>
+          <strong>{{ s.tasaEfectivaAnual | number:'1.4-4' }} %</strong>
+        </div>
+        <div class="cuota-simulada">
+          <small>Cuota estimada con las condiciones digitadas</small>
+          <strong>
+            {{ s.valorCuota | currency:'COP':'symbol-narrow':'1.2-2':'es-CO' }}
+          </strong>
+        </div>
+        <div class="cuota-original">
+          <small>Cuota originalmente proyectada</small>
+          <strong>
+            {{ d.valorCuotaProyectada != null
+            ? (d.valorCuotaProyectada | currency:'COP':'symbol-narrow':'1.2-2':'es-CO')
+            : '—' }}
+          </strong>
+        </div>
+      </div>
+
+      <p class="nota" *ngIf="!simulacionVigente">
+        {{ simulando ? 'Calculando la cuota...'
+        : 'Complete las condiciones financieras para calcular la cuota.' }}
+      </p>
+      <p class="nota" *ngIf="simulacionVigente">
+        Simulación informativa. El valor definitivo se registra al guardar.
+      </p>
     </section>
 
 
@@ -678,7 +745,7 @@
             d.valorCuotaFormalizada != null
             ? (
             d.valorCuotaFormalizada
-            | number:'1.2-2'
+            | currency:'COP':'symbol-narrow':'1.2-2':'es-CO'
             )
             : 'Pendiente de guardar'
             }}
@@ -753,8 +820,8 @@
         *ngIf="!tienePagare"
         class="alert alert-info">
 
-        El pagaré se genera después de validar
-        y guardar las condiciones definitivas.
+        El pagaré se genera después de guardar
+        las condiciones definitivas validadas.
 
         Al generarlo, el sistema asignará el consecutivo
         de la agencia y constituirá el crédito
@@ -835,23 +902,6 @@
     <div
       class="acciones"
       *ngIf="formalizacionAbierta">
-
-
-      <!-- VALIDAR -->
-
-      <button
-        type="button"
-        class="btn btn-outline-primary"
-        (click)="validar()"
-        [disabled]="!puedeValidar">
-
-        {{
-        validando
-        ? 'Validando...'
-        : 'Validar condiciones'
-        }}
-
-      </button>
 
 
       <!-- GUARDAR -->
@@ -937,5 +987,101 @@
     </div>
 
   </ng-container>
+
+
+
+  <!-- ===================================================== -->
+  <!-- MODAL DE GENERACIÓN DEL PAGARÉ -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="modalPagareAbierto && propuestaPagare as propuesta"
+    class="pagare-modal-backdrop"
+    role="presentation"
+    (click)="cerrarModalPagare()">
+
+    <section
+      class="pagare-modal card"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="tituloModalPagare"
+      (click)="$event.stopPropagation()">
+
+      <div class="card-header pagare-modal-header">
+        <h3 id="tituloModalPagare">Generar pagaré</h3>
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          aria-label="Cerrar"
+          (click)="cerrarModalPagare()"
+          [disabled]="generandoPagare">×</button>
+      </div>
+
+      <p class="nota">
+        Confirme los datos antes de constituir el crédito pendiente de desembolso.
+      </p>
+
+      <div class="datos-grid">
+        <div>
+          <small>Asociado</small>
+          <strong>{{ propuesta.nombreCompleto || '—' }}</strong>
+        </div>
+        <div>
+          <small>Valor formalizado</small>
+          <strong>{{ propuesta.valorFormalizado | currency:'COP':'symbol-narrow':'1.2-2':'es-CO' }}</strong>
+        </div>
+        <div>
+          <small>Número de pagaré provisional</small>
+          <strong>{{ propuesta.pagareProvisional }}</strong>
+        </div>
+      </div>
+
+      <p class="nota">
+        El número es informativo: el consecutivo definitivo se asignará al grabar
+        y podría cambiar si se genera otro pagaré antes.
+      </p>
+
+      <div class="form-field">
+        <label for="fechaPagareModal">Fecha del pagaré</label>
+        <input
+          id="fechaPagareModal"
+          name="fechaPagareModal"
+          class="form-control"
+          type="date"
+          required
+          [(ngModel)]="fechaPagare"
+          [disabled]="generandoPagare">
+        <small class="nota">
+          Se registrará en la fecha de inclusión del crédito en el sistema.
+        </small>
+      </div>
+
+      <div
+        *ngIf="errorModalPagare"
+        class="alert alert-danger"
+        role="alert"
+        style="white-space: pre-line;">
+        {{ errorModalPagare }}
+      </div>
+
+      <div class="acciones pagare-modal-acciones">
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          (click)="cerrarModalPagare()"
+          [disabled]="generandoPagare">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn btn-success"
+          (click)="grabarPagare()"
+          [disabled]="generandoPagare || !fechaPagare">
+          {{ generandoPagare ? 'Grabando pagaré...' : 'Grabar pagaré' }}
+        </button>
+      </div>
+
+    </section>
+  </div>
 
 </div>

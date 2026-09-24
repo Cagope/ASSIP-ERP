@@ -14,7 +14,6 @@
   font-size: 0.85rem;
 }
 
-
 // =========================================================
 // ENCABEZADO
 // =========================================================
@@ -40,7 +39,6 @@
   }
 }
 
-
 // =========================================================
 // TARJETAS
 // =========================================================
@@ -49,7 +47,6 @@
   margin-bottom: 1rem;
   padding: 1rem;
   min-width: 0;
-
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 0.65rem;
@@ -60,10 +57,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-
   margin-bottom: 1rem;
   padding: 0 0 0.8rem;
-
   background: transparent;
   border: 0;
   border-bottom: 1px solid #e5e7eb;
@@ -75,7 +70,6 @@
     color: #1f2937;
   }
 }
-
 
 // =========================================================
 // CONSULTA DE SOLICITUD
@@ -105,7 +99,6 @@
   }
 }
 
-
 // =========================================================
 // DATOS INFORMATIVOS
 // =========================================================
@@ -133,6 +126,39 @@ strong {
   overflow-wrap: anywhere;
 }
 
+// =========================================================
+// DECISIÓN DEL ENTE APROBADOR - COMPACTA
+// =========================================================
+
+.card-aprobacion {
+  padding: 0.8rem 1rem;
+
+  .card-header {
+    margin-bottom: 0.65rem;
+    padding-bottom: 0.55rem;
+  }
+
+  .datos-grid {
+    gap: 0.55rem 1rem;
+
+    small {
+      margin-bottom: 0.15rem;
+    }
+  }
+
+  .concepto {
+    margin-top: 0.65rem;
+    padding: 0.55rem 0.75rem;
+
+    p {
+      margin-top: 0.2rem;
+    }
+  }
+
+  .nota {
+    margin: 0.5rem 0 0;
+  }
+}
 
 // =========================================================
 // FORMULARIO DE CONDICIONES DEFINITIVAS
@@ -140,22 +166,74 @@ strong {
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: 0.9rem;
+  row-gap: 1rem;
+  align-items: start;
 }
 
 .form-field {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
 
   label {
     display: block;
     margin-bottom: 0.3rem;
-    font-weight: 650;
+    font-weight: 600;
     color: #374151;
+    font-size: 0.8rem;
+    line-height: 1.35;
   }
 
-  small {
-    min-height: 1rem;
+  // La referencia original se conserva inmediatamente bajo
+  // la etiqueta, con una altura uniforme en cada columna.
+  > small {
+    display: block;
+    min-height: 1.15rem;
+    margin-bottom: 0.3rem;
+    color: #6b7280;
+    font-size: 0.73rem;
+    line-height: 1.15rem;
+    overflow-wrap: anywhere;
+  }
+
+  > .form-control,
+  > .form-select {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    height: 2.45rem;
+    min-height: 2.45rem;
+    padding: 0.5rem 0.65rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background-color: #fff;
+    color: #1f2937;
+    font: inherit;
+    font-size: 0.82rem;
+    line-height: 1.4;
+  }
+
+  > .form-control:focus,
+  > .form-select:focus {
+    border-color: #6366f1;
+    outline: 0;
+    box-shadow: 0 0 0 2px rgb(99 102 241 / 12%);
+  }
+
+  > .form-control:disabled,
+  > .form-select:disabled {
+    background-color: #f3f4f6;
+    color: #6b7280;
+    cursor: not-allowed;
+  }
+
+  // Importe monetario con la directiva numericFormat.
+  // No se altera el valor ni el comportamiento de la directiva.
+  #valorFormalizado {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
   }
 }
 
@@ -173,7 +251,6 @@ strong {
   cursor: not-allowed;
 }
 
-
 // =========================================================
 // CONCEPTO DEL ENTE APROBADOR
 // =========================================================
@@ -181,7 +258,6 @@ strong {
 .concepto {
   margin-top: 1rem;
   padding: 0.8rem;
-
   background: #f8fafc;
   border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
@@ -194,6 +270,57 @@ strong {
   }
 }
 
+// =========================================================
+// CONCEPTO DEL ASESOR DE FORMALIZACIÓN
+// =========================================================
+
+.concepto-formalizacion {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #e5e7eb;
+
+  label {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: #374151;
+    font-weight: 650;
+  }
+
+  textarea {
+    display: block;
+    width: 100%;
+    min-height: 74px;
+    padding: 0.55rem 0.65rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    resize: vertical;
+    line-height: 1.5;
+    font-size: 0.82rem;
+  }
+
+  textarea:focus {
+    border-color: #6366f1;
+    outline: 0;
+    box-shadow: 0 0 0 2px rgb(99 102 241 / 12%);
+  }
+
+  .concepto-ayuda {
+    margin-top: 0.35rem;
+    margin-bottom: 0.4rem;
+    color: #6b7280;
+    font-size: 0.78rem;
+  }
+
+  textarea + .concepto-ayuda {
+    margin-bottom: 0;
+    text-align: right;
+  }
+
+  .concepto-requerido {
+    color: #b45309;
+    font-weight: 600;
+  }
+}
 
 // =========================================================
 // NOTAS
@@ -205,7 +332,6 @@ strong {
   line-height: 1.5;
 }
 
-
 // =========================================================
 // INDICADORES
 // =========================================================
@@ -213,16 +339,12 @@ strong {
 .badge {
   display: inline-block;
   padding: 0.35rem 0.6rem;
-
   background: #eef2ff;
   color: #3730a3;
-
   border-radius: 0.5rem;
-
   font-size: 0.76rem;
   font-weight: 600;
   line-height: 1.3;
-
   white-space: normal;
   text-align: center;
 }
@@ -231,7 +353,6 @@ strong {
   background: #fffbeb;
   color: #92400e;
 }
-
 
 // =========================================================
 // MENSAJES DE VALIDACIÓN
@@ -260,6 +381,66 @@ strong {
   border-color: #bfdbfe;
 }
 
+// =========================================================
+// VALIDACIÓN AUTOMÁTICA
+// =========================================================
+
+.validacion-automatica {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-size: 0.82rem;
+}
+
+.validacion-bloqueos {
+  margin-top: 0.75rem;
+
+  > div + div {
+    margin-top: 0.45rem;
+    padding-top: 0.45rem;
+    border-top: 1px solid #fecaca;
+  }
+}
+
+// =========================================================
+// SIMULACIÓN FINANCIERA
+// =========================================================
+
+.simulacion-financiera {
+  border-color: #bfdbfe;
+  background: #f8fbff;
+
+  .card-header {
+    border-bottom-color: #dbeafe;
+  }
+}
+
+.cuota-simulada {
+  padding: 0.85rem 1rem;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.5rem;
+
+  small {
+    color: #1d4ed8;
+    font-weight: 600;
+  }
+
+  strong {
+    color: #1e40af;
+    font-size: 1.2rem;
+    font-weight: 750;
+    line-height: 1.3;
+  }
+}
+
+.cuota-original {
+  strong {
+    color: #475569;
+  }
+}
 
 // =========================================================
 // ESTADO DE CARGA
@@ -270,14 +451,10 @@ strong {
   color: #6b7280;
 }
 
-
 // =========================================================
 // ACCIONES DEL PROCESO
-//
-// Validar
-// Guardar
-// Generar pagaré
-// Finalizar formalización
+// Guardar / Generar pagaré / Finalizar formalización
+// La validación se ejecuta automáticamente.
 // =========================================================
 
 .acciones {
@@ -286,7 +463,6 @@ strong {
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 0.75rem;
-
   margin-bottom: 1.2rem;
 
   button {
@@ -301,13 +477,11 @@ strong {
   }
 }
 
-
 // =========================================================
 // ADAPTACIÓN A PANTALLAS MEDIANAS
 // =========================================================
 
 @media (max-width: 1000px) {
-
   .datos-grid,
   .form-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -316,16 +490,13 @@ strong {
   .acciones {
     justify-content: flex-start;
   }
-
 }
-
 
 // =========================================================
 // ADAPTACIÓN A MÓVILES
 // =========================================================
 
 @media (max-width: 600px) {
-
   .page {
     padding: 0.75rem;
   }
@@ -363,5 +534,80 @@ strong {
       min-width: 0;
     }
   }
+}
 
+
+// =========================================================
+// MODAL DE GENERACIÓN DEL PAGARÉ
+// =========================================================
+
+.pagare-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgb(15 23 42 / 60%);
+  overflow-y: auto;
+}
+
+.pagare-modal {
+  width: min(100%, 620px);
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  overflow-y: auto;
+  box-shadow: 0 20px 55px rgb(15 23 42 / 25%);
+
+  .datos-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 1rem 0;
+  }
+
+  .form-field {
+    max-width: 280px;
+    margin-top: 1rem;
+  }
+
+  .alert {
+    margin-top: 1rem;
+  }
+}
+
+.pagare-modal-header {
+  h3 {
+    margin: 0;
+  }
+
+  button {
+    flex: 0 0 auto;
+    padding: 0.15rem 0.55rem;
+    font-size: 1.3rem;
+    line-height: 1.2;
+  }
+}
+
+.pagare-modal-acciones {
+  margin: 1.25rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+@media (max-width: 600px) {
+  .pagare-modal-backdrop {
+    padding: 0.5rem;
+  }
+
+  .pagare-modal {
+    max-height: calc(100dvh - 1rem);
+
+    .datos-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .form-field {
+      max-width: none;
+    }
+  }
 }

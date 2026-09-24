@@ -1,0 +1,72 @@
+.page {
+  padding: 1rem;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.35rem 0 0;
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+}
+
+.card {
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background: #fff;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  font-size: 0.85rem;
+
+  thead th {
+    background: #f6f6f6;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  tbody td {
+    vertical-align: middle;
+  }
+}
+
+.estado {
+  display: inline-block;
+  padding: 0.3rem 0.55rem;
+  border-radius: 0.35rem;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mensaje {
+  padding: 1.5rem;
+  text-align: center;
+  color: #6b7280;
+}
+
+.error {
+  color: #b91c1c;
+}
