@@ -5,7 +5,7 @@ import co.assip.erp.cajas.cierre_recaudos_convenios.dto.CierreRecaudosConveniosP
 import co.assip.erp.cajas.cierre_recaudos_convenios.dto.CierreRecaudosConveniosRequestDTO;
 import co.assip.erp.cajas.cierre_recaudos_convenios.dto.CierreRecaudosConveniosResponseDTO;
 import co.assip.erp.cajas.recaudos_convenios.dto.RecaudoConvenioConvenioDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,1137 +1,2240 @@
 package co.assip.erp.cartera.originacion.desembolso;
 
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.depositos.movimientos.DepositosMovimientoService;
+import co.assip.erp.depositos.movimientos.dto.DepositosMovimientoDTO;
+
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import co.assip.erp.cajas.movimientos.CajasMovimientosService;
+
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+
 
 @Service
 public class SolicitudDesembolsoService {
 
-    // =========================================================
-    // ESTADOS DE ORIGINACIÓN
-    // =========================================================
+    private static final String ESTADO_PENDIENTE = "P";
 
-    private static final int PROCESO_DESEMBOLSO = 5;
-    private static final int RESULTADO_APROBADA = 1;
+    private static final String EDAD_A = "A";
 
-    // =========================================================
-    // DEPENDENCIAS
-    // =========================================================
+    private static final String MODIFICACION_NINGUNA = "4";
+    private static final String MODIFICACION_NOVADO = "3";
+
+    private static final BigDecimal CIEN =
+            new BigDecimal("100");
 
     private final SolicitudDesembolsoRepository repository;
-
     private final UsuarioSesionService usuarioSesionService;
+
+    private final SolicitudDesembolsoContabilizacionService
+            contabilizacionService;
+
+    private final DepositosMovimientoService
+            depositosMovimientoService;
+
+    private final CajasMovimientosService
+            cajasMovimientosService;
+
+    private static final String CONCEPTO_CENTRAL_RIESGO =
+            "CENTRAL_RIESGO";
+
+    private static final String CONCEPTO_PAPELERIA =
+            "PAPELERIA";
+
+    private static final String CONCEPTO_IVA =
+            "IVA";
+
+    private static final String CONCEPTO_CUENTA_POR_PAGAR =
+            "CXP";
 
     public SolicitudDesembolsoService(
             SolicitudDesembolsoRepository repository,
-            UsuarioSesionService usuarioSesionService
+            UsuarioSesionService usuarioSesionService,
+            SolicitudDesembolsoContabilizacionService contabilizacionService,
+            DepositosMovimientoService depositosMovimientoService,
+            CajasMovimientosService cajasMovimientosService
     ) {
         this.repository = repository;
         this.usuarioSesionService = usuarioSesionService;
+        this.contabilizacionService = contabilizacionService;
+        this.depositosMovimientoService = depositosMovimientoService;
+        this.cajasMovimientosService = cajasMovimientosService;
     }
 
     // =========================================================
-    // VALIDACIONES FINALES DEL DESEMBOLSO
-    //
-    // 1. Bloquea la solicitud durante la validación.
-    // 2. Verifica el estado de aprobación.
-    // 3. Consulta al deudor y los codeudores.
-    // 4. Consulta todas las obligaciones en mora.
-    // 5. Actualiza la validación de mora por persona.
-    // 6. Consulta y actualiza los aportes vigentes.
-    // 7. Verifica créditos simultáneos y genera alertas de posible novación.
-    // 8. Devuelve bloqueos y alertas por separado.
-    //
-    // NO asigna pagaré.
-    // NO constituye crédito.
-    // NO modifica el resultado de aprobación.
+    // BANDEJA
     // =========================================================
 
-    @Transactional
-    public ResultadoValidacionDesembolso validar(
-            Integer idSolicitudCredito
-    ) {
+    @Transactional(readOnly = true)
+    public List<CreditoPendienteDesembolso> listarPendientes() {
 
-        validarIdSolicitud(
-                idSolicitudCredito
-        );
-
-        // =====================================================
-        // 1. CONSULTAR Y BLOQUEAR SOLICITUD
-        // =====================================================
-
-        SolicitudDesembolsoRepository.SolicitudDesembolsoDatos solicitud =
-                repository.bloquearSolicitud(
-                        idSolicitudCredito
-                ).orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "No existe la solicitud de crédito "
-                                        + idSolicitudCredito
-                        )
-                );
-
-        List<BloqueoDesembolso> bloqueos =
-                new ArrayList<>();
-
-        List<AlertaDesembolso> alertas =
-                new ArrayList<>();
-
-        // =====================================================
-        // 2. VALIDAR ESTADO
-        // =====================================================
-
-        boolean solicitudHabilitada =
-                validarEstadoSolicitud(
-                        solicitud,
-                        bloqueos
-                );
-
-        // =====================================================
-        // 3. CONSULTAR PERSONAS DE LA SOLICITUD
-        // =====================================================
-
-        List<SolicitudDesembolsoRepository.PersonaSolicitudDatos> personas =
-                repository.consultarPersonasSolicitud(
-                        idSolicitudCredito
-                );
-
-        validarPersonasSolicitud(
-                solicitud,
-                personas,
-                bloqueos
-        );
-
-        // =====================================================
-        // 4. CONSULTAR OBLIGACIONES EN MORA
-        // =====================================================
-
-        List<BloqueoMora> bloqueosMora =
-                consultarBloqueosMora(
-                        idSolicitudCredito
-                );
-
-        for (BloqueoMora mora : bloqueosMora) {
-
-            bloqueos.add(
-                    new BloqueoDesembolso(
-                            "MORA",
-                            construirMensajeMora(
-                                    mora
-                            )
-                    )
-            );
-        }
-
-        // =====================================================
-        // 5. ACTUALIZAR VALIDACIÓN DE MORA
-        //
-        // Se actualizan las personas incluso cuando alguna
-        // presenta mora, para conservar el resultado vigente.
-        //
-        // Si la solicitud ya no está habilitada, no se
-        // modifican sus datos.
-        // =====================================================
-
-        if (solicitudHabilitada) {
-
-            actualizarValidacionMora(
-                    idSolicitudCredito,
-                    personas,
-                    bloqueosMora,
-                    bloqueos
-            );
-        }
-
-        // =====================================================
-        // 6. VALIDAR APORTES
-        // =====================================================
-
-        ResultadoAportes resultadoAportes =
-                validarAportes(
-                        idSolicitudCredito,
-                        solicitud,
-                        solicitudHabilitada,
-                        bloqueos
-                );
-
-        // =====================================================
-        // 7. VALIDAR CRÉDITOS SIMULTÁNEOS
-        // =====================================================
-
-        validarCreditosSimultaneos(
-                idSolicitudCredito,
-                solicitud,
-                bloqueos,
-                alertas
-        );
-
-        // =====================================================
-        // 8. RESULTADO GENERAL
-        // =====================================================
-
-        boolean puedeContinuar =
-                bloqueos.isEmpty();
-
-        String mensajeGeneral =
-                puedeContinuar
-                        ? "La solicitud cumple las validaciones "
-                        + "finales y puede continuar con la "
-                        + "constitución del crédito."
-                        + (alertas.isEmpty()
-                        ? ""
-                        : " Revise las alertas informativas antes de continuar.")
-
-                        : "La solicitud presenta condiciones "
-                        + "que impiden continuar con el "
-                        + "desembolso. Revise los bloqueos "
-                        + "identificados.";
-
-        return new ResultadoValidacionDesembolso(
-                solicitud.idSolicitudCredito(),
-                solicitud.numeroSolicitud(),
-                solicitud.idAgencia(),
-                solicitud.idDatosPersonal(),
-                solicitud.idLineaCredito(),
-                puedeContinuar,
-                mensajeGeneral,
-                bloqueos.size(),
-                List.copyOf(bloqueos),
-                List.copyOf(bloqueosMora),
-                resultadoAportes,
-                alertas.size(),
-                List.copyOf(alertas)
-        );
-    }
-
-    // =========================================================
-    // CRÉDITOS SIMULTÁNEOS DEL TITULAR
-    //
-    // Solo aplica cuando la línea solicitada NO permite
-    // simultaneidad. Otras líneas bloquean; la misma línea
-    // genera alerta de posible novación, sin presumirla.
-    // Las alertas no modifican puedeContinuar.
-    // =========================================================
-
-    private void validarCreditosSimultaneos(
-            Integer idSolicitudCredito,
-            SolicitudDesembolsoRepository.SolicitudDesembolsoDatos solicitud,
-            List<BloqueoDesembolso> bloqueos,
-            List<AlertaDesembolso> alertas
-    ) {
-        SolicitudDesembolsoRepository.LineaSimultaneidadDatos linea =
-                repository.consultarLineaSimultaneidad(
-                        idSolicitudCredito
-                ).orElse(null);
-
-        if (linea == null || linea.idLineaCredito() == null
-                || solicitud.idLineaCredito() == null
-                || !solicitud.idLineaCredito().equals(linea.idLineaCredito())) {
-            bloqueos.add(new BloqueoDesembolso(
-                    "LINEA_SIMULTANEIDAD",
-                    "No fue posible verificar la parametrización de "
-                            + "simultaneidad de la línea solicitada."
-            ));
-            return;
-        }
-
-        if (linea.permiteCreditosSimultaneos()) {
-            return;
-        }
-
-        List<SolicitudDesembolsoRepository.CreditoVigenteTitularDatos> vigentes =
-                repository.consultarCreditosVigentesTitular(
-                        idSolicitudCredito
-                );
-
-        for (SolicitudDesembolsoRepository.CreditoVigenteTitularDatos credito
-                : vigentes) {
-
-            String detalle = "Pagaré: "
-                    + textoSeguro(credito.pagareCartera())
-                    + ". Línea: "
-                    + textoSeguro(credito.nombreLineaCredito())
-                    + ". Agencia: "
-                    + credito.idAgencia()
-                    + ". Saldo actual: $"
-                    + valorSeguro(credito.saldoActual()).toPlainString()
-                    + ".";
-
-            if (linea.idLineaCredito().equals(credito.idLineaCredito())) {
-                alertas.add(new AlertaDesembolso(
-                        "POSIBLE_NOVACION",
-                        "El titular tiene un crédito vigente de la misma "
-                                + "línea. " + detalle
-                                + " Podría corresponder a una novación; "
-                                + "verifique la operación antes de constituir "
-                                + "el nuevo crédito. Esta alerta no confirma "
-                                + "que exista una novación."
-                ));
-            } else {
-                bloqueos.add(new BloqueoDesembolso(
-                        "CREDITOS_SIMULTANEOS",
-                        "La línea solicitada "
-                                + textoSeguro(linea.nombreLineaCredito())
-                                + " no permite créditos simultáneos y el "
-                                + "titular tiene otra obligación vigente. "
-                                + detalle
-                ));
-            }
-        }
-    }
-
-    // =========================================================
-    // VALIDAR ESTADO DE LA SOLICITUD
-    // =========================================================
-
-    private boolean validarEstadoSolicitud(
-            SolicitudDesembolsoRepository.SolicitudDesembolsoDatos solicitud,
-            List<BloqueoDesembolso> bloqueos
-    ) {
-
-        boolean habilitada = true;
-
-        // =====================================================
-        // PROCESO DE DESEMBOLSO
-        // =====================================================
-
-        if (solicitud.idSolicitudProceso() == null
-                || solicitud.idSolicitudProceso()
-                != PROCESO_DESEMBOLSO) {
-
-            bloqueos.add(
-                    new BloqueoDesembolso(
-                            "ESTADO_SOLICITUD",
-                            "La solicitud no se encuentra "
-                                    + "en el proceso de desembolso."
-                    )
-            );
-
-            habilitada = false;
-        }
-
-        // =====================================================
-        // RESULTADO DE APROBACIÓN
-        // =====================================================
-
-        if (solicitud.idSolicitudResultado() == null
-                || solicitud.idSolicitudResultado()
-                != RESULTADO_APROBADA) {
-
-            bloqueos.add(
-                    new BloqueoDesembolso(
-                            "APROBACION",
-                            "La solicitud no tiene un resultado "
-                                    + "de aprobación válido para "
-                                    + "continuar con el desembolso."
-                    )
-            );
-
-            habilitada = false;
-        }
-
-        // =====================================================
-        // CRÉDITO YA CONSTITUIDO
-        // =====================================================
-
-        if (solicitud.idCarteraCredito() != null) {
-
-            bloqueos.add(
-                    new BloqueoDesembolso(
-                            "CREDITO_EXISTENTE",
-                            "La solicitud ya tiene un crédito "
-                                    + "constituido. Identificador: "
-                                    + solicitud.idCarteraCredito()
-                    )
-            );
-
-            habilitada = false;
-        }
-
-        return habilitada;
-    }
-
-    // =========================================================
-    // VALIDAR PERSONAS VINCULADAS
-    //
-    // El deudor principal debe estar registrado.
-    //
-    // No se exige que existan codeudores porque algunas
-    // solicitudes pueden no requerirlos.
-    // =========================================================
-
-    private void validarPersonasSolicitud(
-            SolicitudDesembolsoRepository.SolicitudDesembolsoDatos solicitud,
-            List<SolicitudDesembolsoRepository.PersonaSolicitudDatos> personas,
-            List<BloqueoDesembolso> bloqueos
-    ) {
-
-        if (personas.isEmpty()) {
-
-            bloqueos.add(
-                    new BloqueoDesembolso(
-                            "PERSONAS_SOLICITUD",
-                            "La solicitud no tiene deudores "
-                                    + "registrados para efectuar "
-                                    + "las validaciones finales."
-                    )
-            );
-
-            return;
-        }
-
-        long principales = personas.stream()
-                .filter(persona ->
-                        esPrincipal(
-                                persona.tipoDeudor()
+        return repository
+                .listarPendientes()
+                .stream()
+                .filter(item ->
+                        usuarioSesionService.perteneceA(
+                                item.idAgencia()
                         )
                 )
-                .count();
+                .map(item ->
+                        new CreditoPendienteDesembolso(
+                                item.idCarteraCredito(),
+                                item.idSolicitudCredito(),
 
-        if (principales == 0) {
+                                item.idAgencia(),
+                                item.idLineaCredito(),
+                                item.idDatosPersonal(),
 
-            bloqueos.add(
-                    new BloqueoDesembolso(
-                            "DEUDOR_PRINCIPAL",
-                            "La solicitud no tiene registrado "
-                                    + "el deudor principal."
-                    )
-            );
-        }
+                                item.pagareCartera(),
 
-        if (principales > 1) {
+                                item.documento(),
+                                item.nombreCompleto(),
 
-            bloqueos.add(
-                    new BloqueoDesembolso(
-                            "DEUDOR_PRINCIPAL",
-                            "La solicitud tiene más de un "
-                                    + "registro de deudor principal."
-                    )
-            );
-        }
+                                item.codigoLineaCredito(),
+                                item.nombreLineaCredito(),
 
-        boolean principalCoincide = personas.stream()
-                .anyMatch(persona ->
-                        esPrincipal(
-                                persona.tipoDeudor()
+                                normalizar(
+                                        item.valorInicialCredito()
+                                ),
+
+                                item.plazo(),
+
+                                item.fechaInclusionSistema(),
+                                item.fechaPrimeraCuota(),
+                                item.fechaFinal(),
+
+                                item.codigoEstadoCartera()
                         )
-                                && solicitud.idDatosPersonal()
-                                .equals(
-                                        persona.idDatosPersonal()
-                                )
-                );
-
-        if (!principalCoincide) {
-
-            bloqueos.add(
-                    new BloqueoDesembolso(
-                            "DEUDOR_PRINCIPAL",
-                            "El deudor principal registrado "
-                                    + "no coincide con el titular "
-                                    + "de la solicitud."
-                    )
-            );
-        }
+                )
+                .toList();
     }
 
     // =========================================================
-    // CONSULTAR BLOQUEOS POR MORA
+    // PREPARAR DESEMBOLSO
     //
-    // Cada obligación se devuelve individualmente.
+    // COMPROBANTE 1
+    // ---------------------------------------------------------
+    // Crédito
+    // (-) Fondo de garantías
+    // (-) IVA Fondo
+    // = Valor a distribuir
     //
-    // Una persona puede tener:
+    // COMPROBANTE 2
+    // ---------------------------------------------------------
+    // Central de riesgo
+    // Papelería
+    // IVA Papelería
+    // Aportes
+    // = Total cobros contra Caja
     //
-    // - Mora en un crédito propio.
-    // - Mora en un crédito donde es codeudora.
-    // - Mora en obligaciones de diferentes agencias.
+    // Los cobros del comprobante 2 NO reducen el valor
+    // a distribuir del comprobante 1.
     // =========================================================
 
-    private List<BloqueoMora> consultarBloqueosMora(
-            Integer idSolicitudCredito
+    @Transactional(readOnly = true)
+    public PreparacionDesembolso preparar(
+            Integer idCarteraCredito
     ) {
 
-        List<SolicitudDesembolsoRepository.BloqueoMoraDatos> obligaciones =
-                repository.consultarBloqueosMora(
-                        idSolicitudCredito
+        SolicitudDesembolsoRepository.CreditoDesembolsoDatos credito =
+                obtenerCreditoPendiente(
+                        idCarteraCredito
                 );
 
-        List<BloqueoMora> resultado =
-                new ArrayList<>();
+        BigDecimal valorCredito =
+                normalizar(
+                        credito.valorInicialCredito()
+                );
 
-        for (
-                SolicitudDesembolsoRepository.BloqueoMoraDatos obligacion
-                : obligaciones
-        ) {
+        if (valorCredito.signum() <= 0) {
+            throw new IllegalStateException(
+                    "El crédito no tiene un valor inicial válido."
+            );
+        }
 
-            Integer diasMora =
-                    obligacion.diasMora();
+        // =====================================================
+        // IVA GENERAL DE LA AGENCIA
+        // =====================================================
 
-            if (diasMora == null
-                    || diasMora <= 0) {
+        BigDecimal porcentajeIva =
+                normalizarPorcentaje(
+                        repository.obtenerPorcentajeIva(
+                                credito.idAgencia()
+                        )
+                );
 
-                continue;
+        validarPorcentaje(
+                porcentajeIva,
+                "IVA"
+        );
+
+        // =====================================================
+        // COMPROBANTE 1
+        // FONDO DE GARANTÍAS
+        // =====================================================
+
+        BigDecimal porcentajeFondo =
+                normalizarPorcentaje(
+                        credito.porcentajeFondoAplicado()
+                );
+
+        BigDecimal valorFondo =
+                normalizar(
+                        credito.valorFondoGarantia()
+                );
+
+        BigDecimal ivaFondo =
+                calcularIva(
+                        valorFondo,
+                        porcentajeIva
+                );
+
+        // =====================================================
+        // COMPROBANTE 2
+        // CENTRAL DE RIESGO
+        // =====================================================
+
+        int cantidadCentral =
+                repository.contarConsultasCentralRiesgo(
+                        credito.idSolicitudCredito()
+                );
+
+        BigDecimal valorUnitarioCentral =
+                normalizar(
+                        credito.valorConsultaCentralRiesgo()
+                );
+
+        BigDecimal valorCentral =
+                valorUnitarioCentral
+                        .multiply(
+                                BigDecimal.valueOf(
+                                        cantidadCentral
+                                )
+                        )
+                        .setScale(
+                                2,
+                                RoundingMode.HALF_UP
+                        );
+
+        // =====================================================
+        // COMPROBANTE 2
+        // PAPELERÍA
+        // =====================================================
+
+        BigDecimal valorPapeleria =
+                calcularCargoLinea(
+                        valorCredito,
+                        credito.valorPapeleria(),
+                        credito.porcentajePapeleria(),
+                        "papelería"
+                );
+
+        BigDecimal ivaPapeleria =
+                calcularIva(
+                        valorPapeleria,
+                        porcentajeIva
+                );
+
+        // =====================================================
+        // COMPROBANTE 2
+        // APORTES
+        // =====================================================
+
+        BigDecimal valorAportes =
+                calcularCargoLinea(
+                        valorCredito,
+                        credito.valorAportes(),
+                        credito.porcentajeAportes(),
+                        "aportes"
+                );
+
+        // =====================================================
+        // CONSTRUIR LIQUIDACIÓN
+        // =====================================================
+
+        LiquidacionDesembolso liquidacion =
+                construirLiquidacion(
+                        valorCredito,
+
+                        valorFondo,
+                        ivaFondo,
+
+                        cantidadCentral,
+                        valorUnitarioCentral,
+                        valorCentral,
+
+                        valorPapeleria,
+                        ivaPapeleria,
+
+                        valorAportes
+                );
+
+        return new PreparacionDesembolso(
+                credito.idCarteraCredito(),
+                credito.idSolicitudCredito(),
+
+                credito.idAgencia(),
+                credito.idLineaCredito(),
+                credito.idDatosPersonal(),
+                credito.idCuentaAportes(),
+
+                credito.pagareCartera(),
+
+                credito.documento(),
+                credito.nombreCompleto(),
+
+                credito.codigoLineaCredito(),
+                credito.nombreLineaCredito(),
+
+                valorCredito,
+
+                // Comprobante 1
+                porcentajeFondo,
+                valorFondo,
+
+                porcentajeIva,
+                ivaFondo,
+
+                liquidacion.totalComprobante1(),
+                liquidacion.valorDistribuir(),
+
+                // Comprobante 2
+                cantidadCentral,
+                valorUnitarioCentral,
+                valorCentral,
+
+                normalizar(
+                        credito.valorPapeleria()
+                ),
+                normalizarPorcentaje(
+                        credito.porcentajePapeleria()
+                ),
+                valorPapeleria,
+                ivaPapeleria,
+
+                normalizar(
+                        credito.valorAportes()
+                ),
+                normalizarPorcentaje(
+                        credito.porcentajeAportes()
+                ),
+                valorAportes,
+
+                liquidacion.totalComprobante2(),
+                liquidacion.contrapartidaCaja(),
+
+                credito.fechaPrimeraCuota(),
+                credito.fechaFinal()
+        );
+    }
+
+    // =========================================================
+    // RECALCULAR
+    //
+    // Solamente cambia la cantidad de consultas a Central.
+    //
+    // El IVA siempre se obtiene internamente desde:
+    //
+    // general.parametros
+    // codigo_parametro = 1
+    // por agencia.
+    // =========================================================
+
+    @Transactional(readOnly = true)
+    public LiquidacionDesembolso calcularLiquidacion(
+            Integer idCarteraCredito,
+            Integer cantidadCentral
+    ) {
+
+        if (cantidadCentral == null
+                || cantidadCentral < 0) {
+
+            throw new IllegalArgumentException(
+                    "La cantidad de consultas a Central de Riesgo "
+                            + "no puede ser negativa."
+            );
+        }
+
+        SolicitudDesembolsoRepository.CreditoDesembolsoDatos credito =
+                obtenerCreditoPendiente(
+                        idCarteraCredito
+                );
+
+        BigDecimal valorCredito =
+                normalizar(
+                        credito.valorInicialCredito()
+                );
+
+        BigDecimal porcentajeIva =
+                normalizarPorcentaje(
+                        repository.obtenerPorcentajeIva(
+                                credito.idAgencia()
+                        )
+                );
+
+        validarPorcentaje(
+                porcentajeIva,
+                "IVA"
+        );
+
+        // =====================================================
+        // COMPROBANTE 1
+        // =====================================================
+
+        BigDecimal valorFondo =
+                normalizar(
+                        credito.valorFondoGarantia()
+                );
+
+        BigDecimal ivaFondo =
+                calcularIva(
+                        valorFondo,
+                        porcentajeIva
+                );
+
+        // =====================================================
+        // COMPROBANTE 2 - CENTRAL
+        // =====================================================
+
+        BigDecimal valorUnitarioCentral =
+                normalizar(
+                        credito.valorConsultaCentralRiesgo()
+                );
+
+        BigDecimal valorCentral =
+                valorUnitarioCentral
+                        .multiply(
+                                BigDecimal.valueOf(
+                                        cantidadCentral
+                                )
+                        )
+                        .setScale(
+                                2,
+                                RoundingMode.HALF_UP
+                        );
+
+        // =====================================================
+        // COMPROBANTE 2 - PAPELERÍA
+        // =====================================================
+
+        BigDecimal valorPapeleria =
+                calcularCargoLinea(
+                        valorCredito,
+                        credito.valorPapeleria(),
+                        credito.porcentajePapeleria(),
+                        "papelería"
+                );
+
+        BigDecimal ivaPapeleria =
+                calcularIva(
+                        valorPapeleria,
+                        porcentajeIva
+                );
+
+        // =====================================================
+        // COMPROBANTE 2 - APORTES
+        // =====================================================
+
+        BigDecimal valorAportes =
+                calcularCargoLinea(
+                        valorCredito,
+                        credito.valorAportes(),
+                        credito.porcentajeAportes(),
+                        "aportes"
+                );
+
+        if (valorAportes.compareTo(BigDecimal.ZERO) > 0) {
+
+            if (credito.idCuentaAportes() == null
+                    || credito.idCuentaAportes() <= 0) {
+                throw new IllegalStateException(
+                        "El crédito genera cobro de aportes, "
+                                + "pero no tiene una cuenta de aportes asociada."
+                );
             }
 
-            resultado.add(
-                    new BloqueoMora(
-                            obligacion.idDatosPersonal(),
-                            obligacion.cedula(),
-                            obligacion.nombreCompleto(),
-                            obligacion.calidad(),
-                            obligacion.tipoObligacion(),
-                            obligacion.idCarteraCredito(),
-                            obligacion.idAgencia(),
-                            obligacion.idLineaCredito(),
-                            obligacion.codigoLineaCredito(),
-                            obligacion.nombreLineaCredito(),
-                            obligacion.pagareCartera(),
-                            valorSeguro(
-                                    obligacion.saldoActual()
-                            ),
-                            diasMora
-                    )
-            );
+            SolicitudDesembolsoRepository.CuentaAhorroDesembolsoDatos
+                    cuentaAportes =
+                    repository.buscarCuentaAhorroDesembolso(
+                            credito.idCuentaAportes()
+                    ).orElseThrow(() ->
+                            new IllegalStateException(
+                                    "La cuenta de aportes "
+                                            + credito.idCuentaAportes()
+                                            + " no existe."
+                            )
+                    );
+
+            if (!credito.idDatosPersonal().equals(
+                    cuentaAportes.idDatosPersonal()
+            )) {
+                throw new IllegalStateException(
+                        "La cuenta de aportes "
+                                + credito.idCuentaAportes()
+                                + " no pertenece al titular del crédito."
+                );
+            }
+
+            if (cuentaAportes.idCatalogoCuenta() == null
+                    || cuentaAportes.idCatalogoCuenta() <= 0) {
+                throw new IllegalStateException(
+                        "La cuenta de aportes "
+                                + credito.idCuentaAportes()
+                                + " no tiene configurada una cuenta contable "
+                                + "para su forma de ahorro."
+                );
+            }
         }
 
-        return resultado;
+        return construirLiquidacion(
+                valorCredito,
+
+                valorFondo,
+                ivaFondo,
+
+                cantidadCentral,
+                valorUnitarioCentral,
+                valorCentral,
+
+                valorPapeleria,
+                ivaPapeleria,
+
+                valorAportes
+        );
     }
 
     // =========================================================
-    // ACTUALIZAR VALIDACIÓN DE MORA POR PERSONA
-    //
-    // Se registra:
-    //
-    // saldo_cartera_validacion
-    // dias_mora_validacion
-    // cumple_mora_validacion
-    //
-    // El saldo corresponde a las obligaciones identificadas
-    // en la consulta de mora.
-    //
-    // Si una obligación aparece repetida para la misma
-    // persona, no se duplica su saldo.
+    // CONSTRUIR LIQUIDACIÓN
     // =========================================================
 
-    private void actualizarValidacionMora(
-            Integer idSolicitudCredito,
-            List<SolicitudDesembolsoRepository.PersonaSolicitudDatos> personas,
-            List<BloqueoMora> bloqueosMora,
-            List<BloqueoDesembolso> bloqueos
+    private LiquidacionDesembolso construirLiquidacion(
+            BigDecimal valorCredito,
+
+            BigDecimal valorFondo,
+            BigDecimal ivaFondo,
+
+            Integer cantidadCentral,
+            BigDecimal valorUnitarioCentral,
+            BigDecimal valorCentral,
+
+            BigDecimal valorPapeleria,
+            BigDecimal ivaPapeleria,
+
+            BigDecimal valorAportes
     ) {
+
+        // =====================================================
+        // COMPROBANTE 1
+        //
+        // Fondo e IVA Fondo forman parte de la operación
+        // principal del desembolso.
+        // =====================================================
+
+        BigDecimal totalComprobante1 =
+                normalizar(valorFondo)
+                        .add(
+                                normalizar(ivaFondo)
+                        )
+                        .setScale(
+                                2,
+                                RoundingMode.HALF_UP
+                        );
+
+        BigDecimal valorDistribuir =
+                normalizar(valorCredito)
+                        .subtract(
+                                totalComprobante1
+                        )
+                        .setScale(
+                                2,
+                                RoundingMode.HALF_UP
+                        );
+
+        if (valorDistribuir.signum() < 0) {
+            throw new IllegalStateException(
+                    "El Fondo de Garantías y su IVA superan "
+                            + "el valor del crédito."
+            );
+        }
+
+        // =====================================================
+        // COMPROBANTE 2
+        //
+        // Estos cobros NO disminuyen valorDistribuir.
+        //
+        // Su contrapartida contable es Caja.
+        // =====================================================
+
+        BigDecimal totalComprobante2 =
+                normalizar(valorCentral)
+                        .add(
+                                normalizar(valorPapeleria)
+                        )
+                        .add(
+                                normalizar(ivaPapeleria)
+                        )
+                        .add(
+                                normalizar(valorAportes)
+                        )
+                        .setScale(
+                                2,
+                                RoundingMode.HALF_UP
+                        );
+
+        BigDecimal contrapartidaCaja =
+                totalComprobante2;
+
+        return new LiquidacionDesembolso(
+                normalizar(valorCredito),
+
+                // Comprobante 1
+                normalizar(valorFondo),
+                normalizar(ivaFondo),
+
+                totalComprobante1,
+                valorDistribuir,
+
+                // Comprobante 2
+                cantidadCentral,
+                normalizar(valorUnitarioCentral),
+                normalizar(valorCentral),
+
+                normalizar(valorPapeleria),
+                normalizar(ivaPapeleria),
+
+                normalizar(valorAportes),
+
+                totalComprobante2,
+                contrapartidaCaja
+        );
+    }
+
+    // =========================================================
+// VALIDAR DISTRIBUCIÓN DEL DESEMBOLSO
+//
+// Valida:
+//
+// - Efectivo
+// - Una o varias cuentas de depósito
+// - Cuenta por pagar
+//
+// La suma debe ser exactamente igual al valor a distribuir
+// calculado por el backend.
+//
+// NO registra movimientos.
+// NO contabiliza.
+// NO activa el crédito.
+// =========================================================
+
+    @Transactional(readOnly = true)
+    public ResultadoValidacionDistribucion validarDistribucion(
+            Integer idCarteraCredito,
+            DistribucionDesembolso distribucion
+    ) {
+
+        if (distribucion == null) {
+            throw new IllegalArgumentException(
+                    "La distribución del desembolso es obligatoria."
+            );
+        }
+
+        SolicitudDesembolsoRepository.CreditoDesembolsoDatos credito =
+                obtenerCreditoPendiente(
+                        idCarteraCredito
+                );
+
+        BigDecimal valorCredito =
+                normalizar(
+                        credito.valorInicialCredito()
+                );
+
+        BigDecimal porcentajeIva =
+                normalizarPorcentaje(
+                        repository.obtenerPorcentajeIva(
+                                credito.idAgencia()
+                        )
+                );
+
+        validarPorcentaje(
+                porcentajeIva,
+                "IVA"
+        );
+
+        // =====================================================
+        // DETERMINAR VALOR A DISTRIBUIR
+        //
+        // Solamente Fondo + IVA Fondo afectan el comprobante 1.
+        // =====================================================
+
+        BigDecimal valorFondo =
+                normalizar(
+                        credito.valorFondoGarantia()
+                );
+
+        BigDecimal ivaFondo =
+                calcularIva(
+                        valorFondo,
+                        porcentajeIva
+                );
+
+        BigDecimal valorDistribuir =
+                valorCredito
+                        .subtract(valorFondo)
+                        .subtract(ivaFondo)
+                        .setScale(
+                                2,
+                                RoundingMode.HALF_UP
+                        );
+
+        if (valorDistribuir.signum() < 0) {
+            throw new IllegalStateException(
+                    "El Fondo de Garantías y su IVA superan "
+                            + "el valor del crédito."
+            );
+        }
+
+        // =====================================================
+        // EFECTIVO
+        // =====================================================
+
+        BigDecimal valorEfectivo =
+                normalizar(
+                        distribucion.valorEfectivo()
+                );
+
+        if (valorEfectivo.signum() < 0) {
+            throw new IllegalArgumentException(
+                    "El valor en efectivo no puede ser negativo."
+            );
+        }
+
+        if (distribucion.idCaja() == null
+                || distribucion.idCaja() <= 0) {
+
+            throw new IllegalArgumentException(
+                    "Debe seleccionar la Caja que atenderá "
+                            + "el desembolso."
+            );
+        }
+
+        // =====================================================
+        // DEPÓSITOS
+        // =====================================================
+
+        List<DepositoDistribucion> depositos =
+                distribucion.depositos() == null
+                        ? List.of()
+                        : distribucion.depositos();
+
+        BigDecimal totalDepositos =
+                BigDecimal.ZERO.setScale(
+                        2,
+                        RoundingMode.HALF_UP
+                );
+
+        Set<Integer> cuentasUtilizadas =
+                new HashSet<>();
+
+        for (DepositoDistribucion deposito : depositos) {
+
+            if (deposito == null) {
+                throw new IllegalArgumentException(
+                        "La distribución contiene un depósito inválido."
+                );
+            }
+
+            if (deposito.idCuentaAhorro() == null
+                    || deposito.idCuentaAhorro() <= 0) {
+
+                throw new IllegalArgumentException(
+                        "La cuenta de ahorro del depósito es obligatoria."
+                );
+            }
+
+            if (!cuentasUtilizadas.add(
+                    deposito.idCuentaAhorro()
+            )) {
+
+                throw new IllegalArgumentException(
+                        "La cuenta de ahorro "
+                                + deposito.idCuentaAhorro()
+                                + " está repetida en la distribución."
+                );
+            }
+
+            // =====================================================
+// VALIDAR CUENTA DE AHORRO
+// =====================================================
+
+            SolicitudDesembolsoRepository.CuentaAhorroDesembolsoDatos
+                    cuentaAhorro =
+                    repository.buscarCuentaAhorroDesembolso(
+                            deposito.idCuentaAhorro()
+                    ).orElseThrow(() ->
+                            new IllegalArgumentException(
+                                    "La cuenta de ahorro "
+                                            + deposito.idCuentaAhorro()
+                                            + " no existe."
+                            )
+                    );
+
+            if (!credito.idDatosPersonal().equals(
+                    cuentaAhorro.idDatosPersonal()
+            )) {
+
+                throw new IllegalArgumentException(
+                        "La cuenta de ahorro "
+                                + deposito.idCuentaAhorro()
+                                + " no pertenece al titular del crédito."
+                );
+            }
+
+            if (cuentaAhorro.idCatalogoCuenta() == null
+                    || cuentaAhorro.idCatalogoCuenta() <= 0) {
+
+                throw new IllegalStateException(
+                        "La cuenta de ahorro "
+                                + deposito.idCuentaAhorro()
+                                + " no tiene configurada una cuenta contable "
+                                + "para su forma de ahorro."
+                );
+            }
+
+            BigDecimal valorDeposito =
+                    normalizar(
+                            deposito.valor()
+                    );
+
+            if (valorDeposito.signum() <= 0) {
+                throw new IllegalArgumentException(
+                        "El valor destinado a la cuenta de ahorro "
+                                + deposito.idCuentaAhorro()
+                                + " debe ser mayor que cero."
+                );
+            }
+
+            totalDepositos =
+                    totalDepositos.add(
+                            valorDeposito
+                    );
+        }
+
+        totalDepositos =
+                totalDepositos.setScale(
+                        2,
+                        RoundingMode.HALF_UP
+                );
+
+        // =====================================================
+        // CUENTA POR PAGAR
+        // =====================================================
+
+        BigDecimal valorCuentaPorPagar =
+                normalizar(
+                        distribucion.valorCuentaPorPagar()
+                );
+
+        if (valorCuentaPorPagar.signum() < 0) {
+            throw new IllegalArgumentException(
+                    "El valor de la cuenta por pagar "
+                            + "no puede ser negativo."
+            );
+        }
+
+        // =====================================================
+        // TOTAL DISTRIBUCIÓN
+        // =====================================================
+
+        BigDecimal totalDistribuido =
+                valorEfectivo
+                        .add(totalDepositos)
+                        .add(valorCuentaPorPagar)
+                        .setScale(
+                                2,
+                                RoundingMode.HALF_UP
+                        );
+
+        BigDecimal diferencia =
+                valorDistribuir
+                        .subtract(totalDistribuido)
+                        .setScale(
+                                2,
+                                RoundingMode.HALF_UP
+                        );
+
+        boolean cuadra =
+                diferencia.compareTo(
+                        BigDecimal.ZERO
+                ) == 0;
+
+        return new ResultadoValidacionDistribucion(
+                idCarteraCredito,
+
+                valorDistribuir,
+
+                distribucion.idCaja(),
+                valorEfectivo,
+
+                totalDepositos,
+                valorCuentaPorPagar,
+
+                totalDistribuido,
+                diferencia,
+
+                cuadra,
+
+                cuadra
+                        ? "La distribución del desembolso está cuadrada."
+                        : "La distribución del desembolso no cuadra "
+                        + "con el valor a distribuir."
+        );
+    }
+
+    // =========================================================
+    // EDAD INICIAL
+    // =========================================================
+
+    @Transactional(readOnly = true)
+    public String determinarEdadRiesgoInicial(
+            Integer idCarteraCredito,
+            Integer idDatosPersonal
+    ) {
+
+        validarIdCarteraCredito(
+                idCarteraCredito
+        );
+
+        if (idDatosPersonal == null
+                || idDatosPersonal <= 0) {
+
+            throw new IllegalArgumentException(
+                    "El asociado del crédito es obligatorio."
+            );
+        }
+
+        List<SolicitudDesembolsoRepository.CreditoEdadDatos> edades =
+                repository.consultarEdadesCreditosActivos(
+                        idDatosPersonal,
+                        idCarteraCredito
+                );
+
+        return edades
+                .stream()
+                .map(
+                        SolicitudDesembolsoRepository
+                                .CreditoEdadDatos::edadRiesgo
+                )
+                .filter(edad ->
+                        edad != null
+                                && !edad.isBlank()
+                )
+                .map(String::trim)
+                .map(String::toUpperCase)
+                .max(
+                        Comparator.comparingInt(
+                                this::ordenEdadRiesgo
+                        )
+                )
+                .orElse(
+                        EDAD_A
+                );
+    }
+
+    // =========================================================
+    // DTO - DISTRIBUCIÓN DESEMBOLSO
+    // =========================================================
+
+    public record DistribucionDesembolso(
+            Long idCaja,
+            BigDecimal valorEfectivo,
+            List<DepositoDistribucion> depositos,
+            BigDecimal valorCuentaPorPagar
+    ) {
+    }
+
+    // =========================================================
+    // DTO - DEPÓSITO DE LA DISTRIBUCIÓN
+    // =========================================================
+
+    public record DepositoDistribucion(
+            Integer idCuentaAhorro,
+            BigDecimal valor
+    ) {
+    }
+
+    // =========================================================
+    // DTO - RESULTADO VALIDACIÓN DISTRIBUCIÓN
+    // =========================================================
+
+    public record ResultadoValidacionDistribucion(
+            Integer idCarteraCredito,
+
+            BigDecimal valorDistribuir,
+
+            Long idCaja,
+            BigDecimal valorEfectivo,
+
+            BigDecimal totalDepositos,
+            BigDecimal valorCuentaPorPagar,
+
+            BigDecimal totalDistribuido,
+            BigDecimal diferencia,
+
+            boolean cuadra,
+            String mensaje
+    ) {
+    }
+
+    // =========================================================
+    // NOVACIÓN
+    // =========================================================
+
+    @Transactional(readOnly = true)
+    public DatosNovacion determinarNovacion(
+            Integer idCarteraCredito,
+            Integer idDatosPersonal,
+            LocalDate fechaDesembolso
+    ) {
+
+        validarIdCarteraCredito(
+                idCarteraCredito
+        );
+
+        if (idDatosPersonal == null
+                || idDatosPersonal <= 0) {
+
+            throw new IllegalArgumentException(
+                    "El asociado del crédito es obligatorio."
+            );
+        }
+
+        if (fechaDesembolso == null) {
+            throw new IllegalArgumentException(
+                    "La fecha de desembolso es obligatoria."
+            );
+        }
+
+        return repository
+                .consultarCreditosCancelados(
+                        idDatosPersonal,
+                        idCarteraCredito
+                )
+                .stream()
+                .filter(anterior ->
+                        fechaDesembolso.equals(
+                                anterior.ultimaFechaCapital()
+                        )
+                )
+                .findFirst()
+                .map(anterior -> {
+
+                    int numeroAnterior =
+                            anterior.numeroNovaciones() != null
+                                    ? anterior.numeroNovaciones()
+                                    : 0;
+
+                    return new DatosNovacion(
+                            MODIFICACION_NOVADO,
+                            numeroAnterior + 1,
+
+                            anterior.idCarteraCredito(),
+                            anterior.pagareCartera()
+                    );
+                })
+                .orElseGet(() ->
+                        new DatosNovacion(
+                                MODIFICACION_NINGUNA,
+                                0,
+                                null,
+                                null
+                        )
+                );
+    }
+
+    // =========================================================
+// RESOLVER PARÁMETRO CONTABLE
+// =========================================================
+
+    private Integer resolverParametroContable(
+            SolicitudDesembolsoRepository.CreditoDesembolsoDatos credito,
+            String concepto
+    ) {
+
+        SolicitudDesembolsoRepository.CuentaContableDatos cuenta =
+                repository.buscarParametroContable(
+                        credito.idAgencia(),
+                        credito.idLineaCredito(),
+                        concepto
+                ).orElseThrow(() ->
+                        new IllegalStateException(
+                                "No existe configuración contable para "
+                                        + concepto
+                                        + ", agencia "
+                                        + credito.idAgencia()
+                                        + " y línea "
+                                        + credito.idLineaCredito()
+                                        + "."
+                        )
+                );
+
+        if (cuenta.idCatalogoCuenta() == null
+                || cuenta.idCatalogoCuenta() <= 0) {
+
+            throw new IllegalStateException(
+                    "La configuración contable de "
+                            + concepto
+                            + " no tiene una cuenta válida."
+            );
+        }
+
+        return cuenta.idCatalogoCuenta();
+    }
+
+
+    // =========================================================
+    // RESOLVER CUENTA CAPITAL
+    // =========================================================
+
+    private Integer resolverCuentaCapital(
+            SolicitudDesembolsoRepository.CreditoDesembolsoDatos credito,
+            String edadRiesgo
+    ) {
+
+        SolicitudDesembolsoRepository.CuentaContableDatos cuenta =
+                repository.buscarCuentaCapital(
+                        credito.idAgencia(),
+                        credito.codigoClasificacionCredito(),
+                        credito.codigoFormaPago(),
+                        credito.tipoGarantia(),
+                        edadRiesgo,
+                        null
+                ).orElseThrow(() ->
+                        new IllegalStateException(
+                                "No existe configuración contable de CAPITAL "
+                                        + "para el crédito "
+                                        + credito.idCarteraCredito()
+                                        + "."
+                        )
+                );
+
+        if (cuenta.idCatalogoCuenta() == null
+                || cuenta.idCatalogoCuenta() <= 0) {
+
+            throw new IllegalStateException(
+                    "La configuración contable de CAPITAL "
+                            + "no tiene una cuenta válida."
+            );
+        }
+
+        return cuenta.idCatalogoCuenta();
+    }
+
+    // =========================================================
+    // REGISTRAR CRÉDITO EN DEPÓSITOS
+    //
+    // Utilizado para:
+    //
+    // - Distribución del desembolso a cuentas de ahorro.
+    // - Cobro de aportes.
+    //
+    // El movimiento 222 corresponde a NOTA CRÉDITO CARTERA.
+    // El módulo 03 corresponde a CARTERA.
+    // =========================================================
+
+    private void registrarCreditoDeposito(
+            Integer idCuentaAhorro,
+            BigDecimal valor,
+            LocalDate fechaMovimiento,
+
+            String tipoComprobante,
+            String numeroComprobante,
+
+            Integer idCarteraCredito,
+            Integer idUsuario
+    ) {
+
+        BigDecimal valorNormalizado =
+                normalizar(valor);
+
+        if (valorNormalizado.signum() <= 0) {
+            return;
+        }
+
+        if (idCuentaAhorro == null
+                || idCuentaAhorro <= 0) {
+
+            throw new IllegalArgumentException(
+                    "La cuenta de ahorro es obligatoria "
+                            + "para registrar el movimiento."
+            );
+        }
+
+        if (fechaMovimiento == null) {
+            throw new IllegalArgumentException(
+                    "La fecha del movimiento de depósitos es obligatoria."
+            );
+        }
+
+        validarTexto(
+                tipoComprobante,
+                "El tipo de comprobante del movimiento "
+                        + "de depósitos es obligatorio."
+        );
+
+        validarTexto(
+                numeroComprobante,
+                "El número de comprobante del movimiento "
+                        + "de depósitos es obligatorio."
+        );
+
+        DepositosMovimientoDTO movimiento =
+                new DepositosMovimientoDTO();
+
+        movimiento.setIdCuentaAhorro(
+                idCuentaAhorro
+        );
+
+        movimiento.setFechaMovimiento(
+                fechaMovimiento
+        );
+
+        movimiento.setTipoComprobante(
+                tipoComprobante.trim()
+        );
+
+        movimiento.setNumeroComprobante(
+                numeroComprobante.trim()
+        );
+
+        movimiento.setTipoMovimiento(
+                "222"
+        );
+
+        movimiento.setModulo(
+                "03"
+        );
+
+        movimiento.setValorDebito(
+                BigDecimal.ZERO
+        );
+
+        movimiento.setValorCredito(
+                valorNormalizado
+        );
+
+        movimiento.setTarjeta(
+                "N"
+        );
+
+        movimiento.setEstablecimiento(
+                "OFICINA"
+        );
+
+        movimiento.setModuloOrigen(
+                "CARTERA"
+        );
+
+        movimiento.setProcesoOrigen(
+                "DESEMBOLSO_CREDITO"
+        );
+
+        movimiento.setIdOrigen(
+                idCarteraCredito.longValue()
+        );
+
+        depositosMovimientoService.registrarCredito(
+                movimiento,
+                idUsuario
+        );
+    }
+
+
+    // =========================================================
+// EJECUTAR DESEMBOLSO
+//
+// Ejecuta toda la operación dentro de una sola transacción:
+//
+// 1. Bloquea el crédito.
+// 2. Recalcula liquidación.
+// 3. Valida distribución.
+// 4. Resuelve cuentas contables.
+// 5. Genera comprobante(s).
+// 6. Registra Caja.
+// 7. Registra depósitos.
+// 8. Registra aportes.
+// 9. Activa el crédito.
+//
+// Cualquier error revierte toda la operación.
+// =========================================================
+
+    @Transactional
+    public ResultadoEjecucionDesembolso ejecutarDesembolso(
+            Integer idCarteraCredito,
+            Long idCaja,
+            LocalDate fechaContable,
+            LocalDate fechaDesembolso,
+            String tipoComprobanteDesembolso,
+            String tipoComprobanteCobros,
+            Integer cantidadCentral,
+            BigDecimal valorEfectivo,
+            List<DepositoDistribucion> depositos,
+            BigDecimal valorCuentaPorPagar
+    ) {
+
+        validarIdCarteraCredito(idCarteraCredito);
+
+        if (idCaja == null || idCaja <= 0) {
+            throw new IllegalArgumentException(
+                    "Debe seleccionar la caja que atenderá el desembolso."
+            );
+        }
+
+        if (fechaContable == null) {
+            throw new IllegalArgumentException(
+                    "La fecha contable es obligatoria."
+            );
+        }
+
+        if (fechaDesembolso == null) {
+            throw new IllegalArgumentException(
+                    "La fecha de desembolso es obligatoria."
+            );
+        }
+
+        validarTexto(
+                tipoComprobanteDesembolso,
+                "El tipo de comprobante de desembolso es obligatorio."
+        );
+
+        if (cantidadCentral == null || cantidadCentral < 0) {
+            throw new IllegalArgumentException(
+                    "La cantidad de consultas a Central de Riesgo "
+                            + "no puede ser negativa."
+            );
+        }
+
+        List<DepositoDistribucion> depositosNormalizados =
+                depositos == null
+                        ? List.of()
+                        : depositos;
+
+        // =====================================================
+        // BLOQUEAR CRÉDITO
+        // =====================================================
+
+        SolicitudDesembolsoRepository.CreditoDesembolsoDatos credito =
+                repository.bloquearCredito(
+                        idCarteraCredito
+                ).orElseThrow(() ->
+                        new IllegalStateException(
+                                "El crédito no existe o ya no se encuentra "
+                                        + "pendiente de desembolso."
+                        )
+                );
+
+        usuarioSesionService.validarAgencia(
+                credito.idAgencia()
+        );
+
+        validarIntegridadPendiente(
+                credito
+        );
 
         Integer idUsuario =
                 usuarioSesionService.idUsuario();
 
-        Map<Integer, List<BloqueoMora>> moraPorPersona =
-                new HashMap<>();
+        // =====================================================
+        // LIQUIDACIÓN DEFINITIVA
+        // =====================================================
 
-        for (BloqueoMora mora : bloqueosMora) {
+        LiquidacionDesembolso liquidacion =
+                calcularLiquidacion(
+                        idCarteraCredito,
+                        cantidadCentral
+                );
 
-            moraPorPersona
-                    .computeIfAbsent(
-                            mora.idDatosPersonal(),
-                            id -> new ArrayList<>()
-                    )
-                    .add(mora);
+        // =====================================================
+        // VALIDAR DISTRIBUCIÓN
+        // =====================================================
+
+        DistribucionDesembolso distribucion =
+                new DistribucionDesembolso(
+                        idCaja,
+                        valorEfectivo,
+                        depositosNormalizados,
+                        valorCuentaPorPagar
+                );
+
+        ResultadoValidacionDistribucion validacionDistribucion =
+                validarDistribucion(
+                        idCarteraCredito,
+                        distribucion
+                );
+
+        if (!validacionDistribucion.cuadra()) {
+            throw new IllegalStateException(
+                    validacionDistribucion.mensaje()
+                            + " Diferencia: "
+                            + validacionDistribucion.diferencia()
+            );
         }
 
-        for (
-                SolicitudDesembolsoRepository.PersonaSolicitudDatos persona
-                : personas
-        ) {
+        // =====================================================
+        // SEGUNDO COMPROBANTE
+        // =====================================================
 
-            List<BloqueoMora> obligaciones =
-                    moraPorPersona.getOrDefault(
-                            persona.idDatosPersonal(),
-                            List.of()
+        if (liquidacion.totalComprobante2()
+                .compareTo(BigDecimal.ZERO) > 0) {
+
+            validarTexto(
+                    tipoComprobanteCobros,
+                    "El tipo de comprobante de cobros es obligatorio."
+            );
+        }
+
+        // =====================================================
+        // EDAD DE RIESGO INICIAL
+        // =====================================================
+
+        String edadRiesgo =
+                determinarEdadRiesgoInicial(
+                        credito.idCarteraCredito(),
+                        credito.idDatosPersonal()
+                );
+
+        // =====================================================
+        // CUENTA CAPITAL
+        // =====================================================
+
+        Integer idCuentaCapital =
+                resolverCuentaCapital(
+                        credito,
+                        edadRiesgo
+                );
+
+        // =====================================================
+        // CUENTAS DEL COMPROBANTE 2
+        //
+        // Solo se resuelven cuando el concepto realmente
+        // genera movimiento.
+        // =====================================================
+
+        Integer idCuentaCentral = null;
+
+        if (liquidacion.valorCentral()
+                .compareTo(BigDecimal.ZERO) > 0) {
+
+            idCuentaCentral =
+                    resolverParametroContable(
+                            credito,
+                            CONCEPTO_CENTRAL_RIESGO
                     );
+        }
 
-            // =================================================
-            // SALDO TOTAL DE CARTERA PROPIA
-            //
-            // Se consulta independientemente de las obligaciones
-            // en mora. Incluye créditos al día y vencidos.
-            // =================================================
+        Integer idCuentaPapeleria = null;
 
-            BigDecimal saldoCarteraValidacion =
-                    repository.consultarSaldoCarteraPersona(
-                            persona.idDatosPersonal()
+        if (liquidacion.valorPapeleria()
+                .compareTo(BigDecimal.ZERO) > 0) {
+
+            idCuentaPapeleria =
+                    resolverParametroContable(
+                            credito,
+                            CONCEPTO_PAPELERIA
                     );
+        }
 
-            // =================================================
-            // MORA MÁXIMA DE LA PERSONA
-            //
-            // Incluye obligaciones propias y aquellas en las
-            // que figura como codeudor.
-            // =================================================
+        Integer idCuentaIva = null;
 
-            int diasMoraValidacion = 0;
+        if (liquidacion.ivaPapeleria()
+                .compareTo(BigDecimal.ZERO) > 0) {
 
-            for (BloqueoMora obligacion : obligaciones) {
+            idCuentaIva =
+                    resolverParametroContable(
+                            credito,
+                            CONCEPTO_IVA
+                    );
+        }
 
-                diasMoraValidacion =
-                        Math.max(
-                                diasMoraValidacion,
-                                obligacion.diasMora()
-                        );
-            }
+        Integer idCuentaPorPagar = null;
 
-            // =================================================
-            // CUMPLIMIENTO
-            //
-            // Cualquier obligación en mora impide continuar.
-            // =================================================
+        if (normalizar(valorCuentaPorPagar)
+                .compareTo(BigDecimal.ZERO) > 0) {
 
-            boolean cumpleMoraValidacion =
-                    diasMoraValidacion == 0;
+            idCuentaPorPagar =
+                    resolverParametroContable(
+                            credito,
+                            CONCEPTO_CUENTA_POR_PAGAR
+                    );
+        }
 
-            // =================================================
-            // PERSISTIR VALIDACIÓN
-            // =================================================
+        // =====================================================
+        // DEPÓSITOS PARA CONTABILIZACIÓN
+        // =====================================================
 
-            int actualizados =
-                    repository.actualizarValidacionMoraDeudor(
-                            idSolicitudCredito,
-                            persona.idSolicitudDeudor(),
-                            saldoCarteraValidacion,
-                            diasMoraValidacion,
-                            cumpleMoraValidacion,
+        List<SolicitudDesembolsoContabilizacionService.DepositoContabilizacion>
+                depositosContables =
+                depositosNormalizados
+                        .stream()
+                        .map(deposito ->
+                                new SolicitudDesembolsoContabilizacionService
+                                        .DepositoContabilizacion(
+                                        deposito.idCuentaAhorro(),
+                                        normalizar(
+                                                deposito.valor()
+                                        )
+                                )
+                        )
+                        .toList();
+
+        // =====================================================
+        // CONTABILIZAR
+        // =====================================================
+
+        SolicitudDesembolsoContabilizacionService.ResultadoContabilizacion
+                contabilizacion =
+                contabilizacionService.contabilizar(
+                        new SolicitudDesembolsoContabilizacionService
+                                .DatosContabilizacion(
+
+                                credito.idCarteraCredito(),
+                                credito.idAgencia(),
+                                idCaja,
+
+                                fechaContable,
+                                idUsuario,
+
+                                tipoComprobanteDesembolso.trim(),
+                                liquidacion.totalComprobante2()
+                                        .compareTo(BigDecimal.ZERO) > 0
+                                        ? tipoComprobanteCobros.trim()
+                                        : null,
+
+                                idCuentaCapital,
+                                idCuentaCentral,
+                                idCuentaPapeleria,
+                                idCuentaIva,
+                                idCuentaPorPagar,
+
+                                liquidacion.valorCredito(),
+
+                                liquidacion.valorFondo(),
+                                liquidacion.ivaFondo(),
+
+                                normalizar(valorEfectivo),
+                                depositosContables,
+                                normalizar(valorCuentaPorPagar),
+
+                                liquidacion.valorCentral(),
+                                liquidacion.valorPapeleria(),
+                                liquidacion.ivaPapeleria(),
+                                liquidacion.valorAportes(),
+
+                                liquidacion.totalComprobante2()
+                        )
+                );
+
+        // =====================================================
+        // CAJA - EGRESO DEL DESEMBOLSO
+        // =====================================================
+
+        cajasMovimientosService.registrarDesembolsoCredito(
+                idCaja,
+                normalizar(valorEfectivo),
+                fechaContable,
+                credito.idCarteraCredito().longValue(),
+                credito.pagareCartera(),
+                contabilizacion.tipoComprobanteDesembolso(),
+                contabilizacion.numeroComprobanteDesembolso(),
+                idUsuario
+        );
+
+        // =====================================================
+        // DEPÓSITOS - DISTRIBUCIÓN DEL DESEMBOLSO
+        // =====================================================
+
+        for (DepositoDistribucion deposito : depositosNormalizados) {
+
+            registrarCreditoDeposito(
+                    deposito.idCuentaAhorro(),
+                    deposito.valor(),
+                    fechaContable,
+
+                    contabilizacion.tipoComprobanteDesembolso(),
+                    contabilizacion.numeroComprobanteDesembolso(),
+
+                    credito.idCarteraCredito(),
+                    idUsuario
+            );
+        }
+
+        // =====================================================
+        // CAJA - INGRESO DE LOS COBROS
+        // =====================================================
+
+        if (liquidacion.totalComprobante2()
+                .compareTo(BigDecimal.ZERO) > 0) {
+
+            cajasMovimientosService
+                    .registrarCobrosDesembolsoCredito(
+                            idCaja,
+                            liquidacion.totalComprobante2(),
+                            fechaContable,
+                            credito.idCarteraCredito().longValue(),
+                            credito.pagareCartera(),
+                            contabilizacion.tipoComprobanteCobros(),
+                            contabilizacion.numeroComprobanteCobros(),
                             idUsuario
                     );
+        }
 
-            if (actualizados != 1) {
+        // =====================================================
+        // APORTES
+        // =====================================================
 
-                bloqueos.add(
-                        new BloqueoDesembolso(
-                                "ACTUALIZACION_MORA",
-                                "No fue posible actualizar "
-                                        + "la validación de mora "
-                                        + "de la persona con cédula "
-                                        + textoSeguro(
-                                        persona.cedula()
-                                )
+        if (liquidacion.valorAportes()
+                .compareTo(BigDecimal.ZERO) > 0) {
+
+            registrarCreditoDeposito(
+                    credito.idCuentaAportes(),
+                    liquidacion.valorAportes(),
+                    fechaContable,
+
+                    contabilizacion.tipoComprobanteCobros(),
+                    contabilizacion.numeroComprobanteCobros(),
+
+                    credito.idCarteraCredito(),
+                    idUsuario
+            );
+        }
+
+        // =====================================================
+        // NOVACIÓN
+        // =====================================================
+
+        DatosNovacion novacion =
+                determinarNovacion(
+                        credito.idCarteraCredito(),
+                        credito.idDatosPersonal(),
+                        fechaDesembolso
+                );
+
+        // =====================================================
+        // ACTIVAR MAESTRO
+        //
+        // El maestro conserva el comprobante principal
+        // del desembolso.
+        // =====================================================
+
+        int actualizados =
+                repository.activarCredito(
+                        credito.idCarteraCredito(),
+
+                        contabilizacion.tipoComprobanteDesembolso(),
+                        contabilizacion.numeroComprobanteDesembolso(),
+
+                        fechaContable,
+                        fechaDesembolso,
+
+                        edadRiesgo,
+                        edadRiesgo,
+
+                        novacion.codigoModificacionCredito(),
+                        novacion.numeroNovaciones(),
+
+                        idUsuario
+                );
+
+        if (actualizados != 1) {
+            throw new IllegalStateException(
+                    "No fue posible activar el crédito "
+                            + credito.idCarteraCredito()
+                            + "."
+            );
+        }
+
+        // =====================================================
+        // RESULTADO
+        // =====================================================
+
+        return new ResultadoEjecucionDesembolso(
+                credito.idCarteraCredito(),
+                credito.pagareCartera(),
+
+                liquidacion.valorCredito(),
+                liquidacion.valorDistribuir(),
+                liquidacion.totalComprobante2(),
+
+                contabilizacion.tipoComprobanteDesembolso(),
+                contabilizacion.numeroComprobanteDesembolso(),
+
+                contabilizacion.tipoComprobanteCobros(),
+                contabilizacion.numeroComprobanteCobros(),
+
+                fechaContable,
+                fechaDesembolso,
+
+                edadRiesgo,
+
+                novacion.codigoModificacionCredito(),
+                novacion.numeroNovaciones()
+        );
+    }
+
+    @Transactional
+    public void activarCredito(
+            Integer idCarteraCredito,
+            String tipoComprobante,
+            String numeroComprobante,
+            LocalDate fechaContable,
+            LocalDate fechaDesembolso
+    ) {
+
+        validarIdCarteraCredito(
+                idCarteraCredito
+        );
+
+        validarTexto(
+                tipoComprobante,
+                "El tipo de comprobante es obligatorio."
+        );
+
+        validarTexto(
+                numeroComprobante,
+                "El número de comprobante es obligatorio."
+        );
+
+        if (fechaContable == null) {
+            throw new IllegalArgumentException(
+                    "La fecha contable es obligatoria."
+            );
+        }
+
+        if (fechaDesembolso == null) {
+            throw new IllegalArgumentException(
+                    "La fecha de desembolso es obligatoria."
+            );
+        }
+
+        SolicitudDesembolsoRepository.CreditoDesembolsoDatos credito =
+                repository.bloquearCredito(
+                        idCarteraCredito
+                ).orElseThrow(() ->
+                        new IllegalStateException(
+                                "El crédito no existe o ya no se encuentra "
+                                        + "pendiente de desembolso."
+                        )
+                );
+
+        usuarioSesionService.validarAgencia(
+                credito.idAgencia()
+        );
+
+        validarIntegridadPendiente(
+                credito
+        );
+
+        String edadRiesgo =
+                determinarEdadRiesgoInicial(
+                        credito.idCarteraCredito(),
+                        credito.idDatosPersonal()
+                );
+
+        DatosNovacion novacion =
+                determinarNovacion(
+                        credito.idCarteraCredito(),
+                        credito.idDatosPersonal(),
+                        fechaDesembolso
+                );
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        int actualizados =
+                repository.activarCredito(
+                        credito.idCarteraCredito(),
+
+                        tipoComprobante.trim(),
+                        numeroComprobante.trim(),
+
+                        fechaContable,
+                        fechaDesembolso,
+
+                        edadRiesgo,
+                        edadRiesgo,
+
+                        novacion.codigoModificacionCredito(),
+                        novacion.numeroNovaciones(),
+
+                        idUsuario
+                );
+
+        if (actualizados != 1) {
+            throw new IllegalStateException(
+                    "No fue posible activar el crédito "
+                            + credito.idCarteraCredito()
+                            + "."
+            );
+        }
+    }
+
+    // =========================================================
+    // OBTENER CRÉDITO PENDIENTE
+    // =========================================================
+
+    private SolicitudDesembolsoRepository.CreditoDesembolsoDatos
+    obtenerCreditoPendiente(
+            Integer idCarteraCredito
+    ) {
+
+        validarIdCarteraCredito(
+                idCarteraCredito
+        );
+
+        SolicitudDesembolsoRepository.CreditoDesembolsoDatos credito =
+                repository.buscarCredito(
+                        idCarteraCredito
+                ).orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "No existe el crédito "
+                                        + idCarteraCredito
                                         + "."
                         )
                 );
-            }
-        }
-    }
 
-    // =========================================================
-    // CONSTRUIR MENSAJE DE MORA
-    //
-    // Identifica:
-    //
-    // - Deudor o codeudor.
-    // - Nombre.
-    // - Cédula.
-    // - Línea.
-    // - Pagaré.
-    // - Agencia.
-    // - Días de mora.
-    // - Calidad en la obligación.
-    // =========================================================
-
-    private String construirMensajeMora(
-            BloqueoMora mora
-    ) {
-
-        String calidad =
-                "CODEUDOR".equalsIgnoreCase(
-                        mora.calidad()
-                )
-                        ? "El codeudor"
-                        : "El deudor";
-
-        String linea =
-                tieneTexto(
-                        mora.nombreLineaCredito()
-                )
-                        ? mora.nombreLineaCredito()
-                        : mora.codigoLineaCredito();
-
-        String tipoObligacion =
-                "CODEUDA".equalsIgnoreCase(
-                        mora.tipoObligacion()
-                )
-                        ? "Obligación donde figura "
-                        + "como codeudor."
-
-                        : "Obligación propia.";
-
-        return calidad
-                + " "
-                + textoSeguro(
-                mora.nombreCompleto()
-        )
-                + ", cédula "
-                + textoSeguro(
-                mora.cedula()
-        )
-                + ", presenta una obligación en mora. "
-                + "Línea: "
-                + textoSeguro(
-                linea
-        )
-                + ". Pagaré: "
-                + textoSeguro(
-                mora.pagareCartera()
-        )
-                + ". Agencia: "
-                + mora.idAgencia()
-                + ". Días de mora: "
-                + mora.diasMora()
-                + ". "
-                + tipoObligacion
-                + " Debe ponerse al día antes "
-                + "de continuar.";
-    }
-
-    // =========================================================
-    // VALIDAR APORTES
-    //
-    // Consulta el saldo vigente de la cuenta vinculada.
-    //
-    // Actualiza:
-    //
-    // valor_aportes_validacion
-    // cumple_aportes_validacion
-    //
-    // No modifica:
-    //
-    // valor_aportes_inicio
-    // cumple_aportes_inicio
-    // valor_aportes_requerido
-    // valor_solicitado
-    // =========================================================
-
-    private ResultadoAportes validarAportes(
-            Integer idSolicitudCredito,
-            SolicitudDesembolsoRepository.SolicitudDesembolsoDatos solicitud,
-            boolean solicitudHabilitada,
-            List<BloqueoDesembolso> bloqueos
-    ) {
-
-        SolicitudDesembolsoRepository.AportesDesembolsoDatos aportes =
-                repository.consultarAportes(
-                        idSolicitudCredito
-                ).orElse(null);
-
-        // =====================================================
-        // NO SE ENCONTRÓ LA SOLICITUD
-        // =====================================================
-
-        if (aportes == null) {
-
-            String mensaje =
-                    "No fue posible consultar los aportes "
-                            + "de la solicitud.";
-
-            bloqueos.add(
-                    new BloqueoDesembolso(
-                            "APORTES",
-                            mensaje
-                    )
-            );
-
-            return new ResultadoAportes(
-                    solicitud.idCuentaAportes(),
-                    BigDecimal.ZERO,
-                    BigDecimal.ZERO,
-                    BigDecimal.ZERO,
-                    false,
-                    mensaje
-            );
-        }
-
-        BigDecimal valorActual =
-                valorSeguro(
-                        aportes.valorAportesActual()
-                );
-
-        BigDecimal valorRequerido =
-                valorSeguro(
-                        aportes.valorAportesRequerido()
-                );
-
-        BigDecimal faltante =
-                valorRequerido.subtract(
-                        valorActual
-                ).max(
-                        BigDecimal.ZERO
-                );
-
-        // =====================================================
-        // CUENTA DE APORTES NO VINCULADA
-        // =====================================================
-
-        if (aportes.idCuentaAportes() == null) {
-
-            String mensaje =
-                    "La solicitud no tiene una cuenta "
-                            + "de aportes vinculada.";
-
-            bloqueos.add(
-                    new BloqueoDesembolso(
-                            "CUENTA_APORTES",
-                            mensaje
-                    )
-            );
-
-            return new ResultadoAportes(
-                    null,
-                    valorActual,
-                    valorRequerido,
-                    faltante,
-                    false,
-                    mensaje
-            );
-        }
-
-        // =====================================================
-        // CUENTA NO ENCONTRADA O SIN SALDO DISPONIBLE
-        //
-        // SQL_APORTES devuelve NULL cuando no encuentra
-        // la cuenta vinculada o su saldo no está definido.
-        //
-        // No se interpreta una cuenta inexistente como
-        // una cuenta válida con saldo cero.
-        // =====================================================
-
-        if (aportes.valorAportesActual() == null) {
-
-            String mensaje =
-                    "No fue posible obtener el saldo vigente "
-                            + "de la cuenta de aportes "
-                            + aportes.idCuentaAportes()
-                            + ".";
-
-            bloqueos.add(
-                    new BloqueoDesembolso(
-                            "SALDO_APORTES",
-                            mensaje
-                    )
-            );
-
-            return new ResultadoAportes(
-                    aportes.idCuentaAportes(),
-                    BigDecimal.ZERO,
-                    valorRequerido,
-                    valorRequerido.max(
-                            BigDecimal.ZERO
-                    ),
-                    false,
-                    mensaje
-            );
-        }
-
-        // =====================================================
-        // VALOR REQUERIDO NO DEFINIDO
-        // =====================================================
-
-        if (aportes.valorAportesRequerido() == null) {
-
-            String mensaje =
-                    "No fue posible calcular los aportes requeridos "
-                            + "para el desembolso. Verifique que la "
-                            + "solicitud tenga un valor formalizado "
-                            + "válido y un factor de reciprocidad "
-                            + "de aportes mayor que cero.";
-
-            bloqueos.add(
-                    new BloqueoDesembolso(
-                            "APORTES_REQUERIDOS",
-                            mensaje
-                    )
-            );
-
-            return new ResultadoAportes(
-                    aportes.idCuentaAportes(),
-                    valorActual,
-                    BigDecimal.ZERO,
-                    BigDecimal.ZERO,
-                    false,
-                    mensaje
-            );
-        }
-
-        // =====================================================
-        // COMPARAR APORTES
-        // =====================================================
-
-        boolean cumple =
-                valorActual.compareTo(
-                        valorRequerido
-                ) >= 0;
-
-        // =====================================================
-        // ACTUALIZAR APORTES VIGENTES
-        //
-        // Se actualizan aunque sean insuficientes.
-        //
-        // La solicitud debe continuar en estado aprobado
-        // y pendiente de desembolso.
-        // =====================================================
-
-        if (solicitudHabilitada) {
-
-            Integer idUsuario =
-                    usuarioSesionService.idUsuario();
-
-            int actualizados =
-                    repository.actualizarValidacionAportes(
-                            idSolicitudCredito,
-                            valorActual,
-                            cumple,
-                            idUsuario
-                    );
-
-            if (actualizados != 1) {
-
-                String mensaje =
-                        "No fue posible actualizar los "
-                                + "aportes vigentes de la solicitud.";
-
-                bloqueos.add(
-                        new BloqueoDesembolso(
-                                "ACTUALIZACION_APORTES",
-                                mensaje
-                        )
-                );
-
-                return new ResultadoAportes(
-                        aportes.idCuentaAportes(),
-                        valorActual,
-                        valorRequerido,
-                        faltante,
-                        false,
-                        mensaje
-                );
-            }
-        }
-
-        // =====================================================
-        // APORTES INSUFICIENTES
-        // =====================================================
-
-        if (!cumple) {
-
-            String mensaje =
-                    "Los aportes actuales son insuficientes "
-                            + "para continuar con el desembolso. "
-                            + "Aportes requeridos: $"
-                            + valorRequerido.toPlainString()
-                            + ". Aportes actuales: $"
-                            + valorActual.toPlainString()
-                            + ". Faltante: $"
-                            + faltante.toPlainString()
-                            + ".";
-
-            bloqueos.add(
-                    new BloqueoDesembolso(
-                            "APORTES_INSUFICIENTES",
-                            mensaje
-                    )
-            );
-
-            return new ResultadoAportes(
-                    aportes.idCuentaAportes(),
-                    valorActual,
-                    valorRequerido,
-                    faltante,
-                    false,
-                    mensaje
-            );
-        }
-
-        // =====================================================
-        // APORTES CUMPLEN
-        // =====================================================
-
-        return new ResultadoAportes(
-                aportes.idCuentaAportes(),
-                valorActual,
-                valorRequerido,
-                BigDecimal.ZERO,
-                true,
-                "Los aportes cumplen el valor requerido "
-                        + "para continuar con el desembolso."
+        usuarioSesionService.validarAgencia(
+                credito.idAgencia()
         );
+
+        validarPendiente(
+                credito
+        );
+
+        return credito;
     }
 
     // =========================================================
-    // VALIDACIONES AUXILIARES
+    // CARGO CONFIGURADO EN LA LÍNEA
     // =========================================================
 
-    private void validarIdSolicitud(
-            Integer idSolicitudCredito
+    private BigDecimal calcularCargoLinea(
+            BigDecimal valorCredito,
+            BigDecimal valorFijo,
+            BigDecimal porcentaje,
+            String nombreCargo
     ) {
 
-        if (idSolicitudCredito == null
-                || idSolicitudCredito <= 0) {
+        BigDecimal fijo =
+                normalizar(
+                        valorFijo
+                );
+
+        BigDecimal porcentajeNormalizado =
+                normalizarPorcentaje(
+                        porcentaje
+                );
+
+        if (fijo.signum() < 0
+                || porcentajeNormalizado.signum() < 0) {
+
+            throw new IllegalStateException(
+                    "La configuración de "
+                            + nombreCargo
+                            + " no puede contener valores negativos."
+            );
+        }
+
+        /*
+         * Regla:
+         *
+         * Si existe porcentaje, tiene prioridad.
+         * En caso contrario se utiliza el valor fijo.
+         */
+
+        if (porcentajeNormalizado.signum() > 0) {
+
+            return normalizar(valorCredito)
+                    .multiply(
+                            porcentajeNormalizado
+                    )
+                    .divide(
+                            CIEN,
+                            2,
+                            RoundingMode.HALF_UP
+                    );
+        }
+
+        return fijo;
+    }
+
+    // =========================================================
+    // IVA
+    // =========================================================
+
+    private BigDecimal calcularIva(
+            BigDecimal base,
+            BigDecimal porcentajeIva
+    ) {
+
+        BigDecimal valorBase =
+                normalizar(
+                        base
+                );
+
+        BigDecimal porcentaje =
+                normalizarPorcentaje(
+                        porcentajeIva
+                );
+
+        if (valorBase.signum() <= 0
+                || porcentaje.signum() <= 0) {
+
+            return BigDecimal.ZERO.setScale(
+                    2,
+                    RoundingMode.HALF_UP
+            );
+        }
+
+        return valorBase
+                .multiply(
+                        porcentaje
+                )
+                .divide(
+                        CIEN,
+                        2,
+                        RoundingMode.HALF_UP
+                );
+    }
+
+    // =========================================================
+    // VALIDACIONES
+    // =========================================================
+
+    private void validarIdCarteraCredito(
+            Integer idCarteraCredito
+    ) {
+
+        if (idCarteraCredito == null
+                || idCarteraCredito <= 0) {
 
             throw new IllegalArgumentException(
-                    "Debe indicar una solicitud de crédito válida."
+                    "El crédito es obligatorio."
             );
         }
     }
 
-    private boolean esPrincipal(
-            String tipoDeudor
+    private void validarPendiente(
+            SolicitudDesembolsoRepository.CreditoDesembolsoDatos credito
     ) {
 
-        return "PRINCIPAL".equalsIgnoreCase(
-                tipoDeudor == null
-                        ? ""
-                        : tipoDeudor.trim()
-        );
+        if (!ESTADO_PENDIENTE.equalsIgnoreCase(
+                credito.codigoEstadoCartera()
+        )) {
+
+            throw new IllegalStateException(
+                    "El crédito "
+                            + credito.idCarteraCredito()
+                            + " no se encuentra pendiente de desembolso."
+            );
+        }
     }
 
-    private BigDecimal valorSeguro(
+    private void validarIntegridadPendiente(
+            SolicitudDesembolsoRepository.CreditoDesembolsoDatos credito
+    ) {
+
+        validarPendiente(
+                credito
+        );
+
+        if (normalizar(
+                credito.valorDesembolsado()
+        ).signum() != 0) {
+
+            throw new IllegalStateException(
+                    "El crédito está pendiente, pero ya tiene "
+                            + "valor desembolsado."
+            );
+        }
+
+        if (normalizar(
+                credito.saldoActual()
+        ).signum() != 0) {
+
+            throw new IllegalStateException(
+                    "El crédito está pendiente, pero ya tiene "
+                            + "saldo actual."
+            );
+        }
+    }
+
+    private void validarPorcentaje(
+            BigDecimal porcentaje,
+            String nombre
+    ) {
+
+        if (porcentaje == null
+                || porcentaje.signum() < 0) {
+
+            throw new IllegalStateException(
+                    "El porcentaje de "
+                            + nombre
+                            + " no es válido."
+            );
+        }
+    }
+
+    private void validarTexto(
+            String valor,
+            String mensaje
+    ) {
+
+        if (valor == null
+                || valor.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    mensaje
+            );
+        }
+    }
+
+    // =========================================================
+    // ORDEN DE EDAD
+    // =========================================================
+
+    private int ordenEdadRiesgo(
+            String edad
+    ) {
+
+        return switch (
+                edad.trim().toUpperCase()
+                ) {
+            case "A" -> 1;
+            case "B" -> 2;
+            case "C" -> 3;
+            case "D" -> 4;
+            case "E" -> 5;
+
+            default ->
+                    throw new IllegalStateException(
+                            "Edad de riesgo no reconocida: "
+                                    + edad
+                    );
+        };
+    }
+
+    // =========================================================
+    // NORMALIZACIÓN
+    // =========================================================
+
+    private BigDecimal normalizar(
             BigDecimal valor
     ) {
 
-        return valor != null
-                ? valor
-                : BigDecimal.ZERO;
+        if (valor == null) {
+            return BigDecimal.ZERO.setScale(
+                    2,
+                    RoundingMode.HALF_UP
+            );
+        }
+
+        return valor.setScale(
+                2,
+                RoundingMode.HALF_UP
+        );
     }
 
-    private boolean tieneTexto(
-            String valor
+    private BigDecimal normalizarPorcentaje(
+            BigDecimal valor
     ) {
 
-        return valor != null
-                && !valor.isBlank();
-    }
+        if (valor == null) {
+            return BigDecimal.ZERO.setScale(
+                    4,
+                    RoundingMode.HALF_UP
+            );
+        }
 
-    private String textoSeguro(
-            String valor
-    ) {
-
-        return tieneTexto(
-                valor
-        )
-                ? valor.trim()
-                : "No registrado";
+        return valor.setScale(
+                4,
+                RoundingMode.HALF_UP
+        );
     }
 
     // =========================================================
-    // RESULTADO GENERAL
+    // DTO - BANDEJA
     // =========================================================
 
-    public record ResultadoValidacionDesembolso(
-
+    public record CreditoPendienteDesembolso(
+            Integer idCarteraCredito,
             Integer idSolicitudCredito,
 
-            String numeroSolicitud,
-
             Integer idAgencia,
-
-            Integer idDatosPersonal,
-
             Integer idLineaCredito,
-
-            boolean puedeContinuar,
-
-            String mensajeGeneral,
-
-            int cantidadBloqueos,
-
-            List<BloqueoDesembolso> bloqueos,
-
-            List<BloqueoMora> bloqueosMora,
-
-            ResultadoAportes aportes,
-
-            int cantidadAlertas,
-
-            List<AlertaDesembolso> alertas
-
-    ) {
-    }
-
-    // =========================================================
-    // BLOQUEO GENERAL
-    // =========================================================
-
-    public record BloqueoDesembolso(
-
-            String tipo,
-
-            String mensaje
-
-    ) {
-    }
-
-    // =========================================================
-    // ALERTA INFORMATIVA (NO BLOQUEANTE)
-    // =========================================================
-
-    public record AlertaDesembolso(
-            String tipo,
-            String mensaje
-    ) {
-    }
-
-    // =========================================================
-    // DETALLE DE OBLIGACIÓN EN MORA
-    // =========================================================
-
-    public record BloqueoMora(
-
             Integer idDatosPersonal,
-
-            String cedula,
-
-            String nombreCompleto,
-
-            String calidad,
-
-            String tipoObligacion,
-
-            Integer idCarteraCredito,
-
-            Integer idAgencia,
-
-            Integer idLineaCredito,
-
-            String codigoLineaCredito,
-
-            String nombreLineaCredito,
 
             String pagareCartera,
 
-            BigDecimal saldoActual,
+            String documento,
+            String nombreCompleto,
 
-            Integer diasMora
+            String codigoLineaCredito,
+            String nombreLineaCredito,
 
+            BigDecimal valorCredito,
+            Integer plazo,
+
+            LocalDate fechaInclusionSistema,
+            LocalDate fechaPrimeraCuota,
+            LocalDate fechaFinal,
+
+            String codigoEstadoCartera
     ) {
     }
 
     // =========================================================
-    // RESULTADO DE APORTES
+    // DTO - PREPARACIÓN
     // =========================================================
 
-    public record ResultadoAportes(
+    public record PreparacionDesembolso(
+            Integer idCarteraCredito,
+            Integer idSolicitudCredito,
 
+            Integer idAgencia,
+            Integer idLineaCredito,
+            Integer idDatosPersonal,
             Integer idCuentaAportes,
 
-            BigDecimal valorActual,
+            String pagareCartera,
 
-            BigDecimal valorRequerido,
+            String documento,
+            String nombreCompleto,
 
-            BigDecimal faltante,
+            String codigoLineaCredito,
+            String nombreLineaCredito,
 
-            boolean cumple,
+            BigDecimal valorCredito,
 
-            String mensaje
+            // -------------------------------------------------
+            // COMPROBANTE 1
+            // -------------------------------------------------
 
+            BigDecimal porcentajeFondo,
+            BigDecimal valorFondo,
+
+            BigDecimal porcentajeIva,
+            BigDecimal ivaFondo,
+
+            BigDecimal totalComprobante1,
+            BigDecimal valorDistribuir,
+
+            // -------------------------------------------------
+            // COMPROBANTE 2
+            // -------------------------------------------------
+
+            Integer cantidadCentralSugerida,
+            BigDecimal valorUnitarioCentral,
+            BigDecimal valorCentralSugerido,
+
+            BigDecimal valorFijoPapeleria,
+            BigDecimal porcentajePapeleria,
+            BigDecimal valorPapeleria,
+            BigDecimal ivaPapeleria,
+
+            BigDecimal valorFijoAportes,
+            BigDecimal porcentajeAportes,
+            BigDecimal valorAportes,
+
+            BigDecimal totalComprobante2,
+            BigDecimal contrapartidaCaja,
+
+            LocalDate fechaPrimeraCuota,
+            LocalDate fechaFinal
     ) {
     }
+
+    // =========================================================
+    // DTO - LIQUIDACIÓN
+    // =========================================================
+
+    public record LiquidacionDesembolso(
+            BigDecimal valorCredito,
+
+            // -------------------------------------------------
+            // COMPROBANTE 1
+            // -------------------------------------------------
+
+            BigDecimal valorFondo,
+            BigDecimal ivaFondo,
+
+            BigDecimal totalComprobante1,
+            BigDecimal valorDistribuir,
+
+            // -------------------------------------------------
+            // COMPROBANTE 2
+            // -------------------------------------------------
+
+            Integer cantidadCentral,
+            BigDecimal valorUnitarioCentral,
+            BigDecimal valorCentral,
+
+            BigDecimal valorPapeleria,
+            BigDecimal ivaPapeleria,
+
+            BigDecimal valorAportes,
+
+            BigDecimal totalComprobante2,
+            BigDecimal contrapartidaCaja
+    ) {
+    }
+
+    // =========================================================
+// DTO - RESULTADO EJECUCIÓN DESEMBOLSO
+// =========================================================
+
+    public record ResultadoEjecucionDesembolso(
+            Integer idCarteraCredito,
+            String pagareCartera,
+
+            BigDecimal valorCredito,
+            BigDecimal valorDistribuido,
+            BigDecimal totalCobros,
+
+            String tipoComprobanteDesembolso,
+            String numeroComprobanteDesembolso,
+
+            String tipoComprobanteCobros,
+            String numeroComprobanteCobros,
+
+            LocalDate fechaContable,
+            LocalDate fechaDesembolso,
+
+            String edadRiesgoInicial,
+
+            String codigoModificacionCredito,
+            Integer numeroNovaciones
+    ) {
+    }
+
+    // =========================================================
+    // DTO - NOVACIÓN
+    // =========================================================
+
+    public record DatosNovacion(
+            String codigoModificacionCredito,
+            Integer numeroNovaciones,
+
+            Integer idCarteraCreditoAnterior,
+            String pagareAnterior
+    ) {
+    }
+
 }

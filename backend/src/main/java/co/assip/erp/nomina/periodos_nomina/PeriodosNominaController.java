@@ -1,6 +1,6 @@
 package co.assip.erp.nomina.periodos_nomina;
 
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.nomina.periodos_nomina.dto.PeriodoAccionDTO;
 import co.assip.erp.nomina.periodos_nomina.dto.PeriodoNominaListDTO;
 import org.springframework.http.ResponseEntity;

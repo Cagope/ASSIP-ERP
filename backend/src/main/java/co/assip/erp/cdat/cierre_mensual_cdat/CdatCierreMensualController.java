@@ -1,6 +1,6 @@
 package co.assip.erp.cdat.cierre_mensual_cdat;
 
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.cdat.cierre_mensual_cdat.dto.CdatCierreMensualEntradaDTO;
 import co.assip.erp.cdat.cierre_mensual_cdat.dto.CdatCierreMensualPreviewDTO;
 import lombok.RequiredArgsConstructor;

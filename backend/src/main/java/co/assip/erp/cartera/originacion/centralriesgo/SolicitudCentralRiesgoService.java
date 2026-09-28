@@ -3,7 +3,7 @@ package co.assip.erp.cartera.originacion.centralriesgo;
 import co.assip.erp.cartera.originacion.centralriesgo.dto.SolicitudCentralRiesgoDTO;
 import co.assip.erp.cartera.originacion.centralriesgo.dto.SolicitudCentralRiesgoDetalleDTO;
 import co.assip.erp.cartera.originacion.centralriesgo.dto.SolicitudCentralRiesgoGuardarRequestDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -84,21 +84,28 @@ public class SolicitudCentralRiesgoService {
                 "solicitud"
         );
 
-        Integer idAgencia =
-                repository.obtenerAgenciaSolicitud(
-                                idSolicitudCredito
+        repository.obtenerAgenciaSolicitud(
+                        idSolicitudCredito
+                )
+                .orElseThrow(
+                        () -> new IllegalArgumentException(
+                                "No existe la solicitud de crédito con id "
+                                        + idSolicitudCredito
+                                        + "."
                         )
-                        .orElseThrow(
-                                () -> new IllegalArgumentException(
-                                        "No existe la solicitud de crédito con id "
-                                                + idSolicitudCredito
-                                                + "."
-                                )
-                        );
+                );
 
-        usuarioSesionService.validarAgencia(
-                idAgencia
-        );
+        usuarioSesionService.idUsuario();
+
+        if (!usuarioSesionService.tieneAccesoTotal()
+                && (usuarioSesionService.agencias() == null
+                || usuarioSesionService.agencias().isEmpty())) {
+
+            throw new SecurityException(
+                    "El usuario no tiene agencias autorizadas "
+                            + "para gestionar solicitudes."
+            );
+        }
 
         return repository.listarPorSolicitud(
                 idSolicitudCredito
@@ -120,21 +127,28 @@ public class SolicitudCentralRiesgoService {
                 "deudor"
         );
 
-        Integer idAgencia =
-                repository.obtenerAgenciaDeudor(
-                                idSolicitudDeudor
+        repository.obtenerAgenciaDeudor(
+                        idSolicitudDeudor
+                )
+                .orElseThrow(
+                        () -> new IllegalArgumentException(
+                                "No existe el deudor de la solicitud con id "
+                                        + idSolicitudDeudor
+                                        + "."
                         )
-                        .orElseThrow(
-                                () -> new IllegalArgumentException(
-                                        "No existe el deudor de la solicitud con id "
-                                                + idSolicitudDeudor
-                                                + "."
-                                )
-                        );
+                );
 
-        usuarioSesionService.validarAgencia(
-                idAgencia
-        );
+        usuarioSesionService.idUsuario();
+
+        if (!usuarioSesionService.tieneAccesoTotal()
+                && (usuarioSesionService.agencias() == null
+                || usuarioSesionService.agencias().isEmpty())) {
+
+            throw new SecurityException(
+                    "El usuario no tiene agencias autorizadas "
+                            + "para gestionar solicitudes."
+            );
+        }
 
         return repository.listarPorDeudor(
                 idSolicitudDeudor
@@ -165,24 +179,30 @@ public class SolicitudCentralRiesgoService {
             return Optional.empty();
         }
 
-        Integer idAgencia =
-                repository.obtenerAgenciaDeudor(
-                                resultado.get()
-                                        .getIdSolicitudDeudor()
+        repository.obtenerAgenciaDeudor(
+                        resultado.get()
+                                .getIdSolicitudDeudor()
+                )
+                .orElseThrow(
+                        () -> new IllegalStateException(
+                                "No fue posible identificar la agencia de la solicitud."
                         )
-                        .orElseThrow(
-                                () -> new IllegalStateException(
-                                        "No fue posible identificar la agencia de la solicitud."
-                                )
-                        );
+                );
 
-        usuarioSesionService.validarAgencia(
-                idAgencia
-        );
+        usuarioSesionService.idUsuario();
+
+        if (!usuarioSesionService.tieneAccesoTotal()
+                && (usuarioSesionService.agencias() == null
+                || usuarioSesionService.agencias().isEmpty())) {
+
+            throw new SecurityException(
+                    "El usuario no tiene agencias autorizadas "
+                            + "para gestionar solicitudes."
+            );
+        }
 
         return resultado;
     }
-
 
     // =========================================================
     // GUARDAR / ACTUALIZAR
@@ -214,19 +234,31 @@ public class SolicitudCentralRiesgoService {
          * También evita modificaciones cuando la solicitud ya
          * tiene un resultado final.
          */
-        Integer idAgencia =
-                repository.bloquearSolicitudEditable(
-                                request.getIdSolicitudDeudor()
+        repository.bloquearSolicitudEditable(
+                        request.getIdSolicitudDeudor()
+                )
+                .orElseThrow(
+                        () -> new IllegalArgumentException(
+                                "El deudor no existe, la solicitud está inactiva o ya tiene un resultado final."
                         )
-                        .orElseThrow(
-                                () -> new IllegalArgumentException(
-                                        "El deudor no existe, la solicitud está inactiva o ya tiene un resultado final."
-                                )
-                        );
+                );
 
-        usuarioSesionService.validarAgencia(
-                idAgencia
-        );
+        // =====================================================
+        // USUARIO AUTORIZADO PARA GESTIONAR SOLICITUDES
+        // =====================================================
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        if (!usuarioSesionService.tieneAccesoTotal()
+                && (usuarioSesionService.agencias() == null
+                || usuarioSesionService.agencias().isEmpty())) {
+
+            throw new SecurityException(
+                    "El usuario no tiene agencias autorizadas "
+                            + "para gestionar solicitudes."
+            );
+        }
 
         /*
          * La central seleccionada debe existir y encontrarse activa.
@@ -239,9 +271,6 @@ public class SolicitudCentralRiesgoService {
                     "La central de riesgo seleccionada no existe o está inactiva."
             );
         }
-
-        Integer idUsuario =
-                usuarioSesionService.idUsuario();
 
         /*
          * Regla funcional:

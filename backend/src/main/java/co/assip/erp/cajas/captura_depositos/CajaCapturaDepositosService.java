@@ -5,7 +5,7 @@ import co.assip.erp.cajas.captura_depositos.dto.CajaCapturaDepositosCuentaDTO;
 import co.assip.erp.cajas.captura_depositos.dto.CajaCapturaDepositosPreviewDTO;
 import co.assip.erp.cajas.captura_depositos.dto.CajaCapturaDepositosRequestDTO;
 import co.assip.erp.cajas.captura_depositos.dto.CajaCapturaDepositosResponseDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +22,6 @@ import co.assip.erp.depositos.movimientos.DepositosMovimientoService;
 import co.assip.erp.depositos.movimientos.dto.DepositosMovimientoDTO;
 import co.assip.erp.sarlaft.lavado_activos.LavadoActivosService;
 import co.assip.erp.sarlaft.lavado_activos.dto.LavadoActivosRequestDTO;
-import co.assip.erp.sarlaft.lavado_activos.dto.LavadoActivosResponseDTO;
 
 @Service
 @RequiredArgsConstructor

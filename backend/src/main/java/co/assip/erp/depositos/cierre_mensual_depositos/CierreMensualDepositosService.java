@@ -1,7 +1,7 @@
 package co.assip.erp.depositos.cierre_mensual_depositos;
 
 import co.assip.erp.depositos.cierre_mensual_depositos.dto.*;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

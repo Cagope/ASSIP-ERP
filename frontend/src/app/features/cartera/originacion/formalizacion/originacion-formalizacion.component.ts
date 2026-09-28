@@ -116,6 +116,14 @@ export class OriginacionFormalizacionComponent implements OnInit, DoCheck, OnDes
 
 
   // =========================================================
+  // IMPRESIÓN DE PAGARÉS
+  // =========================================================
+
+  imprimiendoPagareDiligenciado = false;
+
+  imprimiendoPagareEnBlanco = false;
+
+  // =========================================================
   // MENSAJES
   // =========================================================
 
@@ -154,7 +162,8 @@ export class OriginacionFormalizacionComponent implements OnInit, DoCheck, OnDes
       || this.consultandoPropuestaPagare
       || this.guardando
       || this.generandoPagare
-      || this.finalizando;
+      || this.finalizando
+      || this.imprimiendoPagareDiligenciado;
   }
 
 
@@ -399,6 +408,19 @@ export class OriginacionFormalizacionComponent implements OnInit, DoCheck, OnDes
       && this.tienePagare;
   }
 
+  // =========================================================
+  // PERMISO PARA IMPRIMIR PAGARÉS
+  //
+  // Permite imprimir después de constituir el crédito,
+  // incluso si la formalización ya fue finalizada.
+  // =========================================================
+
+  get puedeImprimirPagare(): boolean {
+
+    return this.detalle != null
+      && this.tienePagare
+      && !this.procesando;
+  }
 
   // =========================================================
   // INICIALIZACIÓN
@@ -952,6 +974,137 @@ export class OriginacionFormalizacionComponent implements OnInit, DoCheck, OnDes
     });
   }
 
+  // =========================================================
+  // IMPRIMIR PAGARÉ DILIGENCIADO
+  //
+  // Abre la vista Angular de impresión.
+  // Los datos se consultan desde el nuevo componente.
+  // No genera PDF ni modifica el crédito.
+  // =========================================================
+
+  imprimirPagareDiligenciado(): void {
+
+    if (!this.detalle || !this.puedeImprimirPagare) {
+      return;
+    }
+
+    const idSolicitudCredito =
+      this.detalle.idSolicitudCredito;
+
+    this.error = '';
+    this.mensaje = '';
+
+    const ruta = this.router.serializeUrl(
+      this.router.createUrlTree([
+        '/cartera/originacion/impresion/pagare-diligenciado',
+        idSolicitudCredito
+      ])
+    );
+
+    const ventana = window.open(
+      ruta,
+      '_blank'
+    );
+
+    if (!ventana) {
+
+      this.error =
+        'El navegador bloqueó la ventana del pagaré. '
+        + 'Permita las ventanas emergentes para ASSIP ERP.';
+
+      return;
+    }
+
+    ventana.focus();
+  }
+
+  // =========================================================
+  // IMPRIMIR PAGARÉ EN BLANCO
+  //
+  // Abre la vista Angular de impresión.
+  // Los datos se consultan desde el nuevo componente.
+  // No genera PDF ni modifica el crédito.
+  // =========================================================
+
+  imprimirPagareEnBlanco(): void {
+
+    if (!this.detalle || !this.puedeImprimirPagare) {
+      return;
+    }
+
+    const idSolicitudCredito =
+      this.detalle.idSolicitudCredito;
+
+    this.error = '';
+    this.mensaje = '';
+
+    const ruta = this.router.serializeUrl(
+      this.router.createUrlTree([
+        '/cartera/originacion/impresion/pagare-en-blanco',
+        idSolicitudCredito
+      ])
+    );
+
+    const ventana = window.open(
+      ruta,
+      '_blank'
+    );
+
+    if (!ventana) {
+
+      this.error =
+        'El navegador bloqueó la ventana del pagaré en blanco. '
+        + 'Permita las ventanas emergentes para ASSIP ERP.';
+
+      return;
+    }
+
+    ventana.focus();
+  }
+
+  // =========================================================
+  // IMPRIMIR CARTA DE INSTRUCCIONES
+  //
+  // Abre la vista Angular de impresión.
+  // Utiliza los datos del pagaré constituido y sus firmantes.
+  // No modifica el crédito.
+  // =========================================================
+
+  imprimirCartaInstrucciones(): void {
+
+    if (!this.detalle || !this.puedeImprimirPagare) {
+      return;
+    }
+
+    const idSolicitudCredito =
+      this.detalle.idSolicitudCredito;
+
+    this.error = '';
+    this.mensaje = '';
+
+    const ruta = this.router.serializeUrl(
+      this.router.createUrlTree([
+        '/cartera/originacion/impresion/carta-instrucciones',
+        idSolicitudCredito
+      ])
+    );
+
+    const ventana = window.open(
+      ruta,
+      '_blank'
+    );
+
+    if (!ventana) {
+
+      this.error =
+        'El navegador bloqueó la ventana de la carta de instrucciones. '
+        + 'Permita las ventanas emergentes para ASSIP ERP.';
+
+      return;
+    }
+
+    ventana.focus();
+  }
 
   // =========================================================
   // FINALIZAR FORMALIZACIÓN

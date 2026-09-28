@@ -3,7 +3,7 @@ package co.assip.erp.cartera.originacion.financiero;
 import co.assip.erp.cartera.originacion.financiero.dto.SolicitudFinancieroDTO;
 import co.assip.erp.cartera.originacion.financiero.dto.SolicitudFinancieroDetalleDTO;
 import co.assip.erp.cartera.originacion.financiero.dto.SolicitudFinancieroGuardarRequestDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,9 +54,18 @@ public class SolicitudFinancieroService {
                                 )
                         );
 
-        usuarioSesionService.validarAgencia(
-                idAgencia
-        );
+        // Durante originación, un funcionario autorizado puede consultar
+        // información financiera de solicitudes de otras agencias.
+        usuarioSesionService.idUsuario();
+
+        if (!usuarioSesionService.tieneAccesoTotal()
+                && (usuarioSesionService.agencias() == null
+                || usuarioSesionService.agencias().isEmpty())) {
+
+            throw new SecurityException(
+                    "El usuario no tiene agencias autorizadas para consultar información financiera."
+            );
+        }
 
         return repository.listarPorSolicitud(
                 idSolicitudCredito
@@ -89,9 +98,18 @@ public class SolicitudFinancieroService {
                                 )
                         );
 
-        usuarioSesionService.validarAgencia(
-                idAgencia
-        );
+        // Durante originación, un funcionario autorizado puede consultar
+        // información financiera de deudores de otras agencias.
+        usuarioSesionService.idUsuario();
+
+        if (!usuarioSesionService.tieneAccesoTotal()
+                && (usuarioSesionService.agencias() == null
+                || usuarioSesionService.agencias().isEmpty())) {
+
+            throw new SecurityException(
+                    "El usuario no tiene agencias autorizadas para consultar información financiera."
+            );
+        }
 
         return repository.buscarPorDeudor(
                 idSolicitudDeudor
@@ -128,9 +146,18 @@ public class SolicitudFinancieroService {
                                 )
                         );
 
-        usuarioSesionService.validarAgencia(
-                idAgencia
-        );
+        // Durante originación, un funcionario autorizado puede registrar
+        // información financiera de solicitudes pertenecientes a otras agencias.
+        usuarioSesionService.idUsuario();
+
+        if (!usuarioSesionService.tieneAccesoTotal()
+                && (usuarioSesionService.agencias() == null
+                || usuarioSesionService.agencias().isEmpty())) {
+
+            throw new SecurityException(
+                    "El usuario no tiene agencias autorizadas para gestionar información financiera."
+            );
+        }
 
         Integer idUsuario =
                 usuarioSesionService.idUsuario();

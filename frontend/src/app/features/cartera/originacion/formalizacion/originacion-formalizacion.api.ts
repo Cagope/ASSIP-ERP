@@ -19,12 +19,13 @@ import {
   SolicitudFormalizacionSimulacion
 } from './originacion-formalizacion.models';
 
+import {
+  PagareDiligenciadoDatos
+} from '../impresion/pagare-diligenciado/pagare-diligenciado.models';
+
 
 // =========================================================
 // BLOQUEOS Y ALERTAS DE FORMALIZACIÓN
-//
-// Backend:
-// SolicitudFormalizacionValidacionService
 // =========================================================
 
 export interface BloqueoFormalizacion {
@@ -40,9 +41,6 @@ export interface AlertaFormalizacion {
 
 // =========================================================
 // RESPUESTA DE VALIDACIÓN DE FORMALIZACIÓN
-//
-// Backend:
-// ResultadoValidacionFormalizacion
 // =========================================================
 
 export interface ResultadoValidacionFormalizacion {
@@ -62,9 +60,6 @@ export interface ResultadoValidacionFormalizacion {
   bloqueos: BloqueoFormalizacion[];
   alertas: AlertaFormalizacion[];
 
-  // Detalles específicos devueltos por el backend.
-  // Conservamos sus estructuras para uso posterior.
-
   bloqueosMora: unknown[];
 
   aportes: unknown | null;
@@ -78,20 +73,21 @@ export interface ResultadoValidacionFormalizacion {
 
 }
 
- // =========================================================
- // PROPUESTA PARA GENERACIÓN DEL PAGARÉ
- // =========================================================
 
- export interface PropuestaPagare {
-   pagareProvisional: string;
-   fechaSugerida: string;       // yyyy-MM-dd
-   nombreCompleto: string;
-   valorFormalizado: number;
- }
+// =========================================================
+// PROPUESTA PARA GENERACIÓN DEL PAGARÉ
+// =========================================================
 
- export interface GenerarPagareRequest {
-   fechaPagare: string;         // yyyy-MM-dd
- }
+export interface PropuestaPagare {
+  pagareProvisional: string;
+  fechaSugerida: string;
+  nombreCompleto: string;
+  valorFormalizado: number;
+}
+
+export interface GenerarPagareRequest {
+  fechaPagare: string;
+}
 
 
 @Injectable({
@@ -105,6 +101,9 @@ export class OriginacionFormalizacionApi {
 
   private readonly baseUrl =
     `${environment.apiUrl}/cartera/originacion/formalizacion`;
+
+  private readonly impresionUrl =
+    `${environment.apiUrl}/cartera/originacion/impresion`;
 
 
   // =======================================================
@@ -135,9 +134,6 @@ export class OriginacionFormalizacionApi {
 
   // =======================================================
   // SIMULAR CONDICIONES FINANCIERAS
-  //
-  // Calcula TEA y cuota con las condiciones digitadas.
-  // No guarda información.
   // =======================================================
 
   simular(
@@ -154,9 +150,6 @@ export class OriginacionFormalizacionApi {
 
   // =======================================================
   // VALIDAR CONDICIONES DIGITADAS
-  //
-  // Valida bloqueos y alertas de formalización.
-  // No guarda las condiciones financieras.
   // =======================================================
 
   validar(
@@ -187,41 +180,80 @@ export class OriginacionFormalizacionApi {
   }
 
 
-    // =======================================================
-    // CONSULTAR PROPUESTA DEL PAGARÉ
-    //
-    // Consulta el consecutivo provisional del parámetro 605.
-    // No reserva ni incrementa el consecutivo.
-    // =======================================================
+  // =======================================================
+  // CONSULTAR PROPUESTA DEL PAGARÉ
+  //
+  // Consulta el consecutivo provisional del parámetro 605.
+  // No reserva ni incrementa el consecutivo.
+  // =======================================================
 
-    consultarPropuestaPagare(
-      idSolicitudCredito: number
-    ): Observable<PropuestaPagare> {
+  consultarPropuestaPagare(
+    idSolicitudCredito: number
+  ): Observable<PropuestaPagare> {
 
-      return this.http.get<PropuestaPagare>(
-        `${this.baseUrl}/${idSolicitudCredito}/propuesta-pagare`
-      );
-    }
+    return this.http.get<PropuestaPagare>(
+      `${this.baseUrl}/${idSolicitudCredito}/propuesta-pagare`
+    );
+  }
 
 
-    // =======================================================
-    // GENERAR PAGARÉ
-    //
-    // Envía la fecha seleccionada por el asesor.
-    // El backend asigna el consecutivo definitivo y registra
-    // la fecha en cartera.carteras_creditos.fecha_inclusion_sistema.
-    // =======================================================
+  // =======================================================
+  // GENERAR PAGARÉ
+  //
+  // El backend asigna el consecutivo definitivo y registra
+  // la fecha del pagaré en el crédito constituido.
+  // =======================================================
 
-    generarPagare(
-      idSolicitudCredito: number,
-      request: GenerarPagareRequest
-    ): Observable<SolicitudFormalizacionDetalle> {
+  generarPagare(
+    idSolicitudCredito: number,
+    request: GenerarPagareRequest
+  ): Observable<SolicitudFormalizacionDetalle> {
 
-      return this.http.post<SolicitudFormalizacionDetalle>(
-        `${this.baseUrl}/${idSolicitudCredito}/generar-pagare`,
-        request
-      );
-    }
+    return this.http.post<SolicitudFormalizacionDetalle>(
+      `${this.baseUrl}/${idSolicitudCredito}/generar-pagare`,
+      request
+    );
+  }
+
+
+  // =======================================================
+  // CONSULTAR DATOS DEL PAGARÉ DILIGENCIADO
+  //
+  // Angular construye e imprime el documento.
+  //
+  // No genera consecutivos ni modifica el crédito.
+  // =======================================================
+
+  consultarDatosPagareDiligenciado(
+    idSolicitudCredito: number
+  ): Observable<PagareDiligenciadoDatos> {
+
+    return this.http.get<PagareDiligenciadoDatos>(
+      `${this.impresionUrl}/${idSolicitudCredito}/pagare/diligenciado/datos`
+    );
+  }
+
+
+  // =======================================================
+  // CONSULTAR DATOS DEL PAGARÉ EN BLANCO
+  //
+  // Los datos se utilizan para generar desde Angular:
+  //
+  // - Pagaré en blanco.
+  // - Carta de instrucciones.
+  //
+  // No genera PDF en Java.
+  // No modifica información del crédito.
+  // =======================================================
+
+  consultarDatosPagareEnBlanco(
+    idSolicitudCredito: number
+  ): Observable<PagareDiligenciadoDatos> {
+
+    return this.http.get<PagareDiligenciadoDatos>(
+      `${this.impresionUrl}/${idSolicitudCredito}/pagare/en-blanco/datos`
+    );
+  }
 
 
   // =======================================================

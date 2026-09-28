@@ -790,7 +790,6 @@
 
     </section>
 
-
     <!-- =================================================== -->
     <!-- PAGARÉ Y CRÉDITO CONSTITUIDO -->
     <!-- =================================================== -->
@@ -805,16 +804,20 @@
 
         <span class="badge">
 
-          {{
-            tienePagare
-              ? 'Crédito constituido'
-              : 'Pendiente'
-          }}
+      {{
+        tienePagare
+          ? 'Crédito constituido'
+          : 'Pendiente'
+      }}
 
-        </span>
+    </span>
 
       </div>
 
+
+      <!-- ================================================= -->
+      <!-- PAGARÉ PENDIENTE -->
+      <!-- ================================================= -->
 
       <div
         *ngIf="!tienePagare"
@@ -829,6 +832,10 @@
 
       </div>
 
+
+      <!-- ================================================= -->
+      <!-- CRÉDITO CONSTITUIDO -->
+      <!-- ================================================= -->
 
       <div
         class="datos-grid"
@@ -881,19 +888,89 @@
       </div>
 
 
+      <!-- ================================================= -->
+      <!-- IMPRESIÓN DEL PAGARÉ -->
+      <!-- ================================================= -->
+
+      <ng-container *ngIf="tienePagare">
+
+        <div class="card-header">
+
+          <h3>
+            Impresión del pagaré
+          </h3>
+
+        </div>
+
+        <p class="nota">
+
+          Seleccione el formato que corresponda.
+          La impresión no genera un nuevo consecutivo
+          ni modifica las condiciones del crédito.
+
+        </p>
+
+        <div class="acciones">
+
+          <!-- PAGARÉ DILIGENCIADO -->
+
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            (click)="imprimirPagareDiligenciado()"
+            [disabled]="!puedeImprimirPagare">
+
+            Imprimir pagaré diligenciado
+
+          </button>
+
+
+          <!-- PAGARÉ EN BLANCO -->
+
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="imprimirPagareEnBlanco()"
+            [disabled]="!puedeImprimirPagare">
+
+            Imprimir pagaré en blanco
+
+          </button>
+
+
+          <!-- CARTA DE INSTRUCCIONES -->
+
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="imprimirCartaInstrucciones()"
+            [disabled]="!puedeImprimirPagare">
+
+            Imprimir carta de instrucciones
+
+          </button>
+
+        </div>
+
+      </ng-container>
+
+
+      <!-- ================================================= -->
+      <!-- NOTA DEL CRÉDITO -->
+      <!-- ================================================= -->
+
       <p
         class="nota"
         *ngIf="tienePagare">
 
         El crédito está vinculado con esta solicitud.
-        La generación del pagaré no realiza
+        La impresión del pagaré no realiza
         el desembolso ni cambia el proceso
         de la solicitud.
 
       </p>
 
     </section>
-
 
     <!-- =================================================== -->
     <!-- ACCIONES -->

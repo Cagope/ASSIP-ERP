@@ -1,7 +1,7 @@
 package co.assip.erp.nomina.contabilizacion.liquidacion;
 
 import co.assip.erp.nomina.contabilizacion.liquidacion.dto.*;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 
 import co.assip.erp.contabilidad.auxiliares_contables.ContabilidadRegistroService;
 import co.assip.erp.contabilidad.auxiliares_contables.dto.MovimientoContableDTO;

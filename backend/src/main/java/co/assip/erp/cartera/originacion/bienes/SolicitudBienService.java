@@ -3,7 +3,7 @@ package co.assip.erp.cartera.originacion.bienes;
 import co.assip.erp.cartera.originacion.bienes.dto.SolicitudBienCreditoRespaldadoDTO;
 import co.assip.erp.cartera.originacion.bienes.dto.SolicitudBienDTO;
 import co.assip.erp.cartera.originacion.bienes.dto.SolicitudBienSeleccionRequestDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

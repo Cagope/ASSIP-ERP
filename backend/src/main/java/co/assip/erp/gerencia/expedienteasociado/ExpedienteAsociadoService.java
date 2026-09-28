@@ -11,7 +11,6 @@ import co.assip.erp.gerencia.expedienteasociado.dto.ExpedienteCdatDTO;
 import co.assip.erp.gerencia.expedienteasociado.dto.ExpedienteContactoDTO;
 import co.assip.erp.gerencia.expedienteasociado.dto.ExpedienteCreditoDTO;
 import co.assip.erp.gerencia.expedienteasociado.dto.ExpedienteCuentaAhorroDTO;
-import co.assip.erp.gerencia.expedienteasociado.dto.ExpedienteEstadoCargaDTO;
 import co.assip.erp.gerencia.expedienteasociado.dto.ExpedienteGarantiaDTO;
 import co.assip.erp.gerencia.expedienteasociado.dto.ExpedienteIndicadoresDTO;
 import co.assip.erp.gerencia.expedienteasociado.dto.ExpedienteInformacionFinancieraDTO;
@@ -23,7 +22,7 @@ import co.assip.erp.gerencia.expedienteasociado.repository.ExpedienteCdatReposit
 import co.assip.erp.gerencia.expedienteasociado.repository.ExpedienteCarteraRepository;
 import co.assip.erp.gerencia.expedienteasociado.repository.ExpedienteParticipacionRepository;
 import co.assip.erp.gerencia.expedienteasociado.repository.ExpedientePersonaRepository;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

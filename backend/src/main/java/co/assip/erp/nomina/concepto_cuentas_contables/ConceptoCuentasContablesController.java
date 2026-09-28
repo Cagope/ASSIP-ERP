@@ -1,6 +1,6 @@
 package co.assip.erp.nomina.concepto_cuentas_contables;
 
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.nomina.concepto_cuentas_contables.dto.ConceptoCuentaContableFormDTO;
 import co.assip.erp.nomina.concepto_cuentas_contables.dto.ConceptoCuentaContableListDTO;
 import lombok.RequiredArgsConstructor;

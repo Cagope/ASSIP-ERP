@@ -1,0 +1,1036 @@
+<div class="page">
+
+  <!-- =======================================================
+       ENCABEZADO
+       ======================================================= -->
+
+  <div class="page-header">
+
+    <div>
+      <h2>Desembolso de Cartera</h2>
+
+      <p>
+        Validación, distribución y ejecución del desembolso del crédito.
+      </p>
+    </div>
+
+    <div class="page-header__actions">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="volver()">
+        Volver
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       MENSAJES
+       ======================================================= -->
+
+  <div
+    *ngIf="error"
+    class="alert alert--danger">
+    {{ error }}
+  </div>
+
+  <div
+    *ngIf="mensaje"
+    class="alert alert--success">
+    {{ mensaje }}
+  </div>
+
+
+  <!-- =======================================================
+       CARGANDO
+       ======================================================= -->
+
+  <div
+    *ngIf="cargando"
+    class="state-message">
+    Cargando información del crédito...
+  </div>
+
+
+  <!-- =======================================================
+       CONTENIDO
+       ======================================================= -->
+
+  <ng-container
+    *ngIf="!cargando && preparacion">
+
+    <!-- =====================================================
+         CRÉDITO
+         ===================================================== -->
+
+    <section class="card">
+
+      <div class="card-header">
+
+        <div>
+          <h3>Crédito</h3>
+
+          <p>
+            Información del crédito formalizado pendiente de desembolso.
+          </p>
+        </div>
+
+        <div class="status-badge status-badge--pending">
+          Pendiente de desembolso
+        </div>
+
+      </div>
+
+
+      <div class="info-grid">
+
+        <div class="info-item">
+          <span class="info-label">
+            Identificación
+          </span>
+
+          <strong>
+            {{ preparacion.documento }}
+          </strong>
+        </div>
+
+
+        <div class="info-item info-item--wide">
+          <span class="info-label">
+            Asociado
+          </span>
+
+          <strong>
+            {{ preparacion.nombreCompleto }}
+          </strong>
+        </div>
+
+
+        <div class="info-item">
+          <span class="info-label">
+            Pagaré
+          </span>
+
+          <strong>
+            {{ preparacion.pagareCartera }}
+          </strong>
+        </div>
+
+
+        <div class="info-item info-item--wide">
+          <span class="info-label">
+            Línea de crédito
+          </span>
+
+          <strong>
+            {{ preparacion.codigoLineaCredito }}
+            -
+            {{ preparacion.nombreLineaCredito }}
+          </strong>
+        </div>
+
+
+        <div class="info-item">
+          <span class="info-label">
+            Valor del crédito
+          </span>
+
+          <strong class="amount">
+            {{ moneda(preparacion.valorCredito) }}
+          </strong>
+        </div>
+
+
+        <div class="info-item">
+          <span class="info-label">
+            Primera cuota
+          </span>
+
+          <strong>
+            {{ fecha(preparacion.fechaPrimeraCuota) }}
+          </strong>
+        </div>
+
+
+        <div class="info-item">
+          <span class="info-label">
+            Fecha final
+          </span>
+
+          <strong>
+            {{ fecha(preparacion.fechaFinal) }}
+          </strong>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <form [formGroup]="form">
+
+      <!-- ===================================================
+           DATOS DEL DESEMBOLSO
+           =================================================== -->
+
+      <section class="card">
+
+        <div class="card-header">
+
+          <div>
+            <h3>Datos del desembolso</h3>
+
+            <p>
+              Defina las fechas, la caja y los comprobantes contables.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="form-grid form-grid--4">
+
+          <!-- Fecha contable -->
+
+          <div class="form-field">
+
+            <label for="fechaContable">
+              Fecha contable
+            </label>
+
+            <input
+              id="fechaContable"
+              type="date"
+              formControlName="fechaContable"
+              [readonly]="desembolsoEjecutado"
+              (change)="cambiarFechaContable()">
+
+          </div>
+
+
+          <!-- Fecha desembolso -->
+
+          <div class="form-field">
+
+            <label for="fechaDesembolso">
+              Fecha de desembolso
+            </label>
+
+            <input
+              id="fechaDesembolso"
+              type="date"
+              formControlName="fechaDesembolso"
+              [readonly]="desembolsoEjecutado">
+
+          </div>
+
+
+          <!-- Caja -->
+
+          <div class="form-field">
+
+            <label for="idCaja">
+              Caja
+            </label>
+
+            <select
+              id="idCaja"
+              formControlName="idCaja"
+              (change)="cambioDistribucion()">
+
+              <option [ngValue]="null">
+                Seleccione...
+              </option>
+
+              <option
+                *ngFor="let caja of cajas"
+                [ngValue]="caja.idCaja">
+                {{ nombreCaja(caja) }}
+              </option>
+
+            </select>
+
+            <small
+              *ngIf="!cargando && cajas.length === 0"
+              class="field-help field-help--warning">
+              No hay cajas abiertas para la agencia y fecha contable seleccionadas.
+            </small>
+
+          </div>
+
+          <!-- Central de riesgo -->
+
+          <div class="form-field">
+
+            <label for="cantidadCentral">
+              Consultas central de riesgo
+            </label>
+
+            <input
+              id="cantidadCentral"
+              type="number"
+              min="0"
+              step="1"
+              formControlName="cantidadCentral"
+              (change)="calcular()">
+
+            <small class="field-help">
+              Sugeridas:
+              {{ preparacion.cantidadCentralSugerida }}
+            </small>
+
+          </div>
+
+
+          <!-- Comprobante desembolso -->
+
+          <div class="form-field form-field--span-2">
+
+            <label for="tipoComprobanteDesembolso">
+              Comprobante del desembolso
+            </label>
+
+            <select
+              id="tipoComprobanteDesembolso"
+              formControlName="tipoComprobanteDesembolso">
+
+              <option value="">
+                Seleccione...
+              </option>
+
+              <option
+                *ngFor="let tipo of tiposComprobantes"
+                [value]="tipo.tipoComprobante">
+                {{ nombreTipoComprobante(tipo) }}
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- Comprobante cobros -->
+
+          <div
+            *ngIf="tieneCobros"
+            class="form-field form-field--span-2">
+
+            <label for="tipoComprobanteCobros">
+              Comprobante de cobros
+            </label>
+
+            <select
+              id="tipoComprobanteCobros"
+              formControlName="tipoComprobanteCobros">
+
+              <option value="">
+                Seleccione...
+              </option>
+
+              <option
+                *ngFor="let tipo of tiposComprobantes"
+                [value]="tipo.tipoComprobante">
+                {{ nombreTipoComprobante(tipo) }}
+              </option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================
+           LIQUIDACIÓN
+           =================================================== -->
+
+      <section
+        *ngIf="liquidacion"
+        class="card">
+
+        <div class="card-header">
+
+          <div>
+            <h3>Liquidación</h3>
+
+            <p>
+              Valores determinados para el desembolso y los cobros asociados.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="btn btn--secondary"
+            [disabled]="calculando || desembolsoEjecutado"
+            (click)="calcular()">
+            {{ calculando ? 'Calculando...' : 'Recalcular' }}
+          </button>
+
+        </div>
+
+
+        <!-- ===============================================
+             COMPROBANTE 1
+             =============================================== -->
+
+        <div class="section-title">
+          <h4>Desembolso</h4>
+        </div>
+
+
+        <div class="values-grid">
+
+          <div class="value-item">
+            <span>
+              Valor crédito
+            </span>
+
+            <strong>
+              {{ moneda(liquidacion.valorCredito) }}
+            </strong>
+          </div>
+
+
+          <div class="value-item">
+            <span>
+              Fondo de garantía
+            </span>
+
+            <strong>
+              {{ moneda(liquidacion.valorFondo) }}
+            </strong>
+
+            <small>
+              {{ liquidacion.porcentajeFondo }}%
+            </small>
+          </div>
+
+
+          <div class="value-item">
+            <span>
+              IVA fondo
+            </span>
+
+            <strong>
+              {{ moneda(liquidacion.ivaFondo) }}
+            </strong>
+          </div>
+
+
+          <div class="value-item value-item--highlight">
+            <span>
+              Valor a distribuir
+            </span>
+
+            <strong>
+              {{ moneda(liquidacion.valorDistribuir) }}
+            </strong>
+          </div>
+
+        </div>
+
+
+        <!-- ===============================================
+             COMPROBANTE 2
+             =============================================== -->
+
+        <div class="section-title section-title--separated">
+          <h4>Cobros del desembolso</h4>
+        </div>
+
+
+        <div class="values-grid">
+
+          <div class="value-item">
+            <span>
+              Central de riesgo
+            </span>
+
+            <strong>
+              {{ moneda(liquidacion.valorCentral) }}
+            </strong>
+
+            <small>
+              {{ liquidacion.cantidadCentral }}
+              ×
+              {{ moneda(liquidacion.valorUnitarioCentral) }}
+            </small>
+          </div>
+
+
+          <div class="value-item">
+            <span>
+              Papelería
+            </span>
+
+            <strong>
+              {{ moneda(liquidacion.valorPapeleria) }}
+            </strong>
+          </div>
+
+
+          <div class="value-item">
+            <span>
+              IVA papelería
+            </span>
+
+            <strong>
+              {{ moneda(liquidacion.ivaPapeleria) }}
+            </strong>
+          </div>
+
+
+          <div class="value-item">
+            <span>
+              Aportes
+            </span>
+
+            <strong>
+              {{ moneda(liquidacion.valorAportes) }}
+            </strong>
+          </div>
+
+
+          <div class="value-item value-item--highlight">
+            <span>
+              Total cobros
+            </span>
+
+            <strong>
+              {{ moneda(liquidacion.totalComprobante2) }}
+            </strong>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================
+           DISTRIBUCIÓN DEL DESEMBOLSO
+           =================================================== -->
+
+      <section
+        *ngIf="liquidacion"
+        class="card">
+
+        <div class="card-header">
+
+          <div>
+            <h3>Distribución del desembolso</h3>
+
+            <p>
+              Distribuya exactamente
+              <strong>
+                {{ moneda(liquidacion.valorDistribuir) }}
+              </strong>
+              entre efectivo, cuentas de ahorro y cuenta por pagar.
+            </p>
+          </div>
+
+        </div>
+
+
+        <div class="distribution-grid">
+
+          <!-- Efectivo -->
+
+          <div class="form-field">
+
+            <label for="valorEfectivo">
+              Efectivo
+            </label>
+
+            <input
+              id="valorEfectivo"
+              type="text"
+              numericFormat
+              inputmode="decimal"
+              class="input-number"
+              [ngModel]="form.get('valorEfectivo')?.value"
+              [ngModelOptions]="{ standalone: true }"
+              (ngModelChange)="cambiarValorEfectivo($event)">
+
+          </div>
+
+
+          <!-- Cuenta por pagar -->
+
+          <div class="form-field">
+
+            <label for="valorCuentaPorPagar">
+              Cuenta por pagar
+            </label>
+
+            <input
+              id="valorCuentaPorPagar"
+              type="text"
+              numericFormat
+              inputmode="decimal"
+              class="input-number"
+              [ngModel]="form.get('valorCuentaPorPagar')?.value"
+              [ngModelOptions]="{ standalone: true }"
+              (ngModelChange)="cambiarValorCuentaPorPagar($event)">
+
+          </div>
+
+        </div>
+
+
+        <!-- ===============================================
+             CUENTAS DE AHORRO
+             =============================================== -->
+
+        <div class="deposit-section">
+
+          <div class="deposit-section__header">
+
+            <div>
+              <h4>Cuentas de ahorro</h4>
+
+              <p>
+                Registre las cuentas donde se acreditará parte del desembolso.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="btn btn--secondary"
+              [disabled]="desembolsoEjecutado"
+              (click)="agregarDeposito()">
+              Agregar cuenta
+            </button>
+
+          </div>
+
+
+          <div
+            *ngIf="depositos.length === 0"
+            class="empty-inline">
+            No se han agregado cuentas de ahorro a la distribución.
+          </div>
+
+
+          <div
+            formArrayName="depositos"
+            class="deposit-list">
+
+            <div
+              *ngFor="
+                let deposito of depositos.controls;
+                let i = index
+              "
+              [formGroupName]="i"
+              class="deposit-row">
+
+              <div class="form-field">
+
+                <label
+                  [for]="'idCuentaAhorro-' + i">
+                  Cuenta de ahorro
+                </label>
+
+                <select
+                  [id]="'idCuentaAhorro-' + i"
+                  formControlName="idCuentaAhorro"
+                  (change)="cambioDistribucion()">
+
+                  <option [ngValue]="null">
+                    Seleccione cuenta...
+                  </option>
+
+                  <option
+                    *ngFor="let cuenta of cuentasAhorroDisponibles"
+                    [ngValue]="cuenta.id_cuenta_ahorro">
+
+                    {{ cuenta.codigo_cuenta }}
+                    -
+                    {{
+                    cuenta.nombre_forma_ahorro ||
+                    cuenta.nombreFormaAhorro ||
+                    'Ahorro'
+                    }}
+                    -
+                    Saldo
+                    {{
+                    cuenta.saldo_actual_cuenta
+                    | number:'1.0-0'
+                    }}
+
+                  </option>
+
+                </select>
+
+              </div>
+
+
+              <div class="form-field">
+
+                <label
+                  [for]="'valorDeposito-' + i">
+                  Valor
+                </label>
+
+                <input
+                  [id]="'valorDeposito-' + i"
+                  type="text"
+                  numericFormat
+                  inputmode="decimal"
+                  class="input-number"
+                  [ngModel]="depositos.at(i).get('valor')?.value"
+                  [ngModelOptions]="{ standalone: true }"
+                  (ngModelChange)="cambiarValorDeposito(i, $event)">
+
+              </div>
+
+
+              <div class="deposit-row__action">
+
+                <button
+                  type="button"
+                  class="btn btn--danger-outline"
+                  [disabled]="desembolsoEjecutado"
+                  (click)="eliminarDeposito(i)">
+                  Quitar
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===============================================
+             RESUMEN DISTRIBUCIÓN
+             =============================================== -->
+
+        <div class="distribution-summary">
+
+          <div>
+            <span>
+              Valor a distribuir
+            </span>
+
+            <strong>
+              {{ moneda(liquidacion.valorDistribuir) }}
+            </strong>
+          </div>
+
+
+          <div>
+            <span>
+              Efectivo
+            </span>
+
+            <strong>
+              {{
+              moneda(
+              form.get('valorEfectivo')?.value
+              )
+              }}
+            </strong>
+          </div>
+
+
+          <div>
+            <span>
+              Cuentas de ahorro
+            </span>
+
+            <strong>
+              {{ moneda(totalDepositosLocal) }}
+            </strong>
+          </div>
+
+
+          <div>
+            <span>
+              Cuenta por pagar
+            </span>
+
+            <strong>
+              {{
+              moneda(
+              form.get('valorCuentaPorPagar')?.value
+              )
+              }}
+            </strong>
+          </div>
+
+
+          <div class="distribution-summary__total">
+            <span>
+              Total distribuido
+            </span>
+
+            <strong>
+              {{ moneda(totalDistribuidoLocal) }}
+            </strong>
+          </div>
+
+
+          <div
+            class="distribution-summary__difference"
+            [class.is-ok]="diferenciaDistribucionLocal === 0"
+            [class.is-error]="diferenciaDistribucionLocal !== 0">
+
+            <span>
+              Diferencia
+            </span>
+
+            <strong>
+              {{ moneda(diferenciaDistribucionLocal) }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===============================================
+             VALIDACIÓN BACKEND
+             =============================================== -->
+
+        <div
+          *ngIf="validacionDistribucion"
+          class="validation-result"
+          [class.validation-result--ok]="
+            validacionDistribucion.cuadra
+          "
+          [class.validation-result--error]="
+            !validacionDistribucion.cuadra
+          ">
+
+          <strong>
+            {{
+            validacionDistribucion.cuadra
+            ? 'Distribución validada'
+            : 'Distribución con diferencias'
+            }}
+          </strong>
+
+          <span>
+            {{
+              validacionDistribucion.mensaje
+            }}
+          </span>
+
+        </div>
+
+
+        <div class="card-actions">
+
+          <button
+            type="button"
+            class="btn btn--secondary"
+            [disabled]="!puedeValidarDistribucion"
+            (click)="validarDistribucion()">
+
+            {{
+            validando
+            ? 'Validando...'
+            : 'Validar distribución'
+            }}
+
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================
+           RESULTADO DEL DESEMBOLSO
+           =================================================== -->
+
+      <section
+        *ngIf="resultado"
+        class="card result-card">
+
+        <div class="card-header">
+
+          <div>
+            <h3>Desembolso realizado</h3>
+
+            <p>
+              El crédito fue procesado correctamente.
+            </p>
+          </div>
+
+          <div class="status-badge status-badge--success">
+            Desembolsado
+          </div>
+
+        </div>
+
+
+        <div class="info-grid">
+
+          <div class="info-item">
+            <span class="info-label">
+              Pagaré
+            </span>
+
+            <strong>
+              {{ resultado.pagareCartera }}
+            </strong>
+          </div>
+
+
+          <div class="info-item">
+            <span class="info-label">
+              Valor crédito
+            </span>
+
+            <strong class="amount">
+              {{ moneda(resultado.valorCredito) }}
+            </strong>
+          </div>
+
+
+          <div class="info-item">
+            <span class="info-label">
+              Fecha contable
+            </span>
+
+            <strong>
+              {{ fecha(resultado.fechaContable) }}
+            </strong>
+          </div>
+
+
+          <div class="info-item">
+            <span class="info-label">
+              Fecha desembolso
+            </span>
+
+            <strong>
+              {{ fecha(resultado.fechaDesembolso) }}
+            </strong>
+          </div>
+
+
+          <div class="info-item">
+            <span class="info-label">
+              Comprobante desembolso
+            </span>
+
+            <strong>
+              {{ resultado.tipoComprobanteDesembolso }}
+              -
+              {{ resultado.numeroComprobanteDesembolso }}
+            </strong>
+          </div>
+
+
+          <div
+            *ngIf="resultado.numeroComprobanteCobros"
+            class="info-item">
+
+            <span class="info-label">
+              Comprobante cobros
+            </span>
+
+            <strong>
+              {{ resultado.tipoComprobanteCobros }}
+              -
+              {{ resultado.numeroComprobanteCobros }}
+            </strong>
+
+          </div>
+
+
+          <div class="info-item">
+            <span class="info-label">
+              Edad inicial
+            </span>
+
+            <strong>
+              {{ resultado.edadRiesgoInicial }}
+            </strong>
+          </div>
+
+
+          <div class="info-item">
+            <span class="info-label">
+              Modificación
+            </span>
+
+            <strong>
+              {{ resultado.codigoModificacionCredito }}
+            </strong>
+          </div>
+
+
+          <div class="info-item">
+            <span class="info-label">
+              Número de novaciones
+            </span>
+
+            <strong>
+              {{ resultado.numeroNovaciones }}
+            </strong>
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- ===================================================
+           ACCIONES FINALES
+           =================================================== -->
+
+      <div
+        *ngIf="liquidacion"
+        class="process-actions">
+
+        <button
+          type="button"
+          class="btn btn--secondary"
+          [disabled]="ejecutando"
+          (click)="volver()">
+          Volver
+        </button>
+
+
+        <button
+          *ngIf="!desembolsoEjecutado"
+          type="button"
+          class="btn btn--primary btn--execute"
+          [disabled]="!puedeEjecutar"
+          (click)="ejecutar()">
+
+          {{
+          ejecutando
+          ? 'Procesando desembolso...'
+          : 'Ejecutar desembolso'
+          }}
+
+        </button>
+
+
+        <button
+          *ngIf="desembolsoEjecutado"
+          type="button"
+          class="btn btn--primary"
+          (click)="volver()">
+          Finalizar
+        </button>
+
+      </div>
+
+    </form>
+
+  </ng-container>
+
+</div>

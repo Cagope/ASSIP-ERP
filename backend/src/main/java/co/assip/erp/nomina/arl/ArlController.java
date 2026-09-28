@@ -1,6 +1,6 @@
 package co.assip.erp.nomina.arl;
 
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.nomina.arl.dto.ArlDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

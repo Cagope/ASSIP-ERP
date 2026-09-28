@@ -2,7 +2,7 @@ package co.assip.erp.nomina.novedades_nomina;
 
 import co.assip.erp.nomina.novedades_nomina.dto.*;
 import co.assip.erp.nomina.periodos_nomina.PeriodoNominaActivoService;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;

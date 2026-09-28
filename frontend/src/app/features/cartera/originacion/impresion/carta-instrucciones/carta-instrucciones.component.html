@@ -1,0 +1,380 @@
+<div class="carta-instrucciones">
+
+  <!-- =====================================================
+       BARRA DE ACCIONES
+       ===================================================== -->
+
+  <div class="barra-acciones no-imprimir">
+
+    <div class="barra-titulo">
+      <h2>Carta de instrucciones</h2>
+      <span>
+        Pagaré en blanco
+      </span>
+    </div>
+
+    <div class="barra-botones">
+
+      <button
+        type="button"
+        class="btn btn-secundario"
+        (click)="cerrar()">
+        Cerrar
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primario"
+        [disabled]="!puedeImprimir"
+        (click)="imprimir()">
+        Imprimir
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       CARGANDO
+       ===================================================== -->
+
+  <div
+    *ngIf="cargando"
+    class="estado no-imprimir">
+
+    Consultando carta de instrucciones...
+
+  </div>
+
+
+  <!-- =====================================================
+       ERROR
+       ===================================================== -->
+
+  <div
+    *ngIf="error"
+    class="estado estado-error no-imprimir">
+
+    {{ error }}
+
+  </div>
+
+
+  <!-- =====================================================
+       CARTA
+       ===================================================== -->
+
+  <section
+    *ngIf="
+      puedeImprimir
+      && datos
+      && deudorPrincipal
+    "
+    class="hoja-carta">
+
+    <div class="contenido-carta">
+
+
+      <!-- =================================================
+           DESTINATARIO
+           ================================================= -->
+
+      <div class="destinatario">
+
+        <p>Señores:</p>
+
+        <p class="empresa">
+          COOPERATIVA DE AHORRO Y CRÉDITO DEL VALLE DE SAN JOSÉ
+        </p>
+
+        <p class="sigla">
+          COOPVALLE
+        </p>
+
+      </div>
+
+
+      <!-- =================================================
+           INTRODUCCIÓN
+           ================================================= -->
+
+      <div class="cuerpo-carta">
+
+        <p>
+
+          Los suscritos
+
+          <strong>
+            {{ deudorPrincipal.nombreCompleto }}
+          </strong>
+
+          <ng-container *ngIf="codeudor(0)">
+
+            ,
+
+            <strong>
+              {{ codeudor(0)?.nombreCompleto }}
+            </strong>
+
+          </ng-container>
+
+          <ng-container *ngIf="codeudor(1)">
+
+            ,
+
+            <strong>
+              {{ codeudor(1)?.nombreCompleto }}
+            </strong>
+
+          </ng-container>
+
+          <ng-container *ngIf="codeudor(2)">
+
+            ,
+
+            <strong>
+              {{ codeudor(2)?.nombreCompleto }}
+            </strong>
+
+          </ng-container>
+
+          mayores de edad, identificados como aparece al pie
+          de nuestras firmas, por medio de la presente y en
+          términos previstos por el artículo 622 del Código
+          del Comercio, los
+
+          <strong>
+            AUTORIZO
+          </strong>
+
+          para convertir en
+
+          <strong>
+            PAGARÉ A LA ORDEN
+          </strong>
+
+          el documento membreteado como "pagaré" No.
+
+          <strong>
+            {{ datos.pagare.pagareCartera }}
+          </strong>
+
+          que por el concepto de garantía otorgamos a su favor,
+          el día de hoy y en blanco.
+
+        </p>
+
+
+        <p>
+
+          El título valor podrá ser llenado por ustedes, sin
+          previo aviso, de acuerdo con las siguientes
+          instrucciones:
+
+        </p>
+
+
+        <!-- ===============================================
+             INSTRUCCIONES
+             =============================================== -->
+
+        <p>
+
+          1. La
+
+          <strong>
+            CUANTÍA
+          </strong>
+
+          será igual al monto que por capital, intereses,
+          comisiones y gastos que debamos y se causen por la
+
+          <strong>
+            COOPERATIVA.
+          </strong>
+
+        </p>
+
+
+        <p>
+
+          2. El
+
+          <strong>
+            VENCIMIENTO
+          </strong>
+
+          será a la vista.
+
+        </p>
+
+
+        <p>
+
+          3.
+
+          <strong>
+            COOPVALLE,
+          </strong>
+
+          queda facultada para colocarle como
+
+          <strong>
+            FECHA DE EMISIÓN
+          </strong>
+
+          al pagaré, la del día en que sea llenado.
+
+        </p>
+
+
+        <p>
+
+          4. El pagaré así lleno, será
+
+          <strong>
+            EXIGIBLE INMEDIATAMENTE
+          </strong>
+
+          y prestará mérito ejecutivo sin más requisitos.
+
+        </p>
+
+      </div>
+
+
+      <!-- =================================================
+           CIERRE
+           ================================================= -->
+
+      <div class="atentamente">
+
+        Atentamente,
+
+      </div>
+
+
+      <!-- =================================================
+           FIRMAS
+           ================================================= -->
+
+      <div class="firmas">
+
+
+        <!-- ===============================================
+             DEUDOR PRINCIPAL
+             =============================================== -->
+
+        <div class="firma">
+
+          <div class="linea-firma">
+            ________________________________
+          </div>
+
+          <div class="nombre-firmante">
+            {{ deudorPrincipal.nombreCompleto }}
+          </div>
+
+          <div>
+            C.C. No.
+            {{ deudorPrincipal.documento }}
+          </div>
+
+          <div>
+            {{ deudorPrincipal.direccion }}
+          </div>
+
+        </div>
+
+
+        <!-- ===============================================
+             CODEUDOR 1
+             =============================================== -->
+
+        <div
+          *ngIf="codeudor(0) as firmante"
+          class="firma">
+
+          <div class="linea-firma">
+            ________________________________
+          </div>
+
+          <div class="nombre-firmante">
+            {{ firmante.nombreCompleto }}
+          </div>
+
+          <div>
+            C.C. No.
+            {{ firmante.documento }}
+          </div>
+
+          <div>
+            {{ firmante.direccion }}
+          </div>
+
+        </div>
+
+
+        <!-- ===============================================
+             CODEUDOR 2
+             =============================================== -->
+
+        <div
+          *ngIf="codeudor(1) as firmante"
+          class="firma">
+
+          <div class="linea-firma">
+            ________________________________
+          </div>
+
+          <div class="nombre-firmante">
+            {{ firmante.nombreCompleto }}
+          </div>
+
+          <div>
+            C.C. No.
+            {{ firmante.documento }}
+          </div>
+
+          <div>
+            {{ firmante.direccion }}
+          </div>
+
+        </div>
+
+
+        <!-- ===============================================
+             CODEUDOR 3
+             =============================================== -->
+
+        <div
+          *ngIf="codeudor(2) as firmante"
+          class="firma">
+
+          <div class="linea-firma">
+            ________________________________
+          </div>
+
+          <div class="nombre-firmante">
+            {{ firmante.nombreCompleto }}
+          </div>
+
+          <div>
+            C.C. No.
+            {{ firmante.documento }}
+          </div>
+
+          <div>
+            {{ firmante.direccion }}
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>

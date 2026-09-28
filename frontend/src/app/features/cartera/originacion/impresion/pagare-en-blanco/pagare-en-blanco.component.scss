@@ -1,0 +1,392 @@
+// =========================================================
+// ASSIP ERP
+// PAGARÉ EN BLANCO - HOJA DE FIRMAS
+// FORMATO OFICIO: 216 mm x 330 mm
+// =========================================================
+
+:host {
+  display: block;
+}
+
+
+// =========================================================
+// CONTENEDOR DE PANTALLA
+// =========================================================
+
+.pagare-en-blanco {
+  min-height: 100vh;
+  padding: 1rem;
+
+  background: #f3f4f6;
+  color: #111827;
+}
+
+
+// =========================================================
+// BARRA DE ACCIONES
+// =========================================================
+
+.barra-acciones {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  max-width: 216mm;
+  margin: 0 auto 1rem;
+  padding: 0.85rem 1rem;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+}
+
+.barra-acciones__titulo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  strong {
+    font-size: 1rem;
+    color: #1f2937;
+  }
+
+  span {
+    font-size: 0.8rem;
+    color: #6b7280;
+  }
+}
+
+.barra-acciones__botones {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+
+// =========================================================
+// BOTONES
+// =========================================================
+
+.btn {
+  min-height: 36px;
+  padding: 0.45rem 0.9rem;
+
+  border: 1px solid transparent;
+  border-radius: 0.35rem;
+
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primario {
+  color: #ffffff;
+  background: #174b35;
+  border-color: #174b35;
+}
+
+.btn-secundario {
+  color: #374151;
+  background: #ffffff;
+  border-color: #d1d5db;
+}
+
+
+// =========================================================
+// ESTADOS
+// =========================================================
+
+.estado {
+  max-width: 216mm;
+  margin: 0 auto 1rem;
+  padding: 1rem;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.4rem;
+
+  font-size: 0.9rem;
+}
+
+.estado--cargando {
+  color: #4b5563;
+}
+
+.estado--error {
+  color: #991b1b;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+
+// =========================================================
+// HOJA OFICIO
+// =========================================================
+
+.hoja-oficio {
+  box-sizing: border-box;
+
+  width: 216mm;
+  height: 330mm;
+
+  margin: 0 auto 1rem;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+
+// =========================================================
+// CONTENIDO DE LA HOJA
+//
+// La rutina VB comienza aproximadamente en lin = 1.5.
+// Conservamos espacio superior y una distribución vertical
+// amplia para las cuatro zonas de firma.
+// =========================================================
+
+.contenido-pagare {
+  box-sizing: border-box;
+
+  width: 100%;
+  height: 100%;
+
+  padding:
+    13mm
+    11mm
+    10mm
+    13mm;
+
+  font-family:
+    'Courier New',
+    Courier,
+    monospace;
+
+  font-size: 10pt;
+  line-height: 1.15;
+
+  color: #000000;
+}
+
+
+// =========================================================
+// BLOQUE DE FIRMANTE
+// =========================================================
+
+.bloque-firma {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.bloque-codeudor {
+  margin-top: 12mm;
+}
+
+
+// =========================================================
+// TÍTULO DEUDOR / CODEUDOR
+// =========================================================
+
+.titulo-firmante {
+  margin: 0 0 11mm;
+
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+
+// =========================================================
+// LÍNEAS DE FIRMA Y HUELLA
+// =========================================================
+
+.lineas-firma {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    46mm;
+
+  gap: 10mm;
+
+  align-items: end;
+
+  height: 5mm;
+
+  white-space: nowrap;
+}
+
+.linea-firma,
+.linea-huella {
+  display: block;
+
+  overflow: hidden;
+
+  line-height: 1;
+}
+
+.linea-firma {
+  text-align: left;
+}
+
+.linea-huella {
+  text-align: center;
+}
+
+
+// =========================================================
+// DATOS DEL FIRMANTE
+// =========================================================
+
+.fila-firmante {
+  display: grid;
+
+  grid-template-columns:
+    29mm
+    minmax(0, 1fr)
+    46mm;
+
+  gap: 2mm;
+
+  align-items: baseline;
+
+  min-height: 4.8mm;
+}
+
+.etiqueta-firmante {
+  white-space: nowrap;
+}
+
+.valor-firmante {
+  min-width: 0;
+
+  overflow: hidden;
+
+  white-space: nowrap;
+  text-overflow: clip;
+}
+
+.etiqueta-huella {
+  text-align: center;
+  white-space: nowrap;
+}
+
+
+// =========================================================
+// ESPACIO RESERVADO PARA COOPVALLE
+// =========================================================
+
+.espacio-coopvalle {
+  margin-top: 12mm;
+
+  text-align: center;
+
+  white-space: nowrap;
+
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+
+// =========================================================
+// PREPARADO / REVISADO
+// =========================================================
+
+.control-documento {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr);
+
+  gap: 18mm;
+
+  margin-top: 5mm;
+
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.control-columna {
+  min-width: 0;
+}
+
+.control-fila {
+  min-height: 5mm;
+}
+
+.control-firma {
+  margin-top: 7mm;
+
+  overflow: hidden;
+
+  white-space: nowrap;
+}
+
+
+// =========================================================
+// IMPRESIÓN
+// =========================================================
+
+@page {
+  size: 216mm 330mm;
+  margin: 0;
+}
+
+@media print {
+
+  :host {
+    display: block;
+  }
+
+  .no-imprimir {
+    display: none !important;
+  }
+
+  .pagare-en-blanco {
+    min-height: 0;
+
+    margin: 0;
+    padding: 0;
+
+    background: #ffffff;
+  }
+
+  .hoja-oficio {
+    width: 216mm;
+    height: 330mm;
+
+    margin: 0;
+
+    overflow: hidden;
+
+    background: #ffffff;
+
+    box-shadow: none;
+
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .hoja-oficio:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .contenido-pagare {
+    width: 100%;
+    height: 100%;
+  }
+
+}

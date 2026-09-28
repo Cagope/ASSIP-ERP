@@ -50,7 +50,7 @@ import co.assip.erp.cartera.evaluacion.proceso.dto.EvaluacionCriterioResultadoDT
 import co.assip.erp.cartera.evaluacion.proceso.motor.dto.EvaluacionCreditoResultadoDTO;
 import co.assip.erp.cartera.evaluacion.proceso.motor.dto.EvaluacionEdadRiesgoResultadoDTO;
 
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 
 import lombok.RequiredArgsConstructor;
 

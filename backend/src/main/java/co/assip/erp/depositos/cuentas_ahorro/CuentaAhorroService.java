@@ -1,13 +1,12 @@
 package co.assip.erp.depositos.cuentas_ahorro;
 
 import co.assip.erp.depositos.cuentas_ahorro.dto.*;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor

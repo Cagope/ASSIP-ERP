@@ -4,7 +4,7 @@ import co.assip.erp.cartera.referencias.dto.SolicitudReferenciaListadoDTO;
 import co.assip.erp.cartera.referencias.dto.SolicitudReferenciaParticipanteDTO;
 import co.assip.erp.cartera.referencias.dto.SolicitudReferenciaPersonalDTO;
 
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;

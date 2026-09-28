@@ -1,0 +1,336 @@
+<div class="pagare-en-blanco">
+
+  <!-- =======================================================
+       ACCIONES
+       ======================================================= -->
+
+  <div class="barra-acciones no-imprimir">
+
+    <div class="barra-acciones__titulo">
+
+      <strong>
+        Pagaré en blanco
+      </strong>
+
+      <span>
+        Hoja de firmas
+      </span>
+
+    </div>
+
+    <div class="barra-acciones__botones">
+
+      <button
+        type="button"
+        class="btn btn-secundario"
+        [disabled]="cargando"
+        (click)="cerrar()">
+        Cerrar
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primario"
+        [disabled]="!puedeImprimir"
+        (click)="imprimir()">
+        Imprimir pagaré
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =======================================================
+       CARGANDO
+       ======================================================= -->
+
+  <div
+    *ngIf="cargando"
+    class="estado estado--cargando no-imprimir">
+
+    Consultando información del pagaré...
+
+  </div>
+
+
+  <!-- =======================================================
+       ERROR
+       ======================================================= -->
+
+  <div
+    *ngIf="error"
+    class="estado estado--error no-imprimir">
+
+    {{ error }}
+
+  </div>
+
+
+  <!-- =======================================================
+       DOCUMENTO
+       ======================================================= -->
+
+  <ng-container
+    *ngIf="puedeImprimir && datos && deudorPrincipal">
+
+
+    <!-- =====================================================
+         DOS COPIAS
+
+         Equivalente al VB:
+         For I = 1 To 2
+         ...
+         Printer.NewPage
+         Next
+         ===================================================== -->
+
+    <section
+      class="hoja-oficio"
+      *ngFor="let copia of [1, 2]">
+
+
+      <div class="contenido-pagare">
+
+
+        <!-- =================================================
+             DEUDOR PRINCIPAL
+             ================================================= -->
+
+        <div class="bloque-firma">
+
+          <div class="titulo-firmante">
+            DEUDOR
+          </div>
+
+
+          <div class="lineas-firma">
+
+            <span class="linea-firma">
+              ________________________________________________
+            </span>
+
+            <span class="linea-huella">
+              ___________________
+            </span>
+
+          </div>
+
+
+          <div class="fila-firmante">
+
+            <span class="etiqueta-firmante">
+              NOMBRE .:
+            </span>
+
+            <span class="valor-firmante">
+              {{ deudorPrincipal.nombreCompleto | uppercase }}
+            </span>
+
+            <span class="etiqueta-huella">
+              HUELLA
+            </span>
+
+          </div>
+
+
+          <div class="fila-firmante">
+
+            <span class="etiqueta-firmante">
+              DOCUMENTO :
+            </span>
+
+            <span class="valor-firmante">
+              {{ deudorPrincipal.documento }}
+            </span>
+
+          </div>
+
+
+          <div class="fila-firmante">
+
+            <span class="etiqueta-firmante">
+              DIRECCION :
+            </span>
+
+            <span class="valor-firmante">
+              {{ deudorPrincipal.direccion | uppercase }}
+            </span>
+
+          </div>
+
+
+          <div class="fila-firmante">
+
+            <span class="etiqueta-firmante">
+              TELEFONO :
+            </span>
+
+            <span class="valor-firmante">
+              {{ telefonoFirmante(deudorPrincipal) }}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             CODEUDORES
+
+             La impresión histórica reserva siempre
+             tres posiciones.
+             ================================================= -->
+
+        <div
+          class="bloque-firma bloque-codeudor"
+          *ngFor="let posicion of [0, 1, 2]">
+
+
+          <div class="titulo-firmante">
+            CODEUDOR
+          </div>
+
+
+          <div class="lineas-firma">
+
+            <span class="linea-firma">
+              ________________________________________________
+            </span>
+
+            <span class="linea-huella">
+              ___________________
+            </span>
+
+          </div>
+
+
+          <div class="fila-firmante">
+
+            <span class="etiqueta-firmante">
+              NOMBRE .:
+            </span>
+
+            <span class="valor-firmante">
+              {{
+                (codeudores[posicion]?.nombreCompleto || '')
+                  | uppercase
+              }}
+            </span>
+
+            <span class="etiqueta-huella">
+              HUELLA
+            </span>
+
+          </div>
+
+
+          <div class="fila-firmante">
+
+            <span class="etiqueta-firmante">
+              DOCUMENTO :
+            </span>
+
+            <span class="valor-firmante">
+              {{ codeudores[posicion]?.documento || '' }}
+            </span>
+
+          </div>
+
+
+          <div class="fila-firmante">
+
+            <span class="etiqueta-firmante">
+              DIRECCION :
+            </span>
+
+            <span class="valor-firmante">
+              {{
+                (codeudores[posicion]?.direccion || '')
+                  | uppercase
+              }}
+            </span>
+
+          </div>
+
+
+          <div class="fila-firmante">
+
+            <span class="etiqueta-firmante">
+              TELEFONO :
+            </span>
+
+            <span class="valor-firmante">
+              {{
+                telefonoFirmante(
+                  codeudores[posicion] || null
+                )
+              }}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================
+             ESPACIO RESERVADO PARA COOPVALLE
+             ================================================= -->
+
+        <div class="espacio-coopvalle">
+
+          (ESPACIO RESERVADO PARA COOPVALLE)
+
+        </div>
+
+
+        <!-- =================================================
+             CONTROL INTERNO
+             ================================================= -->
+
+        <div class="control-documento">
+
+
+          <div class="control-columna">
+
+            <div class="control-fila">
+              PREPARADO POR :
+            </div>
+
+            <div class="control-fila">
+              NOMBRE :
+            </div>
+
+            <div class="control-firma">
+              __________________________________
+            </div>
+
+          </div>
+
+
+          <div class="control-columna">
+
+            <div class="control-fila">
+              REVISADO POR :
+            </div>
+
+            <div class="control-fila">
+              NOMBRE :
+            </div>
+
+            <div class="control-firma">
+              __________________________________
+            </div>
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</div>

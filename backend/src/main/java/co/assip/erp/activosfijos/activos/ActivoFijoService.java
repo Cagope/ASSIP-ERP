@@ -1,6 +1,6 @@
 package co.assip.erp.activosfijos.activos;
 
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.activosfijos.activos.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

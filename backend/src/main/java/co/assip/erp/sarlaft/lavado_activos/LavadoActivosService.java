@@ -3,7 +3,7 @@ package co.assip.erp.sarlaft.lavado_activos;
 import co.assip.erp.sarlaft.lavado_activos.dto.LavadoActivosPreviewDTO;
 import co.assip.erp.sarlaft.lavado_activos.dto.LavadoActivosRequestDTO;
 import co.assip.erp.sarlaft.lavado_activos.dto.LavadoActivosResponseDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -4,7 +4,7 @@ import co.assip.erp.cartera.originacion.formalizacion.dto.SolicitudFormalizacion
 import co.assip.erp.cartera.originacion.formalizacion.dto.SolicitudFormalizacionGuardarRequestDTO;
 import co.assip.erp.cartera.originacion.solicitudes.SolicitudCreditoRepository;
 
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.cartera.originacion.formalizacion.dto.SolicitudFormalizacionBandejaDTO;
 
 import co.assip.erp.shared.financiero.CuotasFinancieras;
@@ -757,8 +757,109 @@ public class SolicitudFormalizacionService {
     }
 
     // =========================================================
-// GENERAR PAGARÉ
+// CALCULAR FECHAS INICIALES DEL CRÉDITO
 // =========================================================
+
+    private FechasGeneracionPagare calcularFechasGeneracionPagare(
+            SolicitudFormalizacionDetalleDTO solicitud,
+            LocalDate fechaInicial
+    ) {
+
+        if (fechaInicial == null) {
+            throw new IllegalArgumentException(
+                    "Debe seleccionar la fecha inicial del crédito."
+            );
+        }
+
+        Integer plazoMeses =
+                solicitud.getPlazoFormalizado();
+
+        Integer amortizacionCapitalMeses =
+                solicitud.getAmortizacionCapitalFormalizada();
+
+        if (plazoMeses == null || plazoMeses <= 0) {
+            throw new IllegalStateException(
+                    "El crédito no tiene un plazo formalizado válido."
+            );
+        }
+
+        if (amortizacionCapitalMeses == null
+                || amortizacionCapitalMeses <= 0) {
+
+            throw new IllegalStateException(
+                    "El crédito no tiene una periodicidad "
+                            + "de capital válida."
+            );
+        }
+
+        Integer periodoInteresMeses =
+                solicitudCreditoRepository.buscarPeriodoMeses(
+                        solicitud.getPeriodoCodigoInteresFormalizado(),
+                        solicitud.getTipoModalidadInteresFormalizado()
+                ).orElseThrow(
+                        () -> new IllegalStateException(
+                                "No fue posible determinar la "
+                                        + "periodicidad de intereses."
+                        )
+                );
+
+        if (periodoInteresMeses <= 0) {
+            throw new IllegalStateException(
+                    "La periodicidad de intereses no es válida."
+            );
+        }
+
+        LocalDate fechaFinal =
+                fechaInicial.plusMonths(plazoMeses);
+
+        LocalDate fechaPrimeraCuotaCapital =
+                fechaInicial.plusMonths(amortizacionCapitalMeses);
+
+        LocalDate fechaPrimeraCuotaInteres =
+                fechaInicial.plusMonths(periodoInteresMeses);
+
+        if (fechaPrimeraCuotaCapital.isAfter(fechaFinal)) {
+            throw new IllegalStateException(
+                    "La primera cuota de capital supera "
+                            + "el vencimiento final del crédito."
+            );
+        }
+
+        if (fechaPrimeraCuotaInteres.isAfter(fechaFinal)) {
+            throw new IllegalStateException(
+                    "La primera cuota de intereses supera "
+                            + "el vencimiento final del crédito."
+            );
+        }
+
+        LocalDate fechaPrimeraCuota =
+                fechaPrimeraCuotaCapital.isBefore(
+                        fechaPrimeraCuotaInteres
+                )
+                        ? fechaPrimeraCuotaCapital
+                        : fechaPrimeraCuotaInteres;
+
+        return new FechasGeneracionPagare(
+                fechaInicial,
+                fechaPrimeraCuota,
+                fechaPrimeraCuotaCapital,
+                fechaPrimeraCuotaInteres,
+                fechaFinal
+        );
+    }
+
+    private record FechasGeneracionPagare(
+            LocalDate fechaInicial,
+            LocalDate fechaPrimeraCuota,
+            LocalDate fechaPrimeraCuotaCapital,
+            LocalDate fechaPrimeraCuotaInteres,
+            LocalDate fechaFinal
+    ) {
+    }
+
+    // =========================================================
+    // GENERAR PAGARÉ
+    // =========================================================
 
     @Transactional
     public SolicitudFormalizacionDetalleDTO generarPagare(
@@ -835,6 +936,12 @@ public class SolicitudFormalizacionService {
                 consultar(idSolicitudCredito);
 
         validarFormalizacionCompleta(solicitud);
+
+        FechasGeneracionPagare fechas =
+                calcularFechasGeneracionPagare(
+                        solicitud,
+                        fechaPagare
+                );
 
         // =====================================================
         // 4. REVALIDAR CONDICIONES DEFINITIVAS GUARDADAS
@@ -958,7 +1065,11 @@ public class SolicitudFormalizacionService {
                 repository.insertarCreditoDesdeFormalizacion(
                         idSolicitudCredito,
                         pagareCartera,
-                        fechaPagare,
+                        fechas.fechaInicial(),
+                        fechas.fechaPrimeraCuota(),
+                        fechas.fechaPrimeraCuotaCapital(),
+                        fechas.fechaPrimeraCuotaInteres(),
+                        fechas.fechaFinal(),
                         idUsuario
                 );
 

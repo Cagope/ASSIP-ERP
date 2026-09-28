@@ -1,6 +1,6 @@
 package co.assip.erp.nomina.conceptos_nomina;
 
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.nomina.conceptos_nomina.dto.ConceptoNominaDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

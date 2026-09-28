@@ -3,7 +3,7 @@ package co.assip.erp.cartera.evaluacion.reglas;
 import co.assip.erp.cartera.evaluacion.criterios.EvaluacionCriterioRepository;
 import co.assip.erp.cartera.evaluacion.criterios.dto.EvaluacionCriterioDTO;
 import co.assip.erp.cartera.evaluacion.reglas.dto.EvaluacionCriterioReglaDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

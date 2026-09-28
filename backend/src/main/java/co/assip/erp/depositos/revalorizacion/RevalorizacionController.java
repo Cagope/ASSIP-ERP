@@ -1,6 +1,6 @@
 package co.assip.erp.depositos.revalorizacion;
 
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.contabilidad.consecutivos_comprobantes.ConsecutivosComprobantesService;
 import co.assip.erp.depositos.revalorizacion.dto.RevalorizacionEntradaDTO;
 import co.assip.erp.depositos.revalorizacion.dto.RevalorizacionItemDTO;

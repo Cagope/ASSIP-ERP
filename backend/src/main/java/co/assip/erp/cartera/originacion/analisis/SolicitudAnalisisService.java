@@ -4,7 +4,7 @@ import co.assip.erp.cartera.originacion.analisis.dto.SolicitudAnalisisComponente
 import co.assip.erp.cartera.originacion.analisis.dto.SolicitudAnalisisDeudorDTO;
 import co.assip.erp.cartera.originacion.analisis.dto.SolicitudAnalisisPersistenciaDTO;
 import co.assip.erp.cartera.originacion.analisis.dto.SolicitudAnalisisResultadoDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -134,6 +134,10 @@ public class SolicitudAnalisisService {
     // SEGURIDAD
     // =========================================================
 
+    // =========================================================
+// SEGURIDAD
+// =========================================================
+
     private void validarAccesoSolicitud(
             Integer idSolicitudCredito
     ) {
@@ -142,21 +146,33 @@ public class SolicitudAnalisisService {
                 idSolicitudCredito
         );
 
-        Integer idAgencia =
-                repository.obtenerAgenciaSolicitud(
-                                idSolicitudCredito
+        // Verificar que la solicitud exista.
+        // Su agencia es la propietaria del crédito, no una
+        // restricción territorial para el funcionario que analiza.
+        repository.obtenerAgenciaSolicitud(
+                        idSolicitudCredito
+                )
+                .orElseThrow(
+                        () -> new IllegalArgumentException(
+                                "No existe la solicitud de crédito con id "
+                                        + idSolicitudCredito
+                                        + "."
                         )
-                        .orElseThrow(
-                                () -> new IllegalArgumentException(
-                                        "No existe la solicitud de crédito con id "
-                                                + idSolicitudCredito
-                                                + "."
-                                )
-                        );
+                );
 
-        usuarioSesionService.validarAgencia(
-                idAgencia
-        );
+        // Durante originación se permite gestionar solicitudes
+        // de otras agencias, siempre que el usuario tenga
+        // una agencia autorizada o acceso total.
+        usuarioSesionService.idUsuario();
+
+        if (!usuarioSesionService.tieneAccesoTotal()
+                && (usuarioSesionService.agencias() == null
+                || usuarioSesionService.agencias().isEmpty())) {
+
+            throw new SecurityException(
+                    "El usuario no tiene agencias autorizadas para gestionar análisis de crédito."
+            );
+        }
     }
 
 

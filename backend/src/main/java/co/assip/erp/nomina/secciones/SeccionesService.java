@@ -1,7 +1,7 @@
 package co.assip.erp.nomina.secciones;
 
 import co.assip.erp.nomina.secciones.dto.SeccionNominaDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

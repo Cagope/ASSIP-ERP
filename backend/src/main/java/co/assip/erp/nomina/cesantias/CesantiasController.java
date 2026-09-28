@@ -1,6 +1,6 @@
 package co.assip.erp.nomina.cesantias;
 
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.nomina.cesantias.dto.CesantiasDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

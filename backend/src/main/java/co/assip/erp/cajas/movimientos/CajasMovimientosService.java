@@ -126,6 +126,213 @@ public class CajasMovimientosService {
         }
     }
 
+    public void registrarDesembolsoCredito(
+            Long idCaja,
+            BigDecimal valorEfectivo,
+            LocalDate fechaContable,
+            Long idCarteraCredito,
+            String pagareCartera,
+            String tipoComprobante,
+            String numeroComprobante,
+            Integer idUsuario
+    ) {
+
+        BigDecimal efectivo = nvl(valorEfectivo);
+
+        // Si no existe salida física de efectivo,
+        // no corresponde registrar movimiento de Caja.
+        if (efectivo.compareTo(BigDecimal.ZERO) <= 0) {
+            return;
+        }
+
+        if (idCaja == null || idCaja <= 0) {
+            throw new RuntimeException(
+                    "Debe seleccionar la caja para registrar el desembolso en efectivo."
+            );
+        }
+
+        if (fechaContable == null) {
+            throw new RuntimeException(
+                    "Debe indicar la fecha contable para registrar el desembolso."
+            );
+        }
+
+        if (idCarteraCredito == null || idCarteraCredito <= 0) {
+            throw new RuntimeException(
+                    "El crédito es obligatorio para registrar el movimiento de caja."
+            );
+        }
+
+        Long idProvision = repository.obtenerProvisionAbierta(
+                idCaja,
+                fechaContable
+        );
+
+        if (idProvision == null) {
+            throw new RuntimeException(
+                    "La caja seleccionada no tiene provisión ABIERTA "
+                            + "para la fecha contable."
+            );
+        }
+
+        Long idDepartamentoCartera =
+                repository.obtenerIdDepartamento("12");
+
+        if (idDepartamentoCartera == null) {
+            throw new RuntimeException(
+                    "No existe el departamento operativo "
+                            + "12 - MOVIMIENTOS CARTERA."
+            );
+        }
+
+        Long idOperacionDesembolso =
+                repository.obtenerIdOperacion(
+                        "DESEMBOLSO_CREDITO"
+                );
+
+        if (idOperacionDesembolso == null) {
+            throw new RuntimeException(
+                    "No existe la operación de caja "
+                            + "DESEMBOLSO_CREDITO."
+            );
+        }
+
+        String concepto =
+                "Desembolso crédito "
+                        + (pagareCartera == null
+                        ? ""
+                        : pagareCartera);
+
+        repository.insertarMovimientoCaja(
+                idProvision,
+                idCaja,
+                fechaContable,
+                idDepartamentoCartera,
+                idOperacionDesembolso,
+
+                "CARTERA",
+                "DESEMBOLSO_CREDITO",
+                "cartera.carteras_creditos",
+                idCarteraCredito,
+
+                "EGRESO",
+                "EFECTIVO",
+                efectivo,
+
+                concepto,
+
+                tipoComprobante,
+                numeroComprobante,
+
+                idUsuario
+        );
+    }
+
+    public void registrarCobrosDesembolsoCredito(
+            Long idCaja,
+            BigDecimal valorCobros,
+            LocalDate fechaContable,
+            Long idCarteraCredito,
+            String pagareCartera,
+            String tipoComprobante,
+            String numeroComprobante,
+            Integer idUsuario
+    ) {
+
+        BigDecimal cobros = nvl(valorCobros);
+
+        // Si el desembolso no genera cobros,
+        // no corresponde registrar movimiento de Caja.
+        if (cobros.compareTo(BigDecimal.ZERO) <= 0) {
+            return;
+        }
+
+        if (idCaja == null || idCaja <= 0) {
+            throw new RuntimeException(
+                    "Debe seleccionar la caja para registrar "
+                            + "los cobros del desembolso."
+            );
+        }
+
+        if (fechaContable == null) {
+            throw new RuntimeException(
+                    "Debe indicar la fecha contable para registrar "
+                            + "los cobros del desembolso."
+            );
+        }
+
+        if (idCarteraCredito == null || idCarteraCredito <= 0) {
+            throw new RuntimeException(
+                    "El crédito es obligatorio para registrar "
+                            + "los cobros del desembolso."
+            );
+        }
+
+        Long idProvision = repository.obtenerProvisionAbierta(
+                idCaja,
+                fechaContable
+        );
+
+        if (idProvision == null) {
+            throw new RuntimeException(
+                    "La caja seleccionada no tiene provisión ABIERTA "
+                            + "para la fecha contable."
+            );
+        }
+
+        Long idDepartamentoCartera =
+                repository.obtenerIdDepartamento("12");
+
+        if (idDepartamentoCartera == null) {
+            throw new RuntimeException(
+                    "No existe el departamento operativo "
+                            + "12 - MOVIMIENTOS CARTERA."
+            );
+        }
+
+        Long idOperacionCobro =
+                repository.obtenerIdOperacion(
+                        "COBRO_DESEMBOLSO"
+                );
+
+        if (idOperacionCobro == null) {
+            throw new RuntimeException(
+                    "No existe la operación de caja "
+                            + "COBRO_DESEMBOLSO."
+            );
+        }
+
+        String concepto =
+                "Cobros desembolso crédito "
+                        + (pagareCartera == null
+                        ? ""
+                        : pagareCartera);
+
+        repository.insertarMovimientoCaja(
+                idProvision,
+                idCaja,
+                fechaContable,
+                idDepartamentoCartera,
+                idOperacionCobro,
+
+                "CARTERA",
+                "DESEMBOLSO_CREDITO",
+                "cartera.carteras_creditos",
+                idCarteraCredito,
+
+                "INGRESO",
+                "EFECTIVO",
+                cobros,
+
+                concepto,
+
+                tipoComprobante,
+                numeroComprobante,
+
+                idUsuario
+        );
+    }
+
     private void validarCheques(List<MedioPagoChequeDTO> cheques, BigDecimal valorCheques) {
         if (cheques == null || cheques.isEmpty()) {
             throw new RuntimeException("Debe ingresar el detalle de los cheques.");
@@ -152,6 +359,29 @@ public class CajasMovimientosService {
         if (total.compareTo(valorCheques) != 0) {
             throw new RuntimeException("La suma del detalle de cheques no coincide con el valor total de cheques.");
         }
+    }
+
+    public Integer obtenerCuentaContableCaja(
+            Long idCaja
+    ) {
+
+        if (idCaja == null || idCaja <= 0) {
+            throw new IllegalArgumentException(
+                    "La caja es obligatoria para obtener la cuenta contable."
+            );
+        }
+
+        Integer idCatalogoCuenta =
+                repository.obtenerCuentaContableCaja(idCaja);
+
+        if (idCatalogoCuenta == null || idCatalogoCuenta <= 0) {
+            throw new IllegalStateException(
+                    "La caja seleccionada no tiene configurada "
+                            + "una cuenta contable."
+            );
+        }
+
+        return idCatalogoCuenta;
     }
 
     private BigDecimal nvl(BigDecimal value) {

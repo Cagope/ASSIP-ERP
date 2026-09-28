@@ -3,7 +3,7 @@ package co.assip.erp.cajas.convenios_recaudo;
 import co.assip.erp.cajas.convenios_recaudo.dto.ConvenioRecaudoCuentaDTO;
 import co.assip.erp.cajas.convenios_recaudo.dto.ConvenioRecaudoDTO;
 import co.assip.erp.cajas.convenios_recaudo.dto.ConvenioRecaudoRequestDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

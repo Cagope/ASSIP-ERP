@@ -1,6 +1,6 @@
 package co.assip.erp.depositos.formasahorro;
 
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 

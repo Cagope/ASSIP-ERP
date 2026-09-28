@@ -4,7 +4,7 @@ import co.assip.erp.cartera.analisis.vectorcomportamiento.actual.VectorComportam
 import co.assip.erp.cartera.analisis.vectorcomportamiento.actual.dto.VectorComportamientoDetalleDTO;
 import co.assip.erp.cartera.analisis.vectorcomportamiento.actual.dto.VectorComportamientoResumenDTO;
 import co.assip.erp.cartera.originacion.contexto.dto.OriginacionContextoDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -794,7 +794,6 @@ public class OriginacionContextoService {
         return dto;
     }
 
-
     // =========================================================
     // VALIDACIONES
     // =========================================================
@@ -812,7 +811,6 @@ public class OriginacionContextoService {
             );
         }
 
-
         if (idAgencia == null
                 || idAgencia <= 0) {
 
@@ -821,9 +819,20 @@ public class OriginacionContextoService {
             );
         }
 
+        // =====================================================
+        // USUARIO AUTENTICADO Y AUTORIZADO PARA OPERAR
+        // =====================================================
 
-        usuarioSesionService.validarAgencia(
-                idAgencia
-        );
+        usuarioSesionService.idUsuario();
+
+        if (!usuarioSesionService.tieneAccesoTotal()
+                && (usuarioSesionService.agencias() == null
+                || usuarioSesionService.agencias().isEmpty())) {
+
+            throw new SecurityException(
+                    "El usuario no tiene agencias autorizadas "
+                            + "para gestionar solicitudes."
+            );
+        }
     }
 }

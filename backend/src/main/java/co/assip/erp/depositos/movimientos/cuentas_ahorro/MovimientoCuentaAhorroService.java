@@ -10,7 +10,7 @@ import co.assip.erp.depositos.movimientos.dto.DepositosMovimientoDTO;
 import co.assip.erp.sarlaft.evaluacion.SarlaftAlertaService;
 import co.assip.erp.sarlaft.evaluacion.dto.EvaluacionResultado;
 import co.assip.erp.sarlaft.evaluacion.dto.ReglasInput;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -6,7 +6,7 @@ import co.assip.erp.cartera.cierremensual.anexo2.dto.MoraAnexo2DTO;
 import co.assip.erp.cartera.cierremensual.anexo2.dto.ResumenAnexo2DTO;
 import co.assip.erp.cartera.cierremensual.anexo2.dto.TrabajoAnexo2DTO;
 import co.assip.erp.cartera.cierremensual.dto.CierreMensualDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

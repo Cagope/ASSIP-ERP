@@ -36,6 +36,11 @@ export const carteraMenu = {
             {
               label: 'Formalización de Cartera',
               route: '/cartera/originacion/formalizacion'
+            },
+
+            {
+              label: 'Desembolso de Cartera',
+              route: '/cartera/originacion/desembolso'
             }
 
           ]

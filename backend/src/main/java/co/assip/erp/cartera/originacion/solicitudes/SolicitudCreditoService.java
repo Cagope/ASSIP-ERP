@@ -14,7 +14,7 @@ import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudEnviarAprobacio
 import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudEnviarAprobacionRequestDTO;
 import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudEnteAprobadorPreviewRequestDTO;
 import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudEnteAprobadorPreviewDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.shared.financiero.CuotasFinancieras;
 import co.assip.erp.shared.financiero.TasasFinancieras;
 import co.assip.erp.shared.financiero.dto.CuotaVariableResultado;
@@ -60,6 +60,9 @@ public class SolicitudCreditoService {
 
         validarCrearSolicitud(request);
 
+        // La agencia recibida corresponde a la agencia operativa
+        // desde la cual el funcionario está gestionando la solicitud.
+        // No determina la agencia propietaria del crédito.
         usuarioSesionService.validarAgencia(
                 request.getIdAgencia()
         );
@@ -182,6 +185,9 @@ public class SolicitudCreditoService {
             );
         }
 
+        // Validar la agencia operativa desde la cual trabaja el funcionario.
+        // La agencia propietaria del crédito se determina posteriormente
+        // mediante la cuenta operativa de aportes del asociado.
         usuarioSesionService.validarAgencia(
                 request.getIdAgencia()
         );
@@ -455,14 +461,14 @@ public class SolicitudCreditoService {
 
         BigDecimal consecutivo =
                 repository.siguienteConsecutivo(
-                                idAgencia,
+                                idAgenciaAportes,
                                 idUsuario
                         )
                         .orElseThrow(
                                 () ->
                                         new IllegalStateException(
                                                 "No existe el parámetro 600 de consecutivo de solicitudes para la agencia "
-                                                        + idAgencia
+                                                        + idAgenciaAportes
                                                         + "."
                                         )
                         );
@@ -1207,40 +1213,22 @@ public class SolicitudCreditoService {
     @Transactional(readOnly = true)
     public List<SolicitudCreditoResumenDTO> listar() {
 
-        List<SolicitudCreditoResumenDTO> solicitudes =
-                repository.listar();
+        // Usuario autenticado.
+        usuarioSesionService.idUsuario();
 
-        if (usuarioSesionService.tieneAccesoTotal()) {
-            return solicitudes;
-        }
-
-        List<Integer> agenciasUsuario =
-                usuarioSesionService.agencias();
-
-        if (agenciasUsuario == null
-                || agenciasUsuario.isEmpty()) {
+        // Debe tener una agencia operativa asignada,
+        // excepto cuando tiene acceso total.
+        if (!usuarioSesionService.tieneAccesoTotal()
+                && (usuarioSesionService.agencias() == null
+                || usuarioSesionService.agencias().isEmpty())) {
 
             return List.of();
         }
 
-        Set<Integer> agenciasPermitidas =
-                Set.copyOf(
-                        agenciasUsuario
-                );
-
-        return solicitudes.stream()
-
-                .filter(
-                        solicitud ->
-                                solicitud.getIdAgencia() != null
-                                        && agenciasPermitidas.contains(
-                                        solicitud.getIdAgencia()
-                                )
-                )
-
-                .toList();
+        // Originación permite gestionar solicitudes
+        // independientemente de la agencia propietaria.
+        return repository.listar();
     }
-
 
     // =========================================================
     // BUSCAR SOLICITUD POR ID
@@ -1255,19 +1243,25 @@ public class SolicitudCreditoService {
                 idSolicitudCredito
         );
 
-        Optional<SolicitudCreditoDetalleDTO> solicitud =
-                repository.buscarPorId(
-                        idSolicitudCredito
-                );
+        // Usuario autenticado.
+        usuarioSesionService.idUsuario();
 
-        solicitud.ifPresent(
-                detalle ->
-                        usuarioSesionService.validarAgencia(
-                                detalle.getIdAgencia()
-                        )
+        // Debe tener una agencia operativa asignada,
+        // excepto cuando tiene acceso total.
+        if (!usuarioSesionService.tieneAccesoTotal()
+                && (usuarioSesionService.agencias() == null
+                || usuarioSesionService.agencias().isEmpty())) {
+
+            throw new SecurityException(
+                    "El usuario no tiene agencias autorizadas para consultar solicitudes."
+            );
+        }
+
+        // Durante originación se permite consultar solicitudes
+        // independientemente de su agencia propietaria.
+        return repository.buscarPorId(
+                idSolicitudCredito
         );
-
-        return solicitud;
     }
 
     // =========================================================
@@ -1406,25 +1400,19 @@ public class SolicitudCreditoService {
                         );
 
         // ---------------------------------------------------------
-        // VALIDAR AGENCIA
-        // ---------------------------------------------------------
+// VALIDAR USUARIO AUTORIZADO PARA OPERAR EN ORIGINACIÓN
+// ---------------------------------------------------------
 
-        SolicitudCreditoDetalleDTO detalle =
-                repository.buscarPorId(
-                                idSolicitudCredito
-                        )
-                        .orElseThrow(
-                                () ->
-                                        new IllegalArgumentException(
-                                                "No fue posible consultar la solicitud "
-                                                        + idSolicitudCredito
-                                                        + "."
-                                        )
-                        );
+        usuarioSesionService.idUsuario();
 
-        usuarioSesionService.validarAgencia(
-                detalle.getIdAgencia()
-        );
+        if (!usuarioSesionService.tieneAccesoTotal()
+                && (usuarioSesionService.agencias() == null
+                || usuarioSesionService.agencias().isEmpty())) {
+
+            throw new SecurityException(
+                    "El usuario no tiene agencias autorizadas para gestionar solicitudes."
+            );
+        }
 
         // ---------------------------------------------------------
         // ESTADO ACTUAL
@@ -1697,9 +1685,24 @@ public class SolicitudCreditoService {
                                 )
                         );
 
-        usuarioSesionService.validarAgencia(
-                detalleVigencia.getIdAgencia()
-        );
+        // ---------------------------------------------------------
+        // VALIDAR USUARIO AUTORIZADO PARA OPERAR EN ORIGINACIÓN
+        // ---------------------------------------------------------
+
+        usuarioSesionService.idUsuario();
+
+        if (!usuarioSesionService.tieneAccesoTotal()
+                && (usuarioSesionService.agencias() == null
+                || usuarioSesionService.agencias().isEmpty())) {
+
+            throw new SecurityException(
+                    "El usuario no tiene agencias autorizadas para gestionar solicitudes."
+            );
+        }
+
+        // ---------------------------------------------------------
+        // VALIDAR VIGENCIA CON LA AGENCIA PROPIETARIA DEL CRÉDITO
+        // ---------------------------------------------------------
 
         validarVigenciaHojaVida(
                 detalleVigencia.getIdDatosPersonal(),
@@ -2387,7 +2390,16 @@ public class SolicitudCreditoService {
             );
         }
 
-        usuarioSesionService.validarAgencia(idAgencia);
+        usuarioSesionService.idUsuario();
+
+        if (!usuarioSesionService.tieneAccesoTotal()
+                && (usuarioSesionService.agencias() == null
+                || usuarioSesionService.agencias().isEmpty())) {
+
+            throw new SecurityException(
+                    "El usuario no tiene agencias autorizadas para consultar solicitudes."
+            );
+        }
 
         return repository.consultarVigenciaHojaVida(
                 idDatosPersonal,

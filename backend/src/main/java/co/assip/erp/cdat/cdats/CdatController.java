@@ -1,5 +1,5 @@
 package co.assip.erp.cdat.cdats;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.cdat.cdats.dto.CdatAperturaPreviewDTO;
 import co.assip.erp.cdat.cdats.dto.CdatAsociadoValidacionDTO;
 import co.assip.erp.cdat.cdats.dto.CdatFormDTO;

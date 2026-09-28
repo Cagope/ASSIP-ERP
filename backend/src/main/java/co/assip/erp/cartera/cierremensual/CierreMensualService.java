@@ -1,7 +1,7 @@
 package co.assip.erp.cartera.cierremensual;
 
 import co.assip.erp.cartera.cierremensual.dto.CierreMensualDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.cartera.cierremensual.hojavida.CierreHojaVidaCarteraService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

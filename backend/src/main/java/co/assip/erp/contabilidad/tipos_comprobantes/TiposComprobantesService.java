@@ -1,6 +1,6 @@
 package co.assip.erp.contabilidad.tipos_comprobantes;
 
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

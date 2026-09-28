@@ -2,7 +2,7 @@ package co.assip.erp.depositos.habilidad_asociado;
 
 import co.assip.erp.depositos.habilidad_asociado.dto.HabilidadAsociadoEntradaDTO;
 import co.assip.erp.depositos.habilidad_asociado.dto.HabilidadAsociadoItemDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;

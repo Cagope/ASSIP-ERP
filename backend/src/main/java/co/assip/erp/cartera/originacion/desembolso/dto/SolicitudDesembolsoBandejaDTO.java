@@ -1,0 +1,72 @@
+package co.assip.erp.cartera.originacion.desembolso.dto;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+public class SolicitudDesembolsoBandejaDTO {
+
+    // =========================================================
+    // CRÉDITO
+    // =========================================================
+
+    private Integer idCarteraCredito;
+    private String pagareCartera;
+    private String codigoEstadoCartera;
+
+    // =========================================================
+    // SOLICITUD
+    // =========================================================
+
+    private Integer idSolicitudCredito;
+    private String numeroSolicitud;
+
+    // =========================================================
+    // AGENCIA
+    // =========================================================
+
+    private Integer idAgencia;
+    private String nombreAgencia;
+
+    // =========================================================
+    // ASOCIADO
+    // =========================================================
+
+    private Integer idDatosPersonal;
+    private String tipoDocumento;
+    private String documento;
+    private String nombreCompleto;
+
+    // =========================================================
+    // LÍNEA DE CRÉDITO
+    // =========================================================
+
+    private Integer idLineaCredito;
+    private String nombreLineaCredito;
+
+    // =========================================================
+    // CONDICIONES DEL CRÉDITO
+    // =========================================================
+
+    private BigDecimal valorCredito;
+    private Integer plazoCredito;
+
+    // =========================================================
+    // FECHAS
+    // =========================================================
+
+    private LocalDate fechaPrimeraCuota;
+    private LocalDate fechaFinal;
+    private LocalDateTime fechaFormalizacion;
+
+    // =========================================================
+    // CONTROL
+    // =========================================================
+
+    private String estadoDesembolso;
+}

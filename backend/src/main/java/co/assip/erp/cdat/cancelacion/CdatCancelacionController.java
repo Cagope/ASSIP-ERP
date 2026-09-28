@@ -1,6 +1,6 @@
 package co.assip.erp.cdat.cancelacion;
 
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.cdat.cancelacion.dto.CdatCancelacionEntradaDTO;
 import co.assip.erp.cdat.cancelacion.dto.CdatCancelacionItemDTO;
 import co.assip.erp.cdat.cancelacion.dto.CdatCancelacionPreviewDTO;

@@ -1,6 +1,6 @@
 package co.assip.erp.cdat.liquidacion_diaria;
 
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.cdat.liquidacion_diaria.dto.CdatLiquidacionDiariaEntradaDTO;
 import co.assip.erp.cdat.liquidacion_diaria.dto.CdatLiquidacionDiariaPreviewDTO;
 import co.assip.erp.contabilidad.consecutivos_comprobantes.ConsecutivosComprobantesService;

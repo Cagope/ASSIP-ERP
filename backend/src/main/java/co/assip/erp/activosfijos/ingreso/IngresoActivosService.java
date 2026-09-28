@@ -1,7 +1,7 @@
 package co.assip.erp.activosfijos.ingreso;
 
 import co.assip.erp.activosfijos.ingreso.dto.*;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

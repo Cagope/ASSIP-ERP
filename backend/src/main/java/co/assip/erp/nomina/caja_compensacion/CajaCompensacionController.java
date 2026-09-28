@@ -1,6 +1,6 @@
 package co.assip.erp.nomina.caja_compensacion;
 
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.nomina.caja_compensacion.dto.CajaCompensacionDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

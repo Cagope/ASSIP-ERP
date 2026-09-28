@@ -9,8 +9,8 @@ import co.assip.erp.nomina.liquidacion.dto.LiquidacionDetalleDTO;
 import co.assip.erp.nomina.liquidacion.dto.LiquidacionPreviewExcelDTO;
 import co.assip.erp.nomina.liquidacion.dto.LiquidacionRequestDTO;
 import co.assip.erp.nomina.liquidacion.dto.TotalesLiquidacionDTO;
-import co.assip.erp.seguridad.repository.UsuarioAgenciaRepository;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.usuariosagencias.UsuarioAgenciaRepository;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

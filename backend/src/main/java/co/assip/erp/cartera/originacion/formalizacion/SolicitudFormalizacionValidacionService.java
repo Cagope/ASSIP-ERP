@@ -2,7 +2,7 @@ package co.assip.erp.cartera.originacion.formalizacion;
 
 import co.assip.erp.cartera.originacion.formalizacion.dto.SolicitudFormalizacionGuardarRequestDTO;
 import co.assip.erp.cartera.originacion.solicitudes.SolicitudCreditoRepository;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.shared.financiero.TasasFinancieras;
 
 import org.springframework.stereotype.Service;

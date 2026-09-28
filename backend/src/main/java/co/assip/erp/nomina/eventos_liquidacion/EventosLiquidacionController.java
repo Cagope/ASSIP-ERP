@@ -4,7 +4,7 @@ package co.assip.erp.nomina.eventos_liquidacion;
 import co.assip.erp.nomina.eventos_liquidacion.dto.EventoLiquidacionFormDTO;
 import co.assip.erp.nomina.eventos_liquidacion.dto.EventoLiquidacionListDTO;
 import co.assip.erp.nomina.eventos_liquidacion.dto.EventoLiquidacionSaveDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

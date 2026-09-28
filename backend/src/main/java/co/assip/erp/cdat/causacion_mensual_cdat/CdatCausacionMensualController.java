@@ -1,6 +1,6 @@
 package co.assip.erp.cdat.causacion_mensual_cdat;
 
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.cdat.causacion_mensual_cdat.dto.CdatCausacionMensualEntradaDTO;
 import co.assip.erp.cdat.causacion_mensual_cdat.dto.CdatCausacionMensualPreviewDTO;
 import co.assip.erp.contabilidad.consecutivos_comprobantes.ConsecutivosComprobantesService;

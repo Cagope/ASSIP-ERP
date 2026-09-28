@@ -869,19 +869,26 @@ public class SolicitudFormalizacionRepository {
     ) {
     }
 
+
     // =========================================================
-// GENERAR PAGARÉ - CONSTITUIR CRÉDITO PENDIENTE
-//
-// Se ejecuta dentro de la transacción del Service.
-//
-// El crédito se crea en estado P.
-// No se registra desembolso ni saldo de cartera.
-// =========================================================
+    // GENERAR PAGARÉ - CONSTITUIR CRÉDITO PENDIENTE
+    //
+    // Se ejecuta dentro de la transacción del Service.
+    //
+    // El crédito se crea en estado P.
+    // No se registra desembolso ni saldo de cartera.
+    //
+    // Las fechas se calculan previamente en el Service.
+    // =========================================================
 
     public Integer insertarCreditoDesdeFormalizacion(
             Integer idSolicitudCredito,
             String pagareCartera,
-            LocalDate fechaPagare,
+            LocalDate fechaInicial,
+            LocalDate fechaPrimeraCuota,
+            LocalDate fechaPrimeraCuotaCapital,
+            LocalDate fechaPrimeraCuotaInteres,
+            LocalDate fechaFinal,
             Integer idUsuario
     ) {
 
@@ -926,6 +933,11 @@ public class SolicitudFormalizacionRepository {
 
             fecha_inclusion_sistema,
             fecha_contable,
+            fecha_primera_cuota,
+            fecha_primera_cuota_capital,
+            fecha_primera_cuota_interes,
+            fecha_final,
+            comentario_general,
 
             fk_seguridad_creacion,
             fecha_creacion,
@@ -970,8 +982,13 @@ public class SolicitudFormalizacionRepository {
             s.tasa_nominal_formalizada,
             s.tasa_efectiva_anual_formalizada,
 
-            :fechaPagare,
+            :fechaInicial,
             CURRENT_DATE,
+            :fechaPrimeraCuota,
+            :fechaPrimeraCuotaCapital,
+            :fechaPrimeraCuotaInteres,
+            :fechaFinal,
+            s.concepto_formalizacion,
 
             :idUsuario,
             CURRENT_TIMESTAMP,
@@ -1031,22 +1048,47 @@ public class SolicitudFormalizacionRepository {
         List<Integer> resultados = jdbc.query(
                 sql,
                 new MapSqlParameterSource()
+
                         .addValue(
                                 "idSolicitudCredito",
                                 idSolicitudCredito
                         )
+
                         .addValue(
                                 "pagareCartera",
                                 pagareCartera
                         )
+
                         .addValue(
-                                "fechaPagare",
-                                fechaPagare
+                                "fechaInicial",
+                                fechaInicial
                         )
+
+                        .addValue(
+                                "fechaPrimeraCuota",
+                                fechaPrimeraCuota
+                        )
+
+                        .addValue(
+                                "fechaPrimeraCuotaCapital",
+                                fechaPrimeraCuotaCapital
+                        )
+
+                        .addValue(
+                                "fechaPrimeraCuotaInteres",
+                                fechaPrimeraCuotaInteres
+                        )
+
+                        .addValue(
+                                "fechaFinal",
+                                fechaFinal
+                        )
+
                         .addValue(
                                 "idUsuario",
                                 idUsuario
                         ),
+
                 (rs, rowNum) ->
                         rs.getInt("id_cartera_credito")
         );

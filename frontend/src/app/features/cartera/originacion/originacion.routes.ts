@@ -172,6 +172,76 @@ export const ORIGINACION_ROUTES:
       ).then(
         m => m.OriginacionFormalizacionComponent
       )
+  },
+
+  // =========================================================
+  // DESEMBOLSO DE CARTERA - BANDEJA
+  // =========================================================
+
+  {
+    path: 'desembolso',
+    loadComponent: () =>
+      import(
+        './desembolso/list/originacion-desembolso-list.component'
+      ).then(
+        m => m.OriginacionDesembolsoListComponent
+      )
+  },
+
+  // =========================================================
+  // DESEMBOLSO DE CARTERA - EJECUCIÓN
+  // =========================================================
+
+  {
+    path: 'desembolso/:idCarteraCredito',
+    loadComponent: () =>
+      import(
+        './desembolso/originacion-desembolso.component'
+      ).then(
+        m => m.OriginacionDesembolsoComponent
+      )
+  },
+
+  // =========================================================
+  // IMPRESIÓN DEL PAGARÉ DILIGENCIADO
+  // =========================================================
+
+  {
+    path: 'impresion/pagare-diligenciado/:idSolicitudCredito',
+    loadComponent: () =>
+      import(
+        './impresion/pagare-diligenciado/pagare-diligenciado.component'
+      ).then(
+        m => m.PagareDiligenciadoComponent
+      )
+  },
+
+  // =========================================================
+  // IMPRESIÓN DEL PAGARÉ EN BLANCO
+  // =========================================================
+
+  {
+    path: 'impresion/pagare-en-blanco/:idSolicitudCredito',
+    loadComponent: () =>
+      import(
+        './impresion/pagare-en-blanco/pagare-en-blanco.component'
+      ).then(
+        m => m.PagareEnBlancoComponent
+      )
+  },
+
+  // =========================================================
+  // CARTA DE INSTRUCCIONES
+  // =========================================================
+
+  {
+    path: 'impresion/carta-instrucciones/:idSolicitudCredito',
+    loadComponent: () =>
+      import(
+        './impresion/carta-instrucciones/carta-instrucciones.component'
+      ).then(
+        m => m.CartaInstruccionesComponent
+      )
   }
 
 ];

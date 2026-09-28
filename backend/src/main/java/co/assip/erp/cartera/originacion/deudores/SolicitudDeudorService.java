@@ -3,7 +3,7 @@ package co.assip.erp.cartera.originacion.deudores;
 import co.assip.erp.cartera.originacion.deudores.dto.SolicitudDeudorAgregarRequestDTO;
 import co.assip.erp.cartera.originacion.deudores.dto.SolicitudDeudorDTO;
 import co.assip.erp.cartera.originacion.deudores.dto.SolicitudDeudorDetalleDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,9 +54,18 @@ public class SolicitudDeudorService {
                                 )
                         );
 
-        usuarioSesionService.validarAgencia(
-                idAgencia
-        );
+        // El funcionario puede consultar deudores de solicitudes
+        // pertenecientes a otra agencia durante originación.
+        usuarioSesionService.idUsuario();
+
+        if (!usuarioSesionService.tieneAccesoTotal()
+                && (usuarioSesionService.agencias() == null
+                || usuarioSesionService.agencias().isEmpty())) {
+
+            throw new SecurityException(
+                    "El usuario no tiene agencias autorizadas para consultar deudores."
+            );
+        }
 
         return repository.listarPorSolicitud(
                 idSolicitudCredito
@@ -97,9 +106,18 @@ public class SolicitudDeudorService {
                                 )
                         );
 
-        usuarioSesionService.validarAgencia(
-                idAgencia
-        );
+        // Durante originación se permite consultar deudores
+        // independientemente de la agencia propietaria de la solicitud.
+        usuarioSesionService.idUsuario();
+
+        if (!usuarioSesionService.tieneAccesoTotal()
+                && (usuarioSesionService.agencias() == null
+                || usuarioSesionService.agencias().isEmpty())) {
+
+            throw new SecurityException(
+                    "El usuario no tiene agencias autorizadas para consultar deudores."
+            );
+        }
 
         return deudor;
     }
@@ -134,9 +152,18 @@ public class SolicitudDeudorService {
                                 )
                         );
 
-        usuarioSesionService.validarAgencia(
-                idAgencia
-        );
+        // Durante originación, un funcionario autorizado puede agregar
+        // codeudores a solicitudes de otras agencias.
+        usuarioSesionService.idUsuario();
+
+        if (!usuarioSesionService.tieneAccesoTotal()
+                && (usuarioSesionService.agencias() == null
+                || usuarioSesionService.agencias().isEmpty())) {
+
+            throw new SecurityException(
+                    "El usuario no tiene agencias autorizadas para gestionar codeudores."
+            );
+        }
 
         if (!repository.existePersona(
                 request.getIdDatosPersonal()
@@ -237,9 +264,18 @@ public class SolicitudDeudorService {
                                 )
                         );
 
-        usuarioSesionService.validarAgencia(
-                idAgencia
-        );
+        // Durante originación, un funcionario autorizado puede retirar
+        // codeudores de solicitudes pertenecientes a otras agencias.
+        usuarioSesionService.idUsuario();
+
+        if (!usuarioSesionService.tieneAccesoTotal()
+                && (usuarioSesionService.agencias() == null
+                || usuarioSesionService.agencias().isEmpty())) {
+
+            throw new SecurityException(
+                    "El usuario no tiene agencias autorizadas para gestionar codeudores."
+            );
+        }
 
         // Eliminación definitiva de las dependencias con NO ACTION.
         // Análisis, detalles y garantías se eliminan por ON DELETE CASCADE.

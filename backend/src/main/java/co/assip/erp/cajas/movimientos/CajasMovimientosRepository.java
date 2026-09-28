@@ -63,6 +63,31 @@ public class CajasMovimientosRepository {
         );
     }
 
+    public Integer obtenerCuentaContableCaja(
+            Long idCaja
+    ) {
+
+        String sql = """
+        SELECT id_catalogo_cuenta_caja
+        FROM cajas.cajas
+        WHERE id_caja = :idCaja
+          AND activa = TRUE
+        LIMIT 1
+    """;
+
+        return jdbc.query(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idCaja", idCaja),
+                rs -> rs.next()
+                        ? rs.getObject(
+                        "id_catalogo_cuenta_caja",
+                        Integer.class
+                )
+                        : null
+        );
+    }
+
     public Long insertarMovimientoCaja(
             Long idProvision,
             Long idCaja,

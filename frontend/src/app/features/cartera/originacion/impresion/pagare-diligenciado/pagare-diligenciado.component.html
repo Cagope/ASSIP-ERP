@@ -1,0 +1,509 @@
+<div class="pagare-diligenciado">
+
+  <!-- =====================================================
+       BARRA DE ACCIONES
+       No se imprime.
+       ===================================================== -->
+
+  <div class="barra-acciones no-imprimir">
+
+    <div class="barra-titulo">
+      <h2>Pagaré diligenciado</h2>
+
+      <p *ngIf="datos">
+        Pagaré No. {{ numeroPagare }}
+      </p>
+    </div>
+
+    <div class="barra-botones">
+
+      <button
+        type="button"
+        class="btn btn-secundario"
+        [disabled]="cargando"
+        (click)="cerrar()">
+        Cerrar
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="!puedeImprimir"
+        (click)="imprimir()">
+        Imprimir pagaré
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================================
+       ESTADOS
+       ===================================================== -->
+
+  <div
+    *ngIf="cargando"
+    class="estado no-imprimir">
+
+    Consultando información del pagaré...
+
+  </div>
+
+  <div
+    *ngIf="error"
+    class="estado estado-error no-imprimir">
+
+    {{ error }}
+
+  </div>
+
+
+  <!-- =====================================================
+       DOCUMENTO
+       ===================================================== -->
+
+  <ng-container *ngIf="puedeImprimir && datos && deudorPrincipal">
+
+
+    <!-- ===================================================
+         PÁGINA 1
+         =================================================== -->
+
+    <section class="hoja-oficio pagina-uno">
+
+      <div class="contenido-pagare">
+
+
+        <!-- ===============================================
+             ENCABEZADO DEL PAGARÉ
+             =============================================== -->
+
+        <div class="encabezado-pagare">
+
+          <!-- Datos cortos: dos columnas alineadas. -->
+          <div class="encabezado-datos">
+
+            <div class="campo">
+              <span class="etiqueta">PAGARE NUMERO :</span>
+              <strong>{{ datos.pagare.codigoLineaCredito }}-{{ numeroPagare }}</strong>
+            </div>
+
+            <div class="campo">
+              <span class="etiqueta">CUENTA No. :</span>
+              <strong>{{ datos.pagare.numeroCuentaAportes || 'NO DISPONIBLE' }}</strong>
+            </div>
+
+            <div class="campo">
+              <span class="etiqueta">LINEA CREDITO :</span>
+              <strong>{{ datos.pagare.nombreLineaCredito }}</strong>
+            </div>
+
+            <div class="campo">
+              <span class="etiqueta">VALOR CREDITO :</span>
+              <strong>{{ formatearMoneda(datos.pagare.valorFormalizado) }}</strong>
+            </div>
+
+            <div class="campo">
+              <span class="etiqueta">VENCIMIENTO :</span>
+              <strong>{{ formatearFecha(datos.pagare.fechaFinal) || 'NO DISPONIBLE' }}</strong>
+            </div>
+
+          </div>
+
+          <!-- Descripciones largas: ancho completo. -->
+          <div class="encabezado-descripciones">
+
+            <div class="campo campo-descripcion">
+              <span class="etiqueta">TIPO GARANTIA :</span>
+              <strong>{{ datos.pagare.descripcionGarantiaCredito || 'NO DISPONIBLE' }}</strong>
+            </div>
+
+            <div class="campo campo-descripcion">
+              <span class="etiqueta">TIPO INVERSION :</span>
+              <strong>{{ datos.pagare.descripcionDestinoEconomico || 'NO DISPONIBLE' }}</strong>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- ===============================================
+             IDENTIFICACIÓN DE LOS OTORGANTES
+             =============================================== -->
+
+        <div class="otorgantes">
+
+          <div class="otorgante-principal">
+
+            <span>
+              Yo (NOSOTROS)
+            </span>
+
+            <strong>
+              {{ deudorPrincipal.nombreCompleto | uppercase }}
+            </strong>
+
+          </div>
+
+          <div class="otorgantes-codeudores">
+
+            <div *ngFor="let codeudor of codeudores">
+
+              {{ codeudor.nombreCompleto | uppercase }}
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===============================================
+             TEXTO CONTRACTUAL — PÁGINA 1
+
+             Se conservan los textos y la separación de
+             líneas de la rutina VB suministrada.
+             Courier New 10pt y espacios: configurar en SCSS.
+             =============================================== -->
+
+        <div class="texto-contractual">
+
+          <div>Legalmente  capaz(ces) como aparezco(cemos)  al  pie de mí(nuestras)  firma(s), me(nos)</div>
+          <div>declaro(amos) deudor(es) solidario(s)de la COOPERATIVA DE AHORRO Y CREDITO VALLE DE SAN</div>
+          <div>JOSE LTDA, COOPVALLE domiciliada en el Municipio del VALLE DE SAN JOSE, SANTANDER,  con</div>
+          <div>radio de acción en todo el territorio de la República de COLOMBIA por la suma de: *****</div>
+
+          <div class="no-justificar">
+            {{ completarConAsteriscos(datos.valorFormalizadoEnLetras) }}
+          </div>
+
+          <div>($ {{ formatearMoneda(datos.pagare.valorFormalizado) }}) MCTE, que he(mos) recibido de dicha institución a entera satisfacción</div>
+
+          <div>y a título de mutuo préstamo comercial. El pago de la cantidad expresada  lo  hare(mos)</div>
+
+          <!-- Pendiente: texto contractual de pago; no sustituirlo por una fórmula inventada. -->
+          <div>
+            {{ datos.condicionesPago }}
+          </div>
+
+          <div>Sobre el valor expresado o sobre saldos pendientes de pago reconoceré(mos) interes a la</div>
+
+          <div>tasa del ({{ formatearPorcentaje(datos.pagare.tasaNominalFormalizada) }}) por ciento nominal anual, intereses que empiezan a causarse en la</div>
+
+          <div>fecha de elaboración del presente pagaré y cancelaré(mos) de conformidad con los plazos</div>
+          <div>pactados anteriormente. Cuando  se  presente  mora  en  el  pago oportuno de las cuotas</div>
+          <div>pactadas me (nos) comprometo(emos) a cancelar intereses de mora a la tasa máxima  legal</div>
+          <div>autorizada como  sanción por incumplimiento,  sin perjuicio de las acciones legales del</div>
+          <div>derecho del Acreedor para hacer efectiva la obligación judicialmente.</div>
+
+          <div>Si por disposición legal o reglamentaria se autoriza el cobro de interes convencional o</div>
+          <div>de mora superiores a los estipulados, autorizo(amos) a COOPVALLE para hacer los ajustes</div>
+          <div>respectivos y me(nos) obligo(amos) a  pagar  la  diferencia  que  resulte a mi(nuestro)</div>
+          <div class="no-justificar">cargo por este concepto.</div>
+
+          <div>Queda expresamente determinado a satisfacción de los firmantes del presente Pagaré, que</div>
+          <div>en caso de mora de una cualquiera de las cuotas pactadas o  de los intereses, obliga  a</div>
+          <div>COOPVALLE,  a  declarar  vencida  la totalidad  del préstamo concedido  y en  efecto se</div>
+          <div class="no-justificar">exigirá el pago total de la obligación.</div>
+
+          <div>Si diera lugar  a  cobro judicial, renuncio(amos) desde ahora en beneficio del Acreedor</div>
+          <div>al  derecho  de  nombrar depositario de  bienes y  me(nos)  obligo(amos)  igualmente  a</div>
+          <div>cancelar todos los gastos y costas de cobranza incluyendo los honorarios profesionales.</div>
+
+          <div>El(los)   firmante(s)   del   presente   Pagaré   me(nos)   obligo(amos)   solidaria  y</div>
+          <div>mancomunadamente a  pagar la totalidad de la obligación,  renunciando al  beneficio  de</div>
+          <div>exclusión al fiel cumplimiento de este  Documento  en todas sus partes contenidas en el</div>
+          <div>mismo.  Además  doy(amos)  como  garantía  para  respaldar  el  pago de esta obligación</div>
+          <div>debidamente adquirida a entera satisfacción de los que intervienen  como firmantes, los</div>
+          <div>Aportes Sociales, los Depósitos a la orden  y Depósitos de Ahorro a Termino Fijo (CDAT)</div>
+          <div>que  poseo(emos)  a  nuestro  favor en COOPVALLE,  además de todas las  propiedades que</div>
+          <div class="no-justificar">constituyen garantía en el pago de la obligación.</div>
+
+          <div>De  acuerdo  con  lo  previsto  en  el  artículo 142  de  la  ley 79/88  autorizo(amos)</div>
+          <div>irrevocablemente a la persona natural o jurídica, pública o privada a quien corresponda</div>
+          <div>realizarme(nos)  el  pago  de  cualquier  cantidad  de  dinero  por  concepto laboral o</div>
+          <div>prestacional para que reduzca o retenga de estos valores la(s) suma(s) que en virtud de</div>
+          <div>este  Pagaré  adeudo(amos)  y  las consigne  a  favor  de COOPVALLE;  a  quien  tambien</div>
+          <div>autorizo(amos)  para  que  solicite  la  deducción  o  retención de  estos valores, sin</div>
+          <div>perjuicio de las acciones judiciales que quiera iniciar directamente sin hacer valer la</div>
+          <div>autorización. CLAUSULA ACELERATORIA: No  obstante el plazo arriba indicado,  el tenedor</div>
+          <div>podrá exigir en forma anticipada el valor del saldo pendiente, sin necesidad de aviso o</div>
+          <div>requerimiento alguno, en cualquiera de los  siguientes eventos: a) si cualquiera de los</div>
+          <div>suscriptores llegare a ser investigado o vinculado por cualquier autoridad  en razón de</div>
+          <div>contravenciones,  especialmente  en  lo  que  se  refiere al lavado de activos, o fuere</div>
+          <div>demandado judicialmente, o  se  le embargue bienes por cualquier clase de acción; b) en</div>
+          <div class="no-justificar">caso de disolución,  liquidación  o  insolvencia.  c) si  cualquiera  de los otorgantes</div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         PÁGINA 2
+         =================================================== -->
+
+    <section class="hoja-oficio pagina-dos">
+
+      <div class="contenido-pagare">
+
+
+        <!-- ===============================================
+             CONTINUACIÓN DEL TEXTO CONTRACTUAL
+             =============================================== -->
+
+        <div class="texto-contractual">
+
+          <div>comete  inexactitud  en  balances, informes,  declaraciones o documentos que presente a</div>
+          <div>COOPVALLE  o  le  fueren devueltos uno o varios cheques por ausencia total o parcial de</div>
+          <div>fondos  si  fuere el caso; d) si los  bienes dados en garantía a COOPVALLE dejan de ser</div>
+          <div>suficiente  respaldo  a  juicio  de COOPVALLE, de las obligaciones con el contraídas se</div>
+          <div>desmejoren  o  sean perseguidos en cualquier forma. e) la alteración de las condiciones</div>
+          <div>patrimoniales  de  uno  o  varios de  quien(es) firma(mos) el presente documento, que a</div>
+          <div>juicio de COOPVALLE  pueda  llevar  el incumplimiento de mi(nuestras) obligaciones(es);</div>
+          <div>f) cualquier causal establecida en la ley, sus normas reglamentarias o disposiciones de</div>
+          <div>autoridad competente. Para efectos de   consolidar  una  política  de  conocimiento del</div>
+          <div>cliente  y  velar  por  el efectivo  cumplimiento de las garantías constitucionales, el</div>
+          <div>DEUDOR autoriza  permanente e irrevocablemente al ACREDEDOR o a quien este delegue, o a</div>
+          <div>quien en el futuro  le sean cedidos sus derechos u ocupen su misma posición contractual</div>
+          <div>para que  consulte, procese,  repote,  retire y actualice nuestros  datos  personales o</div>
+          <div>cualquier  otra información  que  se  obtenga  en virtud de nuestro comportamiento como</div>
+          <div>DEUDOR a la central de información de la  Superintendencia  de  Economía Solidaria y de</div>
+          <div>instituciones financieras de Colombia,  Datacredito, CIFIN  o  cualquier  otra  Central</div>
+          <div class="no-justificar">de Información debidamente constituida.</div>
+
+
+          <div>En señal de que  acepto(amos) las obligaciones, como tales  en los términos expresados,</div>
+
+          <div class="fecha-firma no-justificar">
+            firmamos en el VALLE DE SAN JOSE, a los
+            <strong>{{ formatearFecha(datos.pagare.fechaInclusionSistema) || 'NO DISPONIBLE' }}</strong>
+          </div>
+
+        </div>
+
+
+        <!-- ===============================================
+             FIRMAS
+             =============================================== -->
+
+        <div class="firmantes-pagare">
+
+
+          <!-- DEUDOR PRINCIPAL -->
+
+          <div class="bloque-firma">
+
+            <div class="titulo-firmante">
+              DEUDOR
+            </div>
+
+            <div class="lineas-firma">
+
+              <span class="linea-firma">
+                ________________________________________________
+              </span>
+
+              <span class="linea-huella">
+                ___________________
+              </span>
+
+            </div>
+
+            <div class="fila-firmante">
+
+              <span class="etiqueta-firmante">
+                NOMBRE .:
+              </span>
+
+              <span class="valor-firmante">
+                {{ deudorPrincipal.nombreCompleto | uppercase }}
+              </span>
+
+              <span class="etiqueta-huella">
+                HUELLA
+              </span>
+
+            </div>
+
+            <div class="fila-firmante">
+
+              <span class="etiqueta-firmante">
+                DOCUMENTO :
+              </span>
+
+              <span class="valor-firmante">
+                {{ deudorPrincipal.documento }}
+              </span>
+
+            </div>
+
+            <div class="fila-firmante">
+
+              <span class="etiqueta-firmante">
+                DIRECCION :
+              </span>
+
+              <span class="valor-firmante">
+                {{ deudorPrincipal.direccion | uppercase }}
+              </span>
+
+            </div>
+
+            <div class="fila-firmante">
+
+              <span class="etiqueta-firmante">
+                TELEFONO :
+              </span>
+
+              <span class="valor-firmante">
+                {{ telefonoFirmante(deudorPrincipal) }}
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <!-- CODEUDORES
+
+               El VB reserva tres espacios de codeudor.
+               Se conservan incluso cuando alguno esté
+               sin registrar.
+          -->
+
+          <div
+            class="bloque-firma"
+            *ngFor="let posicion of [0, 1, 2]">
+
+            <div class="titulo-firmante">
+              CODEUDOR
+            </div>
+
+            <div class="lineas-firma">
+
+              <span class="linea-firma">
+                ________________________________________________
+              </span>
+
+              <span class="linea-huella">
+                ___________________
+              </span>
+
+            </div>
+
+            <div class="fila-firmante">
+
+              <span class="etiqueta-firmante">
+                NOMBRE .:
+              </span>
+
+              <span class="valor-firmante">
+                {{ (codeudores[posicion]?.nombreCompleto || '') | uppercase }}
+              </span>
+
+              <span class="etiqueta-huella">
+                HUELLA
+              </span>
+
+            </div>
+
+            <div class="fila-firmante">
+
+              <span class="etiqueta-firmante">
+                DOCUMENTO :
+              </span>
+
+              <span class="valor-firmante">
+                {{ codeudores[posicion]?.documento || '' }}
+              </span>
+
+            </div>
+
+            <div class="fila-firmante">
+
+              <span class="etiqueta-firmante">
+                DIRECCION :
+              </span>
+
+              <span class="valor-firmante">
+                {{ (codeudores[posicion]?.direccion || '') | uppercase }}
+              </span>
+
+            </div>
+
+            <div class="fila-firmante">
+
+              <span class="etiqueta-firmante">
+                TELEFONO :
+              </span>
+
+              <span class="valor-firmante">
+                {{ telefonoFirmante(codeudores[posicion] || null) }}
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ===============================================
+             ESPACIO RESERVADO PARA COOPVALLE
+             =============================================== -->
+
+        <div class="espacio-coopvalle">
+
+          (ESPACIO RESERVADO PARA COOPVALLE)
+
+        </div>
+
+
+        <div class="control-documento">
+
+          <div class="control-columna">
+
+            <div>
+              PREPARADO POR :
+            </div>
+
+            <div>
+              NOMBRE :
+            </div>
+
+            <div>
+              __________________________________
+            </div>
+
+          </div>
+
+
+          <div class="control-columna">
+
+            <div>
+              REVISADO POR :
+            </div>
+
+            <div>
+              NOMBRE :
+            </div>
+
+            <div>
+              __________________________________
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</div>

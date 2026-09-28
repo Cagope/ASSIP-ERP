@@ -1,6 +1,6 @@
 package co.assip.erp.depositos.interesdiario_sm;
 
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.contabilidad.consecutivos_comprobantes.ConsecutivosComprobantesService;
 import co.assip.erp.depositos.interesdiario_sm.dto.InteresDiarioSMEntradaDTO;
 import co.assip.erp.depositos.interesdiario_sm.dto.InteresDiarioSMItemDTO;

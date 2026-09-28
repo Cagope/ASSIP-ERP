@@ -1,0 +1,603 @@
+// =========================================================
+// PAGARÉ DILIGENCIADO
+// ASSIP ERP
+//
+// Equivalente Visual Basic:
+//
+// Printer.FontName = "Courier New"
+// Printer.FontSize = 10
+//
+// Papel oficio: 216 mm × 330 mm
+// Orientación: vertical
+// Impresión: dos páginas
+// =========================================================
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background: #e5e7eb;
+  color: #111827;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.pagare-diligenciado {
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
+
+// =========================================================
+// BARRA DE ACCIONES
+// =========================================================
+
+.barra-acciones {
+  max-width: 216mm;
+  margin: 0 auto 1.5rem;
+  padding: 1rem 1.25rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+
+  box-shadow: 0 2px 8px rgb(0 0 0 / 5%);
+}
+
+.barra-titulo {
+
+  h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
+    color: #6b7280;
+  }
+}
+
+.barra-botones {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn {
+  padding: 0.55rem 0.9rem;
+
+  border: 1px solid transparent;
+  border-radius: 5px;
+
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+
+  &:not(:disabled):hover {
+    background: #1d4ed8;
+  }
+}
+
+.btn-secondary {
+  background: #ffffff;
+  color: #374151;
+  border-color: #d1d5db;
+
+  &:hover {
+    background: #f3f4f6;
+  }
+}
+
+
+// =========================================================
+// ESTADOS
+// =========================================================
+
+.estado {
+  max-width: 216mm;
+  margin: 0 auto 1rem;
+  padding: 1rem;
+
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.estado-error {
+  color: #991b1b;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+
+// =========================================================
+// HOJA OFICIO
+// =========================================================
+
+.hoja-oficio {
+  position: relative;
+
+  width: 216mm;
+  height: 330mm;
+
+  margin: 0 auto 1.5rem;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  box-shadow: 0 4px 18px rgb(0 0 0 / 12%);
+}
+
+
+// =========================================================
+// CONTENIDO DEL PAGARÉ
+//
+// Equivalente a:
+//
+// Printer.FontName = "Courier New"
+// Printer.FontSize = 10
+//
+// Se utiliza una fuente monoespaciada para conservar
+// las posiciones del documento original de VB.
+// =========================================================
+
+.contenido-pagare {
+  position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  padding:
+    10mm
+    11mm
+    10mm
+    13mm;
+
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 10pt;
+  font-weight: 400;
+
+  line-height: 1.15;
+
+  color: #000000;
+}
+
+
+// =========================================================
+// ENCABEZADO
+// =========================================================
+
+.encabezado-pagare {
+  width: 100%;
+  margin-bottom: 7mm;
+
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 10pt;
+  line-height: 1.2;
+}
+
+// Datos cortos: dos columnas
+.encabezado-datos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 4mm;
+  row-gap: 1mm;
+}
+
+// Cada campo mantiene alineadas su etiqueta y su valor
+.encabezado-pagare .campo {
+  display: grid;
+  grid-template-columns: 39mm minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: 2mm;
+
+  min-width: 0;
+}
+
+.encabezado-pagare .etiqueta {
+  white-space: nowrap;
+}
+
+.encabezado-pagare .campo strong {
+  min-width: 0;
+  font-weight: 700;
+}
+
+// Garantía e inversión: ancho completo
+.encabezado-descripciones {
+  display: grid;
+  row-gap: 1mm;
+  margin-top: 2mm;
+}
+
+.encabezado-pagare .campo-descripcion {
+  grid-template-columns: 39mm minmax(0, 1fr);
+}
+
+.encabezado-pagare .campo-descripcion strong {
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+// =========================================================
+// OTORGANTES
+// =========================================================
+
+.otorgantes {
+  margin-bottom: 2.5mm;
+
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 10pt;
+  line-height: 1.15;
+}
+
+.otorgante-principal {
+  display: flex;
+  align-items: baseline;
+
+  gap: 2mm;
+
+  strong {
+    font-weight: 700;
+  }
+}
+
+.otorgantes-codeudores {
+  padding-left: 23mm;
+
+  > div {
+    min-height: 4mm;
+  }
+}
+
+
+// =========================================================
+// TEXTO CONTRACTUAL
+//
+// Cada div corresponde a un renglón de Visual Basic.
+//
+// No se utiliza text-align: justify porque modificaría
+// la distribución original de los espacios.
+//
+// Se conservan los espacios existentes en cada línea.
+// =========================================================
+
+.texto-contractual {
+  width: 100%;
+
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 10pt;
+
+  font-weight: 400;
+  line-height: 1.15;
+
+  > div {
+    width: 100%;
+    min-height: 4mm;
+
+    margin: 0;
+    padding: 0;
+
+    text-align: justify;
+    text-align-last: justify;
+
+    white-space: normal;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+}
+
+.texto-contractual > div.no-justificar {
+  text-align: left;
+  text-align-last: left;
+}
+
+.texto-contractual > div.no-justificar {
+  text-align: left;
+  text-align-last: left;
+}
+
+.fecha-firma {
+  margin-top: 2mm;
+}
+
+
+
+// =========================================================
+// DATOS PENDIENTES
+//
+// Identificación visual de información que todavía
+// debe completarse antes de imprimir el pagaré definitivo.
+// =========================================================
+
+.dato-pendiente {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+
+// =========================================================
+// PÁGINA 2
+// =========================================================
+
+.pagina-dos {
+
+  .contenido-pagare {
+    padding-top: 10mm;
+  }
+
+  .texto-contractual {
+    margin-bottom: 5mm;
+  }
+}
+
+
+// =========================================================
+// FIRMANTES
+// =========================================================
+
+.firmantes-pagare {
+  width: 100%;
+}
+
+.bloque-firma {
+  width: 100%;
+
+  margin-bottom: 4mm;
+
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 10pt;
+
+  line-height: 1.15;
+
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.titulo-firmante {
+  margin-bottom: 1mm;
+
+  font-weight: 700;
+}
+
+.lineas-firma {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+
+  gap: 3mm;
+
+  margin-top: 4mm;
+
+  white-space: nowrap;
+}
+
+.linea-firma,
+.linea-huella {
+  display: inline-block;
+}
+
+.fila-firmante {
+  display: flex;
+  align-items: baseline;
+
+  min-height: 4mm;
+
+  gap: 2mm;
+}
+
+.etiqueta-firmante {
+  flex: 0 0 23mm;
+
+  white-space: nowrap;
+}
+
+.valor-firmante {
+  flex: 1 1 auto;
+
+  min-width: 0;
+}
+
+.etiqueta-huella {
+  flex: 0 0 22mm;
+
+  text-align: center;
+}
+
+
+// =========================================================
+// ESPACIO RESERVADO PARA COOPVALLE
+// =========================================================
+
+.espacio-coopvalle {
+  margin-top: 5mm;
+
+  text-align: center;
+
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 10pt;
+  font-weight: 700;
+}
+
+
+// =========================================================
+// CONTROL DEL DOCUMENTO
+// =========================================================
+
+.control-documento {
+  display: flex;
+  justify-content: space-between;
+
+  gap: 12mm;
+
+  margin-top: 4mm;
+
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 10pt;
+}
+
+.control-columna {
+  flex: 1 1 50%;
+
+  > div {
+    min-height: 4mm;
+  }
+}
+
+
+// =========================================================
+// AJUSTES DE PANTALLA
+// =========================================================
+
+@media screen and (max-width: 900px) {
+
+  .pagare-diligenciado {
+    padding: 0.75rem;
+    overflow-x: auto;
+  }
+
+  .barra-acciones {
+    min-width: 216mm;
+
+    flex-wrap: wrap;
+  }
+
+  .hoja-oficio {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+
+// =========================================================
+// IMPRESIÓN
+//
+// Papel oficio.
+// Dos páginas.
+// Courier New, 10 puntos.
+// =========================================================
+
+@page {
+  size: 216mm 330mm;
+  margin: 0;
+}
+
+@media print {
+
+  :host {
+    display: block;
+
+    min-height: auto;
+
+    background: #ffffff;
+    color: #000000;
+  }
+
+  .pagare-diligenciado {
+    min-height: auto;
+
+    padding: 0;
+    margin: 0;
+
+    background: #ffffff;
+  }
+
+  .no-imprimir {
+    display: none !important;
+  }
+
+  .hoja-oficio {
+    display: block;
+
+    width: 216mm;
+    height: 330mm;
+
+    margin: 0;
+    padding: 0;
+
+    overflow: hidden;
+
+    background: #ffffff;
+
+    box-shadow: none;
+    border: 0;
+
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .pagina-uno {
+    break-after: page;
+    page-break-after: always;
+  }
+
+  .pagina-dos {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  .contenido-pagare {
+    width: 100%;
+    height: 100%;
+
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 10pt;
+    line-height: 1.15;
+
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .encabezado-pagare,
+  .otorgantes,
+  .texto-contractual,
+  .bloque-firma,
+  .espacio-coopvalle,
+  .control-documento {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 10pt;
+  }
+
+  .texto-contractual > div {
+    width: 100%;
+
+    text-align: justify;
+    text-align-last: justify;
+
+    white-space: normal;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .bloque-firma {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+}

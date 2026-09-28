@@ -1,6 +1,6 @@
 package co.assip.erp.depositos.interesmensual_sm;
 
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.depositos.interesmensual_sm.dto.InteresMensualSMEntradaDTO;
 import co.assip.erp.depositos.interesmensual_sm.dto.InteresMensualSMItemDTO;
 import lombok.RequiredArgsConstructor;

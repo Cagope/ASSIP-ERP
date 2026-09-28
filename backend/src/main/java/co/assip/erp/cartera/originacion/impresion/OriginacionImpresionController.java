@@ -11,11 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class OriginacionImpresionController {
 
     private final OriginacionExpedientePdfService pdfService;
+    private final OriginacionPagareService pagareService;
 
     public OriginacionImpresionController(
-            OriginacionExpedientePdfService pdfService
+            OriginacionExpedientePdfService pdfService,
+            OriginacionPagareService pagareService
     ) {
         this.pdfService = pdfService;
+        this.pagareService = pagareService;
     }
 
     // =========================================================
@@ -45,6 +48,59 @@ public class OriginacionImpresionController {
         return pdfService.generarPdfActuacionResponse(
                 idSolicitudCredito,
                 idSolicitudAprobacion
+        );
+    }
+
+    // =========================================================
+    // DATOS DEL PAGARÉ DILIGENCIADO PARA ANGULAR
+    //
+    // Devuelve:
+    // - Identificación del crédito y pagaré.
+    // - Condiciones financieras definitivas.
+    // - Fechas del crédito constituido.
+    // - Deudor principal y codeudores.
+    //
+    // No genera PDF ni modifica información del crédito.
+    // =========================================================
+
+    @GetMapping("/{idSolicitudCredito}/pagare/diligenciado/datos")
+    public ResponseEntity<OriginacionPagareService.PagareImpresion>
+    consultarDatosPagareDiligenciado(
+            @PathVariable Integer idSolicitudCredito
+    ) {
+
+        return ResponseEntity.ok(
+                pagareService.obtenerPagareDiligenciado(
+                        idSolicitudCredito
+                )
+        );
+    }
+
+    // =========================================================
+    // DATOS DEL PAGARÉ EN BLANCO Y CARTA DE INSTRUCCIONES
+    //
+    // Ambos documentos se generan desde Angular.
+    //
+    // Conserva:
+    // - Número del pagaré.
+    // - Identificación del crédito.
+    // - Deudor principal.
+    // - Codeudores.
+    // - Datos de contacto de los firmantes.
+    //
+    // No genera PDF ni modifica información del crédito.
+    // =========================================================
+
+    @GetMapping("/{idSolicitudCredito}/pagare/en-blanco/datos")
+    public ResponseEntity<OriginacionPagareService.PagareImpresion>
+    consultarDatosPagareEnBlanco(
+            @PathVariable Integer idSolicitudCredito
+    ) {
+
+        return ResponseEntity.ok(
+                pagareService.obtenerPagareEnBlanco(
+                        idSolicitudCredito
+                )
         );
     }
 }

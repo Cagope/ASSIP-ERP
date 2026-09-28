@@ -3,7 +3,7 @@ package co.assip.erp.cartera.cierremensual.anexo1;
 import co.assip.erp.cartera.cierremensual.CierreMensualRepository;
 import co.assip.erp.cartera.cierremensual.anexo1.dto.DetalleAnexo1DTO;
 import co.assip.erp.cartera.cierremensual.dto.CierreMensualDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

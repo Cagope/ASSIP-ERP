@@ -2,7 +2,7 @@ package co.assip.erp.cartera.evaluacion.centralriesgos.resultados;
 
 import co.assip.erp.cartera.evaluacion.centralriesgos.resultados.dto.CentralRiesgoResultadoDatoDTO;
 import co.assip.erp.cartera.evaluacion.centralriesgos.resultados.dto.CentralRiesgoResultadoImportacionDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

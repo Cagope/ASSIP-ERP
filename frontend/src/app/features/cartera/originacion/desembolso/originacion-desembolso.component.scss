@@ -1,0 +1,655 @@
+.page {
+  padding: 1rem;
+}
+
+
+// =========================================================
+// ENCABEZADO
+// =========================================================
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+}
+
+.page-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+
+// =========================================================
+// TARJETAS
+// =========================================================
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background: #ffffff;
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    font-size: 0.82rem;
+    color: #6b7280;
+  }
+}
+
+
+// =========================================================
+// INFORMACIÓN DEL CRÉDITO
+// =========================================================
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.info-item {
+  min-width: 0;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.4rem;
+  background: #f9fafb;
+
+  strong {
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #1f2937;
+    overflow-wrap: anywhere;
+  }
+}
+
+.info-item--wide {
+  grid-column: span 2;
+}
+
+.info-label {
+  display: block;
+  font-size: 0.72rem;
+  color: #6b7280;
+}
+
+.amount {
+  white-space: nowrap;
+}
+
+
+// =========================================================
+// FORMULARIOS
+// =========================================================
+
+.form-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.form-grid--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+
+  label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  input,
+  select {
+    width: 100%;
+    min-height: 36px;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.35rem;
+    background: #ffffff;
+    color: #1f2937;
+    font-size: 0.84rem;
+    outline: none;
+    box-sizing: border-box;
+
+    &:focus {
+      border-color: #9ca3af;
+      box-shadow: 0 0 0 2px rgba(107, 114, 128, 0.1);
+    }
+
+    &:disabled {
+      background: #f3f4f6;
+      color: #6b7280;
+      cursor: not-allowed;
+    }
+
+    &[readonly] {
+      background: #f9fafb;
+    }
+  }
+}
+
+.form-field--span-2 {
+  grid-column: span 2;
+}
+
+.field-help {
+  min-height: 1rem;
+  font-size: 0.7rem;
+  color: #6b7280;
+}
+
+.field-help--warning {
+  color: #92400e;
+}
+
+
+// =========================================================
+// LIQUIDACIÓN
+// =========================================================
+
+.section-title {
+  margin: 0 0 0.65rem;
+
+  h4 {
+    margin: 0;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #374151;
+  }
+}
+
+.section-title--separated {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.values-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.value-item {
+  min-width: 0;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.4rem;
+  background: #f9fafb;
+
+  span {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-size: 0.72rem;
+    color: #6b7280;
+  }
+
+  strong {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1f2937;
+    white-space: nowrap;
+  }
+
+  small {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.68rem;
+    color: #6b7280;
+  }
+}
+
+.value-item--highlight {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+
+  strong {
+    font-size: 0.95rem;
+  }
+}
+
+
+// =========================================================
+// DISTRIBUCIÓN
+// =========================================================
+
+.distribution-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 260px));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+
+// =========================================================
+// CUENTAS DE AHORRO
+// =========================================================
+
+.deposit-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.deposit-section__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+
+  h4 {
+    margin: 0;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #374151;
+  }
+
+  p {
+    margin: 0.2rem 0 0;
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+}
+
+.deposit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.deposit-row {
+  display: grid;
+  grid-template-columns:
+    minmax(220px, 1fr)
+    minmax(180px, 260px)
+    auto;
+  gap: 0.65rem;
+  align-items: end;
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.4rem;
+  background: #f9fafb;
+}
+
+.deposit-row__action {
+  display: flex;
+  align-items: flex-end;
+}
+
+.empty-inline {
+  padding: 0.8rem;
+  border: 1px dashed #d1d5db;
+  border-radius: 0.4rem;
+  background: #f9fafb;
+  color: #6b7280;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+
+// =========================================================
+// RESUMEN DE DISTRIBUCIÓN
+// =========================================================
+
+.distribution-summary {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0.6rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+
+  > div {
+    min-width: 0;
+    padding: 0.65rem 0.7rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.4rem;
+    background: #f9fafb;
+
+    span {
+      display: block;
+      margin-bottom: 0.2rem;
+      font-size: 0.7rem;
+      color: #6b7280;
+    }
+
+    strong {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #1f2937;
+      white-space: nowrap;
+    }
+  }
+}
+
+.distribution-summary__total {
+  background: #f3f4f6 !important;
+  border-color: #d1d5db !important;
+}
+
+.distribution-summary__difference {
+  &.is-ok {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+
+    span,
+    strong {
+      color: #065f46;
+    }
+  }
+
+  &.is-error {
+    background: #fef2f2;
+    border-color: #fecaca;
+
+    span,
+    strong {
+      color: #991b1b;
+    }
+  }
+}
+
+
+// =========================================================
+// VALIDACIÓN DE DISTRIBUCIÓN
+// =========================================================
+
+.validation-result {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-top: 0.75rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid;
+  border-radius: 0.4rem;
+  font-size: 0.8rem;
+
+  strong {
+    font-weight: 700;
+  }
+}
+
+.validation-result--ok {
+  border-color: #a7f3d0;
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.validation-result--error {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+
+// =========================================================
+// ESTADOS
+// =========================================================
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-badge--pending {
+  border: 1px solid #fde68a;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.status-badge--success {
+  border: 1px solid #a7f3d0;
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.state-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 110px;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+
+// =========================================================
+// MENSAJES
+// =========================================================
+
+.alert {
+  margin-bottom: 1rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid;
+  border-radius: 0.4rem;
+  font-size: 0.82rem;
+}
+
+.alert--danger {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.alert--success {
+  border-color: #a7f3d0;
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+
+// =========================================================
+// BOTONES
+// =========================================================
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid transparent;
+  border-radius: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.btn--primary {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+
+  &:hover:not(:disabled) {
+    border-color: #1d4ed8;
+    background: #1d4ed8;
+  }
+}
+
+.btn--secondary {
+  border-color: #d1d5db;
+  background: #ffffff;
+  color: #374151;
+
+  &:hover:not(:disabled) {
+    border-color: #9ca3af;
+    background: #f9fafb;
+  }
+}
+
+.btn--danger-outline {
+  border-color: #fecaca;
+  background: #ffffff;
+  color: #b91c1c;
+
+  &:hover:not(:disabled) {
+    border-color: #fca5a5;
+    background: #fef2f2;
+  }
+}
+
+.btn--execute {
+  min-width: 170px;
+}
+
+
+// =========================================================
+// ACCIONES
+// =========================================================
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.process-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background: #ffffff;
+}
+
+.result-card {
+  border-color: #a7f3d0;
+}
+
+
+// =========================================================
+// RESPONSIVE
+// =========================================================
+
+@media (max-width: 1100px) {
+
+  .info-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .form-grid--4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .values-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .distribution-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+
+@media (max-width: 760px) {
+
+  .page-header,
+  .card-header,
+  .deposit-section__header {
+    flex-direction: column;
+  }
+
+  .info-grid,
+  .form-grid--4,
+  .values-grid,
+  .distribution-grid,
+  .distribution-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .info-item--wide,
+  .form-field--span-2 {
+    grid-column: span 1;
+  }
+
+  .deposit-row {
+    grid-template-columns: 1fr;
+  }
+
+  .deposit-row__action {
+    justify-content: flex-start;
+  }
+
+  .process-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+
+    .btn {
+      width: 100%;
+    }
+  }
+}
+
+
+@media (max-width: 600px) {
+
+  .page {
+    padding: 0.75rem;
+  }
+
+  .card {
+    padding: 0.75rem;
+  }
+}

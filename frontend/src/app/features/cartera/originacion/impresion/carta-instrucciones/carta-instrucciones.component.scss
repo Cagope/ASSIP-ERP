@@ -1,0 +1,428 @@
+:host {
+  display: block;
+}
+
+
+// =========================================================
+// CONTENEDOR GENERAL
+// =========================================================
+
+.carta-instrucciones {
+  min-height: 100vh;
+  padding: 1rem;
+
+  background: #f3f4f6;
+  color: #111827;
+}
+
+
+// =========================================================
+// BARRA DE ACCIONES
+// =========================================================
+
+.barra-acciones {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  max-width: 216mm;
+
+  margin: 0 auto 1rem;
+  padding: 0.85rem 1rem;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+
+.barra-titulo {
+
+  h2 {
+    margin: 0;
+
+    font-size: 1.1rem;
+    font-weight: 700;
+
+    color: #111827;
+  }
+
+  span {
+    display: block;
+
+    margin-top: 0.2rem;
+
+    font-size: 0.8rem;
+
+    color: #6b7280;
+  }
+}
+
+
+.barra-botones {
+  display: flex;
+  align-items: center;
+
+  gap: 0.5rem;
+}
+
+
+// =========================================================
+// BOTONES
+// =========================================================
+
+.btn {
+  min-height: 36px;
+
+  padding: 0.45rem 0.9rem;
+
+  border: 1px solid transparent;
+  border-radius: 6px;
+
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+}
+
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+
+.btn-primario {
+  background: #1f2937;
+  border-color: #1f2937;
+
+  color: #ffffff;
+}
+
+
+.btn-primario:hover:not(:disabled) {
+  background: #111827;
+  border-color: #111827;
+}
+
+
+.btn-secundario {
+  background: #ffffff;
+
+  border-color: #d1d5db;
+
+  color: #374151;
+}
+
+
+.btn-secundario:hover:not(:disabled) {
+  background: #f9fafb;
+}
+
+
+// =========================================================
+// ESTADOS
+// =========================================================
+
+.estado {
+  box-sizing: border-box;
+
+  max-width: 216mm;
+
+  margin: 0 auto 1rem;
+  padding: 1rem;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  font-size: 0.9rem;
+}
+
+
+.estado-error {
+  color: #991b1b;
+
+  background: #fef2f2;
+
+  border-color: #fecaca;
+}
+
+
+// =========================================================
+// HOJA CARTA
+//
+// Crystal Report:
+// carta de instrucciones.
+//
+// Papel:
+// 216 mm x 279 mm
+// =========================================================
+
+.hoja-carta {
+  box-sizing: border-box;
+
+  width: 216mm;
+  height: 279mm;
+
+  margin: 0 auto;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.14);
+}
+
+
+// =========================================================
+// CONTENIDO
+// =========================================================
+
+.contenido-carta {
+  box-sizing: border-box;
+
+  width: 100%;
+  height: 100%;
+
+  padding:
+    16mm
+    18mm
+    14mm
+    18mm;
+
+  font-family:
+    'Courier New',
+    Courier,
+    monospace;
+
+  font-size: 10pt;
+
+  line-height: 1.3;
+
+  color: #000000;
+}
+
+
+// =========================================================
+// DESTINATARIO
+// =========================================================
+
+.destinatario {
+  margin-bottom: 7mm;
+
+  p {
+    margin: 0;
+  }
+}
+
+
+.destinatario .empresa {
+  margin-top: 2mm;
+
+  font-weight: 700;
+}
+
+
+.destinatario .sigla {
+  margin-top: 1mm;
+
+  font-weight: 700;
+}
+
+
+// =========================================================
+// CUERPO DE LA CARTA
+// =========================================================
+
+.cuerpo-carta {
+  text-align: justify;
+
+  p {
+    margin:
+      0
+      0
+      4mm;
+
+    orphans: 3;
+    widows: 3;
+  }
+
+  strong {
+    font-weight: 700;
+  }
+}
+
+
+// =========================================================
+// ATENTAMENTE
+// =========================================================
+
+.atentamente {
+  margin-top: 6mm;
+  margin-bottom: 10mm;
+}
+
+
+// =========================================================
+// FIRMAS
+// =========================================================
+
+.firmas {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  column-gap: 14mm;
+  row-gap: 10mm;
+
+  align-items: start;
+}
+
+
+.firma {
+  min-width: 0;
+
+  font-size: 9pt;
+
+  line-height: 1.25;
+
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+
+.linea-firma {
+  margin-bottom: 1mm;
+
+  overflow: hidden;
+
+  white-space: nowrap;
+
+  line-height: 1;
+}
+
+
+.nombre-firmante {
+  overflow: hidden;
+
+  font-weight: 700;
+
+  white-space: nowrap;
+  text-overflow: clip;
+}
+
+
+// =========================================================
+// IMPRESIÓN
+// =========================================================
+
+@page {
+  size: 216mm 279mm;
+  margin: 0;
+}
+
+
+@media print {
+
+  :host {
+    display: block;
+  }
+
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+
+    background: #ffffff;
+  }
+
+
+  .no-imprimir {
+    display: none !important;
+  }
+
+
+  .carta-instrucciones {
+    min-height: 0;
+
+    margin: 0;
+    padding: 0;
+
+    background: #ffffff;
+  }
+
+
+  .hoja-carta {
+    box-sizing: border-box;
+
+    width: 216mm;
+    height: 279mm;
+
+    margin: 0;
+
+    overflow: hidden;
+
+    background: #ffffff;
+
+    box-shadow: none;
+
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+
+  .contenido-carta {
+    box-sizing: border-box;
+
+    width: 100%;
+    height: 100%;
+  }
+
+
+  .firma,
+  .firmas,
+  .atentamente {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+}
+
+
+// =========================================================
+// PANTALLAS PEQUEÑAS
+// =========================================================
+
+@media screen and (max-width: 900px) {
+
+  .carta-instrucciones {
+    overflow-x: auto;
+  }
+
+
+  .barra-acciones {
+    min-width: 700px;
+  }
+
+
+  .hoja-carta {
+    margin-left: 0;
+  }
+
+}

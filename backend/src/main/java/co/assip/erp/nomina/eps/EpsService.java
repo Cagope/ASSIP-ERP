@@ -1,7 +1,7 @@
 package co.assip.erp.nomina.eps;
 
 import co.assip.erp.nomina.eps.dto.EpsDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

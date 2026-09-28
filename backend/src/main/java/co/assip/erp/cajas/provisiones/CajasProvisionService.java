@@ -4,7 +4,7 @@ import co.assip.erp.cajas.provisiones.dto.CajasProvisionCerrarDTO;
 import co.assip.erp.cajas.provisiones.dto.CajasProvisionFormDTO;
 import co.assip.erp.cajas.provisiones.dto.CajasProvisionListDTO;
 import co.assip.erp.cajas.provisiones.dto.CajasProvisionSaveDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

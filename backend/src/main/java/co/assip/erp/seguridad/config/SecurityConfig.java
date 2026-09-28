@@ -1,5 +1,7 @@
 package co.assip.erp.seguridad.config;
 
+import co.assip.erp.seguridad.autenticacion.JwtAuthenticationEntryPoint;
+import co.assip.erp.seguridad.autenticacion.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

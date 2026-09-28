@@ -7,7 +7,7 @@ import co.assip.erp.nomina.contabilizacion.aportes_parafiscales.dto.AportesParaf
 import co.assip.erp.nomina.contabilizacion.aportes_parafiscales.dto.AportesParafiscalesContabilizacionResultadoDTO;
 import co.assip.erp.nomina.contabilizacion.liquidacion.dto.LiquidacionMovimientoContableDTO;
 import co.assip.erp.nomina.periodos_nomina.PeriodosNominaRepository;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

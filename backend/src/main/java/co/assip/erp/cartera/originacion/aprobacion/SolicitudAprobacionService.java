@@ -5,7 +5,7 @@ import co.assip.erp.cartera.originacion.aprobacion.dto.SolicitudAprobacionBandej
 import co.assip.erp.cartera.originacion.aprobacion.dto.SolicitudAprobacionDecisionDTO;
 import co.assip.erp.cartera.originacion.aprobacion.dto.SolicitudAprobacionFotosDTO;
 import co.assip.erp.cartera.originacion.aprobacion.dto.SolicitudAprobacionDecisionRequestDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,10 +53,6 @@ public class SolicitudAprobacionService {
         return repository.listarDecisiones();
     }
 
-
-    // =========================================================
-    // HISTORIAL
-    // =========================================================
 
     // =========================================================
     // HISTORIAL

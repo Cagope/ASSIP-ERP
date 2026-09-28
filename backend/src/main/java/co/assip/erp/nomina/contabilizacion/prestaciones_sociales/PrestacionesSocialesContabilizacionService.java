@@ -7,7 +7,7 @@ import co.assip.erp.nomina.contabilizacion.prestaciones_sociales.dto.Prestacione
 import co.assip.erp.nomina.contabilizacion.prestaciones_sociales.dto.PrestacionesSocialesContabilizacionResultadoDTO;
 import co.assip.erp.nomina.contabilizacion.liquidacion.dto.LiquidacionMovimientoContableDTO;
 import co.assip.erp.nomina.periodos_nomina.PeriodosNominaRepository;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

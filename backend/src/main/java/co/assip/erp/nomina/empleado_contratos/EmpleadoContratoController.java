@@ -1,7 +1,7 @@
 package co.assip.erp.nomina.empleado_contratos;
 
 import co.assip.erp.nomina.empleado_contratos.dto.EmpleadoContratoDTO;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

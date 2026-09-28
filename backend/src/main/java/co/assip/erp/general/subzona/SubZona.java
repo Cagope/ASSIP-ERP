@@ -1,7 +1,7 @@
 package co.assip.erp.general.subzona;
 
 import co.assip.erp.general.zona.Zona;
-import co.assip.erp.seguridad.domain.Usuario;
+import co.assip.erp.seguridad.usuarios.Usuario;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -2,7 +2,7 @@ package co.assip.erp.reporting.impl;
 
 import co.assip.erp.reporting.api.ReportQueryRequest;
 import co.assip.erp.reporting.api.ReportResult;
-import co.assip.erp.seguridad.service.UsuarioSesionService;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
