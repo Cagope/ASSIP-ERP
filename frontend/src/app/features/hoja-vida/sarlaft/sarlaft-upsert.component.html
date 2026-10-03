@@ -170,7 +170,7 @@
       </div>
     </fieldset>
 
-    <!-- 🟦 Acciones -->
+    <!-- Acciones -->
     <div class="form-actions full">
 
       <button
@@ -183,7 +183,7 @@
       <button
         type="submit"
         class="btn btn--primary"
-        [disabled]="form.invalid">
+        [disabled]="form.invalid || !puedeEditar">
         {{ editando ? 'Actualizar' : 'Guardar' }}
       </button>
 

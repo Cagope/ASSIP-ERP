@@ -29,6 +29,8 @@ import {
   SarlaftExporterService
 } from './sarlaft-exporter.service';
 
+import { SessionService } from '../../../core/auth/session.service';
+
 type PersonaConSarlaft =
   DatosPersonales & {
     sarlaft: Sarlaft | null;
@@ -69,11 +71,20 @@ export class SarlaftListComponent
   private readonly exporter =
     inject(SarlaftExporterService);
 
+  private readonly session =
+    inject(SessionService);
+
   personas: PersonaConSarlaft[] = [];
   filtradas: PersonaConSarlaft[] = [];
 
   cargando = false;
   error = '';
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'HOJAVIDA_SARLAFT_EDIT'
+    );
+  }
 
   filtros = {
     documento: '',
@@ -297,13 +308,22 @@ export class SarlaftListComponent
       return;
     }
 
+    // Registro existente:
+    // VIEW permite ingresar para consultarlo.
     if (sarlaft?.idSarlaft) {
+
       this.router.navigate([
         '/hoja-vida/sarlaft',
         sarlaft.idSarlaft,
         'editar'
       ]);
 
+      return;
+    }
+
+    // Crear registro SARLAFT:
+    // requiere permiso de edición.
+    if (!this.puedeEditar) {
       return;
     }
 

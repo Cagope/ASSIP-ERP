@@ -1,151 +1,555 @@
 @use '../../../../styles/forms';
 @use '../../../../styles/informes-base';
 
-/* =========================================
-   PAGE
-========================================= */
+
+// =========================================================
+// PÁGINA
+// =========================================================
 
 .page {
-  padding: 12px 0;
+  padding: 1rem;
 }
 
-/* =========================================
-   LABELS
-========================================= */
 
-label {
-  margin-bottom: 5px;
+// =========================================================
+// ENCABEZADO
+// =========================================================
 
-  color: #374151;
+.page-header {
+  margin-bottom: 1rem;
 
-  font-size: 13px;
+  h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
+    color: #6b7280;
+  }
+}
+
+
+// =========================================================
+// TARJETAS
+// =========================================================
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  h3 {
+    margin: 0;
+
+    font-size: 0.95rem;
+    font-weight: 700;
+
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.2rem 0 0;
+
+    font-size: 0.8rem;
+
+    color: #6b7280;
+  }
+}
+
+
+// =========================================================
+// FORMULARIO
+// =========================================================
+
+.form-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 0.9rem 1rem;
+}
+
+.f-row {
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+
+  label {
+    margin-bottom: 0.35rem;
+
+    font-size: 0.8rem;
+    font-weight: 600;
+
+    color: #374151;
+  }
+
+  input,
+  select {
+    width: 100%;
+    min-height: 36px;
+
+    padding: 0.45rem 0.65rem;
+
+    font-size: 0.85rem;
+
+    color: #1f2937;
+    background: #ffffff;
+
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+
+    outline: none;
+
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+
+    &:focus {
+      border-color: #9ca3af;
+
+      box-shadow:
+        0 0 0 2px rgba(107, 114, 128, 0.12);
+    }
+
+    &:disabled {
+      background: #f3f4f6;
+      cursor: not-allowed;
+    }
+
+    &[readonly] {
+      background: #f9fafb;
+      color: #4b5563;
+      cursor: default;
+    }
+  }
+}
+
+.f-row--wide {
+  grid-column: span 2;
+}
+
+
+// =========================================================
+// PERSONA VINCULADA
+// =========================================================
+
+.persona-search {
+  max-width: 760px;
+}
+
+.autocomplete {
+  position: relative;
+  width: 100%;
+}
+
+.autocomplete-status,
+.autocomplete-empty {
+  margin-top: 0.35rem;
+  padding: 0.55rem 0.65rem;
+
+  font-size: 0.78rem;
+  color: #6b7280;
+
+  background: #f9fafb;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+}
+
+.autocomplete-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+
+  z-index: 20;
+
+  max-height: 280px;
+  overflow-y: auto;
+
+  background: #ffffff;
+
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.10);
+}
+
+.autocomplete-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  width: 100%;
+
+  padding: 0.65rem 0.75rem;
+
+  text-align: left;
+
+  background: #ffffff;
+
+  border: 0;
+  border-bottom: 1px solid #f3f4f6;
+
+  cursor: pointer;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+
+  &:hover,
+  &:focus {
+    background: #f3f4f6;
+    outline: none;
+  }
+}
+
+.autocomplete-item__name {
+  min-width: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-size: 0.82rem;
   font-weight: 600;
+
+  color: #1f2937;
 }
 
-/* =========================================
-   CHECKBOXES
-========================================= */
+.autocomplete-item__document {
+  flex: 0 0 auto;
 
-.form-check {
+  font-size: 0.78rem;
+
+  color: #6b7280;
+}
+
+
+// =========================================================
+// PERSONA SELECCIONADA
+// =========================================================
+
+.persona-selected {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  padding: 0.85rem 1rem;
+
+  background: #f9fafb;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 7px;
+}
+
+.persona-selected__info {
+  display: flex;
+  flex-direction: column;
+
+  min-width: 0;
+}
+
+.persona-selected__label {
+  margin-bottom: 0.15rem;
+
+  font-size: 0.72rem;
+  font-weight: 600;
+
+  color: #6b7280;
+}
+
+.persona-selected__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-size: 0.9rem;
+  font-weight: 700;
+
+  color: #1f2937;
+}
+
+.persona-selected__document {
+  margin-top: 0.2rem;
+
+  font-size: 0.78rem;
+
+  color: #6b7280;
+}
+
+
+// =========================================================
+// AYUDAS Y VALIDACIONES
+// =========================================================
+
+.field-help {
+  display: block;
+
+  margin-top: 0.3rem;
+
+  font-size: 0.75rem;
+
+  color: #6b7280;
+}
+
+.field-error {
+  display: block;
+
+  margin-top: 0.3rem;
+
+  font-size: 0.75rem;
+  font-weight: 500;
+
+  color: #b91c1c;
+}
+
+
+// =========================================================
+// SELECCIÓN DE ROLES Y AGENCIAS
+// =========================================================
+
+.selection-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(auto-fill, minmax(210px, 1fr));
+
+  gap: 0.65rem;
+}
+
+.selection-item {
   display: flex;
   align-items: center;
 
-  gap: 8px;
+  gap: 0.65rem;
 
-  margin-top: 6px;
+  min-height: 42px;
 
-  .form-check-input {
+  padding: 0.65rem 0.8rem;
+
+  margin: 0;
+
+  background: #f9fafb;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 7px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  input[type='checkbox'] {
     width: 16px;
     height: 16px;
 
     margin: 0;
 
-    cursor: pointer;
-  }
-
-  label {
-    margin-bottom: 0;
+    flex: 0 0 auto;
 
     cursor: pointer;
   }
-}
 
-/* =========================================
-   TABLAS
-========================================= */
+  span {
+    min-width: 0;
 
-.table {
-  font-size: 13px;
-}
+    font-size: 0.82rem;
+    font-weight: 600;
 
-/* =========================================
-   BOTONES
-========================================= */
-
-button.btn {
-  min-width: 110px;
-}
-
-/* =========================================
-   TITULO
-========================================= */
-
-.label-title {
-  margin-bottom: 8px;
-
-  color: #111827;
-
-  font-size: 14px;
-  font-weight: 700;
-
-  text-transform: uppercase;
-}
-
-/* =========================================
-   CONTENEDOR AGENCIAS
-========================================= */
-
-.agencias-card {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-
-  gap: 12px;
-
-  padding: 6px 0;
-}
-
-/* =========================================
-   ITEM AGENCIA
-========================================= */
-
-.agencia-item {
-  display: flex;
-  align-items: center;
-
-  gap: 10px;
-
-  padding: 12px 14px;
-
-  background: #f8fafc;
-
-  border: 1px solid #dbe3ee;
-  border-radius: 10px;
-
-  cursor: pointer;
-
-  transition: all 0.18s ease-in-out;
+    color: #374151;
+  }
 
   &:hover {
-    background: #eef4ff;
+    background: #f3f4f6;
 
-    border-color: #b9d0ff;
-
-    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.08);
+    border-color: #d1d5db;
   }
 }
 
-/* =========================================
-   CHECK AGENCIA
-========================================= */
+.selection-item--selected {
+  background: #f3f6fb;
 
-.agencia-check {
-  width: 18px;
-  height: 18px;
+  border-color: #9ca3af;
+
+  box-shadow:
+    inset 3px 0 0 #4b5563;
+}
+
+.selection-error {
+  margin-top: 0.6rem;
+}
+
+
+// =========================================================
+// ESTADO DE CARGA
+// =========================================================
+
+.loading {
+  padding: 1.5rem;
+
+  text-align: center;
+
+  font-size: 0.85rem;
+
+  color: #6b7280;
+}
+
+
+// =========================================================
+// ACCIONES
+// =========================================================
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 0.65rem;
+
+  margin-top: 1rem;
+}
+
+.btn {
+  min-width: 120px;
+
+  padding: 0.5rem 0.9rem;
+
+  border: 1px solid transparent;
+  border-radius: 6px;
+
+  font-size: 0.82rem;
+  font-weight: 600;
 
   cursor: pointer;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
 }
 
-/* =========================================
-   INFO AGENCIA
-========================================= */
+.btn--primary {
+  color: #ffffff;
+  background: #374151;
 
-.agencia-info {
-  flex: 1;
+  &:hover:not(:disabled) {
+    background: #1f2937;
+  }
 }
 
-.agencia-nombre {
-  color: #1f2937;
+.btn--secondary {
+  color: #374151;
+  background: #ffffff;
 
-  font-size: 13px;
-  font-weight: 600;
+  border-color: #d1d5db;
+
+  &:hover:not(:disabled) {
+    background: #f3f4f6;
+  }
+}
+
+
+// =========================================================
+// RESPONSIVE
+// =========================================================
+
+@media (max-width: 900px) {
+
+  .form-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .f-row--wide {
+    grid-column: span 2;
+  }
+}
+
+
+@media (max-width: 640px) {
+
+  .page {
+    padding: 0.75rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .f-row--wide {
+    grid-column: span 1;
+  }
+
+  .selection-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .persona-search {
+    max-width: none;
+  }
+
+  .persona-selected {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .persona-selected__name {
+    white-space: normal;
+  }
+
+  .autocomplete-item {
+    align-items: flex-start;
+    flex-direction: column;
+
+    gap: 0.2rem;
+  }
+
+  .autocomplete-item__name {
+    white-space: normal;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .btn {
+    width: 100%;
+  }
 }

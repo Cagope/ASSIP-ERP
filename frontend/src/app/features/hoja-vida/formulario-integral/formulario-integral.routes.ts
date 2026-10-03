@@ -1,4 +1,7 @@
 import { Routes } from '@angular/router';
+
+import { permisoGuard } from '../../../core/auth/permiso.guard';
+
 import { FormularioIntegralWizardComponent } from './formulario-integral-wizard.component';
 
 /**
@@ -8,5 +11,12 @@ import { FormularioIntegralWizardComponent } from './formulario-integral-wizard.
  * de una persona (Datos Personales, Ubicaciones, Laborales, etc.)
  */
 export const FORMULARIO_INTEGRAL_ROUTES: Routes = [
-  { path: '', component: FormularioIntegralWizardComponent },
+  {
+    path: '',
+    component: FormularioIntegralWizardComponent,
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'HOJAVIDA_FORMULARIO_INTEGRAL_EDIT'
+    }
+  }
 ];

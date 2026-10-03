@@ -55,7 +55,6 @@ export interface SimuladorResumen {
 }
 
 export interface SimuladorCdatEntrada {
-  idAgencia: number;
   valorCdat: number;
   tasaNominalAnual: number;
   fechaApertura: string;

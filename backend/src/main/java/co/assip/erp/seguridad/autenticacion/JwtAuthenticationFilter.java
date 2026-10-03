@@ -3,7 +3,6 @@ package co.assip.erp.seguridad.autenticacion;
 import co.assip.erp.seguridad.usuarios.Usuario;
 import co.assip.erp.seguridad.usuarios.UsuarioRepository;
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,18 +11,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * Filtro encargado de autenticar las solicitudes mediante JWT.
+ * Filtro encargado de validar el JWT recibido en cada petición
+ * autenticada y establecer la identidad del usuario en el
+ * contexto de Spring Security.
  *
- * Valida el token, verifica el estado actual del usuario
- * y registra la autenticación en el SecurityContext de Spring.
+ * Los roles y permisos no se obtienen del JWT.
+ * La autorización funcional se resuelve posteriormente desde
+ * seguridad.usuarios_roles y seguridad.rol_permisos.
  */
 @Component
 @RequiredArgsConstructor
@@ -33,8 +35,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UsuarioRepository usuarioRepository;
 
     /**
-     * Procesa el JWT enviado en el encabezado Authorization
-     * y establece el usuario autenticado en el contexto de seguridad.
+     * Procesa el token Bearer recibido en la petición.
+     *
+     * Además de validar el JWT, verifica que la cuenta continúe
+     * activa, vigente y sin bloqueo administrativo.
      */
     @Override
     protected void doFilterInternal(
@@ -43,52 +47,56 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String path = request.getServletPath();
-
-        if (esRutaPublica(path)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        String authorizationHeader =
+        String authorization =
                 request.getHeader("Authorization");
 
-        if (authorizationHeader == null
-                || !authorizationHeader.startsWith("Bearer ")) {
+        if (authorization == null
+                || !authorization.startsWith("Bearer ")) {
 
             filterChain.doFilter(request, response);
             return;
         }
 
         String token =
-                authorizationHeader.substring(7);
+                authorization.substring(7);
+
+        if (!jwtService.validarToken(token)) {
+
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         Claims claims;
 
         try {
             claims = jwtService.extraerTodo(token);
-
-        } catch (ExpiredJwtException ex) {
-            responderNoAutorizado(
-                    response,
-                    "Token expirado"
-            );
-            return;
-
         } catch (Exception ex) {
-            responderNoAutorizado(
-                    response,
-                    "Token inválido"
-            );
+            filterChain.doFilter(request, response);
             return;
         }
 
         String username =
                 claims.getSubject();
 
+        Integer idUsuario =
+                claims.get(
+                        "idUsuario",
+                        Integer.class
+                );
+
         if (username == null
                 || username.isBlank()
-                || SecurityContextHolder
+                || idUsuario == null) {
+
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        /*
+         * Evita reconstruir la autenticación cuando Spring Security
+         * ya estableció un usuario para la petición actual.
+         */
+        if (SecurityContextHolder
                 .getContext()
                 .getAuthentication() != null) {
 
@@ -98,67 +106,41 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         Usuario usuario =
                 usuarioRepository
-                        .findByUsername(username)
+                        .findById(idUsuario)
                         .orElse(null);
 
-        if (usuario == null) {
-            responderNoAutorizado(
-                    response,
-                    "Usuario no autorizado"
-            );
+        if (usuario == null
+                || !username.equals(usuario.getUsername())
+                || !usuarioDisponible(usuario)) {
+
+            filterChain.doFilter(request, response);
             return;
         }
 
-        if (!Boolean.TRUE.equals(usuario.getActivo())) {
-            responderNoAutorizado(
-                    response,
-                    "Usuario inactivo"
-            );
-            return;
-        }
-
-        if (Boolean.TRUE.equals(usuario.getBloqueado())) {
-            responderNoAutorizado(
-                    response,
-                    "Usuario bloqueado"
-            );
-            return;
-        }
-
-        if (!jwtService.validarToken(token)) {
-            responderNoAutorizado(
-                    response,
-                    "Token inválido"
-            );
-            return;
-        }
-
-        Integer idRol =
-                obtenerIdRol(claims);
-
-        if (idRol == null) {
-            responderNoAutorizado(
-                    response,
-                    "Usuario sin rol asignado"
-            );
-            return;
-        }
-
-        SimpleGrantedAuthority authority =
-                new SimpleGrantedAuthority(
-                        "ROLE_" + idRol
+        /*
+         * Spring Security solamente necesita reconocer que existe
+         * una identidad autenticada.
+         *
+         * Los permisos funcionales no se convierten aquí en
+         * GrantedAuthority porque AccessValidator los resuelve
+         * desde el estado vigente de la base de datos.
+         */
+        List<SimpleGrantedAuthority> authorities =
+                List.of(
+                        new SimpleGrantedAuthority(
+                                "ROLE_AUTHENTICATED"
+                        )
                 );
 
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
-                        usuario.getUsername(),
+                        username,
                         claims,
-                        List.of(authority)
+                        authorities
                 );
 
         authentication.setDetails(
-                new WebAuthenticationDetailsSource()
-                        .buildDetails(request)
+                usuario.getIdUsuario()
         );
 
         SecurityContextHolder
@@ -169,57 +151,37 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Obtiene el identificador del rol almacenado
-     * en los claims del JWT.
+     * Verifica que la cuenta pueda continuar utilizando
+     * una sesión previamente emitida.
      */
-    private Integer obtenerIdRol(
-            Claims claims
+    private boolean usuarioDisponible(
+            Usuario usuario
     ) {
 
-        Object valor =
-                claims.get("rol");
-
-        if (valor instanceof Integer integer) {
-            return integer;
+        if (!Boolean.TRUE.equals(usuario.getActivo())) {
+            return false;
         }
 
-        if (valor instanceof Number numero) {
-            return numero.intValue();
+        LocalDateTime ahora =
+                LocalDateTime.now();
+
+        if (usuario.getFechaInicioVigencia() != null
+                && usuario.getFechaInicioVigencia().isAfter(ahora)) {
+            return false;
         }
 
-        return null;
-    }
+        if (usuario.getFechaFinVigencia() != null
+                && usuario.getFechaFinVigencia().isBefore(ahora)) {
+            return false;
+        }
 
-    /**
-     * Identifica las rutas que no requieren
-     * procesamiento del JWT en este filtro.
-     */
-    private boolean esRutaPublica(
-            String path
-    ) {
-
-        return path.startsWith("/auth")
-                || path.startsWith("/api/v1/auth")
-                || path.startsWith("/error");
-    }
-
-    /**
-     * Devuelve una respuesta HTTP 401 para
-     * solicitudes con autenticación inválida.
-     */
-    private void responderNoAutorizado(
-            HttpServletResponse response,
-            String mensaje
-    ) throws IOException {
-
-        response.setStatus(
-                HttpServletResponse.SC_UNAUTHORIZED
+        /*
+         * Mientras implementamos formalmente el desbloqueo
+         * temporal, un usuario marcado como bloqueado continúa
+         * considerándose bloqueado.
+         */
+        return !Boolean.TRUE.equals(
+                usuario.getBloqueado()
         );
-
-        response.setContentType(
-                "text/plain;charset=UTF-8"
-        );
-
-        response.getWriter().write(mensaje);
     }
 }

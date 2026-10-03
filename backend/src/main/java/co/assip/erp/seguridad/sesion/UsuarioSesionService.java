@@ -1,25 +1,41 @@
 package co.assip.erp.seguridad.sesion;
 
+import co.assip.erp.seguridad.usuariosroles.UsuarioRolService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 /**
- * Servicio de acceso al contexto de seguridad
- * del usuario autenticado.
+ * Servicio central de acceso al contexto del usuario autenticado.
  *
- * Centraliza el acceso al identificador del usuario,
- * rol y agencias contenidos en la sesión JWT.
+ * Proporciona identidad, agencias y validaciones generales
+ * utilizadas transversalmente por los módulos del ERP.
+ *
+ * Los roles no se obtienen del JWT. Las validaciones basadas
+ * en roles consultan las asignaciones vigentes almacenadas
+ * en seguridad.usuarios_roles.
  */
 @Service
+@RequiredArgsConstructor
 public class UsuarioSesionService {
+
+    /**
+     * Identificador del rol ADMIN.
+     *
+     * Se conserva temporalmente mientras se completa
+     * la matriz definitiva de permisos del ERP.
+     */
+    private static final Integer ID_ROL_ADMIN = 1;
+
+    private final UsuarioRolService usuarioRolService;
 
     /**
      * Obtiene el identificador del usuario autenticado.
      *
-     * @return identificador del usuario
-     * @throws SecurityException si no existe un usuario
-     *                           identificado en la sesión
+     * @return identificador interno del usuario
+     * @throws SecurityException cuando la sesión no permite
+     *                           identificar al usuario
      */
     public Integer idUsuario() {
 
@@ -36,24 +52,8 @@ public class UsuarioSesionService {
     }
 
     /**
-     * Obtiene el identificador del rol autenticado.
-     *
-     * Se conserva el valor 0 cuando la sesión no contiene
-     * un rol para mantener el contrato actual del ERP.
-     */
-    public Integer idRol() {
-
-        Integer idRol =
-                SecurityUtils.getIdRol();
-
-        return idRol != null
-                ? idRol
-                : 0;
-    }
-
-    /**
      * Obtiene las agencias incluidas en el contexto
-     * de seguridad del usuario.
+     * de la sesión autenticada.
      */
     public List<Integer> agencias() {
         return SecurityUtils.getAgencias();
@@ -67,35 +67,63 @@ public class UsuarioSesionService {
             Integer idAgencia
     ) {
 
-        SecurityUtils.validarAgencia(idAgencia);
+        /*
+         * ADMIN conserva acceso global aunque no sea necesario
+         * incluir todas las agencias dentro del JWT.
+         */
+        if (tieneAccesoTotal()) {
+            return;
+        }
+
+        SecurityUtils.validarAgencia(
+                idAgencia
+        );
     }
 
     /**
-     * Indica si el usuario autenticado posee
-     * acceso administrativo total.
+     * Determina si el usuario autenticado posee acceso
+     * administrativo total.
+     *
+     * ADMIN se resuelve desde una asignación activa y vigente
+     * en seguridad.usuarios_roles, no desde un claim del JWT.
      */
     public boolean tieneAccesoTotal() {
-        return SecurityUtils.tieneAccesoTotal();
+
+        return usuarioRolService.tieneRolVigente(
+                idUsuario(),
+                ID_ROL_ADMIN
+        );
     }
 
     /**
-     * Verifica si una agencia pertenece al conjunto
-     * de agencias autorizadas del usuario.
+     * Determina si el usuario tiene acceso a una agencia.
+     *
+     * ADMIN posee acceso global.
      */
     public boolean perteneceA(
             Integer idAgencia
     ) {
 
-        return SecurityUtils.perteneceA(idAgencia);
+        if (idAgencia == null) {
+            return false;
+        }
+
+        if (tieneAccesoTotal()) {
+            return true;
+        }
+
+        return SecurityUtils.perteneceA(
+                idAgencia
+        );
     }
 
     /**
-     * Obtiene la primera agencia disponible en el
-     * contexto de seguridad.
+     * Obtiene la primera agencia disponible en el contexto
+     * actual de sesión.
      *
-     * Este método conserva el comportamiento existente.
-     * No representa necesariamente id_agencia_principal
-     * de seguridad.usuarios.
+     * Se conserva este comportamiento por compatibilidad con
+     * los procesos existentes. Este valor no necesariamente
+     * corresponde a seguridad.usuarios.id_agencia_principal.
      */
     public Integer agenciaPrincipal() {
 

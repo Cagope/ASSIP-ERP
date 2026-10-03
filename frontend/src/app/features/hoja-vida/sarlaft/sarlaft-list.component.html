@@ -256,25 +256,24 @@
 
           <td class="col-acciones">
 
+            <!-- Registro existente: VIEW permite consultarlo -->
             <button
+              *ngIf="persona.sarlaft"
               type="button"
               class="btn-action-edit btn-gestionar"
-              (click)="
-                  gestionar(
-                    persona,
-                    persona.sarlaft
-                  )
-                "
-              [title]="
-                  persona.sarlaft
-                    ? 'Gestionar declaración SARLAFT'
-                    : 'Crear declaración SARLAFT'
-                ">
-              {{
-              persona.sarlaft
-              ? 'Gestionar'
-              : 'Crear'
-              }}
+              (click)="gestionar(persona, persona.sarlaft)"
+              title="Gestionar declaración SARLAFT">
+              Gestionar
+            </button>
+
+            <!-- Sin registro: solamente EDIT permite crearlo -->
+            <button
+              *ngIf="!persona.sarlaft && puedeEditar"
+              type="button"
+              class="btn-action-edit btn-gestionar"
+              (click)="gestionar(persona, null)"
+              title="Crear declaración SARLAFT">
+              Crear
             </button>
 
           </td>

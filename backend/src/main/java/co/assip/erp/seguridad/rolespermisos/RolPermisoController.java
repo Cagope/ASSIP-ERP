@@ -1,9 +1,9 @@
 package co.assip.erp.seguridad.rolespermisos;
 
-import co.assip.erp.seguridad.usuarios.Usuario;
-import co.assip.erp.seguridad.permisos.Permiso;
 import co.assip.erp.seguridad.autorizacion.AccessValidator;
-import co.assip.erp.seguridad.usuarios.UsuarioService;
+import co.assip.erp.seguridad.rolespermisos.dto.RolPermisoDTO;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +23,7 @@ import java.util.List;
 public class RolPermisoController {
 
     private final RolPermisoService rolPermisoService;
-    private final UsuarioService usuarioService;
+    private final UsuarioSesionService usuarioSesionService;
     private final AccessValidator accessValidator;
 
     /**
@@ -32,7 +32,7 @@ public class RolPermisoController {
      * Requiere el permiso ROLES_VIEW.
      */
     @GetMapping("/{idRol}")
-    public ResponseEntity<List<Permiso>> listar(
+    public ResponseEntity<List<RolPermisoDTO>> listar(
             @PathVariable Integer idRol,
             HttpServletRequest request
     ) {
@@ -53,7 +53,7 @@ public class RolPermisoController {
      * Requiere el permiso ROLES_EDIT.
      */
     @PutMapping("/{idRol}")
-    public ResponseEntity<List<Permiso>> asignar(
+    public ResponseEntity<List<RolPermisoDTO>> asignar(
             @PathVariable Integer idRol,
             @RequestBody List<Integer> idPermisos,
             HttpServletRequest request
@@ -78,8 +78,10 @@ public class RolPermisoController {
             String permiso
     ) {
 
-        Usuario usuarioActual =
-                usuarioService.getUsuarioActual(request);
+        Integer idUsuario = usuarioSesionService.idUsuario();
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(idUsuario);
 
         accessValidator.validarAcceso(
                 usuarioActual,

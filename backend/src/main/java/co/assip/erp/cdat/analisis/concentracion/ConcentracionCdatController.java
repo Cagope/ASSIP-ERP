@@ -3,6 +3,10 @@ package co.assip.erp.cdat.analisis.concentracion;
 import co.assip.erp.cdat.analisis.concentracion.dto.ConcentracionCdatDepositanteDTO;
 import co.assip.erp.cdat.analisis.concentracion.dto.ConcentracionCdatDetalleDTO;
 import co.assip.erp.cdat.analisis.concentracion.dto.ConcentracionCdatResumenDTO;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,15 +15,15 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/cdat/analisis/concentracion")
+@RequiredArgsConstructor
 public class ConcentracionCdatController {
 
-    private final ConcentracionCdatService service;
+    private static final String PERMISO =
+            "CDAT_ANALISIS_VIEW";
 
-    public ConcentracionCdatController(
-            ConcentracionCdatService service
-    ) {
-        this.service = service;
-    }
+    private final ConcentracionCdatService service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // =========================================================
     // CORTES DISPONIBLES
@@ -27,6 +31,9 @@ public class ConcentracionCdatController {
 
     @GetMapping("/cortes")
     public List<LocalDate> listarCortes() {
+
+        validarAcceso();
+
         return service.listarCortes();
     }
 
@@ -43,6 +50,9 @@ public class ConcentracionCdatController {
             @RequestParam(required = false)
             Integer idAgencia
     ) {
+
+        validarAcceso();
+
         return service.consultarResumen(
                 fechaCorte,
                 idAgencia
@@ -62,6 +72,9 @@ public class ConcentracionCdatController {
             @RequestParam(required = false)
             Integer idAgencia
     ) {
+
+        validarAcceso();
+
         return service.consultarRanking(
                 fechaCorte,
                 idAgencia
@@ -83,10 +96,26 @@ public class ConcentracionCdatController {
             @RequestParam(required = false)
             Integer idAgencia
     ) {
+
+        validarAcceso();
+
         return service.consultarDetalle(
                 fechaCorte,
                 idDatosPersonal,
                 idAgencia
+        );
+    }
+
+    private void validarAcceso() {
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO
         );
     }
 }

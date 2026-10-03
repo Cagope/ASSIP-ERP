@@ -95,45 +95,22 @@ export class CdatCancelacionComponent extends CdatCancelacionValores {
     cdat: CdatCancelacionItemDTO
   ): void {
 
-    const req = {
-      schema: 'depositos',
-      view: 'vw_depositos_cuentas_ahorro_total',
-      filters: {
-        documento: cdat.documento,
-        codigo_estado: 'A'
-      }
-    };
+    this.cuentasAhorroDisponibles = [];
 
-    this.api.buscarCuentas(req).subscribe({
+    this.api
+      .buscarCuentasAhorroDisponibles(cdat.idDatosPersonal)
+      .subscribe({
 
-      next: (res: any) => {
+        next: (data: any[]) => {
+          this.cuentasAhorroDisponibles = data ?? [];
+        },
 
-        const data = res?.data ?? [];
-
-        this.cuentasAhorroDisponibles = data.filter((c: any) =>
-
-          Number(c.id_datos_personal)
-          === Number(cdat.idDatosPersonal)
-
-          &&
-
-          String(c.codigo_estado ?? '')
-            .trim()
-            .toUpperCase() === 'A'
-
-          &&
-
-          Number(c.id_forma_ahorro ?? c.idFormaAhorro) !== 1
-        );
-      },
-
-      error: err => {
-
-        this.error =
-          err.error?.message ||
-          'No se pudieron cargar las cuentas de ahorro.';
-      }
-    });
+        error: (err: any) => {
+          this.error =
+            err?.error?.message ||
+            'No se pudieron cargar las cuentas de ahorro.';
+        }
+      });
   }
 
   cargarTiposComprobantes(): void {

@@ -29,6 +29,8 @@ import {
   Ubicacion
 } from '../../../shared/models/ubicacion.model';
 
+import { SessionService } from '../../../core/auth/session.service';
+
 type PersonaConUbicacion =
   DatosPersonales & {
     ubicacion: Ubicacion | null;
@@ -72,6 +74,15 @@ export class UbicacionesListComponent
 
   private readonly exporter =
     inject(UbicacionesExporterService);
+
+  private readonly session =
+    inject(SessionService);
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'HOJAVIDA_PERSONA_EDIT'
+    );
+  }
 
   personas: PersonaConUbicacion[] = [];
   filtradas: PersonaConUbicacion[] = [];
@@ -316,6 +327,8 @@ export class UbicacionesListComponent
       return;
     }
 
+    // Registro existente:
+    // VIEW permite ingresar a consultarlo.
     if (ubicacion?.idUbicacion) {
 
       this.router.navigate([
@@ -324,6 +337,12 @@ export class UbicacionesListComponent
         'editar'
       ]);
 
+      return;
+    }
+
+    // Registro nuevo:
+    // requiere permiso de edición.
+    if (!this.puedeEditar) {
       return;
     }
 

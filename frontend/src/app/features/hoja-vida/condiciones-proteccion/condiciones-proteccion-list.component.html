@@ -282,27 +282,27 @@
 
           <td class="col-acciones">
 
+            <!-- Registro existente: VIEW permite consultarlo -->
             <button
+              *ngIf="persona.condicionProteccion"
               type="button"
               class="btn-action-edit btn-gestionar"
-              (click)="
-                gestionar(
-                  persona,
-                  persona.condicionProteccion
-                )
-              "
-              [title]="
+              (click)="gestionar(
+                persona,
                 persona.condicionProteccion
-                  ? 'Gestionar condiciones de protección'
-                  : 'Crear condiciones de protección'
-              ">
+              )"
+              title="Gestionar condiciones de protección">
+              Gestionar
+            </button>
 
-              {{
-              persona.condicionProteccion
-              ? 'Gestionar'
-              : 'Crear'
-              }}
-
+            <!-- Sin registro: solamente EDIT permite crearlo -->
+            <button
+              *ngIf="!persona.condicionProteccion && puedeEditar"
+              type="button"
+              class="btn-action-edit btn-gestionar"
+              (click)="gestionar(persona, null)"
+              title="Crear condiciones de protección">
+              Crear
             </button>
 
           </td>

@@ -1,5 +1,9 @@
 package co.assip.erp.hojavida.condicionesproteccion;
 
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,12 +28,24 @@ import java.util.List;
 @RequestMapping("/hoja-vida/condiciones-proteccion")
 public class CondicionProteccionController {
 
+    private static final String PERMISO_VIEW =
+            "HOJAVIDA_PROTECCION_VIEW";
+
+    private static final String PERMISO_EDIT =
+            "HOJAVIDA_PROTECCION_EDIT";
+
     private final CondicionProteccionService service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     public CondicionProteccionController(
-            CondicionProteccionService service
+            CondicionProteccionService service,
+            UsuarioSesionService usuarioSesionService,
+            AccessValidator accessValidator
     ) {
         this.service = service;
+        this.usuarioSesionService = usuarioSesionService;
+        this.accessValidator = accessValidator;
     }
 
     /**
@@ -39,6 +55,9 @@ public class CondicionProteccionController {
      */
     @GetMapping
     public ResponseEntity<List<CondicionProteccion>> listar() {
+
+        validarAcceso(PERMISO_VIEW);
+
         return ResponseEntity.ok(
                 service.listar()
         );
@@ -53,6 +72,9 @@ public class CondicionProteccionController {
     public ResponseEntity<CondicionProteccion> buscarPorId(
             @PathVariable("id") Long idCondicionProteccion
     ) {
+
+        validarAcceso(PERMISO_VIEW);
+
         CondicionProteccion condicion = service
                 .buscarPorId(idCondicionProteccion)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -72,6 +94,9 @@ public class CondicionProteccionController {
     public ResponseEntity<CondicionProteccion> buscarPorPersona(
             @PathVariable Integer idDatosPersonal
     ) {
+
+        validarAcceso(PERMISO_VIEW);
+
         CondicionProteccion condicion = service
                 .buscarPorPersona(idDatosPersonal)
                 .orElseThrow(() -> new ResponseStatusException(
@@ -91,7 +116,11 @@ public class CondicionProteccionController {
     public ResponseEntity<CondicionProteccion> crear(
             @RequestBody CondicionProteccion condicion
     ) {
-        CondicionProteccion creado = service.crear(condicion);
+
+        validarAcceso(PERMISO_EDIT);
+
+        CondicionProteccion creado =
+                service.crear(condicion);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -108,10 +137,14 @@ public class CondicionProteccionController {
             @PathVariable("id") Long idCondicionProteccion,
             @RequestBody CondicionProteccion condicion
     ) {
-        CondicionProteccion actualizado = service.actualizar(
-                idCondicionProteccion,
-                condicion
-        );
+
+        validarAcceso(PERMISO_EDIT);
+
+        CondicionProteccion actualizado =
+                service.actualizar(
+                        idCondicionProteccion,
+                        condicion
+                );
 
         return ResponseEntity.ok(actualizado);
     }
@@ -125,8 +158,31 @@ public class CondicionProteccionController {
     public ResponseEntity<Void> eliminar(
             @PathVariable("id") Long idCondicionProteccion
     ) {
+
+        validarAcceso(PERMISO_EDIT);
+
         service.eliminar(idCondicionProteccion);
 
         return ResponseEntity.noContent().build();
+    }
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarAcceso(String permiso) {
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        Usuario usuarioActual =
+                new Usuario();
+
+        usuarioActual.setIdUsuario(idUsuario);
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                permiso
+        );
     }
 }

@@ -32,6 +32,8 @@ import {
 
 import { forkJoin } from 'rxjs';
 
+import { SessionService } from '../../../core/auth/session.service';
+
 @Component({
   selector: 'app-bienes-vehiculos-upsert',
   standalone: true,
@@ -44,6 +46,7 @@ import { forkJoin } from 'rxjs';
   templateUrl: './bienes-vehiculos-upsert.component.html',
   styleUrls: ['./bienes-vehiculos-upsert.component.scss']
 })
+
 export class BienesVehiculosUpsertComponent implements OnInit {
 
   private readonly route = inject(ActivatedRoute);
@@ -53,6 +56,11 @@ export class BienesVehiculosUpsertComponent implements OnInit {
   private readonly segurosApi = inject(BienesVehiculosSegurosApi);
   private readonly datosApi = inject(DatosPersonalesApi);
   private readonly catalogosApi = inject(CatalogosApi);
+  private readonly session = inject(SessionService);
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('HOJAVIDA_BIENES_EDIT');
+  }
 
   idDatosPersonal = 0;
 
@@ -159,6 +167,7 @@ export class BienesVehiculosUpsertComponent implements OnInit {
   }
 
   nuevo(): void {
+    if (!this.puedeEditar) return;
     this.error = '';
     this.mensaje = '';
 
@@ -179,6 +188,7 @@ export class BienesVehiculosUpsertComponent implements OnInit {
   }
 
   editar(bien: BienVehiculo): void {
+    if (!this.puedeEditar) return;
     this.error = '';
     this.mensaje = '';
 
@@ -197,6 +207,7 @@ export class BienesVehiculosUpsertComponent implements OnInit {
   }
 
   guardar(): void {
+    if (!this.puedeEditar) return;
     if (!this.bienActual) return;
 
     this.error = '';
@@ -224,6 +235,7 @@ export class BienesVehiculosUpsertComponent implements OnInit {
   }
 
   eliminar(bien: BienVehiculo): void {
+    if (!this.puedeEditar) return;
     if (!bien.idBien) return;
 
     const ok = confirm(
@@ -344,6 +356,7 @@ export class BienesVehiculosUpsertComponent implements OnInit {
   }
 
   nuevoSeguro(): void {
+    if (!this.puedeEditar) return;
     if (!this.bienSeleccionadoSeguros?.idBien) return;
 
     this.seguroActual = nuevoSeguro(this.bienSeleccionadoSeguros.idBien);
@@ -351,6 +364,7 @@ export class BienesVehiculosUpsertComponent implements OnInit {
   }
 
   editarSeguro(s: BienVehiculoSeguro): void {
+    if (!this.puedeEditar) return;
     this.seguroActual = { ...s };
     this.modoSeguro = 'EDITAR';
   }
@@ -362,6 +376,7 @@ export class BienesVehiculosUpsertComponent implements OnInit {
   }
 
   guardarSeguro(): void {
+    if (!this.puedeEditar) return;
     if (!this.seguroActual) return;
 
     this.guardandoSeguro = true;
@@ -399,6 +414,7 @@ export class BienesVehiculosUpsertComponent implements OnInit {
   }
 
   eliminarSeguro(s: BienVehiculoSeguro): void {
+    if (!this.puedeEditar) return;
     if (!s.idBienVehiculoSeguro) return;
 
     const ok = confirm('¿Eliminar este seguro?');

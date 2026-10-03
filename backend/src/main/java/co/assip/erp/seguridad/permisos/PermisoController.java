@@ -2,11 +2,11 @@ package co.assip.erp.seguridad.permisos;
 
 import co.assip.erp.seguridad.usuarios.Usuario;
 import co.assip.erp.seguridad.autorizacion.AccessValidator;
-import co.assip.erp.seguridad.usuarios.UsuarioService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ import java.util.List;
 public class PermisoController {
 
     private final PermisoService permisoService;
-    private final UsuarioService usuarioService;
+    private final UsuarioSesionService usuarioSesionService;
     private final AccessValidator accessValidator;
 
     /**
@@ -133,8 +133,10 @@ public class PermisoController {
             String permiso
     ) {
 
-        Usuario usuarioActual =
-                usuarioService.getUsuarioActual(request);
+        Integer idUsuario = usuarioSesionService.idUsuario();
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(idUsuario);
 
         accessValidator.validarAcceso(
                 usuarioActual,

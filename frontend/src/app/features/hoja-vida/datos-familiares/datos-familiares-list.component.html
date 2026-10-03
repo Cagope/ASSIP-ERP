@@ -233,25 +233,24 @@
 
           <td class="col-acciones">
 
+            <!-- Ya tiene información familiar: VIEW permite consultarla -->
             <button
+              *ngIf="persona.familiares.length > 0"
               type="button"
               class="btn-action-edit btn-gestionar"
-              (click)="
-                  gestionar(
-                    persona,
-                    persona.familiares[0]
-                  )
-                "
-              [title]="
-                  persona.familiares.length > 0
-                    ? 'Gestionar datos familiares'
-                    : 'Crear datos familiares'
-                ">
-              {{
-              persona.familiares.length > 0
-              ? 'Gestionar'
-              : 'Crear'
-              }}
+              (click)="gestionar(persona, persona.familiares[0])"
+              title="Gestionar datos familiares">
+              Gestionar
+            </button>
+
+            <!-- No tiene información familiar: solamente EDIT permite crear -->
+            <button
+              *ngIf="persona.familiares.length === 0 && puedeEditar"
+              type="button"
+              class="btn-action-edit btn-gestionar"
+              (click)="gestionar(persona, null)"
+              title="Crear datos familiares">
+              Crear
             </button>
 
           </td>

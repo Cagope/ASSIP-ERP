@@ -1,68 +1,136 @@
 // src/app/features/seguridad/usuarios/usuarios-list.component.ts
 
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { UsuariosApi } from './usuarios.api';
-import { Usuario } from './usuario.model';
-import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
+import {
+  Component,
+  OnInit,
+  inject,
+  signal
+} from '@angular/core';
+
+import {
+  CommonModule
+} from '@angular/common';
+
+import {
+  Router
+} from '@angular/router';
+
+import {
+  UsuariosApi
+} from './usuarios.api';
+
+import {
+  Usuario
+} from './usuarios.models';
+
+import {
+  HeaderActionsComponent
+} from '../../../shared/header-actions/header-actions.component';
 
 @Component({
   selector: 'app-usuarios-list',
   standalone: true,
-  imports: [CommonModule, HeaderActionsComponent],
+  imports: [
+    CommonModule,
+    HeaderActionsComponent
+  ],
   templateUrl: './usuarios-list.component.html',
   styleUrls: ['./usuarios-list.component.scss'],
 })
 export class UsuariosListComponent implements OnInit {
 
-  private api = inject(UsuariosApi);
-  private router = inject(Router);
+  private readonly api =
+    inject(UsuariosApi);
 
-  usuarios = signal<Usuario[]>([]);
-  cargando = signal<boolean>(false);
+  private readonly router =
+    inject(Router);
+
+  usuarios =
+    signal<Usuario[]>([]);
+
+  cargando =
+    signal<boolean>(false);
 
   ngOnInit(): void {
     this.cargar();
   }
 
-  cargar() {
+  /**
+   * Carga el listado administrativo de usuarios.
+   */
+  cargar(): void {
+
     this.cargando.set(true);
 
     this.api.listar().subscribe({
-      next: (res: any[]) => {
 
-        // 🔥 Normalizar respuesta SIN tocar backend
-        const normalizados = res.map(u => ({
-          idUsuario: u.idUsuario ?? u.idusuario ?? null,
-          username: u.username,
-          nombreCompleto: u.nombreCompleto ?? u.nombrecompleto,
-          email: u.email,
-          activo: u.activo,
-          idRol: u.idRol ?? u.idrol,
-          nombreRol: u.nombreRol ?? u.nombrerol,
-          idAgenciaPrincipal: u.idAgenciaPrincipal ?? u.idagenciaprincipal
-        }));
+      next: usuarios => {
 
-        this.usuarios.set(normalizados);
+        this.usuarios.set(
+          usuarios
+        );
+
         this.cargando.set(false);
       },
+
       error: err => {
-        console.error('Error cargando usuarios:', err);
+
+        console.error(
+          'Error cargando usuarios:',
+          err
+        );
+
         this.cargando.set(false);
       }
     });
   }
 
-  nuevo() {
-    this.router.navigate(['/seguridad/usuarios/nuevo']);
+  /**
+   * Abre la creación de un usuario.
+   */
+  nuevo(): void {
+
+    this.router.navigate([
+      '/seguridad/usuarios/nuevo'
+    ]);
   }
 
-  editar(idUsuario: number | null) {
-    if (!idUsuario) {
-      console.error('❌ idUsuario viene NULL o undefined');
+  /**
+   * Abre la edición del usuario seleccionado.
+   */
+  editar(
+    idUsuario: number | undefined
+  ): void {
+
+    if (idUsuario == null) {
+
+      console.error(
+        'El usuario no tiene identificador.'
+      );
+
       return;
     }
-    this.router.navigate(['/seguridad/usuarios', idUsuario]);
+
+    this.router.navigate([
+      '/seguridad/usuarios',
+      idUsuario
+    ]);
+  }
+
+  /**
+   * Construye el texto de roles que se muestra
+   * en el listado.
+   */
+  nombresRoles(
+    usuario: Usuario
+  ): string {
+
+    if (!usuario.roles?.length) {
+      return 'Sin rol';
+    }
+
+    return usuario.roles
+      .map(rol => rol.nombreRol)
+      .join(', ');
   }
 }

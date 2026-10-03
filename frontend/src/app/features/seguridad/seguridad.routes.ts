@@ -2,27 +2,43 @@
 
 import { Routes } from '@angular/router';
 
-// 🧑‍💼 Submódulo: Usuarios
+import { permisoGuard } from '../../core/auth/permiso.guard';
+
 import { USUARIOS_ROUTES } from './usuarios/usuarios.routes';
-import { PermisoGuard } from '../../core/auth/permiso.guard';   // ⭐ NUEVO
+import { ROLES_ROUTES } from './roles/roles.routes';
+import { PERMISOS_ROUTES } from './permisos/permisos.routes';
 
 export const SEGURIDAD_ROUTES: Routes = [
 
-  // 👤 Gestión de usuarios
+  // =========================================================
+  // USUARIOS
+  // =========================================================
+
   {
     path: 'usuarios',
-    canActivate: [PermisoGuard],               // ⭐ PROTEGE TODAS LAS RUTAS DE USUARIOS
-    data: { permiso: 'USUARIOS_VIEW' },        // ⭐ PERMISO REQUERIDO
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'USUARIOS_VIEW'
+    },
     children: USUARIOS_ROUTES
+  },
+
+  // =========================================================
+  // ROLES
+  // =========================================================
+
+  {
+    path: 'roles',
+    children: ROLES_ROUTES
+  },
+
+  // =========================================================
+  // PERMISOS
+  // =========================================================
+
+  {
+    path: 'permisos',
+    children: PERMISOS_ROUTES
   }
 
-  // En el futuro:
-  // {
-  //   path: 'roles',
-  //   children: rolesRoutes
-  // },
-  // {
-  //   path: 'permisos',
-  //   children: permisosRoutes
-  // }
 ];

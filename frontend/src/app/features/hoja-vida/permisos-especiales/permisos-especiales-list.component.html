@@ -246,25 +246,27 @@
 
           <td class="col-acciones">
 
+            <!-- Registro existente: VIEW permite consultarlo -->
             <button
+              *ngIf="persona.permisos"
               type="button"
               class="btn-action-edit btn-gestionar"
-              (click)="
-                  gestionar(
-                    persona,
-                    persona.permisos
-                  )
-                "
-              [title]="
-                  persona.permisos
-                    ? 'Gestionar permisos especiales'
-                    : 'Crear permisos especiales'
-                ">
-              {{
-              persona.permisos
-              ? 'Gestionar'
-              : 'Crear'
-              }}
+              (click)="gestionar(
+                persona,
+                persona.permisos
+              )"
+              title="Gestionar permisos especiales">
+              Gestionar
+            </button>
+
+            <!-- Sin registro: solamente EDIT permite crearlo -->
+            <button
+              *ngIf="!persona.permisos && puedeEditar"
+              type="button"
+              class="btn-action-edit btn-gestionar"
+              (click)="gestionar(persona, null)"
+              title="Crear permisos especiales">
+              Crear
             </button>
 
           </td>

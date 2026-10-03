@@ -93,9 +93,11 @@
       <button
         type="button"
         class="btn btn--primary"
-        (click)="agregar()">
+        (click)="agregar()"
+        [disabled]="!puedeEditar">
         Agregar
       </button>
+
     </div>
 
   </div>
@@ -136,8 +138,10 @@
           <button
             type="button"
             class="btn-action-delete"
-            (click)="eliminar(item)">
-            🗑
+            (click)="eliminar(item)"
+            [disabled]="!puedeEditar"
+            title="Eliminar">
+            🗑️
           </button>
         </td>
       </tr>

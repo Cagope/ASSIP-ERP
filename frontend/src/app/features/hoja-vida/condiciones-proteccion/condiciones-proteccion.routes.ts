@@ -1,4 +1,10 @@
-import { Routes } from '@angular/router';
+import {
+  Routes
+} from '@angular/router';
+
+import {
+  permisoGuard
+} from '../../../core/auth/permiso.guard';
 
 import {
   CondicionesProteccionListComponent
@@ -9,30 +15,40 @@ import {
 } from './condiciones-proteccion-upsert.component';
 
 /**
- * 🛡️ Rutas del submódulo Condiciones de Protección
- * ------------------------------------------------------------
- * Módulo: Hoja de Vida → Condiciones de Protección
+ * Rutas del submódulo Condiciones de Protección
  *
- * Rutas:
- *  - Listado principal
- *  - Creación
- *  - Edición
+ * Seguridad:
+ * - Consulta: HOJAVIDA_PROTECCION_VIEW
+ * - Creación: HOJAVIDA_PROTECCION_EDIT
+ * - Consulta de registro existente: HOJAVIDA_PROTECCION_VIEW
  */
 export const CONDICIONES_PROTECCION_ROUTES: Routes = [
 
   {
     path: '',
-    component: CondicionesProteccionListComponent
+    component: CondicionesProteccionListComponent,
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'HOJAVIDA_PROTECCION_VIEW'
+    }
   },
 
   {
     path: 'nuevo',
-    component: CondicionesProteccionUpsertComponent
+    component: CondicionesProteccionUpsertComponent,
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'HOJAVIDA_PROTECCION_EDIT'
+    }
   },
 
   {
     path: ':id/editar',
-    component: CondicionesProteccionUpsertComponent
+    component: CondicionesProteccionUpsertComponent,
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'HOJAVIDA_PROTECCION_VIEW'
+    }
   }
 
 ];

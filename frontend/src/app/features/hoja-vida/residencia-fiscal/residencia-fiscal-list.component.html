@@ -252,27 +252,24 @@
 
           <td class="col-acciones">
 
+            <!-- Registro existente: VIEW permite consultarlo -->
             <button
+              *ngIf="persona.residenciaFiscal"
               type="button"
               class="btn-action-edit btn-gestionar"
-              (click)="
-                gestionar(
-                  persona,
-                  persona.residenciaFiscal
-                )
-              "
-              [title]="
-                persona.residenciaFiscal
-                  ? 'Gestionar residencia fiscal'
-                  : 'Crear residencia fiscal'
-              ">
+              (click)="gestionar(persona, persona.residenciaFiscal)"
+              title="Gestionar residencia fiscal">
+              Gestionar
+            </button>
 
-              {{
-              persona.residenciaFiscal
-              ? 'Gestionar'
-              : 'Crear'
-              }}
-
+            <!-- Sin registro: solamente EDIT permite crearlo -->
+            <button
+              *ngIf="!persona.residenciaFiscal && puedeEditar"
+              type="button"
+              class="btn-action-edit btn-gestionar"
+              (click)="gestionar(persona, null)"
+              title="Crear residencia fiscal">
+              Crear
             </button>
 
           </td>

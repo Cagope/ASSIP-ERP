@@ -25,6 +25,8 @@ import {
 
 import { forkJoin } from 'rxjs';
 
+import { SessionService } from '../../../core/auth/session.service';
+
 @Component({
   selector: 'app-bienes-inversiones-upsert',
   standalone: true,
@@ -45,6 +47,7 @@ export class BienesInversionesUpsertComponent implements OnInit {
   private readonly bienesApi = inject(BienesInversionesApi);
   private readonly datosApi = inject(DatosPersonalesApi);
   private readonly catalogosApi = inject(CatalogosApi);
+  private readonly session = inject(SessionService);
 
   idDatosPersonal = 0;
 
@@ -70,6 +73,10 @@ export class BienesInversionesUpsertComponent implements OnInit {
     valorGravamen: 0,
     patrimonioNeto: 0
   };
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('HOJAVIDA_BIENES_EDIT');
+  }
 
   ngOnInit(): void {
     this.idDatosPersonal = Number(
@@ -160,6 +167,10 @@ export class BienesInversionesUpsertComponent implements OnInit {
   // ============================================================
 
   nuevo(): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     this.error = '';
     this.mensaje = '';
 
@@ -180,6 +191,10 @@ export class BienesInversionesUpsertComponent implements OnInit {
   }
 
   editar(bien: BienInversion): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     this.error = '';
     this.mensaje = '';
 
@@ -198,6 +213,10 @@ export class BienesInversionesUpsertComponent implements OnInit {
   }
 
   guardar(): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     if (!this.bienActual) {
       return;
     }
@@ -227,6 +246,10 @@ export class BienesInversionesUpsertComponent implements OnInit {
   }
 
   eliminar(bien: BienInversion): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     if (!bien.idBien) {
       return;
     }

@@ -15,6 +15,7 @@ import { FormsModule } from '@angular/forms';
 import { BeneficiarioDTO } from '../../../shared/models/beneficiario.model';
 import { CuentasAhorroApi } from './cuentas-ahorro.api';
 import { CatalogosApi } from '../../../shared/catalogos/catalogos.api';
+import { SessionService } from '../../../core/auth/session.service';
 
 @Component({
   selector: 'app-beneficiarios',
@@ -27,6 +28,10 @@ export class BeneficiariosComponent implements OnChanges, OnInit {
 
   private readonly api = inject(CuentasAhorroApi);
   private readonly catalogosApi = inject(CatalogosApi);
+  private readonly session = inject(SessionService);
+
+  readonly puedeEditar =
+    this.session.tienePermiso('DEPOSITOS_CUENTAS_EDIT');
 
   @Input() idCuentaAhorro: number | null = null;
   @Input() beneficiarios: BeneficiarioDTO[] = [];

@@ -5,6 +5,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { PermisosEspecialesApi, PermisoEspecial } from './permisos-especiales.api';
 import { Output, EventEmitter, Input, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  SessionService
+} from '../../../core/auth/session.service';
 
 /**
  * 🧾 Componente Upsert (Crear / Editar) — Permisos Especiales
@@ -31,8 +34,17 @@ export class PermisosEspecialesUpsertComponent implements OnInit, OnChanges {
   private readonly router = inject(Router);
   private readonly api = inject(PermisosEspecialesApi);
 
+  private readonly session =
+    inject(SessionService);
+
   form!: FormGroup;
   editando = false;
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'HOJAVIDA_PROTECCION_EDIT'
+    );
+  }
 
   // ✅ Habilita el botón guardar solo si el formulario es válido
   puedeGuardar = computed(() => this.form?.valid ?? false);
@@ -163,9 +175,18 @@ export class PermisosEspecialesUpsertComponent implements OnInit, OnChanges {
   // 💾 Guardar / Actualizar
   // ============================================================
   guardar(): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      alert('⚠️ Complete los campos obligatorios o revise los formatos.');
+
+      alert(
+        '⚠️ Complete los campos obligatorios o revise los formatos.'
+      );
+
       return;
     }
 

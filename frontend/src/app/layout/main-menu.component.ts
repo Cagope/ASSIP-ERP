@@ -136,9 +136,13 @@ export class MainMenuComponent implements OnInit {
   }
 
   tienePermiso(item: MenuItem): boolean {
-    if (this.session.esAdmin()) return true;
-    if (!item?.permiso) return true;
-    return this.session.tienePermiso(item.permiso);
+    if (!item?.permiso) {
+      return true;
+    }
+
+    return this.session.tienePermiso(
+      item.permiso
+    );
   }
 
   grupoActivo(item: MenuItem): boolean {

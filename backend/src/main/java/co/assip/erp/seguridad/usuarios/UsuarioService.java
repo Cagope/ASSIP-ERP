@@ -1,174 +1,453 @@
 package co.assip.erp.seguridad.usuarios;
 
-import io.jsonwebtoken.Claims;
+import co.assip.erp.seguridad.usuarios.dto.UsuarioListDTO;
+import co.assip.erp.seguridad.usuariosroles.UsuarioRol;
+import co.assip.erp.seguridad.usuariosroles.UsuarioRolRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import jakarta.servlet.http.HttpServletRequest;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
- * Servicio de administración y seguridad básica de usuarios.
+ * Servicio administrativo de usuarios del ERP.
  *
- * Gestiona los datos del usuario, contraseña, bloqueo,
- * recuperación de acceso y seguimiento de autenticación.
+ * Su responsabilidad es administrar la cuenta de usuario:
+ * identificación, datos administrativos, estado, vigencia
+ * y relación básica con la persona.
+ *
+ * No administra contraseñas, intentos de autenticación,
+ * recuperación de acceso ni tokens de seguridad.
+ *
+ * Los roles se administran mediante seguridad.usuarios_roles
+ * y las agencias mediante seguridad.usuarios_agencias.
  */
 @Service
 @RequiredArgsConstructor
 public class UsuarioService {
 
-    private static final int MAX_INTENTOS_FALLIDOS = 5;
-    private static final int DIAS_VIGENCIA_PASSWORD = 90;
-    private static final int HORAS_VIGENCIA_TOKEN = 2;
-
     private final UsuarioRepository usuarioRepository;
-
-    /*
-     * Se mantiene local temporalmente mientras reorganizamos
-     * la configuración de seguridad.
-     */
-    private final BCryptPasswordEncoder passwordEncoder =
-            new BCryptPasswordEncoder();
+    private final UsuarioRolRepository usuarioRolRepository;
+    private final UsuarioSesionService usuarioSesionService;
 
     /**
      * Obtiene el listado administrativo de usuarios.
+     *
+     * Cada usuario incluye sus roles activos y vigentes
+     * registrados en seguridad.usuarios_roles.
      */
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> listar() {
-        return usuarioRepository.listarConRolYAgencia();
+    public List<UsuarioListDTO> listar() {
+
+        return usuarioRepository
+                .findAllByOrderByUsernameAsc()
+                .stream()
+                .map(this::construirDto)
+                .toList();
     }
 
     /**
-     * Obtiene la información utilizada para editar un usuario.
+     * Obtiene la información administrativa de un usuario
+     * para consulta o edición.
      */
     @Transactional(readOnly = true)
-    public Map<String, Object> buscarDtoPorId(Integer idUsuario) {
+    public UsuarioListDTO buscarDtoPorId(Integer idUsuario) {
 
-        Map<String, Object> usuario =
-                usuarioRepository.buscarDtoPorId(idUsuario);
+        Usuario usuario = usuarioRepository
+                .findById(idUsuario)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "No existe el usuario con id " + idUsuario
+                        )
+                );
 
-        if (usuario == null || usuario.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "No existe el usuario con id " + idUsuario
-            );
+        return construirDto(usuario);
+    }
+
+    /**
+     * Construye la representación administrativa segura
+     * de un usuario.
+     *
+     * No expone contraseña, tokens ni información interna
+     * de autenticación.
+     */
+    private UsuarioListDTO construirDto(Usuario usuario) {
+
+        List<UsuarioListDTO.RolDTO> roles =
+                usuarioRolRepository
+                        .findByUsuario_IdUsuarioAndActivoTrueOrderByFechaDesdeAsc(
+                                usuario.getIdUsuario()
+                        )
+                        .stream()
+                        .filter(this::asignacionVigente)
+                        .map(this::construirRolDto)
+                        .toList();
+
+        return UsuarioListDTO.builder()
+                .idUsuario(usuario.getIdUsuario())
+                .idDatosPersonal(usuario.getIdDatosPersonal())
+                .username(usuario.getUsername())
+                .nombreCompleto(usuario.getNombreCompleto())
+                .email(usuario.getEmail())
+                .activo(usuario.getActivo())
+                .pendienteActivacion(
+                        (usuario.getPassword() == null
+                                || usuario.getPassword().isBlank())
+                                && Boolean.TRUE.equals(
+                                usuario.getRequiereCambioPassword()
+                        )
+                )
+                .fechaInicioVigencia(usuario.getFechaInicioVigencia())
+                .fechaFinVigencia(usuario.getFechaFinVigencia())
+                .roles(roles)
+                .idAgenciaPrincipal(usuario.getIdAgenciaPrincipal())
+                .build();
+    }
+
+    /**
+     * Construye la información básica de un rol asignado.
+     */
+    private UsuarioListDTO.RolDTO construirRolDto(
+            UsuarioRol usuarioRol
+    ) {
+
+        return UsuarioListDTO.RolDTO.builder()
+                .idRol(usuarioRol.getRol().getIdRol())
+                .nombreRol(usuarioRol.getRol().getNombreRol())
+                .build();
+    }
+
+    /**
+     * Determina si una asignación de rol se encuentra
+     * activa y dentro de su periodo de vigencia.
+     */
+    private boolean asignacionVigente(
+            UsuarioRol usuarioRol
+    ) {
+
+        LocalDateTime ahora = LocalDateTime.now();
+
+        if (!Boolean.TRUE.equals(usuarioRol.getActivo())) {
+            return false;
         }
 
-        return usuario;
+        if (usuarioRol.getFechaDesde() != null
+                && usuarioRol.getFechaDesde().isAfter(ahora)) {
+            return false;
+        }
+
+        return usuarioRol.getFechaHasta() == null
+                || !usuarioRol.getFechaHasta().isBefore(ahora);
     }
 
     /**
      * Busca un usuario por su nombre de acceso.
      */
     @Transactional(readOnly = true)
-    public Optional<Usuario> buscarPorUsername(String username) {
-        return usuarioRepository.findByUsername(username);
+    public Optional<Usuario> buscarPorUsername(
+            String username
+    ) {
+
+        if (username == null || username.isBlank()) {
+            return Optional.empty();
+        }
+
+        return usuarioRepository.findByUsername(
+                username.trim()
+        );
     }
 
     /**
      * Busca un usuario por su identificador.
      */
     @Transactional(readOnly = true)
-    public Optional<Usuario> buscarPorId(Integer idUsuario) {
+    public Optional<Usuario> buscarPorId(
+            Integer idUsuario
+    ) {
+
+        if (idUsuario == null) {
+            return Optional.empty();
+        }
+
         return usuarioRepository.findById(idUsuario);
     }
 
     /**
-     * Crea o actualiza un usuario.
+     * Crea o actualiza administrativamente una cuenta.
      *
-     * Por compatibilidad con el proceso actual, la existencia
-     * del username determina si se trata de creación o actualización.
+     * No administra contraseñas, roles ni agencias.
      */
     @Transactional
-    public Usuario guardar(Usuario usuario) {
+    public Usuario guardar(
+            Usuario usuario
+    ) {
 
         validarDatosBasicos(usuario);
 
-        Optional<Usuario> existente =
-                usuarioRepository.findByUsername(usuario.getUsername());
-
-        if (existente.isPresent()) {
-            return actualizar(existente.get(), usuario);
+        if (usuario.getIdUsuario() == null) {
+            return crear(usuario);
         }
 
-        return crear(usuario);
+        Usuario actual =
+                usuarioRepository.findById(
+                                usuario.getIdUsuario()
+                        )
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "No existe el usuario con id "
+                                                + usuario.getIdUsuario()
+                                )
+                        );
+
+        return actualizar(
+                actual,
+                usuario
+        );
     }
 
     /**
-     * Actualiza los datos administrativos de un usuario existente.
+     * Actualiza exclusivamente los datos administrativos
+     * de una cuenta existente.
+     *
+     * No modifica contraseña, roles, agencias ni controles
+     * internos de autenticación.
      */
     private Usuario actualizar(
             Usuario actual,
             Usuario cambios
     ) {
 
-        if (cambios.getPassword() != null
-                && !cambios.getPassword().isBlank()) {
-
-            actualizarPassword(actual, cambios.getPassword(), false);
-        }
-
-        actual.setNombreCompleto(cambios.getNombreCompleto());
-        actual.setEmail(cambios.getEmail());
-        actual.setActivo(cambios.getActivo());
-        actual.setIdRol(cambios.getIdRol());
-        actual.setIdAgenciaPrincipal(cambios.getIdAgenciaPrincipal());
-
-        actual.setFechaActualizacion(LocalDateTime.now());
-        actual.setUsuarioActualizacion(
-                cambios.getUsuarioActualizacion()
+        validarUsernameDisponible(
+                cambios.getUsername(),
+                actual.getIdUsuario()
         );
 
-        return usuarioRepository.save(actual);
-    }
+        actual.setIdDatosPersonal(
+                cambios.getIdDatosPersonal()
+        );
 
-    /**
-     * Inicializa y persiste un nuevo usuario.
-     */
-    private Usuario crear(Usuario usuario) {
+        actual.setUsername(
+                cambios.getUsername().trim()
+        );
 
-        if (usuario.getPassword() == null
-                || usuario.getPassword().isBlank()) {
-            throw new IllegalArgumentException(
-                    "La contraseña es obligatoria para crear el usuario."
+        actual.setNombreCompleto(
+                cambios.getNombreCompleto()
+        );
+
+        actual.setEmail(
+                normalizarEmail(
+                        cambios.getEmail()
+                )
+        );
+
+        if (cambios.getActivo() != null) {
+            actual.setActivo(
+                    cambios.getActivo()
             );
         }
 
+        actual.setIdAgenciaPrincipal(
+                cambios.getIdAgenciaPrincipal()
+        );
+
+        actual.setFechaInicioVigencia(
+                cambios.getFechaInicioVigencia()
+        );
+
+        actual.setFechaFinVigencia(
+                cambios.getFechaFinVigencia()
+        );
+
+        LocalDateTime ahora =
+                LocalDateTime.now();
+
+        actual.setFechaActualizacion(
+                ahora
+        );
+
+        actual.setFechaEdicion(
+                ahora
+        );
+
+        Integer idUsuarioActor = usuarioSesionService.idUsuario();
+
+        Usuario actor = usuarioRepository.findById(idUsuarioActor)
+                .orElseThrow(() -> new IllegalStateException(
+                        "No existe el usuario autenticado."
+                ));
+
+        actual.setUsuarioActualizacion(actor.getUsername());
+        actual.setFkSeguridadEdicion(idUsuarioActor);
+
+        return usuarioRepository.save(
+                actual
+        );
+    }
+
+    /**
+     * Inicializa una nueva cuenta administrativa.
+     *
+     * Solo acepta los datos administrativos permitidos.
+     * Los campos internos de seguridad se inicializan
+     * exclusivamente desde el backend.
+     *
+     * La contraseña será establecida posteriormente
+     * por el propietario durante la activación.
+     */
+    private Usuario crear(Usuario datos) {
+
+        validarUsernameDisponible(
+                datos.getUsername(),
+                null
+        );
+
         LocalDateTime ahora = LocalDateTime.now();
 
-        usuario.setIdUsuario(null);
-        usuario.setUsername(usuario.getUsername().trim());
+        // =========================================================
+        // IDENTIFICACIÓN Y DATOS ADMINISTRATIVOS
+        // =========================================================
 
-        usuario.setPassword(
-                passwordEncoder.encode(usuario.getPassword())
+        Usuario usuario = new Usuario();
+
+        usuario.setIdDatosPersonal(
+                datos.getIdDatosPersonal()
+        );
+
+        usuario.setUsername(
+                datos.getUsername().trim()
+        );
+
+        usuario.setNombreCompleto(
+                datos.getNombreCompleto()
+        );
+
+        usuario.setEmail(
+                normalizarEmail(datos.getEmail())
         );
 
         usuario.setActivo(true);
-        usuario.setBloqueado(false);
-        usuario.setPasswordIntentos(0);
 
-        usuario.setFechaCreacion(ahora);
-        usuario.setPasswordUltimoCambio(ahora);
-        usuario.setPasswordExpira(
-                ahora.plusDays(DIAS_VIGENCIA_PASSWORD)
+        usuario.setIdAgenciaPrincipal(
+                datos.getIdAgenciaPrincipal()
         );
 
-        usuario.setRequiereCambioPassword(false);
+        usuario.setFechaInicioVigencia(
+                datos.getFechaInicioVigencia() != null
+                        ? datos.getFechaInicioVigencia()
+                        : ahora
+        );
+
+        usuario.setFechaFinVigencia(
+                datos.getFechaFinVigencia()
+        );
+
+        // =========================================================
+        // CONTRASEÑA Y ACTIVACIÓN
+        // =========================================================
+
+        usuario.setPassword(null);
+        usuario.setRequiereCambioPassword(true);
+
+        usuario.setPasswordIntentos(0);
+        usuario.setPasswordUltimoCambio(null);
+        usuario.setPasswordExpira(null);
+
+        // =========================================================
+        // BLOQUEO Y AUTENTICACIÓN
+        // =========================================================
+
+        usuario.setBloqueado(false);
+        usuario.setBloqueadoHasta(null);
+        usuario.setFechaBloqueo(null);
+
+        usuario.setUltimoLogin(null);
+        usuario.setUltimoIntentoLogin(null);
+        usuario.setIpUltimoLogin(null);
+
+        // =========================================================
+        // CAMPOS HEREDADOS
+        // =========================================================
+
+        usuario.setTokenRecuperacion(null);
+        usuario.setTokenExpira(null);
+
+        // =========================================================
+        // AUDITORÍA
+        // =========================================================
+
+        usuario.setFechaCreacion(ahora);
+        usuario.setFechaActualizacion(ahora);
+        usuario.setFechaEdicion(ahora);
+
+        /*
+         * La identidad del administrador responsable
+         * se obtiene directamente de la sesión autenticada.
+         */
+        Integer idUsuarioActor = usuarioSesionService.idUsuario();
+
+        Usuario actor = usuarioRepository.findById(idUsuarioActor)
+                .orElseThrow(() -> new IllegalStateException(
+                        "No existe el usuario autenticado."
+                ));
+
+        usuario.setFkSeguridadCreacion(idUsuarioActor);
+        usuario.setUsuarioCreacion(actor.getUsername());
+
+        // No se aceptan datos de auditoría de edición.
+        usuario.setFkSeguridadEdicion(null);
+        usuario.setUsuarioActualizacion(null);
 
         return usuarioRepository.save(usuario);
     }
 
     /**
-     * Valida los datos mínimos requeridos para administrar un usuario.
+     * Verifica que el nombre de usuario no se encuentre
+     * asignado a otra cuenta.
      */
-    private void validarDatosBasicos(Usuario usuario) {
+    private void validarUsernameDisponible(
+            String username,
+            Integer idUsuarioActual
+    ) {
+
+        String usernameNormalizado =
+                username.trim();
+
+        Optional<Usuario> existente =
+                usuarioRepository.findByUsername(
+                        usernameNormalizado
+                );
+
+        if (existente.isEmpty()) {
+            return;
+        }
+
+        Usuario usuarioExistente =
+                existente.get();
+
+        if (idUsuarioActual == null
+                || !idUsuarioActual.equals(
+                usuarioExistente.getIdUsuario()
+        )) {
+
+            throw new IllegalArgumentException(
+                    "El nombre de usuario ya se encuentra registrado."
+            );
+        }
+    }
+
+    /**
+     * Valida los datos mínimos necesarios para
+     * administrar una cuenta.
+     *
+     * Las credenciales, roles y agencias se validan
+     * en sus procesos correspondientes.
+     */
+    private void validarDatosBasicos(
+            Usuario usuario
+    ) {
 
         if (usuario == null) {
             throw new IllegalArgumentException(
@@ -178,213 +457,47 @@ public class UsuarioService {
 
         if (usuario.getUsername() == null
                 || usuario.getUsername().isBlank()) {
+
             throw new IllegalArgumentException(
                     "El nombre de usuario es obligatorio."
             );
         }
 
-        if (usuario.getIdRol() == null
-                || usuario.getIdRol() <= 0) {
+        // =========================================================
+        // VALIDACIÓN DE VIGENCIA
+        // =========================================================
+
+        if (usuario.getFechaInicioVigencia() != null
+                && usuario.getFechaFinVigencia() != null
+                && usuario.getFechaFinVigencia().isBefore(
+                usuario.getFechaInicioVigencia()
+        )) {
+
             throw new IllegalArgumentException(
-                    "Debe seleccionar un rol válido."
-            );
-        }
-    }
-
-    /**
-     * Obtiene el usuario autenticado a partir de los claims
-     * almacenados en el contexto de Spring Security.
-     *
-     * Se construye un usuario liviano; no realiza consulta
-     * adicional a la base de datos.
-     */
-    public Usuario getUsuarioActual(HttpServletRequest request) {
-
-        Authentication auth =
-                SecurityContextHolder.getContext().getAuthentication();
-
-        if (auth == null || !auth.isAuthenticated()) {
-            throw new IllegalStateException(
-                    "No hay usuario autenticado."
+                    "La fecha de finalización de vigencia "
+                            + "no puede ser anterior a la fecha de inicio."
             );
         }
 
-        Object credentials = auth.getCredentials();
-
-        if (!(credentials instanceof Claims claims)) {
-            throw new IllegalStateException(
-                    "Token inválido en el contexto de seguridad."
-            );
-        }
-
-        Usuario usuario = new Usuario();
-
-        usuario.setIdUsuario(
-                claims.get("idUsuario", Integer.class)
-        );
-
-        usuario.setIdRol(
-                claims.get("rol", Integer.class)
-        );
-
-        usuario.setUsername(auth.getName());
-
-        return usuario;
     }
 
     /**
-     * Genera un token temporal para recuperación de contraseña.
+     * Normaliza el correo electrónico administrativo.
      */
-    @Transactional
-    public String generarTokenRecuperacion(String email) {
-
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Correo no registrado."
-                        )
-                );
-
-        String token = UUID.randomUUID().toString();
-
-        usuario.setTokenRecuperacion(token);
-        usuario.setTokenExpira(
-                LocalDateTime.now()
-                        .plusHours(HORAS_VIGENCIA_TOKEN)
-        );
-
-        usuarioRepository.save(usuario);
-
-        return token;
-    }
-
-    /**
-     * Establece una nueva contraseña mediante un token
-     * de recuperación vigente.
-     */
-    @Transactional
-    public void restaurarPassword(
-            String token,
-            String nuevaClave
+    private String normalizarEmail(
+            String email
     ) {
 
-        if (token == null || token.isBlank()) {
-            throw new IllegalArgumentException(
-                    "El token de recuperación es obligatorio."
-            );
+        if (email == null) {
+            return null;
         }
 
-        if (nuevaClave == null || nuevaClave.isBlank()) {
-            throw new IllegalArgumentException(
-                    "La nueva contraseña es obligatoria."
-            );
-        }
+        String emailNormalizado =
+                email.trim();
 
-        Usuario usuario =
-                usuarioRepository.findByTokenRecuperacion(token)
-                        .orElseThrow(() ->
-                                new IllegalArgumentException(
-                                        "Token inválido."
-                                )
-                        );
-
-        if (usuario.getTokenExpira() == null
-                || usuario.getTokenExpira()
-                .isBefore(LocalDateTime.now())) {
-
-            throw new IllegalArgumentException(
-                    "El token ha expirado."
-            );
-        }
-
-        actualizarPassword(usuario, nuevaClave, false);
-
-        usuario.setTokenRecuperacion(null);
-        usuario.setTokenExpira(null);
-
-        usuarioRepository.save(usuario);
+        return emailNormalizado.isEmpty()
+                ? null
+                : emailNormalizado;
     }
 
-    /**
-     * Registra un intento de autenticación fallido.
-     *
-     * Al alcanzar el máximo permitido, bloquea la cuenta.
-     */
-    @Transactional
-    public void registrarIntentoFallido(String username) {
-
-        Usuario usuario =
-                usuarioRepository.findByUsername(username)
-                        .orElse(null);
-
-        if (usuario == null) {
-            return;
-        }
-
-        int intentos =
-                usuario.getPasswordIntentos() == null
-                        ? 0
-                        : usuario.getPasswordIntentos();
-
-        intentos++;
-
-        usuario.setPasswordIntentos(intentos);
-        usuario.setUltimoIntentoLogin(LocalDateTime.now());
-
-        if (intentos >= MAX_INTENTOS_FALLIDOS) {
-            usuario.setBloqueado(true);
-            usuario.setFechaBloqueo(LocalDateTime.now());
-        }
-
-        usuarioRepository.save(usuario);
-    }
-
-    /**
-     * Registra una autenticación exitosa y reinicia
-     * el contador de intentos fallidos.
-     */
-    @Transactional
-    public void registrarLoginExitoso(
-            String username,
-            String ip
-    ) {
-
-        Usuario usuario =
-                usuarioRepository.findByUsername(username)
-                        .orElse(null);
-
-        if (usuario == null) {
-            return;
-        }
-
-        usuario.setUltimoLogin(LocalDateTime.now());
-        usuario.setIpUltimoLogin(ip);
-        usuario.setPasswordIntentos(0);
-
-        usuarioRepository.save(usuario);
-    }
-
-    /**
-     * Actualiza la contraseña y sus controles asociados.
-     */
-    private void actualizarPassword(
-            Usuario usuario,
-            String nuevaClave,
-            boolean requiereCambio
-    ) {
-
-        LocalDateTime ahora = LocalDateTime.now();
-
-        usuario.setPassword(
-                passwordEncoder.encode(nuevaClave)
-        );
-
-        usuario.setPasswordUltimoCambio(ahora);
-        usuario.setPasswordExpira(
-                ahora.plusDays(DIAS_VIGENCIA_PASSWORD)
-        );
-
-        usuario.setPasswordIntentos(0);
-        usuario.setRequiereCambioPassword(requiereCambio);
-    }
 }

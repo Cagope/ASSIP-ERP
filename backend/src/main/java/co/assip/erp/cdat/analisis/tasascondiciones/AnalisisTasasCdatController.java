@@ -5,6 +5,9 @@ import co.assip.erp.cdat.analisis.tasascondiciones.dto.AnalisisTasasCdatCorteDTO
 import co.assip.erp.cdat.analisis.tasascondiciones.dto.AnalisisTasasCdatDetalleDTO;
 import co.assip.erp.cdat.analisis.tasascondiciones.dto.AnalisisTasasCdatRangoSaldoDTO;
 import co.assip.erp.cdat.analisis.tasascondiciones.dto.AnalisisTasasCdatResumenDTO;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -20,14 +23,22 @@ import java.util.List;
 @RequestMapping("/cdat/analisis/tasas-condiciones")
 public class AnalisisTasasCdatController {
 
+    private static final String PERMISO =
+            "CDAT_ANALISIS_VIEW";
+
     private final AnalisisTasasCdatService service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     public AnalisisTasasCdatController(
-            AnalisisTasasCdatService service
+            AnalisisTasasCdatService service,
+            UsuarioSesionService usuarioSesionService,
+            AccessValidator accessValidator
     ) {
         this.service = service;
+        this.usuarioSesionService = usuarioSesionService;
+        this.accessValidator = accessValidator;
     }
-
 
     // =========================================================
     // CORTES DISPONIBLES
@@ -36,11 +47,12 @@ public class AnalisisTasasCdatController {
     @GetMapping("/cortes")
     public ResponseEntity<List<AnalisisTasasCdatCorteDTO>> listarCortes() {
 
+        validarAcceso();
+
         return ResponseEntity.ok(
                 service.listarCortes()
         );
     }
-
 
     // =========================================================
     // RESUMEN
@@ -66,6 +78,8 @@ public class AnalisisTasasCdatController {
             String rangoSaldo
     ) {
 
+        validarAcceso();
+
         return ResponseEntity.ok(
                 service.obtenerResumen(
                         fechaCorte,
@@ -76,7 +90,6 @@ public class AnalisisTasasCdatController {
                 )
         );
     }
-
 
     // =========================================================
     // CONDICIONES DE CAPTACIÓN
@@ -102,6 +115,8 @@ public class AnalisisTasasCdatController {
             String rangoSaldo
     ) {
 
+        validarAcceso();
+
         return ResponseEntity.ok(
                 service.obtenerCondiciones(
                         fechaCorte,
@@ -112,7 +127,6 @@ public class AnalisisTasasCdatController {
                 )
         );
     }
-
 
     // =========================================================
     // RANGOS DE SALDO
@@ -138,6 +152,8 @@ public class AnalisisTasasCdatController {
             String rangoSaldo
     ) {
 
+        validarAcceso();
+
         return ResponseEntity.ok(
                 service.obtenerRangosSaldo(
                         fechaCorte,
@@ -148,7 +164,6 @@ public class AnalisisTasasCdatController {
                 )
         );
     }
-
 
     // =========================================================
     // DETALLE AUDITABLE
@@ -174,6 +189,8 @@ public class AnalisisTasasCdatController {
             String rangoSaldo
     ) {
 
+        validarAcceso();
+
         return ResponseEntity.ok(
                 service.obtenerDetalle(
                         fechaCorte,
@@ -182,6 +199,19 @@ public class AnalisisTasasCdatController {
                         amortizacion,
                         rangoSaldo
                 )
+        );
+    }
+
+    private void validarAcceso() {
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO
         );
     }
 }

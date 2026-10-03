@@ -65,6 +65,27 @@ public class CdatCancelacionRepository {
         return jdbc.query(sql, params, (rs, rowNum) -> mapItem(rs));
     }
 
+    public List<java.util.Map<String, Object>> buscarCuentasAhorroDisponibles(
+            Integer idDatosPersonal,
+            Integer idAgencia
+    ) {
+        String sql = """
+        SELECT *
+        FROM depositos.vw_depositos_cuentas_ahorro_total
+        WHERE id_datos_personal = :idDatosPersonal
+          AND id_agencia = :idAgencia
+          AND UPPER(TRIM(COALESCE(codigo_estado, ''))) = 'A'
+          AND id_forma_ahorro <> 1
+        ORDER BY codigo_forma, codigo_cuenta
+        """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("idDatosPersonal", idDatosPersonal)
+                .addValue("idAgencia", idAgencia);
+
+        return jdbc.queryForList(sql, params);
+    }
+
     public void marcarCancelado(
             Long idCuentaCdat,
             LocalDate fechaCancelacion,

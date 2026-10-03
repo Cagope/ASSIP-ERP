@@ -1,0 +1,247 @@
+<div class="page">
+
+  <!-- =======================================================
+       ENCABEZADO
+       ======================================================= -->
+
+  <header class="page-header">
+    <div>
+      <h2>Roles y permisos</h2>
+
+      <p>
+        Administre los permisos funcionales asignados
+        a cada rol del sistema.
+      </p>
+    </div>
+  </header>
+
+  <!-- =======================================================
+       MENSAJES
+       ======================================================= -->
+
+  @if (error()) {
+  <div class="alert alert-error">
+    {{ error() }}
+  </div>
+  }
+
+  @if (mensaje()) {
+  <div class="alert alert-success">
+    {{ mensaje() }}
+  </div>
+  }
+
+  <!-- =======================================================
+       CARGA
+       ======================================================= -->
+
+  @if (cargando()) {
+
+  <section class="card estado-card">
+    Cargando roles y permisos...
+  </section>
+
+  } @else {
+
+  <div class="roles-layout">
+
+    <!-- ===================================================
+         ROLES
+         =================================================== -->
+
+    <section class="card roles-panel">
+
+      <div class="section-header">
+        <div>
+          <h3>Roles</h3>
+
+          <p>
+            Seleccione el rol que desea administrar.
+          </p>
+        </div>
+
+        <span class="count">
+            {{ roles().length }}
+          </span>
+      </div>
+
+      <div class="roles-list">
+
+        @for (
+        rol of roles();
+        track rol.idRol
+        ) {
+
+        <button
+          type="button"
+          class="role-item"
+          [class.selected]="esRolSeleccionado(rol)"
+          [disabled]="rol.activo === false"
+          (click)="seleccionarRol(rol)"
+        >
+
+              <span class="role-main">
+                <strong>
+                  {{ rol.nombreRol }}
+                </strong>
+
+                <small>
+                  ID {{ rol.idRol }}
+                </small>
+              </span>
+
+          <span
+            class="status"
+            [class.inactive]="rol.activo === false"
+          >
+                {{
+                  rol.activo === false
+                    ? 'Inactivo'
+                    : 'Activo'
+                }}
+              </span>
+
+        </button>
+
+        } @empty {
+
+        <div class="empty-state">
+          No existen roles registrados.
+        </div>
+
+        }
+
+      </div>
+
+    </section>
+
+    <!-- ===================================================
+         PERMISOS
+         =================================================== -->
+
+    <section class="card permissions-panel">
+
+      @if (!hayRolSeleccionado()) {
+
+      <div class="empty-selection">
+        <h3>Permisos del rol</h3>
+
+        <p>
+          Seleccione un rol para consultar
+          y administrar sus permisos.
+        </p>
+      </div>
+
+      } @else {
+
+      <div class="section-header permissions-header">
+
+        <div>
+          <h3>
+            {{ rolSeleccionado()?.nombreRol }}
+          </h3>
+
+          <p>
+            Seleccione las operaciones que estarán
+            autorizadas para este rol.
+          </p>
+        </div>
+
+        <span class="selected-count">
+              {{ cantidadPermisosSeleccionados() }}
+              permisos
+            </span>
+
+      </div>
+
+      @if (cargandoPermisos()) {
+
+      <div class="loading-permissions">
+        Consultando permisos del rol...
+      </div>
+
+      } @else {
+
+      <div class="permissions-list">
+
+        @for (
+        permiso of permisos();
+        track permiso.idPermiso
+        ) {
+
+        <label class="permission-item">
+
+          <input
+            type="checkbox"
+            [checked]="permisoSeleccionado(
+                      permiso.idPermiso
+                    )"
+            [disabled]="guardando()"
+            (change)="cambiarPermiso(
+                      permiso.idPermiso,
+                      $any($event.target).checked
+                    )"
+          />
+
+          <span class="permission-content">
+
+                    <strong>
+                      {{ permiso.codigo }}
+                    </strong>
+
+                    <small>
+                      {{
+                        permiso.descripcion
+                          || 'Sin descripción'
+                      }}
+                    </small>
+
+                  </span>
+
+        </label>
+
+        } @empty {
+
+        <div class="empty-state">
+          No existen permisos activos registrados.
+        </div>
+
+        }
+
+      </div>
+
+      <footer class="permissions-actions">
+
+              <span class="selection-summary">
+                {{ cantidadPermisosSeleccionados() }}
+                de
+                {{ permisos().length }}
+                seleccionados
+              </span>
+
+        <button
+          type="button"
+          class="btn-primary"
+          [disabled]="guardando()"
+          (click)="guardarPermisos()"
+        >
+          {{
+          guardando()
+          ? 'Guardando...'
+          : 'Guardar permisos'
+          }}
+        </button>
+
+      </footer>
+
+      }
+
+      }
+
+    </section>
+
+  </div>
+
+  }
+
+</div>

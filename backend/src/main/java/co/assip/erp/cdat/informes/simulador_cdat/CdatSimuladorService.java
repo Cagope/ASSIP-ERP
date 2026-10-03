@@ -7,27 +7,68 @@ import co.assip.erp.cdat.liquidacion_diaria.CdatLiquidacionDiariaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class CdatSimuladorService {
 
     private final CdatLiquidacionDiariaRepository repository;
+    private final CdatSimuladorRepository simuladorRepository;
+
+    public List<Map<String, Object>> buscarCuentasAhorro(
+            String documento,
+            String nombres,
+            String primerApellido,
+            String segundoApellido,
+            Integer idAgencia
+    ) {
+
+        boolean sinFiltros =
+                (documento == null || documento.isBlank())
+                        && (nombres == null || nombres.isBlank())
+                        && (primerApellido == null || primerApellido.isBlank())
+                        && (segundoApellido == null || segundoApellido.isBlank());
+
+        if (sinFiltros) {
+            throw new RuntimeException(
+                    "Debe ingresar al menos un criterio de búsqueda."
+            );
+        }
+
+        if (idAgencia == null) {
+            throw new RuntimeException(
+                    "No se pudo determinar la agencia del usuario."
+            );
+        }
+
+        return simuladorRepository.buscarCuentasAhorro(
+                documento,
+                nombres,
+                primerApellido,
+                segundoApellido,
+                idAgencia
+        );
+    }
 
     public CdatSimuladorPreviewDTO generarPreview(
-            CdatSimuladorEntradaDTO input
+            CdatSimuladorEntradaDTO input,
+            Integer idAgencia
     ) {
 
         BigDecimal baseRetencion =
-                repository.obtenerValorBaseRetencion(input.getIdAgencia());
+                repository.obtenerValorBaseRetencion(idAgencia);
 
         BigDecimal porcentajeRetencion =
-                repository.obtenerPorcentajeRetencion(input.getIdAgencia());
+                repository.obtenerPorcentajeRetencion(idAgencia);
+
+
 
         List<CdatSimuladorItemDTO> items = new ArrayList<>();
 

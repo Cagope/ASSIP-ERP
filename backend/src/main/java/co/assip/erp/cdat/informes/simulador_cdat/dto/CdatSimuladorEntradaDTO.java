@@ -10,8 +10,6 @@ import java.time.LocalDate;
 @Setter
 public class CdatSimuladorEntradaDTO {
 
-    private Integer idAgencia;
-
     private BigDecimal valorCdat;
 
     private BigDecimal tasaNominalAnual;

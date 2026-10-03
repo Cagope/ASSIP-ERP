@@ -32,6 +32,10 @@ import {
   nuevaCondicionProteccion
 } from './condiciones-proteccion.api';
 
+import {
+  SessionService
+} from '../../../core/auth/session.service';
+
 /**
  * 🛡️ Componente Upsert — Condiciones de Protección
  * ------------------------------------------------------------
@@ -82,6 +86,9 @@ export class CondicionesProteccionUpsertComponent
   private readonly api =
     inject(CondicionesProteccionApi);
 
+  private readonly session =
+    inject(SessionService);
+
   form!: FormGroup;
 
   editando = false;
@@ -91,6 +98,12 @@ export class CondicionesProteccionUpsertComponent
   guardando = false;
 
   error = '';
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'HOJAVIDA_PROTECCION_EDIT'
+    );
+  }
 
   /**
    * Mantiene el mismo contrato visual de los demás
@@ -439,7 +452,12 @@ export class CondicionesProteccionUpsertComponent
   // ============================================================
 
   guardar(): void {
+
     this.error = '';
+
+    if (!this.puedeEditar) {
+      return;
+    }
 
     if (
       !this.form.get(
@@ -462,6 +480,8 @@ export class CondicionesProteccionUpsertComponent
       this.emitirValidez();
       return;
     }
+
+    // Desde aquí continúa exactamente como está.
 
     const raw =
       this.construirPayload();

@@ -3,6 +3,7 @@ import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
+import { SessionService } from '../../../core/auth/session.service';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
 
@@ -64,6 +65,7 @@ export class BienesInmueblesUpsertComponent implements OnInit {
   private readonly catalogosApi = inject(CatalogosApi);
   private readonly avaluosApi = inject(BienesInmueblesAvaluosApi);
   private readonly segurosApi = inject(BienesInmueblesSegurosApi);
+  private readonly session = inject(SessionService);
 
   idDatosPersonal = 0;
 
@@ -79,6 +81,10 @@ export class BienesInmueblesUpsertComponent implements OnInit {
 
   error = '';
   mensaje = '';
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('HOJAVIDA_BIENES_EDIT');
+  }
 
   tiposBienes: CatalogoIdCodigoNombre[] = [];
   tiposInmuebles: CatalogoIdCodigoNombre[] = [];
@@ -249,6 +255,10 @@ export class BienesInmueblesUpsertComponent implements OnInit {
 
   nuevo(): void {
 
+    if (!this.puedeEditar) {
+      return;
+    }
+
     this.error = '';
     this.mensaje = '';
 
@@ -282,6 +292,10 @@ export class BienesInmueblesUpsertComponent implements OnInit {
   }
 
   editar(bien: BienInmueble): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
 
     this.error = '';
     this.mensaje = '';
@@ -319,6 +333,10 @@ export class BienesInmueblesUpsertComponent implements OnInit {
   }
 
   guardar(): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
 
     if (!this.bienActual) {
       return;
@@ -371,6 +389,10 @@ export class BienesInmueblesUpsertComponent implements OnInit {
   }
 
   eliminar(bien: BienInmueble): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
 
     if (!bien.idBien) {
       return;
@@ -823,6 +845,10 @@ export class BienesInmueblesUpsertComponent implements OnInit {
 
   nuevoAvaluo(): void {
 
+    if (!this.puedeEditar) {
+      return;
+    }
+
     if (!this.bienSeleccionadoAvaluos?.idBien) {
       return;
     }
@@ -839,9 +865,11 @@ export class BienesInmueblesUpsertComponent implements OnInit {
     this.modoAvaluo = 'NUEVO';
   }
 
-  editarAvaluo(
-    avaluo: BienInmuebleAvaluo
-  ): void {
+  editarAvaluo(avaluo: BienInmuebleAvaluo): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
 
     this.error = '';
     this.mensaje = '';
@@ -882,6 +910,10 @@ export class BienesInmueblesUpsertComponent implements OnInit {
   }
 
   guardarAvaluo(): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
 
     if (!this.avaluoActual) {
       return;
@@ -1033,9 +1065,11 @@ export class BienesInmueblesUpsertComponent implements OnInit {
     return true;
   }
 
-  eliminarAvaluo(
-    avaluo: BienInmuebleAvaluo
-  ): void {
+  eliminarAvaluo(avaluo: BienInmuebleAvaluo): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
 
     if (!avaluo.idBienInmuebleAvaluo) {
       return;
@@ -1200,6 +1234,10 @@ export class BienesInmueblesUpsertComponent implements OnInit {
 
   nuevoSeguro(): void {
 
+    if (!this.puedeEditar) {
+      return;
+    }
+
     if (!this.bienSeleccionadoSeguros?.idBien) {
       return;
     }
@@ -1214,9 +1252,11 @@ export class BienesInmueblesUpsertComponent implements OnInit {
     this.modoSeguro = 'NUEVO';
   }
 
-  editarSeguro(
-    seguro: BienInmuebleSeguro
-  ): void {
+  editarSeguro(seguro: BienInmuebleSeguro): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
 
     this.error = '';
     this.mensaje = '';
@@ -1244,6 +1284,10 @@ export class BienesInmueblesUpsertComponent implements OnInit {
   }
 
   guardarSeguro(): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
 
     if (!this.seguroActual) {
       return;
@@ -1357,9 +1401,11 @@ export class BienesInmueblesUpsertComponent implements OnInit {
     return true;
   }
 
-  eliminarSeguro(
-    seguro: BienInmuebleSeguro
-  ): void {
+  eliminarSeguro(seguro: BienInmuebleSeguro): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
 
     if (!seguro.idBienInmuebleSeguro) {
       return;

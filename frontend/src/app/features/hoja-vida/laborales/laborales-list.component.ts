@@ -29,6 +29,8 @@ import {
   LaboralesExporterService
 } from './laborales-exporter.service';
 
+import { SessionService } from '../../../core/auth/session.service';
+
 type PersonaConLaboral =
   DatosPersonales & {
     laboral: Laboral | null;
@@ -69,11 +71,20 @@ export class LaboralesListComponent
   private readonly exporter =
     inject(LaboralesExporterService);
 
+  private readonly session =
+    inject(SessionService);
+
   personas: PersonaConLaboral[] = [];
   filtradas: PersonaConLaboral[] = [];
 
   cargando = false;
   error = '';
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'HOJAVIDA_PERSONA_EDIT'
+    );
+  }
 
   filtros = {
     documento: '',
@@ -297,13 +308,22 @@ export class LaboralesListComponent
       return;
     }
 
+    // Registro existente:
+    // VIEW permite ingresar a consultarlo.
     if (laboral?.idLaboral) {
+
       this.router.navigate([
         '/hoja-vida/laborales',
         laboral.idLaboral,
         'editar'
       ]);
 
+      return;
+    }
+
+    // Registro nuevo:
+    // requiere permiso de edición.
+    if (!this.puedeEditar) {
       return;
     }
 

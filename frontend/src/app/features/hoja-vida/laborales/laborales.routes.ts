@@ -1,17 +1,45 @@
 import { Routes } from '@angular/router';
+
+import { permisoGuard } from '../../../core/auth/permiso.guard';
+
 import { LaboralesListComponent } from './laborales-list.component';
 import { LaboralesUpsertComponent } from './laborales-upsert.component';
 
 /**
  * 💼 Rutas del módulo Laborales
  * ------------------------------------------------------------
- * Define las rutas internas del submódulo Hoja de Vida → Laborales.
- *  - Listado principal
- *  - Formulario de creación
- *  - Formulario de edición
+ * Seguridad:
+ *  - Listado              → HOJAVIDA_PERSONA_VIEW
+ *  - Nuevo                → HOJAVIDA_PERSONA_EDIT
+ *  - Gestionar existente  → HOJAVIDA_PERSONA_VIEW
  */
 export const LABORALES_ROUTES: Routes = [
-  { path: '', component: LaboralesListComponent },
-  { path: 'nuevo', component: LaboralesUpsertComponent },
-  { path: ':id/editar', component: LaboralesUpsertComponent },
+
+  {
+    path: '',
+    component: LaboralesListComponent,
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'HOJAVIDA_PERSONA_VIEW'
+    }
+  },
+
+  {
+    path: 'nuevo',
+    component: LaboralesUpsertComponent,
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'HOJAVIDA_PERSONA_EDIT'
+    }
+  },
+
+  {
+    path: ':id/editar',
+    component: LaboralesUpsertComponent,
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'HOJAVIDA_PERSONA_VIEW'
+    }
+  }
+
 ];

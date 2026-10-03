@@ -3,6 +3,9 @@ package co.assip.erp.depositos.cierre_mensual_depositos;
 import co.assip.erp.depositos.cierre_mensual_depositos.dto.CierreMensualDepositosApplyResponseDTO;
 import co.assip.erp.depositos.cierre_mensual_depositos.dto.CierreMensualDepositosPreviewDTO;
 import co.assip.erp.depositos.cierre_mensual_depositos.dto.CierreMensualDepositosRequestDTO;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,7 +16,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CierreMensualDepositosController {
 
+    private static final String PERMISO_EXECUTE =
+            "DEPOSITOS_CIERRE_MENSUAL_EXECUTE";
+
     private final CierreMensualDepositosService service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
 
     // =========================================================
@@ -27,6 +35,8 @@ public class CierreMensualDepositosController {
     public CierreMensualDepositosPreviewDTO preview(
             @RequestBody CierreMensualDepositosRequestDTO request
     ) {
+
+        validarAcceso();
 
         return service.preview(
                 request
@@ -48,6 +58,8 @@ public class CierreMensualDepositosController {
             @RequestBody CierreMensualDepositosRequestDTO request
     ) {
 
+        validarAcceso();
+
         return service.generar(
                 request
         );
@@ -66,6 +78,8 @@ public class CierreMensualDepositosController {
     public CierreMensualDepositosApplyResponseDTO regenerar(
             @PathVariable Long idCierre
     ) {
+
+        validarAcceso();
 
         return service.regenerar(
                 idCierre
@@ -86,6 +100,8 @@ public class CierreMensualDepositosController {
             @PathVariable Long idCierre
     ) {
 
+        validarAcceso();
+
         return service.cerrarFotografia(
                 idCierre
         );
@@ -98,6 +114,8 @@ public class CierreMensualDepositosController {
 
     @GetMapping
     public List<CierreMensualDepositosPreviewDTO> listar() {
+
+        validarAcceso();
 
         return service.listar();
     }
@@ -112,6 +130,8 @@ public class CierreMensualDepositosController {
             @PathVariable Long idCierre
     ) {
 
+        validarAcceso();
+
         return service.obtenerPorId(
                 idCierre
         );
@@ -119,7 +139,7 @@ public class CierreMensualDepositosController {
 
 
     // =========================================================
-    // ELIMINAR PRECierre
+    // ELIMINAR PRECIERRE
     //
     // Solamente estado P.
     // =========================================================
@@ -129,8 +149,28 @@ public class CierreMensualDepositosController {
             @PathVariable Long idCierre
     ) {
 
+        validarAcceso();
+
         service.eliminar(
                 idCierre
+        );
+    }
+
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarAcceso() {
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO_EXECUTE
         );
     }
 }

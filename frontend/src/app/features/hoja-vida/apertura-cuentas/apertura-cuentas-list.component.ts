@@ -264,7 +264,6 @@ export class AperturaCuentasListComponent
 
     const idAgencia =
       agencia?.idAgencia
-      ?? agencia?.id_agencia
       ?? null;
 
     if (!idAgencia) {

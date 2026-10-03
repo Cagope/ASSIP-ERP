@@ -1,44 +1,57 @@
 package co.assip.erp.hojavida.residencia_fiscal;
 
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /**
- * 🌐 Controlador REST — Residencia Fiscal
- * ------------------------------------------------------------
- * Esquema: hoja_vida
+ * Controlador REST — Residencia Fiscal
  *
- * Rutas:
- *  - GET    /api/v1/hoja-vida/residencia-fiscal
- *  - GET    /api/v1/hoja-vida/residencia-fiscal/{id}
- *  - GET    /api/v1/hoja-vida/residencia-fiscal/persona/{idDatosPersonal}
- *  - POST   /api/v1/hoja-vida/residencia-fiscal
- *  - PUT    /api/v1/hoja-vida/residencia-fiscal/{id}
- *  - DELETE /api/v1/hoja-vida/residencia-fiscal/{id}
+ * Endpoint base:
+ * /api/v1/hoja-vida/residencia-fiscal
  *
- * Cada persona puede registrar una única información
- * de residencia fiscal (FATCA / CRS).
+ * Seguridad:
+ * - Consulta: HOJAVIDA_FISCAL_VIEW
+ * - Creación, actualización y eliminación:
+ *   HOJAVIDA_FISCAL_EDIT
  */
 @RestController
 @RequestMapping("/hoja-vida/residencia-fiscal")
 public class ResidenciaFiscalController {
 
+    private static final String PERMISO_VIEW =
+            "HOJAVIDA_FISCAL_VIEW";
+
+    private static final String PERMISO_EDIT =
+            "HOJAVIDA_FISCAL_EDIT";
+
     private final ResidenciaFiscalService service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     public ResidenciaFiscalController(
-            ResidenciaFiscalService service
+            ResidenciaFiscalService service,
+            UsuarioSesionService usuarioSesionService,
+            AccessValidator accessValidator
     ) {
         this.service = service;
+        this.usuarioSesionService = usuarioSesionService;
+        this.accessValidator = accessValidator;
     }
 
     // ==========================================================
-    // 🔹 LISTAR TODOS
+    // LISTAR TODOS
     // ==========================================================
 
     @GetMapping
     public ResponseEntity<List<ResidenciaFiscal>> listar() {
+
+        validarAcceso(PERMISO_VIEW);
 
         return ResponseEntity.ok(
                 service.listar()
@@ -46,13 +59,15 @@ public class ResidenciaFiscalController {
     }
 
     // ==========================================================
-    // 🔹 OBTENER POR ID
+    // OBTENER POR ID
     // ==========================================================
 
     @GetMapping("/{id}")
     public ResponseEntity<ResidenciaFiscal> obtener(
             @PathVariable Long id
     ) {
+
+        validarAcceso(PERMISO_VIEW);
 
         return service
                 .buscarPorId(id)
@@ -61,13 +76,15 @@ public class ResidenciaFiscalController {
     }
 
     // ==========================================================
-    // 🔹 OBTENER POR PERSONA
+    // OBTENER POR PERSONA
     // ==========================================================
 
     @GetMapping("/persona/{idDatosPersonal}")
     public ResponseEntity<ResidenciaFiscal> obtenerPorPersona(
             @PathVariable Integer idDatosPersonal
     ) {
+
+        validarAcceso(PERMISO_VIEW);
 
         return service
                 .buscarPorPersona(idDatosPersonal)
@@ -76,7 +93,7 @@ public class ResidenciaFiscalController {
     }
 
     // ==========================================================
-    // 🔹 CREAR
+    // CREAR
     // ==========================================================
 
     @PostMapping
@@ -84,13 +101,15 @@ public class ResidenciaFiscalController {
             @RequestBody ResidenciaFiscal residenciaFiscal
     ) {
 
+        validarAcceso(PERMISO_EDIT);
+
         return ResponseEntity.ok(
                 service.crear(residenciaFiscal)
         );
     }
 
     // ==========================================================
-    // 🔹 ACTUALIZAR
+    // ACTUALIZAR
     // ==========================================================
 
     @PutMapping("/{id}")
@@ -99,6 +118,8 @@ public class ResidenciaFiscalController {
             @RequestBody ResidenciaFiscal residenciaFiscal
     ) {
 
+        validarAcceso(PERMISO_EDIT);
+
         return service
                 .actualizar(id, residenciaFiscal)
                 .map(ResponseEntity::ok)
@@ -106,13 +127,15 @@ public class ResidenciaFiscalController {
     }
 
     // ==========================================================
-    // 🔹 ELIMINAR
+    // ELIMINAR
     // ==========================================================
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(
             @PathVariable Long id
     ) {
+
+        validarAcceso(PERMISO_EDIT);
 
         if (!service.eliminar(id)) {
             return ResponseEntity.notFound().build();
@@ -121,4 +144,23 @@ public class ResidenciaFiscalController {
         return ResponseEntity.noContent().build();
     }
 
+    // ==========================================================
+    // SEGURIDAD
+    // ==========================================================
+
+    private void validarAcceso(String permiso) {
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        Usuario usuarioActual =
+                new Usuario();
+
+        usuarioActual.setIdUsuario(idUsuario);
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                permiso
+        );
+    }
 }

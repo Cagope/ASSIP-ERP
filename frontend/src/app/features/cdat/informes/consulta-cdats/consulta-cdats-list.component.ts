@@ -2,12 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { ReportingService } from '../../../../shared/reporting/reporting.service';
-import {
-  ReportQueryRequest,
-  ReportResult
-} from '../../../../shared/reporting/reporting.api';
-
+import { ConsultaCdatsService } from './consulta-cdats.service';
 import { ConsultaCdatsDetalleComponent } from './consulta-cdats-detalle.component';
 
 @Component({
@@ -23,7 +18,7 @@ import { ConsultaCdatsDetalleComponent } from './consulta-cdats-detalle.componen
 })
 export class ConsultaCdatsListComponent {
 
-  private readonly reporting = inject(ReportingService);
+  private readonly consultaCdatsService = inject(ConsultaCdatsService);
 
   filtros = {
     documento: '',
@@ -58,16 +53,13 @@ export class ConsultaCdatsListComponent {
 
     try {
 
-      const req: ReportQueryRequest = {
-        schema: 'cdat',
-        view: 'vw_cdat_cuentas_total_extendida',
-        filters: this.filtros
-      };
-
-      const res: ReportResult =
-        await this.reporting.ejecutarReporte(req);
-
-      this.cdats = res.data ?? [];
+      this.cdats = await this.consultaCdatsService.consultar({
+        documento: this.filtros.documento,
+        nombres: this.filtros.nombres,
+        primerApellido: this.filtros.primer_apellido,
+        segundoApellido: this.filtros.segundo_apellido,
+        codigoCdat: this.filtros.codigo_cdat
+      });
 
       if (this.cdats.length === 0) {
         this.error = 'No se encontraron CDATs con los criterios ingresados.';
@@ -101,7 +93,6 @@ export class ConsultaCdatsListComponent {
   verDetalle(cdat: any): void {
     this.seleccionada = cdat;
   }
-
 
   nombreCompleto(cdat: any): string {
     return cdat?.nombre_completo_apellidos

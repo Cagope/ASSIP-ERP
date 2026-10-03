@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { permisoGuard } from '../../core/auth/permiso.guard';
 
 // =============================
 // CDAT CRUD
@@ -48,6 +49,8 @@ export const CDAT_ROUTES: Routes = [
   // =============================
   {
     path: 'cdats',
+    canActivate: [permisoGuard],
+    data: { permiso: 'CDAT_APERTURA_CREATE' },
     children: CDATS_ROUTES
   },
 
@@ -56,9 +59,11 @@ export const CDAT_ROUTES: Routes = [
   // =============================
   {
     path: 'cancelacion',
+    canActivate: [permisoGuard],
+    data: { permiso: 'CDAT_CANCELACION_EXECUTE' },
     loadComponent: () =>
       import('./cancelacion/cdat-cancelacion.component')
-        .then(m => m.CdatCancelacionComponent),
+        .then(m => m.CdatCancelacionComponent)
   },
 
   // =============================
@@ -66,9 +71,11 @@ export const CDAT_ROUTES: Routes = [
   // =============================
   {
     path: 'liquidacion-diaria',
+    canActivate: [permisoGuard],
+    data: { permiso: 'CDAT_LIQUIDACION_DIARIA_EXECUTE' },
     loadComponent: () =>
       import('./liquidacion-diaria/cdat-liquidacion-diaria.component')
-        .then(m => m.CdatLiquidacionDiariaComponent),
+        .then(m => m.CdatLiquidacionDiariaComponent)
   },
 
   // =============================
@@ -76,6 +83,8 @@ export const CDAT_ROUTES: Routes = [
   // =============================
   {
     path: 'cierre-mensual-cdat',
+    canActivate: [permisoGuard],
+    data: { permiso: 'CDAT_CIERRE_MENSUAL_EXECUTE' },
     children: CIERRE_MENSUAL_CDAT_ROUTES
   },
 
@@ -84,6 +93,8 @@ export const CDAT_ROUTES: Routes = [
   // =============================
   {
     path: 'causacion-mensual-cdat',
+    canActivate: [permisoGuard],
+    data: { permiso: 'CDAT_CAUSACION_MENSUAL_EXECUTE' },
     children: CAUSACION_MENSUAL_CDAT_ROUTES
   },
 
@@ -92,6 +103,8 @@ export const CDAT_ROUTES: Routes = [
   // =============================
   {
     path: 'informes/consulta-cdats',
+    canActivate: [permisoGuard],
+    data: { permiso: 'CDAT_INFORMES_VIEW' },
     children: CONSULTA_CDATS_ROUTES
   },
 
@@ -100,9 +113,11 @@ export const CDAT_ROUTES: Routes = [
   // =============================
   {
     path: 'informes/simulador-cdat',
+    canActivate: [permisoGuard],
+    data: { permiso: 'CDAT_INFORMES_VIEW' },
     loadChildren: () =>
       import('./informes/simulador-cdat/simulador-cdat.routes')
-        .then(m => m.SIMULADOR_CDAT_ROUTES),
+        .then(m => m.SIMULADOR_CDAT_ROUTES)
   },
 
   // =============================
@@ -110,6 +125,8 @@ export const CDAT_ROUTES: Routes = [
   // =============================
   {
     path: 'informes/estadisticos-cdat',
+    canActivate: [permisoGuard],
+    data: { permiso: 'CDAT_INFORMES_VIEW' },
     children: ESTADISTICOS_CDAT_ROUTES
   },
 
@@ -118,6 +135,8 @@ export const CDAT_ROUTES: Routes = [
   // =============================
   {
     path: 'informes/fechas-cdat',
+    canActivate: [permisoGuard],
+    data: { permiso: 'CDAT_INFORMES_VIEW' },
     children: FECHAS_CDAT_ROUTES
   },
 
@@ -126,6 +145,8 @@ export const CDAT_ROUTES: Routes = [
   // =============================
   {
     path: 'analisis/concentracion',
+    canActivate: [permisoGuard],
+    data: { permiso: 'CDAT_ANALISIS_VIEW' },
     children: CONCENTRACION_CDAT_ROUTES
   },
 
@@ -134,6 +155,8 @@ export const CDAT_ROUTES: Routes = [
   // =============================
   {
     path: 'analisis/tasas-condiciones',
+    canActivate: [permisoGuard],
+    data: { permiso: 'CDAT_ANALISIS_VIEW' },
     children: TASAS_CONDICIONES_CDAT_ROUTES
   }
 

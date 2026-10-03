@@ -1,7 +1,12 @@
 package co.assip.erp.hojavida.ubicaciones;
 
-import org.springframework.web.bind.annotation.*;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -9,76 +14,176 @@ import java.util.Optional;
  * 🧭 Controlador REST — Gestión de Ubicaciones
  *
  * Endpoint base: /api/v1/hoja-vida/ubicaciones
- * (El prefijo /api/v1 lo agrega automáticamente la configuración global del proyecto).
  *
- * Funcionalidades:
- *  - GET    /hoja-vida/ubicaciones              → Listar todos
- *  - GET    /hoja-vida/ubicaciones/{id}         → Buscar por ID
- *  - GET    /hoja-vida/ubicaciones/zona/{id}    → Listar por zona
- *  - GET    /hoja-vida/ubicaciones/subzona/{id} → Listar por subzona
- *  - POST   /hoja-vida/ubicaciones              → Crear nuevo registro
- *  - PUT    /hoja-vida/ubicaciones/{id}         → Actualizar existente
- *  - DELETE /hoja-vida/ubicaciones/{id}         → Eliminar registro
+ * Seguridad:
+ *  - GET                 → HOJAVIDA_PERSONA_VIEW
+ *  - POST / PUT / DELETE → HOJAVIDA_PERSONA_EDIT
  */
 @RestController
 @RequestMapping("/hoja-vida/ubicaciones")
 public class UbicacionController {
 
-    private final UbicacionService service;
+    private static final String PERMISO_VIEW =
+            "HOJAVIDA_PERSONA_VIEW";
 
-    public UbicacionController(UbicacionService service) {
+    private static final String PERMISO_EDIT =
+            "HOJAVIDA_PERSONA_EDIT";
+
+    private final UbicacionService service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
+
+    public UbicacionController(
+            UbicacionService service,
+            UsuarioSesionService usuarioSesionService,
+            AccessValidator accessValidator
+    ) {
         this.service = service;
+        this.usuarioSesionService = usuarioSesionService;
+        this.accessValidator = accessValidator;
     }
 
-    /** 🔹 Listar todas las ubicaciones ordenadas por fecha de edición */
+    // =========================================================
+    // CONSULTAS
+    // =========================================================
+
+    /**
+     * 🔹 Listar todas las ubicaciones ordenadas por fecha de edición
+     */
     @GetMapping
     public List<Ubicacion> listar() {
+
+        validarAcceso(PERMISO_VIEW);
+
         return service.listar();
     }
 
-    /** 🔹 Buscar una ubicación específica por su ID */
+    /**
+     * 🔹 Buscar una ubicación específica por su ID
+     */
     @GetMapping("/{id}")
-    public ResponseEntity<Ubicacion> buscarPorId(@PathVariable Integer id) {
-        Optional<Ubicacion> ubicacion = service.buscarPorId(id);
-        return ubicacion.map(ResponseEntity::ok)
+    public ResponseEntity<Ubicacion> buscarPorId(
+            @PathVariable Integer id
+    ) {
+
+        validarAcceso(PERMISO_VIEW);
+
+        Optional<Ubicacion> ubicacion =
+                service.buscarPorId(id);
+
+        return ubicacion
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /** 🔹 Listar ubicaciones por zona */
+    /**
+     * 🔹 Listar ubicaciones por zona
+     */
     @GetMapping("/zona/{idZona}")
-    public ResponseEntity<List<Ubicacion>> listarPorZona(@PathVariable Integer idZona) {
-        List<Ubicacion> lista = service.listarPorZona(idZona);
-        if (lista.isEmpty()) return ResponseEntity.noContent().build();
+    public ResponseEntity<List<Ubicacion>> listarPorZona(
+            @PathVariable Integer idZona
+    ) {
+
+        validarAcceso(PERMISO_VIEW);
+
+        List<Ubicacion> lista =
+                service.listarPorZona(idZona);
+
+        if (lista.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
         return ResponseEntity.ok(lista);
     }
 
-    /** 🔹 Listar ubicaciones por subzona */
+    /**
+     * 🔹 Listar ubicaciones por subzona
+     */
     @GetMapping("/subzona/{idSubZona}")
-    public ResponseEntity<List<Ubicacion>> listarPorSubZona(@PathVariable Integer idSubZona) {
-        List<Ubicacion> lista = service.listarPorSubZona(idSubZona);
-        if (lista.isEmpty()) return ResponseEntity.noContent().build();
+    public ResponseEntity<List<Ubicacion>> listarPorSubZona(
+            @PathVariable Integer idSubZona
+    ) {
+
+        validarAcceso(PERMISO_VIEW);
+
+        List<Ubicacion> lista =
+                service.listarPorSubZona(idSubZona);
+
+        if (lista.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
         return ResponseEntity.ok(lista);
     }
 
-    /** 🔹 Crear nueva ubicación */
+    // =========================================================
+    // MODIFICACIONES
+    // =========================================================
+
+    /**
+     * 🔹 Crear nueva ubicación
+     */
     @PostMapping
-    public ResponseEntity<Ubicacion> crear(@RequestBody Ubicacion nueva) {
-        Ubicacion guardada = service.crear(nueva);
+    public ResponseEntity<Ubicacion> crear(
+            @RequestBody Ubicacion nueva
+    ) {
+
+        validarAcceso(PERMISO_EDIT);
+
+        Ubicacion guardada =
+                service.crear(nueva);
+
         return ResponseEntity.ok(guardada);
     }
 
-    /** 🔹 Actualizar ubicación existente */
+    /**
+     * 🔹 Actualizar ubicación existente
+     */
     @PutMapping("/{id}")
-    public ResponseEntity<Ubicacion> actualizar(@PathVariable Integer id, @RequestBody Ubicacion actualizada) {
+    public ResponseEntity<Ubicacion> actualizar(
+            @PathVariable Integer id,
+            @RequestBody Ubicacion actualizada
+    ) {
+
+        validarAcceso(PERMISO_EDIT);
+
         return service.actualizar(id, actualizada)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /** 🔹 Eliminar ubicación */
+    /**
+     * 🔹 Eliminar ubicación
+     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
-        if (service.eliminar(id)) return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> eliminar(
+            @PathVariable Integer id
+    ) {
+
+        validarAcceso(PERMISO_EDIT);
+
+        if (service.eliminar(id)) {
+            return ResponseEntity.noContent().build();
+        }
+
         return ResponseEntity.notFound().build();
+    }
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarAcceso(String permiso) {
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(idUsuario);
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                permiso
+        );
     }
 }

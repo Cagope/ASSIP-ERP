@@ -163,25 +163,24 @@
 
           <td class="col-acciones">
 
+            <!-- Ubicación existente: VIEW puede consultarla -->
             <button
+              *ngIf="persona.ubicacion"
               type="button"
               class="btn-action-edit btn-gestionar"
-              (click)="
-                  gestionar(
-                    persona,
-                    persona.ubicacion
-                  )
-                "
-              [title]="
-                  persona.ubicacion
-                    ? 'Gestionar ubicación'
-                    : 'Crear ubicación'
-                ">
-              {{
-              persona.ubicacion
-              ? 'Gestionar'
-              : 'Crear'
-              }}
+              (click)="gestionar(persona, persona.ubicacion)"
+              title="Gestionar ubicación">
+              Gestionar
+            </button>
+
+            <!-- Sin ubicación: solamente EDIT puede crearla -->
+            <button
+              *ngIf="!persona.ubicacion && puedeEditar"
+              type="button"
+              class="btn-action-edit btn-gestionar"
+              (click)="gestionar(persona, null)"
+              title="Crear ubicación">
+              Crear
             </button>
 
           </td>

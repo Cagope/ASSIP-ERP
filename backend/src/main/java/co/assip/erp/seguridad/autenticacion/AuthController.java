@@ -1,12 +1,13 @@
 package co.assip.erp.seguridad.autenticacion;
 
 import co.assip.erp.seguridad.auditoria.LogEventoService;
-import co.assip.erp.seguridad.permisos.Permiso;
-import co.assip.erp.seguridad.roles.Rol;
-import co.assip.erp.seguridad.roles.RolRepository;
+import co.assip.erp.seguridad.rolespermisos.dto.RolPermisoDTO;
 import co.assip.erp.seguridad.rolespermisos.RolPermisoService;
-import co.assip.erp.seguridad.usuariosagencias.UsuarioAgenciaService;
 import co.assip.erp.seguridad.usuarios.Usuario;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuariosagencias.UsuarioAgenciaService;
+import co.assip.erp.seguridad.usuariosroles.UsuarioRol;
+import co.assip.erp.seguridad.usuariosroles.UsuarioRolService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,11 +21,16 @@ import java.util.Map;
 /**
  * API REST de autenticación del ERP.
  *
- * Administra el inicio de sesión y la consulta de la sesión
- * autenticada.
+ * Administra:
+ * - consulta del estado de acceso;
+ * - activación inicial de cuentas;
+ * - recuperación de contraseñas mediante código de seguridad;
+ * - inicio de sesión;
+ * - cambio de contraseña del usuario autenticado;
+ * - consulta del contexto funcional vigente.
  *
- * La creación y administración de usuarios se realiza
- * exclusivamente mediante el proceso de usuarios.
+ * Los roles efectivos se obtienen desde usuarios_roles
+ * y los permisos desde rol_permisos.
  */
 @RestController
 @RequestMapping("/auth")
@@ -32,17 +38,243 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final PasswordService passwordService;
     private final LogEventoService logEventoService;
     private final JwtService jwtService;
     private final UsuarioAgenciaService usuarioAgenciaService;
-    private final RolRepository rolRepository;
+    private final UsuarioRolService usuarioRolService;
     private final RolPermisoService rolPermisoService;
+    private final UsuarioSesionService usuarioSesionService;
 
     /**
-     * Autentica al usuario y entrega el token JWT.
+     * Consulta el estado de acceso de una cuenta.
      *
-     * El estado de seguridad de la cuenta, los intentos fallidos
-     * y el último acceso son gestionados por AuthService.
+     * Este endpoint se utiliza después de que el usuario
+     * digita su username y antes de solicitar contraseña.
+     *
+     * No autentica, no genera JWT y no modifica la cuenta.
+     */
+    @PostMapping("/estado-acceso")
+    public ResponseEntity<Map<String, Object>> consultarEstadoAcceso(
+            @RequestBody Map<String, String> request
+    ) {
+
+        try {
+
+            String username =
+                    request.get(
+                            "username"
+                    );
+
+            Map<String, Object> respuesta =
+                    authService.consultarEstadoAcceso(
+                            username
+                    );
+
+            return ResponseEntity.ok(
+                    respuesta
+            );
+
+        } catch (IllegalArgumentException ex) {
+
+            return respuestaError(
+                    HttpStatus.BAD_REQUEST,
+                    ex.getMessage()
+            );
+
+        } catch (RuntimeException ex) {
+
+            return respuestaError(
+                    HttpStatus.UNAUTHORIZED,
+                    ex.getMessage()
+            );
+        }
+    }
+
+    /**
+     * Activa inicialmente una cuenta mediante el código
+     * de seguridad enviado al propietario.
+     *
+     * La activación:
+     * - valida el código;
+     * - establece la contraseña definitiva;
+     * - consume el código;
+     * - no genera JWT.
+     *
+     * Después de activarse, el usuario debe iniciar sesión
+     * normalmente con su nueva contraseña.
+     */
+    @PostMapping("/activar")
+    public ResponseEntity<Map<String, Object>> activarCuenta(
+            @RequestBody Map<String, String> request,
+            HttpServletRequest httpRequest
+    ) {
+
+        try {
+
+            String username =
+                    request.get(
+                            "username"
+                    );
+
+            String codigo =
+                    request.get(
+                            "codigo"
+                    );
+
+            String passwordNueva =
+                    request.get(
+                            "passwordNueva"
+                    );
+
+            Usuario usuario =
+                    authService.activarCuenta(
+                            username,
+                            codigo,
+                            passwordNueva
+                    );
+
+            /*
+             * Nunca se registra el código ni la contraseña.
+             */
+            logEventoService.registrarEvento(
+                    usuario.getIdUsuario(),
+                    "SEGURIDAD",
+                    "ACTIVAR_CUENTA",
+                    "El usuario activó correctamente su cuenta.",
+                    httpRequest
+            );
+
+            Map<String, Object> respuesta =
+                    new HashMap<>();
+
+            respuesta.put(
+                    "mensaje",
+                    "Cuenta activada correctamente."
+            );
+
+            respuesta.put(
+                    "username",
+                    usuario.getUsername()
+            );
+
+            return ResponseEntity.ok(
+                    respuesta
+            );
+
+        } catch (IllegalArgumentException ex) {
+
+            return respuestaError(
+                    HttpStatus.BAD_REQUEST,
+                    ex.getMessage()
+            );
+
+        } catch (RuntimeException ex) {
+
+            return respuestaError(
+                    HttpStatus.UNAUTHORIZED,
+                    ex.getMessage()
+            );
+        }
+    }
+
+    /**
+     * Restablece la contraseña de una cuenta existente
+     * mediante un código de recuperación.
+     *
+     * La recuperación:
+     * - valida el código;
+     * - establece una nueva contraseña;
+     * - consume el código;
+     * - no genera JWT.
+     *
+     * Después del restablecimiento, el usuario debe iniciar
+     * sesión normalmente con su nueva contraseña.
+     */
+    @PostMapping("/recuperar-password")
+    public ResponseEntity<Map<String, Object>> recuperarPassword(
+            @RequestBody Map<String, String> request,
+            HttpServletRequest httpRequest
+    ) {
+
+        try {
+
+            String username =
+                    request.get(
+                            "username"
+                    );
+
+            String codigo =
+                    request.get(
+                            "codigo"
+                    );
+
+            String passwordNueva =
+                    request.get(
+                            "passwordNueva"
+                    );
+
+            Usuario usuario =
+                    authService.recuperarPassword(
+                            username,
+                            codigo,
+                            passwordNueva
+                    );
+
+            /*
+             * Nunca se registra el código ni la contraseña.
+             */
+            logEventoService.registrarEvento(
+                    usuario.getIdUsuario(),
+                    "SEGURIDAD",
+                    "RECUPERAR_PASSWORD",
+                    "El usuario restableció correctamente su contraseña mediante código de recuperación.",
+                    httpRequest
+            );
+
+            Map<String, Object> respuesta =
+                    new HashMap<>();
+
+            respuesta.put(
+                    "mensaje",
+                    "Contraseña restablecida correctamente."
+            );
+
+            respuesta.put(
+                    "username",
+                    usuario.getUsername()
+            );
+
+            return ResponseEntity.ok(
+                    respuesta
+            );
+
+        } catch (IllegalArgumentException ex) {
+
+            return respuestaError(
+                    HttpStatus.BAD_REQUEST,
+                    ex.getMessage()
+            );
+
+        } catch (RuntimeException ex) {
+
+            return respuestaError(
+                    HttpStatus.UNAUTHORIZED,
+                    ex.getMessage()
+            );
+        }
+    }
+
+    /**
+     * Autentica al usuario mediante su contraseña definitiva
+     * y entrega el JWT de sesión.
+     *
+     * Las cuentas pendientes de activación no pueden utilizar
+     * este endpoint hasta establecer su contraseña.
+     *
+     * La respuesta conserva la información de vigencia
+     * calculada por AuthService para que el frontend pueda
+     * mostrar los avisos de vencimiento correspondientes.
      */
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(
@@ -52,7 +284,10 @@ public class AuthController {
 
         try {
 
-            String ip = obtenerIpOrigen(httpRequest);
+            String ip =
+                    obtenerIpOrigen(
+                            httpRequest
+                    );
 
             Map<String, Object> resultado =
                     authService.autenticarConUsuario(
@@ -62,79 +297,135 @@ public class AuthController {
                     );
 
             Integer idUsuario =
-                    (Integer) resultado.get("idUsuario");
-
-            String username =
-                    (String) resultado.get("username");
-
-            Integer idRol =
-                    (Integer) resultado.get("idRol");
-
-            String token =
-                    (String) resultado.get("token");
-
-            String nombreRol = null;
-
-            if (idRol != null) {
-                nombreRol = rolRepository
-                        .findById(idRol)
-                        .map(Rol::getNombreRol)
-                        .orElse(null);
-            }
+                    (Integer) resultado.get(
+                            "idUsuario"
+                    );
 
             /*
-             * Auditoría del inicio de sesión exitoso.
+             * Registra la auditoría del ingreso exitoso.
+             *
+             * AuthService solamente retorna resultado cuando
+             * la autenticación fue completada correctamente.
              */
             logEventoService.registrarLogin(
                     idUsuario,
                     httpRequest
             );
 
-            Map<String, Object> respuesta =
-                    new HashMap<>();
-
-            respuesta.put(
-                    "token",
-                    token
+            /*
+             * No reconstruimos la respuesta.
+             *
+             * AuthService contiene el resultado completo del
+             * proceso de autenticación, incluida la información
+             * de vigencia de contraseña.
+             */
+            return ResponseEntity.ok(
+                    resultado
             );
-
-            respuesta.put(
-                    "username",
-                    username
-            );
-
-            respuesta.put(
-                    "rol",
-                    nombreRol
-            );
-
-            return ResponseEntity.ok(respuesta);
 
         } catch (RuntimeException ex) {
 
-            Map<String, Object> error =
-                    new HashMap<>();
-
-            error.put(
-                    "error",
+            return respuestaError(
+                    HttpStatus.UNAUTHORIZED,
                     ex.getMessage()
             );
-
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(error);
         }
     }
 
     /**
-     * Obtiene la información funcional de la sesión autenticada.
+     * Cambia voluntariamente la contraseña
+     * del usuario autenticado.
+     *
+     * Requiere conocer la contraseña actual.
+     *
+     * No participa en la activación inicial
+     * ni en la recuperación de contraseñas.
+     */
+    @PostMapping("/cambiar-password")
+    public ResponseEntity<Map<String, Object>> cambiarPassword(
+            @RequestBody Map<String, String> request,
+            HttpServletRequest httpRequest
+    ) {
+
+        try {
+
+            Integer idUsuario =
+                    usuarioSesionService.idUsuario();
+
+            String passwordActual =
+                    request.get("passwordActual");
+
+            String passwordNueva =
+                    request.get("passwordNueva");
+
+            // =====================================================
+            // CAMBIO DE CONTRASEÑA
+            // =====================================================
+
+            passwordService.cambiarPassword(
+                    idUsuario,
+                    passwordActual,
+                    passwordNueva
+            );
+
+            // =====================================================
+            // AUDITORÍA
+            // =====================================================
+
+            logEventoService.registrarEvento(
+                    idUsuario,
+                    "SEGURIDAD",
+                    "CAMBIAR_PASSWORD",
+                    "El usuario cambió voluntariamente su contraseña.",
+                    httpRequest
+            );
+
+            // =====================================================
+            // RESPUESTA
+            // =====================================================
+
+            Map<String, Object> respuesta =
+                    new HashMap<>();
+
+            respuesta.put(
+                    "mensaje",
+                    "Contraseña actualizada correctamente."
+            );
+
+            return ResponseEntity.ok(
+                    respuesta
+            );
+
+        } catch (IllegalArgumentException ex) {
+
+            return respuestaError(
+                    HttpStatus.BAD_REQUEST,
+                    ex.getMessage()
+            );
+
+        } catch (RuntimeException ex) {
+
+            return respuestaError(
+                    HttpStatus.UNAUTHORIZED,
+                    ex.getMessage()
+            );
+        }
+    }
+
+    /**
+     * Obtiene el contexto funcional vigente
+     * del usuario autenticado.
      *
      * Devuelve:
-     * - identificador del usuario
-     * - username
-     * - rol
-     * - agencias autorizadas
-     * - permisos efectivos del rol
+     * - identificador del usuario;
+     * - username;
+     * - roles vigentes;
+     * - agencias autorizadas;
+     * - unión de permisos de todos sus roles vigentes.
+     *
+     * Esta información se consulta nuevamente en base de datos
+     * para no depender de roles o permisos almacenados
+     * dentro de un JWT previamente emitido.
      */
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> obtenerUsuarioActual(
@@ -142,22 +433,17 @@ public class AuthController {
     ) {
 
         String authHeader =
-                request.getHeader("Authorization");
+                request.getHeader(
+                        "Authorization"
+                );
 
         if (authHeader == null
                 || !authHeader.startsWith("Bearer ")) {
 
-            Map<String, Object> error =
-                    new HashMap<>();
-
-            error.put(
-                    "error",
+            return respuestaError(
+                    HttpStatus.UNAUTHORIZED,
                     "Token no proporcionado"
             );
-
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(error);
         }
 
         try {
@@ -165,27 +451,20 @@ public class AuthController {
             String token =
                     authHeader.substring(7);
 
-            /*
-             * Valida firma y expiración antes de utilizar
-             * la información contenida en el token.
-             */
-            if (!jwtService.validarToken(token)) {
+            if (!jwtService.validarToken(
+                    token
+            )) {
 
-                Map<String, Object> error =
-                        new HashMap<>();
-
-                error.put(
-                        "error",
+                return respuestaError(
+                        HttpStatus.UNAUTHORIZED,
                         "Token inválido o expirado"
                 );
-
-                return ResponseEntity
-                        .status(HttpStatus.UNAUTHORIZED)
-                        .body(error);
             }
 
             String username =
-                    jwtService.extraerUsername(token);
+                    jwtService.extraerUsername(
+                            token
+                    );
 
             Usuario usuario =
                     authService.buscarUsuarioPorUsername(
@@ -194,82 +473,110 @@ public class AuthController {
 
             if (usuario == null) {
 
-                Map<String, Object> error =
-                        new HashMap<>();
-
-                error.put(
-                        "error",
+                return respuestaError(
+                        HttpStatus.NOT_FOUND,
                         "Usuario no encontrado"
                 );
-
-                return ResponseEntity
-                        .status(HttpStatus.NOT_FOUND)
-                        .body(error);
             }
 
-            /*
-             * Un usuario desactivado o bloqueado después
-             * de haber obtenido el token tampoco puede
-             * continuar utilizando la sesión.
-             */
-            if (!Boolean.TRUE.equals(usuario.getActivo())
-                    || Boolean.TRUE.equals(usuario.getBloqueado())) {
+            if (!Boolean.TRUE.equals(
+                    usuario.getActivo()
+            ) || Boolean.TRUE.equals(
+                    usuario.getBloqueado()
+            )) {
 
-                Map<String, Object> error =
-                        new HashMap<>();
-
-                error.put(
-                        "error",
+                return respuestaError(
+                        HttpStatus.UNAUTHORIZED,
                         "Usuario inactivo o bloqueado"
                 );
-
-                return ResponseEntity
-                        .status(HttpStatus.UNAUTHORIZED)
-                        .body(error);
             }
 
-            String nombreRol = null;
+            List<UsuarioRol> asignaciones =
+                    usuarioRolService.listarVigentes(
+                            usuario.getIdUsuario()
+                    );
 
-            if (usuario.getIdRol() != null) {
+            if (asignaciones.isEmpty()) {
 
-                nombreRol = rolRepository
-                        .findById(usuario.getIdRol())
-                        .map(Rol::getNombreRol)
-                        .orElse(null);
+                return respuestaError(
+                        HttpStatus.UNAUTHORIZED,
+                        "El usuario no tiene roles vigentes asignados"
+                );
             }
 
             /*
-             * Las agencias se consultan nuevamente en base
-             * de datos para obtener la autorización vigente.
+             * Roles vigentes.
              */
-            var agencias =
+            List<Map<String, Object>> roles =
+                    asignaciones.stream()
+                            .map(usuarioRol -> {
+
+                                Map<String, Object> rol =
+                                        new HashMap<>();
+
+                                rol.put(
+                                        "idRol",
+                                        usuarioRol
+                                                .getRol()
+                                                .getIdRol()
+                                );
+
+                                rol.put(
+                                        "nombreRol",
+                                        usuarioRol
+                                                .getRol()
+                                                .getNombreRol()
+                                );
+
+                                return rol;
+                            })
+                            .toList();
+
+            /*
+             * Agencias autorizadas.
+             */
+            List<Map<String, Object>> agencias =
                     usuarioAgenciaService
                             .listarAgenciasDelUsuario(
                                     usuario.getIdUsuario()
                             );
 
             /*
-             * Los permisos efectivos provienen exclusivamente
-             * de seguridad.rol_permisos.
+             * Unión de permisos activos de todos
+             * los roles vigentes.
              */
             List<String> permisos =
-                    List.of();
-
-            if (usuario.getIdRol() != null) {
-
-                permisos = rolPermisoService
-                        .listarPermisos(
-                                usuario.getIdRol()
-                        )
-                        .stream()
-                        .filter(permiso ->
-                                Boolean.TRUE.equals(
-                                        permiso.getActivo()
-                                )
-                        )
-                        .map(Permiso::getCodigo)
-                        .toList();
-            }
+                    asignaciones.stream()
+                            .flatMap(usuarioRol ->
+                                    rolPermisoService
+                                            .listarPermisos(
+                                                    usuarioRol
+                                                            .getRol()
+                                                            .getIdRol()
+                                            )
+                                            .stream()
+                            )
+                            .filter(permiso ->
+                                    Boolean.TRUE.equals(
+                                            permiso.activo()
+                                    )
+                            )
+                            .map(
+                                    RolPermisoDTO::codigo
+                            )
+                            .filter(codigo ->
+                                    codigo != null
+                                            && !codigo.isBlank()
+                            )
+                            .map(
+                                    String::trim
+                            )
+                            .map(
+                                    String::toUpperCase
+                            )
+                            .distinct()
+                            .sorted()
+                            .toList();
 
             Map<String, Object> respuesta =
                     new HashMap<>();
@@ -285,8 +592,8 @@ public class AuthController {
             );
 
             respuesta.put(
-                    "rol",
-                    nombreRol
+                    "roles",
+                    roles
             );
 
             respuesta.put(
@@ -299,37 +606,55 @@ public class AuthController {
                     permisos
             );
 
-            return ResponseEntity.ok(respuesta);
+            return ResponseEntity.ok(
+                    respuesta
+            );
 
         } catch (Exception ex) {
 
-            Map<String, Object> error =
-                    new HashMap<>();
-
-            error.put(
-                    "error",
+            return respuestaError(
+                    HttpStatus.UNAUTHORIZED,
                     "Token inválido o expirado"
             );
-
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(error);
         }
     }
 
     /**
-     * Obtiene la dirección IP de origen de la petición.
+     * Construye una respuesta uniforme
+     * para errores de autenticación.
+     */
+    private ResponseEntity<Map<String, Object>> respuestaError(
+            HttpStatus estado,
+            String mensaje
+    ) {
+
+        Map<String, Object> error =
+                new HashMap<>();
+
+        error.put(
+                "error",
+                mensaje
+        );
+
+        return ResponseEntity
+                .status(estado)
+                .body(error);
+    }
+
+    /**
+     * Obtiene la dirección IP de origen.
      *
-     * Si existe X-Forwarded-For utiliza la primera dirección
-     * informada; de lo contrario utiliza la dirección remota
-     * de la conexión.
+     * Cuando existe X-Forwarded-For utiliza
+     * la primera dirección informada.
      */
     private String obtenerIpOrigen(
             HttpServletRequest request
     ) {
 
         String forwardedFor =
-                request.getHeader("X-Forwarded-For");
+                request.getHeader(
+                        "X-Forwarded-For"
+                );
 
         if (forwardedFor != null
                 && !forwardedFor.isBlank()) {

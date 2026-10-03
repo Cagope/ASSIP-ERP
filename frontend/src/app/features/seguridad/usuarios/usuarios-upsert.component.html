@@ -1,120 +1,688 @@
-<div class="form-container">
+<div class="page">
 
-  <h5>
-    {{ idUsuario() ? 'editar usuario' : 'nuevo usuario' }}
-  </h5>
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO                                            -->
+  <!-- ===================================================== -->
 
-  <form [formGroup]="form" (ngSubmit)="guardar()" class="form-grid">
+  <div class="page-header">
 
-    <!-- 🟩 Usuario -->
-    <!-- 🟦 Rol -->
-    <div class="form-group sm">
-      <label for="idRol">rol *</label>
+    <div>
+      <h2>
+        {{ idUsuario() ? 'Editar usuario' : 'Nuevo usuario' }}
+      </h2>
 
-      <select
-        id="idRol"
-        formControlName="idRol"
-        [ngClass]="{ 'invalid': form.get('idRol')?.invalid && form.get('idRol')?.touched }"
-      >
-        <option value="">-- Seleccione --</option>
-        <option *ngFor="let r of rolesDisponibles()" [value]="r.idRol">
-          {{ r.nombreRol }}
-        </option>
-      </select>
+      <p>
+        Configure la persona vinculada, los datos de acceso,
+        roles y agencias autorizadas.
+      </p>
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CARGANDO                                              -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="cargando()"
+    class="card loading">
+
+    Cargando información del usuario...
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- FORMULARIO                                            -->
+  <!-- ===================================================== -->
+
+  <form
+    *ngIf="!cargando()"
+    [formGroup]="form"
+    (ngSubmit)="guardar()">
+
+
+    <!-- =================================================== -->
+    <!-- PERSONA VINCULADA                                   -->
+    <!-- =================================================== -->
+
+    <section class="card">
+
+      <div class="card-header">
+
+        <div>
+          <h3>Persona vinculada</h3>
+
+          <p>
+            Busque y seleccione la persona de Hoja de Vida
+            a la cual pertenecerá el usuario.
+          </p>
+        </div>
+
+      </div>
+
+
+      <!-- SIN PERSONA SELECCIONADA -->
 
       <div
-        *ngIf="form.get('idRol')?.hasError('required') && form.get('idRol')?.touched"
-        class="error"
-      >
-        Seleccione un rol.
+        *ngIf="!personaSeleccionada()"
+        class="persona-search">
+
+        <div class="f-row f-row--wide">
+
+          <label for="personaBusqueda">
+            Buscar persona *
+          </label>
+
+          <div class="autocomplete">
+
+            <input
+              id="personaBusqueda"
+              type="text"
+              [formControl]="personaCtrl"
+              placeholder="Buscar por nombre o documento..."
+              autocomplete="off"
+              (input)="buscarPersona()"
+            />
+
+
+            <div
+              *ngIf="cargandoPersonas()"
+              class="autocomplete-status">
+
+              Cargando personas...
+
+            </div>
+
+
+            <div
+              *ngIf="
+                !cargandoPersonas()
+                && personaCtrl.value.trim().length >= 3
+                && personasEncontradas().length > 0
+              "
+              class="autocomplete-list">
+
+              <button
+                *ngFor="let persona of personasEncontradas()"
+                type="button"
+                class="autocomplete-item"
+                (click)="seleccionarPersona(persona)">
+
+                <span class="autocomplete-item__name">
+                  {{ nombreCompletoPersona(persona) }}
+                </span>
+
+                <span class="autocomplete-item__document">
+                  {{ persona.documento }}
+                </span>
+
+              </button>
+
+            </div>
+
+
+            <div
+              *ngIf="
+                !cargandoPersonas()
+                && personaCtrl.value.trim().length >= 3
+                && personasEncontradas().length === 0
+              "
+              class="autocomplete-empty">
+
+              No se encontraron personas con ese criterio.
+
+            </div>
+
+          </div>
+
+
+          <small class="field-help">
+            Digite al menos 3 caracteres del nombre o documento.
+          </small>
+
+
+          <small
+            *ngIf="
+              form.get('idDatosPersonal')?.hasError('required')
+              && form.get('idDatosPersonal')?.touched
+            "
+            class="field-error">
+
+            Debe seleccionar una persona.
+
+          </small>
+
+        </div>
+
       </div>
-    </div>
 
-    <!-- 🟦 Contraseña -->
-    <div class="form-group sm">
-      <label for="password">clave</label>
-      <input
-        id="password"
-        type="password"
-        class="form-control"
-        formControlName="password"
-        placeholder="••••••••"
-      />
-    </div>
 
-    <!-- 🟩 Nombre Completo -->
-    <div class="form-group full">
-      <label for="nombreCompleto">nombre completo *</label>
-      <input id="nombreCompleto" type="text" formControlName="nombreCompleto" />
-      <div *ngIf="form.get('nombreCompleto')?.hasError('required') && form.get('nombreCompleto')?.touched"
-           class="error">
-        Este campo es obligatorio.
+      <!-- PERSONA SELECCIONADA -->
+
+      <div
+        *ngIf="personaSeleccionada() as persona"
+        class="persona-selected">
+
+        <div class="persona-selected__info">
+
+          <span class="persona-selected__label">
+            Persona seleccionada
+          </span>
+
+          <strong class="persona-selected__name">
+            {{ nombreCompletoPersona(persona) }}
+          </strong>
+
+          <span class="persona-selected__document">
+            Documento: {{ persona.documento }}
+          </span>
+
+        </div>
+
+
+        <button
+          *ngIf="!idUsuario()"
+          type="button"
+          class="btn btn--secondary"
+          [disabled]="guardando()"
+          (click)="cambiarPersona()">
+
+          Cambiar persona
+
+        </button>
+
       </div>
-    </div>
 
-    <!-- 🟦 Email -->
-    <div class="form-group sm">
-      <label for="email">email</label>
-      <input id="email" type="email" formControlName="email" />
-    </div>
+    </section>
 
-    <!-- 🟧 Activo -->
-    <div class="form-group sm">
-      <label for="activo">activo</label>
-      <select id="activo" formControlName="activo">
-        <option [ngValue]="true">Sí</option>
-        <option [ngValue]="false">No</option>
-      </select>
-    </div>
 
-    <!-- 🟩 Agencia Principal -->
-    <div class="form-group sm">
-      <label for="idAgenciaPrincipal">agencia principal</label>
-      <select id="idAgenciaPrincipal" formControlName="idAgenciaPrincipal">
-        <option [ngValue]="null">-- Seleccione --</option>
+    <!-- =================================================== -->
+    <!-- DATOS DE ACCESO                                     -->
+    <!-- =================================================== -->
 
-        <option *ngFor="let a of agenciasDisponibles()" [ngValue]="a.idAgencia">
-          {{ a.nombreAgencia }}
-        </option>
+    <section class="card">
 
-      </select>
-    </div>
+      <div class="card-header">
 
-    <!-- 🟨 Agencias asignadas -->
-    <div class="form-group full mt-3">
-      <label class="label-title">agencias del usuario</label>
+        <div>
+          <h3>Datos de acceso</h3>
 
-      <div class="agencias-card">
-        <div
-          class="agencia-item"
-          *ngFor="let a of agenciasDisponibles()"
-          (click)="toggleAgencia(a.idAgencia!, { target: { checked: !agenciasUsuario().includes(a.idAgencia!) } })"
-        >
+          <p>
+            Información utilizada para ingresar al ERP.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="form-grid">
+
+        <div class="f-row">
+
+          <label for="username">
+            Usuario *
+          </label>
+
           <input
-            type="checkbox"
-            class="agencia-check"
-            [checked]="agenciasUsuario().includes(a.idAgencia!)"
-            (change)="toggleAgencia(a.idAgencia!, $event)"
-            (click)="$event.stopPropagation()"
+            id="username"
+            type="text"
+            formControlName="username"
+            maxlength="100"
+            autocomplete="off"
           />
 
-          <div class="agencia-info">
-            <span class="agencia-nombre">{{ a.nombreAgencia }}</span>
-          </div>
+          <small
+            *ngIf="
+      form.get('username')?.hasError('required')
+      && form.get('username')?.touched
+    "
+            class="field-error">
+
+            El usuario es obligatorio.
+
+          </small>
+
+          <small
+            *ngIf="
+              form.get('username')?.hasError('pattern')
+              && form.get('username')?.touched
+            "
+            class="field-error">
+
+            Use únicamente letras, números, punto, guion o guion bajo, sin espacios.
+
+          </small>
+
+          <small
+            *ngIf="
+              form.get('username')?.hasError('maxlength')
+              && form.get('username')?.touched
+            "
+            class="field-error">
+
+            El usuario no puede superar los 100 caracteres.
+
+          </small>
+
         </div>
+
+        <div class="f-row">
+
+          <label for="activo">
+            Estado
+          </label>
+
+          <select
+            id="activo"
+            formControlName="activo"
+            [disabled]="!idUsuario()">
+
+            <option [ngValue]="true">
+              Activo
+            </option>
+
+            <option [ngValue]="false">
+              Inactivo
+            </option>
+
+          </select>
+
+          <small
+            *ngIf="!idUsuario()"
+            class="field-help">
+
+            Los usuarios nuevos se crean en estado activo.
+
+          </small>
+
+          <small
+            *ngIf="idUsuario() && form.controls.activo.value === false"
+            class="field-help">
+
+            El usuario inactivo no podrá ingresar al ERP.
+
+          </small>
+
+        </div>
+
       </div>
-    </div>
 
-    <!-- 🟫 Acciones -->
-    <div class="form-actions full">
-      <button type="submit" class="btn sm primary" [disabled]="form.invalid">
-        💾 {{ idUsuario() ? 'actualizar' : 'guardar' }}
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- INFORMACIÓN DEL USUARIO                             -->
+    <!-- =================================================== -->
+
+    <section class="card">
+
+      <div class="card-header">
+
+        <div>
+          <h3>Información del usuario</h3>
+
+          <p>
+            Datos generales, vigencia y agencia principal.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="form-grid">
+
+        <div class="f-row f-row--wide">
+
+          <label for="nombreCompleto">
+            Nombre completo
+          </label>
+
+          <input
+            id="nombreCompleto"
+            type="text"
+            formControlName="nombreCompleto"
+            readonly
+          />
+
+          <small class="field-help">
+            Se obtiene automáticamente de la persona seleccionada.
+          </small>
+
+        </div>
+
+
+        <div class="f-row">
+
+          <label for="email">
+            Correo electrónico
+          </label>
+
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            maxlength="150"
+            autocomplete="email"
+          />
+
+          <small
+            *ngIf="
+              form.get('email')?.hasError('email')
+              && form.get('email')?.touched
+            "
+            class="field-error">
+
+            Ingrese un correo electrónico válido.
+
+          </small>
+
+          <small
+            *ngIf="
+              form.get('email')?.hasError('maxlength')
+              && form.get('email')?.touched
+            "
+            class="field-error">
+
+            El correo electrónico no puede superar los 150 caracteres.
+
+          </small>
+
+        </div>
+
+
+        <div class="f-row">
+
+          <label for="idAgenciaPrincipal">
+            Agencia principal *
+          </label>
+
+          <select
+            id="idAgenciaPrincipal"
+            formControlName="idAgenciaPrincipal">
+
+            <option [ngValue]="null">
+              Seleccione...
+            </option>
+
+            <option
+              *ngFor="let a of agenciasDisponibles()"
+              [ngValue]="a.idAgencia">
+
+              {{ a.nombreAgencia }}
+
+            </option>
+
+          </select>
+
+          <small
+            *ngIf="
+              form.get('idAgenciaPrincipal')?.hasError('required')
+              && form.get('idAgenciaPrincipal')?.touched
+            "
+            class="field-error">
+
+            Debe seleccionar la agencia principal.
+
+          </small>
+
+          <small
+            *ngIf="
+              form.controls.idAgenciaPrincipal.value != null
+              && !agenciaPrincipalAutorizada()
+            "
+            class="field-error">
+
+            La agencia principal debe estar incluida entre las agencias autorizadas.
+
+          </small>
+
+        </div>
+
+        <div class="f-row">
+
+          <label for="fechaInicioVigencia">
+            Inicio de vigencia *
+          </label>
+
+          <input
+            id="fechaInicioVigencia"
+            type="date"
+            formControlName="fechaInicioVigencia"
+          />
+
+          <small
+            *ngIf="
+              form.get('fechaInicioVigencia')?.hasError('required')
+              && form.get('fechaInicioVigencia')?.touched
+            "
+            class="field-error">
+
+            La fecha de inicio de vigencia es obligatoria.
+
+          </small>
+
+        </div>
+
+
+        <div class="f-row">
+
+          <label for="fechaFinVigencia">
+            Fin de vigencia
+          </label>
+
+          <input
+            id="fechaFinVigencia"
+            type="date"
+            formControlName="fechaFinVigencia"
+          />
+
+          <small
+            *ngIf="
+              !vigenciaValida()
+              && (
+                form.get('fechaInicioVigencia')?.touched
+                || form.get('fechaFinVigencia')?.touched
+              )
+            "
+            class="field-error">
+
+            La fecha fin no puede ser anterior a la fecha de inicio.
+
+          </small>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- ROLES                                               -->
+    <!-- =================================================== -->
+
+    <section class="card">
+
+      <div class="card-header">
+
+        <div>
+          <h3>Roles</h3>
+
+          <p>
+            Seleccione uno o varios roles para el usuario.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="selection-grid">
+
+        <label
+          *ngFor="let r of rolesDisponibles()"
+          class="selection-item"
+          [class.selection-item--selected]="
+            rolSeleccionado(r.idRol!)
+          ">
+
+          <input
+            type="checkbox"
+            [checked]="rolSeleccionado(r.idRol!)"
+            (change)="
+              toggleRol(
+                r.idRol!,
+                $any($event.target).checked
+              )
+            "
+          />
+
+          <span>
+            {{ r.nombreRol }}
+          </span>
+
+        </label>
+
+      </div>
+
+
+      <small
+        *ngIf="rolesUsuario().length === 0"
+        class="field-error selection-error">
+
+        Seleccione al menos un rol.
+
+      </small>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- AGENCIAS AUTORIZADAS                                -->
+    <!-- =================================================== -->
+
+    <section class="card">
+
+      <div class="card-header">
+
+        <div>
+          <h3>Agencias autorizadas</h3>
+
+          <p>
+            Defina las agencias sobre las cuales podrá operar el usuario.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="selection-grid">
+
+        <label
+          *ngFor="let a of agenciasDisponibles()"
+          class="selection-item"
+          [class.selection-item--selected]="
+            agenciaSeleccionada(a.idAgencia!)
+          ">
+
+          <input
+            type="checkbox"
+            [checked]="agenciaSeleccionada(a.idAgencia!)"
+            (change)="
+              toggleAgencia(
+                a.idAgencia!,
+                $any($event.target).checked
+              )
+            "
+          />
+
+          <span>
+            {{ a.nombreAgencia }}
+          </span>
+
+        </label>
+
+      </div>
+
+      <small
+        *ngIf="agenciasUsuario().length === 0"
+        class="field-error selection-error">
+
+        Seleccione al menos una agencia autorizada.
+
+      </small>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- ACCIONES                                            -->
+    <!-- =================================================== -->
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        [disabled]="
+          guardando()
+          || generandoDocumento()
+        "
+        (click)="volver()">
+
+        Cancelar
+
       </button>
 
-      <button type="button" class="btn sm danger" (click)="volver()">
-        ↩️ cancelar
+
+      <button
+        *ngIf="idUsuario()"
+        type="button"
+        class="btn btn--secondary"
+        [disabled]="
+          guardando()
+          || generandoDocumento()
+          || form.controls.activo.value === false
+        "
+        (click)="generarDocumentoPassword()">
+
+        {{
+        generandoDocumento()
+        ? 'Generando documento...'
+        : 'Generar documento de contraseña'
+        }}
+
       </button>
+
+
+      <button
+        type="submit"
+        class="btn btn--primary"
+        [disabled]="
+          form.invalid
+          || !vigenciaValida()
+          || rolesUsuario().length === 0
+          || agenciasUsuario().length === 0
+          || !agenciaPrincipalAutorizada()
+          || guardando()
+          || generandoDocumento()
+        ">
+
+        {{
+        guardando()
+        ? 'Guardando...'
+        : (
+        idUsuario()
+        ? 'Actualizar usuario'
+        : 'Guardar usuario'
+        )
+        }}
+
+      </button>
+
     </div>
 
   </form>
+
 </div>

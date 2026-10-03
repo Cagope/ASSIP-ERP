@@ -29,6 +29,8 @@ import {
   DatosFamiliaresExporterService
 } from './datos-familiares-exporter.service';
 
+import { SessionService } from '../../../core/auth/session.service';
+
 type PersonaConFamiliares =
   DatosPersonales & {
     familiares: DatosFamiliar[];
@@ -69,11 +71,20 @@ export class DatosFamiliaresListComponent
   private readonly exporter =
     inject(DatosFamiliaresExporterService);
 
+  private readonly session =
+    inject(SessionService);
+
   personas: PersonaConFamiliares[] = [];
   filtradas: PersonaConFamiliares[] = [];
 
   cargando = false;
   error = '';
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'HOJAVIDA_PERSONA_EDIT'
+    );
+  }
 
   filtros = {
     documento: '',
@@ -304,13 +315,22 @@ export class DatosFamiliaresListComponent
       return;
     }
 
+    // Familiar existente:
+    // VIEW permite ingresar a consultarlo.
     if (familiar?.idDatosFamiliares) {
+
       this.router.navigate([
         '/hoja-vida/datos-familiares',
         familiar.idDatosFamiliares,
         'editar'
       ]);
 
+      return;
+    }
+
+    // Nuevo familiar:
+    // requiere permiso de edición.
+    if (!this.puedeEditar) {
       return;
     }
 

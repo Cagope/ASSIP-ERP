@@ -1,5 +1,9 @@
 package co.assip.erp.hojavida.bienesinmuebles;
 
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,12 +18,24 @@ import java.util.List;
 @RequestMapping("/hoja-vida/bienes-inmuebles")
 public class BienInmuebleController {
 
+    private static final String PERMISO_VIEW =
+            "HOJAVIDA_BIENES_VIEW";
+
+    private static final String PERMISO_EDIT =
+            "HOJAVIDA_BIENES_EDIT";
+
     private final BienInmuebleService service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     public BienInmuebleController(
-            BienInmuebleService service
+            BienInmuebleService service,
+            UsuarioSesionService usuarioSesionService,
+            AccessValidator accessValidator
     ) {
         this.service = service;
+        this.usuarioSesionService = usuarioSesionService;
+        this.accessValidator = accessValidator;
     }
 
     // ============================================================
@@ -30,6 +46,8 @@ public class BienInmuebleController {
     public ResponseEntity<List<BienInmueble>> listarPorPersona(
             @PathVariable Long idDatosPersonal
     ) {
+
+        validarAcceso(PERMISO_VIEW);
 
         List<BienInmueble> lista =
                 service.listarPorPersona(idDatosPersonal);
@@ -46,6 +64,8 @@ public class BienInmuebleController {
             @PathVariable Long idBien
     ) {
 
+        validarAcceso(PERMISO_VIEW);
+
         return service.buscarPorIdBien(idBien)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -60,6 +80,8 @@ public class BienInmuebleController {
             @RequestBody BienInmueble dto
     ) {
 
+        validarAcceso(PERMISO_EDIT);
+
         BienInmueble respuesta =
                 service.registrarBienInmueble(dto);
 
@@ -72,6 +94,8 @@ public class BienInmuebleController {
             @RequestBody BienInmueble dto
     ) {
 
+        validarAcceso(PERMISO_EDIT);
+
         return service.actualizarBienInmueble(idBien, dto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -82,6 +106,8 @@ public class BienInmuebleController {
             @PathVariable Long idBien
     ) {
 
+        validarAcceso(PERMISO_EDIT);
+
         boolean eliminado =
                 service.eliminarBienInmueble(idBien);
 
@@ -90,5 +116,23 @@ public class BienInmuebleController {
         }
 
         return ResponseEntity.noContent().build();
+    }
+
+    // ============================================================
+    // SEGURIDAD
+    // ============================================================
+
+    private void validarAcceso(String permiso) {
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(idUsuario);
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                permiso
+        );
     }
 }

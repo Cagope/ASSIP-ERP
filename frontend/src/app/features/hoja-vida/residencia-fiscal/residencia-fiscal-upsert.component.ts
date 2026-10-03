@@ -31,6 +31,10 @@ import {
   ResidenciaFiscal
 } from './residencia-fiscal.api';
 
+import {
+  SessionService
+} from '../../../core/auth/session.service';
+
 @Component({
   selector: 'app-residencia-fiscal-upsert',
   standalone: true,
@@ -66,9 +70,18 @@ export class ResidenciaFiscalUpsertComponent
   private readonly api =
     inject(ResidenciaFiscalApi);
 
+  private readonly session =
+    inject(SessionService);
+
   form!: FormGroup;
 
   editando = false;
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'HOJAVIDA_FISCAL_EDIT'
+    );
+  }
 
   puedeGuardar = computed(
     () => this.form?.valid ?? false
@@ -366,6 +379,10 @@ export class ResidenciaFiscalUpsertComponent
 
   guardar(): void {
 
+    if (!this.puedeEditar) {
+      return;
+    }
+
     if (this.form.invalid) {
 
       this.form.markAllAsTouched();
@@ -375,7 +392,6 @@ export class ResidenciaFiscalUpsertComponent
       );
 
       return;
-
     }
 
     if (

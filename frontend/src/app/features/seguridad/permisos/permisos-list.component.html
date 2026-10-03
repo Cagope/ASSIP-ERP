@@ -1,0 +1,305 @@
+<div class="page">
+
+  <header class="page-header">
+
+    <div>
+      <h2>Permisos</h2>
+
+      <p>
+        Administre el catálogo de operaciones autorizables
+        del sistema.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="nuevoPermiso()"
+    >
+      Nuevo permiso
+    </button>
+
+  </header>
+
+  @if (error()) {
+  <div class="alert alert-error">
+    {{ error() }}
+  </div>
+  }
+
+  @if (mensaje()) {
+  <div class="alert alert-success">
+    {{ mensaje() }}
+  </div>
+  }
+
+  @if (cargando()) {
+
+  <section class="card loading">
+    Cargando permisos...
+  </section>
+
+  } @else {
+
+  <div class="permissions-layout">
+
+    <!-- ===================================================
+         CATÁLOGO
+         =================================================== -->
+
+    <section class="card catalog-panel">
+
+      <div class="section-header">
+
+        <div>
+          <h3>Catálogo</h3>
+
+          <p>
+            {{ totalActivos() }} activos de
+            {{ permisos().length }} registrados.
+          </p>
+        </div>
+
+        <span class="count">
+            {{ permisos().length }}
+          </span>
+
+      </div>
+
+      <div class="permissions-list">
+
+        @for (
+        permiso of permisos();
+        track permiso.idPermiso
+        ) {
+
+        <button
+          type="button"
+          class="permission-row"
+          [class.selected]="esSeleccionado(permiso)"
+          (click)="seleccionarPermiso(permiso)"
+        >
+
+              <span class="permission-main">
+
+                <strong>
+                  {{ permiso.codigo }}
+                </strong>
+
+                <small>
+                  {{
+                    permiso.descripcion
+                      || 'Sin descripción'
+                  }}
+                </small>
+
+              </span>
+
+          <span
+            class="status"
+            [class.inactive]="!permiso.activo"
+          >
+                {{
+                  permiso.activo
+                    ? 'Activo'
+                    : 'Inactivo'
+                }}
+              </span>
+
+        </button>
+
+        } @empty {
+
+        <div class="empty-state">
+          No existen permisos registrados.
+        </div>
+
+        }
+
+      </div>
+
+    </section>
+
+    <!-- ===================================================
+         EDICIÓN
+         =================================================== -->
+
+    <section class="card editor-panel">
+
+      @if (!modoNuevo() && !permisoSeleccionado()) {
+
+      <div class="empty-editor">
+
+        <h3>Detalle del permiso</h3>
+
+        <p>
+          Seleccione un permiso del catálogo
+          o cree uno nuevo.
+        </p>
+
+      </div>
+
+      } @else {
+
+      <div class="section-header">
+
+        <div>
+
+          <h3>
+            {{
+            modoNuevo()
+            ? 'Nuevo permiso'
+            : 'Editar permiso'
+            }}
+          </h3>
+
+          <p>
+            {{
+            modoNuevo()
+            ? 'Registre una nueva operación autorizable.'
+            : 'Actualice la información del permiso seleccionado.'
+            }}
+          </p>
+
+        </div>
+
+        @if (permisoSeleccionado()) {
+
+        <span
+          class="status"
+          [class.inactive]="
+                  !permisoSeleccionado()!.activo
+                "
+        >
+                {{
+                  permisoSeleccionado()!.activo
+                    ? 'Activo'
+                    : 'Inactivo'
+                }}
+              </span>
+
+        }
+
+      </div>
+
+      <div class="form">
+
+        <div class="field">
+
+          <label for="codigo">
+            Código
+          </label>
+
+          <input
+            id="codigo"
+            type="text"
+            name="codigo"
+            [(ngModel)]="codigo"
+            maxlength="100"
+            autocomplete="off"
+            placeholder="EJEMPLO_MODULO_VIEW"
+          />
+
+          <small>
+            Identificador funcional utilizado por
+            backend y frontend para autorizar operaciones.
+          </small>
+
+        </div>
+
+        <div class="field">
+
+          <label for="descripcion">
+            Descripción
+          </label>
+
+          <textarea
+            id="descripcion"
+            name="descripcion"
+            [(ngModel)]="descripcion"
+            rows="4"
+            maxlength="500"
+            placeholder="Descripción funcional del permiso"
+          ></textarea>
+
+        </div>
+
+      </div>
+
+      <footer class="editor-actions">
+
+        <div class="left-actions">
+
+          @if (
+          !modoNuevo()
+          && permisoSeleccionado()
+          ) {
+
+          <button
+            type="button"
+            class="btn-state"
+            [class.activate]="
+                    !permisoSeleccionado()!.activo
+                  "
+            [disabled]="
+                    cambiandoEstado()
+                    || guardando()
+                  "
+            (click)="cambiarEstado()"
+          >
+            {{
+            cambiandoEstado()
+            ? 'Procesando...'
+            : permisoSeleccionado()!.activo
+            ? 'Inactivar'
+            : 'Activar'
+            }}
+          </button>
+
+          }
+
+        </div>
+
+        <div class="right-actions">
+
+          <button
+            type="button"
+            class="btn-secondary"
+            [disabled]="
+                  guardando()
+                  || cambiandoEstado()
+                "
+            (click)="cancelar()"
+          >
+            Cancelar
+          </button>
+
+          <button
+            type="button"
+            class="btn-primary"
+            [disabled]="
+                  guardando()
+                  || cambiandoEstado()
+                "
+            (click)="guardar()"
+          >
+            {{
+            guardando()
+            ? 'Guardando...'
+            : 'Guardar'
+            }}
+          </button>
+
+        </div>
+
+      </footer>
+
+      }
+
+    </section>
+
+  </div>
+
+  }
+
+</div>

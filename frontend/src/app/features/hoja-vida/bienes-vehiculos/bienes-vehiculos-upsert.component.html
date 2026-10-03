@@ -58,9 +58,14 @@
         <small>Relación de vehículos registrados en la hoja de vida del asociado.</small>
       </div>
 
-      <button type="button" class="btn btn--primary" (click)="nuevo()">
+      <button
+        *ngIf="puedeEditar"
+        type="button"
+        class="btn btn--primary"
+        (click)="nuevo()">
         + Nuevo vehículo
       </button>
+
     </div>
 
     <div *ngIf="cargando" class="loading">
@@ -105,7 +110,12 @@
         <td>
           <div class="acciones">
 
-            <button class="btn-action-edit" type="button" (click)="editar(b)" title="Editar vehículo">
+            <button
+              *ngIf="puedeEditar"
+              class="btn-action-edit"
+              type="button"
+              (click)="editar(b)"
+              title="Editar vehículo">
               ✏️
             </button>
 
@@ -113,7 +123,12 @@
               🛡️
             </button>
 
-            <button class="btn-action-delete" type="button" (click)="eliminar(b)" title="Eliminar vehículo">
+            <button
+              *ngIf="puedeEditar"
+              class="btn-action-delete"
+              type="button"
+              (click)="eliminar(b)"
+              title="Eliminar vehículo">
               🗑️
             </button>
 
@@ -139,6 +154,7 @@
 
       <div class="acciones">
         <button
+          *ngIf="puedeEditar"
           type="button"
           class="btn btn--primary"
           (click)="nuevoSeguro()">
@@ -204,7 +220,7 @@
         </td>
 
         <td>
-          <div class="acciones">
+          <div class="acciones" *ngIf="puedeEditar">
             <button
               class="btn-action-edit"
               type="button"
@@ -310,7 +326,7 @@
         <button
           type="submit"
           class="btn btn--primary"
-          [disabled]="guardandoSeguro">
+          [disabled]="guardandoSeguro || !puedeEditar">
           {{ guardandoSeguro ? 'Guardando...' : 'Guardar seguro' }}
         </button>
 
@@ -474,7 +490,10 @@
       </div>
 
       <div class="form-actions">
-        <button type="submit" class="btn btn--primary" [disabled]="guardando">
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="guardando || !puedeEditar">
           {{ guardando ? 'Guardando...' : 'Guardar' }}
         </button>
 

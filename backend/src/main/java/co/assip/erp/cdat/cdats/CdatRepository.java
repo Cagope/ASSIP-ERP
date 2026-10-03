@@ -265,6 +265,61 @@ public class CdatRepository {
         return lista.stream().findFirst();
     }
 
+    public List<java.util.Map<String, Object>> buscarCuentasAhorro(
+            String documento,
+            String nombres,
+            String primerApellido,
+            String segundoApellido,
+            String codigoCuenta,
+            Integer idAgencia
+    ) {
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT *
+        FROM depositos.vw_depositos_cuentas_ahorro_total
+        WHERE id_agencia = ?
+          AND UPPER(TRIM(COALESCE(codigo_estado, ''))) = 'A'
+        """);
+
+        List<Object> params = new java.util.ArrayList<>();
+        params.add(idAgencia);
+
+        if (documento != null && !documento.isBlank()) {
+            sql.append(" AND documento ILIKE ? ");
+            params.add("%" + documento.trim() + "%");
+        }
+
+        if (nombres != null && !nombres.isBlank()) {
+            sql.append(" AND nombres ILIKE ? ");
+            params.add("%" + nombres.trim() + "%");
+        }
+
+        if (primerApellido != null && !primerApellido.isBlank()) {
+            sql.append(" AND primer_apellido ILIKE ? ");
+            params.add("%" + primerApellido.trim() + "%");
+        }
+
+        if (segundoApellido != null && !segundoApellido.isBlank()) {
+            sql.append(" AND segundo_apellido ILIKE ? ");
+            params.add("%" + segundoApellido.trim() + "%");
+        }
+
+        if (codigoCuenta != null && !codigoCuenta.isBlank()) {
+            sql.append(" AND codigo_cuenta ILIKE ? ");
+            params.add("%" + codigoCuenta.trim() + "%");
+        }
+
+        sql.append("""
+        ORDER BY codigo_forma, codigo_cuenta
+        LIMIT 200
+        """);
+
+        return jdbc.queryForList(
+                sql.toString(),
+                params.toArray()
+        );
+    }
+
     private static BigDecimal nvl(BigDecimal value) {
         return value == null ? BigDecimal.ZERO : value;
     }

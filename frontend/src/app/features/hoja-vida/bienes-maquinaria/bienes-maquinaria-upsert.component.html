@@ -82,11 +82,13 @@
       </div>
 
       <button
+        *ngIf="puedeEditar"
         type="button"
         class="btn btn--primary"
         (click)="nuevo()">
         + Nueva maquinaria
       </button>
+
     </div>
 
     <div *ngIf="cargando" class="loading">
@@ -149,6 +151,7 @@
           <div class="acciones">
 
             <button
+              *ngIf="puedeEditar"
               class="btn-action-edit"
               type="button"
               (click)="editar(b)"
@@ -165,6 +168,7 @@
             </button>
 
             <button
+              *ngIf="puedeEditar"
               class="btn-action-delete"
               type="button"
               (click)="eliminar(b)"
@@ -173,6 +177,7 @@
             </button>
 
           </div>
+
         </td>
 
       </tr>
@@ -203,6 +208,7 @@
       <div class="acciones">
 
         <button
+          *ngIf="puedeEditar"
           type="button"
           class="btn btn--primary"
           (click)="nuevoSeguro()">
@@ -284,7 +290,7 @@
         </td>
 
         <td>
-          <div class="acciones">
+          <div class="acciones" *ngIf="puedeEditar">
 
             <button
               class="btn-action-edit"
@@ -405,7 +411,7 @@
         <button
           type="submit"
           class="btn btn--primary"
-          [disabled]="guardandoSeguro">
+          [disabled]="guardandoSeguro || !puedeEditar">
 
           {{
           guardandoSeguro
@@ -665,7 +671,7 @@
         <button
           type="submit"
           class="btn btn--primary"
-          [disabled]="guardando">
+          [disabled]="guardando || !puedeEditar">
 
           {{
           guardando

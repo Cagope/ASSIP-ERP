@@ -10,6 +10,7 @@ import { Ubicacion } from '../../../shared/models/ubicacion.model';
 import { CatalogosApi, CodigoNombreDTO, Departamento, Ciudad } from '../../../shared/catalogos/catalogos.api';
 import { GeneralApi, ZonaDTO, SubZonaDTO } from '../../../shared/general/general.api';
 import { Output, EventEmitter, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { SessionService } from '../../../core/auth/session.service';
 
 /**
  * 🏠 Componente Upsert (Crear / Editar) — Ubicaciones
@@ -36,10 +37,16 @@ export class UbicacionesUpsertComponent implements OnInit, OnChanges {
   private readonly api = inject(UbicacionesApi);
   private readonly catalogos = inject(CatalogosApi);
   private readonly general = inject(GeneralApi);
+  private readonly session = inject(SessionService);
 
   // === 📋 Propiedades ===
   form!: FormGroup;
   editando = false;
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'HOJAVIDA_PERSONA_EDIT'
+    );
+  }
 
   // === 📚 Catálogos ===
   paises: CodigoNombreDTO[] = [];
@@ -204,6 +211,11 @@ export class UbicacionesUpsertComponent implements OnInit, OnChanges {
   // 💾 Guardar o actualizar
   // ================================================================
   guardar(): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       alert('⚠️ Complete los campos obligatorios o revise los formatos.');

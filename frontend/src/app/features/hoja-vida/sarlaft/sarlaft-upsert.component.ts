@@ -8,6 +8,7 @@ import { tap } from 'rxjs/operators';
 import { SarlaftApi, Sarlaft } from './sarlaft.api';
 import { CatalogosApi, CodigoNombreDTO } from '../../../shared/catalogos/catalogos.api';
 import { Output, EventEmitter, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { SessionService } from '../../../core/auth/session.service';
 
 /**
  * 🧾 Componente Upsert (Crear / Editar) — SARLAFT
@@ -34,9 +35,17 @@ export class SarlaftUpsertComponent implements OnInit, OnChanges {
   private readonly router = inject(Router);
   private readonly api = inject(SarlaftApi);
   private readonly catalogos = inject(CatalogosApi);
+  private readonly session = inject(SessionService);
 
   form!: FormGroup;
   editando = false;
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'HOJAVIDA_SARLAFT_EDIT'
+    );
+  }
+
   tiposPeps: CodigoNombreDTO[] = [];
   parentescos: CodigoNombreDTO[] = [];
 
@@ -262,6 +271,11 @@ export class SarlaftUpsertComponent implements OnInit, OnChanges {
   }
 
   guardar(): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       alert('⚠️ Complete los campos obligatorios o revise los formatos.');

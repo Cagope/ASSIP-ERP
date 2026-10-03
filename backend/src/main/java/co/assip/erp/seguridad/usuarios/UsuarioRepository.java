@@ -1,101 +1,98 @@
+
 package co.assip.erp.seguridad.usuarios;
 
+import jakarta.persistence.LockModeType;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
- * Repositorio de usuarios del sistema.
+ * Repositorio principal de cuentas de usuario.
  *
- * Centraliza las consultas sobre seguridad.usuarios utilizadas
- * por autenticación, recuperación de contraseña y administración
- * de usuarios.
+ * Administra exclusivamente la información almacenada
+ * en seguridad.usuarios.
+ *
+ * Los roles del usuario se administran mediante
+ * seguridad.usuarios_roles.
+ *
+ * Incorpora bloqueo pesimista para operaciones
+ * concurrentes de seguridad y autenticación.
  */
 @Repository
-public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
+public interface UsuarioRepository
+        extends JpaRepository<Usuario, Integer> {
 
     /**
      * Busca un usuario por su nombre de acceso.
-     * Utilizado principalmente durante la autenticación.
      */
     Optional<Usuario> findByUsername(String username);
 
     /**
-     * Verifica si ya existe un nombre de usuario.
+     * Verifica si existe un nombre de usuario.
      */
     boolean existsByUsername(String username);
 
     /**
-     * Busca un usuario por su correo electrónico.
-     * Utilizado en procesos de recuperación de contraseña.
+     * Busca un usuario por correo electrónico.
      */
     Optional<Usuario> findByEmail(String email);
 
     /**
-     * Busca un usuario mediante el token de recuperación
-     * de contraseña.
+     * Busca un usuario mediante su token temporal
+     * de recuperación de contraseña.
+     *
+     * Se conserva por compatibilidad mientras
+     * finaliza la migración de tokens.
      */
     Optional<Usuario> findByTokenRecuperacion(String token);
 
     /**
-     * Obtiene únicamente el identificador interno de un usuario
-     * a partir de su username.
+     * Obtiene los usuarios ordenados por nombre de acceso.
      */
-    @Query(value = """
-            SELECT id_usuario
-            FROM seguridad.usuarios
-            WHERE username = :username
-            """,
-            nativeQuery = true)
-    Integer findIdByUsername(String username);
+    List<Usuario> findAllByOrderByUsernameAsc();
 
     /**
-     * Obtiene el listado administrativo de usuarios incluyendo
-     * la información básica de su rol y agencia principal.
+     * Obtiene el identificador interno correspondiente
+     * a un nombre de usuario.
      */
-    @Query(value = """
-            SELECT
-                u.id_usuario AS idUsuario,
-                u.username AS username,
-                u.nombre_completo AS nombreCompleto,
-                u.email AS email,
-                u.activo AS activo,
-                r.id_rol AS idRol,
-                r.nombre_rol AS nombreRol,
-                u.id_agencia_principal AS idAgenciaPrincipal
-            FROM seguridad.usuarios u
-            LEFT JOIN seguridad.roles r
-                ON r.id_rol = u.id_rol
-            ORDER BY u.username
-            """,
-            nativeQuery = true)
-    List<Map<String, Object>> listarConRolYAgencia();
+    @Query(
+            value = """
+                    SELECT id_usuario
+                    FROM seguridad.usuarios
+                    WHERE username = :username
+                    """,
+            nativeQuery = true
+    )
+    Integer findIdByUsername(
+            @Param("username") String username
+    );
 
     /**
-     * Obtiene la información administrativa de un usuario
-     * para su consulta o edición.
+     * Obtiene un usuario aplicando bloqueo exclusivo
+     * sobre su fila durante la transacción.
      *
-     * Mantiene el mismo formato utilizado por el listado general.
+     * Evita que dos intentos fallidos concurrentes
+     * lean y actualicen el mismo contador sin
+     * considerar los cambios del otro.
+     *
+     * Debe ejecutarse dentro de una transacción activa.
+     *
+     * @param idUsuario identificador del usuario
+     * @return usuario bloqueado para actualización
      */
-    @Query(value = """
-            SELECT
-                u.id_usuario AS idUsuario,
-                u.username AS username,
-                u.nombre_completo AS nombreCompleto,
-                u.email AS email,
-                u.activo AS activo,
-                r.id_rol AS idRol,
-                r.nombre_rol AS nombreRol,
-                u.id_agencia_principal AS idAgenciaPrincipal
-            FROM seguridad.usuarios u
-            LEFT JOIN seguridad.roles r
-                ON r.id_rol = u.id_rol
-            WHERE u.id_usuario = :idUsuario
-            """,
-            nativeQuery = true)
-    Map<String, Object> buscarDtoPorId(Integer idUsuario);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            SELECT u
+            FROM Usuario u
+            WHERE u.idUsuario = :idUsuario
+            """)
+    Optional<Usuario> findByIdForUpdate(
+            @Param("idUsuario") Integer idUsuario
+    );
 }

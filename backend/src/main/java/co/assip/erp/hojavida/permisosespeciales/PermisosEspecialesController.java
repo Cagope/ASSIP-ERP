@@ -1,21 +1,22 @@
 package co.assip.erp.hojavida.permisosespeciales;
 
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.time.LocalDate;
 import java.util.List;
 
 /**
- * 🌐 Controlador REST — Permisos Especiales
+ * Controlador REST — Permisos Especiales
  * Esquema: hoja_vida
  *
- * Rutas:
- *  - GET    /api/v1/hoja-vida/permisos-especiales
- *  - GET    /api/v1/hoja-vida/permisos-especiales/{id}
- *  - GET    /api/v1/hoja-vida/permisos-especiales/persona/{idDatosPersonal}
- *  - POST   /api/v1/hoja-vida/permisos-especiales
- *  - PUT    /api/v1/hoja-vida/permisos-especiales/{id}
- *  - DELETE /api/v1/hoja-vida/permisos-especiales/{id}
+ * Seguridad:
+ * - Consulta: HOJAVIDA_PROTECCION_VIEW
+ * - Escritura: HOJAVIDA_PROTECCION_EDIT
  *
  * Cada permiso (llamadas, sms, emails, cartas, redes) tiene
  * una fecha asociada de otorgamiento o cambio.
@@ -24,119 +25,282 @@ import java.util.List;
 @RequestMapping("/hoja-vida/permisos-especiales")
 public class PermisosEspecialesController {
 
-    private final PermisosEspecialesRepository repository;
+    private static final String PERMISO_VIEW =
+            "HOJAVIDA_PROTECCION_VIEW";
 
-    public PermisosEspecialesController(PermisosEspecialesRepository repository) {
+    private static final String PERMISO_EDIT =
+            "HOJAVIDA_PROTECCION_EDIT";
+
+    private final PermisosEspecialesRepository repository;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
+
+    public PermisosEspecialesController(
+            PermisosEspecialesRepository repository,
+            UsuarioSesionService usuarioSesionService,
+            AccessValidator accessValidator
+    ) {
         this.repository = repository;
+        this.usuarioSesionService = usuarioSesionService;
+        this.accessValidator = accessValidator;
     }
 
     // ==========================================================
-    // 🔹 LISTAR TODOS
+    // LISTAR TODOS
     // ==========================================================
+
     @GetMapping
     public ResponseEntity<List<PermisosEspeciales>> listar() {
-        return ResponseEntity.ok(repository.findAll());
+
+        validarAcceso(PERMISO_VIEW);
+
+        return ResponseEntity.ok(
+                repository.findAll()
+        );
     }
 
     // ==========================================================
-    // 🔹 OBTENER POR ID
+    // OBTENER POR ID
     // ==========================================================
+
     @GetMapping("/{id}")
-    public ResponseEntity<PermisosEspeciales> obtener(@PathVariable Integer id) {
+    public ResponseEntity<PermisosEspeciales> obtener(
+            @PathVariable Integer id
+    ) {
+
+        validarAcceso(PERMISO_VIEW);
+
         return repository.findById(id)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElse(
+                        ResponseEntity.notFound().build()
+                );
     }
 
     // ==========================================================
-    // 🔹 OBTENER POR ID DE PERSONA
+    // OBTENER POR ID DE PERSONA
     // ==========================================================
+
     @GetMapping("/persona/{idDatosPersonal}")
-    public ResponseEntity<PermisosEspeciales> obtenerPorPersona(@PathVariable Integer idDatosPersonal) {
-        return repository.findByIdDatosPersonal(idDatosPersonal)
+    public ResponseEntity<PermisosEspeciales> obtenerPorPersona(
+            @PathVariable Integer idDatosPersonal
+    ) {
+
+        validarAcceso(PERMISO_VIEW);
+
+        return repository
+                .findByIdDatosPersonal(idDatosPersonal)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElse(
+                        ResponseEntity.notFound().build()
+                );
     }
 
     // ==========================================================
-    // 🔹 CREAR NUEVO REGISTRO
+    // CREAR NUEVO REGISTRO
     // ==========================================================
+
     @PostMapping
-    public ResponseEntity<PermisosEspeciales> crear(@RequestBody PermisosEspeciales permiso) {
+    public ResponseEntity<PermisosEspeciales> crear(
+            @RequestBody PermisosEspeciales permiso
+    ) {
+
+        validarAcceso(PERMISO_EDIT);
+
         // Verificar duplicado (1:1 con persona)
-        if (repository.findByIdDatosPersonal(permiso.getIdDatosPersonal()).isPresent()) {
+        if (
+                repository
+                        .findByIdDatosPersonal(
+                                permiso.getIdDatosPersonal()
+                        )
+                        .isPresent()
+        ) {
             return ResponseEntity.badRequest().build();
         }
 
         LocalDate hoy = LocalDate.now();
 
-        if (Boolean.TRUE.equals(permiso.getRecibeLlamadas())) permiso.setFechaLlamadas(hoy);
-        if (Boolean.TRUE.equals(permiso.getRecibeMsm())) permiso.setFechaSms(hoy);
-        if (Boolean.TRUE.equals(permiso.getRecibeEmails())) permiso.setFechaEmails(hoy);
-        if (Boolean.TRUE.equals(permiso.getRecibeCartas())) permiso.setFechaCartas(hoy);
-        if (Boolean.TRUE.equals(permiso.getRecibeRedesSociales())) permiso.setFechaRedes(hoy);
+        if (Boolean.TRUE.equals(
+                permiso.getRecibeLlamadas()
+        )) {
+            permiso.setFechaLlamadas(hoy);
+        }
 
-        PermisosEspeciales nuevo = repository.save(permiso);
+        if (Boolean.TRUE.equals(
+                permiso.getRecibeMsm()
+        )) {
+            permiso.setFechaSms(hoy);
+        }
+
+        if (Boolean.TRUE.equals(
+                permiso.getRecibeEmails()
+        )) {
+            permiso.setFechaEmails(hoy);
+        }
+
+        if (Boolean.TRUE.equals(
+                permiso.getRecibeCartas()
+        )) {
+            permiso.setFechaCartas(hoy);
+        }
+
+        if (Boolean.TRUE.equals(
+                permiso.getRecibeRedesSociales()
+        )) {
+            permiso.setFechaRedes(hoy);
+        }
+
+        PermisosEspeciales nuevo =
+                repository.save(permiso);
+
         return ResponseEntity.ok(nuevo);
     }
 
     // ==========================================================
-    // 🔹 ACTUALIZAR REGISTRO
+    // ACTUALIZAR REGISTRO
     // ==========================================================
+
     @PutMapping("/{id}")
-    public ResponseEntity<PermisosEspeciales> actualizar(@PathVariable Integer id,
-                                                         @RequestBody PermisosEspeciales permiso) {
+    public ResponseEntity<PermisosEspeciales> actualizar(
+            @PathVariable Integer id,
+            @RequestBody PermisosEspeciales permiso
+    ) {
+
+        validarAcceso(PERMISO_EDIT);
+
         return repository.findById(id)
                 .map(existente -> {
+
                     LocalDate hoy = LocalDate.now();
 
-                    // 🔸 Actualizar fechas solo si el valor del permiso cambió
-                    if (!permiso.getRecibeLlamadas().equals(existente.getRecibeLlamadas())) {
+                    // Actualizar fechas solo si el valor
+                    // del permiso cambió.
+
+                    if (
+                            !permiso
+                                    .getRecibeLlamadas()
+                                    .equals(
+                                            existente
+                                                    .getRecibeLlamadas()
+                                    )
+                    ) {
                         permiso.setFechaLlamadas(hoy);
                     } else {
-                        permiso.setFechaLlamadas(existente.getFechaLlamadas());
+                        permiso.setFechaLlamadas(
+                                existente.getFechaLlamadas()
+                        );
                     }
 
-                    if (!permiso.getRecibeMsm().equals(existente.getRecibeMsm())) {
+                    if (
+                            !permiso
+                                    .getRecibeMsm()
+                                    .equals(
+                                            existente
+                                                    .getRecibeMsm()
+                                    )
+                    ) {
                         permiso.setFechaSms(hoy);
                     } else {
-                        permiso.setFechaSms(existente.getFechaSms());
+                        permiso.setFechaSms(
+                                existente.getFechaSms()
+                        );
                     }
 
-                    if (!permiso.getRecibeEmails().equals(existente.getRecibeEmails())) {
+                    if (
+                            !permiso
+                                    .getRecibeEmails()
+                                    .equals(
+                                            existente
+                                                    .getRecibeEmails()
+                                    )
+                    ) {
                         permiso.setFechaEmails(hoy);
                     } else {
-                        permiso.setFechaEmails(existente.getFechaEmails());
+                        permiso.setFechaEmails(
+                                existente.getFechaEmails()
+                        );
                     }
 
-                    if (!permiso.getRecibeCartas().equals(existente.getRecibeCartas())) {
+                    if (
+                            !permiso
+                                    .getRecibeCartas()
+                                    .equals(
+                                            existente
+                                                    .getRecibeCartas()
+                                    )
+                    ) {
                         permiso.setFechaCartas(hoy);
                     } else {
-                        permiso.setFechaCartas(existente.getFechaCartas());
+                        permiso.setFechaCartas(
+                                existente.getFechaCartas()
+                        );
                     }
 
-                    if (!permiso.getRecibeRedesSociales().equals(existente.getRecibeRedesSociales())) {
+                    if (
+                            !permiso
+                                    .getRecibeRedesSociales()
+                                    .equals(
+                                            existente
+                                                    .getRecibeRedesSociales()
+                                    )
+                    ) {
                         permiso.setFechaRedes(hoy);
                     } else {
-                        permiso.setFechaRedes(existente.getFechaRedes());
+                        permiso.setFechaRedes(
+                                existente.getFechaRedes()
+                        );
                     }
 
                     // Mantener datos de auditoría
                     permiso.setIdPermisoEspecial(id);
-                    permiso.setFechaCreacion(existente.getFechaCreacion());
+                    permiso.setFechaCreacion(
+                            existente.getFechaCreacion()
+                    );
 
-                    return ResponseEntity.ok(repository.save(permiso));
+                    return ResponseEntity.ok(
+                            repository.save(permiso)
+                    );
                 })
-                .orElse(ResponseEntity.notFound().build());
+                .orElse(
+                        ResponseEntity.notFound().build()
+                );
     }
 
     // ==========================================================
-    // 🔹 ELIMINAR REGISTRO
+    // ELIMINAR REGISTRO
     // ==========================================================
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
-        if (!repository.existsById(id)) return ResponseEntity.notFound().build();
+    public ResponseEntity<Void> eliminar(
+            @PathVariable Integer id
+    ) {
+
+        validarAcceso(PERMISO_EDIT);
+
+        if (!repository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
         repository.deleteById(id);
+
         return ResponseEntity.noContent().build();
+    }
+
+    // ==========================================================
+    // SEGURIDAD
+    // ==========================================================
+
+    private void validarAcceso(String permiso) {
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(idUsuario);
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                permiso
+        );
     }
 }

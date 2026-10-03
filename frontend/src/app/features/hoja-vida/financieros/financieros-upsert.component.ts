@@ -9,6 +9,7 @@ import { Financiero } from '../../../shared/models/financiero.model'; // ✅ mod
 // ✅ Directiva global de formato numérico
 import { NumericFormatDirective } from '@shared/utils/numeric-format.directive';
 import { Output, EventEmitter, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { SessionService } from '../../../core/auth/session.service';
 
 /**
  * 💰 Componente Upsert (Crear / Editar) — Financieros
@@ -36,12 +37,18 @@ export class FinancierosUpsertComponent implements OnInit, OnChanges {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly api = inject(FinancierosApi);
+  private readonly session = inject(SessionService);
 
   // ================================================================
   // 📋 Propiedades
   // ================================================================
   form!: FormGroup;
   editando = false;
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'HOJAVIDA_FINANCIERO_EDIT'
+    );
+  }
 
   // ================================================================
   // 🚀 Inicialización
@@ -150,6 +157,11 @@ export class FinancierosUpsertComponent implements OnInit, OnChanges {
   // 💾 Guardar o actualizar registro
   // ================================================================
   guardar(): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       alert('⚠️ Complete los campos obligatorios o revise los valores.');

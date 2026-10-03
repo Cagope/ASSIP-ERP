@@ -16,7 +16,7 @@ import co.assip.erp.cajas.medios_pago.dto.MedioPagoDepositoDTO;
 import co.assip.erp.cajas.medios_pago.dto.MediosPagoDTO;
 import co.assip.erp.cdat.cancelacion.dto.CdatCancelacionFiltroDTO;
 import java.util.List;
-
+import java.util.Map;
 import java.math.BigDecimal;
 
 @Service
@@ -38,6 +38,28 @@ public class CdatCancelacionService {
 
     public List<CdatCancelacionItemDTO> buscar(CdatCancelacionFiltroDTO filtro) {
         return repository.buscar(filtro);
+    }
+
+    public List<Map<String, Object>> buscarCuentasAhorroDisponibles(
+            Integer idDatosPersonal,
+            Integer idAgencia
+    ) {
+        if (idDatosPersonal == null) {
+            throw new RuntimeException(
+                    "No se pudo determinar el asociado."
+            );
+        }
+
+        if (idAgencia == null) {
+            throw new RuntimeException(
+                    "No se pudo determinar la agencia del usuario."
+            );
+        }
+
+        return repository.buscarCuentasAhorroDisponibles(
+                idDatosPersonal,
+                idAgencia
+        );
     }
 
     public CdatCancelacionPreviewDTO preview(CdatCancelacionEntradaDTO dto) {

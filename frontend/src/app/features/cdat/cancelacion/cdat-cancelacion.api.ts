@@ -137,9 +137,6 @@ export class CdatCancelacionApi {
   private baseUrl =
     `${environment.apiUrl}/cdat/cancelacion`;
 
-  private readonly reportingUrl =
-    `${environment.apiUrl}/reporting/query`;
-
   constructor(
     private http: HttpClient
   ) {
@@ -216,11 +213,17 @@ export class CdatCancelacionApi {
     );
   }
 
-  buscarCuentas(req: any): Observable<any> {
+  buscarCuentasAhorroDisponibles(
+    idDatosPersonal: number
+  ): Observable<any[]> {
 
-    return this.http.post<any>(
-      this.reportingUrl,
-      req
+    return this.http.get<any[]>(
+      `${this.baseUrl}/cuentas-ahorro`,
+      {
+        params: {
+          idDatosPersonal
+        }
+      }
     );
   }
 

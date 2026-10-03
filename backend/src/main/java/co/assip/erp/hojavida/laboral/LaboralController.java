@@ -1,93 +1,160 @@
-    package co.assip.erp.hojavida.laboral;
+package co.assip.erp.hojavida.laboral;
 
-    import org.springframework.http.ResponseEntity;
-    import org.springframework.web.bind.annotation.*;
-    import java.util.List;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
 
-    /**
-     * 🌐 Controlador REST — Laboral
-     * Esquema: hoja_vida
-     *
-     * Rutas:
-     *  - GET    /api/v1/hoja-vida/laborales
-     *  - GET    /api/v1/hoja-vida/laborales/{id}
-     *  - GET    /api/v1/hoja-vida/laborales/persona/{idDatosPersonal}
-     *  - POST   /api/v1/hoja-vida/laborales
-     *  - PUT    /api/v1/hoja-vida/laborales/{id}
-     *  - DELETE /api/v1/hoja-vida/laborales/{id}
-     *
-     * Descripción:
-     * Maneja la información laboral asociada a cada persona.
-     * Cada persona puede tener **solo un registro laboral** (relación 1:1).
-     */
-    @RestController
-    @RequestMapping("/hoja-vida/laborales")
-    public class LaboralController {
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-        private final LaboralService service;
+import java.util.List;
 
-        public LaboralController(LaboralService service) {
-            this.service = service;
-        }
+/**
+ * 🌐 Controlador REST — Laboral
+ * Esquema: hoja_vida
+ *
+ * Seguridad:
+ *  - GET                 → HOJAVIDA_PERSONA_VIEW
+ *  - POST / PUT / DELETE → HOJAVIDA_PERSONA_EDIT
+ */
+@RestController
+@RequestMapping("/hoja-vida/laborales")
+public class LaboralController {
 
-        // ==========================================================
-        // 🔹 LISTAR TODOS
-        // ==========================================================
-        @GetMapping
-        public ResponseEntity<List<Laboral>> listar() {
-            List<Laboral> lista = service.listar();
-            return ResponseEntity.ok(lista);
-        }
+    private static final String PERMISO_VIEW =
+            "HOJAVIDA_PERSONA_VIEW";
 
-        // ==========================================================
-        // 🔹 OBTENER POR ID
-        // ==========================================================
-        @GetMapping("/{id}")
-        public ResponseEntity<Laboral> obtener(@PathVariable Integer id) {
-            return service.buscarPorId(id)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
-        }
+    private static final String PERMISO_EDIT =
+            "HOJAVIDA_PERSONA_EDIT";
 
-        // ==========================================================
-        // 🔹 OBTENER POR ID DE PERSONA
-        // ==========================================================
-        @GetMapping("/persona/{idDatosPersonal}")
-        public ResponseEntity<Laboral> obtenerPorPersona(@PathVariable Integer idDatosPersonal) {
-            return service.buscarPorPersona(idDatosPersonal)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
-        }
+    private final LaboralService service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
-        // ==========================================================
-        // 🔹 CREAR NUEVO REGISTRO
-        // ==========================================================
-        @PostMapping
-        public ResponseEntity<Laboral> crear(@RequestBody Laboral laboral) {
-            try {
-                Laboral creado = service.crear(laboral);
-                return ResponseEntity.ok(creado);
-            } catch (IllegalArgumentException ex) {
-                return ResponseEntity.badRequest().body(null);
-            }
-        }
+    public LaboralController(
+            LaboralService service,
+            UsuarioSesionService usuarioSesionService,
+            AccessValidator accessValidator
+    ) {
+        this.service = service;
+        this.usuarioSesionService = usuarioSesionService;
+        this.accessValidator = accessValidator;
+    }
 
-        // ==========================================================
-        // 🔹 ACTUALIZAR REGISTRO EXISTENTE
-        // ==========================================================
-        @PutMapping("/{id}")
-        public ResponseEntity<Laboral> actualizar(@PathVariable Integer id, @RequestBody Laboral laboral) {
-            return service.actualizar(id, laboral)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
-        }
+    // ==========================================================
+    // 🔹 LISTAR TODOS
+    // ==========================================================
 
-        // ==========================================================
-        // 🔹 ELIMINAR REGISTRO
-        // ==========================================================
-        @DeleteMapping("/{id}")
-        public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
-            service.eliminar(id);
-            return ResponseEntity.noContent().build();
+    @GetMapping
+    public ResponseEntity<List<Laboral>> listar() {
+
+        validarAcceso(PERMISO_VIEW);
+
+        List<Laboral> lista = service.listar();
+
+        return ResponseEntity.ok(lista);
+    }
+
+    // ==========================================================
+    // 🔹 OBTENER POR ID
+    // ==========================================================
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Laboral> obtener(
+            @PathVariable Integer id
+    ) {
+
+        validarAcceso(PERMISO_VIEW);
+
+        return service.buscarPorId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // ==========================================================
+    // 🔹 OBTENER POR ID DE PERSONA
+    // ==========================================================
+
+    @GetMapping("/persona/{idDatosPersonal}")
+    public ResponseEntity<Laboral> obtenerPorPersona(
+            @PathVariable Integer idDatosPersonal
+    ) {
+
+        validarAcceso(PERMISO_VIEW);
+
+        return service.buscarPorPersona(idDatosPersonal)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // ==========================================================
+    // 🔹 CREAR NUEVO REGISTRO
+    // ==========================================================
+
+    @PostMapping
+    public ResponseEntity<Laboral> crear(
+            @RequestBody Laboral laboral
+    ) {
+
+        validarAcceso(PERMISO_EDIT);
+
+        try {
+            Laboral creado = service.crear(laboral);
+            return ResponseEntity.ok(creado);
+
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(null);
         }
     }
+
+    // ==========================================================
+    // 🔹 ACTUALIZAR REGISTRO EXISTENTE
+    // ==========================================================
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Laboral> actualizar(
+            @PathVariable Integer id,
+            @RequestBody Laboral laboral
+    ) {
+
+        validarAcceso(PERMISO_EDIT);
+
+        return service.actualizar(id, laboral)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // ==========================================================
+    // 🔹 ELIMINAR REGISTRO
+    // ==========================================================
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(
+            @PathVariable Integer id
+    ) {
+
+        validarAcceso(PERMISO_EDIT);
+
+        service.eliminar(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    // ==========================================================
+    // 🔐 SEGURIDAD
+    // ==========================================================
+
+    private void validarAcceso(String permiso) {
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(idUsuario);
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                permiso
+        );
+    }
+}

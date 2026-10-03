@@ -2,12 +2,19 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
 import { LoginComponent } from './core/auth/login/login.component';
 import { MainLayoutComponent } from './layout/main-layout.component';
+import { CambiarPasswordComponent } from './core/auth/cambiar-password/cambiar-password.component';
 
 export const routes: Routes = [
 
   {
     path: 'login',
     component: LoginComponent
+  },
+
+  {
+    path: 'cambiar-password',
+    component: CambiarPasswordComponent,
+    canActivate: [authGuard]
   },
 
   {

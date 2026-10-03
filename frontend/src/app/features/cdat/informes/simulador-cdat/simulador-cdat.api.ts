@@ -18,34 +18,35 @@ export class SimuladorCdatApi {
   private readonly simuladorUrl =
     `${environment.apiUrl}/cdat/informes/simulador-cdat`;
 
-  private readonly reportingUrl =
-    `${environment.apiUrl}/reporting/query`;
-
   constructor(
     private http: HttpClient
   ) {
   }
 
-  buscarAsociados(
+  // ======================================================
+  // BÚSQUEDA DE CUENTAS DE AHORRO
+  // ======================================================
+
+  buscarCuentas(
     filtros: SimuladorBusquedaFiltros
   ): Observable<SimuladorAsociado[]> {
 
-    const req = {
-      schema: 'depositos',
-      view: 'vw_depositos_cuentas_ahorro_total',
-      filters: {
-        documento: filtros.documento,
-        nombres: filtros.nombres,
-        primer_apellido: filtros.primer_apellido,
-        segundo_apellido: filtros.segundo_apellido
+    return this.http.get<SimuladorAsociado[]>(
+      `${this.simuladorUrl}/cuentas-ahorro`,
+      {
+        params: {
+          documento: filtros.documento?.trim() || '',
+          nombres: filtros.nombres?.trim() || '',
+          primerApellido: filtros.primer_apellido?.trim() || '',
+          segundoApellido: filtros.segundo_apellido?.trim() || ''
+        }
       }
-    };
-
-    return this.http.post<SimuladorAsociado[]>(
-      this.reportingUrl,
-      req
     );
   }
+
+  // ======================================================
+  // PREVIEW DEL SIMULADOR
+  // ======================================================
 
   generarPreview(
     entrada: SimuladorCdatEntrada
@@ -55,10 +56,6 @@ export class SimuladorCdatApi {
       `${this.simuladorUrl}/preview`,
       entrada
     );
-  }
-
-  buscarCuentas(req: any): Observable<any> {
-    return this.http.post<any>(this.reportingUrl, req);
   }
 
 }

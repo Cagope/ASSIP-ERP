@@ -2,6 +2,9 @@ package co.assip.erp.depositos.habilidad_asociado;
 
 import co.assip.erp.depositos.habilidad_asociado.dto.HabilidadAsociadoEntradaDTO;
 import co.assip.erp.depositos.habilidad_asociado.dto.HabilidadAsociadoItemDTO;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,20 +32,28 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HabilidadAsociadoController {
 
+    private static final String PERMISO_EXECUTE =
+            "DEPOSITOS_HABILIDAD_ASOCIADO_EXECUTE";
+
     private final HabilidadAsociadoService service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // ===============================================================
-    // 1️⃣ EJECUTAR HABILIDAD / INHABILIDAD
+    // 1. EJECUTAR HABILIDAD / INHABILIDAD
     // ===============================================================
     @PostMapping("/ejecutar")
     public List<HabilidadAsociadoItemDTO> ejecutar(
             @RequestBody HabilidadAsociadoEntradaDTO input
     ) {
+
+        validarAcceso();
+
         return service.ejecutar(input);
     }
 
     // ===============================================================
-    // 2️⃣ ACTUALIZAR ESTADO DE LA CUENTA (A <-> I)
+    // 2. ACTUALIZAR ESTADO DE LA CUENTA (A <-> I)
     // ===============================================================
     @PostMapping("/actualizar-estado")
     public String actualizarEstado(
@@ -50,8 +61,26 @@ public class HabilidadAsociadoController {
             @RequestParam String nuevoEstado
     ) {
 
-        service.actualizarEstado(idCuentaAhorro, nuevoEstado);
+        validarAcceso();
+
+        service.actualizarEstado(
+                idCuentaAhorro,
+                nuevoEstado
+        );
 
         return "OK";
+    }
+
+    private void validarAcceso() {
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO_EXECUTE
+        );
     }
 }

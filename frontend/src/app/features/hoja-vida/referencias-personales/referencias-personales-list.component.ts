@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { finalize, forkJoin } from 'rxjs';
+import { SessionService } from '../../../core/auth/session.service';
 
 import {
   HeaderActionsComponent
@@ -69,11 +70,20 @@ export class ReferenciasPersonalesListComponent
   private readonly exporter =
     inject(ReferenciasPersonalesExporterService);
 
+  private readonly session =
+    inject(SessionService);
+
   personas: PersonaConReferencias[] = [];
   filtradas: PersonaConReferencias[] = [];
 
   cargando = false;
   error = '';
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'HOJAVIDA_PERSONA_EDIT'
+    );
+  }
 
   filtros = {
     documento: '',
@@ -306,13 +316,22 @@ export class ReferenciasPersonalesListComponent
       return;
     }
 
+    // Referencia existente:
+    // VIEW permite ingresar para consultarla.
     if (referencia?.idReferenciaPersonal) {
+
       this.router.navigate([
         '/hoja-vida/referencias-personales',
         referencia.idReferenciaPersonal,
         'editar'
       ]);
 
+      return;
+    }
+
+    // Nueva referencia:
+    // requiere permiso de edición.
+    if (!this.puedeEditar) {
       return;
     }
 

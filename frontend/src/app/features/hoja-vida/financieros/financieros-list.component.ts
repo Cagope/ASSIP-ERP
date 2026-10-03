@@ -29,6 +29,8 @@ import {
   FinancierosExporterService
 } from './financieros-exporter.service';
 
+import { SessionService } from '../../../core/auth/session.service';
+
 type PersonaConFinanciero =
   DatosPersonales & {
     financiero: Financiero | null;
@@ -68,6 +70,15 @@ export class FinancierosListComponent
 
   private readonly exporter =
     inject(FinancierosExporterService);
+
+  private readonly session =
+    inject(SessionService);
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'HOJAVIDA_FINANCIERO_EDIT'
+    );
+  }
 
   personas: PersonaConFinanciero[] = [];
   filtradas: PersonaConFinanciero[] = [];
@@ -297,6 +308,8 @@ export class FinancierosListComponent
       return;
     }
 
+    // Si ya existe información financiera,
+    // VIEW permite ingresar a consultarla.
     if (financiero?.idFinanciero) {
       this.router.navigate([
         '/hoja-vida/financieros',
@@ -304,6 +317,12 @@ export class FinancierosListComponent
         'editar'
       ]);
 
+      return;
+    }
+
+    // Si no existe información financiera,
+    // crearla requiere EDIT.
+    if (!this.puedeEditar) {
       return;
     }
 

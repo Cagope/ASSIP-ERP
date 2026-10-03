@@ -5,6 +5,9 @@ import co.assip.erp.depositos.movimientos.cuentasahorro.dto.MovimientoCuentaPrev
 import co.assip.erp.depositos.movimientos.cuentasahorro.dto.MovimientoCuentaRequestDTO;
 import co.assip.erp.depositos.movimientos.cuentasahorro.dto.MovimientoCuentaResponseDTO;
 import co.assip.erp.depositos.movimientos.cuentasahorro.dto.TipoMovimientoDTO;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +18,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MovimientoCuentaAhorroController {
 
+    private static final String PERMISO_VIEW =
+            "DEPOSITOS_MOVIMIENTOS_VIEW";
+
+    private static final String PERMISO_EDIT =
+            "DEPOSITOS_MOVIMIENTOS_EDIT";
+
     private final MovimientoCuentaAhorroService service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     @GetMapping("/buscar-cuentas")
     public List<CuentaMovimientoDTO> buscarCuentas(
@@ -25,6 +36,9 @@ public class MovimientoCuentaAhorroController {
             @RequestParam(required = false) String primerApellido,
             @RequestParam(required = false) String segundoApellido
     ) {
+
+        validarAcceso(PERMISO_VIEW);
+
         return service.buscarCuentas(
                 idAgencia,
                 documento,
@@ -36,6 +50,9 @@ public class MovimientoCuentaAhorroController {
 
     @GetMapping("/tipos-movimiento")
     public List<TipoMovimientoDTO> listarTiposMovimiento() {
+
+        validarAcceso(PERMISO_VIEW);
+
         return service.listarTiposMovimiento();
     }
 
@@ -43,6 +60,9 @@ public class MovimientoCuentaAhorroController {
     public MovimientoCuentaPreviewDTO preview(
             @RequestBody MovimientoCuentaRequestDTO request
     ) {
+
+        validarAcceso(PERMISO_VIEW);
+
         return service.preview(request);
     }
 
@@ -50,6 +70,17 @@ public class MovimientoCuentaAhorroController {
     public MovimientoCuentaResponseDTO aplicar(
             @RequestBody MovimientoCuentaRequestDTO request
     ) {
+
+        validarAcceso(PERMISO_EDIT);
+
         return service.aplicar(request);
+    }
+
+    private void validarAcceso(String permiso) {
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(usuarioSesionService.idUsuario());
+
+        accessValidator.validarAcceso(usuarioActual, permiso);
     }
 }

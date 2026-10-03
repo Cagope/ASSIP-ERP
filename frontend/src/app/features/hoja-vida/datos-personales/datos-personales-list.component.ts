@@ -18,6 +18,10 @@ import {
   DatosPersonalesExporterService
 } from './datos-personales-exporter.service';
 
+import {
+  SessionService
+} from '../../../core/auth/session.service';
+
 @Component({
   selector: 'app-datos-personales-list',
   standalone: true,
@@ -42,6 +46,15 @@ export class DatosPersonalesListComponent implements OnInit {
 
   private readonly exporter =
     inject(DatosPersonalesExporterService);
+
+  private readonly session =
+    inject(SessionService);
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'HOJAVIDA_PERSONA_EDIT'
+    );
+  }
 
   personas: DatosPersonales[] = [];
   filtradas: DatosPersonales[] = [];

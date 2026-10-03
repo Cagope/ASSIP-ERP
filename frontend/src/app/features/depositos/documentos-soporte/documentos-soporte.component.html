@@ -148,7 +148,7 @@
             type="button"
             class="btn btn--primary btn-sm"
             (click)="prepararAccion(c, 'INCLUIR')"
-            [disabled]="!!accion">
+            [disabled]="!puedeEditar || !!accion">
 
             Crear
 
@@ -159,7 +159,7 @@
             type="button"
             class="btn btn--secondary btn-sm"
             (click)="prepararAccion(c, 'CAMBIAR')"
-            [disabled]="!!accion">
+            [disabled]="!puedeEditar || !!accion">
 
             Cambiar
 
@@ -170,7 +170,7 @@
             type="button"
             class="btn btn--ghost-danger btn-sm"
             (click)="prepararAccion(c, 'INACTIVAR')"
-            [disabled]="!!accion">
+            [disabled]="!puedeEditar || !!accion">
 
             Inhabilitar
 
@@ -326,7 +326,7 @@
         type="button"
         class="btn btn--primary"
         (click)="guardar()"
-        [disabled]="guardando">
+        [disabled]="!puedeEditar || guardando">
 
         Guardar
 

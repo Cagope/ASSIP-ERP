@@ -4,6 +4,9 @@ import { Routes } from '@angular/router';
 import { DocumentosSoporteListComponent }
   from './documentos-soporte-list.component';
 
+// 🔐 Seguridad
+import { permisoGuard } from '../../../../core/auth/permiso.guard';
+
 /**
  * 📌 Rutas — Informe documentos soporte
  * ------------------------------------------------------------
@@ -14,5 +17,9 @@ export const DOCUMENTOS_SOPORTE_INFORME_ROUTES: Routes = [
   {
     path: '',
     component: DocumentosSoporteListComponent,
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'DEPOSITOS_INFORMES_VIEW'
+    }
   }
 ];

@@ -1,52 +1,52 @@
 @use '../../../../styles/forms';
 @use '../../../../styles/informes-base';
 
-/* =========================================
-   USUARIOS LIST
-========================================= */
-
-.usuarios-list {
-  padding: 1rem;
-}
 
 /* =========================================
-   ESTADOS
+   TABLA
 ========================================= */
 
-.loading,
-.empty,
-.error {
-  padding: 1rem;
+.table {
+  width: 100%;
 
-  text-align: center;
+  border-collapse: collapse;
 
-  border-radius: 8px;
+  font-size: 0.88rem;
 
-  font-size: 13px;
-  font-weight: 600;
+  th,
+  td {
+    padding: 0.65rem 0.75rem;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    vertical-align: middle;
+  }
+
+  th {
+    background: #f8fafc;
+
+    color: #334155;
+
+    text-align: left;
+
+    font-weight: 700;
+
+    text-transform: none;
+
+    white-space: nowrap;
+  }
+
+  td {
+    color: #0f172a;
+
+    text-transform: none;
+  }
+
+  tbody tr:hover {
+    background: #f8fafc;
+  }
 }
 
-.loading {
-  background: #f8fafc;
-
-  color: #667085;
-}
-
-.empty {
-  background: #f9fafb;
-
-  color: #6b7280;
-
-  font-style: italic;
-}
-
-.error {
-  background: #fef2f2;
-
-  color: #991b1b;
-
-  border: 1px solid #fecaca;
-}
 
 /* =========================================
    ACCIONES
@@ -54,26 +54,15 @@
 
 .acciones {
   display: flex;
-  justify-content: flex-end;
 
-  gap: 0.4rem;
+  gap: 0.45rem;
 
   flex-wrap: wrap;
-
-  .btn {
-    min-height: 30px;
-
-    padding: 0 10px;
-
-    border-radius: 6px;
-
-    font-size: 12px;
-    font-weight: 600;
-  }
 }
 
+
 /* =========================================
-   BADGES
+   ESTADO
 ========================================= */
 
 .badge {
@@ -81,24 +70,80 @@
   align-items: center;
   justify-content: center;
 
-  min-height: 24px;
+  min-width: 68px;
 
-  padding: 0 10px;
+  padding: 0.22rem 0.5rem;
 
+  border: 1px solid transparent;
   border-radius: 999px;
 
-  color: #fff;
-
-  font-size: 11px;
+  font-size: 0.69rem;
   font-weight: 700;
+
+  line-height: 1.2;
+
+  white-space: nowrap;
 
   text-transform: uppercase;
 }
 
 .badge-success {
-  background: #198754;
+  color: #047857;
+
+  background: #ecfdf5;
+
+  border-color: #a7f3d0;
 }
 
 .badge-danger {
-  background: #dc3545;
+  color: #b91c1c;
+
+  background: #fef2f2;
+
+  border-color: #fecaca;
+}
+
+
+/* =========================================
+   ESTADOS DEL LISTADO
+========================================= */
+
+.loading {
+  margin-top: 1rem;
+
+  text-align: center;
+
+  color: #6b7280;
+
+  font-style: italic;
+}
+
+.empty {
+  margin-top: 1rem;
+
+  text-align: center;
+
+  color: #9ca3af;
+
+  font-size: 0.9rem;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 768px) {
+
+  .usuarios-list {
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 760px;
+  }
+
+  .acciones {
+    flex-wrap: nowrap;
+  }
 }

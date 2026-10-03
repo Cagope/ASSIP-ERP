@@ -34,6 +34,9 @@ export class CuentasAhorroComponent {
   private readonly catalogos = inject(DepositosCatalogosApi);
   private readonly formasApi = inject(FormasAhorroApi);
 
+  readonly puedeEditar =
+    this.session.tienePermiso('DEPOSITOS_CUENTAS_EDIT');
+
   agenciaActiva: any = null;
 
   filtros = {

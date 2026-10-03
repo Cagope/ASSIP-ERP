@@ -132,7 +132,8 @@
       <button
         type="button"
         class="btn btn--primary"
-        (click)="agregar()">
+        (click)="agregar()"
+        [disabled]="!puedeEditar">
 
         {{ editando ? 'Actualizar' : 'Agregar' }}
 
@@ -186,20 +187,18 @@
             class="btn-action-edit"
             type="button"
             (click)="editar(b)"
+            [disabled]="!puedeEditar"
             title="Editar">
-
             ✏️
-
           </button>
 
           <button
             class="btn-action-delete"
             type="button"
             (click)="eliminar(i)"
+            [disabled]="!puedeEditar"
             title="Eliminar">
-
             🗑️
-
           </button>
 
         </td>

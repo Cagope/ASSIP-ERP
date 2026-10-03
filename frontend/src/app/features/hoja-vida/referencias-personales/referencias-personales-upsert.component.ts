@@ -9,6 +9,7 @@ import { ReferenciasPersonalesApi } from './referencias-personales.api';
 import { ReferenciaPersonal } from '../../../shared/models/referencia-personal.model';
 import { CatalogosApi, Departamento, Ciudad } from '../../../shared/catalogos/catalogos.api';
 import { Output, EventEmitter, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { SessionService } from '../../../core/auth/session.service';
 
 /**
  * 👥 Componente Upsert (Crear / Editar) — Referencias Personales
@@ -39,12 +40,19 @@ export class ReferenciasPersonalesUpsertComponent implements OnInit, OnChanges {
   private readonly router = inject(Router);
   private readonly api = inject(ReferenciasPersonalesApi);
   private readonly catalogos = inject(CatalogosApi);
+  private readonly session = inject(SessionService);
 
   // ================================================================
   // 📋 Propiedades
   // ================================================================
   form!: FormGroup;
   editando = false;
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'HOJAVIDA_PERSONA_EDIT'
+    );
+  }
 
   departamentos: Departamento[] = [];
   ciudades: Ciudad[] = [];
@@ -177,6 +185,11 @@ export class ReferenciasPersonalesUpsertComponent implements OnInit, OnChanges {
   // 💾 Guardar o actualizar
   // ================================================================
   guardar(): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       alert('⚠️ Complete los campos obligatorios o revise los formatos.');

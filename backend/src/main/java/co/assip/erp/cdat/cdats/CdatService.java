@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import co.assip.erp.cdat.cdats.dto.CdatAsociadoValidacionDTO;
 import co.assip.erp.cdat.movimientos.CdatMovimientoService;
@@ -36,6 +37,44 @@ public class CdatService {
     public CdatFormDTO obtenerPorId(Long idCuentaCdat) {
         return repository.obtenerPorId(idCuentaCdat)
                 .orElseThrow(() -> new RuntimeException("No se encontró el CDAT."));
+    }
+
+    public List<Map<String, Object>> buscarCuentasAhorro(
+            String documento,
+            String nombres,
+            String primerApellido,
+            String segundoApellido,
+            String codigoCuenta,
+            Integer idAgencia
+    ) {
+
+        boolean sinFiltros =
+                (documento == null || documento.isBlank()) &&
+                        (nombres == null || nombres.isBlank()) &&
+                        (primerApellido == null || primerApellido.isBlank()) &&
+                        (segundoApellido == null || segundoApellido.isBlank()) &&
+                        (codigoCuenta == null || codigoCuenta.isBlank());
+
+        if (sinFiltros) {
+            throw new RuntimeException(
+                    "Debe ingresar al menos un criterio de búsqueda."
+            );
+        }
+
+        if (idAgencia == null) {
+            throw new RuntimeException(
+                    "No se pudo determinar la agencia del usuario."
+            );
+        }
+
+        return repository.buscarCuentasAhorro(
+                documento,
+                nombres,
+                primerApellido,
+                segundoApellido,
+                codigoCuenta,
+                idAgencia
+        );
     }
 
     @Transactional

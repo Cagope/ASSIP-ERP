@@ -1,33 +1,75 @@
-import { Injectable } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
-import { SessionService } from './session.service';
+import {
+  inject
+} from '@angular/core';
 
-@Injectable({ providedIn: 'root' })
-export class PermisoGuard {
+import {
+  CanActivateFn,
+  Router
+} from '@angular/router';
 
-  constructor(
-    private session: SessionService,
-    private router: Router
-  ) {}
+import {
+  SessionService
+} from './session.service';
 
-  canActivate: CanActivateFn = (route, state) => {
-    const permisosRequeridos = route.data?.['permiso'] as string | undefined;
+/**
+ * Protege rutas que requieren un permiso funcional.
+ *
+ * El permiso requerido se declara en:
+ *
+ * data: {
+ *   permiso: 'CODIGO_PERMISO'
+ * }
+ *
+ * ADMIN conserva acceso total mediante
+ * SessionService.tienePermiso().
+ */
+export const permisoGuard: CanActivateFn = (
+  route
+) => {
 
-    // Si la ruta no exige permiso → permitir
-    if (!permisosRequeridos) return true;
+  const router =
+    inject(Router);
 
-    // Si no está logueado → fuera
-    if (!this.session.isAuthenticated()) {
-      this.router.navigate(['/login']);
-      return false;
-    }
+  const session =
+    inject(SessionService);
 
-    // Validar permiso
-    if (!this.session.tienePermiso(permisosRequeridos)) {
-      this.router.navigate(['/acceso-denegado']); // luego creamos esta pantalla
-      return false;
-    }
+  /*
+   * Primero debe existir una sesión autenticada.
+   */
+  if (!session.isAuthenticated()) {
 
+    return router.createUrlTree([
+      '/login'
+    ]);
+  }
+
+  const permisoRequerido =
+    route.data?.['permiso'] as
+      string | undefined;
+
+  /*
+   * Si la ruta no declara un permiso específico,
+   * este guard no agrega restricciones adicionales.
+   */
+  if (!permisoRequerido) {
     return true;
-  };
-}
+  }
+
+  /*
+   * La resolución de permisos pertenece al
+   * SessionService.
+   *
+   * Esto incluye el acceso total de ADMIN.
+   */
+  if (
+    session.tienePermiso(
+      permisoRequerido
+    )
+  ) {
+    return true;
+  }
+
+  return router.createUrlTree([
+    '/acceso-denegado'
+  ]);
+};

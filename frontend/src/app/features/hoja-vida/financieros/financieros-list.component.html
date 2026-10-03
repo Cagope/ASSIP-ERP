@@ -187,25 +187,24 @@
 
           <td class="col-acciones">
 
+            <!-- Registro existente: VIEW puede consultarlo -->
             <button
+              *ngIf="persona.financiero"
               type="button"
               class="btn-action-edit btn-gestionar"
-              (click)="
-                  gestionar(
-                    persona,
-                    persona.financiero
-                  )
-                "
-              [title]="
-                  persona.financiero
-                    ? 'Gestionar información financiera'
-                    : 'Crear información financiera'
-                ">
-              {{
-              persona.financiero
-              ? 'Gestionar'
-              : 'Crear'
-              }}
+              (click)="gestionar(persona, persona.financiero)"
+              title="Gestionar información financiera">
+              Gestionar
+            </button>
+
+            <!-- Registro inexistente: solamente EDIT puede crearlo -->
+            <button
+              *ngIf="!persona.financiero && puedeEditar"
+              type="button"
+              class="btn-action-edit btn-gestionar"
+              (click)="gestionar(persona, null)"
+              title="Crear información financiera">
+              Crear
             </button>
 
           </td>

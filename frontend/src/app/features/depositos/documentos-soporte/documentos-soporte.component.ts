@@ -35,6 +35,9 @@ export class DocumentosSoporteComponent implements OnInit {
   private readonly session = inject(SessionService);
   private readonly exporter = inject(DocumentosSoporteExporterService);
 
+  readonly puedeEditar =
+    this.session.tienePermiso('DEPOSITOS_DOCUMENTOS_SOPORTE_EDIT');
+
   agenciaActiva: any = null;
 
   filtros = {

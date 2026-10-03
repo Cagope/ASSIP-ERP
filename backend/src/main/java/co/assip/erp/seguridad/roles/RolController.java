@@ -1,12 +1,13 @@
 package co.assip.erp.seguridad.roles;
 
-import co.assip.erp.seguridad.usuarios.Usuario;
 import co.assip.erp.seguridad.autorizacion.AccessValidator;
-import co.assip.erp.seguridad.usuarios.UsuarioService;
+import co.assip.erp.seguridad.roles.dto.RolDTO;
+import co.assip.erp.seguridad.usuarios.Usuario;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 
 import java.util.List;
 
@@ -14,8 +15,12 @@ import java.util.List;
  * API REST para la administración de roles de seguridad.
  *
  * Un rol representa una responsabilidad funcional dentro del ERP.
+ *
  * La asignación de permisos y la asignación de usuarios se administran
  * mediante sus procesos correspondientes.
+ *
+ * Las respuestas REST utilizan DTO para evitar exponer directamente
+ * entidades administradas por Hibernate.
  */
 @RestController
 @RequestMapping("/seguridad/roles")
@@ -23,7 +28,7 @@ import java.util.List;
 public class RolController {
 
     private final RolService rolService;
-    private final UsuarioService usuarioService;
+    private final UsuarioSesionService usuarioSesionService;
     private final AccessValidator accessValidator;
 
     /**
@@ -32,12 +37,14 @@ public class RolController {
      * Requiere el permiso ROLES_VIEW.
      */
     @GetMapping
-    public ResponseEntity<List<Rol>> listar(HttpServletRequest request) {
+    public ResponseEntity<List<RolDTO>> listar(
+            HttpServletRequest request
+    ) {
 
         validarAcceso(request, "ROLES_VIEW");
 
         return ResponseEntity.ok(
-                rolService.listar()
+                rolService.listarDto()
         );
     }
 
@@ -47,7 +54,7 @@ public class RolController {
      * Requiere el permiso ROLES_VIEW.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Rol> buscar(
+    public ResponseEntity<RolDTO> buscar(
             @PathVariable Integer id,
             HttpServletRequest request
     ) {
@@ -55,7 +62,7 @@ public class RolController {
         validarAcceso(request, "ROLES_VIEW");
 
         return ResponseEntity.ok(
-                rolService.buscarPorId(id)
+                rolService.buscarDtoPorId(id)
         );
     }
 
@@ -65,15 +72,18 @@ public class RolController {
      * Requiere el permiso ROLES_EDIT.
      */
     @PostMapping
-    public ResponseEntity<Rol> crear(
+    public ResponseEntity<RolDTO> crear(
             @RequestBody Rol rol,
             HttpServletRequest request
     ) {
 
         validarAcceso(request, "ROLES_EDIT");
 
+        Rol creado =
+                rolService.crear(rol);
+
         return ResponseEntity.ok(
-                rolService.crear(rol)
+                rolService.convertirDto(creado)
         );
     }
 
@@ -84,7 +94,7 @@ public class RolController {
      * Requiere el permiso ROLES_EDIT.
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Rol> actualizar(
+    public ResponseEntity<RolDTO> actualizar(
             @PathVariable Integer id,
             @RequestBody Rol rol,
             HttpServletRequest request
@@ -92,8 +102,14 @@ public class RolController {
 
         validarAcceso(request, "ROLES_EDIT");
 
+        Rol actualizado =
+                rolService.actualizar(
+                        id,
+                        rol
+                );
+
         return ResponseEntity.ok(
-                rolService.actualizar(id, rol)
+                rolService.convertirDto(actualizado)
         );
     }
 
@@ -103,7 +119,7 @@ public class RolController {
      * Requiere el permiso ROLES_EDIT.
      */
     @PatchMapping("/{id}/estado")
-    public ResponseEntity<Rol> cambiarEstado(
+    public ResponseEntity<RolDTO> cambiarEstado(
             @PathVariable Integer id,
             @RequestParam boolean activo,
             HttpServletRequest request
@@ -111,8 +127,14 @@ public class RolController {
 
         validarAcceso(request, "ROLES_EDIT");
 
+        Rol actualizado =
+                rolService.cambiarEstado(
+                        id,
+                        activo
+                );
+
         return ResponseEntity.ok(
-                rolService.cambiarEstado(id, activo)
+                rolService.convertirDto(actualizado)
         );
     }
 
@@ -125,8 +147,10 @@ public class RolController {
             String permiso
     ) {
 
-        Usuario usuarioActual =
-                usuarioService.getUsuarioActual(request);
+        Integer idUsuario = usuarioSesionService.idUsuario();
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(idUsuario);
 
         accessValidator.validarAcceso(
                 usuarioActual,

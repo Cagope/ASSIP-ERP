@@ -43,6 +43,10 @@ import {
   CondicionesProteccionExporterService
 } from './condiciones-proteccion-exporter.service';
 
+import {
+  SessionService
+} from '../../../core/auth/session.service';
+
 /**
  * Persona del listado general con su información
  * de condiciones de protección asociada.
@@ -100,6 +104,9 @@ export class CondicionesProteccionListComponent
   private readonly exporter =
     inject(CondicionesProteccionExporterService);
 
+  private readonly session =
+    inject(SessionService);
+
   personas:
     PersonaConCondicionProteccion[] = [];
 
@@ -109,6 +116,12 @@ export class CondicionesProteccionListComponent
   cargando = false;
 
   error = '';
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'HOJAVIDA_PROTECCION_EDIT'
+    );
+  }
 
   filtros = {
     documento: '',
@@ -375,17 +388,24 @@ export class CondicionesProteccionListComponent
       return;
     }
 
+    // Registro existente:
+    // VIEW permite ingresar para consultarlo.
     if (
       condicionProteccion
         ?.idCondicionProteccion
     ) {
       this.router.navigate([
         '/hoja-vida/condiciones-proteccion',
-        condicionProteccion
-          .idCondicionProteccion,
+        condicionProteccion.idCondicionProteccion,
         'editar'
       ]);
 
+      return;
+    }
+
+    // Registro nuevo:
+    // requiere HOJAVIDA_PROTECCION_EDIT.
+    if (!this.puedeEditar) {
       return;
     }
 

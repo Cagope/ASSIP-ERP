@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { permisoGuard } from '../../../core/auth/permiso.guard';
 
 export const CDATS_ROUTES: Routes = [
 
@@ -7,6 +8,10 @@ export const CDATS_ROUTES: Routes = [
     loadComponent: () =>
       import('./cdats-list.component')
         .then(m => m.CdatsListComponent),
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CDAT_CUENTAS_VIEW'
+    }
   },
 
   {
@@ -14,6 +19,10 @@ export const CDATS_ROUTES: Routes = [
     loadComponent: () =>
       import('./cdats-upsert.component')
         .then(m => m.CdatsUpsertComponent),
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CDAT_APERTURA_CREATE'
+    }
   },
 
   {
@@ -21,6 +30,10 @@ export const CDATS_ROUTES: Routes = [
     loadComponent: () =>
       import('./cdats-upsert.component')
         .then(m => m.CdatsUpsertComponent),
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CDAT_CUENTAS_VIEW'
+    }
   }
 
 ];

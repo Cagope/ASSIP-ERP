@@ -93,8 +93,8 @@
             class="btn-action-edit"
             type="button"
             (click)="seleccionarPersona(c)"
-            title="Editar cuenta">
-            ✏️
+            title="Consultar cuenta">
+            👁️
           </button>
 
           <button
@@ -122,7 +122,7 @@
 
         <td>
           <button
-            *ngIf="esPrimeraFilaAsociado(c, i)"
+            *ngIf="puedeEditar && esPrimeraFilaAsociado(c, i)"
             type="button"
             class="btn btn--success btn-nueva-cuenta"
             (click)="abrirNuevaCuenta(asociadoDesdeFila(c))"
@@ -279,7 +279,8 @@
 
         <button
           type="submit"
-          class="btn btn--primary">
+          class="btn btn--primary"
+          [disabled]="!puedeEditar">
           Validar
         </button>
 
@@ -307,7 +308,8 @@
       <button
         type="button"
         class="btn btn--primary"
-        (click)="crear()">
+        (click)="crear()"
+        [disabled]="!puedeEditar">
         Guardar
       </button>
 

@@ -2,12 +2,7 @@ import { Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import { ReportingService } from '../../../../shared/reporting/reporting.service';
-
-import {
-  ReportQueryRequest,
-  ReportResult
-} from '../../../../shared/reporting/reporting.api';
+import { ConsultaCdatsService } from './consulta-cdats.service';
 
 import { ConsultaCdatsExtractoPrintService }
 from './consulta-cdats-extracto-print.service';
@@ -27,7 +22,7 @@ from './consulta-cdats-extracto-exporter.service';
 })
 export class ConsultaCdatsDetalleComponent implements OnInit {
 
-  private readonly reporting = inject(ReportingService);
+  private readonly consultaCdatsService = inject(ConsultaCdatsService);
   private readonly printService = inject(ConsultaCdatsExtractoPrintService);
   private readonly exporterService = inject(ConsultaCdatsExtractoExporterService);
 
@@ -87,6 +82,11 @@ export class ConsultaCdatsDetalleComponent implements OnInit {
       return;
     }
 
+    if (!this.cdat?.codigo_cdat) {
+      this.errorExtracto = 'El CDAT seleccionado no tiene código.';
+      return;
+    }
+
     if (!this.fechaInicial || !this.fechaFinal) {
       this.errorExtracto = 'Debe seleccionar fechas.';
       return;
@@ -106,22 +106,12 @@ export class ConsultaCdatsDetalleComponent implements OnInit {
 
     try {
 
-      const req: ReportQueryRequest = {
-        schema: 'cdat',
-        view: 'vw_cdat_extractos_total',
-        filters: {
-          codigo_cdat: this.cdat.codigo_cdat,
-          fecha_movimiento_desde: this.fechaInicial,
-          fecha_movimiento_hasta: this.fechaFinal
-        }
-      };
-
-      const res: ReportResult =
-        await this.reporting.ejecutarReporte(req);
-
-      this.movimientos = (res.data ?? []).filter(
-        (m: any) => String(m.codigo_cdat) === String(this.cdat.codigo_cdat)
-      );
+      this.movimientos =
+        await this.consultaCdatsService.consultarExtracto(
+          String(this.cdat.codigo_cdat),
+          this.fechaInicial,
+          this.fechaFinal
+        );
 
       this.calcularResumenPorMovimiento();
 
@@ -140,7 +130,6 @@ export class ConsultaCdatsDetalleComponent implements OnInit {
     } finally {
 
       this.cargandoExtracto = false;
-
     }
   }
 
@@ -214,7 +203,6 @@ export class ConsultaCdatsDetalleComponent implements OnInit {
           descripcionMovimiento: descripcion,
           valor: 0
         });
-
       }
 
       const item = mapa.get(key);
@@ -223,7 +211,7 @@ export class ConsultaCdatsDetalleComponent implements OnInit {
         Number(m.valor_debito) || 0;
 
       const credito =
-        Number(m.valor_credito) || 0;
+        Number(m.valor_creditito) || 0;
 
       item.valor +=
         credito > 0
@@ -249,6 +237,4 @@ export class ConsultaCdatsDetalleComponent implements OnInit {
       this.resumenPorMovimiento
     );
   }
-
-
 }

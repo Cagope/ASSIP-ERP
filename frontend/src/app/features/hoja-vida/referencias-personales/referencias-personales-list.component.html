@@ -211,9 +211,7 @@
           </tr>
 
           <tr
-            *ngIf="
-                persona.referencias.length === 0
-              ">
+            *ngIf="persona.referencias.length === 0">
 
             <td>
               {{ persona.tipoDocumento }}
@@ -235,6 +233,7 @@
             <td class="col-acciones">
 
               <button
+                *ngIf="puedeEditar"
                 type="button"
                 class="btn-action-edit btn-gestionar"
                 (click)="gestionar(persona, null)"

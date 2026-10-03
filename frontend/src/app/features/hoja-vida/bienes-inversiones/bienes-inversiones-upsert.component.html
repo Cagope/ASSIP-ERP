@@ -91,6 +91,7 @@
       </div>
 
       <button
+        *ngIf="puedeEditar"
         type="button"
         class="btn btn--primary"
         (click)="nuevo()">
@@ -178,7 +179,7 @@
         </td>
 
         <td>
-          <div class="acciones">
+          <div class="acciones" *ngIf="puedeEditar">
 
             <button
               class="btn-action-edit"
@@ -443,7 +444,7 @@
         <button
           type="submit"
           class="btn btn--primary"
-          [disabled]="guardando">
+          [disabled]="guardando || !puedeEditar">
 
           {{
           guardando

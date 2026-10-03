@@ -43,6 +43,10 @@ import {
   ResidenciaFiscalExporterService
 } from './residencia-fiscal-exporter.service';
 
+import {
+  SessionService
+} from '../../../core/auth/session.service';
+
 /**
  * Persona del listado general con su información
  * de residencia fiscal asociada.
@@ -93,6 +97,9 @@ export class ResidenciaFiscalListComponent
   private readonly exporter =
     inject(ResidenciaFiscalExporterService);
 
+  private readonly session =
+    inject(SessionService);
+
   personas: PersonaConResidenciaFiscal[] = [];
 
   filtradas: PersonaConResidenciaFiscal[] = [];
@@ -100,6 +107,12 @@ export class ResidenciaFiscalListComponent
   cargando = false;
 
   error = '';
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'HOJAVIDA_FISCAL_EDIT'
+    );
+  }
 
   filtros = {
     documento: '',
@@ -363,17 +376,24 @@ export class ResidenciaFiscalListComponent
       return;
     }
 
+    // Registro existente:
+    // VIEW permite ingresar para consultarlo.
     if (
       residenciaFiscal
         ?.idResidenciaFiscal
     ) {
       this.router.navigate([
         '/hoja-vida/residencia-fiscal',
-        residenciaFiscal
-          .idResidenciaFiscal,
+        residenciaFiscal.idResidenciaFiscal,
         'editar'
       ]);
 
+      return;
+    }
+
+    // Registro nuevo:
+    // requiere HOJAVIDA_FISCAL_EDIT.
+    if (!this.puedeEditar) {
       return;
     }
 

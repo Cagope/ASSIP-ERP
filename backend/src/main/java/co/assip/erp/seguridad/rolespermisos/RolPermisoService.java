@@ -4,6 +4,7 @@ import co.assip.erp.seguridad.permisos.Permiso;
 import co.assip.erp.seguridad.permisos.PermisoRepository;
 import co.assip.erp.seguridad.roles.Rol;
 import co.assip.erp.seguridad.roles.RolRepository;
+import co.assip.erp.seguridad.rolespermisos.dto.RolPermisoDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +61,7 @@ public class RolPermisoService {
      * @return permisos asignados al rol
      */
     @Transactional(readOnly = true)
-    public List<Permiso> listarPermisos(Integer idRol) {
+    public List<RolPermisoDTO> listarPermisos(Integer idRol) {
 
         validarRol(idRol);
 
@@ -68,6 +69,7 @@ public class RolPermisoService {
                 .findByRol_IdRol(idRol)
                 .stream()
                 .map(RolPermiso::getPermiso)
+                .map(this::toDTO)
                 .toList();
     }
 
@@ -82,7 +84,7 @@ public class RolPermisoService {
      * @return permisos finalmente asignados
      */
     @Transactional
-    public List<Permiso> asignarPermisos(
+    public List<RolPermisoDTO> asignarPermisos(
             Integer idRol,
             List<Integer> idPermisos
     ) {
@@ -116,7 +118,23 @@ public class RolPermisoService {
             rolPermisoRepository.save(relacion);
         }
 
-        return permisos;
+        return permisos.stream()
+                .map(this::toDTO)
+                .toList();
+    }
+
+    /**
+     * Convierte la entidad de permiso a la representación
+     * utilizada por la API de roles y permisos.
+     */
+    private RolPermisoDTO toDTO(Permiso permiso) {
+
+        return new RolPermisoDTO(
+                permiso.getIdPermiso(),
+                permiso.getCodigo(),
+                permiso.getDescripcion(),
+                permiso.getActivo()
+        );
     }
 
     /**

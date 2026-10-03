@@ -172,7 +172,6 @@ export interface CdatAperturaPreviewDTO {
 export class CdatsApi {
 
   private readonly baseUrl = `${environment.apiUrl}/cdat/cdats`;
-  private readonly reportingUrl = `${environment.apiUrl}/reporting/query`;
 
   constructor(private http: HttpClient) {}
 
@@ -190,8 +189,40 @@ export class CdatsApi {
     });
   }
 
-  buscarCuentas(req: any): Observable<any> {
-    return this.http.post<any>(this.reportingUrl, req);
+  buscarCuentasAhorro(filtros: {
+    documento?: string;
+    nombres?: string;
+    primerApellido?: string;
+    segundoApellido?: string;
+    codigoCuenta?: string;
+  }): Observable<any[]> {
+
+    const params: Record<string, string> = {};
+
+    if (filtros.documento?.trim()) {
+      params['documento'] = filtros.documento.trim();
+    }
+
+    if (filtros.nombres?.trim()) {
+      params['nombres'] = filtros.nombres.trim();
+    }
+
+    if (filtros.primerApellido?.trim()) {
+      params['primerApellido'] = filtros.primerApellido.trim();
+    }
+
+    if (filtros.segundoApellido?.trim()) {
+      params['segundoApellido'] = filtros.segundoApellido.trim();
+    }
+
+    if (filtros.codigoCuenta?.trim()) {
+      params['codigoCuenta'] = filtros.codigoCuenta.trim();
+    }
+
+    return this.http.get<any[]>(
+      `${this.baseUrl}/cuentas-ahorro`,
+      { params }
+    );
   }
 
   validarAsociado(documento: string): Observable<CdatAsociadoValidacionDTO> {

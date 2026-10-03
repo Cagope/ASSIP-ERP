@@ -3,6 +3,11 @@ package co.assip.erp.depositos.apertura_cuentas;
 import co.assip.erp.depositos.apertura_cuentas.dto.AperturaCuentaItemDTO;
 import co.assip.erp.depositos.apertura_cuentas.dto.AperturaCuentasEntradaDTO;
 import co.assip.erp.depositos.apertura_cuentas.dto.AperturaCuentasRespuestaDTO;
+
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,7 +18,12 @@ import java.util.List;
 @RequestMapping("/hoja-vida/apertura-cuentas")
 public class AperturaCuentasController {
 
+    private static final String PERMISO_APERTURA =
+            "HOJAVIDA_APERTURA_CUENTAS";
+
     private final AperturaCuentasService service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // ============================================================
     // 🔹 0. VALIDAR (usado por botón "Gestionar")
@@ -23,8 +33,19 @@ public class AperturaCuentasController {
             @PathVariable Integer idPersona,
             @PathVariable Integer idAgencia
     ) {
-        System.out.println("🔥 VALIDANDO apertura -> persona=" + idPersona + " agencia=" + idAgencia);
-        return service.validarApertura(idPersona, idAgencia);
+        validarAcceso();
+
+        System.out.println(
+                "🔥 VALIDANDO apertura -> persona="
+                        + idPersona
+                        + " agencia="
+                        + idAgencia
+        );
+
+        return service.validarApertura(
+                idPersona,
+                idAgencia
+        );
     }
 
     // ============================================================
@@ -32,7 +53,10 @@ public class AperturaCuentasController {
     //    NO valida, solo retorna formas para el formulario
     // ============================================================
     @GetMapping("/formas/{idPersona}")
-    public List<AperturaCuentaItemDTO> listarFormas(@PathVariable Integer idPersona) {
+    public List<AperturaCuentaItemDTO> listarFormas(
+            @PathVariable Integer idPersona
+    ) {
+        validarAcceso();
 
         System.out.println("🔥 listarFormas ejecutándose");
         System.out.println("Persona = " + idPersona);
@@ -45,8 +69,32 @@ public class AperturaCuentasController {
     // 🔹 2. CREAR LAS DOS CUENTAS
     // ============================================================
     @PostMapping
-    public AperturaCuentasRespuestaDTO crear(@RequestBody AperturaCuentasEntradaDTO dto) {
+    public AperturaCuentasRespuestaDTO crear(
+            @RequestBody AperturaCuentasEntradaDTO dto
+    ) {
+        validarAcceso();
+
         System.out.println("🔥 Crear cuentas ejecutándose");
+
         return service.crear(dto);
+    }
+
+    // ============================================================
+    // 🔐 SEGURIDAD
+    // ============================================================
+    private void validarAcceso() {
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        Usuario usuarioActual =
+                new Usuario();
+
+        usuarioActual.setIdUsuario(idUsuario);
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO_APERTURA
+        );
     }
 }

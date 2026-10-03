@@ -8,15 +8,36 @@
 export const seguridadMenu = {
   title: 'Seguridad',
   items: [
-    // 👤 CRUD Usuarios
+
+    // =====================================================
+    // USUARIOS
+    // =====================================================
+
     {
       label: 'Usuarios',
       route: '/seguridad/usuarios',
-      permiso: 'USUARIOS_VIEW'   // ⭐ SE AGREGA SOLO ESTO
+      permiso: 'USUARIOS_VIEW'
     },
 
-    // Aquí se agregarán más submódulos cuando existan:
-    // { label: 'Roles', route: '/seguridad/roles', permiso: 'ROLES_VIEW' },
-    // { label: 'Permisos', route: '/seguridad/permisos', permiso: 'PERMISOS_VIEW' },
+    // =====================================================
+    // ROLES
+    // =====================================================
+
+    {
+      label: 'Roles',
+      route: '/seguridad/roles',
+      permiso: 'ROLES_VIEW'
+    },
+
+    // =====================================================
+    // PERMISOS
+    // =====================================================
+
+    {
+      label: 'Permisos',
+      route: '/seguridad/permisos',
+      permiso: 'PERMISOS_VIEW'
+    }
+
   ],
 };

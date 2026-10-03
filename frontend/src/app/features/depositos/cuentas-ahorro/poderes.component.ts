@@ -12,6 +12,7 @@ import { FormsModule } from '@angular/forms';
 
 import { PoderDTO } from '../../../shared/models/poder.model';
 import { CuentasAhorroApi } from './cuentas-ahorro.api';
+import { SessionService } from '../../../core/auth/session.service';
 
 @Component({
   selector: 'app-poderes',
@@ -23,6 +24,11 @@ import { CuentasAhorroApi } from './cuentas-ahorro.api';
 export class PoderesComponent implements OnChanges {
 
   private readonly api = inject(CuentasAhorroApi);
+
+  private readonly session = inject(SessionService);
+
+  readonly puedeEditar =
+    this.session.tienePermiso('DEPOSITOS_CUENTAS_EDIT');
 
   @Input() idCuentaAhorro: number | null = null;
   @Input() poderes: PoderDTO[] = [];

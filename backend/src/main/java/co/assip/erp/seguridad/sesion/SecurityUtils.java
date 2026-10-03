@@ -8,23 +8,21 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Utilidades para consultar el contexto de seguridad
- * del usuario autenticado.
+ * Utilidades para consultar el contexto técnico
+ * de la sesión autenticada.
  *
- * La información se obtiene de los claims del JWT
- * almacenados por el filtro de autenticación en el
- * SecurityContext de Spring Security.
+ * El JWT conserva únicamente información de identidad
+ * y contexto de agencias.
+ *
+ * Los roles y permisos funcionales no se obtienen desde aquí.
  */
 public final class SecurityUtils {
-
-    private static final Integer ID_ROL_ADMIN = 1;
 
     private SecurityUtils() {
     }
 
     /**
-     * Obtiene los claims del JWT correspondiente
-     * a la sesión autenticada.
+     * Obtiene los claims asociados a la sesión autenticada.
      */
     private static Claims getClaims() {
 
@@ -33,7 +31,8 @@ public final class SecurityUtils {
                         .getContext()
                         .getAuthentication();
 
-        if (authentication == null) {
+        if (authentication == null
+                || !authentication.isAuthenticated()) {
             return null;
         }
 
@@ -50,7 +49,8 @@ public final class SecurityUtils {
     /**
      * Obtiene el identificador del usuario autenticado.
      *
-     * @return id del usuario o null si no existe sesión válida
+     * @return id del usuario o null cuando no existe
+     *         una sesión JWT válida
      */
     public static Integer getIdUsuario() {
 
@@ -68,7 +68,7 @@ public final class SecurityUtils {
 
     /**
      * Obtiene las agencias incluidas en el contexto
-     * de seguridad del usuario.
+     * de la sesión autenticada.
      */
     public static List<Integer> getAgencias() {
 
@@ -78,18 +78,21 @@ public final class SecurityUtils {
             return Collections.emptyList();
         }
 
-        Object valor = claims.get("agencias");
+        Object valor =
+                claims.get("agencias");
 
         if (!(valor instanceof List<?> lista)) {
             return Collections.emptyList();
         }
 
         try {
+
             return lista.stream()
                     .map(SecurityUtils::convertirAInteger)
                     .toList();
 
         } catch (RuntimeException ex) {
+
             throw new SecurityException(
                     "No fue posible obtener las agencias del usuario.",
                     ex
@@ -98,54 +101,8 @@ public final class SecurityUtils {
     }
 
     /**
-     * Convierte un valor numérico proveniente del JWT
-     * a Integer.
-     */
-    private static Integer convertirAInteger(
-            Object valor
-    ) {
-
-        if (valor instanceof Integer integer) {
-            return integer;
-        }
-
-        if (valor instanceof Number numero) {
-            return numero.intValue();
-        }
-
-        throw new SecurityException(
-                "El identificador de agencia del token no es válido."
-        );
-    }
-
-    /**
-     * Obtiene el identificador del rol autenticado.
-     *
-     * @return id del rol o null si no existe en el contexto
-     */
-    public static Integer getIdRol() {
-
-        Claims claims = getClaims();
-
-        if (claims == null) {
-            return null;
-        }
-
-        Object valor = claims.get("rol");
-
-        if (valor == null) {
-            return null;
-        }
-
-        return convertirAInteger(valor);
-    }
-
-    /**
-     * Valida que el usuario autenticado tenga acceso
-     * a una agencia determinada.
-     *
-     * Si idAgencia es null no se realiza validación,
-     * conservando el comportamiento actual del ERP.
+     * Valida que la agencia indicada pertenezca
+     * al contexto autorizado de la sesión.
      */
     public static void validarAgencia(
             Integer idAgencia
@@ -163,20 +120,8 @@ public final class SecurityUtils {
     }
 
     /**
-     * Indica si el usuario posee acceso administrativo total.
-     *
-     * Actualmente corresponde al rol ADMIN con id 1.
-     */
-    public static boolean tieneAccesoTotal() {
-
-        Integer idRol = getIdRol();
-
-        return ID_ROL_ADMIN.equals(idRol);
-    }
-
-    /**
-     * Verifica si la agencia indicada pertenece al conjunto
-     * de agencias autorizadas del usuario autenticado.
+     * Determina si una agencia pertenece al conjunto
+     * de agencias incluido en la sesión.
      */
     public static boolean perteneceA(
             Integer idAgencia
@@ -186,6 +131,28 @@ public final class SecurityUtils {
             return false;
         }
 
-        return getAgencias().contains(idAgencia);
+        return getAgencias()
+                .contains(idAgencia);
+    }
+
+    /**
+     * Convierte un identificador numérico procedente
+     * del JWT a Integer.
+     */
+    private static Integer convertirAInteger(
+            Object valor
+    ) {
+
+        if (valor instanceof Integer integer) {
+            return integer;
+        }
+
+        if (valor instanceof Number numero) {
+            return numero.intValue();
+        }
+
+        throw new SecurityException(
+                "El identificador de agencia del token no es válido."
+        );
     }
 }

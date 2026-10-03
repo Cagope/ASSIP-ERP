@@ -1,7 +1,9 @@
 package co.assip.erp.depositos.informes.rangos;
 
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
 import org.springframework.web.bind.annotation.*;
-import co.assip.erp.depositos.informes.rangos.RangosItemDTO;
 
 import java.util.List;
 
@@ -11,40 +13,51 @@ import java.util.List;
  * Endpoint único para generar informes estadísticos de cuentas
  * por rangos:
  *
- *   - EDAD        (años)
- *   - SALDO       (pesos)
- *   - ANTIGUEDAD  (años)
- *
- * Body:
- *  {
- *      "tipo": "EDAD" | "SALDO" | "ANTIGUEDAD",
- *      "rangos": [
- *          { "desde": 0, "hasta": 20 },
- *          { "desde": 21, "hasta": 40 },
- *          { "desde": 41, "hasta": 60 },
- *          { "desde": 61, "hasta": 120 }
- *      ]
- *  }
- *
- * Retorna:
- *  List<RangosItemDTO>   (resultado plano para tabla o Excel)
+ * - EDAD
+ * - SALDO
+ * - ANTIGUEDAD
  */
 @RestController
 @RequestMapping("/depositos/informes/rangos")
 public class RangosController {
 
-    private final RangosService service;
+    private static final String PERMISO_VIEW =
+            "DEPOSITOS_INFORMES_VIEW";
 
-    public RangosController(RangosService service) {
+    private final RangosService service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
+
+    public RangosController(
+            RangosService service,
+            UsuarioSesionService usuarioSesionService,
+            AccessValidator accessValidator
+    ) {
         this.service = service;
+        this.usuarioSesionService = usuarioSesionService;
+        this.accessValidator = accessValidator;
     }
 
-    /**
-     * 📌 POST /depositos/informes/rangos
-     * Genera el informe según el tipo y los rangos enviados.
-     */
     @PostMapping
-        public List<RangosItemDTO> consultar(@RequestBody RangosRequestDTO request) {
+    public List<RangosItemDTO> consultar(
+            @RequestBody RangosRequestDTO request
+    ) {
+
+        validarAcceso();
+
         return service.consultar(request);
+    }
+
+    private void validarAcceso() {
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO_VIEW
+        );
     }
 }

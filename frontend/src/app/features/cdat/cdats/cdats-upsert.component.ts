@@ -173,58 +173,32 @@ export class CdatsUpsertComponent extends CdatsUpsertValores implements OnInit {
 
     this.cargandoBusqueda = true;
 
-    const agenciaCodigo =
-      this.agenciaActiva?.codigo_agencia ||
-      this.agenciaActiva?.codigoAgencia ||
-      this.agenciaActiva?.codigo ||
-      this.agenciaActiva?.id_agencia ||
-      this.agenciaActiva?.idAgencia ||
-      null;
-
-    const req = {
-      schema: 'depositos',
-      view: 'vw_depositos_cuentas_ahorro_total',
-      filters: {
-        documento: this.filtros.documento,
-        nombres: this.filtros.nombres,
-        primer_apellido: this.filtros.primer_apellido,
-        segundo_apellido: this.filtros.segundo_apellido,
-        codigo_cuenta: this.filtros.codigo_cuenta,
-        codigo_agencia: agenciaCodigo,
-        cuenta_activa: 'A'
-      }
-    };
-
-    this.api.buscarCuentas(req).subscribe({
-      next: (res: any) => {
-        const data = res?.data ?? [];
-
-        this.resultados = data.filter((c: any) => {
-
-          const estado =
-            String(c.codigo_estado ?? '')
-              .trim()
-              .toUpperCase();
-
-          const forma =
-            Number(c.id_forma_ahorro ?? c.idFormaAhorro);
-
-          return estado === 'A';
-
-
-        });
-
-        this.resultados = this.resultados.sort((a: any, b: any) =>
-          String(a.codigo_forma ?? '').localeCompare(String(b.codigo_forma ?? ''))
+    this.api.buscarCuentasAhorro({
+      documento: this.filtros.documento,
+      nombres: this.filtros.nombres,
+      primerApellido: this.filtros.primer_apellido,
+      segundoApellido: this.filtros.segundo_apellido,
+      codigoCuenta: this.filtros.codigo_cuenta
+    }).subscribe({
+      next: (data: any[]) => {
+        this.resultados = (data ?? []).sort((a: any, b: any) =>
+          String(a.codigo_forma ?? '')
+            .localeCompare(String(b.codigo_forma ?? ''))
         );
 
         if (!this.resultados.length) {
           this.errorBusqueda = 'No se encontraron cuentas activas.';
         }
       },
-      error: err => {
-        this.errorBusqueda = err.error?.message || 'Error consultando cuentas.';
+
+      error: (err: any) => {
+        this.errorBusqueda =
+          err?.error?.message ||
+          'Error consultando cuentas.';
+
+        this.cargandoBusqueda = false;
       },
+
       complete: () => {
         this.cargandoBusqueda = false;
       }

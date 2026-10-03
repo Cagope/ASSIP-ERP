@@ -1,55 +1,91 @@
-<div class="page">
+<div class="usuarios-list">
 
-  <!-- ENCABEZADO -->
   <app-header-actions
-    titulo="👤 Usuarios"
+    titulo="Usuarios"
     [mostrarNuevo]="true"
     [mostrarExportar]="false"
     [mostrarImprimir]="false"
     (nuevo)="nuevo()">
   </app-header-actions>
 
-  <!-- TABLA DE USUARIOS -->
-  <div class="table-responsive mt-3">
+  <table
+    *ngIf="!cargando() && usuarios().length > 0"
+    class="table table-striped">
 
-    <table class="table table-sm table-striped align-middle">
-      <thead>
-      <tr>
-        <th>Usuario</th>
-        <th>Nombre Completo</th>
-        <th>Email</th>
-        <th>Rol</th>
-        <th>Activo</th>
-        <th style="width: 80px;"></th>
-      </tr>
-      </thead>
+    <thead>
+    <tr>
+      <th>Usuario</th>
+      <th>Nombre completo</th>
+      <th>Correo electrónico</th>
+      <th>Roles</th>
+      <th>Estado</th>
+      <th>Acciones</th>
+    </tr>
+    </thead>
 
-      <tbody>
-      <tr *ngFor="let u of usuarios()">
-        <td>{{ u.username }}</td>
-        <td>{{ u.nombreCompleto }}</td>
-        <td>{{ u.email }}</td>
-        <td>{{ u.nombreRol }}</td>
+    <tbody>
 
-        <td>
-          <span
-            class="badge"
-            [class.bg-success]="u.activo"
-            [class.bg-danger]="!u.activo">
-            {{ u.activo ? 'Sí' : 'No' }}
-          </span>
-        </td>
+    <tr *ngFor="let u of usuarios()">
 
-        <td class="text-end">
+      <td>
+        {{ u.username }}
+      </td>
+
+      <td>
+        {{ u.nombreCompleto }}
+      </td>
+
+      <td>
+        {{ u.email || '—' }}
+      </td>
+
+      <td>
+        {{ nombresRoles(u) || '—' }}
+      </td>
+
+      <td>
+        <span
+          class="badge"
+          [class.badge-success]="u.activo"
+          [class.badge-danger]="!u.activo">
+
+          {{ u.activo ? 'Activo' : 'Inactivo' }}
+
+        </span>
+      </td>
+
+      <td>
+        <div class="acciones">
+
           <button
-            class="btn btn-sm btn-primary"
-            (click)="editar(u.idUsuario!)">
+            class="btn-action-edit"
+            type="button"
+            (click)="editar(u.idUsuario)"
+            title="Editar">
             ✏️
           </button>
-        </td>
-      </tr>
-      </tbody>
-    </table>
 
+        </div>
+      </td>
+
+    </tr>
+
+    </tbody>
+
+  </table>
+
+
+  <div
+    *ngIf="cargando()"
+    class="loading">
+    Cargando usuarios...
   </div>
+
+
+  <div
+    *ngIf="!cargando() && usuarios().length === 0"
+    class="empty">
+    No hay usuarios registrados.
+  </div>
+
 </div>

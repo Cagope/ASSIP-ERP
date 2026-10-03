@@ -96,6 +96,7 @@
       <h3>Bienes registrados</h3>
 
       <button
+        *ngIf="puedeEditar"
         type="button"
         class="btn btn--primary"
         (click)="nuevo()">
@@ -194,6 +195,7 @@
             <div class="acciones">
 
               <button
+                *ngIf="puedeEditar"
                 class="btn-action-edit"
                 type="button"
                 (click)="editar(b)"
@@ -218,6 +220,7 @@
               </button>
 
               <button
+                *ngIf="puedeEditar"
                 class="btn-action-delete"
                 type="button"
                 (click)="eliminar(b)"
@@ -263,6 +266,7 @@
       <div class="acciones">
 
         <button
+          *ngIf="puedeEditar"
           type="button"
           class="btn btn--primary"
           (click)="nuevoAvaluo()">
@@ -367,7 +371,7 @@
 
           <td>
 
-            <div class="acciones">
+            <div class="acciones" *ngIf="puedeEditar">
 
               <button
                 class="btn-action-edit"
@@ -606,7 +610,7 @@
         <button
           type="submit"
           class="btn btn--primary"
-          [disabled]="guardandoAvaluo">
+          [disabled]="guardandoAvaluo || !puedeEditar">
 
           {{
           guardandoAvaluo
@@ -653,6 +657,7 @@
       <div class="acciones">
 
         <button
+          *ngIf="puedeEditar"
           type="button"
           class="btn btn--primary"
           (click)="nuevoSeguro()">
@@ -753,7 +758,7 @@
 
           <td>
 
-            <div class="acciones">
+            <div class="acciones" *ngIf="puedeEditar">
 
               <button
                 class="btn-action-edit"
@@ -899,7 +904,7 @@
         <button
           type="submit"
           class="btn btn--primary"
-          [disabled]="guardandoSeguro">
+          [disabled]="guardandoSeguro || !puedeEditar">
 
           {{
           guardandoSeguro
@@ -1468,7 +1473,7 @@
         <button
           type="submit"
           class="btn btn--primary"
-          [disabled]="guardando">
+          [disabled]="guardando || !puedeEditar">
 
           {{
           guardando

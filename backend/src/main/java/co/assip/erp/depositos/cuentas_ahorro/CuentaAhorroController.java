@@ -1,6 +1,9 @@
 package co.assip.erp.depositos.cuentas_ahorro;
 
 import co.assip.erp.depositos.cuentas_ahorro.dto.*;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.usuarios.Usuario;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,39 +15,69 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CuentaAhorroController {
 
+    private static final String PERMISO_VIEW = "DEPOSITOS_CUENTAS_VIEW";
+    private static final String PERMISO_EDIT = "DEPOSITOS_CUENTAS_EDIT";
+
     private final CuentaAhorroService service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // ============================================================
-    // 🟦 1. LISTAR CUENTAS SEGÚN LAS AGENCIAS DEL USUARIO
+    // SEGURIDAD
     // ============================================================
+
+    private void validarAcceso(String permiso) {
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(usuarioSesionService.idUsuario());
+
+        accessValidator.validarAcceso(usuarioActual, permiso);
+    }
+
+    // ============================================================
+    // 1. LISTAR CUENTAS SEGÚN LAS AGENCIAS DEL USUARIO
+    // ============================================================
+
     @GetMapping(value = "/listar", produces = "application/json")
     public List<CuentaAhorroDTO> listarCuentas() {
+
+        validarAcceso(PERMISO_VIEW);
+
         return service.listarCuentas();
     }
 
     // ============================================================
-    // 🟦 2. LISTAR POR AGENCIA ESPECÍFICA
+    // 2. LISTAR POR AGENCIA ESPECÍFICA
     // ============================================================
+
     @GetMapping(value = "/agencia/{idAgencia}", produces = "application/json")
     public List<CuentaAhorroDTO> listarPorAgencia(
             @PathVariable Integer idAgencia
     ) {
+
+        validarAcceso(PERMISO_VIEW);
+
         return service.listarPorAgencia(idAgencia);
     }
 
     // ============================================================
-    // 🟦 3. DETALLE COMPLETO
+    // 3. DETALLE COMPLETO
     // ============================================================
+
     @GetMapping(value = "/{id}", produces = "application/json")
     public CuentaAhorroDetalleDTO obtenerPorId(
             @PathVariable Integer id
     ) {
+
+        validarAcceso(PERMISO_VIEW);
+
         return service.obtenerPorId(id);
     }
 
     // ============================================================
-    // 🟦 4. VALIDAR ANTES DE CREAR
+    // 4. VALIDAR ANTES DE CREAR
     // ============================================================
+
     @PostMapping(
             value = "/validar",
             consumes = "application/json",
@@ -53,12 +86,16 @@ public class CuentaAhorroController {
     public CuentaAhorroGuardarRespuesta validar(
             @RequestBody CuentaAhorroGuardarDTO dto
     ) {
+
+        validarAcceso(PERMISO_EDIT);
+
         return service.validarAntesDeGuardar(dto);
     }
 
     // ============================================================
-    // 🟦 5. CREAR CUENTA
+    // 5. CREAR CUENTA
     // ============================================================
+
     @PostMapping(
             consumes = "application/json",
             produces = "application/json"
@@ -66,22 +103,30 @@ public class CuentaAhorroController {
     public CuentaAhorroGuardarRespuesta guardar(
             @RequestBody CuentaAhorroGuardarDTO dto
     ) {
+
+        validarAcceso(PERMISO_EDIT);
+
         return service.guardar(dto);
     }
 
     // ============================================================
-    // 🟦 CUENTAS CONJUNTAS — LISTAR
+    // CUENTAS CONJUNTAS — LISTAR
     // ============================================================
+
     @GetMapping(value = "/{idCuenta}/cuentas-conjuntas", produces = "application/json")
     public List<CuentaConjuntaDTO> listarCuentasConjuntas(
             @PathVariable Integer idCuenta
     ) {
+
+        validarAcceso(PERMISO_VIEW);
+
         return service.listarCuentasConjuntas(idCuenta);
     }
 
     // ============================================================
-    // 🟦 CUENTAS CONJUNTAS — AGREGAR
+    // CUENTAS CONJUNTAS — AGREGAR
     // ============================================================
+
     @PostMapping(
             value = "/{idCuenta}/cuentas-conjuntas",
             consumes = "application/json",
@@ -91,12 +136,16 @@ public class CuentaAhorroController {
             @PathVariable Integer idCuenta,
             @RequestBody CuentaConjuntaDTO dto
     ) {
+
+        validarAcceso(PERMISO_EDIT);
+
         return service.agregarCuentaConjunta(idCuenta, dto);
     }
 
     // ============================================================
-    // 🟦 CUENTAS CONJUNTAS — ELIMINAR
+    // CUENTAS CONJUNTAS — ELIMINAR
     // ============================================================
+
     @DeleteMapping(
             value = "/{idCuenta}/cuentas-conjuntas/{idCuentaConjunta}",
             produces = "application/json"
@@ -105,22 +154,30 @@ public class CuentaAhorroController {
             @PathVariable Integer idCuenta,
             @PathVariable Integer idCuentaConjunta
     ) {
+
+        validarAcceso(PERMISO_EDIT);
+
         return service.eliminarCuentaConjunta(idCuenta, idCuentaConjunta);
     }
 
     // ============================================================
-    // 🟦 BENEFICIARIOS — LISTAR
+    // BENEFICIARIOS — LISTAR
     // ============================================================
+
     @GetMapping(value = "/{idCuenta}/beneficiarios", produces = "application/json")
     public List<BeneficiarioDTO> listarBeneficiarios(
             @PathVariable Integer idCuenta
     ) {
+
+        validarAcceso(PERMISO_VIEW);
+
         return service.listarBeneficiarios(idCuenta);
     }
 
     // ============================================================
-    // 🟦 BENEFICIARIOS — AGREGAR
+    // BENEFICIARIOS — AGREGAR
     // ============================================================
+
     @PostMapping(
             value = "/{idCuenta}/beneficiarios",
             consumes = "application/json",
@@ -130,12 +187,16 @@ public class CuentaAhorroController {
             @PathVariable Integer idCuenta,
             @RequestBody BeneficiarioDTO dto
     ) {
+
+        validarAcceso(PERMISO_EDIT);
+
         return service.agregarBeneficiario(idCuenta, dto);
     }
 
     // ============================================================
-    // 🟦 BENEFICIARIOS — ACTUALIZAR
+    // BENEFICIARIOS — ACTUALIZAR
     // ============================================================
+
     @PutMapping(
             value = "/{idCuenta}/beneficiarios/{idBeneficiario}",
             consumes = "application/json",
@@ -146,6 +207,9 @@ public class CuentaAhorroController {
             @PathVariable Integer idBeneficiario,
             @RequestBody BeneficiarioDTO dto
     ) {
+
+        validarAcceso(PERMISO_EDIT);
+
         return service.actualizarBeneficiario(
                 idCuenta,
                 idBeneficiario,
@@ -154,8 +218,9 @@ public class CuentaAhorroController {
     }
 
     // ============================================================
-    // 🟦 BENEFICIARIOS — ELIMINAR
+    // BENEFICIARIOS — ELIMINAR
     // ============================================================
+
     @DeleteMapping(
             value = "/{idCuenta}/beneficiarios/{idBeneficiario}",
             produces = "application/json"
@@ -164,22 +229,30 @@ public class CuentaAhorroController {
             @PathVariable Integer idCuenta,
             @PathVariable Integer idBeneficiario
     ) {
+
+        validarAcceso(PERMISO_EDIT);
+
         return service.eliminarBeneficiario(idCuenta, idBeneficiario);
     }
 
     // ============================================================
-    // 🟦 PODERES — LISTAR
+    // PODERES — LISTAR
     // ============================================================
+
     @GetMapping(value = "/{idCuenta}/poderes", produces = "application/json")
     public List<PoderDTO> listarPoderes(
             @PathVariable Integer idCuenta
     ) {
+
+        validarAcceso(PERMISO_VIEW);
+
         return service.listarPoderes(idCuenta);
     }
 
     // ============================================================
-    // 🟦 PODERES — AGREGAR
+    // PODERES — AGREGAR
     // ============================================================
+
     @PostMapping(
             value = "/{idCuenta}/poderes",
             consumes = "application/json",
@@ -189,12 +262,16 @@ public class CuentaAhorroController {
             @PathVariable Integer idCuenta,
             @RequestBody PoderDTO dto
     ) {
+
+        validarAcceso(PERMISO_EDIT);
+
         return service.agregarPoder(idCuenta, dto);
     }
 
     // ============================================================
-    // 🟦 PODERES — ACTUALIZAR
+    // PODERES — ACTUALIZAR
     // ============================================================
+
     @PutMapping(
             value = "/{idCuenta}/poderes/{idPoder}",
             consumes = "application/json",
@@ -205,6 +282,9 @@ public class CuentaAhorroController {
             @PathVariable Integer idPoder,
             @RequestBody PoderDTO dto
     ) {
+
+        validarAcceso(PERMISO_EDIT);
+
         return service.actualizarPoder(
                 idCuenta,
                 idPoder,
@@ -213,8 +293,9 @@ public class CuentaAhorroController {
     }
 
     // ============================================================
-    // 🟦 PODERES — ELIMINAR
+    // PODERES — ELIMINAR
     // ============================================================
+
     @DeleteMapping(
             value = "/{idCuenta}/poderes/{idPoder}",
             produces = "application/json"
@@ -223,16 +304,23 @@ public class CuentaAhorroController {
             @PathVariable Integer idCuenta,
             @PathVariable Integer idPoder
     ) {
+
+        validarAcceso(PERMISO_EDIT);
+
         return service.eliminarPoder(idCuenta, idPoder);
     }
 
     // ============================================================
-    // 🟦 6. ELIMINAR CUENTA
+    // 6. ELIMINAR CUENTA
     // ============================================================
+
     @DeleteMapping(value = "/{idCuenta}", produces = "application/json")
     public CuentaAhorroGuardarRespuesta eliminar(
             @PathVariable Integer idCuenta
     ) {
+
+        validarAcceso(PERMISO_EDIT);
+
         return service.eliminar(idCuenta);
     }
 }

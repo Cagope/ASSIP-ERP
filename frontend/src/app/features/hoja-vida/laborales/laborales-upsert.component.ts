@@ -9,6 +9,7 @@ import { LaboralesApi } from './laborales.api';
 import { Laboral } from '../../../shared/models/laboral.model';
 import { CatalogosApi, CodigoNombreDTO, Departamento, Ciudad } from '../../../shared/catalogos/catalogos.api';
 import { Output, EventEmitter, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { SessionService } from '../../../core/auth/session.service';
 
 /**
  * 💼 Componente Upsert (Crear / Editar) — Laborales
@@ -37,12 +38,18 @@ export class LaboralesUpsertComponent implements OnInit, OnChanges {
   private readonly router = inject(Router);
   private readonly api = inject(LaboralesApi);
   private readonly catalogos = inject(CatalogosApi);
+  private readonly session = inject(SessionService);
 
   // ================================================================
   // 📋 Propiedades
   // ================================================================
   form!: FormGroup;
   editando = false;
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'HOJAVIDA_PERSONA_EDIT'
+    );
+  }
 
   // === 📚 Catálogos (para combos dependientes) ===
   paises: CodigoNombreDTO[] = [];
@@ -196,6 +203,11 @@ export class LaboralesUpsertComponent implements OnInit, OnChanges {
   // 💾 Guardar o actualizar registro
   // ================================================================
   guardar(): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       alert('⚠️ Complete los campos obligatorios o revise los formatos.');

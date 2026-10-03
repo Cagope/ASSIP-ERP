@@ -22,6 +22,8 @@ import {
   ExtractoCuentaSharedComponent
 } from '../../../../shared/cuentas-ahorro/extracto-cuenta/extracto-cuenta-shared.component';
 
+import { SessionService } from '../../../../core/auth/session.service';
+
 @Component({
   selector: 'app-movimiento-cuenta-ahorro',
   standalone: true,
@@ -38,6 +40,11 @@ export class MovimientoCuentaAhorroComponent implements OnInit {
 
   private readonly api = inject(MovimientoCuentaAhorroApi);
   private readonly tiposComprobantesApi = inject(TiposComprobantesApi);
+
+  private readonly session = inject(SessionService);
+
+  readonly puedeEditar =
+    this.session.tienePermiso('DEPOSITOS_MOVIMIENTOS_EDIT');
 
   cargando = false;
 

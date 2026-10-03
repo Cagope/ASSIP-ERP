@@ -208,25 +208,24 @@
 
           <td class="col-acciones">
 
+            <!-- Registro laboral existente: VIEW puede consultarlo -->
             <button
+              *ngIf="persona.laboral"
               type="button"
               class="btn-action-edit btn-gestionar"
-              (click)="
-                  gestionar(
-                    persona,
-                    persona.laboral
-                  )
-                "
-              [title]="
-                  persona.laboral
-                    ? 'Gestionar información laboral'
-                    : 'Crear información laboral'
-                ">
-              {{
-              persona.laboral
-              ? 'Gestionar'
-              : 'Crear'
-              }}
+              (click)="gestionar(persona, persona.laboral)"
+              title="Gestionar información laboral">
+              Gestionar
+            </button>
+
+            <!-- Sin registro laboral: solamente EDIT puede crearlo -->
+            <button
+              *ngIf="!persona.laboral && puedeEditar"
+              type="button"
+              class="btn-action-edit btn-gestionar"
+              (click)="gestionar(persona, null)"
+              title="Crear información laboral">
+              Crear
             </button>
 
           </td>

@@ -9,7 +9,9 @@ import { DatosPersonalesApi, DatosPersonales } from './datos-personales.api';
 import { CatalogosApi, CodigoNombreDTO, Departamento, Ciudad } from '../../../shared/catalogos/catalogos.api';
 import { calcularDvNit } from '../../../shared/utils/calcular-dv-nit';
 import { EventEmitter, Output, Input } from '@angular/core';
-
+import {
+  SessionService
+} from '../../../core/auth/session.service';
 
 @Component({
   selector: 'app-datos-personales-upsert',
@@ -29,6 +31,14 @@ export class DatosPersonalesUpsertComponent implements OnInit {
   private readonly api = inject(DatosPersonalesApi);
   private readonly catalogos = inject(CatalogosApi);
 
+  private readonly session =
+    inject(SessionService);
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'HOJAVIDA_PERSONA_EDIT'
+    );
+  }
 
   form!: FormGroup;
   editando = false;
@@ -309,6 +319,11 @@ export class DatosPersonalesUpsertComponent implements OnInit {
   // 💾 GUARDAR / VALIDACIÓN FINAL
   // ======================================================
   guardar(): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       alert('⚠️ Complete todos los campos obligatorios.');

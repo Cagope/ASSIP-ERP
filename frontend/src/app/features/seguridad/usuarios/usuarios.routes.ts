@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
+
 import { UsuariosListComponent } from './usuarios-list.component';
+import { permisoGuard } from '../../../core/auth/permiso.guard';
 
 export const USUARIOS_ROUTES: Routes = [
   {
@@ -8,6 +10,10 @@ export const USUARIOS_ROUTES: Routes = [
   },
   {
     path: 'nuevo',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'USUARIOS_EDIT'
+    },
     loadComponent: () =>
       import('./usuarios-upsert.component').then(
         (m) => m.UsuariosUpsertComponent
@@ -15,6 +21,10 @@ export const USUARIOS_ROUTES: Routes = [
   },
   {
     path: ':id',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'USUARIOS_EDIT'
+    },
     loadComponent: () =>
       import('./usuarios-upsert.component').then(
         (m) => m.UsuariosUpsertComponent

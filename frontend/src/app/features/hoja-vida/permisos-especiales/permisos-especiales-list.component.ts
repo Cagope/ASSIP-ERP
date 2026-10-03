@@ -29,6 +29,10 @@ import {
   PermisosEspecialesExporterService
 } from './permisos-especiales-exporter.service';
 
+import {
+  SessionService
+} from '../../../core/auth/session.service';
+
 type PersonaConPermiso =
   DatosPersonales & {
     permisos: PermisoEspecial | null;
@@ -69,11 +73,20 @@ export class PermisosEspecialesListComponent
   private readonly exporter =
     inject(PermisosEspecialesExporterService);
 
+  private readonly session =
+    inject(SessionService);
+
   personas: PersonaConPermiso[] = [];
   filtradas: PersonaConPermiso[] = [];
 
   cargando = false;
   error = '';
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'HOJAVIDA_PROTECCION_EDIT'
+    );
+  }
 
   filtros = {
     documento: '',
@@ -297,6 +310,8 @@ export class PermisosEspecialesListComponent
       return;
     }
 
+    // Registro existente:
+    // VIEW permite ingresar para consultarlo.
     if (permisos?.idPermisoEspecial) {
       this.router.navigate([
         '/hoja-vida/permisos-especiales',
@@ -304,6 +319,12 @@ export class PermisosEspecialesListComponent
         'editar'
       ]);
 
+      return;
+    }
+
+    // Registro nuevo:
+    // requiere HOJAVIDA_PROTECCION_EDIT.
+    if (!this.puedeEditar) {
       return;
     }
 

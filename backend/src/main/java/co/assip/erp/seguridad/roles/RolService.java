@@ -1,5 +1,6 @@
 package co.assip.erp.seguridad.roles;
 
+import co.assip.erp.seguridad.roles.dto.RolDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,10 +14,37 @@ public class RolService {
     private final RolRepository rolRepository;
 
     /**
-     * Retorna todos los roles registrados en el sistema.
+     * Retorna todos los roles registrados como DTO.
      *
      * Incluye roles activos e inactivos para permitir su administración
-     * desde el módulo de seguridad.
+     * desde el módulo de seguridad sin exponer entidades Hibernate.
+     */
+    @Transactional(readOnly = true)
+    public List<RolDTO> listarDto() {
+
+        return rolRepository.findAll()
+                .stream()
+                .map(this::convertirDto)
+                .toList();
+    }
+
+    /**
+     * Busca un rol por su identificador y lo retorna como DTO.
+     *
+     * @param id identificador del rol
+     * @return rol encontrado
+     */
+    @Transactional(readOnly = true)
+    public RolDTO buscarDtoPorId(Integer id) {
+        return convertirDto(
+                buscarPorId(id)
+        );
+    }
+
+    /**
+     * Retorna todos los roles registrados como entidades.
+     *
+     * Este método se conserva para uso interno del backend.
      */
     @Transactional(readOnly = true)
     public List<Rol> listar() {
@@ -26,12 +54,16 @@ public class RolService {
     /**
      * Busca un rol por su identificador.
      *
+     * Este método retorna la entidad porque puede ser utilizada
+     * internamente por otros procesos de seguridad.
+     *
      * @param id identificador del rol
      * @return rol encontrado
      * @throws IllegalArgumentException si el rol no existe
      */
     @Transactional(readOnly = true)
     public Rol buscarPorId(Integer id) {
+
         return rolRepository.findById(id)
                 .orElseThrow(() ->
                         new IllegalArgumentException(
@@ -82,7 +114,10 @@ public class RolService {
             );
         }
 
-        String nombre = normalizarNombre(rol.getNombreRol());
+        String nombre =
+                normalizarNombre(
+                        rol.getNombreRol()
+                );
 
         rolRepository.findByNombreRol(nombre)
                 .ifPresent(existente -> {
@@ -112,9 +147,13 @@ public class RolService {
      * @return rol actualizado
      */
     @Transactional
-    public Rol actualizar(Integer id, Rol datos) {
+    public Rol actualizar(
+            Integer id,
+            Rol datos
+    ) {
 
-        Rol actual = buscarPorId(id);
+        Rol actual =
+                buscarPorId(id);
 
         if (datos == null) {
             throw new IllegalArgumentException(
@@ -122,10 +161,15 @@ public class RolService {
             );
         }
 
-        String nombre = normalizarNombre(datos.getNombreRol());
+        String nombre =
+                normalizarNombre(
+                        datos.getNombreRol()
+                );
 
         rolRepository.findByNombreRol(nombre)
-                .filter(otro -> !otro.getIdRol().equals(id))
+                .filter(otro ->
+                        !otro.getIdRol().equals(id)
+                )
                 .ifPresent(otro -> {
                     throw new IllegalArgumentException(
                             "Ya existe un rol con el nombre " + nombre
@@ -133,7 +177,9 @@ public class RolService {
                 });
 
         actual.setNombreRol(nombre);
-        actual.setDescripcion(datos.getDescripcion());
+        actual.setDescripcion(
+                datos.getDescripcion()
+        );
 
         return rolRepository.save(actual);
     }
@@ -149,18 +195,41 @@ public class RolService {
      * @return rol actualizado
      */
     @Transactional
-    public Rol cambiarEstado(Integer id, boolean activo) {
+    public Rol cambiarEstado(
+            Integer id,
+            boolean activo
+    ) {
 
-        Rol rol = buscarPorId(id);
+        Rol rol =
+                buscarPorId(id);
+
         rol.setActivo(activo);
 
         return rolRepository.save(rol);
     }
 
     /**
+     * Convierte una entidad Rol a la representación utilizada
+     * por la API REST.
+     */
+    public RolDTO convertirDto(
+            Rol rol
+    ) {
+
+        return RolDTO.builder()
+                .idRol(rol.getIdRol())
+                .nombreRol(rol.getNombreRol())
+                .descripcion(rol.getDescripcion())
+                .activo(rol.getActivo())
+                .build();
+    }
+
+    /**
      * Normaliza y valida el nombre utilizado para identificar un rol.
      */
-    private String normalizarNombre(String nombre) {
+    private String normalizarNombre(
+            String nombre
+    ) {
 
         if (nombre == null || nombre.isBlank()) {
             throw new IllegalArgumentException(
@@ -168,6 +237,8 @@ public class RolService {
             );
         }
 
-        return nombre.trim().toUpperCase();
+        return nombre
+                .trim()
+                .toUpperCase();
     }
 }

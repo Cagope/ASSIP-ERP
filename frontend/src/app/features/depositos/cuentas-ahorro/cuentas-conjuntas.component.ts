@@ -25,6 +25,8 @@ import {
   PersonaBusquedaDTO
 } from '../../../shared/personas/personas.api';
 
+import { SessionService } from '../../../core/auth/session.service';
+
 @Component({
   selector: 'app-cuentas-conjuntas',
   standalone: true,
@@ -36,6 +38,10 @@ export class CuentasConjuntasComponent implements OnChanges, OnInit {
 
   private readonly api = inject(CuentasAhorroApi);
   private readonly personasApi = inject(PersonasApi);
+  private readonly session = inject(SessionService);
+
+  readonly puedeEditar =
+    this.session.tienePermiso('DEPOSITOS_CUENTAS_EDIT');
 
   @Input() idCuentaAhorro: number | null = null;
   @Input() accionesConjunta: any[] = [];

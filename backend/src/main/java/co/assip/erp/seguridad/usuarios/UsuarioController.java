@@ -2,21 +2,29 @@ package co.assip.erp.seguridad.usuarios;
 
 import co.assip.erp.seguridad.autorizacion.AccessValidator;
 import co.assip.erp.seguridad.auditoria.LogEventoService;
+import co.assip.erp.seguridad.usuarios.dto.UsuarioListDTO;
+import co.assip.erp.seguridad.usuarios.dto.UsuarioAdministracionDTO;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.seguridad.usuariosagencias.UsuarioAgenciaService;
+import co.assip.erp.seguridad.usuariosroles.UsuarioRolService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * API REST para la administración de usuarios del sistema.
  *
- * Permite consultar, crear y actualizar usuarios, además de
- * administrar temporalmente sus agencias autorizadas.
+ * Permite consultar, crear y actualizar cuentas de usuario,
+ * administrar sus agencias autorizadas y gestionar múltiples roles.
+ *
+ * Las respuestas administrativas utilizan DTO y no exponen
+ * contraseñas, tokens ni información interna de autenticación.
  */
 @RestController
 @RequestMapping("/seguridad/usuarios")
@@ -24,19 +32,25 @@ import java.util.Optional;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final UsuarioAdministracionService usuarioAdministracionService;
     private final UsuarioAgenciaService usuarioAgenciaService;
+    private final UsuarioRolService usuarioRolService;
     private final LogEventoService logEventoService;
     private final AccessValidator accessValidator;
+    private final UsuarioSesionService usuarioSesionService;
 
     /**
      * Obtiene el listado administrativo de usuarios.
      */
     @GetMapping
-    public ResponseEntity<List<Map<String, Object>>> listar(
+    public ResponseEntity<List<UsuarioListDTO>> listar(
             HttpServletRequest request
     ) {
 
-        validarAcceso(request, "USUARIOS_VIEW");
+        validarAcceso(
+                request,
+                "USUARIOS_VIEW"
+        );
 
         return ResponseEntity.ok(
                 usuarioService.listar()
@@ -44,92 +58,202 @@ public class UsuarioController {
     }
 
     /**
-     * Obtiene la información de un usuario para consulta o edición.
+     * Obtiene un usuario por su identificador.
      */
     @GetMapping("/id/{idUsuario}")
-    public ResponseEntity<Map<String, Object>> buscarPorId(
+    public ResponseEntity<UsuarioListDTO> buscarPorId(
             @PathVariable Integer idUsuario,
             HttpServletRequest request
     ) {
 
-        validarAcceso(request, "USUARIOS_VIEW");
+        validarAcceso(
+                request,
+                "USUARIOS_VIEW"
+        );
 
         return ResponseEntity.ok(
-                usuarioService.buscarDtoPorId(idUsuario)
+                usuarioService.buscarDtoPorId(
+                        idUsuario
+                )
         );
     }
 
     /**
-     * Busca un usuario por su nombre de acceso.
+     * Obtiene un usuario por su nombre de acceso.
      */
     @GetMapping("/user/{username}")
-    public ResponseEntity<Optional<Usuario>> buscarPorUsername(
+    public ResponseEntity<UsuarioListDTO> buscarPorUsername(
             @PathVariable String username,
             HttpServletRequest request
     ) {
 
-        validarAcceso(request, "USUARIOS_VIEW");
+        validarAcceso(
+                request,
+                "USUARIOS_VIEW"
+        );
+
+        Usuario usuario =
+                usuarioService
+                        .buscarPorUsername(username)
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "No existe el usuario "
+                                                + username
+                                )
+                        );
 
         return ResponseEntity.ok(
-                usuarioService.buscarPorUsername(username)
+                usuarioService.buscarDtoPorId(
+                        usuario.getIdUsuario()
+                )
         );
     }
 
     /**
-     * Crea o actualiza un usuario.
+     * Crea una cuenta administrativa con sus roles
+     * y agencias autorizadas en una sola transacción.
+     *
+     * No recibe contraseñas ni datos de auditoría.
+     */
+    @PostMapping("/completo")
+    public ResponseEntity<UsuarioListDTO> crearCompleto(
+            @RequestBody UsuarioAdministracionDTO datos,
+            HttpServletRequest request
+    ) {
+
+        Usuario usuarioActual = validarAcceso(
+                request,
+                "USUARIOS_EDIT"
+        );
+
+        UsuarioListDTO creado =
+                usuarioAdministracionService.crearCompleto(datos);
+
+        logEventoService.registrarEvento(
+                usuarioActual.getIdUsuario(),
+                "SEGURIDAD",
+                "CREAR_USUARIO",
+                "Se creó el usuario "
+                        + creado.getUsername()
+                        + " con sus roles y agencias autorizadas.",
+                request
+        );
+
+        return ResponseEntity.ok(creado);
+    }
+
+    /**
+     * Genera y descarga el documento cifrado
+     * para la gestión de contraseña del usuario.
+     *
+     * Permite la activación inicial o el restablecimiento
+     * de contraseña de una cuenta existente.
+     *
+     * Requiere permiso USUARIOS_EDIT.
+     */
+    @PostMapping(
+            value = "/{idUsuario}/documento-password",
+            produces = MediaType.APPLICATION_PDF_VALUE
+    )
+    public ResponseEntity<byte[]> generarDocumentoGestionPassword(
+            @PathVariable Integer idUsuario,
+            HttpServletRequest request
+    ) {
+
+        Usuario usuarioActual = validarAcceso(
+                request,
+                "USUARIOS_EDIT"
+        );
+
+        byte[] pdf = usuarioAdministracionService
+                .generarDocumentoGestionPassword(idUsuario);
+
+        logEventoService.registrarEvento(
+                usuarioActual.getIdUsuario(),
+                "SEGURIDAD",
+                "GENERAR_DOCUMENTO_PASSWORD",
+                "Se generó el documento de gestión de contraseña del usuario "
+                        + idUsuario,
+                request
+        );
+
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"gestion_password_usuario_"
+                                + idUsuario + ".pdf\""
+                )
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .contentType(MediaType.APPLICATION_PDF)
+                .contentLength(pdf.length)
+                .body(pdf);
+    }
+
+    /**
+     * Crea o actualiza una cuenta de usuario.
+     *
+     * Los roles se administran mediante los endpoints
+     * específicos de roles del usuario.
      */
     @PostMapping
-    public ResponseEntity<Usuario> guardar(
+    public ResponseEntity<UsuarioListDTO> guardar(
             @RequestBody Usuario usuario,
             HttpServletRequest request
     ) {
 
         Usuario usuarioActual =
-                validarAcceso(request, "USUARIOS_EDIT");
+                validarAcceso(
+                        request,
+                        "USUARIOS_EDIT"
+                );
 
-        boolean nuevo = usuario.getIdUsuario() == null;
+        boolean nuevo =
+                usuario.getIdUsuario() == null;
 
         /*
-         * La auditoría de quién realiza la operación se establece
-         * en el backend y no se confía al valor enviado por el frontend.
+         * La identidad del actor se establece en backend.
+         * No se confía en valores de auditoría enviados
+         * desde el frontend.
          */
-        if (nuevo) {
-            usuario.setUsuarioCreacion(
-                    usuarioActual.getUsername()
-            );
-        } else {
-            usuario.setUsuarioActualizacion(
-                    usuarioActual.getUsername()
-            );
-        }
 
         Usuario guardado =
-                usuarioService.guardar(usuario);
+                usuarioService.guardar(
+                        usuario
+                );
 
-        String accion = nuevo
-                ? "CREAR_USUARIO"
-                : "ACTUALIZAR_USUARIO";
+        String accion =
+                nuevo
+                        ? "CREAR_USUARIO"
+                        : "ACTUALIZAR_USUARIO";
 
-        String descripcion = nuevo
-                ? "Se creó el usuario " + guardado.getUsername()
-                : "Se actualizó el usuario " + guardado.getUsername();
+        String descripcion =
+                nuevo
+                        ? "Se creó el usuario "
+                        + guardado.getUsername()
+                        : "Se actualizó el usuario "
+                        + guardado.getUsername();
 
+        /*
+         * El idUsuario del log corresponde al actor
+         * que realizó la operación.
+         */
         logEventoService.registrarEvento(
-                guardado.getIdUsuario(),
+                usuarioActual.getIdUsuario(),
                 "SEGURIDAD",
                 accion,
                 descripcion,
                 request
         );
 
-        return ResponseEntity.ok(guardado);
+        return ResponseEntity.ok(
+                usuarioService.buscarDtoPorId(
+                        guardado.getIdUsuario()
+                )
+        );
     }
 
     /**
      * Obtiene las agencias autorizadas para un usuario.
-     *
-     * Esta operación será trasladada posteriormente al proceso
-     * funcional usuariosagencias.
      */
     @GetMapping("/{id}/agencias")
     public ResponseEntity<List<Map<String, Object>>> listarAgencias(
@@ -137,18 +261,22 @@ public class UsuarioController {
             HttpServletRequest request
     ) {
 
-        validarAcceso(request, "USUARIOS_VIEW");
+        validarAcceso(
+                request,
+                "USUARIOS_VIEW"
+        );
 
         return ResponseEntity.ok(
-                usuarioAgenciaService.listarAgenciasDelUsuario(id)
+                usuarioAgenciaService
+                        .listarAgenciasDelUsuario(id)
         );
     }
 
     /**
      * Reemplaza las agencias autorizadas para un usuario.
      *
-     * Esta operación será trasladada posteriormente al proceso
-     * funcional usuariosagencias.
+     * Una lista vacía elimina todas las asignaciones
+     * de agencias del usuario.
      */
     @PostMapping("/{id}/agencias")
     public ResponseEntity<Void> asignarAgencias(
@@ -158,7 +286,10 @@ public class UsuarioController {
     ) {
 
         Usuario usuarioActual =
-                validarAcceso(request, "USUARIOS_EDIT");
+                validarAcceso(
+                        request,
+                        "USUARIOS_EDIT"
+                );
 
         usuarioAgenciaService.asignarAgencias(
                 id,
@@ -167,10 +298,13 @@ public class UsuarioController {
         );
 
         logEventoService.registrarEvento(
-                id,
+                usuarioActual.getIdUsuario(),
                 "SEGURIDAD",
                 "ASIGNAR_AGENCIAS",
-                "Se asignaron agencias: " + agencias,
+                "Se actualizaron las agencias autorizadas del usuario "
+                        + id
+                        + ": "
+                        + agencias,
                 request
         );
 
@@ -178,15 +312,143 @@ public class UsuarioController {
     }
 
     /**
-     * Obtiene el usuario autenticado y valida el permiso requerido.
+     * Obtiene los roles actualmente vigentes de un usuario.
+     */
+    @GetMapping("/{id}/roles")
+    public ResponseEntity<List<UsuarioListDTO.RolDTO>> listarRoles(
+            @PathVariable Integer id,
+            HttpServletRequest request
+    ) {
+
+        validarAcceso(
+                request,
+                "USUARIOS_VIEW"
+        );
+
+        List<UsuarioListDTO.RolDTO> roles =
+                usuarioRolService
+                        .listarVigentes(id)
+                        .stream()
+                        .map(usuarioRol ->
+                                UsuarioListDTO.RolDTO
+                                        .builder()
+                                        .idRol(
+                                                usuarioRol
+                                                        .getRol()
+                                                        .getIdRol()
+                                        )
+                                        .nombreRol(
+                                                usuarioRol
+                                                        .getRol()
+                                                        .getNombreRol()
+                                        )
+                                        .build()
+                        )
+                        .toList();
+
+        return ResponseEntity.ok(
+                roles
+        );
+    }
+
+    /**
+     * Asigna un rol al usuario.
+     */
+    @PostMapping("/{idUsuario}/roles/{idRol}")
+    public ResponseEntity<UsuarioListDTO> asignarRol(
+            @PathVariable Integer idUsuario,
+            @PathVariable Integer idRol,
+            HttpServletRequest request
+    ) {
+
+        Usuario usuarioActual =
+                validarAcceso(
+                        request,
+                        "USUARIOS_EDIT"
+                );
+
+        usuarioRolService.asignar(
+                idUsuario,
+                idRol,
+                usuarioActual.getIdUsuario()
+        );
+
+        logEventoService.registrarEvento(
+                usuarioActual.getIdUsuario(),
+                "SEGURIDAD",
+                "ASIGNAR_ROL",
+                "Se asignó el rol "
+                        + idRol
+                        + " al usuario "
+                        + idUsuario,
+                request
+        );
+
+        return ResponseEntity.ok(
+                usuarioService.buscarDtoPorId(
+                        idUsuario
+                )
+        );
+    }
+
+    /**
+     * Retira un rol activo del usuario.
+     *
+     * La asignación no se elimina físicamente.
+     * Se conserva su histórico en usuarios_roles.
+     */
+    @DeleteMapping("/{idUsuario}/roles/{idRol}")
+    public ResponseEntity<UsuarioListDTO> retirarRol(
+            @PathVariable Integer idUsuario,
+            @PathVariable Integer idRol,
+            HttpServletRequest request
+    ) {
+
+        Usuario usuarioActual =
+                validarAcceso(
+                        request,
+                        "USUARIOS_EDIT"
+                );
+
+        usuarioRolService.retirar(
+                idUsuario,
+                idRol,
+                usuarioActual.getIdUsuario()
+        );
+
+        logEventoService.registrarEvento(
+                usuarioActual.getIdUsuario(),
+                "SEGURIDAD",
+                "RETIRAR_ROL",
+                "Se retiró el rol "
+                        + idRol
+                        + " al usuario "
+                        + idUsuario,
+                request
+        );
+
+        return ResponseEntity.ok(
+                usuarioService.buscarDtoPorId(
+                        idUsuario
+                )
+        );
+    }
+
+    /**
+     * Obtiene el usuario autenticado y valida
+     * el permiso funcional requerido.
      */
     private Usuario validarAcceso(
             HttpServletRequest request,
             String permiso
     ) {
 
-        Usuario usuarioActual =
-                usuarioService.getUsuarioActual(request);
+        Integer idUsuario = usuarioSesionService.idUsuario();
+
+        Usuario usuarioActual = usuarioService.buscarPorId(idUsuario)
+                .orElseThrow(() -> new SecurityException(
+                        "El usuario autenticado no existe."
+                ));
 
         accessValidator.validarAcceso(
                 usuarioActual,

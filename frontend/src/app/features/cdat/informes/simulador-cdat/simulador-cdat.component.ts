@@ -83,54 +83,31 @@ export class SimuladorCdatComponent {
 
     this.cargandoBusqueda = true;
 
-    const agenciaCodigo =
-      this.agenciaActiva?.codigo_agencia ||
-      this.agenciaActiva?.codigoAgencia ||
-      this.agenciaActiva?.codigo ||
-      this.agenciaActiva?.id_agencia ||
-      this.agenciaActiva?.idAgencia ||
-      null;
+    this.api.buscarCuentas(this.filtros).subscribe({
+      next: (data: SimuladorAsociado[]) => {
 
-    const req = {
-      schema: 'depositos',
-      view: 'vw_depositos_cuentas_ahorro_total',
-      filters: {
-        documento: this.filtros.documento,
-        nombres: this.filtros.nombres,
-        primer_apellido: this.filtros.primer_apellido,
-        segundo_apellido: this.filtros.segundo_apellido,
-        codigo_agencia: agenciaCodigo,
-        cuenta_activa: 'A'
-      }
-    };
-
-    this.api.buscarCuentas(req).subscribe({
-      next: (res: any) => {
-
-        const data = res?.data ?? [];
-
-        this.resultados = data.filter((c: any) => {
-
-          const estado =
-            String(c.codigo_estado ?? '')
-              .trim()
-              .toUpperCase();
-
-          return estado === 'A';
-        });
-
-        this.resultados = this.resultados.sort((a: any, b: any) =>
-          String(a.codigo_forma ?? '').localeCompare(String(b.codigo_forma ?? ''))
+        this.resultados = [...data].sort((a: any, b: any) =>
+          String(a.codigo_forma ?? '')
+            .localeCompare(String(b.codigo_forma ?? ''))
         );
 
         if (!this.resultados.length) {
           this.errorBusqueda = 'No se encontraron cuentas activas.';
         }
+
+        this.cargandoBusqueda = false;
       },
-      error: err => {
-        this.errorBusqueda = err.error?.message || 'Error consultando cuentas.';
-      },
-      complete: () => {
+
+      error: (err: any) => {
+
+        console.error('Error consultando cuentas de ahorro:', err);
+
+        this.resultados = [];
+
+        this.errorBusqueda =
+          err?.error?.message ||
+          'Error consultando cuentas de ahorro.';
+
         this.cargandoBusqueda = false;
       }
     });
@@ -221,18 +198,7 @@ export class SimuladorCdatComponent {
       return;
     }
 
-    const idAgencia =
-      this.persona.id_agencia ||
-      this.agenciaActiva?.id_agencia ||
-      this.agenciaActiva?.idAgencia;
-
-    if (!idAgencia) {
-      this.errorBusqueda = 'No se pudo identificar la agencia para calcular la simulación.';
-      return;
-    }
-
     this.api.generarPreview({
-      idAgencia,
       valorCdat: Number(this.model.valorCdat),
       tasaNominalAnual: Number(this.model.tasaNominalAnual),
       fechaApertura: this.model.fechaApertura,

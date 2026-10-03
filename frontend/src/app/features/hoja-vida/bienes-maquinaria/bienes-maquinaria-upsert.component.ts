@@ -33,6 +33,7 @@ import {
 } from '../../../shared/catalogos/catalogos.api';
 
 import { forkJoin } from 'rxjs';
+import { SessionService } from '../../../core/auth/session.service';
 
 @Component({
   selector: 'app-bienes-maquinaria-upsert',
@@ -55,6 +56,7 @@ export class BienesMaquinariaUpsertComponent implements OnInit {
   private readonly segurosApi = inject(BienesMaquinariaSegurosApi);
   private readonly datosApi = inject(DatosPersonalesApi);
   private readonly catalogosApi = inject(CatalogosApi);
+  private readonly session = inject(SessionService);
 
   idDatosPersonal = 0;
 
@@ -88,6 +90,10 @@ export class BienesMaquinariaUpsertComponent implements OnInit {
   modoSeguro: 'NINGUNO' | 'NUEVO' | 'EDITAR' = 'NINGUNO';
   cargandoSeguros = false;
   guardandoSeguro = false;
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('HOJAVIDA_BIENES_EDIT');
+  }
 
   ngOnInit(): void {
     this.idDatosPersonal = Number(
@@ -161,6 +167,8 @@ export class BienesMaquinariaUpsertComponent implements OnInit {
   }
 
   nuevo(): void {
+    if (!this.puedeEditar) return;
+
     this.error = '';
     this.mensaje = '';
 
@@ -180,6 +188,8 @@ export class BienesMaquinariaUpsertComponent implements OnInit {
   }
 
   editar(bien: BienMaquinaria): void {
+    if (!this.puedeEditar) return;
+
     this.error = '';
     this.mensaje = '';
 
@@ -198,6 +208,8 @@ export class BienesMaquinariaUpsertComponent implements OnInit {
   }
 
   guardar(): void {
+    if (!this.puedeEditar) return;
+
     if (!this.bienActual) return;
 
     this.error = '';
@@ -225,6 +237,8 @@ export class BienesMaquinariaUpsertComponent implements OnInit {
   }
 
   eliminar(bien: BienMaquinaria): void {
+    if (!this.puedeEditar) return;
+
     if (!bien.idBien) return;
 
     const ok = confirm(
@@ -378,6 +392,8 @@ export class BienesMaquinariaUpsertComponent implements OnInit {
   }
 
   nuevoSeguro(): void {
+    if (!this.puedeEditar) return;
+
     if (!this.bienSeleccionadoSeguros?.idBien) return;
 
     this.seguroActual =
@@ -387,6 +403,8 @@ export class BienesMaquinariaUpsertComponent implements OnInit {
   }
 
   editarSeguro(s: BienMaquinariaSeguro): void {
+    if (!this.puedeEditar) return;
+
     this.seguroActual = { ...s };
     this.modoSeguro = 'EDITAR';
   }
@@ -398,6 +416,8 @@ export class BienesMaquinariaUpsertComponent implements OnInit {
   }
 
   guardarSeguro(): void {
+    if (!this.puedeEditar) return;
+
     if (!this.seguroActual) return;
 
     this.guardandoSeguro = true;
@@ -461,6 +481,8 @@ export class BienesMaquinariaUpsertComponent implements OnInit {
   }
 
   eliminarSeguro(s: BienMaquinariaSeguro): void {
+    if (!this.puedeEditar) return;
+
     if (!s.idBienMaquinariaSeguro) return;
 
     const ok = confirm(
