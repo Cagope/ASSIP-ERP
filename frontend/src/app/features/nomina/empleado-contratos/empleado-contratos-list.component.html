@@ -2,6 +2,7 @@
 
   <app-header-actions
     titulo="Contratos de Empleado"
+    [mostrarNuevo]="puedeEditar"
     (nuevo)="nuevo()"
     (refrescar)="refrescar()"
     (imprimir)="imprimir()"
@@ -61,7 +62,8 @@
             class="btn-action-edit"
             type="button"
             (click)="editar(c.idContrato)"
-            title="Editar">
+            [disabled]="!puedeEditar"
+            [title]="puedeEditar ? 'Editar' : 'Sin permiso para editar'">
             ✏️
           </button>
 
@@ -69,7 +71,8 @@
             class="btn-action-delete"
             type="button"
             (click)="eliminar(c.idContrato)"
-            title="Eliminar">
+            [disabled]="!puedeEditar"
+            [title]="puedeEditar ? 'Eliminar' : 'Sin permiso para eliminar'">
             🗑️
           </button>
         </div>

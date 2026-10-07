@@ -4,6 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { OriginacionSolicitudStateService } from '../solicitud/originacion-solicitud-state.service';
 import { OriginacionBienesApi } from './originacion-bienes.api';
+
+import {
+  SessionService
+} from '../../../../core/auth/session.service';
+
 import {
   SolicitudBien,
   SolicitudBienCreditoRespaldado,
@@ -35,8 +40,15 @@ export class OriginacionBienesComponent implements OnInit {
   constructor(
     private readonly api: OriginacionBienesApi,
     private readonly state: OriginacionSolicitudStateService,
+    private readonly session: SessionService,
     private readonly router: Router
   ) {}
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'CARTERA_ORIGINACION_EDIT'
+    );
+  }
 
   ngOnInit(): void {
     this.idSolicitudCredito = this.state.getIdSolicitudCredito();
@@ -73,7 +85,19 @@ export class OriginacionBienesComponent implements OnInit {
     });
   }
 
-  cambiarSeleccion(bien: SolicitudBien, seleccionado: boolean): void {
+  cambiarSeleccion(
+    bien: SolicitudBien,
+    seleccionado: boolean
+  ): void {
+
+    if (!this.puedeEditar) {
+
+      this.error =
+        'El usuario no tiene permiso para modificar los bienes de la solicitud.';
+
+      return;
+    }
+
     if (this.guardandoIdBienPersona !== null) {
       return;
     }

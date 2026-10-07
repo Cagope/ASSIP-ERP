@@ -22,32 +22,58 @@
 
       <div class="f-row">
         <label>Documento</label>
-        <input type="text" [(ngModel)]="filtros.documento" (keyup.enter)="buscarCdat()">
+        <input
+          type="text"
+          [(ngModel)]="filtros.documento"
+          (keyup.enter)="buscarCdat()">
       </div>
 
       <div class="f-row">
         <label>Nombres</label>
-        <input type="text" [(ngModel)]="filtros.nombres" (keyup.enter)="buscarCdat()">
+        <input
+          type="text"
+          [(ngModel)]="filtros.nombres"
+          (keyup.enter)="buscarCdat()">
       </div>
 
       <div class="f-row">
         <label>Primer apellido</label>
-        <input type="text" [(ngModel)]="filtros.primerApellido" (keyup.enter)="buscarCdat()">
+        <input
+          type="text"
+          [(ngModel)]="filtros.primerApellido"
+          (keyup.enter)="buscarCdat()">
       </div>
 
       <div class="f-row">
         <label>Segundo apellido</label>
-        <input type="text" [(ngModel)]="filtros.segundoApellido" (keyup.enter)="buscarCdat()">
+        <input
+          type="text"
+          [(ngModel)]="filtros.segundoApellido"
+          (keyup.enter)="buscarCdat()">
       </div>
 
       <div class="f-row">
         <label>Código CDAT</label>
-        <input type="text" [(ngModel)]="filtros.codigoCdat" (keyup.enter)="buscarCdat()">
+        <input
+          type="text"
+          [(ngModel)]="filtros.codigoCdat"
+          (keyup.enter)="buscarCdat()">
       </div>
 
       <div class="form-actions full">
-        <button type="button" class="btn btn--secondary" (click)="limpiarEstado()">Limpiar</button>
-        <button type="button" class="btn btn--primary" (click)="buscarCdat()">Buscar</button>
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="limpiarEstado()">
+          Limpiar
+        </button>
+
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="buscarCdat()">
+          Buscar
+        </button>
       </div>
 
     </div>
@@ -74,9 +100,14 @@
         <td>{{ item.documento }}</td>
         <td>{{ item.nombreCompleto }}</td>
         <td>{{ item.fechaVencimientoCdat }}</td>
-        <td class="right">{{ item.saldoActualCdat | number:'1.0-2' }}</td>
+        <td class="right">
+          {{ item.saldoActualCdat | number:'1.0-2' }}
+        </td>
         <td>
-          <button type="button" class="btn-action-edit btn-action-text" (click)="seleccionarCdat(item)">
+          <button
+            type="button"
+            class="btn-action-edit btn-action-text"
+            (click)="seleccionarCdat(item)">
             Seleccionar
           </button>
         </td>
@@ -86,12 +117,15 @@
 
   </div>
 
+
   <!-- ======================================================
        FORMULARIO CANCELACIÓN / RENOVACIÓN
   ======================================================= -->
   <div *ngIf="cdat" class="list-container form-container">
 
-    <!-- DATOS CDAT ORIGEN -->
+    <!-- ====================================================
+         DATOS CDAT ORIGEN
+    ===================================================== -->
     <div class="persona-box full">
 
       <div class="section-header">
@@ -109,20 +143,34 @@
         <p><strong>Fecha apertura:</strong> {{ cdat.fechaAperturaCdat }}</p>
         <p><strong>Fecha vencimiento:</strong> {{ cdat.fechaVencimientoCdat }}</p>
         <p><strong>Plazo:</strong> {{ cdat.plazoMeses }} meses</p>
-        <p><strong>Tasa nominal:</strong> {{ cdat.tasaNominalAnual | number:'1.2-6' }}%</p>
-        <p><strong>Capital:</strong> {{ cdat.valorCapital | number:'1.0-2' }}</p>
-        <p><strong>Disponible:</strong> {{ cdat.valorDisponible | number:'1.0-2' }}</p>
+        <p>
+          <strong>Tasa nominal:</strong>
+          {{ cdat.tasaNominalAnual | number:'1.2-6' }}%
+        </p>
+        <p>
+          <strong>Capital:</strong>
+          {{ cdat.valorCapital | number:'1.0-2' }}
+        </p>
+        <p>
+          <strong>Disponible:</strong>
+          {{ cdat.valorDisponible | number:'1.0-2' }}
+        </p>
       </div>
 
     </div>
 
-    <!-- DATOS CANCELACIÓN -->
+
+    <!-- ====================================================
+         DATOS CANCELACIÓN
+    ===================================================== -->
     <div class="persona-box full">
 
       <div class="section-header">
         <div>
           <h3>Valores de cancelación</h3>
-          <small>Datos base del proceso, comprobante y valor de renovación.</small>
+          <small>
+            Datos base del proceso, comprobante y valor de renovación.
+          </small>
         </div>
       </div>
 
@@ -130,27 +178,42 @@
 
         <div class="f-row">
           <label>Fecha proceso</label>
-          <input type="date" [(ngModel)]="model.fechaProceso">
+          <input
+            type="date"
+            [(ngModel)]="model.fechaProceso"
+            (ngModelChange)="cargarCajasAbiertas()">
         </div>
 
         <div class="f-row">
           <label>Fecha liquidación</label>
-          <input type="date" [(ngModel)]="model.fechaLiquidacion">
+          <input
+            type="date"
+            [(ngModel)]="model.fechaLiquidacion">
         </div>
 
         <div class="f-row">
           <label>Tipo comprobante</label>
-          <select [(ngModel)]="model.tipoComprobante" (ngModelChange)="cargarConsecutivoComprobante()">
+          <select
+            [(ngModel)]="model.tipoComprobante"
+            (ngModelChange)="cargarConsecutivoComprobante()">
+
             <option value="">Seleccione</option>
-            <option *ngFor="let t of tiposComprobantes" [value]="t.tipoComprobante">
+
+            <option
+              *ngFor="let t of tiposComprobantes"
+              [value]="t.tipoComprobante">
               {{ t.tipoComprobante }} - {{ t.nombreTipoComprobante }}
             </option>
+
           </select>
         </div>
 
         <div class="f-row">
           <label>Número comprobante</label>
-          <input type="text" [(ngModel)]="model.numeroComprobante" disabled>
+          <input
+            type="text"
+            [(ngModel)]="model.numeroComprobante"
+            disabled>
         </div>
 
         <div class="f-row">
@@ -166,28 +229,44 @@
 
         <div class="f-row">
           <label>Diferencia</label>
-          <input type="text" class="input-number" [value]="valorDiferenciaCalculada() | number:'1.0-2'" readonly>
+          <input
+            type="text"
+            class="input-number"
+            [value]="valorDiferenciaCalculada() | number:'1.0-2'"
+            readonly>
         </div>
 
         <div class="f-row full">
           <label>Operación diferencia</label>
-          <input type="text" [value]="tipoOperacionDiferencia()" readonly>
+          <input
+            type="text"
+            [value]="tipoOperacionDiferencia()"
+            readonly>
         </div>
 
       </div>
 
     </div>
 
-    <!-- MEDIOS DE PAGO ENTRADA -->
-    <div *ngIf="tipoOperacionDiferencia() === 'ENTRADA'" class="persona-box full">
+
+    <!-- ====================================================
+         MEDIOS DE PAGO ENTRADA
+    ===================================================== -->
+    <div
+      *ngIf="tipoOperacionDiferencia() === 'ENTRADA'"
+      class="persona-box full">
 
       <div class="section-header">
         <div>
           <h3>Medios de pago recibidos</h3>
-          <small>Valor adicional que entrega el asociado para renovar por mayor valor.</small>
+          <small>
+            Valor adicional que entrega el asociado para renovar por mayor valor.
+          </small>
         </div>
       </div>
 
+
+      <!-- EFECTIVO ENTRADA -->
       <div class="section-header">
         <div>
           <h3>Efectivo</h3>
@@ -212,6 +291,53 @@
         </div>
       </div>
 
+      <div
+        *ngIf="requiereCajaEntrada()"
+        class="caja-destino caja-requerida">
+
+        <div class="section-header">
+          <div>
+            <h3>Caja de entrada</h3>
+            <small>
+              Seleccione la caja abierta que recibirá el efectivo.
+            </small>
+          </div>
+        </div>
+
+        <div class="grid grid-2 gap">
+
+          <div class="f-row">
+            <label>Caja</label>
+
+            <select [(ngModel)]="idCajaEntrada">
+              <option [ngValue]="null">Seleccione caja</option>
+
+              <option
+                *ngFor="let caja of cajasAbiertas"
+                [ngValue]="caja.idCaja">
+                {{ caja.codigoCaja }} - {{ caja.descripcionCaja }}
+              </option>
+            </select>
+          </div>
+
+          <div class="f-row">
+            <label>Estado</label>
+            <input
+              type="text"
+              value="ABIERTA"
+              disabled>
+          </div>
+
+        </div>
+
+        <div *ngIf="cajasAbiertas.length === 0" class="loading">
+          No hay cajas abiertas disponibles para la agencia y fecha del proceso.
+        </div>
+
+      </div>
+
+
+      <!-- CHEQUES ENTRADA -->
       <div class="section-header">
         <div>
           <h3>Cheques</h3>
@@ -223,12 +349,16 @@
 
         <div class="f-row">
           <label>Banco</label>
-          <input type="text" [(ngModel)]="nuevoChequeEntrada.codigoBanco">
+          <input
+            type="text"
+            [(ngModel)]="nuevoChequeEntrada.codigoBanco">
         </div>
 
         <div class="f-row">
           <label>Número</label>
-          <input type="text" [(ngModel)]="nuevoChequeEntrada.numeroCheque">
+          <input
+            type="text"
+            [(ngModel)]="nuevoChequeEntrada.numeroCheque">
         </div>
 
         <div class="f-row">
@@ -243,14 +373,20 @@
         </div>
 
         <div class="f-row full inline-actions">
-          <button type="button" class="btn btn--secondary" (click)="agregarChequeEntrada(); cargarCajasAbiertas()">
+          <button
+            type="button"
+            class="btn btn--secondary"
+            (click)="agregarChequeEntrada()">
             + Agregar cheque
           </button>
         </div>
 
       </div>
 
-      <table *ngIf="chequesEntrada.length > 0" class="data-table">
+      <table
+        *ngIf="chequesEntrada.length > 0"
+        class="data-table">
+
         <thead>
         <tr>
           <th>Banco</th>
@@ -264,43 +400,30 @@
         <tr *ngFor="let ch of chequesEntrada; let i = index">
           <td>{{ ch.codigoBanco }}</td>
           <td>{{ ch.numeroCheque }}</td>
-          <td class="right">{{ ch.valorCheque | number:'1.0-0' }}</td>
+          <td class="right">
+            {{ ch.valorCheque | number:'1.0-0' }}
+          </td>
           <td>
-            <button type="button" class="btn--ghost-danger" (click)="eliminarChequeEntrada(i)">
+            <button
+              type="button"
+              class="btn--ghost-danger"
+              (click)="eliminarChequeEntrada(i)">
               🗑 Eliminar
             </button>
           </td>
         </tr>
         </tbody>
+
       </table>
 
-      <div *ngIf="requiereCajaEntrada()" class="caja-destino caja-requerida">
 
-        <div class="section-header">
-          <div>
-            <h3>Caja destino obligatoria</h3>
-            <small>Requerida cuando hay efectivo o cheques.</small>
-          </div>
-        </div>
-
-        <div class="grid grid-2 gap">
-          <div class="f-row">
-            <label>Caja</label>
-            <select [(ngModel)]="idCajaEntrada">
-              <option [ngValue]="null">Seleccione caja</option>
-              <option *ngFor="let c of cajasAbiertas" [ngValue]="c.idCaja">
-                {{ c.codigoCaja }} - {{ c.descripcionCaja }}
-              </option>
-            </select>
-          </div>
-        </div>
-
-      </div>
-
+      <!-- DEPÓSITOS ENTRADA -->
       <div class="section-header">
         <div>
           <h3>Depósitos / Ahorros</h3>
-          <small>Opcional. Use esta sección si recibe dinero desde cuentas de ahorro.</small>
+          <small>
+            Opcional. Use esta sección si recibe dinero desde cuentas de ahorro.
+          </small>
         </div>
       </div>
 
@@ -308,17 +431,34 @@
 
         <div class="f-row">
           <label>Cuenta ahorro</label>
-          <select [(ngModel)]="nuevoDepositoEntrada.idCuentaAhorro" (change)="onSelectCuentaDepositoEntrada()">
+
+          <select
+            [(ngModel)]="nuevoDepositoEntrada.idCuentaAhorro"
+            (change)="onSelectCuentaDepositoEntrada()">
+
             <option [ngValue]="null">Seleccione</option>
-            <option *ngFor="let c of cuentasAhorroDisponibles" [ngValue]="c.id_cuenta_ahorro">
-              {{ c.codigo_cuenta }} - {{ c.nombre_forma_ahorro || 'Ahorro' }} - Saldo {{ c.saldo_actual_cuenta | number:'1.0-0' }}
+
+            <option
+              *ngFor="let c of cuentasAhorroDisponibles"
+              [ngValue]="c.id_cuenta_ahorro">
+
+              {{ c.codigo_cuenta }}
+              -
+              {{ c.nombre_forma_ahorro || 'Ahorro' }}
+              -
+              Saldo {{ c.saldo_actual_cuenta | number:'1.0-0' }}
+
             </option>
+
           </select>
         </div>
 
         <div class="f-row">
           <label>Saldo</label>
-          <input type="text" [value]="nuevoDepositoEntrada.saldoDisponible | number:'1.0-0'" disabled>
+          <input
+            type="text"
+            [value]="nuevoDepositoEntrada.saldoDisponible | number:'1.0-0'"
+            disabled>
         </div>
 
         <div class="f-row">
@@ -333,14 +473,20 @@
         </div>
 
         <div class="f-row full inline-actions">
-          <button type="button" class="btn btn--secondary" (click)="agregarDepositoEntrada()">
+          <button
+            type="button"
+            class="btn btn--secondary"
+            (click)="agregarDepositoEntrada()">
             + Agregar depósito
           </button>
         </div>
 
       </div>
 
-      <table *ngIf="depositosEntrada.length > 0" class="data-table">
+      <table
+        *ngIf="depositosEntrada.length > 0"
+        class="data-table">
+
         <thead>
         <tr>
           <th>Cuenta</th>
@@ -353,21 +499,33 @@
         <tbody>
         <tr *ngFor="let d of depositosEntrada; let i = index">
           <td>{{ d.codigoCuenta }}</td>
-          <td class="right">{{ d.saldoDisponible | number:'1.0-0' }}</td>
-          <td class="right">{{ d.valorDebitar | number:'1.0-2' }}</td>
+          <td class="right">
+            {{ d.saldoDisponible | number:'1.0-0' }}
+          </td>
+          <td class="right">
+            {{ d.valorDebitar | number:'1.0-2' }}
+          </td>
           <td>
-            <button type="button" class="btn--ghost-danger" (click)="eliminarDepositoEntrada(i)">
+            <button
+              type="button"
+              class="btn--ghost-danger"
+              (click)="eliminarDepositoEntrada(i)">
               🗑 Eliminar
             </button>
           </td>
         </tr>
         </tbody>
+
       </table>
 
+
+      <!-- BANCOS ENTRADA -->
       <div class="section-header">
         <div>
           <h3>Bancos</h3>
-          <small>Opcional. Use esta sección si recibe transferencias o consignaciones.</small>
+          <small>
+            Opcional. Use esta sección si recibe transferencias o consignaciones.
+          </small>
         </div>
       </div>
 
@@ -375,12 +533,16 @@
 
         <div class="f-row">
           <label>Cuenta banco</label>
-          <input type="text" [(ngModel)]="nuevoBancoEntrada.codigoCuentaBanco">
+          <input
+            type="text"
+            [(ngModel)]="nuevoBancoEntrada.codigoCuentaBanco">
         </div>
 
         <div class="f-row">
           <label>Nombre cuenta</label>
-          <input type="text" [(ngModel)]="nuevoBancoEntrada.nombreCuentaBanco">
+          <input
+            type="text"
+            [(ngModel)]="nuevoBancoEntrada.nombreCuentaBanco">
         </div>
 
         <div class="f-row">
@@ -395,14 +557,20 @@
         </div>
 
         <div class="f-row full inline-actions">
-          <button type="button" class="btn btn--secondary" (click)="agregarBancoEntrada()">
+          <button
+            type="button"
+            class="btn btn--secondary"
+            (click)="agregarBancoEntrada()">
             + Agregar banco
           </button>
         </div>
 
       </div>
 
-      <table *ngIf="bancosEntrada.length > 0" class="data-table">
+      <table
+        *ngIf="bancosEntrada.length > 0"
+        class="data-table">
+
         <thead>
         <tr>
           <th>Cuenta</th>
@@ -416,20 +584,30 @@
         <tr *ngFor="let b of bancosEntrada; let i = index">
           <td>{{ b.codigoCuentaBanco }}</td>
           <td>{{ b.nombreCuentaBanco }}</td>
-          <td class="right">{{ b.valorBanco | number:'1.0-0' }}</td>
+          <td class="right">
+            {{ b.valorBanco | number:'1.0-0' }}
+          </td>
           <td>
-            <button type="button" class="btn--ghost-danger" (click)="eliminarBancoEntrada(i)">
+            <button
+              type="button"
+              class="btn--ghost-danger"
+              (click)="eliminarBancoEntrada(i)">
               🗑 Eliminar
             </button>
           </td>
         </tr>
         </tbody>
+
       </table>
 
+
+      <!-- TRASLADOS ENTRADA -->
       <div class="section-header">
         <div>
           <h3>Transferencias / Traslados</h3>
-          <small>Opcional. Use esta sección para traslados internos entre agencias.</small>
+          <small>
+            Opcional. Use esta sección para traslados internos entre agencias.
+          </small>
         </div>
       </div>
 
@@ -437,12 +615,16 @@
 
         <div class="f-row">
           <label>Cuenta traslado</label>
-          <input type="text" [(ngModel)]="nuevoTrasladoEntrada.codigoCuentaTraslado">
+          <input
+            type="text"
+            [(ngModel)]="nuevoTrasladoEntrada.codigoCuentaTraslado">
         </div>
 
         <div class="f-row">
           <label>Nombre cuenta</label>
-          <input type="text" [(ngModel)]="nuevoTrasladoEntrada.nombreCuentaTraslado">
+          <input
+            type="text"
+            [(ngModel)]="nuevoTrasladoEntrada.nombreCuentaTraslado">
         </div>
 
         <div class="f-row">
@@ -457,14 +639,20 @@
         </div>
 
         <div class="f-row full inline-actions">
-          <button type="button" class="btn btn--secondary" (click)="agregarTrasladoEntrada()">
+          <button
+            type="button"
+            class="btn btn--secondary"
+            (click)="agregarTrasladoEntrada()">
             + Agregar traslado
           </button>
         </div>
 
       </div>
 
-      <table *ngIf="trasladosEntrada.length > 0" class="data-table">
+      <table
+        *ngIf="trasladosEntrada.length > 0"
+        class="data-table">
+
         <thead>
         <tr>
           <th>Cuenta</th>
@@ -478,16 +666,24 @@
         <tr *ngFor="let t of trasladosEntrada; let i = index">
           <td>{{ t.codigoCuentaTraslado }}</td>
           <td>{{ t.nombreCuentaTraslado }}</td>
-          <td class="right">{{ t.valorTraslado | number:'1.0-0' }}</td>
+          <td class="right">
+            {{ t.valorTraslado | number:'1.0-0' }}
+          </td>
           <td>
-            <button type="button" class="btn--ghost-danger" (click)="eliminarTrasladoEntrada(i)">
+            <button
+              type="button"
+              class="btn--ghost-danger"
+              (click)="eliminarTrasladoEntrada(i)">
               🗑 Eliminar
             </button>
           </td>
         </tr>
         </tbody>
+
       </table>
 
+
+      <!-- RESUMEN ENTRADA -->
       <div class="section-header">
         <div>
           <h3>Resumen medios recibidos</h3>
@@ -496,18 +692,41 @@
       </div>
 
       <div class="persona-box persona-grid">
-        <p><strong>Efectivo:</strong> {{ valorEfectivoEntrada | number:'1.0-2' }}</p>
-        <p><strong>Cheques:</strong> {{ totalChequesEntrada() | number:'1.0-2' }}</p>
-        <p><strong>Depósitos:</strong> {{ totalDepositosEntrada() | number:'1.0-2' }}</p>
-        <p><strong>Bancos:</strong> {{ totalBancosEntrada() | number:'1.0-2' }}</p>
-        <p><strong>Traslados:</strong> {{ totalTrasladosEntrada() | number:'1.0-2' }}</p>
-        <p><strong>Total recibido:</strong> {{ totalMediosEntrada() | number:'1.0-2' }}</p>
+        <p>
+          <strong>Efectivo:</strong>
+          {{ valorEfectivoEntrada | number:'1.0-2' }}
+        </p>
+        <p>
+          <strong>Cheques:</strong>
+          {{ totalChequesEntrada() | number:'1.0-2' }}
+        </p>
+        <p>
+          <strong>Depósitos:</strong>
+          {{ totalDepositosEntrada() | number:'1.0-2' }}
+        </p>
+        <p>
+          <strong>Bancos:</strong>
+          {{ totalBancosEntrada() | number:'1.0-2' }}
+        </p>
+        <p>
+          <strong>Traslados:</strong>
+          {{ totalTrasladosEntrada() | number:'1.0-2' }}
+        </p>
+        <p>
+          <strong>Total recibido:</strong>
+          {{ totalMediosEntrada() | number:'1.0-2' }}
+        </p>
       </div>
 
     </div>
 
-    <!-- MEDIOS DE PAGO SALIDA -->
-    <div *ngIf="tipoOperacionDiferencia() === 'SALIDA'" class="persona-box full">
+
+    <!-- ====================================================
+         MEDIOS DE PAGO SALIDA
+    ===================================================== -->
+    <div
+      *ngIf="tipoOperacionDiferencia() === 'SALIDA'"
+      class="persona-box full">
 
       <div class="section-header">
         <div>
@@ -516,6 +735,8 @@
         </div>
       </div>
 
+
+      <!-- EFECTIVO SALIDA -->
       <div class="section-header">
         <div>
           <h3>Efectivo</h3>
@@ -538,13 +759,61 @@
             (focus)="sugerirEfectivoSalida()"
             (ngModelChange)="cargarCajasAbiertas()">
         </div>
+      </div>
+
+      <div
+        *ngIf="requiereCajaSalida()"
+        class="caja-destino caja-requerida">
+
+        <div class="section-header">
+          <div>
+            <h3>Caja de salida</h3>
+            <small>
+              Seleccione la caja abierta desde la cual se entregará el efectivo.
+            </small>
+          </div>
+        </div>
+
+        <div class="grid grid-2 gap">
+
+          <div class="f-row">
+            <label>Caja</label>
+
+            <select [(ngModel)]="idCajaSalida">
+              <option [ngValue]="null">Seleccione caja</option>
+
+              <option
+                *ngFor="let caja of cajasAbiertas"
+                [ngValue]="caja.idCaja">
+                {{ caja.codigoCaja }} - {{ caja.descripcionCaja }}
+              </option>
+            </select>
+          </div>
+
+          <div class="f-row">
+            <label>Estado</label>
+            <input
+              type="text"
+              value="ABIERTA"
+              disabled>
+          </div>
+
+        </div>
+
+        <div *ngIf="cajasAbiertas.length === 0" class="loading">
+          No hay cajas abiertas disponibles para la agencia y fecha del proceso.
+        </div>
 
       </div>
 
+
+      <!-- CHEQUES SALIDA -->
       <div class="section-header">
         <div>
           <h3>Cheques</h3>
-          <small>Opcional. Use esta sección si devuelve valor en cheque.</small>
+          <small>
+            Opcional. Use esta sección si devuelve valor en cheque.
+          </small>
         </div>
       </div>
 
@@ -552,12 +821,16 @@
 
         <div class="f-row">
           <label>Banco</label>
-          <input type="text" [(ngModel)]="nuevoChequeSalida.codigoBanco">
+          <input
+            type="text"
+            [(ngModel)]="nuevoChequeSalida.codigoBanco">
         </div>
 
         <div class="f-row">
           <label>Número</label>
-          <input type="text" [(ngModel)]="nuevoChequeSalida.numeroCheque">
+          <input
+            type="text"
+            [(ngModel)]="nuevoChequeSalida.numeroCheque">
         </div>
 
         <div class="f-row">
@@ -572,14 +845,20 @@
         </div>
 
         <div class="f-row full inline-actions">
-          <button type="button" class="btn btn--secondary" (click)="agregarChequeSalida(); cargarCajasAbiertas()">
+          <button
+            type="button"
+            class="btn btn--secondary"
+            (click)="agregarChequeSalida()">
             + Agregar cheque
           </button>
         </div>
 
       </div>
 
-      <table *ngIf="chequesSalida.length > 0" class="data-table">
+      <table
+        *ngIf="chequesSalida.length > 0"
+        class="data-table">
+
         <thead>
         <tr>
           <th>Banco</th>
@@ -593,45 +872,30 @@
         <tr *ngFor="let ch of chequesSalida; let i = index">
           <td>{{ ch.codigoBanco }}</td>
           <td>{{ ch.numeroCheque }}</td>
-          <td class="right">{{ ch.valorCheque | number:'1.0-0' }}</td>
+          <td class="right">
+            {{ ch.valorCheque | number:'1.0-0' }}
+          </td>
           <td>
-            <button type="button" class="btn--ghost-danger" (click)="eliminarChequeSalida(i)">
+            <button
+              type="button"
+              class="btn--ghost-danger"
+              (click)="eliminarChequeSalida(i)">
               🗑 Eliminar
             </button>
           </td>
         </tr>
         </tbody>
+
       </table>
 
-      <div *ngIf="requiereCajaSalida()" class="caja-destino caja-requerida">
 
-        <div class="section-header">
-          <div>
-            <h3>Caja origen obligatoria</h3>
-            <small>Requerida cuando hay efectivo o cheques.</small>
-          </div>
-        </div>
-
-        <div class="grid grid-2 gap">
-
-          <div class="f-row">
-            <label>Caja</label>
-            <select [(ngModel)]="idCajaSalida">
-              <option [ngValue]="null">Seleccione caja</option>
-              <option *ngFor="let c of cajasAbiertas" [ngValue]="c.idCaja">
-                {{ c.codigoCaja }} - {{ c.descripcionCaja }}
-              </option>
-            </select>
-          </div>
-
-        </div>
-
-      </div>
-
+      <!-- DEPÓSITOS SALIDA -->
       <div class="section-header">
         <div>
           <h3>Depósitos / Ahorros</h3>
-          <small>Opcional. Use esta sección si devuelve dinero a cuentas de ahorro.</small>
+          <small>
+            Opcional. Use esta sección si devuelve dinero a cuentas de ahorro.
+          </small>
         </div>
       </div>
 
@@ -639,17 +903,34 @@
 
         <div class="f-row">
           <label>Cuenta ahorro</label>
-          <select [(ngModel)]="nuevoDepositoSalida.idCuentaAhorro" (change)="onSelectCuentaDepositoSalida()">
+
+          <select
+            [(ngModel)]="nuevoDepositoSalida.idCuentaAhorro"
+            (change)="onSelectCuentaDepositoSalida()">
+
             <option [ngValue]="null">Seleccione</option>
-            <option *ngFor="let c of cuentasAhorroDisponibles" [ngValue]="c.id_cuenta_ahorro">
-              {{ c.codigo_cuenta }} - {{ c.nombre_forma_ahorro || 'Ahorro' }} - Saldo {{ c.saldo_actual_cuenta | number:'1.0-0' }}
+
+            <option
+              *ngFor="let c of cuentasAhorroDisponibles"
+              [ngValue]="c.id_cuenta_ahorro">
+
+              {{ c.codigo_cuenta }}
+              -
+              {{ c.nombre_forma_ahorro || 'Ahorro' }}
+              -
+              Saldo {{ c.saldo_actual_cuenta | number:'1.0-0' }}
+
             </option>
+
           </select>
         </div>
 
         <div class="f-row">
           <label>Saldo</label>
-          <input type="text" [value]="nuevoDepositoSalida.saldoDisponible | number:'1.0-0'" disabled>
+          <input
+            type="text"
+            [value]="nuevoDepositoSalida.saldoDisponible | number:'1.0-0'"
+            disabled>
         </div>
 
         <div class="f-row">
@@ -664,14 +945,20 @@
         </div>
 
         <div class="f-row full inline-actions">
-          <button type="button" class="btn btn--secondary" (click)="agregarDepositoSalida()">
+          <button
+            type="button"
+            class="btn btn--secondary"
+            (click)="agregarDepositoSalida()">
             + Agregar depósito
           </button>
         </div>
 
       </div>
 
-      <table *ngIf="depositosSalida.length > 0" class="data-table">
+      <table
+        *ngIf="depositosSalida.length > 0"
+        class="data-table">
+
         <thead>
         <tr>
           <th>Cuenta</th>
@@ -684,21 +971,33 @@
         <tbody>
         <tr *ngFor="let d of depositosSalida; let i = index">
           <td>{{ d.codigoCuenta }}</td>
-          <td class="right">{{ d.saldoDisponible | number:'1.0-0' }}</td>
-          <td class="right">{{ d.valorDebitar | number:'1.0-2' }}</td>
+          <td class="right">
+            {{ d.saldoDisponible | number:'1.0-0' }}
+          </td>
+          <td class="right">
+            {{ d.valorDebitar | number:'1.0-2' }}
+          </td>
           <td>
-            <button type="button" class="btn--ghost-danger" (click)="eliminarDepositoSalida(i)">
+            <button
+              type="button"
+              class="btn--ghost-danger"
+              (click)="eliminarDepositoSalida(i)">
               🗑 Eliminar
             </button>
           </td>
         </tr>
         </tbody>
+
       </table>
 
+
+      <!-- BANCOS SALIDA -->
       <div class="section-header">
         <div>
           <h3>Bancos</h3>
-          <small>Opcional. Use esta sección si devuelve transferencias o consignaciones.</small>
+          <small>
+            Opcional. Use esta sección si devuelve transferencias o consignaciones.
+          </small>
         </div>
       </div>
 
@@ -706,12 +1005,16 @@
 
         <div class="f-row">
           <label>Cuenta banco</label>
-          <input type="text" [(ngModel)]="nuevoBancoSalida.codigoCuentaBanco">
+          <input
+            type="text"
+            [(ngModel)]="nuevoBancoSalida.codigoCuentaBanco">
         </div>
 
         <div class="f-row">
           <label>Nombre cuenta</label>
-          <input type="text" [(ngModel)]="nuevoBancoSalida.nombreCuentaBanco">
+          <input
+            type="text"
+            [(ngModel)]="nuevoBancoSalida.nombreCuentaBanco">
         </div>
 
         <div class="f-row">
@@ -726,14 +1029,20 @@
         </div>
 
         <div class="f-row full inline-actions">
-          <button type="button" class="btn btn--secondary" (click)="agregarBancoSalida()">
+          <button
+            type="button"
+            class="btn btn--secondary"
+            (click)="agregarBancoSalida()">
             + Agregar banco
           </button>
         </div>
 
       </div>
 
-      <table *ngIf="bancosSalida.length > 0" class="data-table">
+      <table
+        *ngIf="bancosSalida.length > 0"
+        class="data-table">
+
         <thead>
         <tr>
           <th>Cuenta</th>
@@ -747,20 +1056,30 @@
         <tr *ngFor="let b of bancosSalida; let i = index">
           <td>{{ b.codigoCuentaBanco }}</td>
           <td>{{ b.nombreCuentaBanco }}</td>
-          <td class="right">{{ b.valorBanco | number:'1.0-0' }}</td>
+          <td class="right">
+            {{ b.valorBanco | number:'1.0-0' }}
+          </td>
           <td>
-            <button type="button" class="btn--ghost-danger" (click)="eliminarBancoSalida(i)">
+            <button
+              type="button"
+              class="btn--ghost-danger"
+              (click)="eliminarBancoSalida(i)">
               🗑 Eliminar
             </button>
           </td>
         </tr>
         </tbody>
+
       </table>
 
+
+      <!-- TRASLADOS SALIDA -->
       <div class="section-header">
         <div>
           <h3>Transferencias / Traslados</h3>
-          <small>Opcional. Use esta sección para traslados internos entre agencias.</small>
+          <small>
+            Opcional. Use esta sección para traslados internos entre agencias.
+          </small>
         </div>
       </div>
 
@@ -768,12 +1087,16 @@
 
         <div class="f-row">
           <label>Cuenta traslado</label>
-          <input type="text" [(ngModel)]="nuevoTrasladoSalida.codigoCuentaTraslado">
+          <input
+            type="text"
+            [(ngModel)]="nuevoTrasladoSalida.codigoCuentaTraslado">
         </div>
 
         <div class="f-row">
           <label>Nombre cuenta</label>
-          <input type="text" [(ngModel)]="nuevoTrasladoSalida.nombreCuentaTraslado">
+          <input
+            type="text"
+            [(ngModel)]="nuevoTrasladoSalida.nombreCuentaTraslado">
         </div>
 
         <div class="f-row">
@@ -788,14 +1111,20 @@
         </div>
 
         <div class="f-row full inline-actions">
-          <button type="button" class="btn btn--secondary" (click)="agregarTrasladoSalida()">
+          <button
+            type="button"
+            class="btn btn--secondary"
+            (click)="agregarTrasladoSalida()">
             + Agregar traslado
           </button>
         </div>
 
       </div>
 
-      <table *ngIf="trasladosSalida.length > 0" class="data-table">
+      <table
+        *ngIf="trasladosSalida.length > 0"
+        class="data-table">
+
         <thead>
         <tr>
           <th>Cuenta</th>
@@ -809,16 +1138,52 @@
         <tr *ngFor="let t of trasladosSalida; let i = index">
           <td>{{ t.codigoCuentaTraslado }}</td>
           <td>{{ t.nombreCuentaTraslado }}</td>
-          <td class="right">{{ t.valorTraslado | number:'1.0-0' }}</td>
+          <td class="right">
+            {{ t.valorTraslado | number:'1.0-0' }}
+          </td>
           <td>
-            <button type="button" class="btn--ghost-danger" (click)="eliminarTrasladoSalida(i)">
+            <button
+              type="button"
+              class="btn--ghost-danger"
+              (click)="eliminarTrasladoSalida(i)">
               🗑 Eliminar
             </button>
           </td>
         </tr>
         </tbody>
+
       </table>
 
+
+      <!-- CUENTA POR PAGAR -->
+      <div class="section-header">
+        <div>
+          <h3>Cuenta por Pagar</h3>
+          <small>
+            Opcional. Use esta opción cuando el valor de la cancelación
+            quede reconocido como una obligación por pagar al asociado.
+          </small>
+        </div>
+      </div>
+
+      <div class="grid grid-3 gap">
+        <div></div>
+        <div></div>
+
+        <div class="f-row">
+          <label>Valor</label>
+
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="model.valorCuentaPorPagar"
+            (focus)="sugerirCuentaPorPagarSalida()">
+        </div>
+      </div>
+
+
+      <!-- RESUMEN SALIDA -->
       <div class="section-header">
         <div>
           <h3>Resumen medios devueltos</h3>
@@ -827,23 +1192,52 @@
       </div>
 
       <div class="persona-box persona-grid">
-        <p><strong>Efectivo:</strong> {{ valorEfectivoSalida | number:'1.0-2' }}</p>
-        <p><strong>Cheques:</strong> {{ totalChequesSalida() | number:'1.0-2' }}</p>
-        <p><strong>Depósitos:</strong> {{ totalDepositosSalida() | number:'1.0-2' }}</p>
-        <p><strong>Bancos:</strong> {{ totalBancosSalida() | number:'1.0-2' }}</p>
-        <p><strong>Traslados:</strong> {{ totalTrasladosSalida() | number:'1.0-2' }}</p>
-        <p><strong>Total entregado:</strong> {{ totalMediosSalida() | number:'1.0-2' }}</p>
+        <p>
+          <strong>Efectivo:</strong>
+          {{ valorEfectivoSalida | number:'1.0-2' }}
+        </p>
+        <p>
+          <strong>Cheques:</strong>
+          {{ totalChequesSalida() | number:'1.0-2' }}
+        </p>
+        <p>
+          <strong>Depósitos:</strong>
+          {{ totalDepositosSalida() | number:'1.0-2' }}
+        </p>
+        <p>
+          <strong>Bancos:</strong>
+          {{ totalBancosSalida() | number:'1.0-2' }}
+        </p>
+        <p>
+          <strong>Traslados:</strong>
+          {{ totalTrasladosSalida() | number:'1.0-2' }}
+        </p>
+        <p>
+          <strong>Cuenta por pagar:</strong>
+          {{ model.valorCuentaPorPagar | number:'1.0-2' }}
+        </p>
+        <p>
+          <strong>Total entregado:</strong>
+          {{ totalMediosSalida() | number:'1.0-2' }}
+        </p>
       </div>
 
     </div>
 
-    <!-- NUEVO CDAT -->
-    <div *ngIf="model.valorRenovacion > 0" class="persona-box full">
+
+    <!-- ====================================================
+         NUEVO CDAT
+    ===================================================== -->
+    <div
+      *ngIf="model.valorRenovacion > 0"
+      class="persona-box full">
 
       <div class="section-header">
         <div>
           <h3>Nuevo CDAT por renovación</h3>
-          <small>Datos del nuevo título generado a partir del CDAT origen.</small>
+          <small>
+            Datos del nuevo título generado a partir del CDAT origen.
+          </small>
         </div>
       </div>
 
@@ -867,29 +1261,50 @@
 
         <div class="f-row">
           <label>Tasa nominal anual</label>
-          <input type="text" numericFormat class="input-number" [(ngModel)]="model.tasaNominalAnualNuevoCdat" (blur)="calcularTasaEfectivaNuevoCdat()">
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="model.tasaNominalAnualNuevoCdat"
+            (blur)="calcularTasaEfectivaNuevoCdat()">
         </div>
 
         <div class="f-row">
           <label>Tasa efectiva anual</label>
-          <input type="text" class="input-number" [value]="model.tasaEfectivaAnualNuevoCdat | number:'1.2-6'" disabled>
+          <input
+            type="text"
+            class="input-number"
+            [value]="model.tasaEfectivaAnualNuevoCdat | number:'1.2-6'"
+            disabled>
         </div>
 
         <div class="f-row">
           <label>Plazo meses</label>
-          <input type="text" numericFormat class="input-number" [(ngModel)]="model.plazoMesesNuevoCdat" (ngModelChange)="calcularVencimientoNuevoCdat()">
+          <input
+            type="text"
+            numericFormat
+            class="input-number"
+            [(ngModel)]="model.plazoMesesNuevoCdat"
+            (ngModelChange)="calcularVencimientoNuevoCdat()">
         </div>
 
         <div class="f-row">
           <label>Fecha vencimiento</label>
-          <input type="date" [value]="fechaVencimientoNuevoCdatCalculada" disabled>
+          <input
+            type="date"
+            [value]="fechaVencimientoNuevoCdatCalculada"
+            disabled>
         </div>
 
         <div class="f-row">
           <label>Amortización</label>
+
           <select [(ngModel)]="model.amortizacionDepositoNuevoCdat">
             <option [ngValue]="null">Seleccione</option>
-            <option *ngFor="let a of amortizaciones" [value]="a.codigoAmortizacion">
+
+            <option
+              *ngFor="let a of amortizaciones"
+              [value]="a.codigoAmortizacion">
               {{ a.nombreAmortizacion }}
             </option>
           </select>
@@ -897,16 +1312,28 @@
 
         <div class="f-row">
           <label>Cuenta ahorro para notas</label>
+
           <select [(ngModel)]="model.idCuentaAhorroNuevoCdat">
             <option [ngValue]="null">Seleccione cuenta</option>
-            <option *ngFor="let c of cuentasAhorroDisponibles" [ngValue]="c.id_cuenta_ahorro">
-              {{ c.codigo_cuenta }} - {{ c.nombre_forma_ahorro || 'Ahorro' }} - Saldo {{ c.saldo_actual_cuenta | number:'1.0-0' }}
+
+            <option
+              *ngFor="let c of cuentasAhorroDisponibles"
+              [ngValue]="c.id_cuenta_ahorro">
+
+              {{ c.codigo_cuenta }}
+              -
+              {{ c.nombre_forma_ahorro || 'Ahorro' }}
+              -
+              Saldo {{ c.saldo_actual_cuenta | number:'1.0-0' }}
+
             </option>
+
           </select>
         </div>
 
         <div class="f-row">
           <label>Retención en la fuente</label>
+
           <select [(ngModel)]="model.retencionFuenteNuevoCdat">
             <option [ngValue]="true">Sí</option>
             <option [ngValue]="false">No</option>
@@ -915,14 +1342,20 @@
 
         <div class="f-row full">
           <label>Observación nuevo CDAT</label>
-          <textarea rows="3" [(ngModel)]="model.observacionNuevoCdat"></textarea>
+          <textarea
+            rows="3"
+            [(ngModel)]="model.observacionNuevoCdat">
+          </textarea>
         </div>
 
       </div>
 
     </div>
 
-    <!-- RESUMEN -->
+
+    <!-- ====================================================
+         RESUMEN
+    ===================================================== -->
     <div class="persona-box full">
 
       <div class="section-header">
@@ -933,17 +1366,38 @@
       </div>
 
       <div class="persona-grid">
-        <p><strong>Capital:</strong> {{ cdat.valorCapital | number:'1.0-2' }}</p>
-        <p><strong>Interés causado:</strong> {{ cdat.valorInteresCausado | number:'1.0-2' }}</p>
-        <p><strong>Interés corriente:</strong> {{ cdat.valorInteresCorriente | number:'1.0-2' }}</p>
-        <p><strong>Retención:</strong> {{ cdat.valorRetencion | number:'1.0-2' }}</p>
-        <p><strong>Disponible:</strong> {{ cdat.valorDisponible | number:'1.0-2' }}</p>
-        <p><strong>Renovación:</strong> {{ model.valorRenovacion | number:'1.0-2' }}</p>
+        <p>
+          <strong>Capital:</strong>
+          {{ cdat.valorCapital | number:'1.0-2' }}
+        </p>
+        <p>
+          <strong>Interés causado:</strong>
+          {{ cdat.valorInteresCausado | number:'1.0-2' }}
+        </p>
+        <p>
+          <strong>Interés corriente:</strong>
+          {{ cdat.valorInteresCorriente | number:'1.0-2' }}
+        </p>
+        <p>
+          <strong>Retención:</strong>
+          {{ cdat.valorRetencion | number:'1.0-2' }}
+        </p>
+        <p>
+          <strong>Disponible:</strong>
+          {{ cdat.valorDisponible | number:'1.0-2' }}
+        </p>
+        <p>
+          <strong>Renovación:</strong>
+          {{ model.valorRenovacion | number:'1.0-2' }}
+        </p>
       </div>
 
     </div>
 
-    <!-- COMPROBANTE -->
+
+    <!-- ====================================================
+         COMPROBANTE
+    ===================================================== -->
     <div class="persona-box full">
 
       <div class="section-header">
@@ -952,7 +1406,10 @@
           <small>Genere el preview antes de aplicar el proceso.</small>
         </div>
 
-        <button type="button" class="btn btn--secondary" (click)="generarPreview()">
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="generarPreview()">
           {{ preview ? 'Regenerar preview' : 'Generar preview' }}
         </button>
       </div>
@@ -972,32 +1429,74 @@
 
           <tbody>
           <tr *ngFor="let m of preview.movimientosContables">
-            <td>{{ m.codigoCuenta || m.idCatalogoCuenta }} <span *ngIf="m.nombreCuenta"> - {{ m.nombreCuenta }}</span></td>
-            <td>{{ m.documentoTercero || '' }} <span *ngIf="m.nombreTercero"> - {{ m.nombreTercero }}</span></td>
+            <td>
+              {{ m.codigoCuenta || m.idCatalogoCuenta }}
+              <span *ngIf="m.nombreCuenta">
+                  - {{ m.nombreCuenta }}
+                </span>
+            </td>
+
+            <td>
+              {{ m.documentoTercero || '' }}
+              <span *ngIf="m.nombreTercero">
+                  - {{ m.nombreTercero }}
+                </span>
+            </td>
+
             <td>{{ m.detalleMovimiento }}</td>
-            <td class="right">{{ m.valorDebito | number:'1.0-2' }}</td>
-            <td class="right">{{ m.valorCredito | number:'1.0-2' }}</td>
+
+            <td class="right">
+              {{ m.valorDebito | number:'1.0-2' }}
+            </td>
+
+            <td class="right">
+              {{ m.valorCredito | number:'1.0-2' }}
+            </td>
           </tr>
           </tbody>
         </table>
 
         <div class="persona-grid">
-          <p><strong>Total débito:</strong> {{ preview.totalDebito | number:'1.0-2' }}</p>
-          <p><strong>Total crédito:</strong> {{ preview.totalCredito | number:'1.0-2' }}</p>
-          <p><strong>Diferencia:</strong> {{ preview.diferenciaContable | number:'1.0-2' }}</p>
+
+          <p>
+            <strong>Total débito:</strong>
+            {{ preview.totalDebito | number:'1.0-2' }}
+          </p>
+
+          <p>
+            <strong>Total crédito:</strong>
+            {{ preview.totalCredito | number:'1.0-2' }}
+          </p>
+
+          <p>
+            <strong>Diferencia:</strong>
+            {{ preview.diferenciaContable | number:'1.0-2' }}
+          </p>
+
           <p>
             <strong>Estado:</strong>
             <span *ngIf="preview.cuadrado">✔ Cuadrado</span>
             <span *ngIf="!preview.cuadrado">✖ No cuadra</span>
           </p>
+
         </div>
 
       </div>
 
     </div>
 
+
+    <!-- ====================================================
+         ACCIONES
+    ===================================================== -->
     <div class="form-actions">
-      <button type="button" class="btn btn--secondary" (click)="limpiarEstado()">Cancelar</button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="limpiarEstado()">
+        Cancelar
+      </button>
 
       <button
         type="button"
@@ -1006,8 +1505,10 @@
         (click)="aplicar()">
         Aplicar cancelación / renovación
       </button>
+
     </div>
 
   </div>
 
 </div>
+

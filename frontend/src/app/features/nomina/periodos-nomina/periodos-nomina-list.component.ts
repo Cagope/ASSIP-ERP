@@ -28,6 +28,14 @@ export class PeriodosNominaListComponent implements OnInit {
   estado: string = '';
   q = '';
 
+  get puedeGenerar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
+
+  get puedeReversarPeriodo(): boolean {
+    return this.session.tienePermiso('NOMINA_LIQUIDACION_EXECUTE');
+  }
+
   ngOnInit(): void {
     this.cargar();
   }
@@ -67,20 +75,24 @@ export class PeriodosNominaListComponent implements OnInit {
   // 🔓 SOLO REVERSIÓN (CERRADO → ABIERTO)
   // =========================================================
   puedeReversar(p: PeriodoNominaListDTO): boolean {
-    return (p.estado ?? '').toUpperCase() === 'CERRADO';
+    return this.puedeReversarPeriodo
+      && (p.estado ?? '').toUpperCase() === 'CERRADO';
   }
 
   // =========================================================
   // Header → Generador (NO ejecuta procesos)
   // =========================================================
   generar(): void {
-    this.router.navigate(['/nomina/periodos/generar']);
+    if (!this.puedeGenerar) return;
+
+    this.router.navigate(['/nomina/periodos/generador']);
   }
 
   // =========================================================
   // 🔁 Reversar ejecución del período
   // =========================================================
   reversar(idPeriodo: number): void {
+    if (!this.puedeReversarPeriodo) return;
 
     const ok = confirm(
       `¿Reversar la ejecución del período #${idPeriodo}?\n\n` +

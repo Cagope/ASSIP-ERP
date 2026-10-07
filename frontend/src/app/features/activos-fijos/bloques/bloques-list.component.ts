@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
+
 import {
   BloquesApi,
   BloqueListDTO
@@ -10,6 +11,8 @@ import {
 
 import { BloquesPrintService } from './bloques-print.service';
 import { BloquesExporterService } from './bloques-exporter.service';
+
+import { SessionService } from '../../../core/auth/session.service';
 
 @Component({
   selector: 'app-bloques-list',
@@ -23,19 +26,39 @@ import { BloquesExporterService } from './bloques-exporter.service';
 })
 export class BloquesListComponent implements OnInit {
 
+  // =========================================================
+  // INYECCIONES
+  // =========================================================
   private readonly api = inject(BloquesApi);
   private readonly printer = inject(BloquesPrintService);
   private readonly exporter = inject(BloquesExporterService);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
+  // =========================================================
+  // PERMISOS
+  // =========================================================
+  readonly puedeEditar =
+    this.session.tienePermiso('ACTIVOS_FIJOS_EDIT');
+
+  // =========================================================
+  // DATOS
+  // =========================================================
   bloques: BloqueListDTO[] = [];
+
   cargando = false;
   error = '';
 
+  // =========================================================
+  // INIT
+  // =========================================================
   ngOnInit(): void {
     this.cargar();
   }
 
+  // =========================================================
+  // CARGA
+  // =========================================================
   cargar(): void {
     this.cargando = true;
     this.error = '';
@@ -47,9 +70,9 @@ export class BloquesListComponent implements OnInit {
     });
   }
 
-  // ===============================
+  // =========================================================
   // HEADER ACTIONS
-  // ===============================
+  // =========================================================
   imprimir(): void {
     this.printer.imprimir(this.bloques);
   }
@@ -58,18 +81,27 @@ export class BloquesListComponent implements OnInit {
     this.exporter.exportar(this.bloques);
   }
 
-  // ===============================
+  // =========================================================
   // CRUD
-  // ===============================
+  // =========================================================
   nuevo(): void {
+
+    if (!this.puedeEditar) return;
+
     this.router.navigate(['/activos-fijos/bloques/nuevo']);
   }
 
   editar(id: number): void {
+
+    if (!this.puedeEditar) return;
+
     this.router.navigate(['/activos-fijos/bloques', id, 'editar']);
   }
 
   eliminar(item: BloqueListDTO): void {
+
+    if (!this.puedeEditar) return;
+
     if (!confirm('¿Eliminar este bloque?')) return;
 
     this.api.eliminar(item.idBloque).subscribe(() => {

@@ -64,20 +64,20 @@ export const routes: Routes = [
             .then(m => m.CDAT_ROUTES),
       },
 
+      // === CONSULTAS ===
+      {
+        path: 'consultas',
+        loadChildren: () =>
+          import('./features/consultas/consultas.routes')
+            .then(m => m.CONSULTAS_ROUTES),
+      },
+
       // === CAJAS ===
       {
         path: 'cajas',
         loadChildren: () =>
           import('./features/cajas/cajas.routes')
             .then(m => m.CAJAS_ROUTES),
-      },
-
-      // === GERENCIA ===
-      {
-        path: 'gerencia',
-        loadChildren: () =>
-          import('./features/gerencia/gerencia.routes')
-            .then(m => m.GERENCIA_ROUTES),
       },
 
       // === SARLAFT ===

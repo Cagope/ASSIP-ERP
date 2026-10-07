@@ -1,6 +1,10 @@
 package co.assip.erp.cartera.analisis.riesgodeterioro;
 
 import co.assip.erp.cartera.analisis.riesgodeterioro.dto.*;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -8,19 +12,15 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping(
-        "/cartera/analisis/riesgo-deterioro"
-)
+@RequestMapping("/cartera/analisis/riesgo-deterioro")
+@RequiredArgsConstructor
 public class AnalisisRiesgoDeterioroController {
 
+    private static final String PERMISO_VIEW = "CARTERA_ANALISIS_VIEW";
+
     private final AnalisisRiesgoDeterioroService service;
-
-    public AnalisisRiesgoDeterioroController(
-            AnalisisRiesgoDeterioroService service
-    ) {
-        this.service = service;
-    }
-
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // =========================================================
     // CORTES
@@ -29,9 +29,10 @@ public class AnalisisRiesgoDeterioroController {
     @GetMapping("/cortes")
     public List<LocalDate> listarCortes() {
 
+        validarAcceso();
+
         return service.listarCortes();
     }
-
 
     // =========================================================
     // RESUMEN
@@ -41,9 +42,7 @@ public class AnalisisRiesgoDeterioroController {
     public RiesgoDeterioroResumenDTO consultarResumen(
 
             @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE
-            )
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate fechaCorte,
 
             @RequestParam(required = false)
@@ -53,13 +52,14 @@ public class AnalisisRiesgoDeterioroController {
             Integer idLineaCredito
     ) {
 
+        validarAcceso();
+
         return service.consultarResumen(
                 fechaCorte,
                 idAgencia,
                 idLineaCredito
         );
     }
-
 
     // =========================================================
     // EDADES
@@ -69,14 +69,10 @@ public class AnalisisRiesgoDeterioroController {
     public List<RiesgoDeterioroEdadDTO> consultarEdades(
 
             @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE
-            )
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate fechaCorte,
 
-            @RequestParam(
-                    defaultValue = "CONTABLE"
-            )
+            @RequestParam(defaultValue = "CONTABLE")
             String tipoEdad,
 
             @RequestParam(required = false)
@@ -86,6 +82,8 @@ public class AnalisisRiesgoDeterioroController {
             Integer idLineaCredito
     ) {
 
+        validarAcceso();
+
         return service.consultarEdades(
                 fechaCorte,
                 tipoEdad,
@@ -93,7 +91,6 @@ public class AnalisisRiesgoDeterioroController {
                 idLineaCredito
         );
     }
-
 
     // =========================================================
     // SEGMENTACIÓN
@@ -103,14 +100,10 @@ public class AnalisisRiesgoDeterioroController {
     public List<RiesgoDeterioroSegmentoDTO> consultarSegmentacion(
 
             @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE
-            )
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate fechaCorte,
 
-            @RequestParam(
-                    defaultValue = "LINEA"
-            )
+            @RequestParam(defaultValue = "LINEA")
             String dimension,
 
             @RequestParam(required = false)
@@ -120,6 +113,8 @@ public class AnalisisRiesgoDeterioroController {
             Integer idLineaCredito
     ) {
 
+        validarAcceso();
+
         return service.consultarSegmentacion(
                 fechaCorte,
                 dimension,
@@ -127,7 +122,6 @@ public class AnalisisRiesgoDeterioroController {
                 idLineaCredito
         );
     }
-
 
     // =========================================================
     // EVOLUCIÓN
@@ -137,15 +131,11 @@ public class AnalisisRiesgoDeterioroController {
     public List<RiesgoDeterioroEvolucionDTO> consultarEvolucion(
 
             @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE
-            )
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate fechaDesde,
 
             @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE
-            )
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate fechaHasta,
 
             @RequestParam(required = false)
@@ -155,6 +145,8 @@ public class AnalisisRiesgoDeterioroController {
             Integer idLineaCredito
     ) {
 
+        validarAcceso();
+
         return service.consultarEvolucion(
                 fechaDesde,
                 fechaHasta,
@@ -162,7 +154,6 @@ public class AnalisisRiesgoDeterioroController {
                 idLineaCredito
         );
     }
-
 
     // =========================================================
     // CONCENTRACIÓN
@@ -172,20 +163,13 @@ public class AnalisisRiesgoDeterioroController {
     public List<RiesgoDeterioroConcentracionDTO> consultarConcentracion(
 
             @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE
-            )
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate fechaCorte,
 
-            @RequestParam(
-                    defaultValue =
-                            "PERDIDA_ESPERADA"
-            )
+            @RequestParam(defaultValue = "PERDIDA_ESPERADA")
             String criterio,
 
-            @RequestParam(
-                    defaultValue = "20"
-            )
+            @RequestParam(defaultValue = "20")
             Integer limite,
 
             @RequestParam(required = false)
@@ -194,6 +178,8 @@ public class AnalisisRiesgoDeterioroController {
             @RequestParam(required = false)
             Integer idLineaCredito
     ) {
+
+        validarAcceso();
 
         return service.consultarConcentracion(
                 fechaCorte,
@@ -204,7 +190,6 @@ public class AnalisisRiesgoDeterioroController {
         );
     }
 
-
     // =========================================================
     // DETALLE
     // =========================================================
@@ -213,9 +198,7 @@ public class AnalisisRiesgoDeterioroController {
     public List<RiesgoDeterioroDetalleDTO> consultarDetalle(
 
             @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE
-            )
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate fechaCorte,
 
             @RequestParam(required = false)
@@ -225,10 +208,29 @@ public class AnalisisRiesgoDeterioroController {
             Integer idLineaCredito
     ) {
 
+        validarAcceso();
+
         return service.consultarDetalle(
                 fechaCorte,
                 idAgencia,
                 idLineaCredito
+        );
+    }
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarAcceso() {
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO_VIEW
         );
     }
 }

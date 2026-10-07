@@ -609,15 +609,26 @@ public List<EmpleadoContratoListViewDTO> listar() {
     }
 
     // ============================================================
-    // ELIMINAR
-    // ============================================================
-    public void eliminar(Integer idContrato) {
+// DESACTIVAR
+// ============================================================
+    public void eliminar(
+            Integer idContrato,
+            Integer idUsuario
+    ) {
 
         String sql = """
-            DELETE FROM nomina.empleado_contratos
-            WHERE id_contrato = :id
-        """;
+        UPDATE nomina.empleado_contratos
+           SET activo = FALSE,
+               fk_seguridad_edicion = :usr,
+               fecha_edicion = CURRENT_TIMESTAMP
+         WHERE id_contrato = :id
+    """;
 
-        jdbc.update(sql, new MapSqlParameterSource().addValue("id", idContrato));
+        jdbc.update(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("id", idContrato)
+                        .addValue("usr", idUsuario)
+        );
     }
 }

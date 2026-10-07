@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { SessionService } from '../../../../core/auth/session.service';
 
 import {
   PrestacionesSocialesContabilizacionApi,
@@ -39,6 +40,7 @@ export class PrestacionesSocialesContabilizacionComponent {
   private periodosApi = inject(PeriodosNominaApi);
   private tiposComprobantesApi = inject(TiposComprobantesApi);
   private prestacionesSocialesExporter = inject(PrestacionesSocialesContabilizacionExporter);
+  private readonly session = inject(SessionService);
 
   idPeriodoNomina: number | null = null;
   periodos: any[] = [];
@@ -60,6 +62,14 @@ export class PrestacionesSocialesContabilizacionComponent {
   tipoComprobante = 'NM';
   numeroComprobantePreview = '';
   fechaContabilizacion: string | null = null;
+
+  // =========================================================
+  // PERMISOS
+  // =========================================================
+
+  get puedeContabilizar(): boolean {
+    return this.session.tienePermiso('NOMINA_CONTABILIZACION_EXECUTE');
+  }
 
   ngOnInit(): void {
 
@@ -86,6 +96,10 @@ export class PrestacionesSocialesContabilizacionComponent {
   }
 
   preview(): void {
+
+    if (!this.puedeContabilizar) {
+      return;
+    }
 
     this.error = '';
     this.resultado = null;
@@ -123,6 +137,10 @@ export class PrestacionesSocialesContabilizacionComponent {
   }
 
   ejecutar(): void {
+
+    if (!this.puedeContabilizar) {
+      return;
+    }
 
     this.error = '';
 
@@ -182,6 +200,10 @@ export class PrestacionesSocialesContabilizacionComponent {
   }
 
   reversar(): void {
+
+    if (!this.puedeContabilizar) {
+      return;
+    }
 
     this.error = '';
 

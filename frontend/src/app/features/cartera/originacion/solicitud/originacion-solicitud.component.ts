@@ -319,6 +319,16 @@ export class OriginacionSolicitudComponent
 
   ) {}
 
+  // =========================================================
+  // PERMISOS
+  // =========================================================
+
+  get puedeEditar(): boolean {
+
+    return this.session.tienePermiso(
+      'CARTERA_ORIGINACION_EDIT'
+    );
+  }
 
   // =========================================================
   // INIT
@@ -374,22 +384,30 @@ export class OriginacionSolicitudComponent
 
   }
 
-  private cargarAsociadoDesdeBandeja(
-    idSolicitudCredito: number,
-    idDatosPersonal: number,
-    idAgencia: number
-  ): void {
+    private cargarAsociadoDesdeBandeja(
+      idSolicitudCredito: number,
+      idDatosPersonal: number,
+      idAgencia: number
+    ): void {
 
-    this.cargandoSolicitud = true;
-    this.error = '';
-    this.mensaje = '';
+      if (!this.puedeEditar) {
 
-    this.api
-      .buscarAsociadoPorId(
-        idDatosPersonal,
-        idAgencia
-      )
-      .subscribe({
+        this.error =
+          'El usuario no tiene permiso para retomar solicitudes de crédito.';
+
+        return;
+      }
+
+      this.cargandoSolicitud = true;
+      this.error = '';
+      this.mensaje = '';
+
+      this.api
+        .buscarAsociadoPorId(
+          idDatosPersonal,
+          idAgencia
+        )
+        .subscribe({
 
         next: asociado => {
 
@@ -1035,7 +1053,8 @@ export class OriginacionSolicitudComponent
   crearRetomarSolicitud(): void {
 
     if (
-      !this.asociadoSeleccionado
+      !this.puedeEditar
+      || !this.asociadoSeleccionado
       || !this.agenciaActiva
       || !this.solicitudExistente
       || this.cargandoSolicitud
@@ -1258,7 +1277,8 @@ export class OriginacionSolicitudComponent
   guardarCredito(): void {
 
     if (
-      !this.asociadoSeleccionado
+      !this.puedeEditar
+      || !this.asociadoSeleccionado
       || this.guardandoCredito
     ) {
       return;
@@ -1823,7 +1843,8 @@ export class OriginacionSolicitudComponent
   abrirFinalizacion(): void {
 
     if (
-      !this.solicitud
+      !this.puedeEditar
+      || !this.solicitud
       || this.solicitud.resultadoFinal === true
       || this.solicitud.activo === false
       || this.finalizandoSolicitud
@@ -1862,7 +1883,8 @@ export class OriginacionSolicitudComponent
   finalizarSolicitud(): void {
 
     if (
-      !this.solicitud
+      !this.puedeEditar
+      || !this.solicitud
       || this.finalizandoSolicitud
     ) {
       return;

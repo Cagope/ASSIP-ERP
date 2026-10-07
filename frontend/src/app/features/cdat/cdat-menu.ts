@@ -62,6 +62,12 @@ export const cdatMenu = {
       children: [
 
         {
+          label: 'Dashboard CDAT',
+          route: '/cdat/analisis/dashboard-cdat',
+          permiso: 'CDAT_DASHBOARD_VIEW'
+        },
+
+        {
           label: 'Concentración CDAT',
           route: '/cdat/analisis/concentracion',
           permiso: 'CDAT_ANALISIS_VIEW'

@@ -4,7 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
-import { CajaCompensacionApi, CajaCompensacionFormDTO } from './caja-compensacion.api';
+import { SessionService } from '../../../core/auth/session.service';
+
+import {
+  CajaCompensacionApi,
+  CajaCompensacionFormDTO
+} from './caja-compensacion.api';
 
 import { PersonasSelectorComponent } from '../../../shared/personas/personas-selector.component';
 import { PersonaBusquedaDTO } from '../../../shared/personas/personas-busqueda.dto';
@@ -27,6 +32,7 @@ export class CajaCompensacionUpsertComponent implements OnInit {
   private readonly api = inject(CajaCompensacionApi);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   id: number | null = null;
   loading = false;
@@ -37,6 +43,14 @@ export class CajaCompensacionUpsertComponent implements OnInit {
     activo: true,
     idDatosPersonal: null
   };
+
+  // =========================================================
+  // PERMISOS
+  // =========================================================
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -58,6 +72,7 @@ export class CajaCompensacionUpsertComponent implements OnInit {
           activo: data.activo ?? true,
           idDatosPersonal: data.idDatosPersonal ?? null
         };
+
         this.loading = false;
       },
       error: (err) => {
@@ -78,7 +93,12 @@ export class CajaCompensacionUpsertComponent implements OnInit {
   }
 
   guardar(): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     const nombre = (this.form.nombreCaja ?? '').trim();
+
     if (!nombre) {
       alert('El nombre es obligatorio.');
       return;

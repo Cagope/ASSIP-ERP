@@ -17,22 +17,19 @@
 
         <select
           class="form-control"
-          formControlName="idAgencia"
-        >
+          formControlName="idAgencia">
           <option [ngValue]="null">-- Seleccione agencia --</option>
 
           <option
             *ngFor="let ag of session.getAgencias()"
-            [ngValue]="ag.idAgencia"
-          >
+            [ngValue]="ag.idAgencia">
             {{ ag.codigoAgencia }} — {{ ag.nombreAgencia }}
           </option>
         </select>
 
         <small
           *ngIf="form.get('idAgencia')?.touched && form.get('idAgencia')?.invalid"
-          class="error"
-        >
+          class="error">
           La agencia es obligatoria
         </small>
       </div>
@@ -42,20 +39,20 @@
            ========================= -->
       <div class="form-group">
         <label>Período a depreciar *</label>
+
         <input
           type="date"
           class="form-control"
-          formControlName="fechaPeriodo"
-        />
+          formControlName="fechaPeriodo" />
       </div>
 
       <div class="form-group">
         <label>Fecha de contabilización *</label>
+
         <input
           type="date"
           class="form-control"
-          formControlName="fechaContabilizacion"
-        />
+          formControlName="fechaContabilizacion" />
       </div>
 
       <!-- =========================
@@ -63,30 +60,34 @@
            ========================= -->
       <div class="form-group">
         <label>Tipo comprobante *</label>
+
         <select
           class="form-control"
-          formControlName="tipoComprobante"
-        >
+          formControlName="tipoComprobante">
+
           <option value="">Seleccione…</option>
+
           <option
             *ngFor="let t of tiposComprobantes"
-            [value]="t.tipoComprobante"
-          >
+            [value]="t.tipoComprobante">
             {{ t.tipoComprobante }} — {{ t.nombreTipoComprobante }}
           </option>
+
         </select>
       </div>
 
       <div class="form-group">
         <label>Número comprobante</label>
+
         <input
           type="text"
           class="form-control"
           formControlName="numeroComprobante"
-          readonly
-        />
+          readonly />
 
-        <small *ngIf="consecutivoSugerido" class="hint">
+        <small
+          *ngIf="consecutivoSugerido"
+          class="hint">
           Consecutivo sugerido: {{ consecutivoSugerido }}
         </small>
       </div>
@@ -96,12 +97,12 @@
            ========================= -->
       <div class="form-group full">
         <label>Concepto *</label>
+
         <input
           type="text"
           class="form-control"
           maxlength="200"
-          formControlName="concepto"
-        />
+          formControlName="concepto" />
       </div>
 
     </div>
@@ -115,7 +116,7 @@
         type="button"
         class="btn btn--secondary"
         (click)="preview()"
-        [disabled]="loading || form.invalid">
+        [disabled]="loading || form.invalid || !puedeDepreciar">
         Preview
       </button>
 
@@ -123,7 +124,7 @@
         type="button"
         class="btn btn--primary"
         (click)="ejecutar()"
-        [disabled]="!previewResult?.detalle?.length || loading">
+        [disabled]="!previewResult?.detalle?.length || loading || !puedeDepreciar">
         Ejecutar
       </button>
 
@@ -134,22 +135,29 @@
   <!-- =========================
        MENSAJES
        ========================= -->
-  <div *ngIf="loading" class="loading">
+  <div
+    *ngIf="loading"
+    class="loading">
     Procesando…
   </div>
 
-  <div *ngIf="errorMsg" class="error">
+  <div
+    *ngIf="errorMsg"
+    class="error">
     {{ errorMsg }}
   </div>
 
   <!-- =========================
        RESULTADO PREVIEW
        ========================= -->
-  <div *ngIf="previewResult" class="preview-result">
+  <div
+    *ngIf="previewResult"
+    class="preview-result">
 
     <h3>Detalle de depreciación</h3>
 
     <table class="preview-table">
+
       <thead>
       <tr>
         <th>Placa</th>
@@ -163,35 +171,48 @@
 
       <tbody>
       <tr *ngFor="let d of previewResult.detalle">
+
         <td>{{ d.placaActivo }}</td>
+
         <td>{{ d.nombreActivo }}</td>
+
         <td class="num">
           {{ d.valorMensual | number:'1.0-2' }}
         </td>
+
         <td class="num">
           {{ d.depreciacionAcumulada | number:'1.0-2' }}
         </td>
+
         <td class="num">
           {{ d.saldoPendiente | number:'1.0-2' }}
         </td>
+
         <td class="num">
           {{ d.valorPeriodo | number:'1.0-2' }}
         </td>
+
       </tr>
       </tbody>
 
       <tfoot>
       <tr>
-        <th colspan="5" class="text-right">Totales</th>
+        <th
+          colspan="5"
+          class="text-right">
+          Totales
+        </th>
+
         <th class="num">
           {{ previewResult.totalDebito | number:'1.0-2' }}
         </th>
       </tr>
       </tfoot>
+
     </table>
 
     <!-- =========================
-         ✅ BOTONES EXPORTAR (AQUÍ QUEDAN JUNTOS)
+         EXPORTACIONES
          ========================= -->
     <div class="form-actions">
 
@@ -214,66 +235,117 @@
     </div>
 
     <!-- =========================
-         ✅ COMPROBANTE CONTABLE (PREVIEW)
+         COMPROBANTE CONTABLE
          ========================= -->
     <div class="preview-comprobante">
 
       <h3>Comprobante contable (Preview)</h3>
 
       <table class="preview-table">
+
         <thead>
         <tr>
           <th>#</th>
           <th>Activo</th>
           <th>Tercero</th>
-
           <th>Cuenta</th>
           <th>Nombre cuenta</th>
-
           <th>Débito</th>
           <th>Crédito</th>
         </tr>
         </thead>
 
         <tbody>
-        <ng-container *ngFor="let d of previewResult.detalle; let i = index">
 
-          <!-- ✅ DÉBITO (Gasto) -->
+        <ng-container
+          *ngFor="let d of previewResult.detalle; let i = index">
+
+          <!-- DÉBITO (Gasto) -->
           <tr>
+
             <td>{{ i + 1 }}</td>
-            <td>{{ d.placaActivo }} — {{ d.nombreActivo }}</td>
-            <td>{{ terceroDocumento(d.idDatosPersonalProveedor) }}</td>
 
-            <td>{{ cuentaCodigo(d.idCuentaGasto) }}</td>
-            <td>{{ cuentaNombre(d.idCuentaGasto) }}</td>
+            <td>
+              {{ d.placaActivo }} — {{ d.nombreActivo }}
+            </td>
 
-            <td class="num">{{ d.valorPeriodo | number:'1.0-2' }}</td>
-            <td class="num">0.00</td>
+            <td>
+              {{ terceroDocumento(d.idDatosPersonalProveedor) }}
+            </td>
+
+            <td>
+              {{ cuentaCodigo(d.idCuentaGasto) }}
+            </td>
+
+            <td>
+              {{ cuentaNombre(d.idCuentaGasto) }}
+            </td>
+
+            <td class="num">
+              {{ d.valorPeriodo | number:'1.0-2' }}
+            </td>
+
+            <td class="num">
+              0.00
+            </td>
+
           </tr>
 
-          <!-- ✅ CRÉDITO (Depreciación acumulada) -->
+          <!-- CRÉDITO (Depreciación acumulada) -->
           <tr>
+
             <td>{{ i + 1 }}</td>
-            <td>{{ d.placaActivo }} — {{ d.nombreActivo }}</td>
-            <td>{{ terceroDocumento(d.idDatosPersonalProveedor) }}</td>
 
-            <td>{{ cuentaCodigo(d.idCuentaDepreciacion) }}</td>
-            <td>{{ cuentaNombre(d.idCuentaDepreciacion) }}</td>
+            <td>
+              {{ d.placaActivo }} — {{ d.nombreActivo }}
+            </td>
 
-            <td class="num">0.00</td>
-            <td class="num">{{ d.valorPeriodo | number:'1.0-2' }}</td>
+            <td>
+              {{ terceroDocumento(d.idDatosPersonalProveedor) }}
+            </td>
+
+            <td>
+              {{ cuentaCodigo(d.idCuentaDepreciacion) }}
+            </td>
+
+            <td>
+              {{ cuentaNombre(d.idCuentaDepreciacion) }}
+            </td>
+
+            <td class="num">
+              0.00
+            </td>
+
+            <td class="num">
+              {{ d.valorPeriodo | number:'1.0-2' }}
+            </td>
+
           </tr>
 
         </ng-container>
+
         </tbody>
 
         <tfoot>
         <tr>
-          <th colspan="5" class="text-right">Totales</th>
-          <th class="num">{{ previewResult.totalDebito | number:'1.0-2' }}</th>
-          <th class="num">{{ previewResult.totalCredito | number:'1.0-2' }}</th>
+
+          <th
+            colspan="5"
+            class="text-right">
+            Totales
+          </th>
+
+          <th class="num">
+            {{ previewResult.totalDebito | number:'1.0-2' }}
+          </th>
+
+          <th class="num">
+            {{ previewResult.totalCredito | number:'1.0-2' }}
+          </th>
+
         </tr>
         </tfoot>
+
       </table>
 
     </div>

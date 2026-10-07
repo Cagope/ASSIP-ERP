@@ -1,30 +1,375 @@
-import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import {
+  CommonModule
+} from '@angular/common';
+
+import {
+  Component,
+  Input
+} from '@angular/core';
+
 
 @Component({
   selector: 'app-aprobacion-financiero',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './aprobacion-financiero.component.html',
-  styleUrl: './aprobacion-financiero.component.scss'
+
+  imports: [
+    CommonModule
+  ],
+
+  templateUrl:
+    './aprobacion-financiero.component.html',
+
+  styleUrl:
+    './aprobacion-financiero.component.scss'
 })
 export class AprobacionFinancieroComponent {
 
-  @Input() foto: Record<string, unknown> | Record<string, unknown>[] | null = null;
-  @Input() deudores: Record<string, unknown>[] | null = null;
-  get items(): Record<string, unknown>[] { return Array.isArray(this.foto) ? this.foto : []; }
-  get actual(): Record<string, unknown> { return (!Array.isArray(this.foto) && this.foto) || {}; }
-  valor(o: Record<string, unknown>, k: string): string { const v=o[k];return v===null || v===undefined || v==='' ? 'No registrado' : String(v); }
-  texto(o: Record<string, unknown>, k: string): string {return this.valor(o,k).replaceAll('_',' ');}
-  numero(o: Record<string, unknown>, k: string): number | null {const v=o[k];return v===null || v===undefined || v==='' || !Number.isFinite(Number(v)) ? null : Number(v);}
-  dinero(o: Record<string, unknown>, k: string): string {const n=this.numero(o,k);return n===null?'No registrado':new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(n);}
-  porcentaje(o: Record<string, unknown>, k: string, dec=2): string {const n=this.numero(o,k);return n===null?'No registrado':new Intl.NumberFormat('es-CO',{maximumFractionDigits:dec}).format(n)+' %';}
-  fecha(o: Record<string, unknown>, k: string): string {const v=o[k];if(typeof v!=='string'||!v)return 'No registrada';const d=v.slice(0,10).split('-');return d.length===3?`${d[2]}/${d[1]}/${d[0]}`:'No registrada';}
-  estado(o: Record<string, unknown>, k: string): string {return o[k]===true?'Cumple':o[k]===false?'No cumple':'No evaluado';}
-  nombre(id: unknown): string {const p=(this.deudores??[]).find(x=>x['id_solicitud_deudor']===id);return p ? this.valor(p,'nombre_completo'):'Nombre no disponible en fotografía';}
-  rol(o: Record<string, unknown>): string {return this.texto(o,'tipo_deudor')==='PRINCIPAL'?'Titular':this.texto(o,'tipo_deudor')==='CODEUDOR'?'Codeudor':this.texto(o,'tipo_deudor');}
+  // =========================================================
+  // ENTRADAS
+  // =========================================================
 
-  financiero(item: Record<string, unknown>): Record<string, unknown> {const f=item['financiero'];return f && typeof f==='object' && !Array.isArray(f)?f as Record<string,unknown>:{};}
-  disponible(f: Record<string, unknown>): number | null {const a=this.numero(f,'ingresos_totales_natural'),b=this.numero(f,'egresos_totales_natural');return a===null||b===null?null:a-b;}
-  moneda(n:number|null):string{return n===null?'No registrado':new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(n);}
+  @Input()
+  foto:
+    Record<string, unknown> |
+    Record<string, unknown>[] |
+    null = null;
+
+  @Input()
+  deudores:
+    Record<string, unknown>[] |
+    null = null;
+
+
+  // =========================================================
+  // DATOS DE LA FOTOGRAFÍA
+  // =========================================================
+
+  get items():
+    Record<string, unknown>[] {
+
+    return Array.isArray(
+      this.foto
+    )
+      ? this.foto
+      : [];
+  }
+
+
+  get actual():
+    Record<string, unknown> {
+
+    return (
+      !Array.isArray(this.foto) &&
+      this.foto
+    )
+      ? this.foto
+      : {};
+  }
+
+
+  // =========================================================
+  // VALORES
+  // =========================================================
+
+  valor(
+    objeto: Record<string, unknown>,
+    campo: string
+  ): string {
+
+    const valor =
+      objeto[campo];
+
+    if (
+      valor === null ||
+      valor === undefined ||
+      valor === ''
+    ) {
+      return 'No registrado';
+    }
+
+    return String(valor);
+  }
+
+
+  texto(
+    objeto: Record<string, unknown>,
+    campo: string
+  ): string {
+
+    return this.valor(
+      objeto,
+      campo
+    ).replaceAll(
+      '_',
+      ' '
+    );
+  }
+
+
+  numero(
+    objeto: Record<string, unknown>,
+    campo: string
+  ): number | null {
+
+    const valor =
+      objeto[campo];
+
+    if (
+      valor === null ||
+      valor === undefined ||
+      valor === ''
+    ) {
+      return null;
+    }
+
+    const numero =
+      Number(valor);
+
+    return Number.isFinite(numero)
+      ? numero
+      : null;
+  }
+
+
+  // =========================================================
+  // FORMATO
+  // =========================================================
+
+  dinero(
+    objeto: Record<string, unknown>,
+    campo: string
+  ): string {
+
+    const numero =
+      this.numero(
+        objeto,
+        campo
+      );
+
+    if (numero === null) {
+      return 'No registrado';
+    }
+
+    return new Intl.NumberFormat(
+      'es-CO',
+      {
+        style: 'currency',
+        currency: 'COP',
+        maximumFractionDigits: 0
+      }
+    ).format(numero);
+  }
+
+
+  porcentaje(
+    objeto: Record<string, unknown>,
+    campo: string,
+    decimales = 2
+  ): string {
+
+    const numero =
+      this.numero(
+        objeto,
+        campo
+      );
+
+    if (numero === null) {
+      return 'No registrado';
+    }
+
+    return (
+      new Intl.NumberFormat(
+        'es-CO',
+        {
+          maximumFractionDigits:
+            decimales
+        }
+      ).format(numero)
+      + ' %'
+    );
+  }
+
+
+  fecha(
+    objeto: Record<string, unknown>,
+    campo: string
+  ): string {
+
+    const valor =
+      objeto[campo];
+
+    if (
+      typeof valor !== 'string' ||
+      !valor
+    ) {
+      return 'No registrada';
+    }
+
+    const partes =
+      valor
+        .slice(
+          0,
+          10
+        )
+        .split('-');
+
+    if (partes.length !== 3) {
+      return 'No registrada';
+    }
+
+    return (
+      `${partes[2]}/${partes[1]}/${partes[0]}`
+    );
+  }
+
+
+  moneda(
+    numero: number | null
+  ): string {
+
+    if (numero === null) {
+      return 'No registrado';
+    }
+
+    return new Intl.NumberFormat(
+      'es-CO',
+      {
+        style: 'currency',
+        currency: 'COP',
+        maximumFractionDigits: 0
+      }
+    ).format(numero);
+  }
+
+
+  // =========================================================
+  // ESTADOS
+  // =========================================================
+
+  estado(
+    objeto: Record<string, unknown>,
+    campo: string
+  ): string {
+
+    const valor =
+      objeto[campo];
+
+    if (valor === true) {
+      return 'Cumple';
+    }
+
+    if (valor === false) {
+      return 'No cumple';
+    }
+
+    return 'No evaluado';
+  }
+
+
+  // =========================================================
+  // DEUDORES
+  // =========================================================
+
+  nombre(
+    idSolicitudDeudor: unknown
+  ): string {
+
+    const deudor =
+      (this.deudores ?? [])
+        .find(
+          item =>
+            item[
+              'id_solicitud_deudor'
+            ] === idSolicitudDeudor
+        );
+
+    if (!deudor) {
+      return (
+        'Nombre no disponible en fotografía'
+      );
+    }
+
+    return this.valor(
+      deudor,
+      'nombre_completo'
+    );
+  }
+
+
+  rol(
+    objeto: Record<string, unknown>
+  ): string {
+
+    const tipoDeudor =
+      this.texto(
+        objeto,
+        'tipo_deudor'
+      );
+
+    if (tipoDeudor === 'PRINCIPAL') {
+      return 'Titular';
+    }
+
+    if (tipoDeudor === 'CODEUDOR') {
+      return 'Codeudor';
+    }
+
+    return tipoDeudor;
+  }
+
+
+  // =========================================================
+  // INFORMACIÓN FINANCIERA
+  // =========================================================
+
+  financiero(
+    item: Record<string, unknown>
+  ): Record<string, unknown> {
+
+    const financiero =
+      item['financiero'];
+
+    if (
+      financiero &&
+      typeof financiero === 'object' &&
+      !Array.isArray(financiero)
+    ) {
+      return (
+        financiero as
+          Record<string, unknown>
+      );
+    }
+
+    return {};
+  }
+
+
+  disponible(
+    financiero: Record<string, unknown>
+  ): number | null {
+
+    const ingresos =
+      this.numero(
+        financiero,
+        'ingresos_totales_natural'
+      );
+
+    const egresos =
+      this.numero(
+        financiero,
+        'egresos_totales_natural'
+      );
+
+    if (
+      ingresos === null ||
+      egresos === null
+    ) {
+      return null;
+    }
+
+    return (
+      ingresos -
+      egresos
+    );
+  }
 }

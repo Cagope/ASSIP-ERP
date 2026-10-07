@@ -231,6 +231,6 @@ public class ConceptosNominaRepository {
                 .addValue("afectaBaseParafiscales", dto.getAfectaBaseParafiscales() != null ? dto.getAfectaBaseParafiscales() : Boolean.FALSE)
                 .addValue("smmlvDesde", dto.getSmmlvDesde())
                 .addValue("smmlvHasta", dto.getSmmlvHasta())
-                .addValue("usr", idUsuario != null ? idUsuario : 1);
+                .addValue("usr", idUsuario);
     }
 }

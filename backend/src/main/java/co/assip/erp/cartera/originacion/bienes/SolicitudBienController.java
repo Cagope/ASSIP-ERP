@@ -3,6 +3,10 @@ package co.assip.erp.cartera.originacion.bienes;
 import co.assip.erp.cartera.originacion.bienes.dto.SolicitudBienCreditoRespaldadoDTO;
 import co.assip.erp.cartera.originacion.bienes.dto.SolicitudBienDTO;
 import co.assip.erp.cartera.originacion.bienes.dto.SolicitudBienSeleccionRequestDTO;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,17 +14,23 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/cartera/originacion/bienes")
 public class SolicitudBienController {
 
+    private static final String PERMISO_VIEW =
+            "CARTERA_ORIGINACION_VIEW";
+
+    private static final String PERMISO_EDIT =
+            "CARTERA_ORIGINACION_EDIT";
+
+    // =========================================================
+    // DEPENDENCIAS
+    // =========================================================
+
     private final SolicitudBienService service;
-
-    public SolicitudBienController(
-            SolicitudBienService service
-    ) {
-        this.service = service;
-    }
-
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // =========================================================
     // LISTAR BIENES DE LA SOLICITUD
@@ -31,13 +41,14 @@ public class SolicitudBienController {
             @PathVariable Integer idSolicitudCredito
     ) {
 
+        validarConsulta();
+
         return ResponseEntity.ok(
                 service.listarPorSolicitud(
                         idSolicitudCredito
                 )
         );
     }
-
 
     // =========================================================
     // LISTAR BIENES DE UN DEUDOR
@@ -48,13 +59,14 @@ public class SolicitudBienController {
             @PathVariable Integer idSolicitudDeudor
     ) {
 
+        validarConsulta();
+
         return ResponseEntity.ok(
                 service.listarPorDeudor(
                         idSolicitudDeudor
                 )
         );
     }
-
 
     // =========================================================
     // CRÉDITOS ACTUALES RESPALDADOS POR UN BIEN
@@ -66,13 +78,14 @@ public class SolicitudBienController {
             @PathVariable Long idBien
     ) {
 
+        validarConsulta();
+
         return ResponseEntity.ok(
                 service.listarCreditosRespaldados(
                         idBien
                 )
         );
     }
-
 
     // =========================================================
     // SELECCIONAR / RETIRAR BIEN
@@ -83,13 +96,14 @@ public class SolicitudBienController {
             @RequestBody SolicitudBienSeleccionRequestDTO request
     ) {
 
+        validarEdicion();
+
         return ResponseEntity.ok(
                 service.seleccionar(
                         request
                 )
         );
     }
-
 
     // =========================================================
     // VALIDAR PASO BIENES
@@ -107,6 +121,8 @@ public class SolicitudBienController {
             @PathVariable Integer idSolicitudCredito
     ) {
 
+        validarConsulta();
+
         service.validarParaContinuar(
                 idSolicitudCredito
         );
@@ -117,5 +133,36 @@ public class SolicitudBienController {
                         true
                 )
         );
+    }
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarConsulta() {
+
+        accessValidator.validarAcceso(
+                usuarioActual(),
+                PERMISO_VIEW
+        );
+    }
+
+    private void validarEdicion() {
+
+        accessValidator.validarAcceso(
+                usuarioActual(),
+                PERMISO_EDIT
+        );
+    }
+
+    private Usuario usuarioActual() {
+
+        Usuario usuarioActual = new Usuario();
+
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        return usuarioActual;
     }
 }

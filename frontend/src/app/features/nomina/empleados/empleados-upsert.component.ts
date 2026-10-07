@@ -10,6 +10,7 @@ import { PersonasSelectorComponent } from '../../../shared/personas/personas-sel
 import { GeneralApi } from '../../../shared/general/general.api';
 import { PersonasApi } from '../../../shared/personas/personas.api';
 import { PersonaBusquedaDTO } from '../../../shared/personas/personas-busqueda.dto';
+import { SessionService } from '../../../core/auth/session.service';
 
 @Component({
   standalone: true,
@@ -26,9 +27,10 @@ import { PersonaBusquedaDTO } from '../../../shared/personas/personas-busqueda.d
 })
 export class EmpleadosUpsertComponent implements OnInit {
 
-  private readonly api = inject(EmpleadosApi);
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
+ private readonly api = inject(EmpleadosApi);
+ private readonly route = inject(ActivatedRoute);
+ private readonly router = inject(Router);
+ private readonly session = inject(SessionService);
 
   private readonly personasApi = inject(PersonasApi);
   private readonly generalApi = inject(GeneralApi);
@@ -37,6 +39,10 @@ export class EmpleadosUpsertComponent implements OnInit {
 
   loading = false;
   guardando = false;
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_EMPLEADOS_EDIT');
+  }
 
   // ✅ agencias catálogo
   agencias: any[] = [];
@@ -128,6 +134,11 @@ export class EmpleadosUpsertComponent implements OnInit {
   // ✅ Guardar
   // =========================================================
   guardar(): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
+
     if (!this.form.idAgencia) {
       alert('La agencia es obligatoria.');
       return;

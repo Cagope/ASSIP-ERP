@@ -4,6 +4,8 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
+import { SessionService } from '../../../core/auth/session.service';
+
 import { CargoApi, CargoListDTO } from './cargos.api';
 import { CargosPrintService } from './cargos-print.service';
 import { CargosExporterService } from './cargos-exporter.service';
@@ -13,12 +15,18 @@ import { CargosExporterService } from './cargos-exporter.service';
   selector: 'app-cargos-list',
   templateUrl: './cargos-list.component.html',
   styleUrls: ['./cargos-list.component.scss'],
-  imports: [CommonModule, RouterModule, FormsModule, HeaderActionsComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    HeaderActionsComponent
+  ],
 })
 export class CargosListComponent implements OnInit {
 
   private readonly api = inject(CargoApi);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   private readonly printService = inject(CargosPrintService);
   private readonly exporterService = inject(CargosExporterService);
@@ -26,8 +34,16 @@ export class CargosListComponent implements OnInit {
   cargos: CargoListDTO[] = [];
   loading = false;
 
-  // ✅ filtro simple
+  // filtro simple
   q = '';
+
+  // =========================================================
+  // PERMISOS
+  // =========================================================
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
 
   ngOnInit(): void {
     this.cargar();
@@ -51,7 +67,10 @@ export class CargosListComponent implements OnInit {
 
   get cargosFiltrados(): CargoListDTO[] {
     const q = (this.q ?? '').trim().toLowerCase();
-    if (!q) return this.cargos;
+
+    if (!q) {
+      return this.cargos;
+    }
 
     return this.cargos.filter(x =>
       (x.nombreCargo ?? '').toLowerCase().includes(q)
@@ -59,10 +78,14 @@ export class CargosListComponent implements OnInit {
   }
 
   // =========================================================
-  // ✅ ACCIONES HEADER
+  // ACCIONES HEADER
   // =========================================================
 
   nuevo(): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     this.router.navigate(['/nomina/cargos/nuevo']);
   }
 
@@ -79,16 +102,29 @@ export class CargosListComponent implements OnInit {
   }
 
   // =========================================================
-  // ✅ ACCIONES FILA
+  // ACCIONES FILA
   // =========================================================
 
   editar(id: number): void {
-    this.router.navigate([`/nomina/cargos/${id}/editar`]);
+    if (!this.puedeEditar) {
+      return;
+    }
+
+    this.router.navigate([
+      `/nomina/cargos/${id}/editar`
+    ]);
   }
 
   eliminar(id: number): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     const ok = confirm('¿Desea eliminar este cargo?');
-    if (!ok) return;
+
+    if (!ok) {
+      return;
+    }
 
     this.api.eliminar(id).subscribe({
       next: () => this.cargar(),

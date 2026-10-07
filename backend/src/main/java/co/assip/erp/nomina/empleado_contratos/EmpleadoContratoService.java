@@ -62,8 +62,16 @@ public class EmpleadoContratoService {
     // ============================================================
     // ELIMINAR
     // ============================================================
-    public void eliminar(Integer idContrato) {
-        repository.eliminar(idContrato);
+
+    public void eliminar(
+            Integer idContrato,
+            Integer idUsuario
+    ) {
+
+        repository.eliminar(
+                idContrato,
+                idUsuario
+        );
     }
 
     // ============================================================

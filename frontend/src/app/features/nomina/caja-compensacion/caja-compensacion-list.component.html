@@ -2,6 +2,7 @@
 
   <app-header-actions
     titulo="Cajas de Compensación"
+    [mostrarNuevo]="puedeEditar"
     (nuevo)="nuevo()"
     (refrescar)="cargar()"
     (imprimir)="imprimir()"
@@ -17,7 +18,10 @@
     />
   </div>
 
-  <table class="table" *ngIf="!loading && cajasFiltradas.length > 0; else vacio">
+  <table
+    class="table"
+    *ngIf="!loading && cajasFiltradas.length > 0; else vacio">
+
     <thead>
     <tr>
       <th style="width: 90px;">ID</th>
@@ -30,6 +34,7 @@
 
     <tbody>
     <tr *ngFor="let c of cajasFiltradas">
+
       <td>{{ c.idCaja }}</td>
 
       <td class="nombre">
@@ -44,19 +49,20 @@
         <span
           class="badge"
           [class.badge--ok]="c.activo"
-          [class.badge--off]="!c.activo"
-        >
+          [class.badge--off]="!c.activo">
           {{ c.activo ? 'SI' : 'NO' }}
         </span>
       </td>
 
       <td>
         <div class="acciones">
+
           <button
             class="btn-action-edit"
             type="button"
             (click)="editar(c.idCaja)"
-            title="Editar">
+            [disabled]="!puedeEditar"
+            [title]="puedeEditar ? 'Editar' : 'Sin permiso para modificar'">
             ✏️
           </button>
 
@@ -64,13 +70,17 @@
             class="btn-action-delete"
             type="button"
             (click)="eliminar(c.idCaja)"
-            title="Eliminar">
+            [disabled]="!puedeEditar"
+            [title]="puedeEditar ? 'Eliminar' : 'Sin permiso para eliminar'">
             🗑️
           </button>
+
         </div>
       </td>
+
     </tr>
     </tbody>
+
   </table>
 
   <div *ngIf="loading" class="loading">
@@ -78,7 +88,9 @@
   </div>
 
   <ng-template #vacio>
-    <p class="empty">No hay registros para mostrar.</p>
+    <p class="empty">
+      No hay registros para mostrar.
+    </p>
   </ng-template>
 
 </div>

@@ -8,6 +8,7 @@ import { EpsApi, EpsFormDTO } from './eps.api';
 
 import { PersonasSelectorComponent } from '../../../shared/personas/personas-selector.component';
 import { PersonaBusquedaDTO } from '../../../shared/personas/personas-busqueda.dto';
+import { SessionService } from '../../../core/auth/session.service';
 
 @Component({
   standalone: true,
@@ -27,10 +28,15 @@ export class EpsUpsertComponent implements OnInit {
   private readonly api = inject(EpsApi);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   id: number | null = null;
   loading = false;
   guardando = false;
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
 
   form: EpsFormDTO = {
     nombreEps: '',
@@ -81,7 +87,13 @@ export class EpsUpsertComponent implements OnInit {
   }
 
   guardar(): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
+
     const nombre = (this.form.nombreEps ?? '').trim();
+
     if (!nombre) {
       alert('El nombre de la EPS es obligatorio.');
       return;

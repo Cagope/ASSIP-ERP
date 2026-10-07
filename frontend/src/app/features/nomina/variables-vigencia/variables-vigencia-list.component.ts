@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { SessionService } from '../../../core/auth/session.service';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
 import {
@@ -23,6 +24,7 @@ export class VariablesVigenciaListComponent implements OnInit {
 
   private readonly api = inject(VariablesVigenciaApi);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   private readonly printService = inject(VariablesVigenciaPrintService);
   private readonly exporterService = inject(VariablesVigenciaExporterService);
@@ -32,6 +34,10 @@ export class VariablesVigenciaListComponent implements OnInit {
 
   // ✅ filtro simple
   q = '';
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
 
   ngOnInit(): void {
     this.cargar();
@@ -70,6 +76,8 @@ export class VariablesVigenciaListComponent implements OnInit {
   // =========================================================
 
   nuevo(): void {
+    if (!this.puedeEditar) return;
+
     this.router.navigate(['/nomina/variables-vigencia/nuevo']);
   }
 
@@ -90,10 +98,14 @@ export class VariablesVigenciaListComponent implements OnInit {
   // =========================================================
 
   editar(id: number): void {
+    if (!this.puedeEditar) return;
+
     this.router.navigate([`/nomina/variables-vigencia/${id}/editar`]);
   }
 
   eliminar(id: number): void {
+    if (!this.puedeEditar) return;
+
     const ok = confirm('¿Desea eliminar esta vigencia?');
     if (!ok) return;
 

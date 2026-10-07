@@ -141,6 +141,18 @@ export const CDAT_ROUTES: Routes = [
   },
 
   // =============================
+  // DASHBOARD CDAT
+  // =============================
+  {
+    path: 'analisis/dashboard-cdat',
+    canActivate: [permisoGuard],
+    data: { permiso: 'CDAT_DASHBOARD_VIEW' },
+    loadComponent: () =>
+      import('./analisis/dashboard-cdat/dashboard-cdat.component')
+        .then(m => m.DashboardCdatComponent)
+  },
+
+  // =============================
   // ANÁLISIS - CONCENTRACIÓN CDAT
   // =============================
   {

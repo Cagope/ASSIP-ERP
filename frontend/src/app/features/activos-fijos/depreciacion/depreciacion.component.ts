@@ -7,6 +7,7 @@ import {
 } from '@angular/forms';
 
 import { SessionService } from '../../../core/auth/session.service';
+import { AuthApi } from '../../../core/auth/auth.api';
 
 import {
   DepreciacionApi,
@@ -27,12 +28,13 @@ import {
 
 // ✅ Personas (para decodificar tercero)
 import {
-  PersonasApi,
-  PersonaBusquedaDTO
+  PersonasApi
 } from '../../../shared/personas/personas.api';
 
 // ✅ EXPORTADOR EXCEL
 import { DepreciacionExporter } from './depreciacion.exporter';
+
+
 
 @Component({
   standalone: true,
@@ -53,6 +55,7 @@ export class DepreciacionComponent implements OnInit {
   private tiposComprobantesApi = inject(TiposComprobantesApi);
   private planCuentasApi = inject(PlanCuentasApi);
   private personasApi = inject(PersonasApi);
+  private authApi = inject(AuthApi);
 
   // =========================================================
   // ESTADO
@@ -66,10 +69,10 @@ export class DepreciacionComponent implements OnInit {
 
   // ✅ catálogo cuentas para resolver label
   catalogoCuentas: PlanCuenta[] = [];
-  private cuentasById = new Map<number, string>(); // id -> "codigo — nombre"
+  private cuentasById = new Map<number, string>();
 
   // ✅ terceros cache (id -> documento)
-  private tercerosById = new Map<number, string>(); // idDatosPersonal -> documento
+  private tercerosById = new Map<number, string>();
 
   // =========================================================
   // FORMULARIO
@@ -81,10 +84,17 @@ export class DepreciacionComponent implements OnInit {
     fechaContabilizacion: ['', Validators.required],
 
     tipoComprobante: ['', Validators.required],
-    numeroComprobante: ['', Validators.required], // readonly en HTML
+    numeroComprobante: ['', Validators.required],
 
     concepto: ['', [Validators.required, Validators.maxLength(200)]]
   });
+
+  // =========================================================
+  // PERMISOS
+  // =========================================================
+  get puedeDepreciar(): boolean {
+    return this.session.tienePermiso('ACTIVOS_FIJOS_DEPRECIACION');
+  }
 
   // =========================================================
   // CICLO DE VIDA
@@ -140,7 +150,6 @@ export class DepreciacionComponent implements OnInit {
     this.form.get('fechaContabilizacion')!.valueChanges.subscribe(() => {
       this.sugerirConcepto();
     });
-
   }
 
   // =========================================================
@@ -176,6 +185,7 @@ export class DepreciacionComponent implements OnInit {
 
   private rebuildCuentasMap(): void {
     this.cuentasById.clear();
+
     for (const c of this.catalogoCuentas) {
       if (c?.id != null) {
         this.cuentasById.set(
@@ -191,6 +201,7 @@ export class DepreciacionComponent implements OnInit {
   // =========================================================
   cuentaLabel(idCuenta: number | null | undefined): string {
     if (!idCuenta) return '';
+
     return this.cuentasById.get(idCuenta) ?? String(idCuenta);
   }
 
@@ -199,6 +210,7 @@ export class DepreciacionComponent implements OnInit {
   // =========================================================
   terceroDocumento(idTercero: number | null | undefined): string {
     if (!idTercero) return '';
+
     return this.tercerosById.get(idTercero) ?? String(idTercero);
   }
 
@@ -217,7 +229,10 @@ export class DepreciacionComponent implements OnInit {
       )
     );
 
-    const faltantes = ids.filter(id => !this.tercerosById.has(id));
+    const faltantes = ids.filter(
+      id => !this.tercerosById.has(id)
+    );
+
     if (!faltantes.length) return;
 
     faltantes.forEach(id => {
@@ -233,6 +248,8 @@ export class DepreciacionComponent implements OnInit {
   // PREVIEW
   // =========================================================
   preview(): void {
+
+    if (!this.puedeDepreciar) return;
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -268,7 +285,9 @@ export class DepreciacionComponent implements OnInit {
         this.precargarTercerosPreview();
       },
       error: err => {
-        this.errorMsg = err?.error?.message ?? 'Error al ejecutar preview';
+        this.errorMsg =
+          err?.error?.message ?? 'Error al ejecutar preview';
+
         this.loading = false;
       }
     });
@@ -278,6 +297,8 @@ export class DepreciacionComponent implements OnInit {
   // EJECUTAR
   // =========================================================
   ejecutar(): void {
+
+    if (!this.puedeDepreciar) return;
 
     if (!this.previewResult) return;
 
@@ -308,11 +329,15 @@ export class DepreciacionComponent implements OnInit {
     this.api.ejecutar(payload).subscribe({
       next: () => {
         this.loading = false;
+
         alert('Depreciación ejecutada correctamente');
+
         this.previewResult = null;
       },
       error: err => {
-        this.errorMsg = err?.error?.message ?? 'Error al ejecutar depreciación';
+        this.errorMsg =
+          err?.error?.message ?? 'Error al ejecutar depreciación';
+
         this.loading = false;
       }
     });
@@ -326,16 +351,25 @@ export class DepreciacionComponent implements OnInit {
     if (!this.previewResult?.detalle?.length) return;
 
     const raw = this.form.getRawValue();
-    const agencia = this.session.getAgencias().find(a => a.idAgencia === raw.idAgencia);
 
-    DepreciacionExporter.exportarListado(this.previewResult.detalle, {
-      agenciaNombre: agencia ? `${agencia.codigoAgencia} — ${agencia.nombreAgencia}` : String(raw.idAgencia),
-      fechaPeriodo: raw.fechaPeriodo,
-      fechaContabilizacion: raw.fechaContabilizacion,
-      tipoComprobante: raw.tipoComprobante,
-      numeroComprobante: raw.numeroComprobante,
-      concepto: raw.concepto
-    });
+    const agencia = this.session
+      .getAgencias()
+      .find(a => a.idAgencia === raw.idAgencia);
+
+    DepreciacionExporter.exportarListado(
+      this.previewResult.detalle,
+      {
+        agenciaNombre: agencia
+          ? `${agencia.codigoAgencia} — ${agencia.nombreAgencia}`
+          : String(raw.idAgencia),
+
+        fechaPeriodo: raw.fechaPeriodo,
+        fechaContabilizacion: raw.fechaContabilizacion,
+        tipoComprobante: raw.tipoComprobante,
+        numeroComprobante: raw.numeroComprobante,
+        concepto: raw.concepto
+      }
+    );
   }
 
   // =========================================================
@@ -352,49 +386,58 @@ export class DepreciacionComponent implements OnInit {
       return;
     }
 
-    // ✅ idUsuario: depende de tu SessionService
-    // Si tienes getUsuario() úsalo, si no, deja fallback
-    const idUsuario =
-      (this.session as any)?.getUsuario?.()?.idUsuario
-      ?? (this.session as any)?.usuario?.idUsuario
-      ?? 1;
+    this.authApi.me().subscribe({
+      next: usuario => {
 
-    // ✅ tercero fallback: si algún activo NO trae proveedor
-    // pon el del usuario admin o el tercero genérico contable
-    const idTerceroFallback = idUsuario;
+        const idUsuario = usuario.idUsuario;
 
-    DepreciacionExporter.exportarAuxiliaresContables(
-      this.previewResult.detalle,
-      {
-        idAgencia: raw.idAgencia,
-        fechaAuxiliar: raw.fechaContabilizacion,
-        tipoComprobante: raw.tipoComprobante,
-        numeroComprobante: raw.numeroComprobante,
-        concepto: raw.concepto,
+        DepreciacionExporter.exportarAuxiliaresContables(
+          this.previewResult!.detalle,
+          {
+            idAgencia: raw.idAgencia!,
+            fechaAuxiliar: raw.fechaContabilizacion,
+            tipoComprobante: raw.tipoComprobante,
+            numeroComprobante: raw.numeroComprobante,
+            concepto: raw.concepto,
 
-        estadoMovimiento: 'A',
-        valorBase: 0,
+            estadoMovimiento: 'A',
+            valorBase: 0,
 
-        idUsuario,
-        idTerceroFallback
+            idUsuario
+          }
+        );
+      },
+
+      error: () => {
+        alert('No fue posible obtener el usuario autenticado.');
       }
-    );
+    });
   }
 
   // =========================================================
   // ✅ CUENTA: separar código y nombre solo para UI
   // =========================================================
-  cuentaCodigo(idCuenta: number | null | undefined): string {
+  cuentaCodigo(
+    idCuenta: number | null | undefined
+  ): string {
+
     if (!idCuenta) return '';
-    const label = this.cuentasById.get(idCuenta); // "codigo — nombre"
+
+    const label = this.cuentasById.get(idCuenta);
+
     if (!label) return String(idCuenta);
 
     return label.split(' — ')[0] ?? String(idCuenta);
   }
 
-  cuentaNombre(idCuenta: number | null | undefined): string {
+  cuentaNombre(
+    idCuenta: number | null | undefined
+  ): string {
+
     if (!idCuenta) return '';
+
     const label = this.cuentasById.get(idCuenta);
+
     if (!label) return '';
 
     return label.split(' — ')[1] ?? '';
@@ -405,20 +448,31 @@ export class DepreciacionComponent implements OnInit {
   // =========================================================
   private sugerirConcepto(): void {
 
-    const periodo = this.form.get('fechaPeriodo')?.value;
-    const contabilizacion = this.form.get('fechaContabilizacion')?.value;
+    const periodo =
+      this.form.get('fechaPeriodo')?.value;
+
+    const contabilizacion =
+      this.form.get('fechaContabilizacion')?.value;
 
     if (!periodo || !contabilizacion) return;
 
-    const texto = `Depreciación para la fecha: ${periodo} contabilizados en la fecha: ${contabilizacion}`;
+    const texto =
+      `Depreciación para la fecha: ${periodo} ` +
+      `contabilizados en la fecha: ${contabilizacion}`;
 
-    // ✅ Solo autollenar si está vacío o si aún tiene un texto "anterior" autogenerado
-    const actual = this.form.get('concepto')?.value ?? '';
+    const actual =
+      this.form.get('concepto')?.value ?? '';
 
     // Si el usuario ya escribió algo distinto, NO lo piso
-    if (actual && !actual.startsWith('Depreciación para la fecha:')) return;
+    if (
+      actual &&
+      !actual.startsWith('Depreciación para la fecha:')
+    ) {
+      return;
+    }
 
-    this.form.get('concepto')?.setValue(texto, { emitEvent: false });
+    this.form
+      .get('concepto')
+      ?.setValue(texto, { emitEvent: false });
   }
-
 }

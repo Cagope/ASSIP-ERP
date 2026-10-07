@@ -4,7 +4,13 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
-import { ConceptosNominaApi, ConceptoNominaListDTO } from './conceptos-nomina.api';
+import { SessionService } from '../../../core/auth/session.service';
+
+import {
+  ConceptosNominaApi,
+  ConceptoNominaListDTO
+} from './conceptos-nomina.api';
+
 import { ConceptosNominaPrintService } from './conceptos-nomina-print.service';
 import { ConceptosNominaExporterService } from './conceptos-nomina-exporter.service';
 
@@ -13,12 +19,18 @@ import { ConceptosNominaExporterService } from './conceptos-nomina-exporter.serv
   selector: 'app-conceptos-nomina-list',
   templateUrl: './conceptos-nomina-list.component.html',
   styleUrls: ['./conceptos-nomina-list.component.scss'],
-  imports: [CommonModule, RouterModule, FormsModule, HeaderActionsComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    HeaderActionsComponent
+  ],
 })
 export class ConceptosNominaListComponent implements OnInit {
 
   private readonly api = inject(ConceptosNominaApi);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   private readonly printService = inject(ConceptosNominaPrintService);
   private readonly exporterService = inject(ConceptosNominaExporterService);
@@ -27,6 +39,14 @@ export class ConceptosNominaListComponent implements OnInit {
   loading = false;
 
   q = '';
+
+  // =========================================================
+  // PERMISOS
+  // =========================================================
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
 
   // =========================================================
   // INIT
@@ -57,13 +77,15 @@ export class ConceptosNominaListComponent implements OnInit {
   }
 
   // =========================================================
-  // FILTRO ✅ ALINEADO CON DTO
+  // FILTRO
   // =========================================================
 
   get filtrados(): ConceptoNominaListDTO[] {
-
     const q = this.q.trim().toLowerCase();
-    if (!q) return this.items;
+
+    if (!q) {
+      return this.items;
+    }
 
     return this.items.filter(x =>
       x.codigoConcepto.toLowerCase().includes(q) ||
@@ -77,6 +99,10 @@ export class ConceptosNominaListComponent implements OnInit {
   // =========================================================
 
   nuevo(): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     this.router.navigate(['/nomina/conceptos-nomina/nuevo']);
   }
 
@@ -97,13 +123,25 @@ export class ConceptosNominaListComponent implements OnInit {
   // =========================================================
 
   editar(codigo: string): void {
-    this.router.navigate([`/nomina/conceptos-nomina/${codigo}/editar`]);
+    if (!this.puedeEditar) {
+      return;
+    }
+
+    this.router.navigate([
+      `/nomina/conceptos-nomina/${codigo}/editar`
+    ]);
   }
 
   eliminar(codigo: string): void {
+    if (!this.puedeEditar) {
+      return;
+    }
 
     const ok = confirm('¿Desea eliminar este concepto?');
-    if (!ok) return;
+
+    if (!ok) {
+      return;
+    }
 
     this.api.eliminar(codigo).subscribe({
       next: () => this.cargar(),

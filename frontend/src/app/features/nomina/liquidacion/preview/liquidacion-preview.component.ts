@@ -46,6 +46,10 @@ export class LiquidacionPreviewComponent implements OnInit {
   cargando = false;
   error: string | null = null;
 
+  get puedeLiquidar(): boolean {
+    return this.session.tienePermiso('NOMINA_LIQUIDACION_EXECUTE');
+  }
+
   periodos: PeriodoNominaListDTO[] = [];
   preview: LiquidacionPreviewContratoDTO[] = [];
 
@@ -102,6 +106,10 @@ export class LiquidacionPreviewComponent implements OnInit {
   }
 
   ejecutarPreview(): void {
+    if (!this.puedeLiquidar) {
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -173,6 +181,10 @@ export class LiquidacionPreviewComponent implements OnInit {
   }
 
   exportarExcel(): void {
+    if (!this.puedeLiquidar) {
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -253,6 +265,10 @@ export class LiquidacionPreviewComponent implements OnInit {
   }
 
   ejecutarLiquidacion(): void {
+    if (!this.puedeLiquidar) {
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

@@ -43,6 +43,10 @@ export class NovedadesNominaListComponent implements OnInit {
   // filtros
   q = '';
 
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_NOVEDADES_EDIT');
+  }
+
   ngOnInit(): void {
     this.cargarAgencias();
   }
@@ -112,14 +116,19 @@ export class NovedadesNominaListComponent implements OnInit {
   }
 
   nuevo(): void {
+    if (!this.puedeEditar) return;
+
     this.router.navigate(['/nomina/novedades/nuevo']);
   }
 
   editar(id: number): void {
+    if (!this.puedeEditar) return;
+
     this.router.navigate(['/nomina/novedades', id]);
   }
 
   eliminar(item: NovedadNominaListDTO): void {
+    if (!this.puedeEditar) return;
 
     const mensaje =
       `¿Eliminar novedad?\n\n` +

@@ -9,8 +9,7 @@ import {
 } from '@angular/common';
 
 import {
-  ActivatedRoute,
-  Router
+  ActivatedRoute
 } from '@angular/router';
 
 import {
@@ -44,10 +43,6 @@ export class PagareEnBlancoComponent implements OnInit {
 
   private readonly route = inject(
     ActivatedRoute
-  );
-
-  private readonly router = inject(
-    Router
   );
 
 
@@ -281,11 +276,19 @@ export class PagareEnBlancoComponent implements OnInit {
         'style, link[rel="stylesheet"]'
       )
     )
-      .map(elemento => elemento.outerHTML)
+      .map(
+        elemento =>
+          elemento.outerHTML
+      )
       .join('\n');
 
-    const contenido = Array.from(hojas)
-      .map(hoja => hoja.outerHTML)
+    const contenido = Array.from(
+      hojas
+    )
+      .map(
+        hoja =>
+          hoja.outerHTML
+      )
       .join('\n');
 
     ventanaImpresion.document.open();

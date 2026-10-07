@@ -615,7 +615,10 @@
           *ngIf="estaEnProceso"
           type="button"
           class="btn btn--primary"
-          [disabled]="!puedeEjecutar"
+          [disabled]="
+            !puedeEditar
+            || !puedeEjecutar
+          "
           (click)="ejecutarEvaluacion()">
 
           {{ textoBotonEjecutar }}
@@ -643,7 +646,10 @@
           *ngIf="estaEnProceso && tieneResultados"
           type="button"
           class="btn btn--success"
-          [disabled]="!puedeMarcarDefinitiva"
+          [disabled]="
+            !puedeEditar
+            || !puedeMarcarDefinitiva
+          "
           (click)="marcarDefinitiva()">
 
           {{

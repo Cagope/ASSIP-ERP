@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
+import { SessionService } from '../../../core/auth/session.service';
+
 import {
   ActivosFijosApi,
   ActivoFijoListDTO
@@ -22,10 +24,17 @@ export class ActivosFijosListComponent implements OnInit {
 
   private readonly api = inject(ActivosFijosApi);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   activos: ActivoFijoListDTO[] = [];
   cargando = false;
   error = '';
+
+  // =========================================================
+  // PERMISOS
+  // =========================================================
+  readonly puedeEditar =
+    this.session.tienePermiso('ACTIVOS_FIJOS_EDIT');
 
   // =========================================================
   // INIT
@@ -52,14 +61,20 @@ export class ActivosFijosListComponent implements OnInit {
   // ACCIONES
   // =========================================================
   nuevo(): void {
+    if (!this.puedeEditar) return;
+
     this.router.navigate(['/activos-fijos/activos/nuevo']);
   }
 
   editar(id: number): void {
+    if (!this.puedeEditar) return;
+
     this.router.navigate(['/activos-fijos/activos', id, 'editar']);
   }
 
   eliminar(item: ActivoFijoListDTO): void {
+    if (!this.puedeEditar) return;
+
     if (!confirm('¿Eliminar este activo fijo?')) return;
 
     this.api.eliminar(item.idActivoFijo).subscribe(() => {

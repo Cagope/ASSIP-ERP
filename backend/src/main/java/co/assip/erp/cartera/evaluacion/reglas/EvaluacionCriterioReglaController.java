@@ -1,6 +1,9 @@
 package co.assip.erp.cartera.evaluacion.reglas;
 
 import co.assip.erp.cartera.evaluacion.reglas.dto.EvaluacionCriterioReglaDTO;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,7 +14,19 @@ import java.util.List;
 @RequestMapping("/cartera/evaluacion-criterios-reglas")
 public class EvaluacionCriterioReglaController {
 
+    private static final String PERMISO_VIEW =
+            "CARTERA_EVALUACION_VIEW";
+
+    private static final String PERMISO_EDIT =
+            "CARTERA_EVALUACION_EDIT";
+
+    // =========================================================
+    // DEPENDENCIAS
+    // =========================================================
+
     private final EvaluacionCriterioReglaService service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // =========================================================
     // LISTAR POR CRITERIO
@@ -21,6 +36,8 @@ public class EvaluacionCriterioReglaController {
     public List<EvaluacionCriterioReglaDTO> listarPorCriterio(
             @PathVariable Integer idEvaluacionCriterio
     ) {
+
+        validarConsulta();
 
         return service.listarPorCriterio(
                 idEvaluacionCriterio
@@ -36,6 +53,8 @@ public class EvaluacionCriterioReglaController {
             @PathVariable Integer idEvaluacionCriterioRegla
     ) {
 
+        validarConsulta();
+
         return service.buscarPorId(
                 idEvaluacionCriterioRegla
         );
@@ -50,6 +69,8 @@ public class EvaluacionCriterioReglaController {
             @RequestBody EvaluacionCriterioReglaDTO dto
     ) {
 
+        validarEdicion();
+
         return service.crear(dto);
     }
 
@@ -62,6 +83,8 @@ public class EvaluacionCriterioReglaController {
             @PathVariable Integer idEvaluacionCriterioRegla,
             @RequestBody EvaluacionCriterioReglaDTO dto
     ) {
+
+        validarEdicion();
 
         return service.actualizar(
                 idEvaluacionCriterioRegla,
@@ -79,9 +102,42 @@ public class EvaluacionCriterioReglaController {
             @PathVariable boolean activo
     ) {
 
+        validarEdicion();
+
         return service.cambiarActivo(
                 idEvaluacionCriterioRegla,
                 activo
         );
+    }
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarConsulta() {
+
+        accessValidator.validarAcceso(
+                usuarioActual(),
+                PERMISO_VIEW
+        );
+    }
+
+    private void validarEdicion() {
+
+        accessValidator.validarAcceso(
+                usuarioActual(),
+                PERMISO_EDIT
+        );
+    }
+
+    private Usuario usuarioActual() {
+
+        Usuario usuarioActual = new Usuario();
+
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        return usuarioActual;
     }
 }

@@ -284,8 +284,9 @@
         <button
           type="button"
           class="btn btn--primary"
-          (click)="guardar()">
-          Guardar
+          (click)="guardar()"
+          [disabled]="guardando || !puedeEditar">
+          {{ guardando ? 'Guardando...' : 'Guardar' }}
         </button>
 
       </div>

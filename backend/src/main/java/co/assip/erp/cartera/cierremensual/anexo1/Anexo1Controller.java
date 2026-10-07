@@ -1,11 +1,18 @@
 package co.assip.erp.cartera.cierremensual.anexo1;
 
 import co.assip.erp.cartera.cierremensual.anexo1.dto.DetalleAnexo1DTO;
+import co.assip.erp.cartera.cierremensual.anexo1.dto.ResumenAnexo1DTO;
 import co.assip.erp.cartera.cierremensual.dto.CierreMensualDTO;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import co.assip.erp.cartera.cierremensual.anexo1.dto.ResumenAnexo1DTO;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -14,7 +21,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Anexo1Controller {
 
+    private static final String PERMISO_VIEW =
+            "CARTERA_CIERRE_VIEW";
+
+    private static final String PERMISO_EXECUTE =
+            "CARTERA_CIERRE_EXECUTE";
+
+    // =========================================================
+    // DEPENDENCIAS
+    // =========================================================
+
     private final Anexo1Service service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // =========================================================
     // CALCULAR EDAD CONTABLE
@@ -29,14 +48,17 @@ public class Anexo1Controller {
             @PathVariable Integer idCierreCartera
     ) {
 
+        validarEjecucion();
+
         int cantidad =
                 service.calcularEdadContable(
                         idCierreCartera
                 );
 
-        return ResponseEntity.ok(cantidad);
+        return ResponseEntity.ok(
+                cantidad
+        );
     }
-
 
     // =========================================================
     // PROCESAR ANEXO 1 COMPLETO
@@ -50,13 +72,14 @@ public class Anexo1Controller {
             @PathVariable Integer idCierreCartera
     ) {
 
+        validarEjecucion();
+
         return ResponseEntity.ok(
                 service.procesarAnexo1(
                         idCierreCartera
                 )
         );
     }
-
 
     // =========================================================
     // CERRAR ANEXO 1 EN FIRME
@@ -70,13 +93,14 @@ public class Anexo1Controller {
             @PathVariable Integer idCierreCartera
     ) {
 
+        validarEjecucion();
+
         return ResponseEntity.ok(
                 service.cerrarAnexo1(
                         idCierreCartera
                 )
         );
     }
-
 
     // =========================================================
     // CONSULTAR DETALLE ANEXO 1
@@ -92,6 +116,8 @@ public class Anexo1Controller {
     public ResponseEntity<List<DetalleAnexo1DTO>> obtenerDetalleAnexo1(
             @PathVariable Integer idCierreCartera
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.obtenerDetalleAnexo1(
@@ -125,10 +151,47 @@ public class Anexo1Controller {
             @PathVariable Integer idCierreCartera
     ) {
 
+        validarConsulta();
+
         return ResponseEntity.ok(
                 service.obtenerResumenAnexo1(
                         idCierreCartera
                 )
         );
+    }
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarConsulta() {
+
+        Usuario usuarioActual = usuarioActual();
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO_VIEW
+        );
+    }
+
+    private void validarEjecucion() {
+
+        Usuario usuarioActual = usuarioActual();
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO_EXECUTE
+        );
+    }
+
+    private Usuario usuarioActual() {
+
+        Usuario usuarioActual = new Usuario();
+
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        return usuarioActual;
     }
 }

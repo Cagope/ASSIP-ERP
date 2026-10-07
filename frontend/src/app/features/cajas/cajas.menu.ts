@@ -12,8 +12,15 @@ export const cajasMenu = {
       children: [
 
         {
-          label: 'Vincular caja',
-          route: '/cajas/vincular-caja'
+          label: 'Inicio de caja',
+          route: '/cajas/provisiones',
+          permiso: 'CAJAS_VINCULAR_CAJA'
+        },
+
+        {
+          label: 'Operaciones pendientes',
+          route: '/cajas/operaciones-pendientes',
+          permiso: 'CAJAS_OPERACIONES_PENDIENTES_VIEW'
         },
 
         {

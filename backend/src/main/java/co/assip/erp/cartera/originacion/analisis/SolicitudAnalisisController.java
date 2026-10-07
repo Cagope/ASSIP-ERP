@@ -4,23 +4,33 @@ import co.assip.erp.cartera.originacion.analisis.dto.SolicitudAnalisisComponente
 import co.assip.erp.cartera.originacion.analisis.dto.SolicitudAnalisisDeudorDTO;
 import co.assip.erp.cartera.originacion.analisis.dto.SolicitudAnalisisPersistenciaDTO;
 import co.assip.erp.cartera.originacion.analisis.dto.SolicitudAnalisisResultadoDTO;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/cartera/originacion/analisis")
 public class SolicitudAnalisisController {
 
+    private static final String PERMISO_VIEW =
+            "CARTERA_ORIGINACION_VIEW";
+
+    private static final String PERMISO_ANALISIS =
+            "CARTERA_ORIGINACION_ANALISIS";
+
+    // =========================================================
+    // DEPENDENCIAS
+    // =========================================================
+
     private final SolicitudAnalisisService service;
-
-    public SolicitudAnalisisController(
-            SolicitudAnalisisService service
-    ) {
-        this.service = service;
-    }
-
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // =========================================================
     // RESULTADO ACTUAL DE LA SOLICITUD
@@ -30,6 +40,8 @@ public class SolicitudAnalisisController {
     public ResponseEntity<SolicitudAnalisisResultadoDTO> obtenerResultadoSolicitud(
             @PathVariable Integer idSolicitudCredito
     ) {
+
+        validarConsulta();
 
         return service.obtenerResultadoSolicitud(
                         idSolicitudCredito
@@ -43,7 +55,6 @@ public class SolicitudAnalisisController {
                 );
     }
 
-
     // =========================================================
     // RESULTADOS POR DEUDOR
     // =========================================================
@@ -53,13 +64,14 @@ public class SolicitudAnalisisController {
             @PathVariable Integer idSolicitudCredito
     ) {
 
+        validarConsulta();
+
         return ResponseEntity.ok(
                 service.listarDeudores(
                         idSolicitudCredito
                 )
         );
     }
-
 
     // =========================================================
     // COMPONENTES
@@ -70,13 +82,14 @@ public class SolicitudAnalisisController {
             @PathVariable Integer idSolicitudCredito
     ) {
 
+        validarConsulta();
+
         return ResponseEntity.ok(
                 service.listarComponentes(
                         idSolicitudCredito
                 )
         );
     }
-
 
     // =========================================================
     // GUARDAR ANÁLISIS ACTUAL
@@ -87,10 +100,43 @@ public class SolicitudAnalisisController {
             @PathVariable Integer idSolicitudCredito
     ) {
 
+        validarAnalisis();
+
         return ResponseEntity.ok(
                 service.persistirAnalisis(
                         idSolicitudCredito
                 )
         );
+    }
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarConsulta() {
+
+        accessValidator.validarAcceso(
+                usuarioActual(),
+                PERMISO_VIEW
+        );
+    }
+
+    private void validarAnalisis() {
+
+        accessValidator.validarAcceso(
+                usuarioActual(),
+                PERMISO_ANALISIS
+        );
+    }
+
+    private Usuario usuarioActual() {
+
+        Usuario usuarioActual = new Usuario();
+
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        return usuarioActual;
     }
 }

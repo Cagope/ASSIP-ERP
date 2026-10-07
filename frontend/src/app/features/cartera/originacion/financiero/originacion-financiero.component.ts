@@ -37,6 +37,10 @@ import {
 } from './originacion-financiero.api';
 
 import {
+  SessionService
+} from '../../../../core/auth/session.service';
+
+import {
   SolicitudFinanciero,
   SolicitudFinancieroDetalle,
   SolicitudFinancieroGuardarRequest
@@ -234,10 +238,19 @@ export class OriginacionFinancieroComponent
     private readonly state:
       OriginacionSolicitudStateService,
 
+    private readonly session:
+      SessionService,
+
     private readonly router:
       Router
   ) {}
 
+  get puedeEditar(): boolean {
+
+    return this.session.tienePermiso(
+      'CARTERA_ORIGINACION_EDIT'
+    );
+  }
 
   // =========================================================
   // INICIO
@@ -786,13 +799,21 @@ export class OriginacionFinancieroComponent
   // GUARDAR
   // =========================================================
 
-  guardar(): void {
+    guardar(): void {
 
-    this.error = '';
-    this.mensaje = '';
+      if (!this.puedeEditar) {
 
-    const errorValidacion =
-      this.validarFormulario();
+        this.error =
+          'El usuario no tiene permiso para modificar la información financiera de la solicitud.';
+
+        return;
+      }
+
+      this.error = '';
+      this.mensaje = '';
+
+      const errorValidacion =
+        this.validarFormulario();
 
     if (errorValidacion) {
 

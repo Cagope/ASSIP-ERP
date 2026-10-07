@@ -18,6 +18,7 @@
 
     </div>
 
+
     <div class="barra-acciones__botones">
 
       <button
@@ -25,15 +26,20 @@
         class="btn btn-secundario"
         [disabled]="cargando"
         (click)="cerrar()">
+
         Cerrar
+
       </button>
+
 
       <button
         type="button"
         class="btn btn-primario"
         [disabled]="!puedeImprimir"
         (click)="imprimir()">
+
         Imprimir pagaré
+
       </button>
 
     </div>
@@ -72,23 +78,25 @@
        ======================================================= -->
 
   <ng-container
-    *ngIf="puedeImprimir && datos && deudorPrincipal">
-
+    *ngIf="
+      puedeImprimir
+      && datos
+      && deudorPrincipal
+    ">
 
     <!-- =====================================================
          DOS COPIAS
 
          Equivalente al VB:
          For I = 1 To 2
-         ...
-         Printer.NewPage
+             ...
+             Printer.NewPage
          Next
          ===================================================== -->
 
     <section
-      class="hoja-oficio"
-      *ngFor="let copia of [1, 2]">
-
+      *ngFor="let copia of [1, 2]"
+      class="hoja-oficio">
 
       <div class="contenido-pagare">
 
@@ -100,7 +108,9 @@
         <div class="bloque-firma">
 
           <div class="titulo-firmante">
+
             DEUDOR
+
           </div>
 
 
@@ -124,7 +134,12 @@
             </span>
 
             <span class="valor-firmante">
-              {{ deudorPrincipal.nombreCompleto | uppercase }}
+
+              {{
+                deudorPrincipal.nombreCompleto
+                  | uppercase
+              }}
+
             </span>
 
             <span class="etiqueta-huella">
@@ -141,7 +156,9 @@
             </span>
 
             <span class="valor-firmante">
+
               {{ deudorPrincipal.documento }}
+
             </span>
 
           </div>
@@ -154,7 +171,12 @@
             </span>
 
             <span class="valor-firmante">
-              {{ deudorPrincipal.direccion | uppercase }}
+
+              {{
+                deudorPrincipal.direccion
+                  | uppercase
+              }}
+
             </span>
 
           </div>
@@ -167,7 +189,13 @@
             </span>
 
             <span class="valor-firmante">
-              {{ telefonoFirmante(deudorPrincipal) }}
+
+              {{
+                telefonoFirmante(
+                  deudorPrincipal
+                )
+              }}
+
             </span>
 
           </div>
@@ -183,12 +211,13 @@
              ================================================= -->
 
         <div
-          class="bloque-firma bloque-codeudor"
-          *ngFor="let posicion of [0, 1, 2]">
-
+          *ngFor="let posicion of [0, 1, 2]"
+          class="bloque-firma bloque-codeudor">
 
           <div class="titulo-firmante">
+
             CODEUDOR
+
           </div>
 
 
@@ -212,10 +241,15 @@
             </span>
 
             <span class="valor-firmante">
+
               {{
-                (codeudores[posicion]?.nombreCompleto || '')
+                (
+                  codeudores[posicion]?.nombreCompleto
+                  || ''
+                )
                   | uppercase
               }}
+
             </span>
 
             <span class="etiqueta-huella">
@@ -232,7 +266,12 @@
             </span>
 
             <span class="valor-firmante">
-              {{ codeudores[posicion]?.documento || '' }}
+
+              {{
+                codeudores[posicion]?.documento
+                || ''
+              }}
+
             </span>
 
           </div>
@@ -245,10 +284,15 @@
             </span>
 
             <span class="valor-firmante">
+
               {{
-                (codeudores[posicion]?.direccion || '')
+                (
+                  codeudores[posicion]?.direccion
+                  || ''
+                )
                   | uppercase
               }}
+
             </span>
 
           </div>
@@ -261,11 +305,14 @@
             </span>
 
             <span class="valor-firmante">
+
               {{
                 telefonoFirmante(
-                  codeudores[posicion] || null
+                  codeudores[posicion]
+                  || null
                 )
               }}
+
             </span>
 
           </div>
@@ -289,7 +336,6 @@
              ================================================= -->
 
         <div class="control-documento">
-
 
           <div class="control-columna">
 
@@ -323,7 +369,6 @@
             </div>
 
           </div>
-
 
         </div>
 

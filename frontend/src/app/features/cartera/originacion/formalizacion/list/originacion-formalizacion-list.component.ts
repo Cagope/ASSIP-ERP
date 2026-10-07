@@ -4,27 +4,43 @@ import {
   inject
 } from '@angular/core';
 
-import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import {
+  CommonModule
+} from '@angular/common';
 
-import { OriginacionFormalizacionApi } from
-  '../originacion-formalizacion.api';
+import {
+  Router
+} from '@angular/router';
+
+import {
+  OriginacionFormalizacionApi
+} from '../originacion-formalizacion.api';
 
 import {
   SolicitudFormalizacionBandeja
 } from '../originacion-formalizacion.models';
 
+
 @Component({
   selector: 'app-originacion-formalizacion-list',
   standalone: true,
+
   imports: [
     CommonModule
   ],
-  templateUrl: './originacion-formalizacion-list.component.html',
-  styleUrl: './originacion-formalizacion-list.component.scss'
+
+  templateUrl:
+    './originacion-formalizacion-list.component.html',
+
+  styleUrl:
+    './originacion-formalizacion-list.component.scss'
 })
 export class OriginacionFormalizacionListComponent
   implements OnInit {
+
+  // =========================================================
+  // DEPENDENCIAS
+  // =========================================================
 
   private readonly api =
     inject(OriginacionFormalizacionApi);
@@ -32,42 +48,75 @@ export class OriginacionFormalizacionListComponent
   private readonly router =
     inject(Router);
 
-  solicitudes: SolicitudFormalizacionBandeja[] = [];
+
+  // =========================================================
+  // DATOS
+  // =========================================================
+
+  solicitudes:
+    SolicitudFormalizacionBandeja[] = [];
+
+
+  // =========================================================
+  // ESTADO DE PANTALLA
+  // =========================================================
 
   cargando = false;
   error = '';
 
+
+  // =========================================================
+  // CICLO DE VIDA
+  // =========================================================
+
   ngOnInit(): void {
+
     this.cargar();
   }
+
+
+  // =========================================================
+  // CONSULTA
+  // =========================================================
 
   cargar(): void {
 
     this.cargando = true;
     this.error = '';
 
-    this.api.listarBandeja().subscribe({
+    this.api
+      .listarBandeja()
+      .subscribe({
 
-      next: solicitudes => {
+        next: solicitudes => {
 
-        this.solicitudes = solicitudes;
-        this.cargando = false;
-      },
+          this.solicitudes =
+            solicitudes;
 
-      error: () => {
+          this.cargando = false;
+        },
 
-        this.solicitudes = [];
-        this.error =
-          'No fue posible consultar las solicitudes pendientes de formalización.';
+        error: () => {
 
-        this.cargando = false;
-      }
+          this.solicitudes = [];
 
-    });
+          this.error =
+            'No fue posible consultar las solicitudes pendientes de formalización.';
+
+          this.cargando = false;
+        }
+
+      });
   }
 
+
+  // =========================================================
+  // NAVEGACIÓN
+  // =========================================================
+
   abrirFormalizacion(
-    solicitud: SolicitudFormalizacionBandeja
+    solicitud:
+      SolicitudFormalizacionBandeja
   ): void {
 
     this.router.navigate([
@@ -75,6 +124,11 @@ export class OriginacionFormalizacionListComponent
       solicitud.idSolicitudCredito
     ]);
   }
+
+
+  // =========================================================
+  // PRESENTACIÓN
+  // =========================================================
 
   descripcionEstado(
     estado: string

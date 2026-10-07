@@ -1,0 +1,640 @@
+<div class="page">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <div class="page-header">
+
+    <div>
+      <h2>Operaciones pendientes</h2>
+
+      <p class="page-subtitle">
+        Operaciones enviadas a Caja que requieren validación
+        física antes de quedar en firme.
+      </p>
+    </div>
+
+
+    <button
+      type="button"
+      class="btn btn-secondary"
+      (click)="cargar()"
+      [disabled]="cargando">
+
+      {{ cargando ? 'Consultando...' : 'Actualizar' }}
+
+    </button>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJES -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="mensajeError"
+    class="alert alert-error">
+
+    {{ mensajeError }}
+
+  </div>
+
+  <div
+    *ngIf="mensajeExito"
+    class="alert alert-success">
+
+    {{ mensajeExito }}
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CARGANDO -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="cargando"
+    class="card">
+
+    <div class="loading">
+      Consultando operaciones pendientes...
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- CAJA ACTIVA -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="!cargando && provision"
+    class="card">
+
+    <div class="card-header">
+
+      <div>
+        <h3>Caja de atención</h3>
+
+        <p>
+          Las operaciones mostradas corresponden a la caja
+          abierta del usuario autenticado.
+        </p>
+      </div>
+
+
+      <span class="status-badge status-active">
+        {{ provision.estado }}
+      </span>
+
+    </div>
+
+
+    <div class="summary-grid">
+
+      <div class="summary-item">
+
+        <span class="summary-label">
+          Caja
+        </span>
+
+        <strong class="summary-value">
+          {{ provision.codigoCaja }}
+          -
+          {{ provision.descripcionCaja }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-item">
+
+        <span class="summary-label">
+          Agencia
+        </span>
+
+        <strong class="summary-value">
+          {{ provision.codigoAgencia }}
+          -
+          {{ provision.nombreAgencia }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-item">
+
+        <span class="summary-label">
+          Fecha contable
+        </span>
+
+        <strong class="summary-value">
+          {{ provision.fechaContable | date:'dd/MM/yyyy' }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-item">
+
+        <span class="summary-label">
+          Provisión
+        </span>
+
+        <strong class="summary-value">
+          {{ provision.idProvision }}
+        </strong>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- BANDEJA -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="!cargando && provision"
+    class="card">
+
+    <div class="card-header">
+
+      <div>
+        <h3>Pendientes por atender</h3>
+
+        <p>
+          Seleccione una operación para revisar la información
+          antes de recibir o entregar valores.
+        </p>
+      </div>
+
+
+      <span class="counter-badge">
+        {{ operaciones.length }}
+        {{ operaciones.length === 1 ? 'pendiente' : 'pendientes' }}
+      </span>
+
+    </div>
+
+
+    <!-- SIN PENDIENTES -->
+
+    <div
+      *ngIf="operaciones.length === 0"
+      class="empty-state">
+
+      <strong>
+        No hay operaciones pendientes
+      </strong>
+
+      <p>
+        La caja no tiene operaciones externas pendientes
+        de validación para la jornada actual.
+      </p>
+
+    </div>
+
+
+    <!-- TABLA -->
+
+    <div
+      *ngIf="operaciones.length > 0"
+      class="table-wrap">
+
+      <table>
+
+        <thead>
+
+        <tr>
+          <th>Hora</th>
+          <th>Operación</th>
+          <th>Referencia</th>
+          <th>Asociado</th>
+          <th>Documento</th>
+          <th>Acción</th>
+          <th>Medio</th>
+          <th class="text-right">Valor</th>
+          <th></th>
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        <tr
+          *ngFor="let operacion of operaciones"
+          [class.row-selected]="
+              operacionSeleccionada?.idMovimientoCaja ===
+              operacion.idMovimientoCaja
+            ">
+
+          <td class="nowrap">
+            {{ operacion.horaMovimiento }}
+          </td>
+
+
+          <td>
+
+            <strong class="operation-name">
+              {{ operacion.nombreOperacion }}
+            </strong>
+
+            <span class="operation-origin">
+                {{ operacion.moduloOrigen }}
+              </span>
+
+          </td>
+
+
+          <td class="nowrap">
+
+            <strong>
+              {{ operacion.codigoReferencia || '-' }}
+            </strong>
+
+          </td>
+
+
+          <td>
+            {{ operacion.nombreCompleto }}
+          </td>
+
+
+          <td class="nowrap">
+            {{ operacion.documento }}
+          </td>
+
+
+          <td>
+
+              <span
+                class="nature-badge"
+                [class.nature-income]="
+                  operacion.naturaleza === 'INGRESO'
+                "
+                [class.nature-expense]="
+                  operacion.naturaleza === 'EGRESO'
+                ">
+
+                {{ etiquetaNaturaleza(operacion.naturaleza) }}
+
+              </span>
+
+          </td>
+
+
+          <td>
+            {{ operacion.medioPago }}
+          </td>
+
+
+          <td class="text-right value-cell">
+
+            {{
+            operacion.valor
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+
+          </td>
+
+
+          <td class="actions-cell">
+
+            <button
+              type="button"
+              class="btn btn-primary btn-small"
+              (click)="atender(operacion)">
+
+              Atender
+
+            </button>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- DETALLE DE LA OPERACIÓN -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="operacionSeleccionada as operacion"
+    class="card detail-card">
+
+    <div class="card-header">
+
+      <div>
+        <h3>Validación de la operación</h3>
+
+        <p>
+          Revise la información antes de realizar el movimiento
+          físico en Caja.
+        </p>
+      </div>
+
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="cerrarDetalle()">
+
+        Cerrar
+
+      </button>
+
+    </div>
+
+
+    <!-- INDICACIÓN PRINCIPAL -->
+
+    <div
+      class="operation-instruction"
+      [class.instruction-income]="
+        operacion.naturaleza === 'INGRESO'
+      "
+      [class.instruction-expense]="
+        operacion.naturaleza === 'EGRESO'
+      ">
+
+      <div>
+
+        <span class="instruction-label">
+          Acción de caja
+        </span>
+
+        <strong>
+          {{ etiquetaNaturaleza(operacion.naturaleza) }}
+          {{
+          operacion.valor
+          | currency:'COP':'symbol-narrow':'1.0-0'
+          }}
+        </strong>
+
+      </div>
+
+      <p>
+        {{ instruccionOperacion(operacion) }}
+      </p>
+
+    </div>
+
+
+    <!-- OPERACIÓN -->
+
+    <div class="detail-section">
+
+      <div class="section-title">
+        <h4>Operación</h4>
+      </div>
+
+
+      <div class="detail-grid">
+
+        <div class="detail-item">
+
+          <span>Proceso</span>
+
+          <strong>
+            {{ operacion.nombreOperacion }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span>Referencia</span>
+
+          <strong>
+            {{ operacion.codigoReferencia || '-' }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span>Origen</span>
+
+          <strong>
+            {{ operacion.moduloOrigen }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span>Medio de pago</span>
+
+          <strong>
+            {{ operacion.medioPago }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span>Fecha</span>
+
+          <strong>
+            {{ operacion.fechaContable | date:'dd/MM/yyyy' }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span>Hora</span>
+
+          <strong>
+            {{ operacion.horaMovimiento }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- TITULAR -->
+
+    <div class="detail-section">
+
+      <div class="section-title">
+        <h4>Titular</h4>
+      </div>
+
+
+      <div class="detail-grid">
+
+        <div class="detail-item detail-item-wide">
+
+          <span>Nombre</span>
+
+          <strong>
+            {{ operacion.nombreCompleto }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span>Tipo documento</span>
+
+          <strong>
+            {{ operacion.tipoDocumento }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span>Documento</span>
+
+          <strong>
+            {{ operacion.documento }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- SOPORTE -->
+
+    <div class="detail-section">
+
+      <div class="section-title">
+        <h4>Soporte</h4>
+      </div>
+
+
+      <div class="detail-grid">
+
+        <div class="detail-item">
+
+          <span>Comprobante</span>
+
+          <strong>
+            {{ operacion.tipoComprobante || '-' }}
+            {{ operacion.numeroComprobante || '' }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item">
+
+          <span>Estado</span>
+
+          <strong>
+            {{ operacion.estado }}
+          </strong>
+
+        </div>
+
+
+        <div class="detail-item detail-item-wide">
+
+          <span>Concepto</span>
+
+          <strong>
+            {{ operacion.concepto }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- VALOR -->
+
+    <div class="amount-summary">
+
+      <span>
+        Valor a
+        {{
+          operacion.naturaleza === 'INGRESO'
+            ? 'recibir'
+            : 'entregar'
+        }}
+      </span>
+
+      <strong>
+        {{
+        operacion.valor
+        | currency:'COP':'symbol-narrow':'1.0-0'
+        }}
+      </strong>
+
+    </div>
+
+
+    <!-- ACCIONES -->
+
+    <div class="detail-actions">
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="cerrarDetalle()"
+        [disabled]="confirmando">
+
+        Volver a la bandeja
+
+      </button>
+
+
+      <!--
+        La confirmación se habilitará cuando construyamos
+        el endpoint backend que cambia:
+
+        PENDIENTE -> REGISTRADO
+
+        No simulamos esa confirmación desde el frontend.
+      -->
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="confirmarOperacion()"
+        [disabled]="confirmando">
+
+        {{
+        confirmando
+        ? 'Confirmando...'
+        : 'Confirmar operación'
+        }}
+
+      </button>
+
+    </div>
+
+  </section>
+
+</div>

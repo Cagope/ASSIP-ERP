@@ -32,6 +32,10 @@ import {
 } from './originacion-desembolso.api';
 
 import {
+  SessionService
+} from '../../../../core/auth/session.service';
+
+import {
   DepositoDesembolso,
   EjecutarDesembolsoRequest,
   LiquidacionDesembolso,
@@ -187,101 +191,105 @@ export class OriginacionDesembolsoComponent
     );
 
 
-  constructor(
-    private readonly route: ActivatedRoute,
-    private readonly router: Router,
-    private readonly fb: FormBuilder,
-    private readonly http: HttpClient,
-    private readonly api: OriginacionDesembolsoApi,
-    private readonly tiposComprobantesApi: TiposComprobantesApi
-  ) {
+    constructor(
+      private readonly route: ActivatedRoute,
+      private readonly router: Router,
+      private readonly fb: FormBuilder,
+      private readonly http: HttpClient,
+      private readonly api: OriginacionDesembolsoApi,
+      private readonly tiposComprobantesApi: TiposComprobantesApi,
+      private readonly session: SessionService
+    ) {
 
-    this.form = this.fb.group({
+      this.form = this.fb.group({
 
-      // ---------------------------------------------------
-      // FECHAS
-      // ---------------------------------------------------
+        // ---------------------------------------------------
+        // FECHAS
+        // ---------------------------------------------------
 
-      fechaContable: [
-        this.fechaHoy(),
-        Validators.required
-      ],
+        fechaContable: [
+          this.fechaHoy(),
+          Validators.required
+        ],
 
-      fechaDesembolso: [
-        this.fechaHoy(),
-        Validators.required
-      ],
+        fechaDesembolso: [
+          this.fechaHoy(),
+          Validators.required
+        ],
 
+        // ---------------------------------------------------
+        // CAJA
+        // ---------------------------------------------------
 
-      // ---------------------------------------------------
-      // CAJA
-      // ---------------------------------------------------
+        idCaja: [
+          null,
+          Validators.required
+        ],
 
-      idCaja: [
-        null,
-        Validators.required
-      ],
+        // ---------------------------------------------------
+        // COMPROBANTES
+        // ---------------------------------------------------
 
+        tipoComprobanteDesembolso: [
+          '',
+          Validators.required
+        ],
 
-      // ---------------------------------------------------
-      // COMPROBANTES
-      // ---------------------------------------------------
+        tipoComprobanteCobros: [
+          ''
+        ],
 
-      tipoComprobanteDesembolso: [
-        '',
-        Validators.required
-      ],
+        // ---------------------------------------------------
+        // CENTRAL DE RIESGO
+        // ---------------------------------------------------
 
-      tipoComprobanteCobros: [
-        ''
-      ],
+        cantidadCentral: [
+          0,
+          [
+            Validators.required,
+            Validators.min(0)
+          ]
+        ],
 
+        // ---------------------------------------------------
+        // DISTRIBUCIÓN
+        // ---------------------------------------------------
 
-      // ---------------------------------------------------
-      // CENTRAL DE RIESGO
-      // ---------------------------------------------------
+        valorEfectivo: [
+          0,
+          [
+            Validators.required,
+            Validators.min(0)
+          ]
+        ],
 
-      cantidadCentral: [
-        0,
-        [
-          Validators.required,
-          Validators.min(0)
-        ]
-      ],
+        valorCuentaPorPagar: [
+          0,
+          [
+            Validators.required,
+            Validators.min(0)
+          ]
+        ],
 
+        depositos: this.fb.array([])
 
-      // ---------------------------------------------------
-      // DISTRIBUCIÓN
-      // ---------------------------------------------------
-
-      valorEfectivo: [
-        0,
-        [
-          Validators.required,
-          Validators.min(0)
-        ]
-      ],
-
-      valorCuentaPorPagar: [
-        0,
-        [
-          Validators.required,
-          Validators.min(0)
-        ]
-      ],
-
-      depositos: this.fb.array([])
-
-    });
-  }
+      });
+    }
 
 
-  // =======================================================
-  // INICIALIZACIÓN
-  // =======================================================
+    get puedeDesembolsar(): boolean {
 
-  ngOnInit(): void {
+      return this.session.tienePermiso(
+        'CARTERA_ORIGINACION_DESEMBOLSO'
+      );
+    }
 
+
+    // =======================================================
+    // INICIALIZACIÓN
+    // =======================================================
+
+    ngOnInit(): void {
     const id =
       Number(
         this.route.snapshot.paramMap.get(
@@ -536,6 +544,14 @@ export class OriginacionDesembolsoComponent
 
   calcular(): void {
 
+    if (!this.puedeDesembolsar) {
+
+      this.error =
+        'El usuario no tiene permiso para procesar desembolsos.';
+
+      return;
+    }
+
     if (
       !this.preparacion ||
       this.desembolsoEjecutado
@@ -605,15 +621,23 @@ export class OriginacionDesembolsoComponent
   // VALIDAR DISTRIBUCIÓN
   // =======================================================
 
-  validarDistribucion(): void {
+ validarDistribucion(): void {
 
-    if (
-      !this.preparacion ||
-      !this.liquidacion ||
-      this.desembolsoEjecutado
-    ) {
-      return;
-    }
+   if (!this.puedeDesembolsar) {
+
+     this.error =
+       'El usuario no tiene permiso para validar distribuciones de desembolso.';
+
+     return;
+   }
+
+   if (
+     !this.preparacion ||
+     !this.liquidacion ||
+     this.desembolsoEjecutado
+   ) {
+     return;
+   }
 
     const idCaja =
       this.numero(
@@ -712,6 +736,14 @@ export class OriginacionDesembolsoComponent
   // =======================================================
 
   ejecutar(): void {
+
+    if (!this.puedeDesembolsar) {
+
+      this.error =
+        'El usuario no tiene permiso para ejecutar desembolsos.';
+
+      return;
+    }
 
     if (
       !this.preparacion ||
@@ -1151,6 +1183,7 @@ export class OriginacionDesembolsoComponent
   get puedeValidarDistribucion(): boolean {
 
     return (
+      this.puedeDesembolsar &&
       !!this.preparacion &&
       !!this.liquidacion &&
       !this.cargando &&
@@ -1165,13 +1198,13 @@ export class OriginacionDesembolsoComponent
   get puedeEjecutar(): boolean {
 
     return (
+      this.puedeDesembolsar &&
       this.puedeValidarDistribucion &&
       !!this.validacionDistribucion &&
       this.validacionDistribucion.cuadra &&
       this.form.valid
     );
   }
-
 
   // =======================================================
   // NOMBRE COMPROBANTE

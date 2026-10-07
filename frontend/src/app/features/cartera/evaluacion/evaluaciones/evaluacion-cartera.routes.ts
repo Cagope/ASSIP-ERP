@@ -18,6 +18,10 @@ import {
   EvaluacionResultadoDetalleComponent
 } from './resultados/detalle/evaluacion-resultado-detalle.component';
 
+import {
+  permisoGuard
+} from '../../../../core/auth/permiso.guard';
+
 
 export const EVALUACION_CARTERA_ROUTES: Routes = [
 
@@ -27,7 +31,11 @@ export const EVALUACION_CARTERA_ROUTES: Routes = [
 
   {
     path: '',
-    component: EvaluacionCarteraListComponent
+    component: EvaluacionCarteraListComponent,
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_EVALUACION_VIEW'
+    }
   },
 
   // =========================================================
@@ -36,7 +44,11 @@ export const EVALUACION_CARTERA_ROUTES: Routes = [
 
   {
     path: ':idEvaluacionCartera/gestionar',
-    component: EvaluacionCarteraGestionarComponent
+    component: EvaluacionCarteraGestionarComponent,
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_EVALUACION_VIEW'
+    }
   },
 
   // =========================================================
@@ -45,7 +57,11 @@ export const EVALUACION_CARTERA_ROUTES: Routes = [
 
   {
     path: ':idEvaluacionCartera/resultados',
-    component: EvaluacionCarteraResultadosComponent
+    component: EvaluacionCarteraResultadosComponent,
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_EVALUACION_VIEW'
+    }
   },
 
   // =========================================================
@@ -56,7 +72,11 @@ export const EVALUACION_CARTERA_ROUTES: Routes = [
     path:
       ':idEvaluacionCartera/resultados/:idEvaluacionCarteraCredito',
     component:
-      EvaluacionResultadoDetalleComponent
+      EvaluacionResultadoDetalleComponent,
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_EVALUACION_VIEW'
+    }
   }
 
 ];

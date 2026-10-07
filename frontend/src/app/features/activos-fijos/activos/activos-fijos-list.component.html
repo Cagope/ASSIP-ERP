@@ -2,6 +2,7 @@
 
   <app-header-actions
     titulo="Activos Fijos"
+    [mostrarNuevo]="puedeEditar"
     (nuevo)="nuevo()"
     (refrescar)="cargar()">
   </app-header-actions>
@@ -15,7 +16,7 @@
       <th>Estado</th>
       <th>Ingreso</th>
       <th>Valor</th>
-      <th>Acciones</th>
+      <th *ngIf="puedeEditar">Acciones</th>
     </tr>
     </thead>
 
@@ -28,7 +29,7 @@
       <td>{{ a.fechaIngreso | date:'yyyy-MM-dd' }}</td>
       <td>{{ a.valorAdquisicion | number:'1.0-0' }}</td>
 
-      <td>
+      <td *ngIf="puedeEditar">
         <div class="acciones">
           <button
             class="btn-action-edit"

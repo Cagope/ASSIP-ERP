@@ -357,7 +357,7 @@ public class VariablesVigenciaRepository {
                 .addValue("aplicaIcbf", b(dto.getAplicaIcbf()))
 
                 .addValue("activo", dto.getActivo() != null ? dto.getActivo() : Boolean.TRUE)
-                .addValue("usr", idUsuario != null ? idUsuario : 1);
+                .addValue("usr", idUsuario);
     }
 
     private BigDecimal n(BigDecimal v) {

@@ -193,8 +193,8 @@ public class NovedadesNominaRepository {
                 .addValue("cantidad", dto.getCantidad())
                 .addValue("valor", dto.getValor())
                 .addValue("obs", dto.getObservacion())
-                // ⛔ NO fk_agencia desde el DTO
-                .addValue("usr", idUsuario != null ? idUsuario : 1);
+                // ⛔ NO fk_agencia desde el DTO|
+                .addValue("usr", idUsuario);
 
         return jdbc.queryForObject(sql, params, Integer.class);
     }
@@ -235,7 +235,7 @@ public class NovedadesNominaRepository {
                 .addValue("valor", dto.getValor())
                 .addValue("obs", dto.getObservacion())
                 .addValue("agencia", dto.getFkAgencia())
-                .addValue("usr", idUsuario != null ? idUsuario : 1);
+                .addValue("usr", idUsuario);
 
         jdbc.update(sql, params);
     }
@@ -352,7 +352,7 @@ public class NovedadesNominaRepository {
         var params = new MapSqlParameterSource()
                 .addValue("id", idNovedad)
                 .addValue("estado", estado)
-                .addValue("usr", idUsuario != null ? idUsuario : 1);
+                .addValue("usr", idUsuario);
 
         jdbc.update(sql, params);
     }
@@ -424,7 +424,7 @@ public class NovedadesNominaRepository {
                 new MapSqlParameterSource()
                         .addValue("periodo", idPeriodo)
                         .addValue("contrato", idContrato)
-                        .addValue("usr", idUsuario != null ? idUsuario : 1)
+                        .addValue("usr", idUsuario)
         );
     }
 
@@ -494,7 +494,7 @@ public class NovedadesNominaRepository {
                         .addValue("fin", fechaFinal)
                         .addValue("cantidad", cantidad)
                         .addValue("valor", valor)
-                        .addValue("usr", idUsuario != null ? idUsuario : 1)
+                        .addValue("usr", idUsuario)
         );
     }
 
@@ -555,7 +555,7 @@ public class NovedadesNominaRepository {
                 new MapSqlParameterSource()
                         .addValue("periodo", idPeriodo)
                         .addValue("estado", estado)
-                        .addValue("usr", idUsuario != null ? idUsuario : 1)
+                        .addValue("usr", idUsuario)
         );
     }
 
@@ -637,7 +637,7 @@ public class NovedadesNominaRepository {
                         .addValue("fin", fechaFinal)
                         .addValue("cantidad", cantidad)
                         .addValue("valor", valor)
-                        .addValue("usr", idUsuario != null ? idUsuario : 1)
+                        .addValue("usr", idUsuario)
         );
     }
 
@@ -685,7 +685,7 @@ public class NovedadesNominaRepository {
                         .addValue("id", idNovedad)
                         .addValue("valor", valor)
                         .addValue("cantidad", cantidad)
-                        .addValue("usr", idUsuario != null ? idUsuario : 1)
+                        .addValue("usr", idUsuario)
         );
     }
 

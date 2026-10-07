@@ -77,13 +77,17 @@
               *ngFor="let bien of bienes; trackBy: trackByBienPersona"
               [class.row-selected]="bien.seleccionado">
 
-              <td class="text-center">
-                <input
-                  type="checkbox"
-                  [checked]="bien.seleccionado"
-                  [disabled]="guardandoIdBienPersona !== null"
-                  (change)="cambiarSeleccion(bien, $any($event.target).checked)">
-              </td>
+              <input
+                type="checkbox"
+                [checked]="bien.seleccionado"
+                [disabled]="
+                  !puedeEditar
+                  || guardandoIdBienPersona !== null
+                "
+                              (change)="cambiarSeleccion(
+                  bien,
+                  $any($event.target).checked
+                )">
 
               <td>
                 <div class="participant-name">{{ bien.nombreCompleto || '-' }}</div>
@@ -131,14 +135,20 @@
                     [(ngModel)]="bien.observacion"
                     [disabled]="!bien.seleccionado || guardandoIdBienPersona !== null"
                     placeholder="Observación">
+
                   <button
                     *ngIf="bien.seleccionado"
                     type="button"
                     class="btn-icon"
                     title="Guardar observación"
-                    [disabled]="guardandoIdBienPersona !== null"
+                    [disabled]="
+                      !puedeEditar
+                      || guardandoIdBienPersona !== null
+                    "
                     (click)="guardarObservacion(bien)">
+
                     Guardar
+
                   </button>
                 </div>
               </td>

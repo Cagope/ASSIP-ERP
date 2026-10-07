@@ -181,10 +181,17 @@ export class CdatsUpsertComponent extends CdatsUpsertValores implements OnInit {
       codigoCuenta: this.filtros.codigo_cuenta
     }).subscribe({
       next: (data: any[]) => {
-        this.resultados = (data ?? []).sort((a: any, b: any) =>
-          String(a.codigo_forma ?? '')
-            .localeCompare(String(b.codigo_forma ?? ''))
-        );
+        this.resultados = (data ?? []).sort((a: any, b: any) => {
+          const formaA = Number(a.id_forma_ahorro ?? 0);
+          const formaB = Number(b.id_forma_ahorro ?? 0);
+
+          if (formaA !== formaB) {
+            return formaA - formaB;
+          }
+
+          return String(a.codigo_cuenta ?? '')
+            .localeCompare(String(b.codigo_cuenta ?? ''));
+        });
 
         if (!this.resultados.length) {
           this.errorBusqueda = 'No se encontraron cuentas activas.';

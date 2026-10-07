@@ -24,6 +24,10 @@ import {
 } from './originacion-analisis.api';
 
 import {
+  SessionService
+} from '../../../../core/auth/session.service';
+
+import {
   SolicitudAnalisisComponente,
   SolicitudAnalisisDeudor,
   SolicitudAnalisisPersistencia,
@@ -131,8 +135,23 @@ export class OriginacionAnalisisComponent
       OriginacionSolicitudStateService,
 
     private readonly router:
-      Router
+      Router,
+
+    private readonly session:
+      SessionService
   ) {}
+
+  get puedeAnalizar(): boolean {
+    return this.session.tienePermiso(
+      'CARTERA_ORIGINACION_ANALISIS'
+    );
+  }
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'CARTERA_ORIGINACION_EDIT'
+    );
+  }
 
 
   // =========================================================
@@ -314,6 +333,14 @@ export class OriginacionAnalisisComponent
   // =========================================================
 
   persistirAnalisis(): void {
+
+    if (!this.puedeAnalizar) {
+
+      this.error =
+        'El usuario no tiene permiso para ejecutar el análisis de la solicitud.';
+
+      return;
+    }
 
     if (!this.idSolicitudCredito) {
 
@@ -576,6 +603,14 @@ export class OriginacionAnalisisComponent
   // =========================================================
 
   enviarAprobacion(): void {
+
+    if (!this.puedeEditar) {
+
+      this.error =
+        'El usuario no tiene permiso para enviar solicitudes a aprobación.';
+
+      return;
+    }
 
     if (!this.idSolicitudCredito) {
 

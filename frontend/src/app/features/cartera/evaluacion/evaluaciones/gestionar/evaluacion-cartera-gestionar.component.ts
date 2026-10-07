@@ -22,6 +22,10 @@ import {
 } from '../evaluacion-cartera.api';
 
 import {
+  SessionService
+} from '../../../../../core/auth/session.service';
+
+import {
   EvaluacionCartera,
   EstadoEvaluacionCartera,
   ESTADO_EVALUACION_DESCRIPCION
@@ -48,6 +52,15 @@ export class EvaluacionCarteraGestionarComponent implements OnInit {
 
   private readonly api =
     inject(EvaluacionCarteraApi);
+
+  private readonly session =
+    inject(SessionService);
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'CARTERA_EVALUACION_EDIT'
+    );
+  }
 
   // =========================================================
   // IDENTIFICACIÓN
@@ -169,7 +182,8 @@ export class EvaluacionCarteraGestionarComponent implements OnInit {
   ejecutarEvaluacion(): void {
 
     if (
-      this.idEvaluacionCartera === null
+      !this.puedeEditar
+      || this.idEvaluacionCartera === null
       || !this.evaluacion
       || !this.estaEnProceso
       || this.ejecutando
@@ -255,7 +269,8 @@ export class EvaluacionCarteraGestionarComponent implements OnInit {
   marcarDefinitiva(): void {
 
     if (
-      this.idEvaluacionCartera === null
+      !this.puedeEditar
+      || this.idEvaluacionCartera === null
       || !this.evaluacion
       || !this.estaEnProceso
       || !this.tieneResultados
@@ -442,7 +457,8 @@ export class EvaluacionCarteraGestionarComponent implements OnInit {
   get puedeEjecutar(): boolean {
 
     return (
-      this.estaEnProceso
+      this.puedeEditar
+      && this.estaEnProceso
       && !this.procesando
     );
   }
@@ -466,7 +482,8 @@ export class EvaluacionCarteraGestionarComponent implements OnInit {
   get puedeMarcarDefinitiva(): boolean {
 
     return (
-      this.estaEnProceso
+      this.puedeEditar
+      && this.estaEnProceso
       && this.tieneResultados
       && !this.procesando
     );

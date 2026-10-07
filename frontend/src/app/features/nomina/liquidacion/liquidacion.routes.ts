@@ -1,4 +1,7 @@
 import { Routes } from '@angular/router';
+
+import { permisoGuard } from '../../../core/auth/permiso.guard';
+
 import { LiquidacionPreviewComponent } from './preview/liquidacion-preview.component';
 
 export const LIQUIDACION_ROUTES: Routes = [
@@ -8,7 +11,9 @@ export const LIQUIDACION_ROUTES: Routes = [
   // =========================================
   {
     path: '',
-    component: LiquidacionPreviewComponent
+    component: LiquidacionPreviewComponent,
+    canActivate: [permisoGuard],
+    data: { permiso: 'NOMINA_LIQUIDACION_EXECUTE' }
   }
 
 ];

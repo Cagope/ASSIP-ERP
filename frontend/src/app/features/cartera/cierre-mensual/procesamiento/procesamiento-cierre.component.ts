@@ -19,6 +19,9 @@ import {
   ResultadoProcesamientoCierre
 } from './procesamiento-cierre.models';
 
+import {
+  SessionService
+} from '../../../../core/auth/session.service';
 
 @Component({
   selector: 'app-procesamiento-cierre',
@@ -79,9 +82,17 @@ export class ProcesamientoCierreComponent {
 
   constructor(
     private readonly api:
-      ProcesamientoCierreApi
+      ProcesamientoCierreApi,
+
+    private readonly session:
+      SessionService
   ) {}
 
+  get puedeEjecutar(): boolean {
+    return this.session.tienePermiso(
+      'CARTERA_CIERRE_EXECUTE'
+    );
+  }
 
   // =========================================================
   // EJECUTAR PROCESAMIENTO COMPLETO
@@ -106,6 +117,10 @@ export class ProcesamientoCierreComponent {
 
   procesar(): void {
 
+    if (!this.puedeEjecutar) {
+      return;
+    }
+
     this.limpiarMensajes();
 
     if (!this.idCierreCartera) {
@@ -115,7 +130,6 @@ export class ProcesamientoCierreComponent {
 
       return;
     }
-
 
     if (!this.puedeProcesar()) {
 
@@ -205,7 +219,11 @@ export class ProcesamientoCierreComponent {
 
   puedeProcesar(): boolean {
 
-    if (!this.idCierreCartera) {
+    if (
+      !this.puedeEjecutar
+      ||
+      !this.idCierreCartera
+    ) {
       return false;
     }
 

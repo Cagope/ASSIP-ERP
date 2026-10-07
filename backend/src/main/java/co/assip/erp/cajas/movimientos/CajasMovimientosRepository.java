@@ -98,73 +98,85 @@ public class CajasMovimientosRepository {
             String procesoOrigen,
             String tablaOrigen,
             Long idOrigen,
+            String codigoReferencia,
             String naturaleza,
             String medioPago,
             BigDecimal valor,
             String concepto,
+            String estado,
             String tipoComprobante,
             String numeroComprobante,
             Integer idUsuario
     ) {
         String sql = """
-            INSERT INTO cajas.movimientos_caja (
-                id_provision,
-                id_caja,
-                fecha_contable,
-                id_departamento_operativo,
-                id_operacion_caja,
-                modulo_origen,
-                proceso_origen,
-                tabla_origen,
-                id_origen,
-                naturaleza,
-                medio_pago,
-                valor,
-                concepto,
-                tipo_comprobante,
-                numero_comprobante,
-                fk_seguridad_creacion,
-                fk_seguridad_edicion
-            )
-            VALUES (
-                :idProvision,
-                :idCaja,
-                :fechaContable,
-                :idDepartamentoOperativo,
-                :idOperacionCaja,
-                :moduloOrigen,
-                :procesoOrigen,
-                :tablaOrigen,
-                :idOrigen,
-                :naturaleza,
-                :medioPago,
-                :valor,
-                :concepto,
-                :tipoComprobante,
-                :numeroComprobante,
-                :idUsuario,
-                :idUsuario
-            )
-            RETURNING id_movimiento_caja
-        """;
+        INSERT INTO cajas.movimientos_caja (
+            id_provision,
+            id_caja,
+            fecha_contable,
+            id_departamento_operativo,
+            id_operacion_caja,
+            modulo_origen,
+            proceso_origen,
+            tabla_origen,
+            id_origen,
+            codigo_referencia,
+            naturaleza,
+            medio_pago,
+            valor,
+            concepto,
+            estado,
+            tipo_comprobante,
+            numero_comprobante,
+            fk_seguridad_creacion,
+            fk_seguridad_edicion
+        )
+        VALUES (
+            :idProvision,
+            :idCaja,
+            :fechaContable,
+            :idDepartamentoOperativo,
+            :idOperacionCaja,
+            :moduloOrigen,
+            :procesoOrigen,
+            :tablaOrigen,
+            :idOrigen,
+            :codigoReferencia,
+            :naturaleza,
+            :medioPago,
+            :valor,
+            :concepto,
+            :estado,
+            :tipoComprobante,
+            :numeroComprobante,
+            :idUsuario,
+            :idUsuario
+        )
+        RETURNING id_movimiento_caja
+    """;
 
-        return jdbc.queryForObject(sql, new MapSqlParameterSource()
-                .addValue("idProvision", idProvision)
-                .addValue("idCaja", idCaja)
-                .addValue("fechaContable", fechaContable)
-                .addValue("idDepartamentoOperativo", idDepartamentoOperativo)
-                .addValue("idOperacionCaja", idOperacionCaja)
-                .addValue("moduloOrigen", moduloOrigen)
-                .addValue("procesoOrigen", procesoOrigen)
-                .addValue("tablaOrigen", tablaOrigen)
-                .addValue("idOrigen", idOrigen)
-                .addValue("naturaleza", naturaleza)
-                .addValue("medioPago", medioPago)
-                .addValue("valor", valor)
-                .addValue("concepto", concepto)
-                .addValue("tipoComprobante", tipoComprobante)
-                .addValue("numeroComprobante", numeroComprobante)
-                .addValue("idUsuario", idUsuario), Long.class);
+        return jdbc.queryForObject(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idProvision", idProvision)
+                        .addValue("idCaja", idCaja)
+                        .addValue("fechaContable", fechaContable)
+                        .addValue("idDepartamentoOperativo", idDepartamentoOperativo)
+                        .addValue("idOperacionCaja", idOperacionCaja)
+                        .addValue("moduloOrigen", moduloOrigen)
+                        .addValue("procesoOrigen", procesoOrigen)
+                        .addValue("tablaOrigen", tablaOrigen)
+                        .addValue("idOrigen", idOrigen)
+                        .addValue("codigoReferencia", codigoReferencia)
+                        .addValue("naturaleza", naturaleza)
+                        .addValue("medioPago", medioPago)
+                        .addValue("valor", valor)
+                        .addValue("concepto", concepto)
+                        .addValue("estado", estado)
+                        .addValue("tipoComprobante", tipoComprobante)
+                        .addValue("numeroComprobante", numeroComprobante)
+                        .addValue("idUsuario", idUsuario),
+                Long.class
+        );
     }
 
     public void insertarChequeRecibido(

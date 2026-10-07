@@ -2,6 +2,7 @@
 
   <app-header-actions
     titulo="Secciones Nómina"
+    [mostrarNuevo]="puedeEditar"
     (nuevo)="nuevo()"
     (refrescar)="cargar()"
     (imprimir)="imprimir()"
@@ -69,7 +70,8 @@
               class="btn-action-edit"
               type="button"
               (click)="editar(s.idSeccion!)"
-              title="Editar">
+              [disabled]="!puedeEditar"
+              [title]="puedeEditar ? 'Editar' : 'Sin permiso para editar'">
               ✏️
             </button>
 
@@ -77,7 +79,8 @@
               class="btn-action-delete"
               type="button"
               (click)="eliminar(s.idSeccion!)"
-              title="Eliminar">
+              [disabled]="!puedeEditar"
+              [title]="puedeEditar ? 'Eliminar' : 'Sin permiso para eliminar'">
               🗑️
             </button>
           </div>

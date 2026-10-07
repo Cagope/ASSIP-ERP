@@ -93,7 +93,7 @@ public class EmpleadoRepository {
                 .addValue("idAgencia", dto.getIdAgencia())
                 .addValue("idDatosPersonal", dto.getIdDatosPersonal())
                 .addValue("activo", dto.getActivo() != null ? dto.getActivo() : Boolean.TRUE)
-                .addValue("usr", idUsuario != null ? idUsuario : 1);
+                .addValue("usr", idUsuario);
 
         return jdbc.queryForObject(sql, params, Integer.class);
     }
@@ -119,7 +119,7 @@ public class EmpleadoRepository {
                 .addValue("idAgencia", dto.getIdAgencia())
                 .addValue("idDatosPersonal", dto.getIdDatosPersonal())
                 .addValue("activo", dto.getActivo() != null ? dto.getActivo() : Boolean.TRUE)
-                .addValue("usr", idUsuario != null ? idUsuario : 1);
+                .addValue("usr", idUsuario);
 
         jdbc.update(sql, params);
     }

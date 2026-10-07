@@ -78,11 +78,14 @@ public class CdatAperturaContabilizacionService {
         // =========================
         // REGISTRAR COMPROBANTE
         // =========================
+
+        String concepto = construirConceptoComprobante(dto, cdat.getCodigoCdat());
+
         contabilidadRegistroService.registrarComprobante(
                 dto.getIdAgencia(),
                 dto.getTipoComprobante(),
                 dto.getNumeroComprobante(),
-                "Apertura CDAT " + cdat.getCodigoCdat(),
+                concepto,
                 origen,
                 movimientos,
                 idUsuario
@@ -316,5 +319,114 @@ public class CdatAperturaContabilizacionService {
         }
 
         return lista;
+    }
+
+
+    private String construirConceptoComprobante(
+            CdatSaveDTO dto,
+            String codigoCdat
+    ) {
+
+        var tercero = repository.obtenerTerceroInfo(
+                dto.getIdDatosPersonal()
+        );
+
+        StringBuilder concepto = new StringBuilder();
+
+        concepto.append("Apertura CDAT No. ")
+                .append(codigoCdat)
+                .append(" - Titular Doc. ")
+                .append(tercero.getDocumento())
+                .append(" - Capital ")
+                .append(formatearValor(dto.getValorAperturaCdat()))
+                .append(" - Plazo ")
+                .append(dto.getPlazoMeses())
+                .append(" meses");
+
+        MediosPagoDTO mp = dto.getMediosPago();
+
+        if (mp == null) {
+            return concepto.toString();
+        }
+
+        List<String> medios = new ArrayList<>();
+
+        if (mayorCero(mp.getValorEfectivo())) {
+            medios.add(
+                    "Efectivo "
+                            + formatearValor(mp.getValorEfectivo())
+            );
+        }
+
+        if (mayorCero(mp.getValorCheques())) {
+            medios.add(
+                    "Cheques "
+                            + formatearValor(mp.getValorCheques())
+            );
+        }
+
+        if (mp.getDepositos() != null) {
+
+            BigDecimal totalDepositos = mp.getDepositos()
+                    .stream()
+                    .map(MedioPagoDepositoDTO::getValorDebitar)
+                    .map(this::nvl)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            if (mayorCero(totalDepositos)) {
+                medios.add(
+                        "Depósitos "
+                                + formatearValor(totalDepositos)
+                );
+            }
+        }
+
+        if (mp.getBancos() != null) {
+
+            BigDecimal totalBancos = mp.getBancos()
+                    .stream()
+                    .map(MedioPagoBancoDTO::getValorBanco)
+                    .map(this::nvl)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            if (mayorCero(totalBancos)) {
+                medios.add(
+                        "Bancos "
+                                + formatearValor(totalBancos)
+                );
+            }
+        }
+
+        if (mp.getTrasladosAgencias() != null) {
+
+            BigDecimal totalTraslados = mp.getTrasladosAgencias()
+                    .stream()
+                    .map(MedioPagoTrasladoAgenciaDTO::getValorTraslado)
+                    .map(this::nvl)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            if (mayorCero(totalTraslados)) {
+                medios.add(
+                        "Traslado agencias "
+                                + formatearValor(totalTraslados)
+                );
+            }
+        }
+
+        if (!medios.isEmpty()) {
+            concepto.append(" - Pago: ")
+                    .append(String.join(", ", medios));
+        }
+
+        return concepto.toString();
+    }
+
+    private String formatearValor(BigDecimal valor) {
+
+        return "$" + String.format(
+                java.util.Locale.forLanguageTag("es-CO"),
+                "%,.0f",
+                nvl(valor)
+        );
     }
 }

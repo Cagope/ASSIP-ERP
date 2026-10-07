@@ -1,13 +1,14 @@
 package co.assip.erp.nomina.empleado_contratos;
 
 import co.assip.erp.nomina.empleado_contratos.dto.EmpleadoContratoDTO;
+import co.assip.erp.nomina.empleado_contratos.dto.EmpleadoContratoListViewDTO;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
 import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import co.assip.erp.nomina.empleado_contratos.dto.EmpleadoContratoListViewDTO;
-
 
 @RestController
 @RequiredArgsConstructor
@@ -16,12 +17,16 @@ public class EmpleadoContratoController {
 
     private final EmpleadoContratoService service;
     private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // ============================================================
     // LISTAR
     // ============================================================
     @GetMapping
     public List<EmpleadoContratoListViewDTO> listar() {
+
+        validarAcceso("NOMINA_VIEW");
+
         return service.listar();
     }
 
@@ -30,7 +35,10 @@ public class EmpleadoContratoController {
     // ============================================================
     @GetMapping("/por-empleado/{idEmpleado}")
     public List<EmpleadoContratoListViewDTO> listarPorEmpleado(
-            @PathVariable Integer idEmpleado) {
+            @PathVariable Integer idEmpleado
+    ) {
+
+        validarAcceso("NOMINA_VIEW");
 
         return service.listarPorEmpleado(idEmpleado);
     }
@@ -39,7 +47,12 @@ public class EmpleadoContratoController {
     // OBTENER
     // ============================================================
     @GetMapping("/{id}")
-    public EmpleadoContratoDTO obtener(@PathVariable Integer id) {
+    public EmpleadoContratoDTO obtener(
+            @PathVariable Integer id
+    ) {
+
+        validarAcceso("NOMINA_VIEW");
+
         return service.obtener(id);
     }
 
@@ -47,32 +60,75 @@ public class EmpleadoContratoController {
     // CREAR
     // ============================================================
     @PostMapping
-    public Integer crear(@RequestBody EmpleadoContratoDTO dto) {
+    public Integer crear(
+            @RequestBody EmpleadoContratoDTO dto
+    ) {
+
+        validarAcceso("NOMINA_EMPLEADOS_EDIT");
 
         Integer idUsuario =
                 usuarioSesionService.idUsuario();
 
-        return service.crear(dto, idUsuario);
+        return service.crear(
+                dto,
+                idUsuario
+        );
     }
 
     // ============================================================
     // ACTUALIZAR
     // ============================================================
     @PutMapping("/{id}")
-    public void actualizar(@PathVariable Integer id,
-                           @RequestBody EmpleadoContratoDTO dto) {
+    public void actualizar(
+            @PathVariable Integer id,
+            @RequestBody EmpleadoContratoDTO dto
+    ) {
+
+        validarAcceso("NOMINA_EMPLEADOS_EDIT");
 
         Integer idUsuario =
                 usuarioSesionService.idUsuario();
 
-        service.actualizar(id, dto, idUsuario);
+        service.actualizar(
+                id,
+                dto,
+                idUsuario
+        );
     }
 
     // ============================================================
-    // ELIMINAR
+    // ELIMINAR / DESACTIVAR
     // ============================================================
     @DeleteMapping("/{id}")
-    public void eliminar(@PathVariable Integer id) {
-        service.eliminar(id);
+    public void eliminar(
+            @PathVariable Integer id
+    ) {
+
+        validarAcceso("NOMINA_EMPLEADOS_EDIT");
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        service.eliminar(
+                id,
+                idUsuario
+        );
+    }
+
+    // ============================================================
+    // AUTORIZACIÓN
+    // ============================================================
+    private void validarAcceso(String permiso) {
+
+        Usuario usuarioActual = new Usuario();
+
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                permiso
+        );
     }
 }

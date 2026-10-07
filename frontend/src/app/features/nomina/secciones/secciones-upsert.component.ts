@@ -5,6 +5,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
 import { SeccionesNominaApi, SeccionNominaDTO } from './secciones.api';
+import { SessionService } from '../../../core/auth/session.service';
 
 @Component({
   standalone: true,
@@ -19,9 +20,14 @@ export class SeccionesUpsertComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
+  private readonly session = inject(SessionService);
 
   id: number | null = null;
   loading = false;
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
 
   form = this.fb.group({
     codigo: ['', [Validators.required, Validators.maxLength(10)]],
@@ -58,6 +64,8 @@ export class SeccionesUpsertComponent implements OnInit {
   }
 
   guardar(): void {
+    if (!this.puedeEditar) return;
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;

@@ -2,6 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import {
+  SessionService
+} from '../../../../../core/auth/session.service';
 
 import { SolicitudListApi } from './solicitud-list.api';
 import {
@@ -24,6 +27,15 @@ export class SolicitudListComponent implements OnInit {
 
   private readonly api = inject(SolicitudListApi);
   private readonly router = inject(Router);
+
+  private readonly session =
+    inject(SessionService);
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'CARTERA_ORIGINACION_EDIT'
+    );
+  }
 
 
   // =========================================================
@@ -133,13 +145,20 @@ export class SolicitudListComponent implements OnInit {
   // NAVEGACIÓN
   // =========================================================
 
+  // =========================================================
+  // NAVEGACIÓN
+  // =========================================================
+
   nuevaSolicitud(): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
 
     this.router.navigate([
       '/cartera/originacion/solicitud'
     ]);
   }
-
 
   // =========================================================
   // NAVEGACIÓN SEGÚN EL PROCESO DE LA SOLICITUD

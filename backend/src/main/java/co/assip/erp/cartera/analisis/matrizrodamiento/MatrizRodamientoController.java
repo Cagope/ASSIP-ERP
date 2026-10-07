@@ -3,7 +3,10 @@ package co.assip.erp.cartera.analisis.matrizrodamiento;
 import co.assip.erp.cartera.analisis.matrizrodamiento.dto.MatrizRodamientoCorteDTO;
 import co.assip.erp.cartera.analisis.matrizrodamiento.dto.MatrizRodamientoDTO;
 import co.assip.erp.cartera.analisis.matrizrodamiento.dto.MatrizRodamientoDetalleDTO;
-
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,28 +18,19 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping(
-        "/cartera/analisis/matriz-rodamiento"
-)
+@RequestMapping("/cartera/analisis/matriz-rodamiento")
+@RequiredArgsConstructor
 public class MatrizRodamientoController {
+
+    private static final String PERMISO_VIEW = "CARTERA_ANALISIS_VIEW";
 
     // =========================================================
     // DEPENDENCIAS
     // =========================================================
 
     private final MatrizRodamientoService service;
-
-    // =========================================================
-    // CONSTRUCTOR
-    // =========================================================
-
-    public MatrizRodamientoController(
-            MatrizRodamientoService service
-    ) {
-
-        this.service =
-                service;
-    }
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // =========================================================
     // CORTES DISPONIBLES
@@ -45,6 +39,8 @@ public class MatrizRodamientoController {
     @GetMapping("/cortes")
     public ResponseEntity<List<MatrizRodamientoCorteDTO>>
     listarCortesDisponibles() {
+
+        validarAcceso();
 
         return ResponseEntity.ok(
                 service.listarCortesDisponibles()
@@ -71,25 +67,20 @@ public class MatrizRodamientoController {
      * &fechaComparacion=2026-04-30
      */
     @GetMapping("/calcular")
-    public ResponseEntity<MatrizRodamientoDTO>
-    calcular(
+    public ResponseEntity<MatrizRodamientoDTO> calcular(
             @RequestParam
             String tipoPartida,
 
-            @RequestParam(
-                    required = false
-            )
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE
-            )
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate fechaPartida,
 
             @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE
-            )
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate fechaComparacion
     ) {
+
+        validarAcceso();
 
         return ResponseEntity.ok(
                 service.calcular(
@@ -124,18 +115,12 @@ public class MatrizRodamientoController {
             @RequestParam
             String tipoPartida,
 
-            @RequestParam(
-                    required = false
-            )
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE
-            )
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate fechaPartida,
 
             @RequestParam
-            @DateTimeFormat(
-                    iso = DateTimeFormat.ISO.DATE
-            )
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate fechaComparacion,
 
             @RequestParam
@@ -145,6 +130,8 @@ public class MatrizRodamientoController {
             String categoriaPartida
     ) {
 
+        validarAcceso();
+
         return ResponseEntity.ok(
                 service.listarDetalleCelda(
                         tipoPartida,
@@ -153,6 +140,23 @@ public class MatrizRodamientoController {
                         categoriaAnterior,
                         categoriaPartida
                 )
+        );
+    }
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarAcceso() {
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO_VIEW
         );
     }
 }

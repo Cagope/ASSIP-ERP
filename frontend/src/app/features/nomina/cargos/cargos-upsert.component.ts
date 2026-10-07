@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
+import { SessionService } from '../../../core/auth/session.service';
+
 import { CargoApi, CargoFormDTO } from './cargos.api';
 
 @Component({
@@ -11,13 +13,19 @@ import { CargoApi, CargoFormDTO } from './cargos.api';
   selector: 'app-cargos-upsert',
   templateUrl: './cargos-upsert.component.html',
   styleUrls: ['./cargos-upsert.component.scss'],
-  imports: [CommonModule, FormsModule, RouterModule, HeaderActionsComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    HeaderActionsComponent
+  ],
 })
 export class CargosUpsertComponent implements OnInit {
 
   private readonly api = inject(CargoApi);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   id: number | null = null;
   loading = false;
@@ -27,6 +35,14 @@ export class CargosUpsertComponent implements OnInit {
     nombreCargo: '',
     activo: true
   };
+
+  // =========================================================
+  // PERMISOS
+  // =========================================================
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -47,6 +63,7 @@ export class CargosUpsertComponent implements OnInit {
           nombreCargo: data.nombreCargo ?? '',
           activo: data.activo ?? true
         };
+
         this.loading = false;
       },
       error: (err) => {
@@ -59,7 +76,12 @@ export class CargosUpsertComponent implements OnInit {
   }
 
   guardar(): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     const nombre = (this.form.nombreCargo ?? '').trim();
+
     if (!nombre) {
       alert('El nombre del cargo es obligatorio.');
       return;

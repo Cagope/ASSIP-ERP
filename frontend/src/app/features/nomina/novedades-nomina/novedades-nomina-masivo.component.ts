@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
+import { SessionService } from '../../../core/auth/session.service';
 
 import {
   NovedadesNominaApi,
@@ -30,11 +31,16 @@ export class NovedadesNominaMasivoComponent implements OnInit {
   private readonly api = inject(NovedadesNominaApi);
   private readonly conceptosApi = inject(ConceptosNominaApi);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   conceptos: ConceptoNominaListDTO[] = [];
 
   loading = false;
   procesando = false;
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_NOVEDADES_EDIT');
+  }
 
   // ✅ flujo preview
   viendoPreview = false;
@@ -226,6 +232,10 @@ export class NovedadesNominaMasivoComponent implements OnInit {
   // ✅ APLICAR / GRABAR
   // =========================================================
   generar(): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
 
     if (!this.preview || this.preview.length === 0) {
       alert('Primero debe ejecutar Preview.');

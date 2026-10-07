@@ -1005,7 +1005,8 @@
         type="button"
         class="btn btn--primary"
         [disabled]="
-          cargandoSolicitud
+          !puedeEditar
+          || cargandoSolicitud
           || consultandoVigenciaHojaVida
           || vigenciaHojaVida?.vigente !== true
         "
@@ -1742,28 +1743,11 @@
     <div class="actions-row">
 
       <button
-        *ngIf="!solicitud"
-        type="button"
-        class="btn btn--secondary"
-        [disabled]="
-          !puedeGenerarTablaAmortizacion
-          || guardandoCredito
-          || cargandoCatalogos
-          || consultandoVigenciaHojaVida
-          || vigenciaHojaVida?.vigente !== true
-        "
-        (click)="abrirTablaAmortizacion()">
-
-        Tabla de amortización
-
-      </button>
-
-
-      <button
         type="button"
         class="btn btn--primary"
         [disabled]="
-          !solicitudEditable
+          !puedeEditar
+          || !solicitudEditable
           || guardandoCredito
           || cargandoCatalogos
           || consultandoVigenciaHojaVida
@@ -2436,10 +2420,11 @@
         type="button"
         class="btn btn--danger"
         [disabled]="
-      !solicitud
-      || solicitud.resultadoFinal === true
-      || finalizandoSolicitud
-    "
+          !puedeEditar
+          || !solicitud
+          || solicitud.resultadoFinal === true
+          || finalizandoSolicitud
+        "
         (click)="abrirFinalizacion()">
 
         Finalizar solicitud
@@ -2614,7 +2599,8 @@
           type="button"
           class="btn btn--danger"
           [disabled]="
-            finalizandoSolicitud
+            !puedeEditar
+            || finalizandoSolicitud
             || !idResultadoFinalizacion
             || !observacionFinal.trim()
           "

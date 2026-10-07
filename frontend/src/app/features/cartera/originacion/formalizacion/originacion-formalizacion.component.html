@@ -987,7 +987,10 @@
         type="button"
         class="btn btn-primary"
         (click)="guardar()"
-        [disabled]="!puedeGuardar">
+        [disabled]="
+          !puedeEditar
+          || !puedeGuardar
+        ">
 
         {{
         guardando
@@ -1005,7 +1008,10 @@
         class="btn btn-outline-success"
         *ngIf="!tienePagare"
         (click)="generarPagare()"
-        [disabled]="!puedeGenerarPagare">
+        [disabled]="
+          !puedeEditar
+          || !puedeGenerarPagare
+        ">
 
         {{
         generandoPagare
@@ -1022,7 +1028,10 @@
         type="button"
         class="btn btn-success"
         (click)="finalizar()"
-        [disabled]="!puedeFinalizar">
+        [disabled]="
+          !puedeEditar
+          || !puedeFinalizar
+        ">
 
         {{
         finalizando
@@ -1142,6 +1151,7 @@
       </div>
 
       <div class="acciones pagare-modal-acciones">
+
         <button
           type="button"
           class="btn btn-outline-secondary"
@@ -1149,13 +1159,25 @@
           [disabled]="generandoPagare">
           Cancelar
         </button>
+
         <button
           type="button"
           class="btn btn-success"
           (click)="grabarPagare()"
-          [disabled]="generandoPagare || !fechaPagare">
-          {{ generandoPagare ? 'Grabando pagaré...' : 'Grabar pagaré' }}
+          [disabled]="
+            !puedeEditar
+            || generandoPagare
+            || !fechaPagare
+          ">
+
+          {{
+          generandoPagare
+          ? 'Grabando pagaré...'
+          : 'Grabar pagaré'
+          }}
+
         </button>
+
       </div>
 
     </section>

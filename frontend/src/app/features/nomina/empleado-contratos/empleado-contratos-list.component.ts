@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { SessionService } from '../../../core/auth/session.service';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
 import { EmpleadoContratosApi, EmpleadoContratoListDTO } from './empleado-contratos.api';
@@ -20,6 +21,7 @@ export class EmpleadoContratosListComponent implements OnInit {
 
   private readonly api = inject(EmpleadoContratosApi);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   private readonly printService = inject(EmpleadoContratosPrintService);
   private readonly exporterService = inject(EmpleadoContratosExporterService);
@@ -28,6 +30,10 @@ export class EmpleadoContratosListComponent implements OnInit {
   loading = false;
 
   q = '';
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_EMPLEADOS_EDIT');
+  }
 
   ngOnInit(): void {
     this.cargar();
@@ -91,9 +97,11 @@ export class EmpleadoContratosListComponent implements OnInit {
   // HEADER
   // =========================
 
-  nuevo(): void {
-    this.router.navigate(['/nomina/empleado-contratos/nuevo']);
-  }
+ nuevo(): void {
+   if (!this.puedeEditar) return;
+
+   this.router.navigate(['/nomina/empleado-contratos/nuevo']);
+ }
 
   refrescar(): void {
     this.cargar();
@@ -113,10 +121,14 @@ export class EmpleadoContratosListComponent implements OnInit {
   // =========================
 
   editar(id: number): void {
+    if (!this.puedeEditar) return;
+
     this.router.navigate([`/nomina/empleado-contratos/${id}/editar`]);
   }
 
   eliminar(id: number): void {
+
+    if (!this.puedeEditar) return;
 
     const ok = confirm('¿Desea eliminar este contrato?');
     if (!ok) return;

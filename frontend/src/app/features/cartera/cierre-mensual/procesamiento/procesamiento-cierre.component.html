@@ -85,15 +85,37 @@
 
 
   <!-- ===================================================== -->
-  <!-- MENSAJE DE BLOQUEO -->
+  <!-- MENSAJE SIN PERMISO DE EJECUCIÓN -->
   <!-- ===================================================== -->
 
   <div
-    *ngIf="idCierreCartera && !puedeProcesar()"
+    *ngIf="
+    idCierreCartera
+    && !puedeEjecutar
+  "
     class="procesamiento-cierre__warning">
 
-    La fotografía debe encontrarse cerrada en firme antes de ejecutar
-    los cálculos del cierre.
+    El usuario tiene acceso de consulta al cierre,
+    pero no tiene permiso para ejecutar o recalcular
+    los cálculos del cierre mensual de cartera.
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJE DE BLOQUEO POR ESTADO -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="
+    idCierreCartera
+    && puedeEjecutar
+    && estadoCierre?.trim()?.toUpperCase() !== 'C'
+  "
+    class="procesamiento-cierre__warning">
+
+    La fotografía debe encontrarse cerrada en firme
+    antes de ejecutar los cálculos del cierre.
 
   </div>
 
@@ -130,16 +152,19 @@
     <button
       type="button"
       class="btn btn--primary"
-      [disabled]="!puedeProcesar() || ejecutando"
+      [disabled]="
+      !puedeProcesar()
+      || ejecutando
+    "
       (click)="procesar()">
 
-      <span *ngIf="!ejecutando">
-        Procesar cálculos
-      </span>
+    <span *ngIf="!ejecutando">
+      Procesar cálculos
+    </span>
 
       <span *ngIf="ejecutando">
-        Procesando...
-      </span>
+      Procesando...
+    </span>
 
     </button>
 

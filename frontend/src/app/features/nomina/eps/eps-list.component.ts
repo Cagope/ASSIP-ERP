@@ -7,6 +7,7 @@ import { HeaderActionsComponent } from '../../../shared/header-actions/header-ac
 import { EpsApi, EpsListDTO } from './eps.api';
 import { EpsPrintService } from './eps-print.service';
 import { EpsExporterService } from './eps-exporter.service';
+import { SessionService } from '../../../core/auth/session.service';
 
 @Component({
   standalone: true,
@@ -19,6 +20,7 @@ export class EpsListComponent implements OnInit {
 
   private readonly api = inject(EpsApi);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   private readonly printService = inject(EpsPrintService);
   private readonly exporterService = inject(EpsExporterService);
@@ -28,6 +30,10 @@ export class EpsListComponent implements OnInit {
 
   // ✅ filtro simple
   q = '';
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
 
   ngOnInit(): void {
     this.cargar();
@@ -64,6 +70,8 @@ export class EpsListComponent implements OnInit {
   // =========================================================
 
   nuevo(): void {
+    if (!this.puedeEditar) return;
+
     this.router.navigate(['/nomina/eps/nuevo']);
   }
 
@@ -84,10 +92,14 @@ export class EpsListComponent implements OnInit {
   // =========================================================
 
   editar(id: number): void {
+    if (!this.puedeEditar) return;
+
     this.router.navigate([`/nomina/eps/${id}/editar`]);
   }
 
   eliminar(id: number): void {
+    if (!this.puedeEditar) return;
+
     const ok = confirm('¿Desea eliminar esta EPS?');
     if (!ok) return;
 

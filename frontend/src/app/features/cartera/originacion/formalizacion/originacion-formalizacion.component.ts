@@ -22,6 +22,10 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { forkJoin, Subscription } from 'rxjs';
 
 import {
+  SessionService
+} from '../../../../core/auth/session.service';
+
+import {
   OriginacionFormalizacionApi,
   PropuestaPagare,
   ResultadoValidacionFormalizacion
@@ -59,6 +63,14 @@ export class OriginacionFormalizacionComponent implements OnInit, DoCheck, OnDes
 
   private readonly router = inject(Router);
 
+  private readonly session = inject(SessionService);
+
+  get puedeEditar(): boolean {
+
+    return this.session.tienePermiso(
+      'CARTERA_ORIGINACION_EDIT'
+    );
+  }
 
   // =========================================================
   // CONSULTA
@@ -808,6 +820,14 @@ export class OriginacionFormalizacionComponent implements OnInit, DoCheck, OnDes
 
   guardar(): void {
 
+    if (!this.puedeEditar) {
+
+      this.error =
+        'El usuario no tiene permiso para modificar la formalización de la solicitud.';
+
+      return;
+    }
+
     if (
       !this.editable
       || this.procesando
@@ -816,9 +836,7 @@ export class OriginacionFormalizacionComponent implements OnInit, DoCheck, OnDes
       return;
     }
 
-
     this.error = '';
-
     this.mensaje = '';
 
 
@@ -936,8 +954,21 @@ export class OriginacionFormalizacionComponent implements OnInit, DoCheck, OnDes
 
   grabarPagare(): void {
 
-    if (!this.modalPagareAbierto || !this.propuestaPagare ||
-        !this.detalle || !this.editable || this.procesando) {
+    if (!this.puedeEditar) {
+
+      this.errorModalPagare =
+        'El usuario no tiene permiso para generar el pagaré de la solicitud.';
+
+      return;
+    }
+
+    if (
+      !this.modalPagareAbierto
+      || !this.propuestaPagare
+      || !this.detalle
+      || !this.editable
+      || this.procesando
+    ) {
       return;
     }
 
@@ -1114,6 +1145,14 @@ export class OriginacionFormalizacionComponent implements OnInit, DoCheck, OnDes
 
   finalizar(): void {
 
+    if (!this.puedeEditar) {
+
+      this.error =
+        'El usuario no tiene permiso para finalizar la formalización de la solicitud.';
+
+      return;
+    }
+
     if (
       !this.detalle
       || this.procesando
@@ -1122,11 +1161,8 @@ export class OriginacionFormalizacionComponent implements OnInit, DoCheck, OnDes
       return;
     }
 
-
     this.error = '';
-
     this.mensaje = '';
-
 
     if (!this.condicionesGuardadas) {
 

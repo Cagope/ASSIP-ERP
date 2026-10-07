@@ -259,7 +259,9 @@ export class IngresoActivosComponent implements OnInit {
   }
 
   get puedeGuardar(): boolean {
-    return this.totalValorHistorico > 0 && this.form.valid;
+    return this.puedeIngresar
+      && this.totalValorHistorico > 0
+      && this.form.valid;
   }
 
   get totalDebitoContable(): number {
@@ -325,6 +327,10 @@ export class IngresoActivosComponent implements OnInit {
     }
 
     return lineas;
+  }
+
+  get puedeIngresar(): boolean {
+    return this.session.tienePermiso('ACTIVOS_FIJOS_INGRESO');
   }
 
   // =========================================================
@@ -554,6 +560,8 @@ export class IngresoActivosComponent implements OnInit {
   // =========================================================
   guardar(): void {
 
+    if (!this.puedeIngresar) return;
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -570,7 +578,7 @@ export class IngresoActivosComponent implements OnInit {
         detalle: raw.header.detalle!,
         idProveedor: raw.header.idProveedor!,
         idCuentaFactura: raw.header.idCuentaFactura!,
-        idTipoAdquisicion: raw.header.idTipoAdquisicion! // ✅ faltaba en payload
+        idTipoAdquisicion: raw.header.idTipoAdquisicion!
       },
       items: raw.items.map((it: any) => ({
         placaActivo: it.placaActivo!,
@@ -585,7 +593,7 @@ export class IngresoActivosComponent implements OnInit {
         valorRetencion: it.valorRetencion || 0,
 
         idEstadoActivo: it.idEstadoActivo!,
-        idTipoAdquisicion: it.idTipoAdquisicion!, // viene copiado desde header
+        idTipoAdquisicion: it.idTipoAdquisicion!,
 
         idUbicacion: it.idUbicacion!,
         idBloque: it.idBloque || null,

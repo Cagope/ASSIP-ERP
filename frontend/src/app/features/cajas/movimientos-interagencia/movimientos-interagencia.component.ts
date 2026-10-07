@@ -25,9 +25,12 @@ import {
 } from './movimientos-interagencia.api';
 
 import {
-  VincularCajaApi,
-  CajaProvisionActivaDTO
-} from '../provisiones/vincular-caja/vincular-caja.api';
+  CajasProvisionApi
+} from '../provisiones/cajas-provision.api';
+
+import {
+  CajaProvisionActiva
+} from '../provisiones/cajas-provision.models';
 
 import {
   NumericFormatDirective
@@ -50,9 +53,9 @@ export class MovimientosInteragenciaComponent implements OnInit {
     inject(MovimientosInteragenciaApi);
 
   private readonly cajaApi =
-    inject(VincularCajaApi);
+    inject(CajasProvisionApi);
 
-  provisionActiva: CajaProvisionActivaDTO | null = null;
+  provisionActiva: CajaProvisionActiva | null = null;
 
   documento = '';
   nombres = '';

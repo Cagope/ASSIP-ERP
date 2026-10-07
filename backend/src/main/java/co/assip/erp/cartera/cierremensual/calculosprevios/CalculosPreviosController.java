@@ -1,26 +1,41 @@
 package co.assip.erp.cartera.calculosprevios;
 
-import co.assip.erp.cartera.cierremensual.dto.CierreMensualDTO;
-import co.assip.erp.cartera.calculosprevios.dto.ResumenEdadMoraDTO;
-import co.assip.erp.cartera.calculosprevios.dto.ResumenControlesCalculosDTO;
-import co.assip.erp.cartera.calculosprevios.dto.ResumenAportesGarantiasDTO;
 import co.assip.erp.cartera.calculosprevios.dto.DetalleCalculosCierreDTO;
+import co.assip.erp.cartera.calculosprevios.dto.ResumenAportesGarantiasDTO;
+import co.assip.erp.cartera.calculosprevios.dto.ResumenControlesCalculosDTO;
+import co.assip.erp.cartera.calculosprevios.dto.ResumenEdadMoraDTO;
+import co.assip.erp.cartera.cierremensual.dto.CierreMensualDTO;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/cartera/calculos-previos")
+@RequiredArgsConstructor
 public class CalculosPreviosController {
 
-    private final CalculosPreviosService service;
+    private static final String PERMISO_VIEW =
+            "CARTERA_CIERRE_VIEW";
 
-    public CalculosPreviosController(
-            CalculosPreviosService service
-    ) {
-        this.service = service;
-    }
+    private static final String PERMISO_EXECUTE =
+            "CARTERA_CIERRE_EXECUTE";
+
+    // =========================================================
+    // DEPENDENCIAS
+    // =========================================================
+
+    private final CalculosPreviosService service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // =========================================================
     // EJECUTAR CÁLCULOS PREVIOS
@@ -60,6 +75,8 @@ public class CalculosPreviosController {
             @PathVariable Integer idCierreCartera
     ) {
 
+        validarEjecucion();
+
         return ResponseEntity.ok(
                 service.ejecutar(
                         idCierreCartera
@@ -71,8 +88,7 @@ public class CalculosPreviosController {
     // CERRAR CÁLCULOS EN FIRME
     //
     // POST
-    // /api/v1/cartera/calculos-previos/
-    // {idCierreCartera}/cerrar
+    // /api/v1/cartera/calculos-previos/{idCierreCartera}/cerrar
     //
     // REQUISITOS:
     // - fotografía cerrada en firme
@@ -94,6 +110,8 @@ public class CalculosPreviosController {
             @PathVariable Integer idCierreCartera
     ) {
 
+        validarEjecucion();
+
         return ResponseEntity.ok(
                 service.cerrarCalculos(
                         idCierreCartera
@@ -114,6 +132,8 @@ public class CalculosPreviosController {
     public ResponseEntity<Integer> calcularMora(
             @PathVariable Integer idCierreCartera
     ) {
+
+        validarEjecucion();
 
         return ResponseEntity.ok(
                 service.calcularMora(
@@ -137,6 +157,8 @@ public class CalculosPreviosController {
             @PathVariable Integer idCierreCartera
     ) {
 
+        validarEjecucion();
+
         return ResponseEntity.ok(
                 service.calcularProrrateoAportes(
                         idCierreCartera
@@ -153,6 +175,8 @@ public class CalculosPreviosController {
     obtenerResumenEdadMora(
             @PathVariable Integer idCierreCartera
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.obtenerResumenEdadMora(
@@ -178,6 +202,8 @@ public class CalculosPreviosController {
             @PathVariable Integer idCierreCartera
     ) {
 
+        validarConsulta();
+
         return ResponseEntity.ok(
                 service.obtenerResumenControles(
                         idCierreCartera
@@ -201,6 +227,8 @@ public class CalculosPreviosController {
     obtenerResumenAportesGarantias(
             @PathVariable Integer idCierreCartera
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.obtenerResumenAportesGarantias(
@@ -231,10 +259,47 @@ public class CalculosPreviosController {
             @PathVariable Integer idCierreCartera
     ) {
 
+        validarConsulta();
+
         return ResponseEntity.ok(
                 service.obtenerDetalleCalculosCierre(
                         idCierreCartera
                 )
         );
+    }
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarConsulta() {
+
+        Usuario usuarioActual = usuarioActual();
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO_VIEW
+        );
+    }
+
+    private void validarEjecucion() {
+
+        Usuario usuarioActual = usuarioActual();
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO_EXECUTE
+        );
+    }
+
+    private Usuario usuarioActual() {
+
+        Usuario usuarioActual = new Usuario();
+
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        return usuarioActual;
     }
 }

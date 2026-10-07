@@ -24,6 +24,10 @@ import {
 } from '../solicitud/originacion-solicitud-state.service';
 
 import {
+  SessionService
+} from '../../../../core/auth/session.service';
+
+import {
   CentralRiesgoCatalogo,
   SolicitudCentralRiesgo,
   SolicitudCentralRiesgoDetalle,
@@ -102,12 +106,23 @@ export class OriginacionCentralRiesgoComponent implements OnInit {
 
   constructor(
     private readonly router: Router,
+
     private readonly api:
       OriginacionCentralRiesgoApi,
+
     private readonly state:
-      OriginacionSolicitudStateService
+      OriginacionSolicitudStateService,
+
+    private readonly session:
+      SessionService
   ) {}
 
+  get puedeEditar(): boolean {
+
+    return this.session.tienePermiso(
+      'CARTERA_ORIGINACION_EDIT'
+    );
+  }
 
   // =========================================================
   // INICIO
@@ -398,6 +413,14 @@ export class OriginacionCentralRiesgoComponent implements OnInit {
   // =========================================================
 
   guardar(): void {
+
+    if (!this.puedeEditar) {
+
+      this.mensajeError =
+        'El usuario no tiene permiso para modificar la información de central de riesgo de la solicitud.';
+
+      return;
+    }
 
     this.limpiarMensajes();
 

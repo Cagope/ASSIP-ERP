@@ -152,7 +152,7 @@ public class ConceptoCuentasContablesRepository {
                 .addValue("idCuentaDebito", dto.getIdCuentaDebito())
                 .addValue("idCuentaCredito", dto.getIdCuentaCredito())
                 .addValue("activo", dto.getActivo() != null ? dto.getActivo() : Boolean.TRUE)
-                .addValue("usr", idUsuario != null ? idUsuario : 1);
+                .addValue("usr", idUsuario);
 
         jdbc.update(sql, params);
     }
@@ -178,7 +178,7 @@ public class ConceptoCuentasContablesRepository {
                 .addValue("idCuentaDebito", dto.getIdCuentaDebito())
                 .addValue("idCuentaCredito", dto.getIdCuentaCredito())
                 .addValue("activo", dto.getActivo() != null ? dto.getActivo() : Boolean.TRUE)
-                .addValue("usr", idUsuario != null ? idUsuario : 1);
+                .addValue("usr", idUsuario);
 
         jdbc.update(sql, params);
     }
@@ -199,7 +199,7 @@ public class ConceptoCuentasContablesRepository {
 
         var params = new MapSqlParameterSource()
                 .addValue("idMapeo", idMapeo)
-                .addValue("usr", idUsuario != null ? idUsuario : 1);
+                .addValue("usr", idUsuario);
 
         jdbc.update(sql, params);
     }

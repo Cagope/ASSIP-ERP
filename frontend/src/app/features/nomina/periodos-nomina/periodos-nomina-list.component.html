@@ -2,9 +2,10 @@
 
   <app-header-actions
     titulo="Administración Períodos de Nómina"
-    [mostrarNuevo]="false"
+    [mostrarNuevo]="puedeGenerar"
     [mostrarImprimir]="false"
-    [mostrarExportar]="false">
+    [mostrarExportar]="false"
+    (nuevo)="generar()">
   </app-header-actions>
 
   <div class="filters-card">
@@ -92,7 +93,9 @@
             class="btn btn--ghost-danger"
             (click)="reversar(x.idPeriodo)"
             [disabled]="!puedeReversar(x)"
-            title="Reabrir el período y eliminar liquidaciones y novedades calculadas">
+            [title]="puedeReversarPeriodo
+            ? 'Reabrir el período y eliminar liquidaciones y novedades calculadas'
+            : 'Sin permiso para reabrir períodos'">
             Reabrir período
           </button>
 

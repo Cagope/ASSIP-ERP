@@ -21,7 +21,9 @@
 
       <div class="form-group">
         <label>Activo</label>
-        <select class="form-control" [(ngModel)]="form.activo">
+        <select
+          class="form-control"
+          [(ngModel)]="form.activo">
           <option [ngValue]="true">Sí</option>
           <option [ngValue]="false">No</option>
         </select>
@@ -43,15 +45,18 @@
         type="button"
         class="btn btn--primary"
         (click)="guardar()"
-        [disabled]="guardando">
+        [disabled]="guardando || !puedeEditar">
         {{ guardando ? 'Guardando...' : 'Guardar' }}
       </button>
 
     </div>
+
   </div>
 
   <ng-template #cargandoTpl>
-    <div class="loading">Cargando...</div>
+    <div class="loading">
+      Cargando...
+    </div>
   </ng-template>
 
 </div>

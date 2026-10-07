@@ -7,6 +7,7 @@ import { HeaderActionsComponent } from '../../../shared/header-actions/header-ac
 import { SeccionesNominaApi, SeccionNominaDTO } from './secciones.api';
 import { SeccionesNominaPrintService } from './secciones-print.service';
 import { SeccionesNominaExporterService } from './secciones-exporter.service';
+import { SessionService } from '../../../core/auth/session.service';
 
 @Component({
   standalone: true,
@@ -19,6 +20,7 @@ export class SeccionesListComponent implements OnInit {
 
   private readonly api = inject(SeccionesNominaApi);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   private readonly printer = inject(SeccionesNominaPrintService);
   private readonly exporter = inject(SeccionesNominaExporterService);
@@ -28,6 +30,10 @@ export class SeccionesListComponent implements OnInit {
 
   // ✅ filtro simple
   q = '';
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
 
   ngOnInit(): void {
     this.cargar();
@@ -60,14 +66,20 @@ export class SeccionesListComponent implements OnInit {
   }
 
   nuevo(): void {
+    if (!this.puedeEditar) return;
+
     this.router.navigate(['/nomina/secciones/nuevo']);
   }
 
   editar(id: number): void {
+    if (!this.puedeEditar) return;
+
     this.router.navigate([`/nomina/secciones/${id}/editar`]);
   }
 
   eliminar(id: number): void {
+    if (!this.puedeEditar) return;
+
     const ok = confirm('¿Desea eliminar esta sección?');
     if (!ok) return;
 

@@ -4,9 +4,17 @@ import {
   CentralRiesgoResultadoImportComponent
 } from './central-riesgo-resultado-import.component';
 
+import {
+  permisoGuard
+} from '../../../../../core/auth/permiso.guard';
+
 export const CENTRAL_RIESGO_RESULTADO_ROUTES: Routes = [
   {
     path: '',
-    component: CentralRiesgoResultadoImportComponent
+    component: CentralRiesgoResultadoImportComponent,
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_EVALUACION_VIEW'
+    }
   }
 ];

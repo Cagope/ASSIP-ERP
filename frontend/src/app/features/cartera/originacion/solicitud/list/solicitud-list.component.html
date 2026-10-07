@@ -19,8 +19,11 @@
       <button
         type="button"
         class="btn btn--primary"
+        [disabled]="!puedeEditar"
         (click)="nuevaSolicitud()">
+
         Nueva solicitud
+
       </button>
 
     </div>
@@ -454,9 +457,9 @@
 
             <button
               *ngIf="
-      solicitud.idSolicitudProceso === 4
-      && solicitud.idSolicitudResultado === 1
-    "
+                solicitud.idSolicitudProceso === 4
+                && solicitud.idSolicitudResultado === 1
+              "
               type="button"
               class="btn btn--small btn--primary"
               (click)="abrirFormalizacion(solicitud)">

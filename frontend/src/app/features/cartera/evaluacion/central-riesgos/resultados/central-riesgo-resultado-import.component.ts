@@ -11,6 +11,10 @@ import {
 
 import { HeaderActionsComponent } from '../../../../../shared/header-actions/header-actions.component';
 
+import {
+  SessionService
+} from '../../../../../core/auth/session.service';
+
 @Component({
   selector: 'app-central-riesgo-resultado-import',
   standalone: true,
@@ -26,6 +30,14 @@ import { HeaderActionsComponent } from '../../../../../shared/header-actions/hea
 export class CentralRiesgoResultadoImportComponent {
 
   private readonly api = inject(CentralRiesgoResultadoApi);
+
+  private readonly session = inject(SessionService);
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'CARTERA_EVALUACION_EDIT'
+    );
+  }
 
   // =========================================================
   // DATOS DE LA IMPORTACIÓN
@@ -103,6 +115,10 @@ export class CentralRiesgoResultadoImportComponent {
 
   importar(): void {
 
+    if (!this.puedeEditar) {
+      return;
+    }
+
     this.limpiarMensajes();
 
     if (!this.validarAntesDeImportar()) {
@@ -115,6 +131,10 @@ export class CentralRiesgoResultadoImportComponent {
   private ejecutarImportacion(
     reemplazar: boolean
   ): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
 
     this.importando = true;
     this.resultadoImportacion = null;
@@ -305,7 +325,8 @@ export class CentralRiesgoResultadoImportComponent {
   get puedeImportar(): boolean {
 
     return (
-      !this.importando
+      this.puedeEditar
+      && !this.importando
       && this.idCentralRiesgo !== null
       && this.idCentralRiesgo > 0
       && !!this.fechaCorte

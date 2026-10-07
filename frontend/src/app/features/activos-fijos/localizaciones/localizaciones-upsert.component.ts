@@ -1,6 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  Validators
+} from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import {
@@ -10,6 +14,7 @@ import {
 } from './localizaciones.api';
 
 import { GeneralApi } from '../../../shared/general/general.api';
+import { SessionService } from '../../../core/auth/session.service';
 
 @Component({
   selector: 'app-localizaciones-upsert',
@@ -20,29 +25,48 @@ import { GeneralApi } from '../../../shared/general/general.api';
 })
 export class LocalizacionesUpsertComponent implements OnInit {
 
-  private api = inject(LocalizacionesApi);
-  private generalApi = inject(GeneralApi);
-  private fb = inject(FormBuilder);
+  // =========================================================
+  // INYECCIONES
+  // =========================================================
+  private readonly api = inject(LocalizacionesApi);
+  private readonly generalApi = inject(GeneralApi);
+  private readonly fb = inject(FormBuilder);
+  private readonly session = inject(SessionService);
 
-  route = inject(ActivatedRoute);
-  router = inject(Router);
+  readonly route = inject(ActivatedRoute);
+  readonly router = inject(Router);
 
+  // =========================================================
+  // PERMISOS
+  // =========================================================
+  readonly puedeEditar =
+    this.session.tienePermiso('ACTIVOS_FIJOS_EDIT');
+
+  // =========================================================
+  // DATOS
+  // =========================================================
   agencias: any[] = [];
 
+  // =========================================================
+  // FORMULARIO
+  // =========================================================
   form = this.fb.group({
     nombre: ['', Validators.required],
     telefono: [null as string | null],
     idAgencia: [null as number | null, Validators.required]
   });
 
+  // =========================================================
+  // INIT
+  // =========================================================
   ngOnInit(): void {
 
-    // 🔽 cargar agencias
     this.generalApi.listarAgencias().subscribe(data => {
       this.agencias = data;
     });
 
     const id = this.route.snapshot.paramMap.get('id');
+
     if (!id) return;
 
     this.api.obtener(+id).subscribe((data: LocalizacionFormDTO) => {
@@ -50,7 +74,13 @@ export class LocalizacionesUpsertComponent implements OnInit {
     });
   }
 
+  // =========================================================
+  // ACCIONES
+  // =========================================================
   guardar(): void {
+
+    if (!this.puedeEditar) return;
+
     if (this.form.invalid) return;
 
     const payload = this.form.value as LocalizacionSaveDTO;

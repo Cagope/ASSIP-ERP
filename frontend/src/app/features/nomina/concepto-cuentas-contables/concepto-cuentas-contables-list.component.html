@@ -2,6 +2,7 @@
 
   <app-header-actions
     titulo="Concepto · Cuentas Contables"
+    [mostrarNuevo]="puedeEditar"
     (nuevo)="nuevo()"
     (refrescar)="cargar()"
     (imprimir)="imprimir()"
@@ -58,21 +59,23 @@
       </td>
 
       <td class="center">
-          <span
-            class="badge"
-            [class.badge--ok]="x.activo"
-            [class.badge--off]="!x.activo">
-            {{ x.activo ? 'SI' : 'NO' }}
-          </span>
+        <span
+          class="badge"
+          [class.badge--ok]="x.activo"
+          [class.badge--off]="!x.activo">
+          {{ x.activo ? 'SI' : 'NO' }}
+        </span>
       </td>
 
       <td>
         <div class="acciones">
+
           <button
             class="btn-action-edit"
             type="button"
             (click)="editar(x.idMapeo)"
-            title="Editar">
+            [disabled]="!puedeEditar"
+            [title]="puedeEditar ? 'Editar' : 'Sin permiso para modificar'">
             ✏️
           </button>
 
@@ -80,9 +83,11 @@
             class="btn-action-delete"
             type="button"
             (click)="eliminar(x.idMapeo)"
-            title="Eliminar">
+            [disabled]="!puedeEditar"
+            [title]="puedeEditar ? 'Eliminar' : 'Sin permiso para eliminar'">
             🗑️
           </button>
+
         </div>
       </td>
 
@@ -102,7 +107,9 @@
        VACÍO
        ========================= -->
   <ng-template #vacio>
-    <p class="empty">No hay mapeos contables para mostrar.</p>
+    <p class="empty">
+      No hay mapeos contables para mostrar.
+    </p>
   </ng-template>
 
 </div>

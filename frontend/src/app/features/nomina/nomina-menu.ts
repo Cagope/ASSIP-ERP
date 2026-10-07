@@ -30,7 +30,7 @@ export const nominaMenu = {
         {
           label: 'Generar por año',
           route: '/nomina/periodos/generador',
-          permiso: 'NOMINA_VIEW'
+          permiso: 'NOMINA_PARAMETROS_EDIT'
         },
         {
           label: 'Administración de períodos',
@@ -54,7 +54,7 @@ export const nominaMenu = {
         {
           label: 'Novedades Masivas',
           route: '/nomina/novedades/masivo',
-          permiso: 'NOMINA_VIEW'
+          permiso: 'NOMINA_NOVEDADES_EDIT'
         },
         {
           label: 'Eventos de Liquidación',
@@ -73,12 +73,12 @@ export const nominaMenu = {
         {
           label: 'Liquidación (V1)',
           route: '/nomina/liquidacion',
-          permiso: 'NOMINA_VIEW'
+          permiso: 'NOMINA_LIQUIDACION_EXECUTE'
         },
         {
           label: 'Liquidación (V2)',
           route: '/nomina/liquidacion-v2',
-          permiso: 'NOMINA_VIEW'
+          permiso: 'NOMINA_LIQUIDACION_EXECUTE'
         }
       ]
     },
@@ -92,17 +92,17 @@ export const nominaMenu = {
         {
           label: 'Liquidación',
           route: '/nomina/contabilizacion/liquidacion',
-          permiso: 'NOMINA_VIEW'
+          permiso: 'NOMINA_CONTABILIZACION_EXECUTE'
         },
         {
           label: 'Seguridad Social',
           route: '/nomina/contabilizacion/aportes-parafiscales',
-          permiso: 'NOMINA_VIEW'
+          permiso: 'NOMINA_CONTABILIZACION_EXECUTE'
         },
         {
           label: 'Prestaciones',
           route: '/nomina/contabilizacion/prestaciones-sociales',
-          permiso: 'NOMINA_VIEW'
+          permiso: 'NOMINA_CONTABILIZACION_EXECUTE'
         }
       ]
     },
@@ -184,17 +184,17 @@ export const nominaMenu = {
         {
           label: 'Novedades por empleado',
           route: '/nomina/informes/novedades-empleado',
-          permiso: 'NOMINA_VIEW'
+          permiso: 'NOMINA_INFORMES_VIEW'
         },
         {
           label: 'Novedades por concepto',
           route: '/nomina/informes/novedades-concepto',
-          permiso: 'NOMINA_VIEW'
+          permiso: 'NOMINA_INFORMES_VIEW'
         },
         {
           label: 'Consolidado por conceptos',
           route: '/nomina/informes/consolidado-conceptos',
-          permiso: 'NOMINA_VIEW'
+          permiso: 'NOMINA_INFORMES_VIEW'
         }
       ]
     }

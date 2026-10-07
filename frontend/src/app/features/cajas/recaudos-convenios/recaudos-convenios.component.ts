@@ -23,9 +23,12 @@ import {
 } from './recaudos-convenios.api';
 
 import {
-  VincularCajaApi,
-  CajaProvisionActivaDTO
-} from '../provisiones/vincular-caja/vincular-caja.api';
+  CajasProvisionApi
+} from '../provisiones/cajas-provision.api';
+
+import {
+  CajaProvisionActiva
+} from '../provisiones/cajas-provision.models';
 
 import { NumericFormatDirective } from '../../../shared/utils/numeric-format.directive';
 
@@ -46,9 +49,9 @@ export class RecaudosConveniosComponent implements OnInit {
     inject(RecaudosConveniosApi);
 
   private readonly cajaApi =
-    inject(VincularCajaApi);
+    inject(CajasProvisionApi);
 
-  provisionActiva: CajaProvisionActivaDTO | null = null;
+  provisionActiva: CajaProvisionActiva | null = null;
 
   convenios: RecaudoConvenioConvenio[] = [];
   recaudos: RecaudoConvenio[] = [];

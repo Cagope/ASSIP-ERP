@@ -2,7 +2,10 @@ package co.assip.erp.cartera.analisis.vectorcomportamiento.actual;
 
 import co.assip.erp.cartera.analisis.vectorcomportamiento.actual.dto.VectorComportamientoDetalleDTO;
 import co.assip.erp.cartera.analisis.vectorcomportamiento.actual.dto.VectorComportamientoResumenDTO;
-
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,26 +47,18 @@ import java.util.List;
 @RequestMapping(
         "/cartera/analisis/vector-comportamiento/actual"
 )
+@RequiredArgsConstructor
 public class VectorComportamientoActualController {
+
+    private static final String PERMISO_VIEW = "CARTERA_ANALISIS_VIEW";
 
     // =========================================================
     // DEPENDENCIAS
     // =========================================================
 
     private final VectorComportamientoActualService service;
-
-
-    // =========================================================
-    // CONSTRUCTOR
-    // =========================================================
-
-    public VectorComportamientoActualController(
-            VectorComportamientoActualService service
-    ) {
-
-        this.service =
-                service;
-    }
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
 
     // =========================================================
@@ -82,6 +77,8 @@ public class VectorComportamientoActualController {
     @GetMapping("/resumen")
     public ResponseEntity<List<VectorComportamientoResumenDTO>>
     listarResumenCarteraActiva() {
+
+        validarAcceso();
 
         return ResponseEntity.ok(
                 service.listarResumenCarteraActiva()
@@ -109,6 +106,8 @@ public class VectorComportamientoActualController {
     public ResponseEntity<List<VectorComportamientoDetalleDTO>>
     listarDetalleCarteraActiva() {
 
+        validarAcceso();
+
         return ResponseEntity.ok(
                 service.listarDetalleCarteraActiva()
         );
@@ -131,6 +130,8 @@ public class VectorComportamientoActualController {
             @PathVariable
             Integer idDatosPersonal
     ) {
+
+        validarAcceso();
 
         return ResponseEntity.ok(
                 service.listarResumenPorPersona(
@@ -161,6 +162,8 @@ public class VectorComportamientoActualController {
             Integer idDatosPersonal
     ) {
 
+        validarAcceso();
+
         return ResponseEntity.ok(
                 service.listarDetallePorPersona(
                         idDatosPersonal
@@ -187,6 +190,8 @@ public class VectorComportamientoActualController {
             @PathVariable
             Integer idCarteraCredito
     ) {
+
+        validarAcceso();
 
         return service
                 .buscarResumenPorCredito(
@@ -225,6 +230,8 @@ public class VectorComportamientoActualController {
             Integer idCarteraCredito
     ) {
 
+        validarAcceso();
+
         return ResponseEntity.ok(
                 service.listarDetallePorCredito(
                         idCarteraCredito
@@ -251,10 +258,30 @@ public class VectorComportamientoActualController {
             Integer idCarteraCredito
     ) {
 
+        validarAcceso();
+
         return ResponseEntity.ok(
                 service.existeCreditoEnVector(
                         idCarteraCredito
                 )
+        );
+    }
+
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarAcceso() {
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO_VIEW
         );
     }
 }

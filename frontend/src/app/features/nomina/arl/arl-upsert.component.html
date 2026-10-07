@@ -19,7 +19,7 @@
         />
       </div>
 
-      <!-- ✅ TERCERO (id_datos_personal) -->
+      <!-- TERCERO (id_datos_personal) -->
       <div class="form-group full">
         <label>Tercero asociado (opcional)</label>
 
@@ -29,6 +29,7 @@
 
         <small *ngIf="form.idDatosPersonal">
           ID Datos Personal: <b>{{ form.idDatosPersonal }}</b>
+
           <button
             type="button"
             class="btn btn--ghost-danger btn-quitar"
@@ -41,7 +42,10 @@
 
       <div class="form-group">
         <label>Activo</label>
-        <select class="form-control" [(ngModel)]="form.activo">
+
+        <select
+          class="form-control"
+          [(ngModel)]="form.activo">
           <option [ngValue]="true">Sí</option>
           <option [ngValue]="false">No</option>
         </select>
@@ -63,7 +67,7 @@
         type="button"
         class="btn btn--primary"
         (click)="guardar()"
-        [disabled]="guardando">
+        [disabled]="guardando || !puedeEditar">
         {{ guardando ? 'Guardando...' : 'Guardar' }}
       </button>
 
@@ -72,7 +76,9 @@
   </div>
 
   <ng-template #cargandoTpl>
-    <div class="loading">Cargando...</div>
+    <div class="loading">
+      Cargando...
+    </div>
   </ng-template>
 
 </div>

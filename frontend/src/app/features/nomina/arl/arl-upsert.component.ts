@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
+import { SessionService } from '../../../core/auth/session.service';
+
 import { ArlApi, ArlFormDTO } from './arl.api';
 
 import { PersonasSelectorComponent } from '../../../shared/personas/personas-selector.component';
@@ -27,6 +29,7 @@ export class ArlUpsertComponent implements OnInit {
   private readonly api = inject(ArlApi);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   id: number | null = null;
   loading = false;
@@ -37,6 +40,10 @@ export class ArlUpsertComponent implements OnInit {
     activo: true,
     idDatosPersonal: null
   };
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
@@ -58,6 +65,7 @@ export class ArlUpsertComponent implements OnInit {
           activo: data.activo ?? true,
           idDatosPersonal: data.idDatosPersonal ?? null
         };
+
         this.loading = false;
       },
       error: (err) => {
@@ -70,8 +78,9 @@ export class ArlUpsertComponent implements OnInit {
   }
 
   // =========================================================
-  // ✅ Capturar id_datos_personal desde el selector
+  // PERSONA
   // =========================================================
+
   onPersonaSeleccionada(p: PersonaBusquedaDTO): void {
     this.form.idDatosPersonal = p.idDatosPersonal;
   }
@@ -80,8 +89,17 @@ export class ArlUpsertComponent implements OnInit {
     this.form.idDatosPersonal = null;
   }
 
+  // =========================================================
+  // GUARDAR
+  // =========================================================
+
   guardar(): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     const nombre = (this.form.nombreArl ?? '').trim();
+
     if (!nombre) {
       alert('El nombre de la ARL es obligatorio.');
       return;
@@ -101,19 +119,21 @@ export class ArlUpsertComponent implements OnInit {
           alert('No se pudo actualizar la ARL.');
         }
       });
-    } else {
-      this.api.crear(this.form).subscribe({
-        next: () => {
-          this.guardando = false;
-          this.volver();
-        },
-        error: (err) => {
-          console.error('Error creando ARL', err);
-          this.guardando = false;
-          alert('No se pudo crear la ARL.');
-        }
-      });
+
+      return;
     }
+
+    this.api.crear(this.form).subscribe({
+      next: () => {
+        this.guardando = false;
+        this.volver();
+      },
+      error: (err) => {
+        console.error('Error creando ARL', err);
+        this.guardando = false;
+        alert('No se pudo crear la ARL.');
+      }
+    });
   }
 
   volver(): void {

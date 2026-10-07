@@ -6,22 +6,23 @@ import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoEvaluacionDTO;
 import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoExtractoDTO;
 import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoIntegralDTO;
 import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoInteresDTO;
+import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoProrrogaDTO;
 import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoResumenDTO;
+import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoResultadoMensualDTO;
 import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoSeguroDTO;
 import co.assip.erp.cartera.consultacreditos.pdf.ConsultaCreditoExtractoPdfService;
-import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoProrrogaDTO;
-import co.assip.erp.cartera.consultacreditos.dto.ConsultaCreditoResultadoMensualDTO;
-
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-
 
 /**
  * Controlador de consulta especializada de créditos.
@@ -45,7 +46,11 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/cartera/consulta-creditos")
+@RequiredArgsConstructor
 public class ConsultaCreditosController {
+
+    private static final String PERMISO_VIEW =
+            "CARTERA_VIEW";
 
     // =========================================================
     // DEPENDENCIAS
@@ -56,22 +61,8 @@ public class ConsultaCreditosController {
     private final ConsultaCreditoExtractoPdfService
             extractoPdfService;
 
-
-    // =========================================================
-    // CONSTRUCTOR
-    // =========================================================
-
-    public ConsultaCreditosController(
-            ConsultaCreditosService service,
-            ConsultaCreditoExtractoPdfService extractoPdfService
-    ) {
-
-        this.service =
-                service;
-
-        this.extractoPdfService =
-                extractoPdfService;
-    }
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
 
     // =========================================================
@@ -97,6 +88,8 @@ public class ConsultaCreditosController {
             Integer idDatosPersonal
     ) {
 
+        validarConsulta();
+
         return ResponseEntity.ok(
                 service.listarPorPersona(
                         idDatosPersonal
@@ -119,6 +112,8 @@ public class ConsultaCreditosController {
             Integer idCarteraCredito
     ) {
 
+        validarConsulta();
+
         return ResponseEntity.ok(
                 service.buscarPorId(
                         idCarteraCredito
@@ -140,6 +135,8 @@ public class ConsultaCreditosController {
             @PathVariable
             Integer idCarteraCredito
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.listarExtracto(
@@ -172,6 +169,8 @@ public class ConsultaCreditosController {
             Integer idCarteraCredito
     ) {
 
+        validarConsulta();
+
         return extractoPdfService
                 .generarPdfResponse(
                         idCarteraCredito
@@ -193,6 +192,8 @@ public class ConsultaCreditosController {
             @PathVariable
             Integer idCarteraCredito
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.listarSeguros(
@@ -216,6 +217,8 @@ public class ConsultaCreditosController {
             Integer idCarteraCredito
     ) {
 
+        validarConsulta();
+
         return ResponseEntity.ok(
                 service.listarAlivios(
                         idCarteraCredito
@@ -237,6 +240,8 @@ public class ConsultaCreditosController {
             @PathVariable
             Integer idCarteraCredito
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.listarInteresesCausados(
@@ -261,12 +266,15 @@ public class ConsultaCreditosController {
             Integer idCarteraCredito
     ) {
 
+        validarConsulta();
+
         return ResponseEntity.ok(
                 service.listarEvaluaciones(
                         idCarteraCredito
                 )
         );
     }
+
 
     // =========================================================
     // PRÓRROGAS
@@ -283,6 +291,8 @@ public class ConsultaCreditosController {
             Integer idCarteraCredito
     ) {
 
+        validarConsulta();
+
         return ResponseEntity.ok(
                 service.listarProrrogas(
                         idCarteraCredito
@@ -290,9 +300,10 @@ public class ConsultaCreditosController {
         );
     }
 
+
     // =========================================================
-// RESULTADOS MENSUALES
-// =========================================================
+    // RESULTADOS MENSUALES
+    // =========================================================
 
     /**
      * Consulta el historial de resultados mensuales
@@ -307,6 +318,8 @@ public class ConsultaCreditosController {
             @PathVariable
             Integer idCarteraCredito
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.listarResultadosMensuales(
@@ -328,6 +341,8 @@ public class ConsultaCreditosController {
             @PathVariable
             Integer idCarteraCredito
     ) {
+
+        validarConsulta();
 
         return service.buscarUltimaEvaluacion(
                         idCarteraCredito
@@ -358,6 +373,8 @@ public class ConsultaCreditosController {
             Integer idCarteraCredito
     ) {
 
+        validarConsulta();
+
         return ResponseEntity.ok(
                 service.consultarIntegral(
                         idCarteraCredito
@@ -380,10 +397,31 @@ public class ConsultaCreditosController {
             Integer idCarteraCredito
     ) {
 
+        validarConsulta();
+
         return ResponseEntity.ok(
                 service.existeCredito(
                         idCarteraCredito
                 )
+        );
+    }
+
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarConsulta() {
+
+        Usuario usuarioActual = new Usuario();
+
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO_VIEW
         );
     }
 }

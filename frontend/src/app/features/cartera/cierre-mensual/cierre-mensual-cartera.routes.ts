@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 
+import { permisoGuard } from '../../../core/auth/permiso.guard';
+
 import {
   CierreMensualCarteraComponent
 } from './cierre-mensual-cartera.component';
@@ -12,7 +14,11 @@ export const CIERRE_MENSUAL_CARTERA_ROUTES: Routes = [
 
   {
     path: '',
-    component: CierreMensualCarteraComponent
+    component: CierreMensualCarteraComponent,
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_CIERRE_VIEW'
+    }
   },
 
   // =========================================================
@@ -26,7 +32,11 @@ export const CIERRE_MENSUAL_CARTERA_ROUTES: Routes = [
         './calculos/calculos-cierre.component'
       ).then(
         m => m.CalculosCierreComponent
-      )
+      ),
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_CIERRE_VIEW'
+    }
   },
 
   // =========================================================
@@ -40,7 +50,11 @@ export const CIERRE_MENSUAL_CARTERA_ROUTES: Routes = [
         './anexo1/anexo1-cierre.component'
       ).then(
         m => m.Anexo1CierreComponent
-      )
+      ),
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_CIERRE_VIEW'
+    }
   },
 
   // =========================================================
@@ -54,7 +68,11 @@ export const CIERRE_MENSUAL_CARTERA_ROUTES: Routes = [
         './anexo2/anexo2-cierre.component'
       ).then(
         m => m.Anexo2CierreComponent
-      )
+      ),
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_CIERRE_VIEW'
+    }
   }
 
 ];

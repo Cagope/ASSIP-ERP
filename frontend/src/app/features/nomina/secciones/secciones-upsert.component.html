@@ -61,7 +61,7 @@
           type="button"
           class="btn btn--primary"
           (click)="guardar()"
-          [disabled]="loading">
+          [disabled]="loading || !puedeEditar">
           {{ loading ? 'Guardando...' : 'Guardar' }}
         </button>
 

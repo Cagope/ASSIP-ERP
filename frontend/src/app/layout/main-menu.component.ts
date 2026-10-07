@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
 import {
   LucideAngularModule,
   UserRound,
@@ -14,7 +15,8 @@ import {
   PiggyBank,
   Gauge,
   Wallet,
-  HandCoins
+  HandCoins,
+  Search
 } from 'lucide-angular';
 
 import {
@@ -23,6 +25,7 @@ import {
   RouterLinkActive,
   NavigationEnd
 } from '@angular/router';
+
 import { filter } from 'rxjs/operators';
 
 import { SessionService } from '../core/auth/session.service';
@@ -69,8 +72,8 @@ export class MainMenuComponent implements OnInit {
     general: Settings,
     seguridad: LockKeyhole,
     cdat: PiggyBank,
-    gerencia: Gauge,
-    cajas: Wallet
+    cajas: Wallet,
+    consultas: Search
   };
 
   openedIndex: number | null = null;
@@ -122,13 +125,24 @@ export class MainMenuComponent implements OnInit {
     this.openedSubGroupKey = null;
   }
 
-  isSubGroupOpen(groupIndex: number, subGroupIndex: number): boolean {
-    return this.openedSubGroupKey === `${groupIndex}-${subGroupIndex}`;
+  isSubGroupOpen(
+    groupIndex: number,
+    subGroupIndex: number
+  ): boolean {
+    return this.openedSubGroupKey ===
+      `${groupIndex}-${subGroupIndex}`;
   }
 
-  toggleSubGroup(groupIndex: number, subGroupIndex: number): void {
+  toggleSubGroup(
+    groupIndex: number,
+    subGroupIndex: number
+  ): void {
     const key = `${groupIndex}-${subGroupIndex}`;
-    this.openedSubGroupKey = this.openedSubGroupKey === key ? null : key;
+
+    this.openedSubGroupKey =
+      this.openedSubGroupKey === key
+        ? null
+        : key;
   }
 
   closeMenu(): void {
@@ -147,50 +161,90 @@ export class MainMenuComponent implements OnInit {
 
   grupoActivo(item: MenuItem): boolean {
     const url = this.router.url;
-    return this.itemContieneRuta(item, url);
+
+    return this.itemContieneRuta(
+      item,
+      url
+    );
   }
 
   private abrirSegunRuta(): void {
     const url = this.router.url;
 
-    this.menu.forEach((section, sectionIndex) => {
+    this.menu.forEach(
+      (section, sectionIndex) => {
 
-      const tieneRutaDirecta = section.items.some(item =>
-        !!item.route && url.startsWith(item.route)
-      );
+        const tieneRutaDirecta =
+          section.items.some(item =>
+            !!item.route &&
+            url.startsWith(item.route)
+          );
 
-      const groupIndex = section.items.findIndex(item =>
-        this.itemContieneRuta(item, url)
-      );
-
-      if (tieneRutaDirecta || groupIndex >= 0) {
-        this.openedIndex = sectionIndex;
-        this.openedGroupIndex = groupIndex >= 0 ? groupIndex : null;
-        this.openedSubGroupKey = null;
-
-        if (groupIndex >= 0) {
-          const group = section.items[groupIndex];
-
-          const subGroupIndex = group.children?.findIndex(child =>
-            child.children?.some(subchild =>
-              !!subchild.route && url.startsWith(subchild.route)
+        const groupIndex =
+          section.items.findIndex(item =>
+            this.itemContieneRuta(
+              item,
+              url
             )
-          ) ?? -1;
+          );
 
-          if (subGroupIndex >= 0) {
-            this.openedSubGroupKey = `${groupIndex}-${subGroupIndex}`;
+        if (
+          tieneRutaDirecta ||
+          groupIndex >= 0
+        ) {
+          this.openedIndex = sectionIndex;
+
+          this.openedGroupIndex =
+            groupIndex >= 0
+              ? groupIndex
+              : null;
+
+          this.openedSubGroupKey = null;
+
+          if (groupIndex >= 0) {
+            const group =
+              section.items[groupIndex];
+
+            const subGroupIndex =
+              group.children?.findIndex(
+                child =>
+                  child.children?.some(
+                    subchild =>
+                      !!subchild.route &&
+                      url.startsWith(
+                        subchild.route
+                      )
+                  )
+              ) ?? -1;
+
+            if (subGroupIndex >= 0) {
+              this.openedSubGroupKey =
+                `${groupIndex}-${subGroupIndex}`;
+            }
           }
         }
       }
-    });
+    );
   }
 
-  private itemContieneRuta(item: MenuItem, url: string): boolean {
-    if (item.route && url.startsWith(item.route)) {
+  private itemContieneRuta(
+    item: MenuItem,
+    url: string
+  ): boolean {
+    if (
+      item.route &&
+      url.startsWith(item.route)
+    ) {
       return true;
     }
 
-    return !!item.children?.some(child => this.itemContieneRuta(child, url));
+    return !!item.children?.some(
+      child =>
+        this.itemContieneRuta(
+          child,
+          url
+        )
+    );
   }
 
   logout(): void {

@@ -17,6 +17,7 @@ import { AfpApi, AfpListDTO } from '../afp/afp.api';
 import { ArlApi, ArlListDTO } from '../arl/arl.api';
 import { CajaCompensacionApi, CajaCompensacionListDTO } from '../caja-compensacion/caja-compensacion.api';
 import { CesantiasApi, CesantiasDTO } from '../cesantias/cesantias.api';
+import { SessionService } from '../../../core/auth/session.service';
 
 import {
   CuentasAhorroApi,
@@ -37,6 +38,7 @@ export class EmpleadoContratosUpsertComponent implements OnInit {
   private readonly api = inject(EmpleadoContratosApi);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   private readonly empleadosApi = inject(EmpleadosApi);
   private readonly personasApi = inject(PersonasApi);
@@ -53,6 +55,7 @@ export class EmpleadoContratosUpsertComponent implements OnInit {
   private readonly cuentasApi = inject(CuentasAhorroApi);
 
   private readonly tiposContratoApi = inject(TiposContratosApi);
+
 
   id: number | null = null;
   loading = false;
@@ -96,6 +99,10 @@ export class EmpleadoContratosUpsertComponent implements OnInit {
     activo: true,
     liquidaPrimaSemestral: false
   };
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_EMPLEADOS_EDIT');
+  }
 
   ngOnInit(): void {
     this.cargarCatalogos();
@@ -256,6 +263,10 @@ export class EmpleadoContratosUpsertComponent implements OnInit {
   // =========================
 
   guardar(): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
 
     if (!this.form.idEmpleado) {
       alert('Debe seleccionar un empleado.');

@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
+import { SessionService } from '../../../core/auth/session.service';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
 import {
@@ -21,10 +22,15 @@ export class VariablesVigenciaUpsertComponent implements OnInit {
   private readonly api = inject(VariablesVigenciaApi);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   id: number | null = null;
   loading = false;
   guardando = false;
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
 
   form: VariablesVigenciaFormDTO = this.nuevo();
 
@@ -70,6 +76,10 @@ export class VariablesVigenciaUpsertComponent implements OnInit {
   // =========================================================
 
   guardar(): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
 
     // =========================
     // VALIDACIONES

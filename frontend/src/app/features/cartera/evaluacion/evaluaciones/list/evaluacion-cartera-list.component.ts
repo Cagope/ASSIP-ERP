@@ -25,6 +25,10 @@ import {
 } from '../evaluacion-cartera.api';
 
 import {
+  SessionService
+} from '../../../../../core/auth/session.service';
+
+import {
   EvaluacionCartera,
   EvaluacionCarteraGuardar,
   EstadoEvaluacionCartera,
@@ -50,6 +54,15 @@ export class EvaluacionCarteraListComponent implements OnInit {
 
   private readonly router =
     inject(Router);
+
+  private readonly session =
+    inject(SessionService);
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso(
+      'CARTERA_EVALUACION_EDIT'
+    );
+  }
 
   // =========================================================
   // DATOS
@@ -160,7 +173,8 @@ export class EvaluacionCarteraListComponent implements OnInit {
   nuevo(): void {
 
     if (
-      this.cargando
+      !this.puedeEditar
+      || this.cargando
       || this.guardando
     ) {
       return;
@@ -207,7 +221,8 @@ export class EvaluacionCarteraListComponent implements OnInit {
   crearEvaluacion(): void {
 
     if (
-      this.guardando
+      !this.puedeEditar
+      || this.guardando
     ) {
       return;
     }

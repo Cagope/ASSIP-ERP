@@ -14,13 +14,17 @@
            ========================= -->
       <div class="form-group">
         <label>Agencia *</label>
+
         <select
           class="form-control"
           [(ngModel)]="form.idAgencia"
           (change)="onChangeAgencia(form.idAgencia)"
           [disabled]="!!idMapeo"
         >
-          <option [ngValue]="null">-- Seleccione agencia --</option>
+          <option [ngValue]="null">
+            -- Seleccione agencia --
+          </option>
+
           <option
             *ngFor="let ag of agencias"
             [ngValue]="ag.idAgencia"
@@ -35,12 +39,16 @@
            ========================= -->
       <div class="form-group">
         <label>Concepto Nómina *</label>
+
         <select
           class="form-control"
           [(ngModel)]="form.codigoConcepto"
           [disabled]="!!idMapeo"
         >
-          <option [ngValue]="null">-- Seleccione concepto --</option>
+          <option [ngValue]="null">
+            -- Seleccione concepto --
+          </option>
+
           <option
             *ngFor="let c of conceptos"
             [ngValue]="c.codigoConcepto"
@@ -51,7 +59,7 @@
       </div>
 
       <!-- =========================
-           CUENTA DÉBITO (BUSCADOR)
+           CUENTA DÉBITO
            ========================= -->
       <div class="form-group full">
         <label>Cuenta Débito *</label>
@@ -63,7 +71,10 @@
           placeholder="Buscar cuenta contable..."
         />
 
-        <ul class="autocomplete" *ngIf="cuentasDebito.length > 0">
+        <ul
+          class="autocomplete"
+          *ngIf="cuentasDebito.length > 0"
+        >
           <li
             *ngFor="let c of cuentasDebito"
             (click)="seleccionarCuentaDebito(c)"
@@ -74,7 +85,7 @@
       </div>
 
       <!-- =========================
-           CUENTA CRÉDITO (BUSCADOR)
+           CUENTA CRÉDITO
            ========================= -->
       <div class="form-group full">
         <label>Cuenta Crédito *</label>
@@ -86,7 +97,10 @@
           placeholder="Buscar cuenta contable..."
         />
 
-        <ul class="autocomplete" *ngIf="cuentasCredito.length > 0">
+        <ul
+          class="autocomplete"
+          *ngIf="cuentasCredito.length > 0"
+        >
           <li
             *ngFor="let c of cuentasCredito"
             (click)="seleccionarCuentaCredito(c)"
@@ -101,7 +115,11 @@
            ========================= -->
       <div class="form-group">
         <label>Activo</label>
-        <select class="form-control" [(ngModel)]="form.activo">
+
+        <select
+          class="form-control"
+          [(ngModel)]="form.activo"
+        >
           <option [ngValue]="true">Sí</option>
           <option [ngValue]="false">No</option>
         </select>
@@ -118,7 +136,8 @@
         type="button"
         class="btn btn--secondary"
         (click)="volver()"
-        [disabled]="guardando">
+        [disabled]="guardando"
+      >
         Cancelar
       </button>
 
@@ -126,7 +145,8 @@
         type="button"
         class="btn btn--primary"
         (click)="guardar()"
-        [disabled]="guardando">
+        [disabled]="guardando || !puedeEditar"
+      >
         {{ guardando ? 'Guardando...' : 'Guardar' }}
       </button>
 

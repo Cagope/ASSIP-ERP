@@ -6,12 +6,11 @@
 
   <app-header-actions
     titulo="Evaluación de Cartera"
-    [mostrarNuevo]="true"
+    [mostrarNuevo]="puedeEditar"
     [mostrarImprimir]="false"
     [mostrarExportar]="false"
     (nuevo)="nuevo()">
   </app-header-actions>
-
 
   <!-- ===================================================== -->
   <!-- INICIAR EVALUACIÓN -->
@@ -80,7 +79,10 @@
           <button
             type="submit"
             class="btn btn--primary"
-            [disabled]="guardando">
+            [disabled]="
+              !puedeEditar
+              || guardando
+            ">
 
             {{
             guardando

@@ -2,7 +2,10 @@ package co.assip.erp.cartera.analisis.vectorcomportamiento.corte;
 
 import co.assip.erp.cartera.analisis.vectorcomportamiento.corte.dto.VectorComportamientoCorteDetalleDTO;
 import co.assip.erp.cartera.analisis.vectorcomportamiento.corte.dto.VectorComportamientoCorteResumenDTO;
-
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -59,26 +62,18 @@ import java.util.List;
 @RequestMapping(
         "/cartera/analisis/vector-comportamiento/corte"
 )
+@RequiredArgsConstructor
 public class VectorComportamientoCorteController {
+
+    private static final String PERMISO_VIEW = "CARTERA_ANALISIS_VIEW";
 
     // =========================================================
     // DEPENDENCIAS
     // =========================================================
 
     private final VectorComportamientoCorteService service;
-
-
-    // =========================================================
-    // CONSTRUCTOR
-    // =========================================================
-
-    public VectorComportamientoCorteController(
-            VectorComportamientoCorteService service
-    ) {
-
-        this.service =
-                service;
-    }
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
 
     // =========================================================
@@ -96,6 +91,8 @@ public class VectorComportamientoCorteController {
     @GetMapping("/fechas")
     public ResponseEntity<List<LocalDate>>
     listarFechasCorteDisponibles() {
+
+        validarAcceso();
 
         return ResponseEntity.ok(
                 service.listarFechasCorteDisponibles()
@@ -133,6 +130,8 @@ public class VectorComportamientoCorteController {
             )
             LocalDate fechaCorte
     ) {
+
+        validarAcceso();
 
         return ResponseEntity.ok(
                 service.listarResumenPorCorte(
@@ -175,6 +174,8 @@ public class VectorComportamientoCorteController {
             LocalDate fechaCorte
     ) {
 
+        validarAcceso();
+
         return ResponseEntity.ok(
                 service.listarDetallePorCorte(
                         fechaCorte
@@ -212,6 +213,8 @@ public class VectorComportamientoCorteController {
             )
             LocalDate fechaCorte
     ) {
+
+        validarAcceso();
 
         return ResponseEntity.ok(
                 service.listarResumenPorPersona(
@@ -257,6 +260,8 @@ public class VectorComportamientoCorteController {
             LocalDate fechaCorte
     ) {
 
+        validarAcceso();
+
         return ResponseEntity.ok(
                 service.listarDetallePorPersona(
                         fechaCorte,
@@ -297,6 +302,8 @@ public class VectorComportamientoCorteController {
             )
             LocalDate fechaCorte
     ) {
+
+        validarAcceso();
 
         return service
                 .buscarResumenPorCredito(
@@ -351,6 +358,8 @@ public class VectorComportamientoCorteController {
             LocalDate fechaCorte
     ) {
 
+        validarAcceso();
+
         return ResponseEntity.ok(
                 service.listarDetallePorCredito(
                         fechaCorte,
@@ -390,11 +399,31 @@ public class VectorComportamientoCorteController {
             LocalDate fechaCorte
     ) {
 
+        validarAcceso();
+
         return ResponseEntity.ok(
                 service.existeCreditoEnCorte(
                         fechaCorte,
                         idCarteraCredito
                 )
+        );
+    }
+
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarAcceso() {
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO_VIEW
         );
     }
 }

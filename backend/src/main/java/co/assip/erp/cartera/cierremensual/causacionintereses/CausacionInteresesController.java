@@ -1,19 +1,30 @@
 package co.assip.erp.cartera.cierremensual.causacionintereses;
 
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/cartera/causacion-intereses")
+@RequiredArgsConstructor
 public class CausacionInteresesController {
 
-    private final CausacionInteresesService service;
+    private static final String PERMISO_EXECUTE =
+            "CARTERA_CIERRE_EXECUTE";
 
-    public CausacionInteresesController(
-            CausacionInteresesService service
-    ) {
-        this.service = service;
-    }
+    // =========================================================
+    // DEPENDENCIAS
+    // =========================================================
+
+    private final CausacionInteresesService service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // =========================================================
     // EJECUTAR CAUSACIÓN DE INTERESES
@@ -43,10 +54,29 @@ public class CausacionInteresesController {
             @PathVariable Integer idCierreCartera
     ) {
 
+        validarEjecucion();
+
         return ResponseEntity.ok(
                 service.ejecutar(
                         idCierreCartera
                 )
+        );
+    }
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarEjecucion() {
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO_EXECUTE
         );
     }
 }

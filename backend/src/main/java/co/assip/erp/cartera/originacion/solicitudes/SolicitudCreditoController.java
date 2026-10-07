@@ -14,24 +14,34 @@ import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudEnviarAprobacio
 import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudEnteAprobadorPreviewRequestDTO;
 import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudEnteAprobadorPreviewDTO;
 import co.assip.erp.cartera.originacion.solicitudes.dto.SolicitudValidacionAprobacionDTO;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/cartera/originacion/solicitudes")
 public class SolicitudCreditoController {
 
+    private static final String PERMISO_VIEW =
+            "CARTERA_ORIGINACION_VIEW";
+
+    private static final String PERMISO_EDIT =
+            "CARTERA_ORIGINACION_EDIT";
+
+    // =========================================================
+    // DEPENDENCIAS
+    // =========================================================
+
     private final SolicitudCreditoService service;
-
-    public SolicitudCreditoController(
-            SolicitudCreditoService service
-    ) {
-        this.service = service;
-    }
-
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // =========================================================
     // CREAR SOLICITUD + GUARDAR DATOS DEL CRÉDITO
@@ -42,11 +52,12 @@ public class SolicitudCreditoController {
             @RequestBody SolicitudCreditoCrearRequestDTO request
     ) {
 
+        validarEdicion();
+
         return ResponseEntity.ok(
                 service.crearSolicitud(request)
         );
     }
-
 
     // =========================================================
     // CREAR / RETOMAR SOLICITUD
@@ -57,11 +68,12 @@ public class SolicitudCreditoController {
             @RequestBody SolicitudCrearRetomarRequestDTO request
     ) {
 
+        validarEdicion();
+
         return ResponseEntity.ok(
                 service.crearRetomar(request)
         );
     }
-
 
     // =========================================================
     // GUARDAR DATOS DEL CRÉDITO
@@ -71,6 +83,8 @@ public class SolicitudCreditoController {
     public ResponseEntity<SolicitudCreditoGuardarResponseDTO> guardarCredito(
             @RequestBody SolicitudCreditoGuardarRequestDTO request
     ) {
+
+        validarEdicion();
 
         return ResponseEntity.ok(
                 service.guardarCredito(request)
@@ -86,14 +100,16 @@ public class SolicitudCreditoController {
             @RequestBody SolicitudEnteAprobadorPreviewRequestDTO request
     ) {
 
+        validarEdicion();
+
         return ResponseEntity.ok(
                 service.previsualizarEnteAprobador(request)
         );
     }
 
     // =========================================================
-// CONSULTAR TASA PARA SIMULACIÓN
-// =========================================================
+    // CONSULTAR TASA PARA SIMULACIÓN
+    // =========================================================
 
     @GetMapping("/tasa-simulacion")
     public ResponseEntity<BigDecimal> consultarTasaSimulacion(
@@ -102,6 +118,8 @@ public class SolicitudCreditoController {
             @RequestParam Integer amortizacionCapital,
             @RequestParam Integer plazoSolicitado
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.consultarTasaColocacionSimulacion(
@@ -113,13 +131,14 @@ public class SolicitudCreditoController {
         );
     }
 
-
     // =========================================================
     // LISTAR SOLICITUDES
     // =========================================================
 
     @GetMapping
     public ResponseEntity<List<SolicitudCreditoResumenDTO>> listar() {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.listar()
@@ -137,6 +156,8 @@ public class SolicitudCreditoController {
             @RequestParam Integer idAgencia
     ) {
 
+        validarConsulta();
+
         return ResponseEntity.ok(
                 service.consultarVigenciaHojaVida(
                         idDatosPersonal,
@@ -144,7 +165,6 @@ public class SolicitudCreditoController {
                 )
         );
     }
-
 
     // =========================================================
     // CONSULTAR SOLICITUD POR ID
@@ -154,6 +174,8 @@ public class SolicitudCreditoController {
     public ResponseEntity<SolicitudCreditoDetalleDTO> buscarPorId(
             @PathVariable Integer idSolicitudCredito
     ) {
+
+        validarConsulta();
 
         return service.buscarPorId(idSolicitudCredito)
                 .map(ResponseEntity::ok)
@@ -171,6 +193,8 @@ public class SolicitudCreditoController {
             @RequestBody SolicitudFinalizarRequestDTO request
     ) {
 
+        validarEdicion();
+
         return ResponseEntity.ok(
                 service.finalizarSolicitud(request)
         );
@@ -184,6 +208,8 @@ public class SolicitudCreditoController {
     public ResponseEntity<SolicitudValidacionAprobacionDTO> validarParaAprobacion(
             @PathVariable Integer idSolicitudCredito
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.validarParaAprobacion(
@@ -202,11 +228,44 @@ public class SolicitudCreditoController {
             @RequestBody SolicitudEnviarAprobacionRequestDTO request
     ) {
 
+        validarEdicion();
+
         return ResponseEntity.ok(
                 service.enviarAprobacion(
                         idSolicitudCredito,
                         request
                 )
         );
+    }
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarConsulta() {
+
+        accessValidator.validarAcceso(
+                usuarioActual(),
+                PERMISO_VIEW
+        );
+    }
+
+    private void validarEdicion() {
+
+        accessValidator.validarAcceso(
+                usuarioActual(),
+                PERMISO_EDIT
+        );
+    }
+
+    private Usuario usuarioActual() {
+
+        Usuario usuarioActual = new Usuario();
+
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        return usuarioActual;
     }
 }

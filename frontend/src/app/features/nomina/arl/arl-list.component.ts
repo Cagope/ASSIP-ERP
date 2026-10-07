@@ -4,6 +4,8 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
+import { SessionService } from '../../../core/auth/session.service';
+
 import { ArlApi, ArlListDTO } from './arl.api';
 import { ArlPrintService } from './arl-print.service';
 import { ArlExporterService } from './arl-exporter.service';
@@ -19,6 +21,7 @@ export class ArlListComponent implements OnInit {
 
   private readonly api = inject(ArlApi);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   private readonly printService = inject(ArlPrintService);
   private readonly exporterService = inject(ArlExporterService);
@@ -26,8 +29,11 @@ export class ArlListComponent implements OnInit {
   arl: ArlListDTO[] = [];
   loading = false;
 
-  // ✅ filtro simple
   q = '';
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
 
   ngOnInit(): void {
     this.cargar();
@@ -51,7 +57,10 @@ export class ArlListComponent implements OnInit {
 
   get arlFiltradas(): ArlListDTO[] {
     const q = (this.q ?? '').trim().toLowerCase();
-    if (!q) return this.arl;
+
+    if (!q) {
+      return this.arl;
+    }
 
     return this.arl.filter(x =>
       (x.nombreArl ?? '').toLowerCase().includes(q) ||
@@ -60,10 +69,14 @@ export class ArlListComponent implements OnInit {
   }
 
   // =========================================================
-  // ✅ ACCIONES HEADER
+  // ACCIONES HEADER
   // =========================================================
 
   nuevo(): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     this.router.navigate(['/nomina/arl/nuevo']);
   }
 
@@ -80,16 +93,27 @@ export class ArlListComponent implements OnInit {
   }
 
   // =========================================================
-  // ✅ ACCIONES FILA
+  // ACCIONES FILA
   // =========================================================
 
   editar(id: number): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     this.router.navigate([`/nomina/arl/${id}/editar`]);
   }
 
   eliminar(id: number): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     const ok = confirm('¿Desea eliminar esta ARL?');
-    if (!ok) return;
+
+    if (!ok) {
+      return;
+    }
 
     this.api.eliminar(id).subscribe({
       next: () => this.cargar(),

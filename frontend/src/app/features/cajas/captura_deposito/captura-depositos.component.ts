@@ -20,9 +20,12 @@ import {
 import { environment } from '../../../../environments/environment';
 
 import {
-  VincularCajaApi,
-  CajaProvisionActivaDTO
-} from '../provisiones/vincular-caja/vincular-caja.api';
+  CajasProvisionApi
+} from '../provisiones/cajas-provision.api';
+
+import {
+  CajaProvisionActiva
+} from '../provisiones/cajas-provision.models';
 
 import {
   LavadoActivosModalComponent
@@ -85,7 +88,7 @@ export class CapturaDepositosComponent {
 
   mostrarCheques = true;
 
-  provisionActiva: CajaProvisionActivaDTO | null = null;
+  provisionActiva: CajaProvisionActiva | null = null;
 
   cuenta: CajaCapturaDepositosCuenta | null = null;
   previewData: CajaCapturaDepositosPreview | null = null;
@@ -97,7 +100,7 @@ export class CapturaDepositosComponent {
 
   constructor(
     private api: CapturaDepositosApi,
-    private cajaApi: VincularCajaApi
+    private cajaApi: CajasProvisionApi
   ) {
     this.cargarCajaActiva();
     this.cargarTiposMovimiento();

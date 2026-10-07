@@ -68,7 +68,7 @@
       <button
         type="submit"
         class="btn btn--primary"
-        [disabled]="cargando || form.invalid">
+        [disabled]="cargando || form.invalid || !puedeLiquidar">
         {{ cargando ? 'Generando preview...' : 'Generar preview' }}
       </button>
     </div>
@@ -176,14 +176,16 @@
     <button
       type="button"
       class="btn btn--secondary"
-      (click)="exportarExcel()">
+      (click)="exportarExcel()"
+      [disabled]="cargando || !puedeLiquidar">
       Exportar
     </button>
 
     <button
       type="button"
       class="btn btn--primary"
-      (click)="ejecutarLiquidacion()">
+      (click)="ejecutarLiquidacion()"
+      [disabled]="cargando || !puedeLiquidar">
       Ejecutar liquidación
     </button>
 

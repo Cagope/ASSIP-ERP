@@ -57,7 +57,7 @@
             type="button"
             class="btn btn--secondary"
             (click)="preview()"
-            [disabled]="!esPeriodoContabilizado || cargando || ejecutando">
+            [disabled]="!puedeContabilizar || !esPeriodoContabilizado || cargando || ejecutando">
             {{ cargando ? 'Consultando...' : 'Preview' }}
           </button>
 
@@ -77,7 +77,7 @@
             type="button"
             class="btn btn--primary"
             (click)="ejecutar()"
-            [disabled]="!esPeriodoContabilizado || movimientos.length === 0 || cargando || ejecutando || comprobanteExistente">
+            [disabled]="!puedeContabilizar || !esPeriodoContabilizado || movimientos.length === 0 || cargando || ejecutando || comprobanteExistente">
             {{ ejecutando ? 'Contabilizando...' : 'Contabilizar' }}
           </button>
 
@@ -85,7 +85,7 @@
             type="button"
             class="btn btn--ghost-danger"
             (click)="reversar()"
-            [disabled]="!esPeriodoContabilizado || reversando || cargando || !comprobanteExistente">
+            [disabled]="!puedeContabilizar || !esPeriodoContabilizado || reversando || cargando || !comprobanteExistente">
             {{ reversando ? 'Reversando...' : 'Reversar' }}
           </button>
 

@@ -11,6 +11,7 @@ import { EmpleadosPrintService } from './empleados-print.service';
 import { EmpleadosExporterService } from './empleados-exporter.service';
 
 import { PersonasApi, PersonaBusquedaDTO } from '../../../shared/personas/personas.api';
+import { SessionService } from '../../../core/auth/session.service';
 
 @Component({
   standalone: true,
@@ -23,6 +24,7 @@ export class EmpleadosListComponent implements OnInit {
 
   private readonly api = inject(EmpleadosApi);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   private readonly printService = inject(EmpleadosPrintService);
   private readonly exporterService = inject(EmpleadosExporterService);
@@ -33,6 +35,10 @@ export class EmpleadosListComponent implements OnInit {
   loading = false;
 
   q = '';
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_EMPLEADOS_EDIT');
+  }
 
   // ✅ cache idDatosPersonal -> persona
   personasMap = new Map<number, PersonaBusquedaDTO>();
@@ -133,6 +139,8 @@ export class EmpleadosListComponent implements OnInit {
   // =========================================================
 
   nuevo(): void {
+    if (!this.puedeEditar) return;
+
     this.router.navigate(['/nomina/empleados/nuevo']);
   }
 
@@ -153,10 +161,15 @@ export class EmpleadosListComponent implements OnInit {
   // =========================================================
 
   editar(id: number): void {
+    if (!this.puedeEditar) return;
+
     this.router.navigate([`/nomina/empleados/${id}/editar`]);
   }
 
   eliminar(id: number): void {
+
+    if (!this.puedeEditar) return;
+
     const ok = confirm('¿Desea eliminar este empleado?');
     if (!ok) return;
 

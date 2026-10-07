@@ -138,6 +138,8 @@ export abstract class CdatCancelacionValores {
       mediosPagoEntrada: null,
       mediosPagoSalida: null,
 
+      valorCuentaPorPagar: 0,
+
       observacion: '',
 
       // =========================
@@ -163,13 +165,11 @@ export abstract class CdatCancelacionValores {
   }
 
   requiereCajaEntrada(): boolean {
-    return Number(this.valorEfectivoEntrada || 0) > 0 ||
-      this.totalChequesEntrada() > 0;
+    return Number(this.valorEfectivoEntrada || 0) > 0;
   }
 
   requiereCajaSalida(): boolean {
-    return Number(this.valorEfectivoSalida || 0) > 0 ||
-      this.totalChequesSalida() > 0;
+    return Number(this.valorEfectivoSalida || 0) > 0;
   }
 
   totalChequesEntrada(): number {
@@ -225,7 +225,8 @@ export abstract class CdatCancelacionValores {
       + this.totalChequesSalida()
       + this.totalDepositosSalida()
       + this.totalBancosSalida()
-      + this.totalTrasladosSalida();
+      + this.totalTrasladosSalida()
+      + Number(this.model.valorCuentaPorPagar || 0);
   }
 
   limpiarEstado(): void {
@@ -414,4 +415,14 @@ export abstract class CdatCancelacionValores {
       this.saldoPendienteSalida();
   }
 
-}
+  sugerirCuentaPorPagarSalida(): void {
+
+    if (Number(this.model.valorCuentaPorPagar || 0) > 0) {
+      return;
+    }
+
+    this.model.valorCuentaPorPagar =
+      this.saldoPendienteSalida();
+  }
+
+  }

@@ -2,9 +2,18 @@ package co.assip.erp.cartera.evaluacion.centralriesgos.resultados;
 
 import co.assip.erp.cartera.evaluacion.centralriesgos.resultados.dto.CentralRiesgoResultadoDatoDTO;
 import co.assip.erp.cartera.evaluacion.centralriesgos.resultados.dto.CentralRiesgoResultadoImportacionDTO;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -15,11 +24,23 @@ import java.util.List;
 @RequestMapping("/cartera/centrales-riesgo/resultados")
 public class CentralRiesgoResultadoController {
 
-    private final CentralRiesgoResultadoService service;
+    private static final String PERMISO_VIEW =
+            "CARTERA_EVALUACION_VIEW";
+
+    private static final String PERMISO_EDIT =
+            "CARTERA_EVALUACION_EDIT";
 
     // =========================================================
-// IMPORTAR RESULTADOS
-// =========================================================
+    // DEPENDENCIAS
+    // =========================================================
+
+    private final CentralRiesgoResultadoService service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
+
+    // =========================================================
+    // IMPORTAR RESULTADOS
+    // =========================================================
 
     @PostMapping(
             value = "/importar",
@@ -43,6 +64,8 @@ public class CentralRiesgoResultadoController {
             MultipartFile archivo
     ) {
 
+        validarEdicion();
+
         return service.importar(
                 idCentralRiesgo,
                 fechaCorte,
@@ -60,6 +83,8 @@ public class CentralRiesgoResultadoController {
             @PathVariable Integer idCentralArchivo
     ) {
 
+        validarConsulta();
+
         return service.buscarArchivoPorId(
                 idCentralArchivo
         );
@@ -74,8 +99,41 @@ public class CentralRiesgoResultadoController {
             @PathVariable Integer idCentralArchivo
     ) {
 
+        validarConsulta();
+
         return service.listarDatos(
                 idCentralArchivo
         );
+    }
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarConsulta() {
+
+        accessValidator.validarAcceso(
+                usuarioActual(),
+                PERMISO_VIEW
+        );
+    }
+
+    private void validarEdicion() {
+
+        accessValidator.validarAcceso(
+                usuarioActual(),
+                PERMISO_EDIT
+        );
+    }
+
+    private Usuario usuarioActual() {
+
+        Usuario usuarioActual = new Usuario();
+
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        return usuarioActual;
     }
 }

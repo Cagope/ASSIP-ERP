@@ -20,27 +20,32 @@ export const carteraMenu = {
 
             {
               label: 'Originación de Cartera',
-              route: '/cartera/originacion'
+              route: '/cartera/originacion',
+              permiso: 'CARTERA_ORIGINACION_VIEW'
             },
 
             {
               label: 'Referencias Personales',
-              route: '/cartera/originacion/referencias'
+              route: '/cartera/originacion/referencias',
+              permiso: 'CARTERA_ORIGINACION_VIEW'
             },
 
             {
               label: 'Aprobación de Cartera',
-              route: '/cartera/originacion/aprobacion'
+              route: '/cartera/originacion/aprobacion',
+              permiso: 'CARTERA_ORIGINACION_VIEW'
             },
 
             {
               label: 'Formalización de Cartera',
-              route: '/cartera/originacion/formalizacion'
+              route: '/cartera/originacion/formalizacion',
+              permiso: 'CARTERA_ORIGINACION_VIEW'
             },
 
             {
               label: 'Desembolso de Cartera',
-              route: '/cartera/originacion/desembolso'
+              route: '/cartera/originacion/desembolso',
+              permiso: 'CARTERA_ORIGINACION_VIEW'
             }
 
           ]
@@ -51,7 +56,8 @@ export const carteraMenu = {
         // =====================================================
         {
           label: 'Consulta de Créditos',
-          route: '/cartera/consulta-creditos'
+          route: '/cartera/consulta-creditos',
+          permiso: 'CARTERA_VIEW'
         }
 
       ]
@@ -73,22 +79,26 @@ export const carteraMenu = {
 
             {
               label: 'Consolidación del Cierre',
-              route: '/cartera/cierre-mensual'
+              route: '/cartera/cierre-mensual',
+              permiso: 'CARTERA_CIERRE_VIEW'
             },
 
             {
               label: 'Cálculos',
-              route: '/cartera/cierre-mensual/calculos'
+              route: '/cartera/cierre-mensual/calculos',
+              permiso: 'CARTERA_CIERRE_VIEW'
             },
 
             {
               label: 'Anexo 1',
-              route: '/cartera/cierre-mensual/anexo1'
+              route: '/cartera/cierre-mensual/anexo1',
+              permiso: 'CARTERA_CIERRE_VIEW'
             },
 
             {
               label: 'Anexo PE',
-              route: '/cartera/cierre-mensual/anexo2'
+              route: '/cartera/cierre-mensual/anexo2',
+              permiso: 'CARTERA_CIERRE_VIEW'
             }
 
           ]
@@ -103,12 +113,14 @@ export const carteraMenu = {
 
             {
               label: 'Evaluaciones de Cartera',
-              route: '/cartera/evaluacion/evaluaciones'
+              route: '/cartera/evaluacion/evaluaciones',
+              permiso: 'CARTERA_EVALUACION_VIEW'
             },
 
             {
               label: 'Resultados Central de Riesgos',
-              route: '/cartera/evaluacion/central-riesgos/resultados'
+              route: '/cartera/evaluacion/central-riesgos/resultados',
+              permiso: 'CARTERA_EVALUACION_VIEW'
             }
 
           ]
@@ -125,6 +137,15 @@ export const carteraMenu = {
       children: [
 
         // =====================================================
+        // DASHBOARD DE CARTERA
+        // =====================================================
+        {
+          label: 'Dashboard de Cartera',
+          route: '/cartera/analisis/dashboard-cartera',
+          permiso: 'CARTERA_DASHBOARD_VIEW'
+        },
+
+        // =====================================================
         // VECTOR DE COMPORTAMIENTO
         // =====================================================
         {
@@ -133,12 +154,14 @@ export const carteraMenu = {
 
             {
               label: 'Actual',
-              route: '/cartera/analisis/vector-comportamiento'
+              route: '/cartera/analisis/vector-comportamiento',
+              permiso: 'CARTERA_ANALISIS_VIEW'
             },
 
             {
               label: 'Por Corte',
-              route: '/cartera/analisis/vector-comportamiento/corte'
+              route: '/cartera/analisis/vector-comportamiento/corte',
+              permiso: 'CARTERA_ANALISIS_VIEW'
             }
 
           ]
@@ -149,7 +172,8 @@ export const carteraMenu = {
         // =====================================================
         {
           label: 'Mora Temprana',
-          route: '/cartera/analisis/mora-temprana'
+          route: '/cartera/analisis/mora-temprana',
+          permiso: 'CARTERA_ANALISIS_VIEW'
         },
 
         // =====================================================
@@ -157,7 +181,8 @@ export const carteraMenu = {
         // =====================================================
         {
           label: 'Riesgo y Deterioro',
-          route: '/cartera/analisis/riesgo-deterioro'
+          route: '/cartera/analisis/riesgo-deterioro',
+          permiso: 'CARTERA_ANALISIS_VIEW'
         },
 
         // =====================================================
@@ -165,7 +190,8 @@ export const carteraMenu = {
         // =====================================================
         {
           label: 'Concentración de Cartera',
-          route: '/cartera/analisis/concentracion-cartera'
+          route: '/cartera/analisis/concentracion-cartera',
+          permiso: 'CARTERA_ANALISIS_VIEW'
         },
 
         // =====================================================
@@ -173,7 +199,8 @@ export const carteraMenu = {
         // =====================================================
         {
           label: 'Garantías y Cobertura',
-          route: '/cartera/analisis/garantias-cobertura'
+          route: '/cartera/analisis/garantias-cobertura',
+          permiso: 'CARTERA_ANALISIS_VIEW'
         },
 
         // =====================================================
@@ -181,7 +208,8 @@ export const carteraMenu = {
         // =====================================================
         {
           label: 'Reciprocidad de Aportes',
-          route: '/cartera/analisis/reciprocidad-aportes'
+          route: '/cartera/analisis/reciprocidad-aportes',
+          permiso: 'CARTERA_ANALISIS_VIEW'
         },
 
         // =====================================================
@@ -189,7 +217,8 @@ export const carteraMenu = {
         // =====================================================
         {
           label: 'Matriz de Rodamiento',
-          route: '/cartera/analisis/matriz-rodamiento'
+          route: '/cartera/analisis/matriz-rodamiento',
+          permiso: 'CARTERA_ANALISIS_VIEW'
         },
 
         // =====================================================
@@ -197,7 +226,8 @@ export const carteraMenu = {
         // =====================================================
         {
           label: 'Análisis de Cosechas',
-          route: '/cartera/analisis/cosechas'
+          route: '/cartera/analisis/cosechas',
+          permiso: 'CARTERA_ANALISIS_VIEW'
         },
 
         // =====================================================
@@ -205,7 +235,8 @@ export const carteraMenu = {
         // =====================================================
         {
           label: 'Curación y Reincidencia',
-          route: '/cartera/analisis/curacion-reincidencia'
+          route: '/cartera/analisis/curacion-reincidencia',
+          permiso: 'CARTERA_ANALISIS_VIEW'
         },
 
         // =====================================================
@@ -213,7 +244,8 @@ export const carteraMenu = {
         // =====================================================
         {
           label: 'Cancelación y Prepago',
-          route: '/cartera/analisis/cancelacion-prepago'
+          route: '/cartera/analisis/cancelacion-prepago',
+          permiso: 'CARTERA_ANALISIS_VIEW'
         },
 
         // =====================================================
@@ -221,7 +253,8 @@ export const carteraMenu = {
         // =====================================================
         {
           label: 'Roll Forward',
-          route: '/cartera/analisis/roll-forward'
+          route: '/cartera/analisis/roll-forward',
+          permiso: 'CARTERA_ANALISIS_VIEW'
         }
 
       ]

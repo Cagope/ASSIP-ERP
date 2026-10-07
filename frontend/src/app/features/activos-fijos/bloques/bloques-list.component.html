@@ -2,30 +2,38 @@
 
   <app-header-actions
     titulo="Bloques"
+    [mostrarNuevo]="puedeEditar"
     (nuevo)="nuevo()"
     (refrescar)="cargar()"
     (imprimir)="imprimir()"
     (exportar)="exportar()">
   </app-header-actions>
 
-  <table class="table" *ngIf="!cargando && bloques.length > 0; else vacio">
+  <table
+    class="table"
+    *ngIf="!cargando && bloques.length > 0; else vacio">
+
     <thead>
     <tr>
       <th>Código</th>
       <th>Nombre</th>
       <th>Meses Depreciación</th>
-      <th>Acciones</th>
+      <th *ngIf="puedeEditar">Acciones</th>
     </tr>
     </thead>
 
     <tbody>
     <tr *ngFor="let b of bloques">
+
       <td>{{ b.codigoBloque }}</td>
+
       <td>{{ b.nombreBloque }}</td>
+
       <td>{{ b.mesesDepreciacionDefecto }}</td>
 
-      <td>
+      <td *ngIf="puedeEditar">
         <div class="acciones">
+
           <button
             class="btn-action-edit"
             type="button"
@@ -41,10 +49,13 @@
             title="Eliminar">
             🗑️
           </button>
+
         </div>
       </td>
+
     </tr>
     </tbody>
+
   </table>
 
   <div *ngIf="cargando" class="loading">
@@ -52,7 +63,9 @@
   </div>
 
   <ng-template #vacio>
-    <p class="empty">No hay bloques registrados.</p>
+    <p class="empty">
+      No hay bloques registrados.
+    </p>
   </ng-template>
 
 </div>

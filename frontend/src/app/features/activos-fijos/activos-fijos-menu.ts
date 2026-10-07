@@ -51,27 +51,27 @@ export const activosFijosMenu = {
         {
           label: 'Maestro de activos',
           route: '/activos-fijos/informes/maestro-activos',
-          permiso: 'ACTIVOS_FIJOS_VIEW'
+          permiso: 'ACTIVOS_FIJOS_INFORMES_VIEW'
         },
         {
           label: 'Movimientos de activos',
           route: '/activos-fijos/informes/movimientos-activos',
-          permiso: 'ACTIVOS_FIJOS_VIEW'
+          permiso: 'ACTIVOS_FIJOS_INFORMES_VIEW'
         },
         {
           label: 'Kardex por activo',
           route: '/activos-fijos/informes/kardex-activo',
-          permiso: 'ACTIVOS_FIJOS_VIEW'
+          permiso: 'ACTIVOS_FIJOS_INFORMES_VIEW'
         },
         {
           label: 'Resumen mensual',
           route: '/activos-fijos/informes/resumen-movimientos',
-          permiso: 'ACTIVOS_FIJOS_VIEW'
+          permiso: 'ACTIVOS_FIJOS_INFORMES_VIEW'
         },
         {
           label: 'Depreciación entre fechas',
           route: '/activos-fijos/informes/depreciacion',
-          permiso: 'ACTIVOS_FIJOS_VIEW'
+          permiso: 'ACTIVOS_FIJOS_INFORMES_VIEW'
         }
       ]
     }

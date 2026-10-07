@@ -5,7 +5,10 @@ import co.assip.erp.cartera.analisis.moratemprana.dto.MoraTempranaDetalleDTO;
 import co.assip.erp.cartera.analisis.moratemprana.dto.MoraTempranaPrimeraMoraDTO;
 import co.assip.erp.cartera.analisis.moratemprana.dto.MoraTempranaResumenDTO;
 import co.assip.erp.cartera.analisis.moratemprana.dto.MoraTempranaSegmentoDTO;
-
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,23 +22,18 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/cartera/analisis/mora-temprana")
+@RequiredArgsConstructor
 public class AnalisisMoraTempranaController {
+
+    private static final String PERMISO_VIEW = "CARTERA_ANALISIS_VIEW";
 
     // =========================================================
     // DEPENDENCIAS
     // =========================================================
 
     private final AnalisisMoraTempranaService service;
-
-    // =========================================================
-    // CONSTRUCTOR
-    // =========================================================
-
-    public AnalisisMoraTempranaController(
-            AnalisisMoraTempranaService service
-    ) {
-        this.service = service;
-    }
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // =========================================================
     // INFORMACIÓN DE CONTROL
@@ -43,6 +41,8 @@ public class AnalisisMoraTempranaController {
 
     @GetMapping("/control")
     public ResponseEntity<Map<String, Object>> obtenerControl() {
+
+        validarAcceso();
 
         LocalDate ultimoCorte =
                 service.obtenerUltimoCorteDisponible();
@@ -85,6 +85,8 @@ public class AnalisisMoraTempranaController {
             Integer idLineaCredito
     ) {
 
+        validarAcceso();
+
         MoraTempranaResumenDTO resultado =
                 service.consultarResumen(
                         cosechaDesde,
@@ -116,6 +118,8 @@ public class AnalisisMoraTempranaController {
             @RequestParam(required = false)
             Integer idLineaCredito
     ) {
+
+        validarAcceso();
 
         List<MoraTempranaCosechaDTO> resultado =
                 service.consultarCosechas(
@@ -149,6 +153,8 @@ public class AnalisisMoraTempranaController {
             Integer idLineaCredito
     ) {
 
+        validarAcceso();
+
         List<MoraTempranaSegmentoDTO> resultado =
                 service.consultarPorAgencia(
                         cosechaDesde,
@@ -181,6 +187,8 @@ public class AnalisisMoraTempranaController {
             Integer idLineaCredito
     ) {
 
+        validarAcceso();
+
         List<MoraTempranaSegmentoDTO> resultado =
                 service.consultarPorLinea(
                         cosechaDesde,
@@ -212,6 +220,8 @@ public class AnalisisMoraTempranaController {
             @RequestParam(required = false)
             Integer idLineaCredito
     ) {
+
+        validarAcceso();
 
         List<MoraTempranaPrimeraMoraDTO> resultado =
                 service.consultarPrimeraMora(
@@ -251,6 +261,8 @@ public class AnalisisMoraTempranaController {
             String indicador
     ) {
 
+        validarAcceso();
+
         List<MoraTempranaDetalleDTO> resultado =
                 service.consultarDetalle(
                         cosechaDesde,
@@ -261,5 +273,22 @@ public class AnalisisMoraTempranaController {
                 );
 
         return ResponseEntity.ok(resultado);
+    }
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarAcceso() {
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO_VIEW
+        );
     }
 }

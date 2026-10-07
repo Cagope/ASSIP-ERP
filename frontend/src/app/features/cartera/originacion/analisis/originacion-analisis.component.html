@@ -1018,6 +1018,7 @@
           type="button"
           class="btn btn-primary"
           [disabled]="
+            !puedeEditar ||
             enviandoAprobacion ||
             validandoAprobacion ||
             !conceptoAsesorValido ||
@@ -1061,11 +1062,11 @@
 
       </button>
 
-
       <button
         type="button"
         class="btn btn-primary"
         [disabled]="
+          !puedeAnalizar ||
           cargando ||
           guardando ||
           validandoAprobacion ||

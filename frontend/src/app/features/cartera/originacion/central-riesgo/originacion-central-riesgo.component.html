@@ -1033,10 +1033,11 @@
           class="btn btn-primary"
           (click)="guardar()"
           [disabled]="
-        guardando ||
-        cargandoDetalle ||
-        cargandoCatalogos
-      ">
+            !puedeEditar
+            || guardando
+            || cargandoDetalle
+            || cargandoCatalogos
+          ">
 
           @if (guardando) {
 

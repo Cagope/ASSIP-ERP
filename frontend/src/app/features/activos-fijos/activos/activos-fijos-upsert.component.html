@@ -302,9 +302,9 @@
       </ul>
     </div>
 
-    <!-- =============================
-     ACCIONES
-     ============================= -->
+      <!-- =============================
+       ACCIONES
+       ============================= -->
 
       <div class="form-actions full">
 
@@ -318,7 +318,7 @@
         <button
           type="submit"
           class="btn btn--primary"
-          [disabled]="form.invalid">
+          [disabled]="form.invalid || !puedeEditar">
           Guardar
         </button>
 

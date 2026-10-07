@@ -42,6 +42,7 @@ import {
   TipoAdquisicionDTO
 } from '../catalogos/tipos-adquisicion.api';
 
+import { SessionService } from '../../../core/auth/session.service';
 
 @Component({
   selector: 'app-activos-fijos-upsert',
@@ -65,6 +66,7 @@ export class ActivosFijosUpsertComponent implements OnInit {
   private cuentasApi = inject(CuentasApi);
   private fb = inject(FormBuilder);
   private tiposAdquisicionApi = inject(TiposAdquisicionApi);
+  private readonly session = inject(SessionService);
 
   route = inject(ActivatedRoute);
   router = inject(Router);
@@ -138,6 +140,12 @@ export class ActivosFijosUpsertComponent implements OnInit {
     idCatalogoCuentaGasto: [null as number | null],
     idCatalogoCuentaControl: [null as number | null],
   });
+
+  // =========================================================
+  // PERMISOS
+  // =========================================================
+  readonly puedeEditar =
+    this.session.tienePermiso('ACTIVOS_FIJOS_EDIT');
 
   // =========================================================
   // INIT
@@ -363,6 +371,9 @@ export class ActivosFijosUpsertComponent implements OnInit {
   // ACCIONES
   // =========================================================
   guardar(): void {
+
+    if (!this.puedeEditar) return;
+
     if (this.form.invalid) return;
 
     const payload = this.form.getRawValue() as ActivoFijoSaveDTO;

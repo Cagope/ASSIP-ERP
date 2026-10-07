@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { SessionService } from '../../../core/auth/session.service';
 
 import { EmpleadoAutocompleteComponent } from '../busqueda/empleado-autocomplete.component';
 import {
@@ -35,11 +36,16 @@ export class EventosLiquidacionUpsertComponent implements OnInit {
   private contratosApi = inject(EmpleadoContratosApi);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private session = inject(SessionService);
 
   id: number | null = null;
   cargando = false;
   guardando = false;
   error = '';
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
 
   contratosEmpleado: EmpleadoContratoListDTO[] = [];
   contratoActivo: EmpleadoContratoListDTO | null = null;
@@ -275,7 +281,12 @@ export class EventosLiquidacionUpsertComponent implements OnInit {
   }
 
   guardar(): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     this.error = '';
+
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();

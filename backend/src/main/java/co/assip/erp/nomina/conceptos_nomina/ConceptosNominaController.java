@@ -1,7 +1,9 @@
 package co.assip.erp.nomina.conceptos_nomina;
 
-import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 import co.assip.erp.nomina.conceptos_nomina.dto.ConceptoNominaDTO;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,13 +17,19 @@ public class ConceptosNominaController {
 
     private final ConceptosNominaService service;
     private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // ============================================================
     // LISTAR
     // ============================================================
     @GetMapping
     public ResponseEntity<List<ConceptoNominaDTO>> listar() {
-        return ResponseEntity.ok(service.listar());
+
+        validarAcceso("NOMINA_VIEW");
+
+        return ResponseEntity.ok(
+                service.listar()
+        );
     }
 
     // ============================================================
@@ -31,7 +39,12 @@ public class ConceptosNominaController {
     public ResponseEntity<ConceptoNominaDTO> obtener(
             @PathVariable String codigoConcepto
     ) {
-        return ResponseEntity.ok(service.obtener(codigoConcepto));
+
+        validarAcceso("NOMINA_VIEW");
+
+        return ResponseEntity.ok(
+                service.obtener(codigoConcepto)
+        );
     }
 
     // ============================================================
@@ -42,10 +55,15 @@ public class ConceptosNominaController {
             @RequestBody ConceptoNominaDTO dto
     ) {
 
+        validarAcceso("NOMINA_PARAMETROS_EDIT");
+
         Integer idUsuario =
                 usuarioSesionService.idUsuario();
 
-        service.crear(dto, idUsuario);
+        service.crear(
+                dto,
+                idUsuario
+        );
 
         return ResponseEntity.ok().build();
     }
@@ -58,6 +76,8 @@ public class ConceptosNominaController {
             @PathVariable String codigoConcepto,
             @RequestBody ConceptoNominaDTO dto
     ) {
+
+        validarAcceso("NOMINA_PARAMETROS_EDIT");
 
         Integer idUsuario =
                 usuarioSesionService.idUsuario();
@@ -78,7 +98,28 @@ public class ConceptosNominaController {
     public ResponseEntity<Void> eliminar(
             @PathVariable String codigoConcepto
     ) {
+
+        validarAcceso("NOMINA_PARAMETROS_EDIT");
+
         service.eliminar(codigoConcepto);
+
         return ResponseEntity.ok().build();
+    }
+
+    // ============================================================
+    // AUTORIZACIÓN
+    // ============================================================
+    private void validarAcceso(String permiso) {
+
+        Usuario usuarioActual = new Usuario();
+
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                permiso
+        );
     }
 }

@@ -9,8 +9,11 @@ import {
 } from '@angular/common';
 
 import {
-  ActivatedRoute,
-  Router
+  HttpErrorResponse
+} from '@angular/common/http';
+
+import {
+  ActivatedRoute
 } from '@angular/router';
 
 import {
@@ -30,84 +33,96 @@ import {
 @Component({
   selector: 'app-pagare-diligenciado',
   standalone: true,
+
   imports: [
     CommonModule
   ],
-  templateUrl: './pagare-diligenciado.component.html',
-  styleUrl: './pagare-diligenciado.component.scss'
+
+  templateUrl:
+    './pagare-diligenciado.component.html',
+
+  styleUrl:
+    './pagare-diligenciado.component.scss'
 })
-export class PagareDiligenciadoComponent implements OnInit {
+export class PagareDiligenciadoComponent
+  implements OnInit {
 
-  private readonly api = inject(
-    OriginacionFormalizacionApi
-  );
+  // =========================================================
+  // DEPENDENCIAS
+  // =========================================================
 
-  private readonly route = inject(
-    ActivatedRoute
-  );
+  private readonly api =
+    inject(OriginacionFormalizacionApi);
 
-  private readonly router = inject(
-    Router
-  );
+  private readonly route =
+    inject(ActivatedRoute);
 
 
-  // =======================================================
+  // =========================================================
   // ESTADO
-  // =======================================================
+  // =========================================================
 
-  idSolicitudCredito: number | null = null;
+  idSolicitudCredito:
+    number | null = null;
 
   cargando = false;
 
-  error: string | null = null;
+  error:
+    string | null = null;
 
-  datos: PagareDiligenciadoDatos | null = null;
+  datos:
+    PagareDiligenciadoDatos | null = null;
 
 
-  // =======================================================
+  // =========================================================
   // FIRMANTES
-  // =======================================================
+  // =========================================================
 
-  deudorPrincipal: PagareFirmante | null = null;
+  deudorPrincipal:
+    PagareFirmante | null = null;
 
-  codeudores: PagareFirmante[] = [];
+  codeudores:
+    PagareFirmante[] = [];
 
 
-  // =======================================================
+  // =========================================================
   // FORMATEADORES
   //
   // Uso exclusivo de presentación.
   // No modifica valores financieros ni fechas del crédito.
-  // =======================================================
+  // =========================================================
 
-  private readonly formatoMoneda = new Intl.NumberFormat(
-    'es-CO',
-    {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }
-  );
+  private readonly formatoMoneda =
+    new Intl.NumberFormat(
+      'es-CO',
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }
+    );
 
-  private readonly formatoPorcentaje = new Intl.NumberFormat(
-    'es-CO',
-    {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 4
-    }
-  );
+  private readonly formatoPorcentaje =
+    new Intl.NumberFormat(
+      'es-CO',
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 4
+      }
+    );
 
 
-  // =======================================================
+  // =========================================================
   // INICIALIZACIÓN
-  // =======================================================
+  // =========================================================
 
   ngOnInit(): void {
 
-    const id = Number(
-      this.route.snapshot.paramMap.get(
-        'idSolicitudCredito'
-      )
-    );
+    const id =
+      Number(
+        this.route.snapshot.paramMap.get(
+          'idSolicitudCredito'
+        )
+      );
 
     if (
       !Number.isInteger(id) ||
@@ -126,9 +141,9 @@ export class PagareDiligenciadoComponent implements OnInit {
   }
 
 
-  // =======================================================
+  // =========================================================
   // CONSULTAR DATOS DEFINITIVOS DEL PAGARÉ
-  // =======================================================
+  // =========================================================
 
   consultarPagare(): void {
 
@@ -149,9 +164,10 @@ export class PagareDiligenciadoComponent implements OnInit {
 
     this.codeudores = [];
 
-    this.api.consultarDatosPagareDiligenciado(
-      this.idSolicitudCredito
-    )
+    this.api
+      .consultarDatosPagareDiligenciado(
+        this.idSolicitudCredito
+      )
       .pipe(
         finalize(() => {
           this.cargando = false;
@@ -159,7 +175,7 @@ export class PagareDiligenciadoComponent implements OnInit {
       )
       .subscribe({
 
-        next: (respuesta) => {
+        next: respuesta => {
 
           this.datos = respuesta;
 
@@ -174,53 +190,57 @@ export class PagareDiligenciadoComponent implements OnInit {
 
             return;
           }
-
         },
 
-        error: (err) => {
+        error: (
+          error: HttpErrorResponse
+        ) => {
 
           this.error =
-            err?.error?.message ||
-            err?.error?.mensaje ||
-            'No fue posible consultar los datos del pagaré.';
-
+            this.obtenerMensajeError(
+              error
+            );
         }
 
       });
   }
 
 
-  // =======================================================
+  // =========================================================
   // ORGANIZAR DEUDOR PRINCIPAL Y CODEUDORES
-  // =======================================================
+  // =========================================================
 
   private organizarFirmantes(
-    firmantes: PagareFirmante[]
+    firmantes:
+      PagareFirmante[]
   ): void {
 
-    const ordenados = [...firmantes].sort(
-      (a, b) =>
-        (a.ordenDeudor ?? 0) -
-        (b.ordenDeudor ?? 0)
-    );
+    const ordenados =
+      [...firmantes].sort(
+        (a, b) =>
+          (a.ordenDeudor ?? 0) -
+          (b.ordenDeudor ?? 0)
+      );
 
     this.deudorPrincipal =
       ordenados.find(
         firmante =>
-          firmante.tipoDeudor === 'PRINCIPAL'
+          firmante.tipoDeudor ===
+          'PRINCIPAL'
       ) ?? null;
 
     this.codeudores =
       ordenados.filter(
         firmante =>
-          firmante.tipoDeudor === 'CODEUDOR'
+          firmante.tipoDeudor ===
+          'CODEUDOR'
       );
   }
 
 
-  // =======================================================
+  // =========================================================
   // INDICADORES PARA LA PLANTILLA
-  // =======================================================
+  // =========================================================
 
   get puedeImprimir(): boolean {
 
@@ -236,20 +256,24 @@ export class PagareDiligenciadoComponent implements OnInit {
   get numeroPagare(): string {
 
     return (
-      this.datos?.pagare.pagareCartera ?? ''
+      this.datos?.pagare.pagareCartera ??
+      ''
     );
   }
 
 
-  // =======================================================
+  // =========================================================
   // FORMATO DE VALORES
   //
   // Uso exclusivo de presentación.
   // No modifica valores financieros.
-  // =======================================================
+  // =========================================================
 
   formatearMoneda(
-    valor: number | null | undefined
+    valor:
+      number |
+      null |
+      undefined
   ): string {
 
     if (
@@ -259,12 +283,17 @@ export class PagareDiligenciadoComponent implements OnInit {
       return '';
     }
 
-    return this.formatoMoneda.format(valor);
+    return this.formatoMoneda.format(
+      valor
+    );
   }
 
 
   formatearPorcentaje(
-    valor: number | null | undefined
+    valor:
+      number |
+      null |
+      undefined
   ): string {
 
     if (
@@ -274,11 +303,13 @@ export class PagareDiligenciadoComponent implements OnInit {
       return '';
     }
 
-    return this.formatoPorcentaje.format(valor);
+    return this.formatoPorcentaje.format(
+      valor
+    );
   }
 
 
-  // =======================================================
+  // =========================================================
   // FORMATO DE FECHAS DEFINITIVAS
   //
   // Recibe yyyy-MM-dd desde el backend.
@@ -287,23 +318,31 @@ export class PagareDiligenciadoComponent implements OnInit {
   // por zona horaria.
   //
   // No calcula vencimientos ni modifica fechas.
-  // =======================================================
+  // =========================================================
 
   formatearFecha(
-    fecha: string | null | undefined
+    fecha:
+      string |
+      null |
+      undefined
   ): string {
 
     if (!fecha) {
       return '';
     }
 
-    const partes = fecha.split('-');
+    const partes =
+      fecha.split('-');
 
     if (partes.length !== 3) {
       return fecha;
     }
 
-    const [anio, mes, dia] = partes;
+    const [
+      anio,
+      mes,
+      dia
+    ] = partes;
 
     if (
       !/^\d{4}$/.test(anio) ||
@@ -317,12 +356,13 @@ export class PagareDiligenciadoComponent implements OnInit {
   }
 
 
-  // =======================================================
+  // =========================================================
   // TELÉFONO DEL FIRMANTE
-  // =======================================================
+  // =========================================================
 
   telefonoFirmante(
-    firmante: PagareFirmante | null
+    firmante:
+      PagareFirmante | null
   ): string {
 
     if (!firmante) {
@@ -338,9 +378,9 @@ export class PagareDiligenciadoComponent implements OnInit {
   }
 
 
-  // =======================================================
+  // =========================================================
   // IMPRIMIR DESDE EL NAVEGADOR
-  // =======================================================
+  // =========================================================
 
   imprimir(): void {
 
@@ -348,45 +388,65 @@ export class PagareDiligenciadoComponent implements OnInit {
       return;
     }
 
-    const hojas = document.querySelectorAll(
-      'app-pagare-diligenciado .hoja-oficio'
-    );
+    const hojas =
+      document.querySelectorAll(
+        'app-pagare-diligenciado .hoja-oficio'
+      );
 
     if (hojas.length === 0) {
       return;
     }
 
-    const ventanaImpresion = window.open(
-      '',
-      '_blank',
-      'width=900,height=1100'
-    );
+    const ventanaImpresion =
+      window.open(
+        '',
+        '_blank',
+        'width=900,height=1100'
+      );
 
     if (!ventanaImpresion) {
+
+      this.error =
+        'El navegador bloqueó la ventana de impresión. '
+        + 'Permita las ventanas emergentes para ASSIP ERP.';
+
       return;
     }
 
-    const estilos = Array.from(
-      document.querySelectorAll(
-        'style, link[rel="stylesheet"]'
+    const estilos =
+      Array.from(
+        document.querySelectorAll(
+          'style, link[rel="stylesheet"]'
+        )
       )
-    )
-      .map(elemento => elemento.outerHTML)
-      .join('\n');
+        .map(
+          elemento =>
+            elemento.outerHTML
+        )
+        .join('\n');
 
-    const contenido = Array.from(hojas)
-      .map(hoja => hoja.outerHTML)
-      .join('\n');
+    const contenido =
+      Array.from(hojas)
+        .map(
+          hoja =>
+            hoja.outerHTML
+        )
+        .join('\n');
 
     ventanaImpresion.document.open();
 
     ventanaImpresion.document.write(`
       <!doctype html>
+
       <html lang="es">
+
         <head>
+
           <meta charset="utf-8">
 
-          <title>Pagaré ${this.numeroPagare}</title>
+          <title>
+            Pagaré ${this.numeroPagare}
+          </title>
 
           ${estilos}
 
@@ -456,33 +516,82 @@ export class PagareDiligenciadoComponent implements OnInit {
 
       ventanaImpresion.print();
 
-      ventanaImpresion.onafterprint = () => {
-        ventanaImpresion.close();
-      };
+      ventanaImpresion.onafterprint =
+        () => {
+
+          ventanaImpresion.close();
+        };
     };
   }
 
 
-  // =======================================================
+  // =========================================================
   // CERRAR
-  // =======================================================
+  // =========================================================
 
   cerrar(): void {
+
     window.close();
   }
 
+
+  // =========================================================
+  // COMPLETAR TEXTO DEL PAGARÉ
+  // =========================================================
+
   completarConAsteriscos(
-    texto: string | null | undefined,
+    texto:
+      string |
+      null |
+      undefined,
     longitud = 87
   ): string {
 
-    const valor = (texto ?? '').trim();
+    const valor =
+      (texto ?? '').trim();
 
-    if (valor.length >= longitud) {
+    if (
+      valor.length >= longitud
+    ) {
       return valor;
     }
 
-    return valor.padEnd(longitud, '*');
+    return valor.padEnd(
+      longitud,
+      '*'
+    );
+  }
+
+
+  // =========================================================
+  // ERRORES
+  // =========================================================
+
+  private obtenerMensajeError(
+    error: HttpErrorResponse
+  ): string {
+
+    const respuesta =
+      error.error;
+
+    if (
+      typeof respuesta === 'string'
+    ) {
+
+      return (
+        respuesta ||
+        'No fue posible consultar los datos del pagaré.'
+      );
+    }
+
+    const mensaje =
+      respuesta?.message ??
+      respuesta?.mensaje ??
+      error.message;
+
+    return mensaje
+      ? String(mensaje)
+      : 'No fue posible consultar los datos del pagaré.';
   }
 
 }

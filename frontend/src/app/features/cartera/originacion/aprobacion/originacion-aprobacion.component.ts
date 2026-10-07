@@ -21,6 +21,10 @@ import {
 } from './originacion-aprobacion.api';
 
 import {
+  SessionService
+} from '../../../../core/auth/session.service';
+
+import {
   SolicitudAprobacionBandeja,
   SolicitudAprobacionDecision,
   SolicitudAprobacionActuacion,
@@ -70,6 +74,15 @@ export class OriginacionAprobacionComponent
   private readonly api =
     inject(OriginacionAprobacionApi);
 
+  private readonly session =
+      inject(SessionService);
+
+  get puedeAprobar(): boolean {
+
+    return this.session.tienePermiso(
+      'CARTERA_ORIGINACION_APROBACION'
+    );
+  }
 
   // =========================================================
   // CONSTANTES
@@ -657,6 +670,14 @@ export class OriginacionAprobacionComponent
   // =========================================================
 
   registrarDecision(): void {
+
+    if (!this.puedeAprobar) {
+
+      this.error =
+        'El usuario no tiene permiso para registrar decisiones de aprobación.';
+
+      return;
+    }
 
     const solicitud =
       this.solicitudSeleccionada;

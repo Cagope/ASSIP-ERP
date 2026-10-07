@@ -3,6 +3,8 @@ package co.assip.erp.cdat.cancelacion;
 import co.assip.erp.cdat.cancelacion.dto.CdatCancelacionEntradaDTO;
 import co.assip.erp.cdat.cancelacion.dto.CdatCancelacionItemDTO;
 import co.assip.erp.cdat.cancelacion.dto.CdatCancelacionPreviewDTO;
+import co.assip.erp.cajas.movimientos.CajasMovimientosService;
+
 import co.assip.erp.cdat.cdats.CdatService;
 import co.assip.erp.cdat.cdats.dto.CdatSaveDTO;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class CdatCancelacionService {
     private final CdatService cdatService;
     private final CdatMovimientoService cdatMovimientoService;
     private final DepositosMovimientoService depositosMovimientoService;
+    private final CajasMovimientosService cajasMovimientosService;
 
     public CdatCancelacionItemDTO obtenerPorId(Long idCuentaCdat) {
 
@@ -91,6 +94,7 @@ public class CdatCancelacionService {
 
         registrarMovimientoCancelacionCdat(dto, cdat, idUsuario);
         registrarMovimientosSalida(dto, cdat, idUsuario);
+        registrarMovimientoCajaSalida(dto, cdat, idUsuario);
         registrarMovimientosEntrada(dto, cdat, idUsuario);
 
         // =========================
@@ -237,10 +241,14 @@ public class CdatCancelacionService {
         mov.setFechaMovimiento(dto.getFechaProceso());
         mov.setTipoComprobante(dto.getTipoComprobante());
         mov.setNumeroComprobante(dto.getNumeroComprobante());
-        mov.setTipoMovimiento("551");
+
+        // CDAT: 051 = CANCELACION CAPITAL EFECTIVO
+        mov.setTipoMovimiento("051");
+
         mov.setModulo("11");
         mov.setTarjeta("N");
         mov.setEstablecimiento("CANCELACION CDAT");
+
         mov.setValorDebito(cdat.getValorCapital());
         mov.setValorCredito(BigDecimal.ZERO);
 
@@ -248,7 +256,10 @@ public class CdatCancelacionService {
         mov.setProcesoOrigen("CANCELACION_CDAT");
         mov.setIdOrigen(cdat.getIdCuentaCdat());
 
-        cdatMovimientoService.registrarDebito(mov, idUsuario);
+        cdatMovimientoService.registrarDebito(
+                mov,
+                idUsuario
+        );
     }
 
     private void registrarMovimientosSalida(
@@ -300,6 +311,42 @@ public class CdatCancelacionService {
                     idUsuario
             );
         }
+    }
+
+    private void registrarMovimientoCajaSalida(
+            CdatCancelacionEntradaDTO dto,
+            CdatCancelacionItemDTO cdat,
+            Integer idUsuario
+    ) {
+
+        MediosPagoDTO mediosPago = dto.getMediosPagoSalida();
+
+        if (mediosPago == null) {
+            return;
+        }
+
+        BigDecimal valorEfectivo = nvl(mediosPago.getValorEfectivo());
+
+        if (!mayorCero(valorEfectivo)) {
+            return;
+        }
+
+        if (mediosPago.getIdCaja() == null) {
+            throw new RuntimeException(
+                    "Debe seleccionar una caja abierta para realizar la salida en efectivo."
+            );
+        }
+
+        cajasMovimientosService.registrarCancelacionCdat(
+                mediosPago.getIdCaja(),
+                valorEfectivo,
+                dto.getFechaProceso(),
+                cdat.getIdCuentaCdat(),
+                cdat.getCodigoCdat(),
+                dto.getTipoComprobante(),
+                dto.getNumeroComprobante(),
+                idUsuario
+        );
     }
 
     private void registrarMovimientosEntrada(
@@ -376,7 +423,9 @@ public class CdatCancelacionService {
 
         if (diferencia.compareTo(BigDecimal.ZERO) < 0) {
 
-            BigDecimal totalSalida = totalMediosPago(dto.getMediosPagoSalida());
+            BigDecimal totalSalida =
+                    totalMediosPago(dto.getMediosPagoSalida())
+                            .add(nvl(dto.getValorCuentaPorPagar()));
 
             if (totalSalida.compareTo(diferencia.abs()) != 0) {
                 throw new RuntimeException(

@@ -1,5 +1,9 @@
 package co.assip.erp.cartera.originacion.impresion;
 
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -7,19 +11,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/cartera/originacion/impresion")
 public class OriginacionImpresionController {
 
+    private static final String PERMISO_VIEW =
+            "CARTERA_ORIGINACION_VIEW";
+
+    // =========================================================
+    // DEPENDENCIAS
+    // =========================================================
+
     private final OriginacionExpedientePdfService pdfService;
     private final OriginacionPagareService pagareService;
-
-    public OriginacionImpresionController(
-            OriginacionExpedientePdfService pdfService,
-            OriginacionPagareService pagareService
-    ) {
-        this.pdfService = pdfService;
-        this.pagareService = pagareService;
-    }
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // =========================================================
     // EXPEDIENTE DE LA SOLICITUD
@@ -29,6 +35,8 @@ public class OriginacionImpresionController {
     public ResponseEntity<byte[]> generarExpediente(
             @PathVariable Integer idSolicitudCredito
     ) {
+
+        validarConsulta();
 
         return pdfService.generarPdfResponse(
                 idSolicitudCredito
@@ -44,6 +52,8 @@ public class OriginacionImpresionController {
             @PathVariable Integer idSolicitudCredito,
             @PathVariable Integer idSolicitudAprobacion
     ) {
+
+        validarConsulta();
 
         return pdfService.generarPdfActuacionResponse(
                 idSolicitudCredito,
@@ -68,6 +78,8 @@ public class OriginacionImpresionController {
     consultarDatosPagareDiligenciado(
             @PathVariable Integer idSolicitudCredito
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 pagareService.obtenerPagareDiligenciado(
@@ -97,10 +109,35 @@ public class OriginacionImpresionController {
             @PathVariable Integer idSolicitudCredito
     ) {
 
+        validarConsulta();
+
         return ResponseEntity.ok(
                 pagareService.obtenerPagareEnBlanco(
                         idSolicitudCredito
                 )
         );
+    }
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarConsulta() {
+
+        accessValidator.validarAcceso(
+                usuarioActual(),
+                PERMISO_VIEW
+        );
+    }
+
+    private Usuario usuarioActual() {
+
+        Usuario usuarioActual = new Usuario();
+
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        return usuarioActual;
     }
 }

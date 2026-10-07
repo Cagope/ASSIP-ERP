@@ -4,6 +4,9 @@ import co.assip.erp.cartera.analisis.cancelacionprepago.dto.CancelacionPrepagoCr
 import co.assip.erp.cartera.analisis.cancelacionprepago.dto.CancelacionPrepagoDetalleDTO;
 import co.assip.erp.cartera.analisis.cancelacionprepago.dto.CancelacionPrepagoLineaDTO;
 import co.assip.erp.cartera.analisis.cancelacionprepago.dto.CancelacionPrepagoResumenDTO;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +25,11 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CancelacionPrepagoController {
 
+ private static final String PERMISO_VIEW = "CARTERA_ANALISIS_VIEW";
+
  private final CancelacionPrepagoService service;
+ private final UsuarioSesionService usuarioSesionService;
+ private final AccessValidator accessValidator;
 
  // =========================================================
  // CONTROL
@@ -30,6 +37,8 @@ public class CancelacionPrepagoController {
 
  @GetMapping("/control")
  public Map<String, Object> control() {
+
+  validarAcceso();
 
   Map<String, Object> respuesta = new LinkedHashMap<>();
 
@@ -46,6 +55,9 @@ public class CancelacionPrepagoController {
 
  @GetMapping("/cortes")
  public List<LocalDate> cortes() {
+
+  validarAcceso();
+
   return service.listarCortes();
  }
 
@@ -59,6 +71,9 @@ public class CancelacionPrepagoController {
          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
          LocalDate fechaCorte
  ) {
+
+  validarAcceso();
+
   return service.obtenerResumen(fechaCorte);
  }
 
@@ -72,6 +87,9 @@ public class CancelacionPrepagoController {
          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
          LocalDate fechaCorte
  ) {
+
+  validarAcceso();
+
   return service.listarLineas(fechaCorte);
  }
 
@@ -88,6 +106,8 @@ public class CancelacionPrepagoController {
          @RequestParam(required = false)
          String clasificacion
  ) {
+
+  validarAcceso();
 
   if (clasificacion == null || clasificacion.isBlank()) {
    return service.listarCreditosPorCorte(fechaCorte);
@@ -108,6 +128,9 @@ public class CancelacionPrepagoController {
          @PathVariable
          Long idCarteraCredito
  ) {
+
+  validarAcceso();
+
   return service.obtenerCredito(idCarteraCredito);
  }
 
@@ -124,6 +147,8 @@ public class CancelacionPrepagoController {
          @RequestParam(required = false)
          Long idLineaCredito
  ) {
+
+  validarAcceso();
 
   if (idLineaCredito == null) {
    return service.listarDetalle(fechaCorte);
@@ -144,8 +169,28 @@ public class CancelacionPrepagoController {
          @PathVariable
          Long idCarteraCredito
  ) {
+
+  validarAcceso();
+
   return service.listarHistoriaCredito(
           idCarteraCredito
+  );
+ }
+
+ // =========================================================
+ // SEGURIDAD
+ // =========================================================
+
+ private void validarAcceso() {
+
+  Usuario usuarioActual = new Usuario();
+  usuarioActual.setIdUsuario(
+          usuarioSesionService.idUsuario()
+  );
+
+  accessValidator.validarAcceso(
+          usuarioActual,
+          PERMISO_VIEW
   );
  }
 }

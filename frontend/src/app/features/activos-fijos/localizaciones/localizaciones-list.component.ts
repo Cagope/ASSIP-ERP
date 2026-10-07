@@ -11,6 +11,7 @@ import {
 import { GeneralApi } from '../../../shared/general/general.api';
 import { LocalizacionesPrintService } from './localizaciones-print.service';
 import { LocalizacionesExporterService } from './localizaciones-exporter.service';
+import { SessionService } from '../../../core/auth/session.service';
 
 @Component({
   selector: 'app-localizaciones-list',
@@ -29,12 +30,18 @@ export class LocalizacionesListComponent implements OnInit {
   private readonly printer = inject(LocalizacionesPrintService);
   private readonly exporter = inject(LocalizacionesExporterService);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   localizaciones: LocalizacionListDTO[] = [];
   agenciasMap = new Map<number, string>();
 
   cargando = false;
   error = '';
+  // ===============================
+  // PERMISOS
+  // ===============================
+  readonly puedeEditar =
+    this.session.tienePermiso('ACTIVOS_FIJOS_EDIT');
 
   ngOnInit(): void {
     this.cargarAgencias();
@@ -79,14 +86,20 @@ export class LocalizacionesListComponent implements OnInit {
   // ACCIONES CRUD
   // ===============================
   nuevo(): void {
+    if (!this.puedeEditar) return;
+
     this.router.navigate(['/activos-fijos/localizaciones/nuevo']);
   }
 
   editar(id: number): void {
+    if (!this.puedeEditar) return;
+
     this.router.navigate(['/activos-fijos/localizaciones', id, 'editar']);
   }
 
   eliminar(item: LocalizacionListDTO): void {
+    if (!this.puedeEditar) return;
+
     if (!confirm('¿Eliminar esta localización?')) return;
 
     this.api.eliminar(item.idLocalizacion).subscribe(() => {

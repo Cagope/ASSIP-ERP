@@ -367,9 +367,19 @@
           <button
             type="button"
             class="btn btn--secondary"
-            [disabled]="calculando || desembolsoEjecutado"
+            [disabled]="
+              !puedeDesembolsar
+              || calculando
+              || desembolsoEjecutado
+            "
             (click)="calcular()">
-            {{ calculando ? 'Calculando...' : 'Recalcular' }}
+
+            {{
+            calculando
+            ? 'Calculando...'
+            : 'Recalcular'
+            }}
+
           </button>
 
         </div>

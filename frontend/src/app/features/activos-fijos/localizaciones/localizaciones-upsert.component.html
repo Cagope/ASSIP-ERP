@@ -33,7 +33,10 @@
           class="form-control"
           formControlName="idAgencia">
           <option [ngValue]="null">-- Seleccione --</option>
-          <option *ngFor="let a of agencias" [ngValue]="a.idAgencia">
+
+          <option
+            *ngFor="let a of agencias"
+            [ngValue]="a.idAgencia">
             {{ a.nombreAgencia }}
           </option>
         </select>
@@ -51,7 +54,7 @@
         <button
           type="submit"
           class="btn btn--primary"
-          [disabled]="form.invalid">
+          [disabled]="form.invalid || !puedeEditar">
           Guardar
         </button>
 

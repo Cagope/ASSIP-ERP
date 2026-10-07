@@ -79,8 +79,13 @@
         <td>{{ c.codigo_cuenta }}</td>
         <td>{{ c.documento }}</td>
         <td>{{ c.nombre_completo }}</td>
-        <td>{{ c.nombre_forma_ahorro }}</td>
-        <td>{{ c.nombre_estado }}</td>
+        <td>
+          {{ c.codigo_forma }} - {{ c.nombre_forma }}
+        </td>
+
+        <td>
+          {{ c.codigo_estado }}
+        </td>
         <td class="right">{{ c.saldo_actual_cuenta | number:'1.0-0' }}</td>
         <td>
           <button type="button" class="btn-action-edit btn-action-text" (click)="seleccionarPersona(c)">

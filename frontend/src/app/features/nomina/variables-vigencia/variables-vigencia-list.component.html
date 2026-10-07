@@ -2,6 +2,7 @@
 
   <app-header-actions
     titulo="Variables Vigencia"
+    [mostrarNuevo]="puedeEditar"
     (nuevo)="nuevo()"
     (refrescar)="cargar()"
     (imprimir)="imprimir()"
@@ -57,7 +58,8 @@
             class="btn-action-edit"
             type="button"
             (click)="editar(v.idVariable)"
-            title="Editar">
+            [disabled]="!puedeEditar"
+            [title]="puedeEditar ? 'Editar' : 'Sin permiso para editar'">
             ✏️
           </button>
 
@@ -65,7 +67,8 @@
             class="btn-action-delete"
             type="button"
             (click)="eliminar(v.idVariable)"
-            title="Eliminar">
+            [disabled]="!puedeEditar"
+            [title]="puedeEditar ? 'Eliminar' : 'Sin permiso para eliminar'">
             🗑️
           </button>
         </div>

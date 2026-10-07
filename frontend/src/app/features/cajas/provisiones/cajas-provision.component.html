@@ -1,0 +1,621 @@
+<div class="page">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <div class="page-header">
+
+    <div>
+      <h2>Inicio de caja</h2>
+
+      <p class="page-subtitle">
+        Seleccione la caja de la jornada y confirme los valores
+        iniciales antes de comenzar las operaciones.
+      </p>
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJES -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="mensajeError"
+    class="alert alert-error">
+
+    {{ mensajeError }}
+
+  </div>
+
+  <div
+    *ngIf="mensajeExito"
+    class="alert alert-success">
+
+    {{ mensajeExito }}
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CARGANDO -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="cargando"
+    class="card">
+
+    <div class="loading">
+      Consultando estado de caja...
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- SIN CAJA VINCULADA -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="!cargando && !cajaActiva"
+    class="card">
+
+    <div class="card-header">
+
+      <div>
+        <h3>Seleccionar caja</h3>
+
+        <p>
+          Seleccione la caja que operará durante la jornada actual.
+        </p>
+      </div>
+
+    </div>
+
+
+    <div
+      *ngIf="cajasDisponibles.length > 0"
+      class="seleccion-caja">
+
+      <div class="form-field">
+
+        <label for="cajaInicial">
+          Caja
+        </label>
+
+        <select
+          id="cajaInicial"
+          [(ngModel)]="idCajaSeleccionada"
+          [disabled]="vinculando">
+
+          <option [ngValue]="null">
+            Seleccione una caja
+          </option>
+
+          <option
+            *ngFor="let caja of cajasDisponibles"
+            [ngValue]="caja.idCaja">
+
+            {{ descripcionCaja(caja) }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="form-actions">
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="vincularCaja()"
+          [disabled]="
+            vinculando ||
+            idCajaSeleccionada === null
+          ">
+
+          {{
+          vinculando
+          ? 'Seleccionando...'
+          : 'Continuar'
+          }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div
+      *ngIf="cajasDisponibles.length === 0"
+      class="empty-state">
+
+      <strong>
+        No hay cajas disponibles
+      </strong>
+
+      <p>
+        No existe una caja disponible para iniciar la jornada
+        con el usuario actual.
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- CAJA DE LA JORNADA -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="!cargando && cajaActiva"
+    class="card">
+
+    <div class="card-header">
+
+      <div>
+        <h3>Caja de la jornada</h3>
+
+        <p>
+          Caja asignada al usuario autenticado para la jornada actual.
+        </p>
+      </div>
+
+
+      <span
+        class="status-badge"
+        [class.status-active]="apertura?.tieneProvision"
+        [class.status-pending]="!apertura?.tieneProvision">
+
+        {{
+          apertura?.tieneProvision
+            ? apertura?.estado
+            : 'PENDIENTE DE APERTURA'
+        }}
+
+      </span>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- INFORMACIÓN DE LA CAJA -->
+    <!-- =================================================== -->
+
+    <div class="summary-grid">
+
+      <div class="summary-item">
+
+        <span class="summary-label">
+          Caja
+        </span>
+
+        <strong class="summary-value">
+          {{ cajaActiva.codigoCaja }}
+          -
+          {{ cajaActiva.descripcionCaja }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-item">
+
+        <span class="summary-label">
+          Agencia
+        </span>
+
+        <strong class="summary-value">
+          {{ cajaActiva.idAgencia }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-item">
+
+        <span class="summary-label">
+          Fecha de jornada
+        </span>
+
+        <strong class="summary-value">
+          {{
+          apertura?.fechaJornada
+          | date:'dd/MM/yyyy'
+          }}
+        </strong>
+
+      </div>
+
+
+      <div class="summary-item">
+
+        <span class="summary-label">
+          Usuario
+        </span>
+
+        <strong class="summary-value">
+          {{ cajaActiva.nombreCompleto }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- INFORMACIÓN DEL SALDO ANTERIOR -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="
+        apertura &&
+        !apertura.tieneProvision &&
+        !modoCambio
+      "
+      class="opening-info">
+
+      <ng-container
+        *ngIf="
+          apertura.tieneCierreAnterior;
+          else primeraApertura
+        ">
+
+        <strong>
+          Continuidad de caja
+        </strong>
+
+        <p>
+          Los valores iniciales fueron propuestos a partir del
+          cierre del
+
+          <strong>
+            {{
+            apertura.fechaUltimoCierre
+            | date:'dd/MM/yyyy'
+            }}
+          </strong>.
+
+          Durante esta etapa pueden ser modificados antes de
+          confirmar el inicio de caja.
+        </p>
+
+      </ng-container>
+
+
+      <ng-template #primeraApertura>
+
+        <strong>
+          Primera apertura
+        </strong>
+
+        <p>
+          Esta caja no tiene un cierre anterior registrado.
+          Ingrese los valores físicos con los que inicia
+          la jornada.
+        </p>
+
+      </ng-template>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- APERTURA / PROVISIÓN -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="
+        apertura &&
+        !apertura.tieneProvision &&
+        !modoCambio
+      "
+      class="opening-section">
+
+      <div class="section-title">
+
+        <h4>Valores iniciales</h4>
+
+        <p>
+          Verifique el efectivo y los cheques físicos antes
+          de iniciar operaciones.
+        </p>
+
+      </div>
+
+
+      <div class="opening-grid">
+
+        <!-- EFECTIVO -->
+
+        <div class="form-field">
+
+          <label for="efectivoInicio">
+            Efectivo inicial
+          </label>
+
+          <input
+            id="efectivoInicio"
+            type="text"
+            numericFormat
+            [(ngModel)]="efectivoInicio"
+            [disabled]="abriendo">
+
+        </div>
+
+
+        <!-- CHEQUES -->
+
+        <div class="form-field">
+
+          <label for="chequesInicio">
+            Cheques iniciales
+          </label>
+
+          <input
+            id="chequesInicio"
+            type="text"
+            numericFormat
+            [(ngModel)]="chequesInicio"
+            [disabled]="abriendo">
+
+        </div>
+
+      </div>
+
+
+      <div class="opening-actions">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="iniciarCambioCaja()"
+          [disabled]="abriendo">
+
+          Cambiar caja
+
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="abrirCaja()"
+          [disabled]="abriendo">
+
+          {{
+          abriendo
+          ? 'Iniciando...'
+          : 'Iniciar caja'
+          }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- CAJA ABIERTA -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="
+        apertura &&
+        apertura.tieneProvision
+      "
+      class="opening-confirmed">
+
+      <div class="opening-confirmed-header">
+
+        <div>
+
+          <strong>
+            Caja lista para operar
+          </strong>
+
+          <p>
+            La apertura de la jornada fue realizada correctamente.
+          </p>
+
+        </div>
+
+
+        <span class="provision-number">
+          Provisión {{ apertura.idProvision }}
+        </span>
+
+      </div>
+
+
+      <div class="summary-grid opening-values">
+
+        <div class="summary-item">
+
+          <span class="summary-label">
+            Efectivo inicial
+          </span>
+
+          <strong class="summary-value">
+            {{
+            apertura.efectivoInicio
+            | number:'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="summary-item">
+
+          <span class="summary-label">
+            Cheques iniciales
+          </span>
+
+          <strong class="summary-value">
+            {{
+            apertura.chequesInicio
+            | number:'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="summary-item">
+
+          <span class="summary-label">
+            Estado
+          </span>
+
+          <strong class="summary-value">
+            {{ apertura.estado }}
+          </strong>
+
+        </div>
+
+
+        <div class="summary-item">
+
+          <span class="summary-label">
+            Fecha contable
+          </span>
+
+          <strong class="summary-value">
+            {{
+            apertura.fechaJornada
+            | date:'dd/MM/yyyy'
+            }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- CAMBIO / CORRECCIÓN DE CAJA -->
+    <!-- =================================================== -->
+
+    <div
+      *ngIf="modoCambio"
+      class="change-section">
+
+      <div class="section-title">
+
+        <h4>Cambiar caja</h4>
+
+        <p>
+          Seleccione la caja correcta antes de iniciar
+          operaciones.
+        </p>
+
+      </div>
+
+
+      <div
+        *ngIf="cajasDisponibles.length > 0"
+        class="seleccion-caja change-form">
+
+        <div class="form-field">
+
+          <label for="nuevaCaja">
+            Nueva caja
+          </label>
+
+          <select
+            id="nuevaCaja"
+            [(ngModel)]="idCajaSeleccionada"
+            [disabled]="cambiando">
+
+            <option [ngValue]="null">
+              Seleccione una caja
+            </option>
+
+            <option
+              *ngFor="let caja of cajasDisponibles"
+              [ngValue]="caja.idCaja">
+
+              {{ descripcionCaja(caja) }}
+
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="form-actions">
+
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="cancelarCambioCaja()"
+            [disabled]="cambiando">
+
+            Cancelar
+
+          </button>
+
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="cambiarCaja()"
+            [disabled]="
+              cambiando ||
+              idCajaSeleccionada === null
+            ">
+
+            {{
+            cambiando
+            ? 'Cambiando...'
+            : 'Confirmar cambio'
+            }}
+
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div
+        *ngIf="cajasDisponibles.length === 0"
+        class="empty-state">
+
+        <strong>
+          No hay otra caja disponible
+        </strong>
+
+        <p>
+          No existen cajas disponibles para realizar el cambio
+          durante esta jornada.
+        </p>
+
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="cancelarCambioCaja()">
+
+          Volver
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>

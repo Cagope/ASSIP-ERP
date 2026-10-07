@@ -97,6 +97,12 @@ export const depositosMenu = {
       children: [
 
         {
+          label: 'Dashboard Depósitos',
+          route: '/depositos/analisis/dashboard-depositos',
+          permiso: 'DEPOSITOS_DASHBOARD_VIEW'
+        },
+
+        {
           label: 'Concentración de captaciones',
           route: '/depositos/analisis/concentracion',
           permiso: 'DEPOSITOS_ANALISIS_VIEW'

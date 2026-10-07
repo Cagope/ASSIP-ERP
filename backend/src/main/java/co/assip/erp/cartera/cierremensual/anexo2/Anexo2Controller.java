@@ -4,9 +4,16 @@ import co.assip.erp.cartera.cierremensual.anexo2.dto.DetalleAnexo2DTO;
 import co.assip.erp.cartera.cierremensual.anexo2.dto.MoraAnexo2DTO;
 import co.assip.erp.cartera.cierremensual.anexo2.dto.ResumenAnexo2DTO;
 import co.assip.erp.cartera.cierremensual.anexo2.dto.TrabajoAnexo2DTO;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -15,7 +22,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Anexo2Controller {
 
+    private static final String PERMISO_VIEW =
+            "CARTERA_CIERRE_VIEW";
+
+    private static final String PERMISO_EXECUTE =
+            "CARTERA_CIERRE_EXECUTE";
+
+    // =========================================================
+    // DEPENDENCIAS
+    // =========================================================
+
     private final Anexo2Service service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
 
     // =========================================================
@@ -26,6 +45,8 @@ public class Anexo2Controller {
     public ResponseEntity<Anexo2Service.ResultadoPreparacionAnexo2> preparar(
             @PathVariable Integer idCierreCartera
     ) {
+
+        validarEjecucion();
 
         return ResponseEntity.ok(
                 service.preparar(
@@ -44,6 +65,8 @@ public class Anexo2Controller {
             @PathVariable Integer idCierreCartera
     ) {
 
+        validarEjecucion();
+
         service.cerrar(
                 idCierreCartera
         );
@@ -60,6 +83,8 @@ public class Anexo2Controller {
     public ResponseEntity<List<Integer>> obtenerModelosDelCierre(
             @PathVariable Integer idCierreCartera
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.obtenerModelosDelCierre(
@@ -78,6 +103,8 @@ public class Anexo2Controller {
             @PathVariable Integer idCierreCartera,
             @PathVariable Integer idModeloPe
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.obtenerDetalle(
@@ -98,6 +125,8 @@ public class Anexo2Controller {
             @PathVariable Integer idModeloPe
     ) {
 
+        validarConsulta();
+
         return ResponseEntity.ok(
                 service.obtenerTrabajo(
                         idCierreCartera,
@@ -116,6 +145,8 @@ public class Anexo2Controller {
             @PathVariable Integer idCierreCartera,
             @PathVariable Integer idModeloPe
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.obtenerMora(
@@ -136,11 +167,49 @@ public class Anexo2Controller {
             @PathVariable Integer idModeloPe
     ) {
 
+        validarConsulta();
+
         return ResponseEntity.ok(
                 service.obtenerResumen(
                         idCierreCartera,
                         idModeloPe
                 )
         );
+    }
+
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarConsulta() {
+
+        Usuario usuarioActual = usuarioActual();
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO_VIEW
+        );
+    }
+
+    private void validarEjecucion() {
+
+        Usuario usuarioActual = usuarioActual();
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO_EXECUTE
+        );
+    }
+
+    private Usuario usuarioActual() {
+
+        Usuario usuarioActual = new Usuario();
+
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        return usuarioActual;
     }
 }

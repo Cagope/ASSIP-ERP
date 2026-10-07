@@ -91,6 +91,11 @@ export class LiquidacionV2PreviewComponent implements OnInit {
   // =========================================================
   // GETTERS UI
   // =========================================================
+
+  get puedeLiquidar(): boolean {
+    return this.session.tienePermiso('NOMINA_LIQUIDACION_EXECUTE');
+  }
+
   get items(): LiquidacionV2PreviewItemDTO[] {
     return this.resultado?.items ?? [];
   }
@@ -104,11 +109,18 @@ export class LiquidacionV2PreviewComponent implements OnInit {
   }
 
   get puedePrevisualizar(): boolean {
-    return !this.cargando && !this.ejecutando && !this.cargandoPeriodo;
+    return this.puedeLiquidar
+      && !this.cargando
+      && !this.ejecutando
+      && !this.cargandoPeriodo;
   }
 
   get puedeEjecutar(): boolean {
-    return !this.cargando && !this.ejecutando && !this.cargandoPeriodo && this.hayItems;
+    return this.puedeLiquidar
+      && !this.cargando
+      && !this.ejecutando
+      && !this.cargandoPeriodo
+      && this.hayItems;
   }
 
   // =========================================================
@@ -163,6 +175,10 @@ export class LiquidacionV2PreviewComponent implements OnInit {
   // =========================================================
   preview(): void {
 
+    if (!this.puedeLiquidar) {
+      return;
+    }
+
     if (this.cargando || this.ejecutando || this.cargandoPeriodo) {
       return;
     }
@@ -203,6 +219,10 @@ export class LiquidacionV2PreviewComponent implements OnInit {
   // EJECUTAR
   // =========================================================
   ejecutar(): void {
+
+    if (!this.puedeLiquidar) {
+      return;
+    }
 
     if (this.cargando || this.ejecutando || this.cargandoPeriodo) {
       return;

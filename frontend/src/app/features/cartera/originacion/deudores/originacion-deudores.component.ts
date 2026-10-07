@@ -196,6 +196,11 @@ export class OriginacionDeudoresComponent
   ) {
   }
 
+  get puedeEditar(): boolean {
+    return this.sessionService.tienePermiso(
+      'CARTERA_ORIGINACION_EDIT'
+    );
+  }
 
   // =========================================================
   // INICIO
@@ -724,6 +729,14 @@ export class OriginacionDeudoresComponent
 
   agregarCodeudor(): void {
 
+    if (!this.puedeEditar) {
+
+      this.error =
+        'El usuario no tiene permiso para agregar codeudores a la solicitud.';
+
+      return;
+    }
+
     const idSolicitudCredito =
       this.obtenerIdSolicitudCredito();
 
@@ -824,6 +837,14 @@ export class OriginacionDeudoresComponent
   retirarCodeudor(
     codeudor: SolicitudDeudor
   ): void {
+
+    if (!this.puedeEditar) {
+
+      this.error =
+        'El usuario no tiene permiso para retirar codeudores de la solicitud.';
+
+      return;
+    }
 
     if (
       !codeudor

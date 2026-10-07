@@ -12,6 +12,7 @@ import {
   TipoComprobante
 } from '../../contabilidad/tipos-comprobantes/tipos-comprobantes.api';
 
+
 @Component({
   selector: 'app-cdat-cancelacion',
   standalone: true,
@@ -157,6 +158,57 @@ export class CdatCancelacionComponent extends CdatCancelacionValores {
     });
   }
 
+  cargarCajasAbiertas(): void {
+
+    this.cajasAbiertas = [];
+
+    if (!this.model.idAgencia || !this.model.fechaProceso) {
+      return;
+    }
+
+    this.api
+      .obtenerCajasAbiertas(
+        this.model.idAgencia,
+        this.model.fechaProceso
+      )
+      .subscribe({
+
+        next: (data: any[]) => {
+
+          this.cajasAbiertas = data ?? [];
+
+          const idsDisponibles = new Set(
+            this.cajasAbiertas.map(c => Number(c.idCaja))
+          );
+
+          if (
+            this.idCajaEntrada !== null
+            && !idsDisponibles.has(Number(this.idCajaEntrada))
+          ) {
+            this.idCajaEntrada = null;
+          }
+
+          if (
+            this.idCajaSalida !== null
+            && !idsDisponibles.has(Number(this.idCajaSalida))
+          ) {
+            this.idCajaSalida = null;
+          }
+        },
+
+        error: (err: any) => {
+
+          this.cajasAbiertas = [];
+          this.idCajaEntrada = null;
+          this.idCajaSalida = null;
+
+          this.error =
+            err?.error?.message ||
+            'No se pudieron consultar las cajas abiertas.';
+        }
+      });
+  }
+
   cargarProximoCodigoNuevoCdat(): void {
 
     this.proximoCodigoNuevoCdat = '';
@@ -188,31 +240,6 @@ export class CdatCancelacionComponent extends CdatCancelacionValores {
     if (!this.proximoCodigoNuevoCdat) {
       this.cargarProximoCodigoNuevoCdat();
     }
-  }
-
-  cargarCajasAbiertas(): void {
-
-    this.cajasAbiertas = [];
-
-    if (!this.model.idAgencia || !this.model.fechaProceso) {
-      return;
-    }
-
-    this.api.obtenerCajasAbiertas(
-      this.model.idAgencia,
-      this.model.fechaProceso
-    ).subscribe({
-
-      next: (data: any[]) => {
-        this.cajasAbiertas = data ?? [];
-      },
-
-      error: (err: any) => {
-        this.error =
-          err.error?.message ||
-          'No se pudieron cargar las cajas abiertas.';
-      }
-    });
   }
 
   async cargarConsecutivoComprobante(): Promise<void> {
@@ -535,7 +562,9 @@ export class CdatCancelacionComponent extends CdatCancelacionValores {
 
     this.model.mediosPagoEntrada = {
 
-      idCaja: this.idCajaEntrada,
+      idCaja: this.requiereCajaEntrada()
+        ? this.idCajaEntrada
+        : null,
 
       valorEfectivo: this.valorEfectivoEntrada || 0,
       valorCheques: this.totalChequesEntrada(),
@@ -551,7 +580,9 @@ export class CdatCancelacionComponent extends CdatCancelacionValores {
 
     this.model.mediosPagoSalida = {
 
-      idCaja: this.idCajaSalida,
+      idCaja: this.requiereCajaSalida()
+        ? this.idCajaSalida
+        : null,
 
       valorEfectivo: this.valorEfectivoSalida || 0,
       valorCheques: this.totalChequesSalida(),
@@ -682,9 +713,36 @@ export class CdatCancelacionComponent extends CdatCancelacionValores {
   }
 
   private validarBase(): string | null {
-    if (!this.cdat) return 'Debe seleccionar primero el CDAT.';
-    if (!this.model.fechaProceso) return 'La fecha del proceso es obligatoria.';
-    if (!this.model.tipoComprobante) return 'Debe seleccionar el tipo de comprobante.';
+
+    if (!this.cdat) {
+      return 'Debe seleccionar primero el CDAT.';
+    }
+
+    if (!this.model.fechaProceso) {
+      return 'La fecha del proceso es obligatoria.';
+    }
+
+    if (!this.model.tipoComprobante) {
+      return 'Debe seleccionar el tipo de comprobante.';
+    }
+
+    // =====================================================
+    // CAJA
+    // La caja solo es obligatoria cuando existe movimiento
+    // en efectivo. Se selecciona entre las cajas abiertas.
+    // =====================================================
+
+    if (this.requiereCajaEntrada() && !this.idCajaEntrada) {
+      return 'Debe seleccionar una caja abierta para recibir el efectivo.';
+    }
+
+    if (this.requiereCajaSalida() && !this.idCajaSalida) {
+      return 'Debe seleccionar una caja abierta para entregar el efectivo.';
+    }
+
+    // =====================================================
+    // RENOVACIÓN
+    // =====================================================
 
     if (Number(this.model.valorRenovacion || 0) > 0) {
 
@@ -700,9 +758,10 @@ export class CdatCancelacionComponent extends CdatCancelacionValores {
         return 'No se pudo calcular la fecha vencimiento.';
       }
 
-      if (!this.model.tasaNominalAnualNuevoCdat
-        || this.model.tasaNominalAnualNuevoCdat <= 0) {
-
+      if (
+        !this.model.tasaNominalAnualNuevoCdat
+        || this.model.tasaNominalAnualNuevoCdat <= 0
+      ) {
         return 'Debe ingresar la tasa nominal anual.';
       }
 

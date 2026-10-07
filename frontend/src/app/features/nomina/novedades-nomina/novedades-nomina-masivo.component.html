@@ -150,7 +150,7 @@
           type="button"
           class="btn btn--primary"
           (click)="generar()"
-          [disabled]="procesando || !formularioValido || !preview || preview.length === 0">
+          [disabled]="procesando || !formularioValido || !preview || preview.length === 0 || !puedeEditar">
           {{ procesando ? '⏳ Aplicando...' : '✅ Aplicar' }}
         </button>
 

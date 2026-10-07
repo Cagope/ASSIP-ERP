@@ -2,30 +2,38 @@
 
   <app-header-actions
     titulo="Localizaciones"
+    [mostrarNuevo]="puedeEditar"
     (nuevo)="nuevo()"
     (refrescar)="cargar()"
     (imprimir)="imprimir()"
     (exportar)="exportar()">
   </app-header-actions>
 
-  <table class="table" *ngIf="!cargando && localizaciones.length > 0; else vacio">
+  <table
+    class="table"
+    *ngIf="!cargando && localizaciones.length > 0; else vacio">
+
     <thead>
     <tr>
       <th>Nombre</th>
       <th>Teléfono</th>
       <th>Agencia</th>
-      <th>Acciones</th>
+      <th *ngIf="puedeEditar">Acciones</th>
     </tr>
     </thead>
 
     <tbody>
     <tr *ngFor="let l of localizaciones">
+
       <td>{{ l.nombre }}</td>
+
       <td>{{ l.telefono || '-' }}</td>
+
       <td>{{ nombreAgencia(l.idAgencia) }}</td>
 
-      <td>
+      <td *ngIf="puedeEditar">
         <div class="acciones">
+
           <button
             class="btn-action-edit"
             type="button"
@@ -41,10 +49,13 @@
             title="Eliminar">
             🗑️
           </button>
+
         </div>
       </td>
+
     </tr>
     </tbody>
+
   </table>
 
   <div *ngIf="cargando" class="loading">
@@ -52,7 +63,9 @@
   </div>
 
   <ng-template #vacio>
-    <p class="empty">No hay localizaciones registradas.</p>
+    <p class="empty">
+      No hay localizaciones registradas.
+    </p>
   </ng-template>
 
 </div>

@@ -41,11 +41,11 @@ import {
 
 import {
   ExpedienteAsociadoApi
-} from '../../../gerencia/expediente-asociado/expediente-asociado.api';
+} from '../../../consultas/expediente-asociado/expediente-asociado.api';
 
 import type {
   ExpedienteAsociado
-} from '../../../gerencia/expediente-asociado/expediente-asociado.dto';
+} from '../../../consultas/expediente-asociado/expediente-asociado.dto';
 
 
 // =========================================================
@@ -579,7 +579,9 @@ export class OriginacionExpedientePrintService {
     }
 
     const resumen = expediente.resumenGeneral;
+    const afiliacion = expediente.afiliacion;
     const contacto = expediente.contacto;
+    const financiero = expediente.informacionFinanciera;
 
     return {
 
@@ -613,16 +615,19 @@ export class OriginacionExpedientePrintService {
         ?? expediente.nombreCompleto
         ?? null,
 
-
       // -----------------------------------------------------
       // VINCULACIÓN
       // -----------------------------------------------------
 
       fechaAfiliacion:
-        resumen?.fechaAfiliacion ?? null,
+        afiliacion?.fechaAfiliacion
+        ?? resumen?.fechaAfiliacion
+        ?? null,
 
-      cuentaAsociado: null,
-
+      cuentaAsociado:
+        afiliacion?.numeroAfiliacion
+        ?? afiliacion?.codigoAsociado
+        ?? null,
 
       // -----------------------------------------------------
       // INFORMACIÓN PERSONAL
@@ -643,7 +648,6 @@ export class OriginacionExpedientePrintService {
       personasACargo: null,
 
       nombreConyuge: null,
-
 
       // -----------------------------------------------------
       // CONTACTO
@@ -679,23 +683,28 @@ export class OriginacionExpedientePrintService {
         ?? resumen?.departamento
         ?? null,
 
-
       // -----------------------------------------------------
       // ACTIVIDAD ECONÓMICA
       // -----------------------------------------------------
 
       actividadEconomica:
-        resumen?.nombreActividadDian
+        financiero?.nombreActividadEconomica
+        ?? resumen?.nombreActividadDian
         ?? resumen?.nombreActividadSes
         ?? null,
 
       sectorEconomico:
-        resumen?.nombreSectorEconomico ?? null,
+        financiero?.nombreSectorEconomico
+        ?? resumen?.nombreSectorEconomico
+        ?? null,
 
       ocupacion:
-        resumen?.ocupacion ?? null,
+        financiero?.ocupacion
+        ?? resumen?.ocupacion
+        ?? null,
 
-      profesion: null,
+      profesion:
+        financiero?.profesion ?? null,
 
       // -----------------------------------------------------
       // INFORMACIÓN LABORAL
@@ -703,11 +712,14 @@ export class OriginacionExpedientePrintService {
 
       empresa:
         contacto?.empresa
+        ?? afiliacion?.nombreEmpresa
         ?? resumen?.empresa
         ?? null,
 
       cargo:
-        contacto?.cargo ?? null,
+        contacto?.cargo
+        ?? afiliacion?.cargoEmpresa
+        ?? null,
 
       direccionLaboral:
         contacto?.direccionEmpresa ?? null,
@@ -719,7 +731,8 @@ export class OriginacionExpedientePrintService {
 
       celularLaboral: null,
 
-      fechaVinculacionLaboral: null
+      fechaVinculacionLaboral:
+        afiliacion?.fechaIngresoEmpresa ?? null
 
     };
   }

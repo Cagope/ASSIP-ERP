@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
+import { SessionService } from '../../../core/auth/session.service';
 
 import {
   EventosLiquidacionApi,
@@ -21,6 +22,7 @@ export class EventosLiquidacionComponent implements OnInit {
 
   private readonly api = inject(EventosLiquidacionApi);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   rows: EventoLiquidacionListDTO[] = [];
   rowsFiltradas: EventoLiquidacionListDTO[] = [];
@@ -28,6 +30,10 @@ export class EventosLiquidacionComponent implements OnInit {
   q = '';
   cargando = false;
   error = '';
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
 
   ngOnInit(): void {
     this.cargar();
@@ -79,15 +85,27 @@ export class EventosLiquidacionComponent implements OnInit {
   }
 
   nuevo(): void {
+    if (!this.puedeEditar) return;
+
     this.router.navigate(['/nomina/eventos-liquidacion/nuevo']);
   }
 
   editar(row: EventoLiquidacionListDTO): void {
-    this.router.navigate(['/nomina/eventos-liquidacion', row.idEventoLiquidacion, 'editar']);
+    if (!this.puedeEditar) return;
+
+    this.router.navigate([
+      '/nomina/eventos-liquidacion',
+      row.idEventoLiquidacion,
+      'editar'
+    ]);
   }
 
   eliminar(row: EventoLiquidacionListDTO): void {
-    const ok = confirm(`¿Desea eliminar el evento ${row.idEventoLiquidacion}?`);
+    if (!this.puedeEditar) return;
+
+    const ok = confirm(
+      `¿Desea eliminar el evento ${row.idEventoLiquidacion}?`
+    );
     if (!ok) return;
 
     this.api.eliminar(row.idEventoLiquidacion).subscribe({

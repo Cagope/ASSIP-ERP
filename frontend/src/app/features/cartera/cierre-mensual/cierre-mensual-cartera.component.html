@@ -123,7 +123,8 @@
           class="btn btn--primary"
           (click)="ejecutarCierre()"
           [disabled]="
-            ejecutando
+            !puedeEjecutar
+            || ejecutando
             || regenerando
             || cerrandoFotografia
             || cargando
@@ -148,11 +149,12 @@
           *ngIf="
             obtenerCierreFecha() as cierreFecha
           "
-          type="button"
-          class="btn btn--warning"
-          (click)="regenerarFoto(cierreFecha)"
-          [disabled]="
-            ejecutando
+                  type="button"
+                  class="btn btn--warning"
+                  (click)="regenerarFoto(cierreFecha)"
+                  [disabled]="
+            !puedeEjecutar
+            || ejecutando
             || regenerando
             || cerrandoFotografia
             || cargando
@@ -305,7 +307,8 @@
           class="btn btn--primary btn-sm"
           (click)="cerrarFotografia(cierre)"
           [disabled]="
-            ejecutando
+            !puedeEjecutar
+            || ejecutando
             || regenerando
             || cerrandoFotografia
             || cargando
@@ -903,11 +906,12 @@
                 class="btn btn--primary btn-sm"
                 (click)="cerrarFotografia(cierre)"
                 [disabled]="
-                    ejecutando
-                    || regenerando
-                    || cerrandoFotografia
-                    || cargando
-                  ">
+                  !puedeEjecutar
+                  || ejecutando
+                  || regenerando
+                  || cerrandoFotografia
+                  || cargando
+                ">
 
                   <span *ngIf="!cerrandoFotografia">
                     Cerrar

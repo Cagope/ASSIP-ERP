@@ -74,6 +74,8 @@ export interface CdatCancelacionEntradaDTO {
   mediosPagoEntrada: any;
   mediosPagoSalida: any;
 
+  valorCuentaPorPagar: number;
+
   observacion: string;
 
   // =========================

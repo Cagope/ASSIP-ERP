@@ -9,6 +9,7 @@ import co.assip.erp.cdat.cdats.dto.CdatSaveResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import co.assip.erp.cajas.movimientos.CajasMovimientosService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -29,6 +30,7 @@ public class CdatService {
     private final CdatAperturaContabilizacionService contabilizacionService;
     private final DepositosMovimientoService depositosMovimientoService;
     private final CdatMovimientoService cdatMovimientoService;
+    private final CajasMovimientosService cajasMovimientosService;
 
     public List<CdatListDTO> listar() {
         return repository.listar();
@@ -122,6 +124,16 @@ public class CdatService {
         contabilizacionService.contabilizarApertura(
                 idCuentaCdat,
                 dto,
+                idUsuario
+        );
+
+        cajasMovimientosService.registrarAperturaCdat(
+                dto.getMediosPago(),
+                dto.getFechaComprobante(),
+                idCuentaCdat,
+                codigoCdat,
+                dto.getTipoComprobante(),
+                dto.getNumeroComprobante(),
                 idUsuario
         );
 

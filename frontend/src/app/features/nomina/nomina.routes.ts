@@ -12,21 +12,15 @@ import { EMPLEADOS_ROUTES } from './empleados/empleados.routes';
 import { EMPLEADO_CONTRATOS_ROUTES } from './empleado-contratos/empleado-contratos.routes';
 import { CESANTIAS_ROUTES } from './cesantias/cesantias.routes';
 import { DESPRENDIBLE_ROUTES } from './desprendible/desprendible.routes';
-
-// ✅ NUEVO: Novedades Nómina
 import { NOVEDADES_NOMINA_ROUTES } from './novedades-nomina/novedades-nomina.routes';
-
-// ✅ NUEVO: Períodos Nómina
 import { PERIODOS_NOMINA_ROUTES } from './periodos-nomina/periodos-nomina.routes';
 import { LIQUIDACION_ROUTES } from './liquidacion/liquidacion.routes';
 import { CONCEPTO_CUENTAS_CONTABLES_ROUTES } from './concepto-cuentas-contables/concepto-cuentas-contables.routes';
 import { TIPOS_CONTRATOS_ROUTES } from './tipos-contratos/tipos-contratos.routes';
 import { LIQUIDACION_V2_ROUTES } from './liquidacion-v2/liquidacion-v2.routes';
-
-// ✅ NUEVO: Eventos de liquidación
 import { EVENTOS_LIQUIDACION_ROUTES } from './eventos-liquidacion/eventos-liquidacion.routes';
-import { NOVEDADES_EMPLEADO_INFORME_ROUTES } from './informes/novedades-empleado/novedades-empleado.routes';
 
+import { NOVEDADES_EMPLEADO_INFORME_ROUTES } from './informes/novedades-empleado/novedades-empleado.routes';
 import { NOVEDADES_CONCEPTO_INFORME_ROUTES } from './informes/novedades-concepto/novedades-concepto.routes';
 import { CONSOLIDADO_CONCEPTOS_INFORME_ROUTES } from './informes/consolidado-conceptos/consolidado-conceptos.routes';
 
@@ -58,6 +52,7 @@ export const NOMINA_ROUTES: Routes = [
   // =========================
   // 📄 DESPRENDIBLES DE NÓMINA
   // =========================
+
   {
     path: 'desprendible',
     children: DESPRENDIBLE_ROUTES
@@ -136,6 +131,10 @@ export const NOMINA_ROUTES: Routes = [
     children: CAJA_COMPENSACION_ROUTES
   },
 
+  // =========================
+  // 🧾 CONTABILIZACIÓN
+  // =========================
+
   {
     path: 'contabilizacion/liquidacion',
     loadChildren: () =>
@@ -170,26 +169,17 @@ export const NOMINA_ROUTES: Routes = [
   // =========================
   // 📊 INFORMES
   // =========================
+
   {
     path: 'informes/novedades-empleado',
     children: NOVEDADES_EMPLEADO_INFORME_ROUTES
   },
+
   {
     path: 'informes/novedades-concepto',
     children: NOVEDADES_CONCEPTO_INFORME_ROUTES
   },
 
-  // =========================
-  // 📊 INFORMES
-  // =========================
-  {
-    path: 'informes/novedades-empleado',
-    children: NOVEDADES_EMPLEADO_INFORME_ROUTES
-  },
-  {
-    path: 'informes/novedades-concepto',
-    children: NOVEDADES_CONCEPTO_INFORME_ROUTES
-  },
   {
     path: 'informes/consolidado-conceptos',
     children: CONSOLIDADO_CONCEPTOS_INFORME_ROUTES

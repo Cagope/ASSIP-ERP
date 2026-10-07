@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
+import { SessionService } from '../../../core/auth/session.service';
 
 import { EmpleadoAutocompleteComponent } from '../busqueda/empleado-autocomplete.component';
 
@@ -46,6 +47,7 @@ export class NovedadesNominaUpsertComponent implements OnInit {
   private readonly api = inject(NovedadesNominaApi);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   private readonly empleadosApi = inject(EmpleadosApi);
   private readonly conceptosApi = inject(ConceptosNominaApi);
@@ -56,6 +58,10 @@ export class NovedadesNominaUpsertComponent implements OnInit {
 
   loading = false;
   guardando = false;
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_NOVEDADES_EDIT');
+  }
 
   empleados: EmpleadoListDTO[] = [];
   conceptos: ConceptoNominaListDTO[] = [];
@@ -275,6 +281,10 @@ export class NovedadesNominaUpsertComponent implements OnInit {
   // GUARDAR
   // =========================================================
   guardar(): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
 
     if (!this.formularioValido) {
       alert('Complete los datos obligatorios de la novedad.');

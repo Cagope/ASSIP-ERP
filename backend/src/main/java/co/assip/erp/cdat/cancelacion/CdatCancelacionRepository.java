@@ -201,7 +201,7 @@ public class CdatCancelacionRepository {
 
     public Integer obtenerCuentaConceptoCancelacionCdat(
             Integer idAgencia,
-            String tipoMovimiento
+            String codigoProceso
     ) {
         String sql = """
         SELECT
@@ -213,26 +213,31 @@ public class CdatCancelacionRepository {
                 ELSE NULL
             END AS cuenta
         FROM cdat.conceptos_contables_cdats
-        WHERE codigo_proceso = 'CANCELACION_CDAT'
-          AND tipo_movimiento = :tipoMovimiento
+        WHERE codigo_proceso = :codigoProceso
           AND activo = TRUE
           AND (id_agencia IS NULL OR id_agencia = :idAgencia)
-        ORDER BY id_agencia DESC
+          AND plazo_desde_meses IS NULL
+          AND plazo_hasta_meses IS NULL
+        ORDER BY
+            CASE WHEN id_agencia = :idAgencia THEN 0 ELSE 1 END
         LIMIT 1
-    """;
+        """;
 
         List<Integer> lista = jdbc.query(
                 sql,
                 new MapSqlParameterSource()
                         .addValue("idAgencia", idAgencia)
-                        .addValue("tipoMovimiento", tipoMovimiento),
+                        .addValue("codigoProceso", codigoProceso),
                 (rs, rowNum) -> (Integer) rs.getObject("cuenta")
         );
 
         if (lista.isEmpty() || lista.get(0) == null) {
             throw new RuntimeException(
-                    "No existe configuración contable para cancelación CDAT: "
-                            + tipoMovimiento
+                    "No existe configuración contable CDAT para el proceso "
+                            + codigoProceso
+                            + " y la agencia "
+                            + idAgencia
+                            + "."
             );
         }
 

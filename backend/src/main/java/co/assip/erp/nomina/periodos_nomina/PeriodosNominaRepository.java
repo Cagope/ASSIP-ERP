@@ -109,7 +109,7 @@ public class PeriodosNominaRepository {
                 new MapSqlParameterSource()
                         .addValue("id", idPeriodo)
                         .addValue("estado", estado)
-                        .addValue("usr", idUsuario != null ? idUsuario : 1)
+                        .addValue("usr", idUsuario)
         );
     }
 
@@ -128,7 +128,7 @@ public class PeriodosNominaRepository {
         jdbc.update(sql,
                 new MapSqlParameterSource()
                         .addValue("id", idPeriodo)
-                        .addValue("usr", idUsuario != null ? idUsuario : 1)
+                        .addValue("usr", idUsuario)
         );
     }
 
@@ -167,7 +167,7 @@ public class PeriodosNominaRepository {
         jdbc.update(sql,
                 new MapSqlParameterSource()
                         .addValue("id", idPeriodo)
-                        .addValue("usr", idUsuario != null ? idUsuario : 1)
+                        .addValue("usr", idUsuario)
         );
     }
 

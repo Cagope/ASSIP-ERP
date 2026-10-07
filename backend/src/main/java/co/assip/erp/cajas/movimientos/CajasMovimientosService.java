@@ -76,10 +76,12 @@ public class CajasMovimientosService {
                     "APERTURA_CDAT",
                     "cdat.cuentas_cdats",
                     idCuentaCdat,
+                    codigoCdat,
                     "INGRESO",
                     "EFECTIVO",
                     valorEfectivo,
                     concepto,
+                    "PENDIENTE",
                     tipoComprobante,
                     numeroComprobante,
                     idUsuario
@@ -99,10 +101,12 @@ public class CajasMovimientosService {
                     "APERTURA_CDAT",
                     "cdat.cuentas_cdats",
                     idCuentaCdat,
+                    codigoCdat,
                     "INGRESO",
                     "CHEQUE",
                     valorCheques,
                     concepto,
+                    "PENDIENTE",
                     tipoComprobante,
                     numeroComprobante,
                     idUsuario
@@ -209,21 +213,18 @@ public class CajasMovimientosService {
                 fechaContable,
                 idDepartamentoCartera,
                 idOperacionDesembolso,
-
                 "CARTERA",
                 "DESEMBOLSO_CREDITO",
                 "cartera.carteras_creditos",
                 idCarteraCredito,
-
+                pagareCartera,
                 "EGRESO",
                 "EFECTIVO",
                 efectivo,
-
                 concepto,
-
+                "REGISTRADO",
                 tipoComprobante,
                 numeroComprobante,
-
                 idUsuario
         );
     }
@@ -314,21 +315,115 @@ public class CajasMovimientosService {
                 fechaContable,
                 idDepartamentoCartera,
                 idOperacionCobro,
-
                 "CARTERA",
                 "DESEMBOLSO_CREDITO",
                 "cartera.carteras_creditos",
                 idCarteraCredito,
-
+                pagareCartera,
                 "INGRESO",
                 "EFECTIVO",
                 cobros,
-
                 concepto,
-
+                "REGISTRADO",
                 tipoComprobante,
                 numeroComprobante,
+                idUsuario
+        );
+    }
 
+    public void registrarCancelacionCdat(
+            Long idCaja,
+            BigDecimal valorEfectivo,
+            LocalDate fechaContable,
+            Long idCuentaCdat,
+            String codigoCdat,
+            String tipoComprobante,
+            String numeroComprobante,
+            Integer idUsuario
+    ) {
+
+        BigDecimal efectivo = nvl(valorEfectivo);
+
+        // Si la cancelación no genera salida física de efectivo,
+        // no corresponde registrar movimiento de Caja.
+        if (efectivo.compareTo(BigDecimal.ZERO) <= 0) {
+            return;
+        }
+
+        if (idCaja == null || idCaja <= 0) {
+            throw new RuntimeException(
+                    "Debe seleccionar la caja para registrar la cancelación en efectivo."
+            );
+        }
+
+        if (fechaContable == null) {
+            throw new RuntimeException(
+                    "Debe indicar la fecha contable para registrar la cancelación."
+            );
+        }
+
+        if (idCuentaCdat == null || idCuentaCdat <= 0) {
+            throw new RuntimeException(
+                    "El CDAT es obligatorio para registrar el movimiento de caja."
+            );
+        }
+
+        Long idProvision = repository.obtenerProvisionAbierta(
+                idCaja,
+                fechaContable
+        );
+
+        if (idProvision == null) {
+            throw new RuntimeException(
+                    "La caja seleccionada no tiene provisión ABIERTA "
+                            + "para la fecha contable."
+            );
+        }
+
+        Long idDepartamentoCdat =
+                repository.obtenerIdDepartamento("11");
+
+        if (idDepartamentoCdat == null) {
+            throw new RuntimeException(
+                    "No existe el departamento operativo "
+                            + "11 - MOVIMIENTOS C.D.A.T."
+            );
+        }
+
+        Long idOperacionCancelacionCdat =
+                repository.obtenerIdOperacion(
+                        "CANCELACION_CDAT"
+                );
+
+        if (idOperacionCancelacionCdat == null) {
+            throw new RuntimeException(
+                    "No existe la operación de caja "
+                            + "CANCELACION_CDAT."
+            );
+        }
+
+        String concepto =
+                "Cancelación CDAT "
+                        + (codigoCdat == null ? "" : codigoCdat);
+
+        repository.insertarMovimientoCaja(
+                idProvision,
+                idCaja,
+                fechaContable,
+                idDepartamentoCdat,
+                idOperacionCancelacionCdat,
+                "CDAT",
+                "CANCELACION_CDAT",
+                "cdat.cuentas_cdats",
+                idCuentaCdat,
+                codigoCdat,
+                "EGRESO",
+                "EFECTIVO",
+                efectivo,
+                concepto,
+                "PENDIENTE",
+                tipoComprobante,
+                numeroComprobante,
                 idUsuario
         );
     }

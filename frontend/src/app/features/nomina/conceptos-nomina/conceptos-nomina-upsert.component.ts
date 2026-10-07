@@ -5,19 +5,26 @@ import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
 import { ConceptosNominaApi, ConceptoNominaFormDTO } from './conceptos-nomina.api';
+import { SessionService } from '../../../core/auth/session.service';
 
 @Component({
   standalone: true,
   selector: 'app-conceptos-nomina-upsert',
   templateUrl: './conceptos-nomina-upsert.component.html',
   styleUrls: ['./conceptos-nomina-upsert.component.scss'],
-  imports: [CommonModule, FormsModule, RouterModule, HeaderActionsComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    HeaderActionsComponent
+  ],
 })
 export class ConceptosNominaUpsertComponent implements OnInit {
 
   private readonly api = inject(ConceptosNominaApi);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   codigo: string | null = null;
 
@@ -25,6 +32,18 @@ export class ConceptosNominaUpsertComponent implements OnInit {
   guardando = false;
 
   form: ConceptoNominaFormDTO = this.nuevo();
+
+  // =========================================================
+  // PERMISOS
+  // =========================================================
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
+
+  // =========================================================
+  // INIT
+  // =========================================================
 
   ngOnInit(): void {
     const codigoParam = this.route.snapshot.paramMap.get('codigo');
@@ -34,6 +53,10 @@ export class ConceptosNominaUpsertComponent implements OnInit {
       this.cargar(this.codigo);
     }
   }
+
+  // =========================================================
+  // CARGAR
+  // =========================================================
 
   cargar(codigo: string): void {
     this.loading = true;
@@ -76,7 +99,15 @@ export class ConceptosNominaUpsertComponent implements OnInit {
     });
   }
 
+  // =========================================================
+  // GUARDAR
+  // =========================================================
+
   guardar(): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
 
     const codigo = (this.form.codigoConcepto ?? '').trim();
     const nombre = (this.form.nombreConcepto ?? '').trim();
@@ -165,9 +196,17 @@ export class ConceptosNominaUpsertComponent implements OnInit {
     }
   }
 
+  // =========================================================
+  // VOLVER
+  // =========================================================
+
   volver(): void {
     this.router.navigate(['/nomina/conceptos-nomina']);
   }
+
+  // =========================================================
+  // NUEVO FORM
+  // =========================================================
 
   private nuevo(): ConceptoNominaFormDTO {
     return {

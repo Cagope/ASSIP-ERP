@@ -2,6 +2,7 @@
 
   <app-header-actions
     titulo="Conceptos Nómina"
+    [mostrarNuevo]="puedeEditar"
     (nuevo)="nuevo()"
     (refrescar)="cargar()"
     (imprimir)="imprimir()"
@@ -37,9 +38,18 @@
 
     <tbody>
     <tr *ngFor="let x of filtrados">
-      <td><strong>{{ x.codigoConcepto }}</strong></td>
-      <td class="nombre">{{ x.nombreConcepto }}</td>
-      <td>{{ x.tipoConcepto }}</td>
+
+      <td>
+        <strong>{{ x.codigoConcepto }}</strong>
+      </td>
+
+      <td class="nombre">
+        {{ x.nombreConcepto }}
+      </td>
+
+      <td>
+        {{ x.tipoConcepto }}
+      </td>
 
       <td class="center">
         <span
@@ -61,11 +71,13 @@
 
       <td>
         <div class="acciones">
+
           <button
             class="btn-action-edit"
             type="button"
             (click)="editar(x.codigoConcepto)"
-            title="Editar">
+            [disabled]="!puedeEditar"
+            [title]="puedeEditar ? 'Editar' : 'Sin permiso para modificar'">
             ✏️
           </button>
 
@@ -73,11 +85,14 @@
             class="btn-action-delete"
             type="button"
             (click)="eliminar(x.codigoConcepto)"
-            title="Eliminar">
+            [disabled]="!puedeEditar"
+            [title]="puedeEditar ? 'Eliminar' : 'Sin permiso para eliminar'">
             🗑️
           </button>
+
         </div>
       </td>
+
     </tr>
     </tbody>
 
@@ -94,7 +109,9 @@
        VACÍO
        ========================= -->
   <ng-template #vacio>
-    <p class="empty">No hay conceptos para mostrar.</p>
+    <p class="empty">
+      No hay conceptos para mostrar.
+    </p>
   </ng-template>
 
 </div>

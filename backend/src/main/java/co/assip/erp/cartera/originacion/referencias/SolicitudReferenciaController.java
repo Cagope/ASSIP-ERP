@@ -3,6 +3,11 @@ package co.assip.erp.cartera.referencias;
 import co.assip.erp.cartera.referencias.dto.SolicitudReferenciaListadoDTO;
 import co.assip.erp.cartera.referencias.dto.SolicitudReferenciaParticipanteDTO;
 import co.assip.erp.cartera.referencias.dto.SolicitudReferenciaPersonalDTO;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -10,20 +15,23 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/cartera/referencias-personales")
 public class SolicitudReferenciaController {
 
+    private static final String PERMISO_VIEW =
+            "CARTERA_ORIGINACION_VIEW";
+
+    private static final String PERMISO_EDIT =
+            "CARTERA_ORIGINACION_EDIT";
+
+    // =========================================================
+    // DEPENDENCIAS
+    // =========================================================
+
     private final SolicitudReferenciaService service;
-
-    // =========================================================
-    // CONSTRUCTOR
-    // =========================================================
-
-    public SolicitudReferenciaController(
-            SolicitudReferenciaService service
-    ) {
-        this.service = service;
-    }
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // =========================================================
     // 1. LISTAR SOLICITUDES
@@ -53,6 +61,8 @@ public class SolicitudReferenciaController {
             String estadoReferencias
     ) {
 
+        validarConsulta();
+
         return service.listar(
                 idAgencia,
                 numeroSolicitud,
@@ -74,6 +84,8 @@ public class SolicitudReferenciaController {
             Integer idSolicitudCredito
     ) {
 
+        validarConsulta();
+
         return service.buscarPorSolicitud(
                 idSolicitudCredito
         );
@@ -89,6 +101,8 @@ public class SolicitudReferenciaController {
             @PathVariable
             Integer idSolicitudCredito
     ) {
+
+        validarConsulta();
 
         return service.listarParticipantes(
                 idSolicitudCredito
@@ -110,6 +124,8 @@ public class SolicitudReferenciaController {
             Integer idSolicitudDeudor
     ) {
 
+        validarConsulta();
+
         return service.buscarParticipante(
                 idSolicitudCredito,
                 idSolicitudDeudor
@@ -126,6 +142,8 @@ public class SolicitudReferenciaController {
             @PathVariable
             Integer idSolicitudCredito
     ) {
+
+        validarConsulta();
 
         return service.listarReferenciasPorSolicitud(
                 idSolicitudCredito
@@ -148,6 +166,8 @@ public class SolicitudReferenciaController {
             Integer idSolicitudDeudor
     ) {
 
+        validarConsulta();
+
         return service.listarReferenciasPorParticipante(
                 idSolicitudCredito,
                 idSolicitudDeudor
@@ -164,6 +184,8 @@ public class SolicitudReferenciaController {
             Long idSolicitudReferenciaPersonal
     ) {
 
+        validarConsulta();
+
         return service.buscarReferenciaPorId(
                 idSolicitudReferenciaPersonal
         );
@@ -178,6 +200,8 @@ public class SolicitudReferenciaController {
             @PathVariable
             Integer idSolicitudCredito
     ) {
+
+        validarEdicion();
 
         return service.iniciarGestion(
                 idSolicitudCredito
@@ -202,6 +226,8 @@ public class SolicitudReferenciaController {
             @RequestBody
             SolicitudReferenciaPersonalDTO dto
     ) {
+
+        validarEdicion();
 
         dto.setIdSolicitudCredito(
                 idSolicitudCredito
@@ -231,6 +257,8 @@ public class SolicitudReferenciaController {
             SolicitudReferenciaPersonalDTO dto
     ) {
 
+        validarEdicion();
+
         return service.actualizarReferencia(
                 idSolicitudReferenciaPersonal,
                 dto
@@ -251,6 +279,8 @@ public class SolicitudReferenciaController {
             @RequestBody
             EntrevistaReferenciaRequest request
     ) {
+
+        validarEdicion();
 
         return service.registrarEntrevista(
                 idSolicitudReferenciaPersonal,
@@ -273,6 +303,8 @@ public class SolicitudReferenciaController {
             Long idSolicitudReferenciaPersonal
     ) {
 
+        validarEdicion();
+
         service.desactivarReferencia(
                 idSolicitudReferenciaPersonal
         );
@@ -291,11 +323,44 @@ public class SolicitudReferenciaController {
             CierreReferenciaRequest request
     ) {
 
+        validarEdicion();
+
         return service.cerrarGestion(
                 idSolicitudCredito,
                 request.tipoCierre(),
                 request.observacionCierre()
         );
+    }
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarConsulta() {
+
+        accessValidator.validarAcceso(
+                usuarioActual(),
+                PERMISO_VIEW
+        );
+    }
+
+    private void validarEdicion() {
+
+        accessValidator.validarAcceso(
+                usuarioActual(),
+                PERMISO_EDIT
+        );
+    }
+
+    private Usuario usuarioActual() {
+
+        Usuario usuarioActual = new Usuario();
+
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        return usuarioActual;
     }
 
     // =========================================================

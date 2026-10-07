@@ -4,6 +4,8 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
+import { SessionService } from '../../../core/auth/session.service';
+
 import { AfpApi, AfpListDTO } from './afp.api';
 import { AfpPrintService } from './afp-print.service';
 import { AfpExporterService } from './afp-exporter.service';
@@ -19,6 +21,7 @@ export class AfpListComponent implements OnInit {
 
   private readonly api = inject(AfpApi);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   private readonly printService = inject(AfpPrintService);
   private readonly exporterService = inject(AfpExporterService);
@@ -26,8 +29,11 @@ export class AfpListComponent implements OnInit {
   afp: AfpListDTO[] = [];
   loading = false;
 
-  // ✅ filtro simple
   q = '';
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
 
   ngOnInit(): void {
     this.cargar();
@@ -51,7 +57,10 @@ export class AfpListComponent implements OnInit {
 
   get afpFiltradas(): AfpListDTO[] {
     const q = (this.q ?? '').trim().toLowerCase();
-    if (!q) return this.afp;
+
+    if (!q) {
+      return this.afp;
+    }
 
     return this.afp.filter(x =>
       (x.nombreAfp ?? '').toLowerCase().includes(q) ||
@@ -60,10 +69,14 @@ export class AfpListComponent implements OnInit {
   }
 
   // =========================================================
-  // ✅ ACCIONES HEADER
+  // ACCIONES HEADER
   // =========================================================
 
   nuevo(): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     this.router.navigate(['/nomina/afp/nuevo']);
   }
 
@@ -80,16 +93,27 @@ export class AfpListComponent implements OnInit {
   }
 
   // =========================================================
-  // ✅ ACCIONES FILA
+  // ACCIONES FILA
   // =========================================================
 
   editar(id: number): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     this.router.navigate([`/nomina/afp/${id}/editar`]);
   }
 
   eliminar(id: number): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     const ok = confirm('¿Desea eliminar esta AFP?');
-    if (!ok) return;
+
+    if (!ok) {
+      return;
+    }
 
     this.api.eliminar(id).subscribe({
       next: () => this.cargar(),

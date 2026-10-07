@@ -1,24 +1,40 @@
 package co.assip.erp.cartera.cierremensual;
 
 import co.assip.erp.cartera.cierremensual.dto.CierreMensualDTO;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @RestController
 @RequestMapping("/cartera/cierre-mensual")
+@RequiredArgsConstructor
 public class CierreMensualController {
 
-    private final CierreMensualService service;
+    private static final String PERMISO_VIEW =
+            "CARTERA_CIERRE_VIEW";
 
-    public CierreMensualController(
-            CierreMensualService service
-    ) {
-        this.service = service;
-    }
+    private static final String PERMISO_EXECUTE =
+            "CARTERA_CIERRE_EXECUTE";
+
+    // =========================================================
+    // DEPENDENCIAS
+    // =========================================================
+
+    private final CierreMensualService service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // =========================================================
     // LISTAR CIERRES
@@ -26,6 +42,8 @@ public class CierreMensualController {
 
     @GetMapping
     public ResponseEntity<List<CierreMensualDTO>> listar() {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.listar()
@@ -40,6 +58,8 @@ public class CierreMensualController {
     public ResponseEntity<CierreMensualDTO> buscarPorId(
             @PathVariable Integer idCierreCartera
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.buscarPorId(
@@ -80,6 +100,8 @@ public class CierreMensualController {
             LocalDate fechaCorte
     ) {
 
+        validarEjecucion();
+
         return ResponseEntity.ok(
                 service.ejecutar(
                         fechaCorte
@@ -117,6 +139,8 @@ public class CierreMensualController {
     public ResponseEntity<CierreMensualDTO> regenerar(
             @PathVariable Integer idCierreCartera
     ) {
+
+        validarEjecucion();
 
         return ResponseEntity.ok(
                 service.regenerar(
@@ -159,6 +183,8 @@ public class CierreMensualController {
             @PathVariable Integer idCierreCartera
     ) {
 
+        validarEjecucion();
+
         return ResponseEntity.ok(
                 service.cerrarFotografia(
                         idCierreCartera
@@ -174,6 +200,8 @@ public class CierreMensualController {
     public ResponseEntity<Boolean> existeFoto(
             @PathVariable Integer idCierreCartera
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.existeFoto(
@@ -204,10 +232,43 @@ public class CierreMensualController {
             @PathVariable Integer idCierreCartera
     ) {
 
+        validarEjecucion();
+
         return ResponseEntity.ok(
                 service.prepararBaseCalculosHistorico(
                         idCierreCartera
                 )
         );
+    }
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarConsulta() {
+
+        accessValidator.validarAcceso(
+                usuarioActual(),
+                PERMISO_VIEW
+        );
+    }
+
+    private void validarEjecucion() {
+
+        accessValidator.validarAcceso(
+                usuarioActual(),
+                PERMISO_EXECUTE
+        );
+    }
+
+    private Usuario usuarioActual() {
+
+        Usuario usuarioActual = new Usuario();
+
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        return usuarioActual;
     }
 }

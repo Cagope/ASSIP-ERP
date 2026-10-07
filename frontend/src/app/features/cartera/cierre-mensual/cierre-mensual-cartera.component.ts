@@ -32,6 +32,9 @@ import {
   CuadreCierreComponent
 } from './cuadre/cuadre-cierre.component';
 
+import {
+  SessionService
+} from '../../../core/auth/session.service';
 
 // =========================================================
 // COMPONENTE
@@ -115,9 +118,17 @@ export class CierreMensualCarteraComponent
 
   constructor(
     private readonly api:
-      CierreMensualCarteraApi
+      CierreMensualCarteraApi,
+
+    private readonly session:
+      SessionService
   ) {}
 
+  get puedeEjecutar(): boolean {
+    return this.session.tienePermiso(
+      'CARTERA_CIERRE_EXECUTE'
+    );
+  }
 
   // =========================================================
   // INIT
@@ -203,6 +214,10 @@ export class CierreMensualCarteraComponent
 
   ejecutarCierre(): void {
 
+    if (!this.puedeEjecutar) {
+      return;
+    }
+
     this.limpiarMensajes();
 
     if (!this.fechaCorte) {
@@ -278,6 +293,10 @@ export class CierreMensualCarteraComponent
   regenerarFoto(
     cierre?: CierreMensualCartera | null
   ): void {
+
+    if (!this.puedeEjecutar) {
+      return;
+    }
 
     this.limpiarMensajes();
 
@@ -392,11 +411,15 @@ export class CierreMensualCarteraComponent
   // CERRAR FOTOGRAFÍA EN FIRME
   // =========================================================
 
-  cerrarFotografia(
-    cierre?: CierreMensualCartera | null
-  ): void {
+ cerrarFotografia(
+   cierre?: CierreMensualCartera | null
+ ): void {
 
-    this.limpiarMensajes();
+   if (!this.puedeEjecutar) {
+     return;
+   }
+
+   this.limpiarMensajes();
 
     const cierreProceso =
       cierre
@@ -511,7 +534,7 @@ export class CierreMensualCarteraComponent
     cierre: CierreMensualCartera | null | undefined
   ): boolean {
 
-    if (!cierre) {
+    if (!this.puedeEjecutar || !cierre) {
       return false;
     }
 

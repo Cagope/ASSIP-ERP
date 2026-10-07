@@ -9,6 +9,10 @@ import {
 } from '@angular/common';
 
 import {
+  HttpErrorResponse
+} from '@angular/common/http';
+
+import {
   ActivatedRoute
 } from '@angular/router';
 
@@ -29,56 +33,70 @@ import {
 @Component({
   selector: 'app-carta-instrucciones',
   standalone: true,
+
   imports: [
     CommonModule
   ],
-  templateUrl: './carta-instrucciones.component.html',
-  styleUrl: './carta-instrucciones.component.scss'
+
+  templateUrl:
+    './carta-instrucciones.component.html',
+
+  styleUrl:
+    './carta-instrucciones.component.scss'
 })
-export class CartaInstruccionesComponent implements OnInit {
+export class CartaInstruccionesComponent
+  implements OnInit {
 
-  private readonly api = inject(
-    OriginacionFormalizacionApi
-  );
+  // =========================================================
+  // DEPENDENCIAS
+  // =========================================================
 
-  private readonly route = inject(
-    ActivatedRoute
-  );
+  private readonly api =
+    inject(OriginacionFormalizacionApi);
+
+  private readonly route =
+    inject(ActivatedRoute);
 
 
-  // =======================================================
+  // =========================================================
   // ESTADO
-  // =======================================================
+  // =========================================================
 
-  idSolicitudCredito: number | null = null;
+  idSolicitudCredito:
+    number | null = null;
 
   cargando = false;
 
-  error: string | null = null;
+  error:
+    string | null = null;
 
-  datos: PagareDiligenciadoDatos | null = null;
+  datos:
+    PagareDiligenciadoDatos | null = null;
 
 
-  // =======================================================
+  // =========================================================
   // FIRMANTES
-  // =======================================================
+  // =========================================================
 
-  deudorPrincipal: PagareFirmante | null = null;
+  deudorPrincipal:
+    PagareFirmante | null = null;
 
-  codeudores: PagareFirmante[] = [];
+  codeudores:
+    PagareFirmante[] = [];
 
 
-  // =======================================================
+  // =========================================================
   // INICIALIZACIÓN
-  // =======================================================
+  // =========================================================
 
   ngOnInit(): void {
 
-    const id = Number(
-      this.route.snapshot.paramMap.get(
-        'idSolicitudCredito'
-      )
-    );
+    const id =
+      Number(
+        this.route.snapshot.paramMap.get(
+          'idSolicitudCredito'
+        )
+      );
 
     if (
       !Number.isInteger(id) ||
@@ -97,12 +115,12 @@ export class CartaInstruccionesComponent implements OnInit {
   }
 
 
-  // =======================================================
+  // =========================================================
   // CONSULTAR DATOS
   //
   // La carta utiliza la información del pagaré constituido
   // y sus firmantes.
-  // =======================================================
+  // =========================================================
 
   consultarCarta(): void {
 
@@ -123,9 +141,10 @@ export class CartaInstruccionesComponent implements OnInit {
 
     this.codeudores = [];
 
-    this.api.consultarDatosPagareEnBlanco(
-      this.idSolicitudCredito
-    )
+    this.api
+      .consultarDatosPagareEnBlanco(
+        this.idSolicitudCredito
+      )
       .pipe(
         finalize(() => {
           this.cargando = false;
@@ -133,7 +152,7 @@ export class CartaInstruccionesComponent implements OnInit {
       )
       .subscribe({
 
-        next: (respuesta) => {
+        next: respuesta => {
 
           this.datos = respuesta;
 
@@ -149,57 +168,60 @@ export class CartaInstruccionesComponent implements OnInit {
 
             return;
           }
-
         },
 
-        error: (err) => {
+        error: (
+          error: HttpErrorResponse
+        ) => {
 
           this.error =
-            err?.error?.message ||
-            err?.error?.mensaje ||
-            'No fue posible consultar los datos '
-            + 'para la carta de instrucciones.';
-
+            this.obtenerMensajeError(
+              error
+            );
         }
 
       });
   }
 
 
-  // =======================================================
+  // =========================================================
   // ORGANIZAR FIRMANTES
   //
   // Conservamos exactamente el mismo modelo utilizado
   // por las impresiones del pagaré.
-  // =======================================================
+  // =========================================================
 
   private organizarFirmantes(
-    firmantes: PagareFirmante[]
+    firmantes:
+      PagareFirmante[]
   ): void {
 
-    const ordenados = [...firmantes].sort(
-      (a, b) =>
-        (a.ordenDeudor ?? 0) -
-        (b.ordenDeudor ?? 0)
-    );
+    const ordenados =
+      [...firmantes].sort(
+        (a, b) =>
+          (a.ordenDeudor ?? 0) -
+          (b.ordenDeudor ?? 0)
+      );
 
     this.deudorPrincipal =
       ordenados.find(
         firmante =>
-          firmante.tipoDeudor === 'PRINCIPAL'
+          firmante.tipoDeudor ===
+          'PRINCIPAL'
       ) ?? null;
 
     this.codeudores =
       ordenados.filter(
         firmante =>
-          firmante.tipoDeudor === 'CODEUDOR'
+          firmante.tipoDeudor ===
+          'CODEUDOR'
       );
   }
 
 
-  // =======================================================
+  // =========================================================
   // DISPONIBILIDAD
-  // =======================================================
+  // =========================================================
 
   get puedeImprimir(): boolean {
 
@@ -212,18 +234,21 @@ export class CartaInstruccionesComponent implements OnInit {
   }
 
 
-  // =======================================================
+  // =========================================================
   // FIRMANTES DE LA CARTA
   //
   // El reporte histórico contempla el deudor principal
   // y los codeudores asociados al pagaré.
-  // =======================================================
+  // =========================================================
 
-  get firmantesCarta(): PagareFirmante[] {
+  get firmantesCarta():
+    PagareFirmante[] {
 
-    const firmantes: PagareFirmante[] = [];
+    const firmantes:
+      PagareFirmante[] = [];
 
     if (this.deudorPrincipal) {
+
       firmantes.push(
         this.deudorPrincipal
       );
@@ -237,29 +262,33 @@ export class CartaInstruccionesComponent implements OnInit {
   }
 
 
-  // =======================================================
+  // =========================================================
   // CODEUDOR POR POSICIÓN
   //
   // Facilita reproducir en el HTML las posiciones
   // utilizadas por la carta histórica.
-  // =======================================================
+  // =========================================================
 
   codeudor(
     posicion: number
   ): PagareFirmante | null {
 
-    return this.codeudores[posicion] ?? null;
+    return (
+      this.codeudores[posicion] ??
+      null
+    );
   }
 
 
-  // =======================================================
+  // =========================================================
   // TELÉFONO
   //
   // Misma estructura del modelo real PagareFirmante.
-  // =======================================================
+  // =========================================================
 
   telefonoFirmante(
-    firmante: PagareFirmante | null
+    firmante:
+      PagareFirmante | null
   ): string {
 
     if (!firmante) {
@@ -275,12 +304,12 @@ export class CartaInstruccionesComponent implements OnInit {
   }
 
 
-  // =======================================================
+  // =========================================================
   // IMPRIMIR
   //
   // La carta se imprime en tamaño carta:
   // 216 mm x 279 mm.
-  // =======================================================
+  // =========================================================
 
   imprimir(): void {
 
@@ -288,19 +317,21 @@ export class CartaInstruccionesComponent implements OnInit {
       return;
     }
 
-    const carta = document.querySelector(
-      'app-carta-instrucciones .hoja-carta'
-    );
+    const carta =
+      document.querySelector(
+        'app-carta-instrucciones .hoja-carta'
+      );
 
     if (!carta) {
       return;
     }
 
-    const ventanaImpresion = window.open(
-      '',
-      '_blank',
-      'width=900,height=1100'
-    );
+    const ventanaImpresion =
+      window.open(
+        '',
+        '_blank',
+        'width=900,height=1100'
+      );
 
     if (!ventanaImpresion) {
 
@@ -311,13 +342,17 @@ export class CartaInstruccionesComponent implements OnInit {
       return;
     }
 
-    const estilos = Array.from(
-      document.querySelectorAll(
-        'style, link[rel="stylesheet"]'
+    const estilos =
+      Array.from(
+        document.querySelectorAll(
+          'style, link[rel="stylesheet"]'
+        )
       )
-    )
-      .map(elemento => elemento.outerHTML)
-      .join('\n');
+        .map(
+          elemento =>
+            elemento.outerHTML
+        )
+        .join('\n');
 
     const contenido =
       carta.outerHTML;
@@ -333,7 +368,9 @@ export class CartaInstruccionesComponent implements OnInit {
 
           <meta charset="utf-8">
 
-          <title>Carta de instrucciones</title>
+          <title>
+            Carta de instrucciones
+          </title>
 
           ${estilos}
 
@@ -398,23 +435,57 @@ export class CartaInstruccionesComponent implements OnInit {
 
       ventanaImpresion.print();
 
-      ventanaImpresion.onafterprint = () => {
-        ventanaImpresion.close();
-      };
+      ventanaImpresion.onafterprint =
+        () => {
+
+          ventanaImpresion.close();
+        };
     };
   }
 
 
-  // =======================================================
+  // =========================================================
   // CERRAR
   //
   // La carta se abre desde Formalización en una pestaña
   // independiente.
-  // =======================================================
+  // =========================================================
 
   cerrar(): void {
 
     window.close();
+  }
+
+
+  // =========================================================
+  // ERRORES
+  // =========================================================
+
+  private obtenerMensajeError(
+    error: HttpErrorResponse
+  ): string {
+
+    const respuesta =
+      error.error;
+
+    if (
+      typeof respuesta === 'string'
+    ) {
+
+      return (
+        respuesta ||
+        'No fue posible consultar los datos para la carta de instrucciones.'
+      );
+    }
+
+    const mensaje =
+      respuesta?.message ??
+      respuesta?.mensaje ??
+      error.message;
+
+    return mensaje
+      ? String(mensaje)
+      : 'No fue posible consultar los datos para la carta de instrucciones.';
   }
 
 }

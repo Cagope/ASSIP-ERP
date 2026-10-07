@@ -1,48 +1,42 @@
 package co.assip.erp.cartera.originacion.contexto;
 
+import co.assip.erp.cartera.originacion.contexto.dto.OriginacionContextoDTO;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import co.assip.erp.cartera.originacion.contexto.dto.OriginacionContextoDTO;
 
 import java.util.List;
 
 @RestController
-@RequestMapping(
-        "/cartera/originacion/contexto"
-)
+@RequiredArgsConstructor
+@RequestMapping("/cartera/originacion/contexto")
 public class OriginacionContextoController {
+
+    private static final String PERMISO_VIEW =
+            "CARTERA_ORIGINACION_VIEW";
 
     // =========================================================
     // DEPENDENCIAS
     // =========================================================
 
     private final OriginacionContextoService service;
-
-
-    // =========================================================
-    // CONSTRUCTOR
-    // =========================================================
-
-    public OriginacionContextoController(
-            OriginacionContextoService service
-    ) {
-        this.service = service;
-    }
-
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // =========================================================
     // CONTEXTO COMPLETO
     // =========================================================
 
     @GetMapping("/{idDatosPersonal}")
-    public ResponseEntity<OriginacionContextoDTO>
-    consultar(
-            @PathVariable
-            Integer idDatosPersonal,
-
-            @RequestParam
-            Integer idAgencia
+    public ResponseEntity<OriginacionContextoDTO> consultar(
+            @PathVariable Integer idDatosPersonal,
+            @RequestParam Integer idAgencia
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.consultar(
@@ -52,23 +46,18 @@ public class OriginacionContextoController {
         );
     }
 
-
     // =========================================================
     // INFORMACIÓN ECONÓMICA
     // =========================================================
 
-    @GetMapping(
-            "/{idDatosPersonal}/informacion-economica"
-    )
-    public ResponseEntity<
-            OriginacionContextoDTO.InformacionEconomicaDTO>
+    @GetMapping("/{idDatosPersonal}/informacion-economica")
+    public ResponseEntity<OriginacionContextoDTO.InformacionEconomicaDTO>
     consultarInformacionEconomica(
-            @PathVariable
-            Integer idDatosPersonal,
-
-            @RequestParam
-            Integer idAgencia
+            @PathVariable Integer idDatosPersonal,
+            @RequestParam Integer idAgencia
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.consultarInformacionEconomica(
@@ -78,23 +67,18 @@ public class OriginacionContextoController {
         );
     }
 
-
     // =========================================================
     // DEPÓSITOS
     // =========================================================
 
-    @GetMapping(
-            "/{idDatosPersonal}/depositos"
-    )
-    public ResponseEntity<
-            List<OriginacionContextoDTO.DepositoDTO>>
+    @GetMapping("/{idDatosPersonal}/depositos")
+    public ResponseEntity<List<OriginacionContextoDTO.DepositoDTO>>
     listarDepositos(
-            @PathVariable
-            Integer idDatosPersonal,
-
-            @RequestParam
-            Integer idAgencia
+            @PathVariable Integer idDatosPersonal,
+            @RequestParam Integer idAgencia
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.listarDepositos(
@@ -104,23 +88,18 @@ public class OriginacionContextoController {
         );
     }
 
-
     // =========================================================
     // CARTERA ACTUAL
     // =========================================================
 
-    @GetMapping(
-            "/{idDatosPersonal}/cartera"
-    )
-    public ResponseEntity<
-            List<OriginacionContextoDTO.CarteraDTO>>
+    @GetMapping("/{idDatosPersonal}/cartera")
+    public ResponseEntity<List<OriginacionContextoDTO.CarteraDTO>>
     listarCarteraActual(
-            @PathVariable
-            Integer idDatosPersonal,
-
-            @RequestParam
-            Integer idAgencia
+            @PathVariable Integer idDatosPersonal,
+            @RequestParam Integer idAgencia
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.listarCarteraActual(
@@ -130,23 +109,18 @@ public class OriginacionContextoController {
         );
     }
 
-
     // =========================================================
     // CARTERA HISTÓRICA
     // =========================================================
 
-    @GetMapping(
-            "/{idDatosPersonal}/cartera/historico"
-    )
-    public ResponseEntity<
-            List<OriginacionContextoDTO.CarteraDTO>>
+    @GetMapping("/{idDatosPersonal}/cartera/historico")
+    public ResponseEntity<List<OriginacionContextoDTO.CarteraDTO>>
     listarCarteraHistorica(
-            @PathVariable
-            Integer idDatosPersonal,
-
-            @RequestParam
-            Integer idAgencia
+            @PathVariable Integer idDatosPersonal,
+            @RequestParam Integer idAgencia
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.listarCarteraHistorica(
@@ -156,23 +130,18 @@ public class OriginacionContextoController {
         );
     }
 
-
     // =========================================================
     // CODEUDAS ACTUALES
     // =========================================================
 
-    @GetMapping(
-            "/{idDatosPersonal}/codeudas"
-    )
-    public ResponseEntity<
-            List<OriginacionContextoDTO.CodeudaDTO>>
+    @GetMapping("/{idDatosPersonal}/codeudas")
+    public ResponseEntity<List<OriginacionContextoDTO.CodeudaDTO>>
     listarCodeudasActuales(
-            @PathVariable
-            Integer idDatosPersonal,
-
-            @RequestParam
-            Integer idAgencia
+            @PathVariable Integer idDatosPersonal,
+            @RequestParam Integer idAgencia
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.listarCodeudasActuales(
@@ -182,29 +151,42 @@ public class OriginacionContextoController {
         );
     }
 
-
     // =========================================================
     // CODEUDAS HISTÓRICAS
     // =========================================================
 
-    @GetMapping(
-            "/{idDatosPersonal}/codeudas/historico"
-    )
-    public ResponseEntity<
-            List<OriginacionContextoDTO.CodeudaDTO>>
+    @GetMapping("/{idDatosPersonal}/codeudas/historico")
+    public ResponseEntity<List<OriginacionContextoDTO.CodeudaDTO>>
     listarCodeudasHistoricas(
-            @PathVariable
-            Integer idDatosPersonal,
-
-            @RequestParam
-            Integer idAgencia
+            @PathVariable Integer idDatosPersonal,
+            @RequestParam Integer idAgencia
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.listarCodeudasHistoricas(
                         idDatosPersonal,
                         idAgencia
                 )
+        );
+    }
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarConsulta() {
+
+        Usuario usuarioActual = new Usuario();
+
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO_VIEW
         );
     }
 }

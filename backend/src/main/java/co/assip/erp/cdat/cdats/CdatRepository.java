@@ -133,7 +133,7 @@ public class CdatRepository {
             ps.setObject(7, dto.getPlazoMeses());
             ps.setObject(8, dto.getPlazoDias());
             ps.setBigDecimal(9, dto.getValorAperturaCdat());
-            ps.setBigDecimal(10, dto.getValorAperturaCdat());
+            ps.setBigDecimal(10, BigDecimal.ZERO);
             ps.setBigDecimal(11, nvl(dto.getTasaNominalAnual()));
             ps.setBigDecimal(12, nvl(dto.getTasaEfectivaAnual()));
             ps.setBigDecimal(13, nvl(dto.getTasaNominalMensual()));
@@ -275,42 +275,88 @@ public class CdatRepository {
     ) {
 
         StringBuilder sql = new StringBuilder("""
-        SELECT *
-        FROM depositos.vw_depositos_cuentas_ahorro_total
-        WHERE id_agencia = ?
-          AND UPPER(TRIM(COALESCE(codigo_estado, ''))) = 'A'
+        SELECT
+            ca.id_cuenta_ahorro,
+            ca.codigo_cuenta,
+            ca.id_datos_personal,
+
+            dp.tipo_documento,
+            dp.documento,
+            dp.nombres,
+            dp.primer_apellido,
+            dp.segundo_apellido,
+
+            TRIM(CONCAT_WS(
+                ' ',
+                dp.nombres,
+                dp.primer_apellido,
+                dp.segundo_apellido
+            )) AS nombre_completo,
+
+            ca.id_agencia,
+            a.nombre_agencia,
+
+            ca.id_forma_ahorro,
+            fa.codigo_forma,
+            fa.nombre_forma,
+
+            ca.plazo_cuenta,
+            ca.fecha_apertura_cuenta,
+            ca.fecha_final_cuenta,
+
+            ca.estado_cuenta_cuenta AS codigo_estado,
+            ca.cuenta_activa,
+            ca.cuenta_conjunta,
+            ca.accion_conjunta,
+
+            ca.saldo_inicial_cuenta,
+            ca.saldo_actual_cuenta
+
+        FROM depositos.cuentas_ahorro ca
+
+        JOIN hoja_vida.datos_personales dp
+          ON dp.id_datos_personal = ca.id_datos_personal
+
+        JOIN depositos.formas_ahorro fa
+          ON fa.id_forma_ahorro = ca.id_forma_ahorro
+
+        JOIN general.datos_agencias a
+          ON a.id_agencia = ca.id_agencia
+
+        WHERE ca.id_agencia = ?
+          AND ca.estado_cuenta_cuenta = 'A'
         """);
 
         List<Object> params = new java.util.ArrayList<>();
         params.add(idAgencia);
 
         if (documento != null && !documento.isBlank()) {
-            sql.append(" AND documento ILIKE ? ");
+            sql.append(" AND dp.documento ILIKE ? ");
             params.add("%" + documento.trim() + "%");
         }
 
         if (nombres != null && !nombres.isBlank()) {
-            sql.append(" AND nombres ILIKE ? ");
+            sql.append(" AND dp.nombres ILIKE ? ");
             params.add("%" + nombres.trim() + "%");
         }
 
         if (primerApellido != null && !primerApellido.isBlank()) {
-            sql.append(" AND primer_apellido ILIKE ? ");
+            sql.append(" AND dp.primer_apellido ILIKE ? ");
             params.add("%" + primerApellido.trim() + "%");
         }
 
         if (segundoApellido != null && !segundoApellido.isBlank()) {
-            sql.append(" AND segundo_apellido ILIKE ? ");
+            sql.append(" AND dp.segundo_apellido ILIKE ? ");
             params.add("%" + segundoApellido.trim() + "%");
         }
 
         if (codigoCuenta != null && !codigoCuenta.isBlank()) {
-            sql.append(" AND codigo_cuenta ILIKE ? ");
+            sql.append(" AND ca.codigo_cuenta ILIKE ? ");
             params.add("%" + codigoCuenta.trim() + "%");
         }
 
         sql.append("""
-        ORDER BY codigo_forma, codigo_cuenta
+        ORDER BY id_forma_ahorro, codigo_cuenta
         LIMIT 200
         """);
 

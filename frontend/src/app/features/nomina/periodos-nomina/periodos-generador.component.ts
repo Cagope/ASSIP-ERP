@@ -5,6 +5,7 @@ import { RouterModule, Router } from '@angular/router';
 
 import { GeneralApi } from '../../../shared/general/general.api';
 import { PeriodosGeneradorApi } from './periodos-generador.api';
+import { SessionService } from '../../../core/auth/session.service';
 
 @Component({
   standalone: true,
@@ -18,8 +19,13 @@ export class PeriodosGeneradorComponent implements OnInit {
   private readonly api = inject(PeriodosGeneradorApi);
   private readonly generalApi = inject(GeneralApi);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   loading = false;
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
 
   agencias: any[] = [];
 
@@ -52,6 +58,10 @@ export class PeriodosGeneradorComponent implements OnInit {
   // Generar períodos
   // =========================
   generar(): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
 
     if (!this.form.idAgencia) {
       alert('La agencia es obligatoria.');

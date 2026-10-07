@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
+import { SessionService } from '../../../core/auth/session.service';
+
 import { CesantiasApi, CesantiasDTO } from './cesantias.api';
 
 import { PersonasSelectorComponent } from '../../../shared/personas/personas-selector.component';
@@ -27,6 +29,7 @@ export class CesantiasUpsertComponent implements OnInit {
   private readonly api = inject(CesantiasApi);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   id: number | null = null;
   loading = false;
@@ -38,6 +41,14 @@ export class CesantiasUpsertComponent implements OnInit {
     idDatosPersonal: null
   };
 
+  // =========================================================
+  // PERMISOS
+  // =========================================================
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
+
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     this.id = idParam ? +idParam : null;
@@ -48,8 +59,9 @@ export class CesantiasUpsertComponent implements OnInit {
   }
 
   // =========================================================
-  // 📥 Cargar para edición
+  // Cargar para edición
   // =========================================================
+
   cargar(id: number): void {
     this.loading = true;
 
@@ -61,6 +73,7 @@ export class CesantiasUpsertComponent implements OnInit {
           activo: data.activo ?? true,
           idDatosPersonal: data.idDatosPersonal ?? null
         };
+
         this.loading = false;
       },
       error: (err) => {
@@ -73,8 +86,9 @@ export class CesantiasUpsertComponent implements OnInit {
   }
 
   // =========================================================
-  // 👤 Selector de persona
+  // Selector de persona
   // =========================================================
+
   onPersonaSeleccionada(p: PersonaBusquedaDTO): void {
     this.form.idDatosPersonal = p.idDatosPersonal;
   }
@@ -84,10 +98,16 @@ export class CesantiasUpsertComponent implements OnInit {
   }
 
   // =========================================================
-  // 💾 Guardar
+  // Guardar
   // =========================================================
+
   guardar(): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     const nombre = (this.form.nombreCesantias ?? '').trim();
+
     if (!nombre) {
       alert('El nombre de la Cesantía es obligatorio.');
       return;
@@ -123,8 +143,9 @@ export class CesantiasUpsertComponent implements OnInit {
   }
 
   // =========================================================
-  // 🔙 Volver al listado
+  // Volver al listado
   // =========================================================
+
   volver(): void {
     this.router.navigate(['/nomina/cesantias']);
   }

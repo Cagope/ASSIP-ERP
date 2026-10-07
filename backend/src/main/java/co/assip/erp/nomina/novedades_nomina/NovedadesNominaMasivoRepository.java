@@ -189,7 +189,7 @@ public class NovedadesNominaMasivoRepository {
                 .addValue("valor", valorManual != null ? valorManual : BigDecimal.ZERO)
                 .addValue("observacion", observacion)
                 .addValue("estado", estado)
-                .addValue("usr", idUsuario != null ? idUsuario : 1);
+                .addValue("usr", idUsuario);
 
         return jdbc.update(sql, params);
     }

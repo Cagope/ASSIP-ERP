@@ -90,14 +90,7 @@ public class CdatCancelacionContabilizacionService {
         origen.setTablaOrigen("cdat.cuentas_cdats");
         origen.setIdOrigen(cdat.getIdCuentaCdat());
 
-        String concepto =
-                "Cancelación CDAT "
-                        + cdat.getCodigoCdat()
-                        + " Doc "
-                        + cdat.getDocumento()
-                        + " Plazo "
-                        + cdat.getPlazoMeses()
-                        + " meses";
+        String concepto = construirConceptoComprobante(input, cdat);
 
         contabilidadRegistroService.registrarComprobante(
                 cdat.getIdAgencia(),
@@ -254,22 +247,47 @@ public class CdatCancelacionContabilizacionService {
         if (diferencia.compareTo(BigDecimal.ZERO) > 0) {
             BigDecimal valorSalida = diferencia;
 
-            validarTotalMediosPago(
+            BigDecimal valorCuentaPorPagar =
+                    nvl(input.getValorCuentaPorPagar());
+
+            validarTotalSalida(
                     input.getMediosPagoSalida(),
-                    valorSalida,
-                    "salida"
+                    valorCuentaPorPagar,
+                    valorSalida
             );
 
-            agregarMediosPago(
-                    movimientos,
-                    input.getMediosPagoSalida(),
-                    idAgencia,
-                    idTercero,
-                    fecha,
-                    documentoSoporte,
-                    "Cancelación CDAT - salida al cliente",
-                    false
-            );
+            if (input.getMediosPagoSalida() != null) {
+                agregarMediosPago(
+                        movimientos,
+                        input.getMediosPagoSalida(),
+                        idAgencia,
+                        idTercero,
+                        fecha,
+                        documentoSoporte,
+                        "Cancelación CDAT - salida al cliente",
+                        false
+                );
+            }
+
+            if (mayorCero(valorCuentaPorPagar)) {
+
+                Integer cuentaPorPagar =
+                        cancelacionRepository.obtenerCuentaConceptoCancelacionCdat(
+                                idAgencia,
+                                "CUENTA_POR_PAGAR_CDAT"
+                        );
+
+                movimientos.add(crearMovimiento(
+                        idAgencia,
+                        cuentaPorPagar,
+                        idTercero,
+                        fecha,
+                        "Cancelación CDAT - cuenta por pagar",
+                        BigDecimal.ZERO,
+                        valorCuentaPorPagar,
+                        documentoSoporte
+                ));
+            }
         }
 
         validarCuadre(movimientos);
@@ -375,6 +393,33 @@ public class CdatCancelacionContabilizacionService {
                         esDebito
                 ));
             }
+        }
+    }
+
+    private void validarTotalSalida(
+            MediosPagoDTO mp,
+            BigDecimal valorCuentaPorPagar,
+            BigDecimal valorEsperado
+    ) {
+
+        BigDecimal total = nvl(valorCuentaPorPagar);
+
+        if (mp != null) {
+            total = total
+                    .add(nvl(mp.getValorEfectivo()))
+                    .add(nvl(mp.getValorCheques()))
+                    .add(nvl(mp.getValorDepositos()))
+                    .add(nvl(mp.getValorBancos()))
+                    .add(nvl(mp.getValorTrasladosAgencias()));
+        }
+
+        if (total.compareTo(valorEsperado) != 0) {
+            throw new RuntimeException(
+                    "El total de medios de pago de salida no coincide. Esperado: "
+                            + valorEsperado
+                            + ", recibido: "
+                            + total
+            );
         }
     }
 
@@ -561,5 +606,90 @@ public class CdatCancelacionContabilizacionService {
 
     private BigDecimal nvl(BigDecimal v) {
         return v == null ? BigDecimal.ZERO : v;
+    }
+
+    private String construirConceptoComprobante(
+            CdatCancelacionEntradaDTO input,
+            CdatCancelacionItemDTO cdat
+    ) {
+        StringBuilder concepto = new StringBuilder();
+
+        concepto.append("Cancelación CDAT No. ")
+                .append(cdat.getCodigoCdat())
+                .append(" - Titular Doc. ")
+                .append(cdat.getDocumento())
+                .append(" - Capital ")
+                .append(formatearValor(cdat.getValorCapital()))
+                .append(" - Plazo ")
+                .append(cdat.getPlazoMeses())
+                .append(" meses");
+
+        BigDecimal renovacion = nvl(input.getValorRenovacion());
+
+        if (mayorCero(renovacion)) {
+            concepto.append(" - Renovación ")
+                    .append(formatearValor(renovacion));
+        }
+
+        List<String> medios = new ArrayList<>();
+
+        MediosPagoDTO salida = input.getMediosPagoSalida();
+
+        if (salida != null) {
+
+            if (mayorCero(salida.getValorEfectivo())) {
+                medios.add(
+                        "Efectivo " + formatearValor(salida.getValorEfectivo())
+                );
+            }
+
+            if (mayorCero(salida.getValorCheques())) {
+                medios.add(
+                        "Cheques " + formatearValor(salida.getValorCheques())
+                );
+            }
+
+            if (mayorCero(salida.getValorDepositos())) {
+                medios.add(
+                        "Depósitos " + formatearValor(salida.getValorDepositos())
+                );
+            }
+
+            if (mayorCero(salida.getValorBancos())) {
+                medios.add(
+                        "Bancos " + formatearValor(salida.getValorBancos())
+                );
+            }
+
+            if (mayorCero(salida.getValorTrasladosAgencias())) {
+                medios.add(
+                        "Traslado agencias "
+                                + formatearValor(salida.getValorTrasladosAgencias())
+                );
+            }
+        }
+
+        if (mayorCero(input.getValorCuentaPorPagar())) {
+            medios.add(
+                    "Cuenta por pagar "
+                            + formatearValor(input.getValorCuentaPorPagar())
+            );
+        }
+
+        if (!medios.isEmpty()) {
+            concepto.append(" - Pago: ")
+                    .append(String.join(", ", medios));
+        }
+
+        return concepto.toString();
+    }
+
+    private String formatearValor(BigDecimal valor) {
+        return "$"
+                + String.format(
+                java.util.Locale.forLanguageTag("es-CO"),
+                "%,.0f",
+                nvl(valor)
+        );
     }
 }

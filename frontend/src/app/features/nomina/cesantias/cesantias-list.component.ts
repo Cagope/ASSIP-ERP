@@ -4,6 +4,8 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
+import { SessionService } from '../../../core/auth/session.service';
+
 import { CesantiasApi, CesantiasDTO } from './cesantias.api';
 import { CesantiasPrintService } from './cesantias-print.service';
 import { CesantiasExporterService } from './cesantias-exporter.service';
@@ -13,12 +15,18 @@ import { CesantiasExporterService } from './cesantias-exporter.service';
   selector: 'app-cesantias-list',
   templateUrl: './cesantias-list.component.html',
   styleUrls: ['./cesantias-list.component.scss'],
-  imports: [CommonModule, RouterModule, FormsModule, HeaderActionsComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    HeaderActionsComponent
+  ],
 })
 export class CesantiasListComponent implements OnInit {
 
   private readonly api = inject(CesantiasApi);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   private readonly printService = inject(CesantiasPrintService);
   private readonly exporterService = inject(CesantiasExporterService);
@@ -26,16 +34,25 @@ export class CesantiasListComponent implements OnInit {
   cesantias: CesantiasDTO[] = [];
   loading = false;
 
-  // ✅ filtro simple
+  // filtro simple
   q = '';
+
+  // =========================================================
+  // PERMISOS
+  // =========================================================
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
 
   ngOnInit(): void {
     this.cargar();
   }
 
   // =========================================================
-  // 📥 CARGA
+  // CARGA
   // =========================================================
+
   cargar(): void {
     this.loading = true;
 
@@ -53,11 +70,15 @@ export class CesantiasListComponent implements OnInit {
   }
 
   // =========================================================
-  // 🔎 FILTRO (IGUAL A ARL)
+  // FILTRO
   // =========================================================
+
   get cesantiasFiltradas(): CesantiasDTO[] {
     const q = (this.q ?? '').trim().toLowerCase();
-    if (!q) return this.cesantias;
+
+    if (!q) {
+      return this.cesantias;
+    }
 
     return this.cesantias.filter(x =>
       (x.nombreCesantias ?? '').toLowerCase().includes(q) ||
@@ -66,9 +87,14 @@ export class CesantiasListComponent implements OnInit {
   }
 
   // =========================================================
-  // ✅ ACCIONES HEADER
+  // ACCIONES HEADER
   // =========================================================
+
   nuevo(): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     this.router.navigate(['/nomina/cesantias/nuevo']);
   }
 
@@ -85,15 +111,29 @@ export class CesantiasListComponent implements OnInit {
   }
 
   // =========================================================
-  // ✅ ACCIONES FILA
+  // ACCIONES FILA
   // =========================================================
+
   editar(id: number): void {
-    this.router.navigate([`/nomina/cesantias/${id}/editar`]);
+    if (!this.puedeEditar) {
+      return;
+    }
+
+    this.router.navigate([
+      `/nomina/cesantias/${id}/editar`
+    ]);
   }
 
   eliminar(id: number): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     const ok = confirm('¿Desea eliminar esta Cesantía?');
-    if (!ok) return;
+
+    if (!ok) {
+      return;
+    }
 
     this.api.eliminar(id).subscribe({
       next: () => this.cargar(),

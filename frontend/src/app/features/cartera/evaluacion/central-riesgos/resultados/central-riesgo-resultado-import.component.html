@@ -82,15 +82,18 @@
         type="button"
         class="btn btn--primary"
         (click)="importar()"
-        [disabled]="!puedeImportar">
+        [disabled]="
+      !puedeEditar
+      || !puedeImportar
+    ">
 
-        <span *ngIf="!importando">
-          Importar
-        </span>
+    <span *ngIf="!importando">
+      Importar
+    </span>
 
         <span *ngIf="importando">
-          Importando...
-        </span>
+      Importando...
+    </span>
 
       </button>
 

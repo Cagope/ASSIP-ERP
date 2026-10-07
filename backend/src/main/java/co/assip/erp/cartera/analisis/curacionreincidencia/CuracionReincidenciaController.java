@@ -1,6 +1,10 @@
 package co.assip.erp.cartera.analisis.curacionreincidencia;
 
 import co.assip.erp.cartera.analisis.curacionreincidencia.dto.*;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,16 +13,20 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/cartera/analisis/curacion-reincidencia")
+@RequiredArgsConstructor
 public class CuracionReincidenciaController {
 
-    private final CuracionReincidenciaService service;
+    private static final String PERMISO_VIEW = "CARTERA_ANALISIS_VIEW";
 
-    public CuracionReincidenciaController(CuracionReincidenciaService service) {
-        this.service = service;
-    }
+    private final CuracionReincidenciaService service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     @GetMapping("/control")
     public CuracionReincidenciaControlDTO control() {
+
+        validarAcceso();
+
         return service.control();
     }
 
@@ -32,10 +40,18 @@ public class CuracionReincidenciaController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate periodoHasta,
 
-            @RequestParam(required = false) Integer idAgencia,
-            @RequestParam(required = false) Integer idLineaCredito,
-            @RequestParam(required = false) String edadEntrada
+            @RequestParam(required = false)
+            Integer idAgencia,
+
+            @RequestParam(required = false)
+            Integer idLineaCredito,
+
+            @RequestParam(required = false)
+            String edadEntrada
     ) {
+
+        validarAcceso();
+
         return service.resumen(
                 periodoDesde,
                 periodoHasta,
@@ -55,10 +71,18 @@ public class CuracionReincidenciaController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate periodoHasta,
 
-            @RequestParam(required = false) Integer idAgencia,
-            @RequestParam(required = false) Integer idLineaCredito,
-            @RequestParam(required = false) String edadEntrada
+            @RequestParam(required = false)
+            Integer idAgencia,
+
+            @RequestParam(required = false)
+            Integer idLineaCredito,
+
+            @RequestParam(required = false)
+            String edadEntrada
     ) {
+
+        validarAcceso();
+
         return service.periodos(
                 periodoDesde,
                 periodoHasta,
@@ -78,10 +102,18 @@ public class CuracionReincidenciaController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate periodoHasta,
 
-            @RequestParam(required = false) Integer idAgencia,
-            @RequestParam(required = false) Integer idLineaCredito,
-            @RequestParam(required = false) String edadEntrada
+            @RequestParam(required = false)
+            Integer idAgencia,
+
+            @RequestParam(required = false)
+            Integer idLineaCredito,
+
+            @RequestParam(required = false)
+            String edadEntrada
     ) {
+
+        validarAcceso();
+
         return service.agencias(
                 periodoDesde,
                 periodoHasta,
@@ -101,10 +133,18 @@ public class CuracionReincidenciaController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate periodoHasta,
 
-            @RequestParam(required = false) Integer idAgencia,
-            @RequestParam(required = false) Integer idLineaCredito,
-            @RequestParam(required = false) String edadEntrada
+            @RequestParam(required = false)
+            Integer idAgencia,
+
+            @RequestParam(required = false)
+            Integer idLineaCredito,
+
+            @RequestParam(required = false)
+            String edadEntrada
     ) {
+
+        validarAcceso();
+
         return service.lineas(
                 periodoDesde,
                 periodoHasta,
@@ -124,10 +164,18 @@ public class CuracionReincidenciaController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate periodoHasta,
 
-            @RequestParam(required = false) Integer idAgencia,
-            @RequestParam(required = false) Integer idLineaCredito,
-            @RequestParam(required = false) String edadEntrada
+            @RequestParam(required = false)
+            Integer idAgencia,
+
+            @RequestParam(required = false)
+            Integer idLineaCredito,
+
+            @RequestParam(required = false)
+            String edadEntrada
     ) {
+
+        validarAcceso();
+
         return service.edadesEntrada(
                 periodoDesde,
                 periodoHasta,
@@ -147,10 +195,18 @@ public class CuracionReincidenciaController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate periodoHasta,
 
-            @RequestParam(required = false) Integer idAgencia,
-            @RequestParam(required = false) Integer idLineaCredito,
-            @RequestParam(required = false) String edadEntrada
+            @RequestParam(required = false)
+            Integer idAgencia,
+
+            @RequestParam(required = false)
+            Integer idLineaCredito,
+
+            @RequestParam(required = false)
+            String edadEntrada
     ) {
+
+        validarAcceso();
+
         return service.distribucionCura(
                 periodoDesde,
                 periodoHasta,
@@ -170,10 +226,18 @@ public class CuracionReincidenciaController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate periodoHasta,
 
-            @RequestParam(required = false) Integer idAgencia,
-            @RequestParam(required = false) Integer idLineaCredito,
-            @RequestParam(required = false) String edadEntrada
+            @RequestParam(required = false)
+            Integer idAgencia,
+
+            @RequestParam(required = false)
+            Integer idLineaCredito,
+
+            @RequestParam(required = false)
+            String edadEntrada
     ) {
+
+        validarAcceso();
+
         return service.primeraReincidencia(
                 periodoDesde,
                 periodoHasta,
@@ -193,12 +257,21 @@ public class CuracionReincidenciaController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate periodoHasta,
 
-            @RequestParam(required = false) Integer idAgencia,
-            @RequestParam(required = false) Integer idLineaCredito,
-            @RequestParam(required = false) String edadEntrada,
+            @RequestParam(required = false)
+            Integer idAgencia,
 
-            @RequestParam(defaultValue = "TODOS") String indicador
+            @RequestParam(required = false)
+            Integer idLineaCredito,
+
+            @RequestParam(required = false)
+            String edadEntrada,
+
+            @RequestParam(defaultValue = "TODOS")
+            String indicador
     ) {
+
+        validarAcceso();
+
         return service.detalle(
                 periodoDesde,
                 periodoHasta,
@@ -206,6 +279,23 @@ public class CuracionReincidenciaController {
                 idLineaCredito,
                 edadEntrada,
                 indicador
+        );
+    }
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarAcceso() {
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO_VIEW
         );
     }
 }

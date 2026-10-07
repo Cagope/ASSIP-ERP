@@ -1,5 +1,9 @@
 package co.assip.erp.cartera.originacion.desembolso;
 
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -8,16 +12,23 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/cartera/originacion/desembolso")
 public class SolicitudDesembolsoController {
 
-    private final SolicitudDesembolsoService service;
+    private static final String PERMISO_VIEW =
+            "CARTERA_ORIGINACION_VIEW";
 
-    public SolicitudDesembolsoController(
-            SolicitudDesembolsoService service
-    ) {
-        this.service = service;
-    }
+    private static final String PERMISO_DESEMBOLSO =
+            "CARTERA_ORIGINACION_DESEMBOLSO";
+
+    // =========================================================
+    // DEPENDENCIAS
+    // =========================================================
+
+    private final SolicitudDesembolsoService service;
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // =========================================================
     // BANDEJA
@@ -29,6 +40,8 @@ public class SolicitudDesembolsoController {
     public ResponseEntity<
             List<SolicitudDesembolsoService.CreditoPendienteDesembolso>
             > listarPendientes() {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.listarPendientes()
@@ -50,6 +63,8 @@ public class SolicitudDesembolsoController {
             > preparar(
             @PathVariable Integer idCarteraCredito
     ) {
+
+        validarConsulta();
 
         return ResponseEntity.ok(
                 service.preparar(
@@ -77,6 +92,8 @@ public class SolicitudDesembolsoController {
             @PathVariable Integer idCarteraCredito,
             @RequestBody CalcularDesembolsoRequest request
     ) {
+
+        validarDesembolso();
 
         if (request == null) {
             throw new IllegalArgumentException(
@@ -122,6 +139,8 @@ public class SolicitudDesembolsoController {
             @RequestBody DistribucionDesembolsoRequest request
     ) {
 
+        validarDesembolso();
+
         if (request == null) {
             throw new IllegalArgumentException(
                     "La distribución del desembolso es obligatoria."
@@ -150,24 +169,24 @@ public class SolicitudDesembolsoController {
     }
 
     // =========================================================
-// EJECUTAR DESEMBOLSO
-//
-// POST
-// /cartera/originacion/desembolso/{idCarteraCredito}/ejecutar
-//
-// Ejecuta integralmente:
-//
-// - Liquidación definitiva
-// - Validación de distribución
-// - Contabilización
-// - Caja
-// - Depósitos
-// - Aportes
-// - Activación del crédito
-//
-// Todo se ejecuta dentro de la transacción controlada
-// por SolicitudDesembolsoService.
-// =========================================================
+    // EJECUTAR DESEMBOLSO
+    //
+    // POST
+    // /cartera/originacion/desembolso/{idCarteraCredito}/ejecutar
+    //
+    // Ejecuta integralmente:
+    //
+    // - Liquidación definitiva
+    // - Validación de distribución
+    // - Contabilización
+    // - Caja
+    // - Depósitos
+    // - Aportes
+    // - Activación del crédito
+    //
+    // Todo se ejecuta dentro de la transacción controlada
+    // por SolicitudDesembolsoService.
+    // =========================================================
 
     @PostMapping("/{idCarteraCredito}/ejecutar")
     public ResponseEntity<
@@ -176,6 +195,8 @@ public class SolicitudDesembolsoController {
             @PathVariable Integer idCarteraCredito,
             @RequestBody EjecutarDesembolsoRequest request
     ) {
+
+        validarDesembolso();
 
         if (request == null) {
             throw new IllegalArgumentException(
@@ -226,6 +247,8 @@ public class SolicitudDesembolsoController {
             @RequestBody ActivarCreditoRequest request
     ) {
 
+        validarDesembolso();
+
         if (request == null) {
             throw new IllegalArgumentException(
                     "Los datos de activación son obligatorios."
@@ -243,6 +266,37 @@ public class SolicitudDesembolsoController {
         );
 
         return ResponseEntity.noContent().build();
+    }
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarConsulta() {
+
+        accessValidator.validarAcceso(
+                usuarioActual(),
+                PERMISO_VIEW
+        );
+    }
+
+    private void validarDesembolso() {
+
+        accessValidator.validarAcceso(
+                usuarioActual(),
+                PERMISO_DESEMBOLSO
+        );
+    }
+
+    private Usuario usuarioActual() {
+
+        Usuario usuarioActual = new Usuario();
+
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        return usuarioActual;
     }
 
     // =========================================================

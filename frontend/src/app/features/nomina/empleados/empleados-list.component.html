@@ -2,6 +2,7 @@
 
   <app-header-actions
     titulo="Empleados Nómina"
+    [mostrarNuevo]="puedeEditar"
     (nuevo)="nuevo()"
     (refrescar)="cargar()"
     (imprimir)="imprimir()"
@@ -60,16 +61,18 @@
             class="btn-action-edit"
             type="button"
             (click)="editar(e.idEmpleado)"
-            title="Editar">
+            [disabled]="!puedeEditar"
+            [title]="puedeEditar ? 'Editar' : 'Sin permiso para editar'">
             ✏️
           </button>
 
           <button
-            class="btn-action-delete"
+            class="btn-action-edit"
             type="button"
-            (click)="eliminar(e.idEmpleado)"
-            title="Eliminar">
-            🗑️
+            (click)="editar(e.idEmpleado)"
+            [disabled]="!puedeEditar"
+            [title]="puedeEditar ? 'Editar' : 'Sin permiso para editar'">
+            ✏️
           </button>
         </div>
       </td>

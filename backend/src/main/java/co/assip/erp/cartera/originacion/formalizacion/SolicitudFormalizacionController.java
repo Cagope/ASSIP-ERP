@@ -3,9 +3,14 @@ package co.assip.erp.cartera.originacion.formalizacion;
 import co.assip.erp.cartera.originacion.formalizacion.dto.SolicitudFormalizacionBandejaDTO;
 import co.assip.erp.cartera.originacion.formalizacion.dto.SolicitudFormalizacionDetalleDTO;
 import co.assip.erp.cartera.originacion.formalizacion.dto.SolicitudFormalizacionGuardarRequestDTO;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+
+import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,20 +25,24 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/cartera/originacion/formalizacion")
 public class SolicitudFormalizacionController {
 
+    private static final String PERMISO_VIEW =
+            "CARTERA_ORIGINACION_VIEW";
+
+    private static final String PERMISO_EDIT =
+            "CARTERA_ORIGINACION_EDIT";
+
+    // =========================================================
+    // DEPENDENCIAS
+    // =========================================================
+
     private final SolicitudFormalizacionService service;
-
     private final SolicitudFormalizacionValidacionService validacionService;
-
-    public SolicitudFormalizacionController(
-            SolicitudFormalizacionService service,
-            SolicitudFormalizacionValidacionService validacionService
-    ) {
-        this.service = service;
-        this.validacionService = validacionService;
-    }
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // =========================================================
     // BANDEJA DE FORMALIZACIÓN
@@ -41,6 +50,8 @@ public class SolicitudFormalizacionController {
 
     @GetMapping("/bandeja")
     public ResponseEntity<List<SolicitudFormalizacionBandejaDTO>> listarBandeja() {
+
+        validarConsulta();
 
         List<SolicitudFormalizacionBandejaDTO> resultado =
                 service.listarBandeja();
@@ -56,6 +67,8 @@ public class SolicitudFormalizacionController {
     public ResponseEntity<SolicitudFormalizacionDetalleDTO> consultar(
             @PathVariable Integer idSolicitudCredito
     ) {
+
+        validarConsulta();
 
         SolicitudFormalizacionDetalleDTO resultado =
                 service.consultar(idSolicitudCredito);
@@ -82,6 +95,8 @@ public class SolicitudFormalizacionController {
             @Valid
             @RequestBody SolicitudFormalizacionGuardarRequestDTO request
     ) {
+
+        validarEdicion();
 
         SolicitudFormalizacionService.ResultadoSimulacionFinanciera resultado =
                 service.simular(
@@ -112,6 +127,8 @@ public class SolicitudFormalizacionController {
             @RequestBody SolicitudFormalizacionGuardarRequestDTO request
     ) {
 
+        validarEdicion();
+
         SolicitudFormalizacionValidacionService.ResultadoValidacionFormalizacion resultado =
                 validacionService.validar(
                         idSolicitudCredito,
@@ -139,6 +156,8 @@ public class SolicitudFormalizacionController {
             @RequestBody SolicitudFormalizacionGuardarRequestDTO request
     ) {
 
+        validarEdicion();
+
         SolicitudFormalizacionDetalleDTO resultado =
                 service.guardar(
                         idSolicitudCredito,
@@ -165,6 +184,8 @@ public class SolicitudFormalizacionController {
             @PathVariable Integer idSolicitudCredito
     ) {
 
+        validarConsulta();
+
         SolicitudFormalizacionService.PropuestaPagare resultado =
                 service.consultarPropuestaPagare(idSolicitudCredito);
 
@@ -188,6 +209,8 @@ public class SolicitudFormalizacionController {
             @Valid @RequestBody GenerarPagareRequest request
     ) {
 
+        validarEdicion();
+
         SolicitudFormalizacionDetalleDTO resultado =
                 service.generarPagare(
                         idSolicitudCredito,
@@ -210,10 +233,43 @@ public class SolicitudFormalizacionController {
             @PathVariable Integer idSolicitudCredito
     ) {
 
+        validarEdicion();
+
         SolicitudFormalizacionDetalleDTO resultado =
                 service.finalizar(idSolicitudCredito);
 
         return ResponseEntity.ok(resultado);
+    }
+
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarConsulta() {
+
+        accessValidator.validarAcceso(
+                usuarioActual(),
+                PERMISO_VIEW
+        );
+    }
+
+    private void validarEdicion() {
+
+        accessValidator.validarAcceso(
+                usuarioActual(),
+                PERMISO_EDIT
+        );
+    }
+
+    private Usuario usuarioActual() {
+
+        Usuario usuarioActual = new Usuario();
+
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        return usuarioActual;
     }
 
     // =========================================================

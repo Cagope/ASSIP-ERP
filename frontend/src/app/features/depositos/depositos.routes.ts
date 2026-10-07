@@ -66,6 +66,11 @@ import { MOVIMIENTO_CUENTA_AHORRO_ROUTES } from './movimientos/cuentas-ahorro/mo
 
 import { CONCENTRACION_DEPOSITOS_ROUTES } from './analisis/concentracion/concentracion-depositos.routes';
 
+import { permisoGuard } from '../../core/auth/permiso.guard';
+
+import { dashboardDepositosRoutes }
+  from './analisis/dashboard-depositos/dashboard-depositos.routes';
+
 export const DEPOSITOS_ROUTES: Routes = [
 
   //CONSULTA CUENTAS DE AHORRO
@@ -243,6 +248,14 @@ export const DEPOSITOS_ROUTES: Routes = [
   {
     path: 'movimientos/cuentas-ahorro',
     children: MOVIMIENTO_CUENTA_AHORRO_ROUTES
+  },
+
+  // Análisis — Dashboard Depósitos
+  {
+    path: 'analisis/dashboard-depositos',
+    canActivate: [permisoGuard],
+    data: { permiso: 'DEPOSITOS_DASHBOARD_VIEW' },
+    children: dashboardDepositosRoutes
   },
 
   // Análisis — Concentración de Captaciones

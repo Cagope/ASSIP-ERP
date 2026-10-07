@@ -42,7 +42,9 @@
 
       <div class="form-group">
         <label>Es fijo</label>
-        <select class="form-control" [(ngModel)]="form.esFijo">
+        <select
+          class="form-control"
+          [(ngModel)]="form.esFijo">
           <option [ngValue]="true">Sí</option>
           <option [ngValue]="false">No</option>
         </select>
@@ -50,7 +52,9 @@
 
       <div class="form-group">
         <label>Activo</label>
-        <select class="form-control" [(ngModel)]="form.activo">
+        <select
+          class="form-control"
+          [(ngModel)]="form.activo">
           <option [ngValue]="true">Sí</option>
           <option [ngValue]="false">No</option>
         </select>
@@ -62,7 +66,9 @@
 
       <div class="form-group">
         <label>Tipo cálculo *</label>
-        <select class="form-control" [(ngModel)]="form.tipoCalculo">
+        <select
+          class="form-control"
+          [(ngModel)]="form.tipoCalculo">
           <option value="MANUAL">Manual</option>
           <option value="POR_DIAS">Por días</option>
           <option value="POR_HORAS">Por horas</option>
@@ -74,10 +80,11 @@
       <div class="form-group">
         <label>Base cálculo</label>
 
-        <select class="form-control" [(ngModel)]="form.baseCalculo">
+        <select
+          class="form-control"
+          [(ngModel)]="form.baseCalculo">
 
           <option [ngValue]="null">-- No aplica --</option>
-
           <option value="SALARIO_BASE">Salario base</option>
           <option value="IBC">IBC</option>
 
@@ -100,7 +107,9 @@
 
       <div class="form-group">
         <label>Afecta IBC</label>
-        <select class="form-control" [(ngModel)]="form.afectaIbc">
+        <select
+          class="form-control"
+          [(ngModel)]="form.afectaIbc">
           <option [ngValue]="true">Sí</option>
           <option [ngValue]="false">No</option>
         </select>
@@ -108,7 +117,9 @@
 
       <div class="form-group">
         <label>Base cesantías</label>
-        <select class="form-control" [(ngModel)]="form.afectaBaseCesantias">
+        <select
+          class="form-control"
+          [(ngModel)]="form.afectaBaseCesantias">
           <option [ngValue]="true">Sí</option>
           <option [ngValue]="false">No</option>
         </select>
@@ -116,7 +127,9 @@
 
       <div class="form-group">
         <label>Base prima legal</label>
-        <select class="form-control" [(ngModel)]="form.afectaBasePrimaLegal">
+        <select
+          class="form-control"
+          [(ngModel)]="form.afectaBasePrimaLegal">
           <option [ngValue]="true">Sí</option>
           <option [ngValue]="false">No</option>
         </select>
@@ -124,7 +137,9 @@
 
       <div class="form-group">
         <label>Base vacaciones</label>
-        <select class="form-control" [(ngModel)]="form.afectaBaseVacaciones">
+        <select
+          class="form-control"
+          [(ngModel)]="form.afectaBaseVacaciones">
           <option [ngValue]="true">Sí</option>
           <option [ngValue]="false">No</option>
         </select>
@@ -132,7 +147,9 @@
 
       <div class="form-group">
         <label>Base prima semestral</label>
-        <select class="form-control" [(ngModel)]="form.afectaBasePrimaSemestral">
+        <select
+          class="form-control"
+          [(ngModel)]="form.afectaBasePrimaSemestral">
           <option [ngValue]="true">Sí</option>
           <option [ngValue]="false">No</option>
         </select>
@@ -140,7 +157,9 @@
 
       <div class="form-group">
         <label>Base ARL</label>
-        <select class="form-control" [(ngModel)]="form.afectaBaseArl">
+        <select
+          class="form-control"
+          [(ngModel)]="form.afectaBaseArl">
           <option [ngValue]="true">Sí</option>
           <option [ngValue]="false">No</option>
         </select>
@@ -148,7 +167,9 @@
 
       <div class="form-group">
         <label>Base parafiscales</label>
-        <select class="form-control" [(ngModel)]="form.afectaBaseParafiscales">
+        <select
+          class="form-control"
+          [(ngModel)]="form.afectaBaseParafiscales">
           <option [ngValue]="true">Sí</option>
           <option [ngValue]="false">No</option>
         </select>
@@ -196,7 +217,7 @@
         type="button"
         class="btn btn--primary"
         (click)="guardar()"
-        [disabled]="guardando">
+        [disabled]="guardando || !puedeEditar">
         {{ guardando ? 'Guardando...' : 'Guardar' }}
       </button>
 

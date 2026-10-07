@@ -249,7 +249,7 @@
         type="button"
         class="btn btn--primary"
         (click)="guardar()"
-        [disabled]="guardando">
+        [disabled]="guardando || !puedeEditar">
         {{ guardando ? 'Guardando...' : 'Guardar' }}
       </button>
 

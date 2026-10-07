@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { SessionService } from '../../../../core/auth/session.service';
 
 import {
   LiquidacionContabilizacionApi,
@@ -38,6 +39,7 @@ export class LiquidacionContabilizacionComponent {
   private periodosApi = inject(PeriodosNominaApi);
   private tiposComprobantesApi = inject(TiposComprobantesApi);
   private liquidacionContabilizacionExporter = inject(LiquidacionContabilizacionExporter);
+  private readonly session = inject(SessionService);
 
   idPeriodoNomina: number | null = null;
   periodos: any[] = [];
@@ -54,6 +56,14 @@ export class LiquidacionContabilizacionComponent {
   comprobanteExistente: string | null = null;
 
   error = '';
+
+  // =========================================================
+  // PERMISOS
+  // =========================================================
+
+  get puedeContabilizar(): boolean {
+    return this.session.tienePermiso('NOMINA_CONTABILIZACION_EXECUTE');
+  }
 
   ngOnInit(): void {
 
@@ -84,6 +94,10 @@ export class LiquidacionContabilizacionComponent {
   fechaContabilizacion: string | null = null;
 
   preview(): void {
+
+    if (!this.puedeContabilizar) {
+      return;
+    }
 
     this.error = '';
     this.resultado = null;
@@ -119,6 +133,10 @@ export class LiquidacionContabilizacionComponent {
   }
 
   ejecutar(): void {
+
+    if (!this.puedeContabilizar) {
+      return;
+    }
 
     this.error = '';
 
@@ -171,6 +189,10 @@ export class LiquidacionContabilizacionComponent {
   }
 
   reversar(): void {
+
+    if (!this.puedeContabilizar) {
+      return;
+    }
 
     this.error = '';
 

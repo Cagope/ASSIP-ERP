@@ -27,9 +27,13 @@ import {
 } from './convenios-recaudo.api';
 
 import {
-  VincularCajaApi,
-  CajaProvisionActivaDTO
-} from '../provisiones/vincular-caja/vincular-caja.api';
+  CajasProvisionApi
+} from '../provisiones/cajas-provision.api';
+
+import {
+  CajaProvisionActiva
+} from '../provisiones/cajas-provision.models';
+
 
 @Component({
   selector: 'app-convenios-recaudo-upsert',
@@ -49,7 +53,7 @@ export class ConveniosRecaudoUpsertComponent implements OnInit {
   private readonly api =
     inject(ConveniosRecaudoApi);
 
-  private readonly cajaApi = inject(VincularCajaApi);
+  private readonly cajaApi = inject(CajasProvisionApi);
 
   readonly route =
     inject(ActivatedRoute);
@@ -64,7 +68,8 @@ export class ConveniosRecaudoUpsertComponent implements OnInit {
   cuentas: ConvenioRecaudoCuenta[] = [];
   convenioActual: ConvenioRecaudo | null = null;
 
-  provisionActiva: CajaProvisionActivaDTO | null = null;
+  provisionActiva: CajaProvisionActiva | null = null;
+
   busqueda: ConvenioRecaudoBusqueda | null = null;
 
   error = '';

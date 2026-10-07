@@ -6,6 +6,8 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+
+
 @Data
 public class CdatCancelacionEntradaDTO {
 
@@ -24,6 +26,8 @@ public class CdatCancelacionEntradaDTO {
 
     private MediosPagoDTO mediosPagoEntrada;
     private MediosPagoDTO mediosPagoSalida;
+
+    private BigDecimal valorCuentaPorPagar;
 
     private String observacion;
 

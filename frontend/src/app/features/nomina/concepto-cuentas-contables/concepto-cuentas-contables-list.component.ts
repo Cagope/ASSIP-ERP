@@ -18,7 +18,12 @@ import { SessionService } from '../../../core/auth/session.service';
   selector: 'app-concepto-cuentas-contables-list',
   templateUrl: './concepto-cuentas-contables-list.component.html',
   styleUrls: ['./concepto-cuentas-contables-list.component.scss'],
-  imports: [CommonModule, RouterModule, FormsModule, HeaderActionsComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    HeaderActionsComponent
+  ],
 })
 export class ConceptoCuentasContablesListComponent implements OnInit {
 
@@ -38,17 +43,26 @@ export class ConceptoCuentasContablesListComponent implements OnInit {
   idAgencia: number | null = null;
 
   // =========================================================
+  // PERMISOS
+  // =========================================================
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
+
+  // =========================================================
   // INIT
   // =========================================================
+
   ngOnInit(): void {
     this.cargar();
   }
 
   // =========================================================
-  // CARGAR  ✅ LISTADO GLOBAL
+  // CARGAR - LISTADO GLOBAL
   // =========================================================
-  cargar(): void {
 
+  cargar(): void {
     this.loading = true;
 
     this.api.listar().subscribe({
@@ -67,10 +81,13 @@ export class ConceptoCuentasContablesListComponent implements OnInit {
   // =========================================================
   // FILTRO
   // =========================================================
-  get filtrados(): ConceptoCuentaContableListDTO[] {
 
+  get filtrados(): ConceptoCuentaContableListDTO[] {
     const q = this.q.trim().toLowerCase();
-    if (!q) return this.items;
+
+    if (!q) {
+      return this.items;
+    }
 
     return this.items.filter(x =>
       x.codigoConcepto?.toLowerCase().includes(q) ||
@@ -83,8 +100,15 @@ export class ConceptoCuentasContablesListComponent implements OnInit {
   // =========================================================
   // HEADER
   // =========================================================
+
   nuevo(): void {
-    this.router.navigate(['/nomina/concepto-cuentas-contables/nuevo']);
+    if (!this.puedeEditar) {
+      return;
+    }
+
+    this.router.navigate([
+      '/nomina/concepto-cuentas-contables/nuevo'
+    ]);
   }
 
   refrescar(): void {
@@ -102,16 +126,27 @@ export class ConceptoCuentasContablesListComponent implements OnInit {
   // =========================================================
   // FILA
   // =========================================================
+
   editar(idMapeo: number): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     this.router.navigate([
       `/nomina/concepto-cuentas-contables/${idMapeo}/editar`
     ]);
   }
 
   eliminar(idMapeo: number): void {
+    if (!this.puedeEditar) {
+      return;
+    }
 
     const ok = confirm('¿Desea eliminar este mapeo contable?');
-    if (!ok) return;
+
+    if (!ok) {
+      return;
+    }
 
     this.api.eliminar(idMapeo).subscribe({
       next: () => this.cargar(),

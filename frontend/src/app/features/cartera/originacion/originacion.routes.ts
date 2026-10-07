@@ -2,6 +2,10 @@ import {
   Routes
 } from '@angular/router';
 
+import {
+  permisoGuard
+} from '../../../core/auth/permiso.guard';
+
 
 export const ORIGINACION_ROUTES:
   Routes = [
@@ -12,6 +16,10 @@ export const ORIGINACION_ROUTES:
 
   {
     path: '',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_ORIGINACION_VIEW'
+    },
     loadComponent: () =>
       import(
         './solicitud/list/solicitud-list.component'
@@ -26,6 +34,10 @@ export const ORIGINACION_ROUTES:
 
   {
     path: 'solicitud',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_ORIGINACION_VIEW'
+    },
     loadComponent: () =>
       import(
         './solicitud/originacion-solicitud.component'
@@ -40,6 +52,10 @@ export const ORIGINACION_ROUTES:
 
   {
     path: 'contexto/:idDatosPersonal',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_ORIGINACION_VIEW'
+    },
     loadComponent: () =>
       import(
         './contexto/originacion-contexto.component'
@@ -54,6 +70,10 @@ export const ORIGINACION_ROUTES:
 
   {
     path: 'deudores',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_ORIGINACION_VIEW'
+    },
     loadComponent: () =>
       import(
         './deudores/originacion-deudores.component'
@@ -68,6 +88,10 @@ export const ORIGINACION_ROUTES:
 
   {
     path: 'bienes',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_ORIGINACION_VIEW'
+    },
     loadComponent: () =>
       import(
         './bienes/originacion-bienes.component'
@@ -82,6 +106,10 @@ export const ORIGINACION_ROUTES:
 
   {
     path: 'financiero',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_ORIGINACION_VIEW'
+    },
     loadComponent: () =>
       import(
         './financiero/originacion-financiero.component'
@@ -96,6 +124,10 @@ export const ORIGINACION_ROUTES:
 
   {
     path: 'central-riesgo',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_ORIGINACION_VIEW'
+    },
     loadComponent: () =>
       import(
         './central-riesgo/originacion-central-riesgo.component'
@@ -110,6 +142,10 @@ export const ORIGINACION_ROUTES:
 
   {
     path: 'analisis',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_ORIGINACION_VIEW'
+    },
     loadComponent: () =>
       import(
         './analisis/originacion-analisis.component'
@@ -124,6 +160,10 @@ export const ORIGINACION_ROUTES:
 
   {
     path: 'referencias',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_ORIGINACION_VIEW'
+    },
     loadComponent: () =>
       import(
         './referencias/originacion-referencias.component'
@@ -138,6 +178,10 @@ export const ORIGINACION_ROUTES:
 
   {
     path: 'aprobacion',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_ORIGINACION_VIEW'
+    },
     loadComponent: () =>
       import(
         './aprobacion/originacion-aprobacion.component'
@@ -152,6 +196,10 @@ export const ORIGINACION_ROUTES:
 
   {
     path: 'formalizacion',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_ORIGINACION_VIEW'
+    },
     loadComponent: () =>
       import(
         './formalizacion/list/originacion-formalizacion-list.component'
@@ -166,6 +214,10 @@ export const ORIGINACION_ROUTES:
 
   {
     path: 'formalizacion/:idSolicitudCredito',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_ORIGINACION_VIEW'
+    },
     loadComponent: () =>
       import(
         './formalizacion/originacion-formalizacion.component'
@@ -180,6 +232,10 @@ export const ORIGINACION_ROUTES:
 
   {
     path: 'desembolso',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_ORIGINACION_VIEW'
+    },
     loadComponent: () =>
       import(
         './desembolso/list/originacion-desembolso-list.component'
@@ -194,6 +250,10 @@ export const ORIGINACION_ROUTES:
 
   {
     path: 'desembolso/:idCarteraCredito',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_ORIGINACION_VIEW'
+    },
     loadComponent: () =>
       import(
         './desembolso/originacion-desembolso.component'
@@ -208,6 +268,10 @@ export const ORIGINACION_ROUTES:
 
   {
     path: 'impresion/pagare-diligenciado/:idSolicitudCredito',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_ORIGINACION_VIEW'
+    },
     loadComponent: () =>
       import(
         './impresion/pagare-diligenciado/pagare-diligenciado.component'
@@ -222,6 +286,10 @@ export const ORIGINACION_ROUTES:
 
   {
     path: 'impresion/pagare-en-blanco/:idSolicitudCredito',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_ORIGINACION_VIEW'
+    },
     loadComponent: () =>
       import(
         './impresion/pagare-en-blanco/pagare-en-blanco.component'
@@ -236,6 +304,10 @@ export const ORIGINACION_ROUTES:
 
   {
     path: 'impresion/carta-instrucciones/:idSolicitudCredito',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_ORIGINACION_VIEW'
+    },
     loadComponent: () =>
       import(
         './impresion/carta-instrucciones/carta-instrucciones.component'

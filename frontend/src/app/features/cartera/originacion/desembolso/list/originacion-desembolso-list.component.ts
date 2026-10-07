@@ -12,6 +12,10 @@ import {
 } from '@angular/router';
 
 import {
+  HttpErrorResponse
+} from '@angular/common/http';
+
+import {
   finalize
 } from 'rxjs/operators';
 
@@ -27,25 +31,37 @@ import {
 @Component({
   selector: 'app-originacion-desembolso-list',
   standalone: true,
+
   imports: [
     CommonModule
   ],
-  templateUrl: './originacion-desembolso-list.component.html',
+
+  templateUrl:
+    './originacion-desembolso-list.component.html',
+
   styleUrls: [
     './originacion-desembolso-list.component.scss'
   ]
 })
-export class OriginacionDesembolsoListComponent implements OnInit {
+export class OriginacionDesembolsoListComponent
+  implements OnInit {
 
   // =========================================================
   // DATOS
   // =========================================================
 
-  creditos: CreditoPendienteDesembolso[] = [];
-  creditosFiltrados: CreditoPendienteDesembolso[] = [];
+  creditos:
+    CreditoPendienteDesembolso[] = [];
+
+  creditosFiltrados:
+    CreditoPendienteDesembolso[] = [];
+
+
+  // =========================================================
+  // ESTADO DE PANTALLA
+  // =========================================================
 
   cargando = false;
-
   error = '';
 
 
@@ -60,28 +76,37 @@ export class OriginacionDesembolsoListComponent implements OnInit {
   // FORMATEADORES
   // =========================================================
 
-  private readonly formatoMoneda = new Intl.NumberFormat(
-    'es-CO',
-    {
-      style: 'currency',
-      currency: 'COP',
-      maximumFractionDigits: 0
-    }
-  );
+  private readonly formatoMoneda =
+    new Intl.NumberFormat(
+      'es-CO',
+      {
+        style: 'currency',
+        currency: 'COP',
+        maximumFractionDigits: 0
+      }
+    );
 
+
+  // =========================================================
+  // CONSTRUCTOR
+  // =========================================================
 
   constructor(
-    private readonly api: OriginacionDesembolsoApi,
-    private readonly router: Router
+    private readonly api:
+      OriginacionDesembolsoApi,
+
+    private readonly router:
+      Router
   ) {
   }
 
 
   // =========================================================
-  // INICIO
+  // CICLO DE VIDA
   // =========================================================
 
   ngOnInit(): void {
+
     this.cargar();
   }
 
@@ -108,7 +133,7 @@ export class OriginacionDesembolsoListComponent implements OnInit {
       )
       .subscribe({
 
-        next: (creditos) => {
+        next: creditos => {
 
           this.creditos =
             Array.isArray(creditos)
@@ -118,7 +143,7 @@ export class OriginacionDesembolsoListComponent implements OnInit {
           this.aplicarFiltro();
         },
 
-        error: (error) => {
+        error: error => {
 
           console.error(
             'Error cargando créditos pendientes de desembolso',
@@ -139,14 +164,15 @@ export class OriginacionDesembolsoListComponent implements OnInit {
 
 
   // =========================================================
-  // FILTRAR
+  // FILTRO
   // =========================================================
 
   cambiarFiltro(
     valor: string
   ): void {
 
-    this.filtro = valor ?? '';
+    this.filtro =
+      valor ?? '';
 
     this.aplicarFiltro();
   }
@@ -180,33 +206,36 @@ export class OriginacionDesembolsoListComponent implements OnInit {
       this.creditos.filter(
         credito => {
 
-          const contenido =
-            [
-              credito.documento,
-              credito.nombreCompleto,
-              credito.pagareCartera,
-              credito.codigoLineaCredito,
-              credito.nombreLineaCredito
-            ]
-              .map(valor =>
+          const contenido = [
+            credito.documento,
+            credito.nombreCompleto,
+            credito.pagareCartera,
+            credito.codigoLineaCredito,
+            credito.nombreLineaCredito
+          ]
+            .map(
+              valor =>
                 this.normalizarTexto(
                   valor
                 )
-              )
-              .join(' ');
+            )
+            .join(' ');
 
-          return contenido.includes(texto);
+          return contenido.includes(
+            texto
+          );
         }
       );
   }
 
 
   // =========================================================
-  // ABRIR DESEMBOLSO
+  // NAVEGACIÓN AL DESEMBOLSO
   // =========================================================
 
   abrir(
-    credito: CreditoPendienteDesembolso
+    credito:
+      CreditoPendienteDesembolso
   ): void {
 
     if (
@@ -216,22 +245,21 @@ export class OriginacionDesembolsoListComponent implements OnInit {
       return;
     }
 
-    void this.router.navigate(
-      [
-        '/cartera/originacion/desembolso',
-        credito.idCarteraCredito
-      ]
-    );
+    void this.router.navigate([
+      '/cartera/originacion/desembolso',
+      credito.idCarteraCredito
+    ]);
   }
 
 
   // =========================================================
-  // TRACK
+  // TRACK BY
   // =========================================================
 
   trackByCredito(
     _index: number,
-    credito: CreditoPendienteDesembolso
+    credito:
+      CreditoPendienteDesembolso
   ): number {
 
     return credito.idCarteraCredito;
@@ -243,7 +271,10 @@ export class OriginacionDesembolsoListComponent implements OnInit {
   // =========================================================
 
   moneda(
-    valor: number | null | undefined
+    valor:
+      number |
+      null |
+      undefined
   ): string {
 
     return this.formatoMoneda.format(
@@ -253,7 +284,10 @@ export class OriginacionDesembolsoListComponent implements OnInit {
 
 
   fecha(
-    valor: string | null | undefined
+    valor:
+      string |
+      null |
+      undefined
   ): string {
 
     if (!valor) {
@@ -269,7 +303,11 @@ export class OriginacionDesembolsoListComponent implements OnInit {
       return valor;
     }
 
-    return `${partes[2]}/${partes[1]}/${partes[0]}`;
+    return (
+      `${partes[2]}/` +
+      `${partes[1]}/` +
+      `${partes[0]}`
+    );
   }
 
 
@@ -286,7 +324,10 @@ export class OriginacionDesembolsoListComponent implements OnInit {
   get valorTotalPendiente(): number {
 
     return this.creditosFiltrados.reduce(
-      (total, credito) =>
+      (
+        total,
+        credito
+      ) =>
         total +
         this.numero(
           credito.valorCredito
@@ -301,7 +342,10 @@ export class OriginacionDesembolsoListComponent implements OnInit {
   // =========================================================
 
   private numero(
-    valor: number | null | undefined
+    valor:
+      number |
+      null |
+      undefined
   ): number {
 
     const numero =
@@ -330,23 +374,37 @@ export class OriginacionDesembolsoListComponent implements OnInit {
   }
 
 
+  // =========================================================
+  // ERRORES
+  // =========================================================
+
   private obtenerMensajeError(
-    error: any,
+    error: unknown,
     mensajeDefecto: string
   ): string {
 
+    const httpError =
+      error as HttpErrorResponse;
+
+    const respuesta =
+      httpError?.error;
+
+    if (
+      typeof respuesta === 'string'
+    ) {
+
+      return respuesta ||
+        mensajeDefecto;
+    }
+
     const mensaje =
-      error?.error?.message ??
-      error?.error?.mensaje ??
-      (
-        typeof error?.error === 'string'
-          ? error.error
-          : null
-      ) ??
-      error?.message;
+      respuesta?.message ??
+      respuesta?.mensaje ??
+      httpError?.message;
 
     return mensaje
       ? String(mensaje)
       : mensajeDefecto;
   }
+
 }

@@ -74,7 +74,7 @@
         type="button"
         class="btn btn--primary"
         (click)="generar()"
-        [disabled]="loading">
+        [disabled]="loading || !puedeEditar">
         {{ loading ? 'Generando...' : 'Generar períodos' }}
       </button>
 

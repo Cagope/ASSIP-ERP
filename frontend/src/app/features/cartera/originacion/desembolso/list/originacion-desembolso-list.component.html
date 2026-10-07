@@ -1,45 +1,58 @@
 <div class="page">
 
-  <!-- =======================================================
-       ENCABEZADO
-       ======================================================= -->
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
 
   <div class="page-header">
+
     <div>
-      <h2>Desembolso de Créditos</h2>
+
+      <h2>
+        Desembolso de Créditos
+      </h2>
+
       <p>
         Créditos formalizados pendientes de desembolso.
       </p>
+
     </div>
+
 
     <button
       type="button"
       class="btn btn-outline-secondary"
       [disabled]="cargando"
       (click)="cargar()">
+
       Actualizar
+
     </button>
+
   </div>
 
 
-  <!-- =======================================================
-       ERROR
-       ======================================================= -->
+  <!-- ===================================================== -->
+  <!-- ERROR -->
+  <!-- ===================================================== -->
 
   <div
     *ngIf="error"
     class="alert alert-danger">
+
     {{ error }}
+
   </div>
 
 
-  <!-- =======================================================
-       RESUMEN
-       ======================================================= -->
+  <!-- ===================================================== -->
+  <!-- RESUMEN -->
+  <!-- ===================================================== -->
 
   <div class="summary-grid">
 
     <div class="summary-card">
+
       <span class="summary-label">
         Créditos pendientes
       </span>
@@ -47,9 +60,12 @@
       <strong class="summary-value">
         {{ cantidadPendientes }}
       </strong>
+
     </div>
 
+
     <div class="summary-card">
+
       <span class="summary-label">
         Valor pendiente
       </span>
@@ -57,20 +73,22 @@
       <strong class="summary-value">
         {{ moneda(valorTotalPendiente) }}
       </strong>
+
     </div>
 
   </div>
 
 
-  <!-- =======================================================
-       FILTRO
-       ======================================================= -->
+  <!-- ===================================================== -->
+  <!-- FILTRO -->
+  <!-- ===================================================== -->
 
   <div class="card">
 
     <div class="filter-row">
 
       <div class="filter-field">
+
         <label for="filtroDesembolso">
           Buscar
         </label>
@@ -83,17 +101,27 @@
           autocomplete="off"
           [value]="filtro"
           placeholder="Cédula, nombre, pagaré o línea"
-          (input)="cambiarFiltro(filtroInput.value)">
+          (input)="
+            cambiarFiltro(
+              filtroInput.value
+            )
+          ">
+
       </div>
 
+
       <div class="filter-actions">
+
         <button
           *ngIf="filtro"
           type="button"
           class="btn btn-outline-secondary"
           (click)="limpiarFiltro()">
+
           Limpiar
+
         </button>
+
       </div>
 
     </div>
@@ -101,26 +129,34 @@
   </div>
 
 
-  <!-- =======================================================
-       CARGANDO
-       ======================================================= -->
+  <!-- ===================================================== -->
+  <!-- CARGANDO -->
+  <!-- ===================================================== -->
 
   <div
     *ngIf="cargando"
     class="state-message">
+
     Cargando créditos pendientes...
+
   </div>
 
 
-  <!-- =======================================================
-       SIN RESULTADOS
-       ======================================================= -->
+  <!-- ===================================================== -->
+  <!-- SIN RESULTADOS -->
+  <!-- ===================================================== -->
 
   <div
-    *ngIf="!cargando && !error && creditosFiltrados.length === 0"
+    *ngIf="
+      !cargando
+      && !error
+      && creditosFiltrados.length === 0
+    "
     class="state-message">
 
-    <strong>No hay créditos pendientes de desembolso.</strong>
+    <strong>
+      No hay créditos pendientes de desembolso.
+    </strong>
 
     <span *ngIf="filtro">
       No se encontraron resultados para el filtro indicado.
@@ -129,12 +165,15 @@
   </div>
 
 
-  <!-- =======================================================
-       TABLA
-       ======================================================= -->
+  <!-- ===================================================== -->
+  <!-- TABLA -->
+  <!-- ===================================================== -->
 
   <div
-    *ngIf="!cargando && creditosFiltrados.length > 0"
+    *ngIf="
+      !cargando
+      && creditosFiltrados.length > 0
+    "
     class="card table-card">
 
     <div class="table-wrap">
@@ -142,28 +181,49 @@
       <table class="table table-hover">
 
         <thead>
+
         <tr>
-          <th>Documento</th>
-          <th>Asociado</th>
-          <th>Pagaré</th>
-          <th>Línea</th>
+
+          <th>
+            Documento
+          </th>
+
+          <th>
+            Asociado
+          </th>
+
+          <th>
+            Pagaré
+          </th>
+
+          <th>
+            Línea
+          </th>
+
           <th class="text-end">
             Valor crédito
           </th>
+
           <th class="text-center">
             Plazo
           </th>
+
           <th>
             Primera cuota
           </th>
+
           <th>
             Fecha final
           </th>
+
           <th class="text-center">
             Acción
           </th>
+
         </tr>
+
         </thead>
+
 
         <tbody>
 
@@ -173,8 +233,12 @@
               trackBy: trackByCredito
             ">
 
-          <!-- Documento -->
+          <!-- =========================================== -->
+          <!-- DOCUMENTO -->
+          <!-- =========================================== -->
+
           <td>
+
             <div class="cell-main">
               {{ credito.documento }}
             </div>
@@ -182,26 +246,46 @@
             <div
               *ngIf="credito.tipoDocumento"
               class="cell-secondary">
+
               {{ credito.tipoDocumento }}
+
             </div>
+
           </td>
 
-          <!-- Asociado -->
+
+          <!-- =========================================== -->
+          <!-- ASOCIADO -->
+          <!-- =========================================== -->
+
           <td>
+
             <div class="cell-main">
               {{ credito.nombreCompleto }}
             </div>
+
           </td>
 
-          <!-- Pagaré -->
+
+          <!-- =========================================== -->
+          <!-- PAGARÉ -->
+          <!-- =========================================== -->
+
           <td>
+
               <span class="pagare">
                 {{ credito.pagareCartera }}
               </span>
+
           </td>
 
-          <!-- Línea -->
+
+          <!-- =========================================== -->
+          <!-- LÍNEA -->
+          <!-- =========================================== -->
+
           <td>
+
             <div class="cell-main">
               {{ credito.nombreLineaCredito }}
             </div>
@@ -209,36 +293,77 @@
             <div class="cell-secondary">
               {{ credito.codigoLineaCredito }}
             </div>
+
           </td>
 
-          <!-- Valor -->
+
+          <!-- =========================================== -->
+          <!-- VALOR -->
+          <!-- =========================================== -->
+
           <td class="text-end amount">
+
             {{ moneda(credito.valorCredito) }}
+
           </td>
 
-          <!-- Plazo -->
+
+          <!-- =========================================== -->
+          <!-- PLAZO -->
+          <!-- =========================================== -->
+
           <td class="text-center">
+
             {{ credito.plazo }} meses
+
           </td>
 
-          <!-- Primera cuota -->
+
+          <!-- =========================================== -->
+          <!-- PRIMERA CUOTA -->
+          <!-- =========================================== -->
+
           <td>
-            {{ fecha(credito.fechaPrimeraCuota) }}
+
+            {{
+            fecha(
+            credito.fechaPrimeraCuota
+            )
+            }}
+
           </td>
 
-          <!-- Fecha final -->
+
+          <!-- =========================================== -->
+          <!-- FECHA FINAL -->
+          <!-- =========================================== -->
+
           <td>
-            {{ fecha(credito.fechaFinal) }}
+
+            {{
+            fecha(
+            credito.fechaFinal
+            )
+            }}
+
           </td>
 
-          <!-- Acción -->
+
+          <!-- =========================================== -->
+          <!-- ACCIÓN -->
+          <!-- =========================================== -->
+
           <td class="text-center">
+
             <button
               type="button"
               class="btn btn-primary btn-sm"
               (click)="abrir(credito)">
+
               Desembolsar
+
             </button>
+
           </td>
 
         </tr>

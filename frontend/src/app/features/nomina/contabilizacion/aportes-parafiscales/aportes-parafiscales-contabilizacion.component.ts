@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { SessionService } from '../../../../core/auth/session.service';
 
 import {
   AportesParafiscalesContabilizacionApi,
@@ -33,11 +34,14 @@ interface ResumenCuentaDTO {
 })
 export class AportesParafiscalesContabilizacionComponent {
 
-  private api = inject(AportesParafiscalesContabilizacionApi);
-  private periodosApi = inject(PeriodosNominaApi);
-  private tiposComprobantesApi = inject(TiposComprobantesApi);
-  private aportesParafiscalesExporter =
+  private readonly api = inject(AportesParafiscalesContabilizacionApi);
+  private readonly periodosApi = inject(PeriodosNominaApi);
+  private readonly tiposComprobantesApi = inject(TiposComprobantesApi);
+  private readonly aportesParafiscalesExporter =
     inject(AportesParafiscalesContabilizacionExporter);
+
+  private readonly session = inject(SessionService);
+
 
   idPeriodoNomina: number | null = null;
   periodos: any[] = [];
@@ -57,6 +61,18 @@ export class AportesParafiscalesContabilizacionComponent {
   numeroComprobantePreview = '';
   fechaContabilizacion: string | null = null;
 
+  // =========================================================
+  // PERMISOS
+  // =========================================================
+
+  get puedeContabilizar(): boolean {
+    return this.session.tienePermiso('NOMINA_CONTABILIZACION_EXECUTE');
+  }
+
+  // =========================================================
+  // INIT
+  // =========================================================
+
   ngOnInit(): void {
     this.periodosApi.listarParaContabilizacion().subscribe(data => {
       this.periodos = data ?? [];
@@ -75,6 +91,11 @@ export class AportesParafiscalesContabilizacionComponent {
   }
 
   preview(): void {
+
+    if (!this.puedeContabilizar) {
+      return;
+    }
+
     this.error = '';
     this.resultado = null;
     this.cargando = true;
@@ -101,6 +122,11 @@ export class AportesParafiscalesContabilizacionComponent {
   }
 
   ejecutar(): void {
+
+    if (!this.puedeContabilizar) {
+      return;
+    }
+
     this.error = '';
 
     if (!this.idPeriodoNomina) {
@@ -147,6 +173,11 @@ export class AportesParafiscalesContabilizacionComponent {
   }
 
   reversar(): void {
+
+    if (!this.puedeContabilizar) {
+      return;
+    }
+
     this.error = '';
 
     if (!this.idPeriodoNomina) {

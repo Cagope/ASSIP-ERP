@@ -10,13 +10,13 @@ import {
   ConceptoCuentaContableFormDTO
 } from './concepto-cuentas-contables.api';
 
-// 👉 Catálogo de conceptos nómina
+// Catálogo de conceptos nómina
 import { ConceptosNominaApi } from '../conceptos-nomina/conceptos-nomina.api';
 
-// 👉 Sesión (agencia activa)
+// Sesión
 import { SessionService } from '../../../core/auth/session.service';
 
-// 👉 Cuentas contables (autocomplete)
+// Cuentas contables (autocomplete)
 import { CuentasApi, CuentaAutocompleteDTO } from '../../../shared/cuentas/cuentas.api';
 
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
@@ -31,7 +31,7 @@ import { of } from 'rxjs';
     CommonModule,
     RouterModule,
     FormsModule,
-    ReactiveFormsModule, // ✅ OBLIGATORIO para [formControl]
+    ReactiveFormsModule,
     HeaderActionsComponent
   ],
 })
@@ -40,23 +40,35 @@ export class ConceptoCuentasContablesUpsertComponent implements OnInit {
   // =========================================================
   // INYECCIONES
   // =========================================================
+
   private readonly api = inject(ConceptoCuentasContablesApi);
   private readonly conceptosApi = inject(ConceptosNominaApi);
   private readonly cuentasApi = inject(CuentasApi);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  public session = inject(SessionService);
+
+  public readonly session = inject(SessionService);
 
   // =========================================================
   // STATE
   // =========================================================
+
   idMapeo?: number;
   loading = false;
   guardando = false;
 
   // =========================================================
-  // FORM (modelo simple)
+  // PERMISOS
   // =========================================================
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
+
+  // =========================================================
+  // FORM
+  // =========================================================
+
   form: ConceptoCuentaContableFormDTO = {
     codigoConcepto: '',
     idAgencia: 0,
@@ -68,12 +80,14 @@ export class ConceptoCuentasContablesUpsertComponent implements OnInit {
   // =========================================================
   // FUENTES DE DATOS
   // =========================================================
+
   agencias: any[] = [];
   conceptos: any[] = [];
 
   // =========================================================
   // AUTOCOMPLETE CUENTAS
   // =========================================================
+
   ctaDebitoCtrl = new FormControl('');
   ctaCreditoCtrl = new FormControl('');
 
@@ -83,14 +97,17 @@ export class ConceptoCuentasContablesUpsertComponent implements OnInit {
   // =========================================================
   // INIT
   // =========================================================
+
   ngOnInit(): void {
 
     // -------------------------------
     // AGENCIAS DESDE SESIÓN
     // -------------------------------
+
     this.agencias = this.session.getAgencias?.() ?? [];
 
     const agActiva = this.session.getAgenciaActiva?.();
+
     if (agActiva?.idAgencia) {
       this.form.idAgencia = agActiva.idAgencia;
       this.onChangeAgencia(agActiva.idAgencia);
@@ -99,6 +116,7 @@ export class ConceptoCuentasContablesUpsertComponent implements OnInit {
     // -------------------------------
     // CONCEPTOS NÓMINA
     // -------------------------------
+
     this.conceptosApi.listar().subscribe({
       next: d => this.conceptos = d ?? [],
       error: err => {
@@ -110,6 +128,7 @@ export class ConceptoCuentasContablesUpsertComponent implements OnInit {
     // -------------------------------
     // AUTOCOMPLETE CUENTA DÉBITO
     // -------------------------------
+
     this.ctaDebitoCtrl.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged(),
@@ -134,6 +153,7 @@ export class ConceptoCuentasContablesUpsertComponent implements OnInit {
     // -------------------------------
     // AUTOCOMPLETE CUENTA CRÉDITO
     // -------------------------------
+
     this.ctaCreditoCtrl.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged(),
@@ -158,7 +178,9 @@ export class ConceptoCuentasContablesUpsertComponent implements OnInit {
     // -------------------------------
     // EDITAR
     // -------------------------------
+
     const id = this.route.snapshot.paramMap.get('idMapeo');
+
     if (id) {
       this.idMapeo = Number(id);
       this.cargar();
@@ -166,11 +188,14 @@ export class ConceptoCuentasContablesUpsertComponent implements OnInit {
   }
 
   // =========================================================
-  // CARGAR (editar)
+  // CARGAR
   // =========================================================
+
   cargar(): void {
 
-    if (!this.idMapeo) return;
+    if (!this.idMapeo) {
+      return;
+    }
 
     this.loading = true;
 
@@ -179,9 +204,7 @@ export class ConceptoCuentasContablesUpsertComponent implements OnInit {
 
         this.form = data;
 
-        // =========================================
-        // 👉 PRECARGAR CUENTA DÉBITO (EDICIÓN)
-        // =========================================
+        // PRECARGAR CUENTA DÉBITO
         if (data.idCuentaDebito && (data as any).cuentaDebito) {
           this.ctaDebitoCtrl.setValue(
             (data as any).cuentaDebito,
@@ -189,9 +212,7 @@ export class ConceptoCuentasContablesUpsertComponent implements OnInit {
           );
         }
 
-        // =========================================
-        // 👉 PRECARGAR CUENTA CRÉDITO (EDICIÓN)
-        // =========================================
+        // PRECARGAR CUENTA CRÉDITO
         if (data.idCuentaCredito && (data as any).cuentaCredito) {
           this.ctaCreditoCtrl.setValue(
             (data as any).cuentaCredito,
@@ -213,6 +234,7 @@ export class ConceptoCuentasContablesUpsertComponent implements OnInit {
   // =========================================================
   // CAMBIO DE AGENCIA
   // =========================================================
+
   onChangeAgencia(idAgencia: number): void {
 
     const id = Number(idAgencia);
@@ -220,10 +242,13 @@ export class ConceptoCuentasContablesUpsertComponent implements OnInit {
     if (!id) {
       this.form.idCuentaDebito = 0;
       this.form.idCuentaCredito = 0;
+
       this.ctaDebitoCtrl.reset('', { emitEvent: false });
       this.ctaCreditoCtrl.reset('', { emitEvent: false });
+
       this.cuentasDebito = [];
       this.cuentasCredito = [];
+
       return;
     }
 
@@ -232,6 +257,7 @@ export class ConceptoCuentasContablesUpsertComponent implements OnInit {
     // limpiar cuentas seleccionadas
     this.form.idCuentaDebito = 0;
     this.form.idCuentaCredito = 0;
+
     this.ctaDebitoCtrl.reset('', { emitEvent: false });
     this.ctaCreditoCtrl.reset('', { emitEvent: false });
   }
@@ -239,6 +265,7 @@ export class ConceptoCuentasContablesUpsertComponent implements OnInit {
   // =========================================================
   // SELECCIONAR CUENTAS
   // =========================================================
+
   seleccionarCuentaDebito(c: CuentaAutocompleteDTO): void {
 
     const label = `${c.codigoCuenta} — ${c.nombreCuenta}`;
@@ -260,7 +287,12 @@ export class ConceptoCuentasContablesUpsertComponent implements OnInit {
   // =========================================================
   // GUARDAR
   // =========================================================
+
   guardar(): void {
+
+    if (!this.puedeEditar) {
+      return;
+    }
 
     if (
       !this.form.idAgencia ||
@@ -294,6 +326,7 @@ export class ConceptoCuentasContablesUpsertComponent implements OnInit {
   // =========================================================
   // VOLVER
   // =========================================================
+
   volver(): void {
     this.router.navigate(['/nomina/concepto-cuentas-contables']);
   }

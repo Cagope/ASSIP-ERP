@@ -1,5 +1,9 @@
 package co.assip.erp.cartera.buscadorasociados;
 
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,22 +18,21 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/cartera/asociados")
+@RequiredArgsConstructor
 public class CarteraAsociadoBusquedaController {
 
+    private static final String PERMISO_VIEW = "CARTERA_VIEW";
+
     // =========================================================
-    // Dependencia
+    // DEPENDENCIAS
     // =========================================================
 
     private final CarteraAsociadoBusquedaService service;
-
-    public CarteraAsociadoBusquedaController(
-            CarteraAsociadoBusquedaService service
-    ) {
-        this.service = service;
-    }
+    private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
 
     // =========================================================
-    // Buscar asociados
+    // BUSCAR ASOCIADOS
     // =========================================================
 
     /**
@@ -47,26 +50,20 @@ public class CarteraAsociadoBusquedaController {
      */
     @GetMapping("/buscar")
     public ResponseEntity<List<CarteraAsociadoBusquedaDTO>> buscar(
-            @RequestParam(
-                    required = false
-            )
+            @RequestParam(required = false)
             String documento,
 
-            @RequestParam(
-                    required = false
-            )
+            @RequestParam(required = false)
             String nombres,
 
-            @RequestParam(
-                    required = false
-            )
+            @RequestParam(required = false)
             String primerApellido,
 
-            @RequestParam(
-                    required = false
-            )
+            @RequestParam(required = false)
             String segundoApellido
     ) {
+
+        validarAcceso();
 
         List<CarteraAsociadoBusquedaDTO> resultados =
                 service.buscar(
@@ -81,4 +78,20 @@ public class CarteraAsociadoBusquedaController {
         );
     }
 
+    // =========================================================
+    // SEGURIDAD
+    // =========================================================
+
+    private void validarAcceso() {
+
+        Usuario usuarioActual = new Usuario();
+        usuarioActual.setIdUsuario(
+                usuarioSesionService.idUsuario()
+        );
+
+        accessValidator.validarAcceso(
+                usuarioActual,
+                PERMISO_VIEW
+        );
+    }
 }

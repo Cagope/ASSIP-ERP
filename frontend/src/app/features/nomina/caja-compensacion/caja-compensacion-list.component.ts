@@ -4,7 +4,13 @@ import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
-import { CajaCompensacionApi, CajaCompensacionListDTO } from './caja-compensacion.api';
+import { SessionService } from '../../../core/auth/session.service';
+
+import {
+  CajaCompensacionApi,
+  CajaCompensacionListDTO
+} from './caja-compensacion.api';
+
 import { CajaCompensacionPrintService } from './caja-compensacion-print.service';
 import { CajaCompensacionExporterService } from './caja-compensacion-exporter.service';
 
@@ -13,12 +19,18 @@ import { CajaCompensacionExporterService } from './caja-compensacion-exporter.se
   selector: 'app-caja-compensacion-list',
   templateUrl: './caja-compensacion-list.component.html',
   styleUrls: ['./caja-compensacion-list.component.scss'],
-  imports: [CommonModule, RouterModule, FormsModule, HeaderActionsComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    HeaderActionsComponent
+  ],
 })
 export class CajaCompensacionListComponent implements OnInit {
 
   private readonly api = inject(CajaCompensacionApi);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
 
   private readonly printService = inject(CajaCompensacionPrintService);
   private readonly exporterService = inject(CajaCompensacionExporterService);
@@ -27,6 +39,14 @@ export class CajaCompensacionListComponent implements OnInit {
   loading = false;
 
   q = '';
+
+  // =========================================================
+  // PERMISOS
+  // =========================================================
+
+  get puedeEditar(): boolean {
+    return this.session.tienePermiso('NOMINA_PARAMETROS_EDIT');
+  }
 
   ngOnInit(): void {
     this.cargar();
@@ -50,7 +70,10 @@ export class CajaCompensacionListComponent implements OnInit {
 
   get cajasFiltradas(): CajaCompensacionListDTO[] {
     const q = (this.q ?? '').trim().toLowerCase();
-    if (!q) return this.cajas;
+
+    if (!q) {
+      return this.cajas;
+    }
 
     return this.cajas.filter(x =>
       (x.nombreCaja ?? '').toLowerCase().includes(q) ||
@@ -59,9 +82,14 @@ export class CajaCompensacionListComponent implements OnInit {
   }
 
   // =========================================================
-  // ✅ HEADER
+  // HEADER
   // =========================================================
+
   nuevo(): void {
+    if (!this.puedeEditar) {
+      return;
+    }
+
     this.router.navigate(['/nomina/caja-compensacion/nuevo']);
   }
 
@@ -78,15 +106,31 @@ export class CajaCompensacionListComponent implements OnInit {
   }
 
   // =========================================================
-  // ✅ FILA
+  // FILA
   // =========================================================
+
   editar(id: number): void {
-    this.router.navigate([`/nomina/caja-compensacion/${id}/editar`]);
+    if (!this.puedeEditar) {
+      return;
+    }
+
+    this.router.navigate([
+      `/nomina/caja-compensacion/${id}/editar`
+    ]);
   }
 
   eliminar(id: number): void {
-    const ok = confirm('¿Desea eliminar esta Caja de Compensación?');
-    if (!ok) return;
+    if (!this.puedeEditar) {
+      return;
+    }
+
+    const ok = confirm(
+      '¿Desea eliminar esta Caja de Compensación?'
+    );
+
+    if (!ok) {
+      return;
+    }
 
     this.api.eliminar(id).subscribe({
       next: () => this.cargar(),
