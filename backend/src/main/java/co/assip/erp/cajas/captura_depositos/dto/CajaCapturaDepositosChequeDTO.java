@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class CajaCapturaDepositosChequeDTO {
 
-    private String codigoBanco;
+    private Integer codigoBanco;
     private String numeroCheque;
     private BigDecimal valorCheque;
     private String observacion;

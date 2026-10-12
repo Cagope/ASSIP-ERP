@@ -42,31 +42,40 @@ public class AccessValidator {
      *
      * @param usuario       usuario autenticado
      * @param codigoPermiso código funcional requerido
-     * @throws IllegalArgumentException si los datos recibidos
-     *                                  no son válidos
-     * @throws SecurityException        si el usuario no posee
-     *                                  el permiso requerido
      */
     public void validarAcceso(
             Usuario usuario,
             String codigoPermiso
     ) {
 
-        if (usuario == null
-                || usuario.getIdUsuario() == null) {
-
-            throw new IllegalArgumentException(
-                    "No se encontró un usuario autenticado."
+        if (!tienePermiso(usuario, codigoPermiso)) {
+            throw new SecurityException(
+                    "Acceso denegado. El usuario no tiene el permiso "
+                            + codigoPermiso.trim().toUpperCase()
+                            + "."
             );
         }
+    }
 
-        if (codigoPermiso == null
-                || codigoPermiso.isBlank()) {
+    /**
+     * Indica si el usuario posee un permiso funcional efectivo.
+     *
+     * Los permisos son acumulativos entre todos los roles vigentes.
+     * ADMIN conserva acceso administrativo total.
+     *
+     * Este método no genera SecurityException cuando el permiso
+     * no existe para el usuario; simplemente retorna false.
+     *
+     * @param usuario       usuario autenticado
+     * @param codigoPermiso código funcional consultado
+     * @return true si el usuario posee el permiso; false en caso contrario
+     */
+    public boolean tienePermiso(
+            Usuario usuario,
+            String codigoPermiso
+    ) {
 
-            throw new IllegalArgumentException(
-                    "El código del permiso es obligatorio."
-            );
-        }
+        validarParametros(usuario, codigoPermiso);
 
         String permisoNormalizado =
                 codigoPermiso.trim().toUpperCase();
@@ -77,9 +86,7 @@ public class AccessValidator {
                 );
 
         if (rolesVigentes.isEmpty()) {
-            throw new SecurityException(
-                    "Acceso denegado. El usuario no tiene roles vigentes."
-            );
+            return false;
         }
 
         /*
@@ -99,7 +106,7 @@ public class AccessValidator {
                         );
 
         if (esAdmin) {
-            return;
+            return true;
         }
 
         /*
@@ -108,22 +115,40 @@ public class AccessValidator {
          * Si cualquiera de los roles vigentes contiene
          * el permiso solicitado, el usuario queda autorizado.
          */
-        boolean autorizado =
-                rolesVigentes.stream()
-                        .anyMatch(usuarioRol ->
-                                rolPermisoService
-                                        .rolTienePermiso(
-                                                usuarioRol
-                                                        .getRol()
-                                                        .getIdRol(),
-                                                permisoNormalizado
-                                        )
-                        );
+        return rolesVigentes.stream()
+                .anyMatch(usuarioRol ->
+                        rolPermisoService
+                                .rolTienePermiso(
+                                        usuarioRol
+                                                .getRol()
+                                                .getIdRol(),
+                                        permisoNormalizado
+                                )
+                );
+    }
 
-        if (!autorizado) {
-            throw new SecurityException(
-                    "Acceso denegado. El usuario no tiene el permiso "
-                            + permisoNormalizado + "."
+    /**
+     * Valida los parámetros comunes utilizados para
+     * consultar o exigir un permiso.
+     */
+    private void validarParametros(
+            Usuario usuario,
+            String codigoPermiso
+    ) {
+
+        if (usuario == null
+                || usuario.getIdUsuario() == null) {
+
+            throw new IllegalArgumentException(
+                    "No se encontró un usuario autenticado."
+            );
+        }
+
+        if (codigoPermiso == null
+                || codigoPermiso.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "El código del permiso es obligatorio."
             );
         }
     }

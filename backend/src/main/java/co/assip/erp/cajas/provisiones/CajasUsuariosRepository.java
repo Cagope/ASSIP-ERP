@@ -7,8 +7,10 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+
 
 @Repository
 @RequiredArgsConstructor
@@ -145,6 +147,67 @@ public class CajasUsuariosRepository {
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("idUsuario", idUsuario);
+
+        List<CajaUsuarioDTO> lista = jdbc.query(
+                sql,
+                params,
+                (rs, rowNum) -> mapCajaUsuario(rs)
+        );
+
+        return lista.stream().findFirst();
+    }
+
+    // =========================================================
+// VINCULACIÓN DEL USUARIO POR FECHA
+// =========================================================
+
+    /**
+     * Obtiene la caja trabajada por un usuario en una fecha de jornada.
+     *
+     * No depende de CURRENT_DATE y conserva como válida la relación
+     * aunque la vinculación ya se encuentre FINALIZADA.
+     *
+     * Se utiliza para determinar el alcance del usuario en procesos
+     * asociados a una jornada específica, como el cierre de caja.
+     */
+    public Optional<CajaUsuarioDTO> obtenerPorUsuarioYFecha(
+            Integer idUsuario,
+            LocalDate fechaJornada
+    ) {
+
+        String sql = """
+        SELECT
+            cu.id_caja_usuario,
+            cu.id_caja,
+            cu.id_usuario,
+            cu.fecha_jornada,
+            cu.estado,
+            cu.fecha_vinculacion,
+            cu.fecha_finalizacion,
+            cu.motivo_finalizacion,
+
+            c.id_agencia,
+            c.codigo_caja,
+            c.descripcion AS descripcion_caja,
+
+            u.username,
+            u.nombre_completo
+
+        FROM cajas.cajas_usuarios cu
+
+        INNER JOIN cajas.cajas c
+            ON c.id_caja = cu.id_caja
+
+        INNER JOIN seguridad.usuarios u
+            ON u.id_usuario = cu.id_usuario
+
+        WHERE cu.id_usuario = :idUsuario
+          AND cu.fecha_jornada = :fechaJornada
+        """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("idUsuario", idUsuario)
+                .addValue("fechaJornada", fechaJornada);
 
         List<CajaUsuarioDTO> lista = jdbc.query(
                 sql,

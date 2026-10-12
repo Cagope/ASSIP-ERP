@@ -4,6 +4,7 @@
   padding: 1rem;
 }
 
+
 /* =========================================
    CARDS / ALERTAS
 ========================================= */
@@ -34,6 +35,7 @@
   color: #065f46;
   border-color: #a7f3d0;
 }
+
 
 /* =========================================
    FORMULARIOS
@@ -113,6 +115,7 @@
   }
 }
 
+
 /* =========================================
    TABLAS
 ========================================= */
@@ -153,6 +156,7 @@
   text-align: center;
 }
 
+
 /* =========================================
    BOTONES
 ========================================= */
@@ -165,6 +169,7 @@
   padding: 6px 10px;
   font-size: 12px;
 }
+
 
 /* =========================================
    PROVISIÓN
@@ -203,6 +208,7 @@
     font-weight: 700;
   }
 }
+
 
 /* =========================================
    CUENTA SELECCIONADA
@@ -252,6 +258,7 @@
   }
 }
 
+
 /* =========================================
    FIRMAS
 ========================================= */
@@ -291,6 +298,7 @@
   border: 1px dashed #d1d5db;
   color: #6b7280;
 }
+
 
 /* =========================================
    SALDOS
@@ -357,6 +365,7 @@
   }
 }
 
+
 /* =========================================
    ESTADOS
 ========================================= */
@@ -383,25 +392,101 @@
   color: #991b1b;
 }
 
+
 /* =========================================
    MOVIMIENTO
 ========================================= */
 
+.movement-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 18px;
+
+  h3 {
+    margin: 0;
+  }
+}
+
+.movement-date {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: #eff6ff;
+
+  span {
+    color: #475569;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  strong {
+    color: #1e3a8a;
+    font-size: 16px;
+    font-weight: 900;
+  }
+}
+
+
+/* Primera línea:
+   Tipo movimiento | Soporte | Número soporte
+*/
+
 .movement-grid {
   display: grid;
   grid-template-columns:
-    150px
-    minmax(260px, 1fr)
-    190px
-    170px
-    170px;
+    minmax(360px, 1fr)
+    minmax(220px, 280px)
+    minmax(200px, 240px);
   gap: 12px;
   align-items: end;
 }
 
 .movement-grid .full {
-  grid-column: span 5;
+  grid-column: span 3;
 }
+
+
+/* Segunda línea:
+   Efectivo | Cheques
+*/
+
+.movement-values {
+  display: grid;
+  grid-template-columns:
+    minmax(300px, 380px)
+    minmax(300px, 380px);
+  gap: 18px;
+  margin-top: 20px;
+  align-items: end;
+  justify-content: start;
+}
+
+.movement-value-field {
+  label {
+    margin-bottom: 7px;
+    color: #374151;
+    font-size: 14px;
+    font-weight: 800;
+  }
+}
+
+.movement-value-input {
+  width: 100%;
+  height: 58px !important;
+  min-height: 58px !important;
+  padding: 8px 15px !important;
+
+  text-align: right;
+  font-size: 24px !important;
+  font-weight: 900 !important;
+
+  border-radius: 10px !important;
+}
+
 
 /* =========================================
    CHEQUES
@@ -454,6 +539,7 @@
   align-items: end;
 }
 
+
 /* =========================================
    PREVIEW / RESULTADO
 ========================================= */
@@ -466,6 +552,7 @@
   border-left: 5px solid #16a34a;
 }
 
+
 /* =========================================
    RESPONSIVE
 ========================================= */
@@ -473,11 +560,16 @@
 @media (max-width: 1200px) {
 
   .movement-grid {
-    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    grid-template-columns:
+      minmax(280px, 1fr)
+      minmax(200px, 240px)
+      minmax(180px, 220px);
   }
 
-  .movement-grid .full {
-    grid-column: span 3;
+  .movement-values {
+    grid-template-columns:
+      minmax(260px, 340px)
+      minmax(260px, 340px);
   }
 }
 
@@ -503,6 +595,18 @@
   .provision-grid {
     grid-template-columns: 1fr;
   }
+
+  .movement-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .movement-grid .form-field:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .movement-values {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 700px) {
@@ -514,12 +618,23 @@
   .saldo-resumen,
   .saldo-resumen-preview,
   .movement-grid,
+  .movement-values,
   .cheque-row {
     grid-template-columns: 1fr;
   }
 
+  .movement-grid .form-field:first-child {
+    grid-column: auto;
+  }
+
   .movement-grid .full {
     grid-column: span 1;
+  }
+
+  .movement-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
   }
 
   .selected-header,
@@ -536,6 +651,11 @@
     }
   }
 }
+
+
+/* =========================================
+   PREVIEW HEADER
+========================================= */
 
 .preview-header-inline {
   display: flex;
@@ -580,6 +700,11 @@
   color: #991b1b;
 }
 
+
+/* =========================================
+   VALIDACIONES
+========================================= */
+
 .preview-validation-error {
   margin: 10px 0 12px;
   padding: 12px 14px;
@@ -590,6 +715,11 @@
   font-size: 13px;
   font-weight: 700;
 }
+
+
+/* =========================================
+   SARLAFT
+========================================= */
 
 .sarlaft-alert {
   margin: 12px 0;
@@ -659,6 +789,11 @@
     font-weight: 800;
   }
 }
+
+
+/* =========================================
+   INTERAGENCIA
+========================================= */
 
 .interagencia-alert {
   margin: 12px 0;

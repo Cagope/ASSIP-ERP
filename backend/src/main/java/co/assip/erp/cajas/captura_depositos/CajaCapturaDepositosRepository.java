@@ -2,6 +2,7 @@ package co.assip.erp.cajas.captura_depositos;
 
 import co.assip.erp.cajas.captura_depositos.dto.CajaCapturaDepositosCuentaDTO;
 import co.assip.erp.depositos.movimientos.cuentasahorro.dto.TipoMovimientoDTO;
+import co.assip.erp.cajas.captura_depositos.dto.CajaCapturaDepositosBancoDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -38,6 +39,31 @@ public class CajaCapturaDepositosRepository {
 
         return datos.isEmpty() ? null : datos.get(0);
     }
+
+    public Long obtenerProvisionAbiertaConLock(
+            Long idCaja,
+            LocalDate fechaContable
+    ) {
+
+        String sql = """
+        SELECT id_provision
+        FROM cajas.provisiones_diarias
+        WHERE id_caja = ?
+          AND fecha_contable = ?
+          AND estado = 'ABIERTA'
+        FOR UPDATE
+        """;
+
+        List<Long> datos = jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> rs.getLong("id_provision"),
+                idCaja,
+                fechaContable
+        );
+
+        return datos.isEmpty() ? null : datos.get(0);
+    }
+
     public Long obtenerDepartamentoDepositos() {
         String sql = """
             SELECT id_departamento_operativo
@@ -167,6 +193,12 @@ public class CajaCapturaDepositosRepository {
         ca.id_forma_ahorro,
         fa.codigo_forma,
         fa.nombre_forma,
+        fa.tipo_captacion_forma,
+
+        fa.cuenta_forma_corto AS id_catalogo_cuenta_corto,
+        fa.cuenta_forma_largo AS id_catalogo_cuenta_largo,
+        fa.cuenta_interagencia AS id_catalogo_cuenta_interagencia,
+        ca.plazo_cuenta AS plazo_cuenta,
 
         COALESCE(ca.saldo_actual_cuenta, 0) AS saldo_actual,
         COALESCE(canje.valor_en_canje, 0) AS valor_canje,
@@ -374,6 +406,34 @@ public class CajaCapturaDepositosRepository {
                         rs.getString("nombre_forma")
                 )
 
+                .tipoCaptacionForma(
+                        rs.getString("tipo_captacion_forma")
+                )
+
+                .idCatalogoCuentaCorto(
+                        rs.getObject("id_catalogo_cuenta_corto") != null
+                                ? rs.getInt("id_catalogo_cuenta_corto")
+                                : null
+                )
+
+                .idCatalogoCuentaLargo(
+                        rs.getObject("id_catalogo_cuenta_largo") != null
+                                ? rs.getInt("id_catalogo_cuenta_largo")
+                                : null
+                )
+
+                .idCatalogoCuentaInteragencia(
+                        rs.getObject("id_catalogo_cuenta_interagencia") != null
+                                ? rs.getInt("id_catalogo_cuenta_interagencia")
+                                : null
+                )
+
+                .plazoCuenta(
+                        rs.getObject("plazo_cuenta") != null
+                                ? rs.getInt("plazo_cuenta")
+                                : null
+                )
+
                 .saldoActual(saldoActual)
 
                 .valorCanje(valorCanje)
@@ -544,10 +604,85 @@ public class CajaCapturaDepositosRepository {
         );
     }
 
+    public void asociarComprobanteContable(
+            Long idMovimientoCaja,
+            String tipoComprobante,
+            String numeroComprobante,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+        UPDATE cajas.movimientos_caja
+        SET tipo_comprobante = ?,
+            numero_comprobante = ?,
+            fk_seguridad_edicion = ?,
+            fecha_edicion = CURRENT_TIMESTAMP
+        WHERE id_movimiento_caja = ?
+          AND estado = 'REGISTRADO'
+        """;
+
+        int actualizados = jdbcTemplate.update(
+                sql,
+                tipoComprobante,
+                numeroComprobante,
+                idUsuario,
+                idMovimientoCaja
+        );
+
+        if (actualizados != 1) {
+            throw new IllegalStateException(
+                    "No fue posible asociar el comprobante contable al movimiento de caja " +
+                            idMovimientoCaja
+            );
+        }
+    }
+
+    public boolean existeBancoActivo(Integer codigoBanco) {
+
+        if (codigoBanco == null) {
+            return false;
+        }
+
+        String sql = """
+        SELECT COUNT(1)
+        FROM tesoreria.bancos
+        WHERE codigo_banco = ?
+          AND activo = true
+        """;
+
+        Integer cantidad = jdbcTemplate.queryForObject(
+                sql,
+                Integer.class,
+                codigoBanco
+        );
+
+        return cantidad != null && cantidad > 0;
+    }
+
+    public List<CajaCapturaDepositosBancoDTO> listarBancosActivos() {
+
+        String sql = """
+        SELECT
+            codigo_banco,
+            nombre_banco
+        FROM tesoreria.bancos
+        WHERE activo = true
+        ORDER BY nombre_banco
+        """;
+
+        return jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> CajaCapturaDepositosBancoDTO.builder()
+                        .codigoBanco(rs.getInt("codigo_banco"))
+                        .nombreBanco(rs.getString("nombre_banco"))
+                        .build()
+        );
+    }
+
     public void insertarChequeRecibido(
             Long idMovimientoCaja,
             Long idCaja,
-            String codigoBanco,
+            Integer codigoBanco,
             String numeroCheque,
             BigDecimal valorCheque,
             String numeroDocumento,
@@ -599,7 +734,7 @@ public class CajaCapturaDepositosRepository {
             ?,
             ?
         )
-    """;
+        """;
 
         jdbcTemplate.update(
                 sql,
@@ -690,6 +825,83 @@ public class CajaCapturaDepositosRepository {
         return cantidad != null && cantidad > 0;
     }
 
+    public boolean validarFormatoConsignacion(
+            Integer idAgencia,
+            String numeroFormato
+    ) {
+
+        String sql = """
+        SELECT COUNT(1)
+        FROM depositos.formatos_consignacion
+        WHERE id_agencia = ?
+          AND activo = true
+          AND CAST(? AS NUMERIC)
+              BETWEEN CAST(numero_inicial AS NUMERIC)
+                  AND CAST(numero_final AS NUMERIC)
+    """;
+
+        Integer cantidad = jdbcTemplate.queryForObject(
+                sql,
+                Integer.class,
+                idAgencia,
+                numeroFormato
+        );
+
+        return cantidad != null && cantidad > 0;
+    }
+
+    public boolean bloquearFormatoConsignacion(
+            Integer idAgencia,
+            String numeroFormato
+    ) {
+
+        String sql = """
+        SELECT id_formato_consignacion
+        FROM depositos.formatos_consignacion
+        WHERE id_agencia = ?
+          AND activo = true
+          AND CAST(? AS NUMERIC)
+              BETWEEN CAST(numero_inicial AS NUMERIC)
+                  AND CAST(numero_final AS NUMERIC)
+        ORDER BY id_formato_consignacion
+        FOR UPDATE
+    """;
+
+        List<Long> formatos = jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> rs.getLong("id_formato_consignacion"),
+                idAgencia,
+                numeroFormato
+        );
+
+        return !formatos.isEmpty();
+    }
+
+    public List<Long[]> consultarUsosFormatoConsignacion(
+            String numeroFormato
+    ) {
+
+        String sql = """
+        SELECT DISTINCT
+            ca.id_datos_personal,
+            ca.id_forma_ahorro
+        FROM depositos.extractos_cuentas_ahorros eca
+        INNER JOIN depositos.cuentas_ahorro ca
+            ON ca.id_cuenta_ahorro = eca.id_cuenta_ahorro
+        WHERE TRIM(eca.tipo_comprobante) = 'FJ'
+          AND TRIM(eca.numero_comprobante) = TRIM(?)
+    """;
+
+        return jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> new Long[] {
+                        rs.getLong("id_datos_personal"),
+                        rs.getLong("id_forma_ahorro")
+                },
+                numeroFormato
+        );
+    }
+
     public List<TipoMovimientoDTO> listarTiposMovimientoCaja() {
         String sql = """
             SELECT
@@ -749,5 +961,62 @@ public class CajaCapturaDepositosRepository {
         );
 
         return count != null && count > 0;
+    }
+
+    public Integer obtenerCuentaInteragencia(
+            Integer idAgencia,
+            String tipoCaptacionForma
+    ) {
+
+        String sql = """
+        SELECT DISTINCT cuenta_interagencia
+        FROM depositos.formas_ahorro
+        WHERE id_agencia = ?
+          AND TRIM(tipo_captacion_forma) = TRIM(?)
+          AND cuenta_interagencia IS NOT NULL
+        """;
+
+        List<Integer> cuentas = jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> rs.getInt("cuenta_interagencia"),
+                idAgencia,
+                tipoCaptacionForma
+        );
+
+        if (cuentas.isEmpty()) {
+            return null;
+        }
+
+        if (cuentas.size() > 1) {
+            throw new IllegalStateException(
+                    "Existe más de una cuenta interagencia configurada "
+                            + "para el tipo de captación "
+                            + tipoCaptacionForma
+                            + " en la agencia "
+                            + idAgencia
+            );
+        }
+
+        return cuentas.get(0);
+    }
+
+    public Integer obtenerCuentaContableCaja(Long idCaja) {
+
+        String sql = """
+        SELECT id_catalogo_cuenta_caja
+        FROM cajas.cajas
+        WHERE id_caja = ?
+          AND activa = true
+        """;
+
+        List<Integer> datos = jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> rs.getObject("id_catalogo_cuenta_caja") != null
+                        ? rs.getInt("id_catalogo_cuenta_caja")
+                        : null,
+                idCaja
+        );
+
+        return datos.isEmpty() ? null : datos.get(0);
     }
 }

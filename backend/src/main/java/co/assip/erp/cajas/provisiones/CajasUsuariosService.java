@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -147,6 +148,40 @@ public class CajasUsuariosService {
         Integer idUsuario = usuarioSesionService.idUsuario();
 
         return repository.obtenerActivaPorUsuario(idUsuario)
+                .orElse(null);
+    }
+
+    // =========================================================
+// CAJA TRABAJADA POR FECHA
+// =========================================================
+
+    /**
+     * Obtiene la caja trabajada por el usuario autenticado
+     * en una fecha de jornada determinada.
+     *
+     * La vinculación puede encontrarse ACTIVA o FINALIZADA.
+     *
+     * Se utiliza para determinar el alcance del usuario
+     * en procesos asociados a una jornada específica,
+     * como el cierre de caja.
+     */
+    public CajaUsuarioDTO obtenerUsuarioPorFechaSiExiste(
+            LocalDate fechaJornada
+    ) {
+
+        if (fechaJornada == null) {
+            throw new RuntimeException(
+                    "Debe indicar la fecha de la jornada."
+            );
+        }
+
+        Integer idUsuario = usuarioSesionService.idUsuario();
+
+        return repository
+                .obtenerPorUsuarioYFecha(
+                        idUsuario,
+                        fechaJornada
+                )
                 .orElse(null);
     }
 

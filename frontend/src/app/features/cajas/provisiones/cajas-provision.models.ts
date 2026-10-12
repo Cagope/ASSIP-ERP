@@ -58,6 +58,8 @@ export interface CajaApertura {
   codigoCaja: string;
   descripcionCaja: string;
 
+  tipoCaja: string;
+
   fechaJornada: string;
 
   idProvision: number | null;
@@ -65,6 +67,9 @@ export interface CajaApertura {
 
   efectivoInicio: number;
   chequesInicio: number;
+
+  fondoSugeridoVentanilla: number;
+  limiteMaximoVentanilla: number;
 
   tieneProvision: boolean;
   tieneCierreAnterior: boolean;
@@ -81,6 +86,8 @@ export interface CajaAperturaRequest {
   idCaja: number;
   efectivoInicio: number;
   chequesInicio: number;
+
+  valorInicialVentanilla: number;
 }
 
 

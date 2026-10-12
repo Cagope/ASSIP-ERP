@@ -110,6 +110,18 @@ public class CajasProvisionService {
      *
      * El frontend no determina la fecha contable.
      */
+    /**
+     * Abre la provisión de la caja vinculada al usuario.
+     *
+     * El frontend no determina la fecha contable.
+     *
+     * Para cajas OPERATIVAS:
+     * - crea la provisión diaria;
+     * - registra el valor inicial llevado a ventanilla.
+     *
+     * La apertura y el movimiento inicial de ventanilla
+     * quedan dentro de la misma transacción.
+     */
     @Transactional
     public Long abrirCaja(
             CajasProvisionSaveDTO dto
@@ -144,6 +156,19 @@ public class CajasProvisionService {
                 dto.getChequesInicio()
         );
 
+        /*
+         * Bloqueo pesimista de la caja.
+         *
+         * Dos solicitudes concurrentes para la misma caja
+         * no pueden comprobar y crear la provisión al mismo tiempo.
+         */
+        repository.bloquearCajaParaApertura(idCaja);
+
+        /*
+         * La preparación se consulta después de adquirir el bloqueo.
+         * Así conocemos el estado definitivo de la jornada antes
+         * de intentar crear una nueva provisión.
+         */
         CajaAperturaDTO apertura =
                 repository
                         .prepararApertura(idCaja)
@@ -152,6 +177,18 @@ public class CajasProvisionService {
                                         "No se encontró la caja vinculada al usuario."
                                 )
                         );
+
+        /*
+         * Este flujo corresponde exclusivamente a cajas
+         * operativas con ventanilla.
+         */
+        if (!"OPERATIVA".equalsIgnoreCase(
+                apertura.getTipoCaja()
+        )) {
+            throw new RuntimeException(
+                    "La caja vinculada no es una caja operativa."
+            );
+        }
 
         /*
          * Ya existe provisión para la jornada.
@@ -177,21 +214,51 @@ public class CajasProvisionService {
             }
 
             /*
-             * Apertura idempotente:
-             * si ya estaba abierta, reutilizamos la provisión.
+             * Apertura idempotente.
+             *
+             * Si la caja ya estaba abierta, no volvemos a crear
+             * provisión ni movimiento inicial de ventanilla.
              */
             return apertura.getIdProvision();
         }
 
+        BigDecimal valorInicialVentanilla =
+                dto.getValorInicialVentanilla();
+
+        validarValorInicialVentanilla(
+                valorInicialVentanilla,
+                dto.getEfectivoInicio()
+        );
+
         Integer idUsuario =
                 usuarioSesionService.idUsuario();
 
-        return repository.crearApertura(
-                idCaja,
-                dto.getEfectivoInicio(),
-                dto.getChequesInicio(),
-                idUsuario
-        );
+        Long idProvision =
+                repository.crearApertura(
+                        idCaja,
+                        dto.getEfectivoInicio(),
+                        dto.getChequesInicio(),
+                        idUsuario
+                );
+
+        /*
+         * El traslado inicial Caja -> Ventanilla solamente
+         * se registra cuando existe un valor real a trasladar.
+         *
+         * No genera movimiento de caja ni contabilización.
+         */
+        if (valorInicialVentanilla.compareTo(
+                BigDecimal.ZERO
+        ) > 0) {
+
+            repository.registrarEntradaInicialVentanilla(
+                    idProvision,
+                    valorInicialVentanilla,
+                    idUsuario
+            );
+        }
+
+        return idProvision;
     }
 
     @Transactional
@@ -359,6 +426,40 @@ public class CajasProvisionService {
 
             throw new RuntimeException(
                     "El valor inicial de cheques no puede ser negativo."
+            );
+        }
+    }
+
+    private void validarValorInicialVentanilla(
+            BigDecimal valorInicialVentanilla,
+            BigDecimal efectivoInicio
+    ) {
+
+        if (valorInicialVentanilla == null) {
+            throw new RuntimeException(
+                    "Debe indicar el valor inicial de ventanilla."
+            );
+        }
+
+        if (valorInicialVentanilla.compareTo(
+                BigDecimal.ZERO
+        ) < 0) {
+            throw new RuntimeException(
+                    "El valor inicial de ventanilla no puede ser negativo."
+            );
+        }
+
+        /*
+         * La ventanilla pertenece a la misma caja.
+         *
+         * No puede trasladarse a ventanilla más efectivo
+         * del que físicamente tiene la caja al iniciar.
+         */
+        if (valorInicialVentanilla.compareTo(
+                efectivoInicio
+        ) > 0) {
+            throw new RuntimeException(
+                    "El valor inicial de ventanilla no puede superar el efectivo disponible de la caja."
             );
         }
     }

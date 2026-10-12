@@ -73,6 +73,7 @@ export class MainMenuComponent implements OnInit {
     seguridad: LockKeyhole,
     cdat: PiggyBank,
     cajas: Wallet,
+    tesoreria: Landmark,
     consultas: Search
   };
 

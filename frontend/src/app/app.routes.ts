@@ -80,6 +80,14 @@ export const routes: Routes = [
             .then(m => m.CAJAS_ROUTES),
       },
 
+      // === TESORERÍA ===
+      {
+        path: 'tesoreria',
+        loadChildren: () =>
+          import('./features/tesoreria/tesoreria.routes')
+            .then(m => m.TESORERIA_ROUTES),
+      },
+
       // === SARLAFT ===
       {
         path: 'sarlaft',

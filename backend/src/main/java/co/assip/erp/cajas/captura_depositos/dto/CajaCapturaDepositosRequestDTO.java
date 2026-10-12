@@ -28,10 +28,11 @@ public class CajaCapturaDepositosRequestDTO {
     // Tipo movimiento depósitos
     private String tipoMovimiento;
 
-    // Puede ir null o "CAJA"
+    // CJ = documento propio de la cuenta (libreta/orden)
+    // FJ = formato físico prenumerado de consignación
     private String tipoComprobante;
 
-    // Número desprendible/libreta/orden
+    // Número del documento soporte utilizado
     private String numeroComprobante;
 
     private BigDecimal valorEfectivo;

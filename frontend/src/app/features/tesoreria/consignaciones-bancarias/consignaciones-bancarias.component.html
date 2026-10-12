@@ -1,0 +1,668 @@
+<div class="page">
+
+  <div class="page-header">
+    <h2>Consignaciones bancarias</h2>
+    <p>Salida de cheques y efectivo de Caja hacia una cuenta bancaria de la agencia.</p>
+  </div>
+
+  <div *ngIf="mensajeError" class="alert alert-error">
+    {{ mensajeError }}
+  </div>
+
+  <!-- =========================================================
+       DATOS DE LA CONSIGNACIÓN
+       ========================================================= -->
+
+  <div class="card">
+
+    <div class="card-header">
+      <div>
+        <h3>Datos de la consignación</h3>
+        <p>Registre el soporte bancario y seleccione la cuenta de destino.</p>
+      </div>
+    </div>
+
+    <div class="captura-consignacion">
+
+      <div class="field field-agencia">
+        <label>Agencia</label>
+
+        <input
+          type="text"
+          [value]="nombreAgencia || codigoAgencia || ''"
+          readonly>
+      </div>
+
+      <div class="captura-documento">
+
+        <div class="field captura-fecha">
+          <label for="fechaConsignacion">
+            Fecha consignación
+          </label>
+
+          <input
+            id="fechaConsignacion"
+            name="fechaConsignacion"
+            type="date"
+            [(ngModel)]="fechaConsignacion"
+            (change)="cambiarFecha()"
+            [disabled]="procesando || generandoPreview">
+        </div>
+
+        <div class="field captura-numero">
+          <label for="numeroConsignacion">
+            Número de consignación
+          </label>
+
+          <input
+            id="numeroConsignacion"
+            name="numeroConsignacion"
+            type="text"
+            inputmode="numeric"
+            maxlength="20"
+            autocomplete="off"
+            [(ngModel)]="numeroConsignacion"
+            (ngModelChange)="cambiarNumeroConsignacion()"
+            [disabled]="procesando || generandoPreview">
+        </div>
+
+      </div>
+
+      <div class="field">
+        <label for="idCuentaBancaria">
+          Cuenta bancaria destino
+        </label>
+
+        <select
+          id="idCuentaBancaria"
+          name="idCuentaBancaria"
+          [(ngModel)]="idCuentaBancaria"
+          (ngModelChange)="cambiarCuentaBancaria()"
+          [disabled]="procesando || generandoPreview || cargando">
+
+          <option [ngValue]="null">
+            Seleccione...
+          </option>
+
+          <option
+            *ngFor="let cuenta of cuentasBancarias"
+            [ngValue]="cuenta.idCuentaBancaria">
+
+            {{ cuenta.nombreBanco }}
+            -
+            {{ cuenta.nombreCuenta }}
+            -
+            {{ cuenta.numeroCuenta }}
+            ({{ cuenta.codigoCuentaContable }})
+
+          </option>
+
+        </select>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- =========================================================
+       CHEQUES
+       ========================================================= -->
+
+  <div class="card">
+
+    <div class="card-header">
+
+      <div>
+        <h3>Cheques disponibles</h3>
+        <p>
+          Seleccione los cheques recibidos en Caja que serán incluidos
+          en esta consignación.
+        </p>
+      </div>
+
+      <div class="card-summary">
+
+        <span>
+          Seleccionados:
+          <strong>{{ cantidadChequesSeleccionados }}</strong>
+        </span>
+
+        <span>
+          <strong>
+            {{ valorChequesSeleccionados | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </strong>
+        </span>
+
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="idAgencia === null"
+      class="empty-state">
+
+      No hay una agencia activa en la sesión.
+
+    </div>
+
+    <div
+      *ngIf="idAgencia !== null && !cargando && cheques.length === 0"
+      class="empty-state">
+
+      No hay cheques pendientes de consignación para la agencia activa.
+
+    </div>
+
+    <div
+      *ngIf="cargando"
+      class="empty-state">
+
+      Consultando información...
+
+    </div>
+
+    <div
+      *ngIf="!cargando && cheques.length > 0"
+      class="table-wrap">
+
+      <table>
+
+        <thead>
+        <tr>
+
+          <th class="check-column">
+            <input
+              type="checkbox"
+              [checked]="todosChequesSeleccionados"
+              (change)="seleccionarTodosCheques($any($event.target).checked)"
+              [disabled]="procesando || generandoPreview">
+          </th>
+
+          <th>Fecha</th>
+          <th>Caja</th>
+          <th>Banco cheque</th>
+          <th>Número cheque</th>
+          <th>Referencia</th>
+          <th>Documento origen</th>
+          <th class="numeric">Valor</th>
+
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr
+          *ngFor="let cheque of cheques"
+          [class.row-selected]="chequeSeleccionado(cheque.idChequeRecibido)">
+
+          <td class="check-column">
+            <input
+              type="checkbox"
+              [checked]="chequeSeleccionado(cheque.idChequeRecibido)"
+              (change)="cambiarSeleccionCheque(
+                cheque,
+                $any($event.target).checked
+              )"
+              [disabled]="procesando || generandoPreview">
+          </td>
+
+          <td>
+            {{ cheque.fechaRecibido | date:'dd/MM/yyyy' }}
+          </td>
+
+          <td>
+            <strong>{{ cheque.codigoCaja }}</strong>
+
+            <div class="secondary">
+              {{ cheque.nombreCaja }}
+            </div>
+          </td>
+
+          <td>
+            {{ cheque.nombreBancoCheque }}
+
+            <div class="secondary">
+              Código {{ cheque.codigoBancoCheque }}
+            </div>
+          </td>
+
+          <td>
+            {{ cheque.numeroCheque }}
+          </td>
+
+          <td>
+            {{ cheque.codigoReferencia || '-' }}
+          </td>
+
+          <td>
+            {{ cheque.numeroDocumentoOrigen || '-' }}
+          </td>
+
+          <td class="numeric">
+            {{ cheque.valorCheque | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+  <!-- =========================================================
+       EFECTIVO
+       ========================================================= -->
+
+  <div class="card">
+
+    <div class="card-header">
+      <div>
+        <h3>Efectivo</h3>
+        <p>
+          Opcional. Digite el valor total en efectivo que se incluirá
+          en la consignación.
+        </p>
+      </div>
+    </div>
+
+    <div class="efectivo-grid">
+
+      <div class="field efectivo-valor">
+
+        <label for="valorEfectivo">
+          Valor efectivo
+        </label>
+
+        <input
+          id="valorEfectivo"
+          name="valorEfectivo"
+          type="text"
+          numericFormat
+          autocomplete="off"
+          class="input-number"
+          [ngModel]="valorEfectivo"
+          (ngModelChange)="cambiarValorEfectivo($event)"
+          [disabled]="procesando || generandoPreview">
+
+      </div>
+
+      <div
+        class="field"
+        *ngIf="valorEfectivoTotal > 0">
+
+        <label for="idCajaEfectivo">
+          Caja origen del efectivo
+        </label>
+
+        <select
+          id="idCajaEfectivo"
+          name="idCajaEfectivo"
+          [(ngModel)]="idCajaEfectivo"
+          (ngModelChange)="cambiarCajaEfectivo()"
+          [disabled]="procesando || generandoPreview || cargando">
+
+          <option [ngValue]="null">
+            Seleccione...
+          </option>
+
+          <option
+            *ngFor="let caja of cajas"
+            [ngValue]="caja.idCaja">
+
+            {{ caja.codigoCaja }}
+            -
+            {{ caja.nombreCaja }}
+            -
+            {{ caja.codigoCuentaContableCaja }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+    </div>
+
+    <div
+      *ngIf="
+        valorEfectivoTotal > 0 &&
+        !cargando &&
+        cajas.length === 0
+      "
+      class="empty-state efectivo-empty">
+
+      No hay cajas disponibles para registrar la salida de efectivo
+      en la fecha seleccionada.
+
+    </div>
+
+  </div>
+
+  <!-- =========================================================
+     CONCEPTO
+     ========================================================= -->
+
+  <div class="card concepto-card">
+
+    <div class="field">
+
+      <label for="concepto">
+        Concepto / observación del comprobante
+      </label>
+
+      <textarea
+        id="concepto"
+        name="concepto"
+        rows="3"
+        [ngModel]="observacion || conceptoSugerido"
+        (ngModelChange)="observacion = $event; invalidarPreview()"
+        [disabled]="procesando || generandoPreview">
+    </textarea>
+
+      <small>
+        El sistema propone el concepto. Puede modificarlo antes de generar el preview contable.
+      </small>
+
+    </div>
+
+  </div>
+
+  <!-- =========================================================
+       RESUMEN
+       ========================================================= -->
+
+  <div class="card resumen-card">
+
+    <div class="resumen">
+
+      <div class="resumen-item">
+        <span>Cheques</span>
+
+        <strong>
+          {{ valorChequesSeleccionados | currency:'COP':'symbol-narrow':'1.0-0' }}
+        </strong>
+      </div>
+
+      <div class="resumen-item">
+        <span>Efectivo</span>
+
+        <strong>
+          {{ valorEfectivoTotal | currency:'COP':'symbol-narrow':'1.0-0' }}
+        </strong>
+      </div>
+
+      <div class="resumen-item resumen-total">
+        <span>Total consignación</span>
+
+        <strong>
+          {{ valorTotalConsignacion | currency:'COP':'symbol-narrow':'1.0-0' }}
+        </strong>
+      </div>
+
+    </div>
+
+    <div class="actions">
+
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="generarPreview()"
+        [disabled]="
+          generandoPreview ||
+          procesando ||
+          cargando ||
+          idAgencia === null ||
+          idCuentaBancaria === null ||
+          !numeroConsignacion.trim() ||
+          valorTotalConsignacion <= 0 ||
+          (valorEfectivoTotal > 0 && idCajaEfectivo === null)
+        ">
+
+        {{ generandoPreview ? 'Generando...' : 'Generar preview contable' }}
+
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- =========================================================
+       PREVIEW CONTABLE
+       ========================================================= -->
+
+  <div *ngIf="preview" class="card preview-contable-card">
+
+    <div class="card-header">
+
+      <div>
+        <h3>Preview contable</h3>
+        <p>
+          Revise las cuentas y valores antes de registrar la consignación.
+        </p>
+      </div>
+
+      <div
+        class="preview-estado"
+        [class.preview-cuadrado]="preview.cuadrado"
+        [class.preview-descuadrado]="!preview.cuadrado">
+
+        {{ preview.cuadrado ? 'Cuadrado' : 'Descuadrado' }}
+
+      </div>
+
+    </div>
+
+    <div class="table-wrap">
+
+      <table class="preview-table">
+
+        <thead>
+        <tr>
+          <th>Código cuenta</th>
+          <th>Nombre cuenta</th>
+          <th>Detalle</th>
+          <th class="numeric">Débito</th>
+          <th class="numeric">Crédito</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let movimiento of preview.movimientos">
+
+          <td>
+            <strong>
+              {{ movimiento.codigoCuenta }}
+            </strong>
+          </td>
+
+          <td>
+            {{ movimiento.nombreCuenta }}
+          </td>
+
+          <td>
+            {{ movimiento.detalleMovimiento }}
+          </td>
+
+          <td class="numeric">
+            {{ movimiento.valorDebito | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </td>
+
+          <td class="numeric">
+            {{ movimiento.valorCredito | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+        <tfoot>
+
+        <tr>
+          <td colspan="3">
+            <strong>Totales</strong>
+          </td>
+
+          <td class="numeric">
+            <strong>
+              {{ preview.totalDebito | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </strong>
+          </td>
+
+          <td class="numeric">
+            <strong>
+              {{ preview.totalCredito | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </strong>
+          </td>
+        </tr>
+
+        </tfoot>
+
+      </table>
+
+    </div>
+
+    <div class="preview-resumen">
+
+      <div>
+        <span>Total débito</span>
+        <strong>
+          {{ preview.totalDebito | currency:'COP':'symbol-narrow':'1.0-0' }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Total crédito</span>
+        <strong>
+          {{ preview.totalCredito | currency:'COP':'symbol-narrow':'1.0-0' }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Diferencia</span>
+        <strong>
+          {{ preview.diferencia | currency:'COP':'symbol-narrow':'1.0-0' }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Estado</span>
+        <strong>
+          {{ preview.cuadrado ? 'CUADRADO' : 'DESCUADRADO' }}
+        </strong>
+      </div>
+
+    </div>
+
+    <div class="actions preview-actions">
+
+      <button
+        type="button"
+        class="btn-primary"
+        (click)="aplicar()"
+        [disabled]="
+          procesando ||
+          generandoPreview ||
+          !previewValido
+        ">
+
+        {{ procesando ? 'Procesando...' : 'Registrar consignación' }}
+
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- =========================================================
+       COMPROBANTE CONTABLE GENERADO
+       ========================================================= -->
+
+  <div *ngIf="resultado" class="card comprobante-card">
+
+    <div class="comprobante-header">
+
+      <div>
+
+        <span class="comprobante-ok">
+          Consignación registrada
+        </span>
+
+        <h3>
+          Comprobante contable
+          {{ resultado.tipoComprobante }}
+          {{ resultado.numeroComprobante }}
+        </h3>
+
+      </div>
+
+      <strong class="comprobante-total">
+        {{ resultado.valorTotal | currency:'COP':'symbol-narrow':'1.0-0' }}
+      </strong>
+
+    </div>
+
+    <div class="comprobante-grid">
+
+      <div>
+        <span>Fecha</span>
+        <strong>
+          {{ resultado.fechaConsignacion | date:'dd/MM/yyyy' }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Consignación bancaria</span>
+        <strong>
+          {{ resultado.numeroConsignacion }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Banco destino</span>
+        <strong>
+          {{ resultado.nombreBanco }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Cuenta destino</span>
+        <strong>
+          {{ resultado.numeroCuenta }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Cheques</span>
+        <strong>
+          {{ resultado.cantidadCheques }}
+          ·
+          {{ resultado.valorCheques | currency:'COP':'symbol-narrow':'1.0-0' }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Efectivo</span>
+        <strong>
+          {{ resultado.valorEfectivo | currency:'COP':'symbol-narrow':'1.0-0' }}
+        </strong>
+      </div>
+
+    </div>
+
+    <div class="comprobante-concepto">
+
+      <span>Concepto</span>
+
+      <strong>
+        {{ resultado.conceptoComprobante }}
+      </strong>
+
+    </div>
+
+  </div>
+
+</div>

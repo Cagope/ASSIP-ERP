@@ -62,7 +62,7 @@ export class CajasProvisionComponent implements OnInit {
 
   efectivoInicio = 0;
   chequesInicio = 0;
-
+  valorInicialVentanilla = 0;
 
   constructor(
     private readonly api: CajasProvisionApi
@@ -263,6 +263,15 @@ export class CajasProvisionComponent implements OnInit {
         this.chequesInicio =
           Number(apertura.chequesInicio ?? 0);
 
+        /*
+         * Para una caja OPERATIVA proponemos el fondo configurado.
+         * El usuario podrá modificar este valor antes de abrir.
+         */
+        this.valorInicialVentanilla =
+          apertura.tipoCaja === 'OPERATIVA'
+            ? Number(apertura.fondoSugeridoVentanilla ?? 0)
+            : 0;
+
         this.cargando = false;
       },
 
@@ -328,6 +337,27 @@ export class CajasProvisionComponent implements OnInit {
       return;
     }
 
+    if (
+      this.valorInicialVentanilla === null ||
+      Number(this.valorInicialVentanilla) < 0
+    ) {
+
+      this.mensajeError =
+        'El valor inicial de ventanilla no puede ser negativo.';
+
+      return;
+    }
+
+    if (
+      Number(this.valorInicialVentanilla) >
+      Number(this.efectivoInicio)
+    ) {
+
+      this.mensajeError =
+        'El valor inicial de ventanilla no puede superar el efectivo disponible de la caja.';
+
+      return;
+    }
 
     if (this.abriendo) {
       return;
@@ -347,7 +377,10 @@ export class CajasProvisionComponent implements OnInit {
         Number(this.efectivoInicio || 0),
 
       chequesInicio:
-        Number(this.chequesInicio || 0)
+        Number(this.chequesInicio || 0),
+
+      valorInicialVentanilla:
+        Number(this.valorInicialVentanilla || 0)
     };
 
 

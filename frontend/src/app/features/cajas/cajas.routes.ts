@@ -9,6 +9,8 @@ import { RECAUDOS_CONVENIOS_ROUTES } from './recaudos-convenios/recaudos-conveni
 import { CIERRE_RECAUDOS_CONVENIOS_ROUTES } from './cierre-recaudos-convenios/cierre-recaudos-convenios.routes';
 import { MOVIMIENTOS_INTERAGENCIA_ROUTES } from './movimientos-interagencia/movimientos-interagencia.routes';
 import { OPERACIONES_PENDIENTES_ROUTES } from './operaciones-pendientes/operaciones-pendientes.routes';
+import { CAJAS_CIERRE_ROUTES } from './cierres/cajas-cierre.routes';
+import { CAJAS_VENTANILLA_ROUTES } from './ventanilla/cajas-ventanilla.routes';
 
 
 export const CAJAS_ROUTES: Routes = [
@@ -50,6 +52,16 @@ export const CAJAS_ROUTES: Routes = [
     canActivate: [permisoGuard],
     data: { permiso: 'CAJAS_OPERACIONES_PENDIENTES_VIEW' },
     children: OPERACIONES_PENDIENTES_ROUTES
+  },
+
+  {
+    path: 'ventanilla',
+    children: CAJAS_VENTANILLA_ROUTES
+  },
+
+  {
+    path: 'cierres',
+    children: CAJAS_CIERRE_ROUTES
   }
 
 ];

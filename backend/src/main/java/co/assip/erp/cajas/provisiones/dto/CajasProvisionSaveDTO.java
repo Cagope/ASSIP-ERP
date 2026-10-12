@@ -17,4 +17,15 @@ public class CajasProvisionSaveDTO {
     private BigDecimal efectivoInicio;
     private BigDecimal chequesInicio;
 
+    // =========================================================
+    // Ventanilla
+    // =========================================================
+
+    /**
+     * Valor real que se traslada desde la caja física
+     * hacia la ventanilla al realizar la apertura.
+     *
+     * Solo aplica para cajas tipo OPERATIVA.
+     */
+    private BigDecimal valorInicialVentanilla;
 }

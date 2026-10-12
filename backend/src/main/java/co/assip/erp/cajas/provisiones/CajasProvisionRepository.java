@@ -208,71 +208,74 @@ public class CajasProvisionRepository {
     ) {
 
         String sql = """
+        SELECT
+            c.id_caja,
+            c.id_agencia,
+            c.codigo_caja,
+            c.descripcion AS descripcion_caja,
+            c.tipo_caja,
+            c.fondo_sugerido_ventanilla,
+            c.limite_maximo_ventanilla,
+
+            CURRENT_DATE AS fecha_jornada,
+
+            actual.id_provision,
+            actual.estado,
+
+            COALESCE(
+                actual.efectivo_inicio,
+                anterior.efectivo_fin,
+                0
+            ) AS efectivo_inicio,
+
+            COALESCE(
+                actual.cheques_inicio,
+                anterior.cheques_fin,
+                0
+            ) AS cheques_inicio,
+
+            (actual.id_provision IS NOT NULL)
+                AS tiene_provision,
+
+            (anterior.id_provision IS NOT NULL)
+                AS tiene_cierre_anterior,
+
+            anterior.fecha_contable
+                AS fecha_ultimo_cierre
+
+        FROM cajas.cajas c
+
+        LEFT JOIN LATERAL (
             SELECT
-                c.id_caja,
-                c.id_agencia,
-                c.codigo_caja,
-                c.descripcion AS descripcion_caja,
+                p.id_provision,
+                p.estado,
+                p.efectivo_inicio,
+                p.cheques_inicio
+            FROM cajas.provisiones_diarias p
+            WHERE p.id_caja = c.id_caja
+              AND p.fecha_contable = CURRENT_DATE
+            LIMIT 1
+        ) actual
+            ON TRUE
 
-                CURRENT_DATE AS fecha_jornada,
+        LEFT JOIN LATERAL (
+            SELECT
+                p.id_provision,
+                p.fecha_contable,
+                p.efectivo_fin,
+                p.cheques_fin
+            FROM cajas.provisiones_diarias p
+            WHERE p.id_caja = c.id_caja
+              AND p.estado = 'CERRADA'
+              AND p.fecha_contable < CURRENT_DATE
+            ORDER BY p.fecha_contable DESC
+            LIMIT 1
+        ) anterior
+            ON TRUE
 
-                actual.id_provision,
-                actual.estado,
-
-                COALESCE(
-                    actual.efectivo_inicio,
-                    anterior.efectivo_fin,
-                    0
-                ) AS efectivo_inicio,
-
-                COALESCE(
-                    actual.cheques_inicio,
-                    anterior.cheques_fin,
-                    0
-                ) AS cheques_inicio,
-
-                (actual.id_provision IS NOT NULL)
-                    AS tiene_provision,
-
-                (anterior.id_provision IS NOT NULL)
-                    AS tiene_cierre_anterior,
-
-                anterior.fecha_contable
-                    AS fecha_ultimo_cierre
-
-            FROM cajas.cajas c
-
-            LEFT JOIN LATERAL (
-                SELECT
-                    p.id_provision,
-                    p.estado,
-                    p.efectivo_inicio,
-                    p.cheques_inicio
-                FROM cajas.provisiones_diarias p
-                WHERE p.id_caja = c.id_caja
-                  AND p.fecha_contable = CURRENT_DATE
-                LIMIT 1
-            ) actual
-                ON TRUE
-
-            LEFT JOIN LATERAL (
-                SELECT
-                    p.id_provision,
-                    p.fecha_contable,
-                    p.efectivo_fin,
-                    p.cheques_fin
-                FROM cajas.provisiones_diarias p
-                WHERE p.id_caja = c.id_caja
-                  AND p.estado = 'CERRADA'
-                  AND p.fecha_contable < CURRENT_DATE
-                ORDER BY p.fecha_contable DESC
-                LIMIT 1
-            ) anterior
-                ON TRUE
-
-            WHERE c.id_caja = :idCaja
-              AND c.activa = TRUE
-            """;
+        WHERE c.id_caja = :idCaja
+          AND c.activa = TRUE
+        """;
 
         List<CajaAperturaDTO> result = jdbc.query(
                 sql,
@@ -284,6 +287,9 @@ public class CajasProvisionRepository {
                         .codigoCaja(rs.getString("codigo_caja"))
                         .descripcionCaja(
                                 rs.getString("descripcion_caja")
+                        )
+                        .tipoCaja(
+                                rs.getString("tipo_caja")
                         )
                         .fechaJornada(
                                 rs.getObject(
@@ -302,6 +308,16 @@ public class CajasProvisionRepository {
                         )
                         .chequesInicio(
                                 rs.getBigDecimal("cheques_inicio")
+                        )
+                        .fondoSugeridoVentanilla(
+                                rs.getBigDecimal(
+                                        "fondo_sugerido_ventanilla"
+                                )
+                        )
+                        .limiteMaximoVentanilla(
+                                rs.getBigDecimal(
+                                        "limite_maximo_ventanilla"
+                                )
                         )
                         .tieneProvision(
                                 rs.getBoolean("tiene_provision")
@@ -367,6 +383,97 @@ public class CajasProvisionRepository {
                                 chequesInicio
                         )
                         .addValue("idUsuario", idUsuario),
+                Long.class
+        );
+    }
+
+    /**
+     * Bloquea la caja durante el proceso de apertura.
+     *
+     * Evita que dos solicitudes concurrentes intenten crear
+     * simultáneamente la provisión de la misma caja.
+     *
+     * El bloqueo se mantiene hasta finalizar la transacción
+     * del servicio.
+     */
+    public void bloquearCajaParaApertura(
+            Long idCaja
+    ) {
+
+        String sql = """
+        SELECT id_caja
+        FROM cajas.cajas
+        WHERE id_caja = :idCaja
+          AND activa = TRUE
+        FOR UPDATE
+        """;
+
+        List<Long> result = jdbc.query(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idCaja", idCaja),
+                (rs, rowNum) -> rs.getLong("id_caja")
+        );
+
+        if (result.isEmpty()) {
+            throw new RuntimeException(
+                    "No se encontró la caja activa para realizar la apertura."
+            );
+        }
+    }
+
+
+    /**
+     * Registra el traslado físico inicial desde la caja
+     * hacia la ventanilla.
+     *
+     * Este movimiento no genera movimiento de caja ni
+     * contabilización, porque el dinero continúa perteneciendo
+     * a la misma caja.
+     */
+    public Long registrarEntradaInicialVentanilla(
+            Long idProvision,
+            BigDecimal valorEntrada,
+            Integer idUsuario
+    ) {
+
+        String sql = """
+        INSERT INTO cajas.movimientos_ventanilla (
+            id_provision,
+            valor_entrada,
+            valor_salida,
+            observacion,
+            fk_seguridad_creacion
+        )
+        VALUES (
+            :idProvision,
+            :valorEntrada,
+            0,
+            :observacion,
+            :idUsuario
+        )
+        RETURNING id_movimiento_ventanilla
+        """;
+
+        return jdbc.queryForObject(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue(
+                                "idProvision",
+                                idProvision
+                        )
+                        .addValue(
+                                "valorEntrada",
+                                valorEntrada
+                        )
+                        .addValue(
+                                "observacion",
+                                "Fondo inicial de ventanilla"
+                        )
+                        .addValue(
+                                "idUsuario",
+                                idUsuario
+                        ),
                 Long.class
         );
     }

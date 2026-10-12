@@ -3,7 +3,9 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { CapturaDepositosApi } from './captura-depositos.api';
+
 import {
+  CajaCapturaDepositosBanco,
   CajaCapturaDepositosCuenta,
   CajaCapturaDepositosPreview,
   CajaCapturaDepositosRequest,
@@ -62,8 +64,7 @@ export class CapturaDepositosComponent {
 
   cuentas: CajaCapturaDepositosCuenta[] = [];
   tiposMovimiento: TipoMovimientoDeposito[] = [];
-
-
+  bancos: CajaCapturaDepositosBanco[] = [];
 
   idCaja = 0;
   idAgencia = 0;
@@ -73,13 +74,14 @@ export class CapturaDepositosComponent {
 
   tipoMovimiento = '';
   numeroComprobante = '';
+  tipoComprobante = 'CJ';
 
   valorEfectivo = 0;
   valorCheques = 0;
 
   cheques = [
     {
-      codigoBanco: '',
+      codigoBanco: 0,
       numeroCheque: '',
       valorCheque: 0,
       observacion: ''
@@ -104,6 +106,7 @@ export class CapturaDepositosComponent {
   ) {
     this.cargarCajaActiva();
     this.cargarTiposMovimiento();
+    this.cargarBancos();
   }
 
   cargarTiposMovimiento(): void {
@@ -113,6 +116,19 @@ export class CapturaDepositosComponent {
       },
       error: err => {
         this.error = err?.error?.message || 'No fue posible cargar los tipos de movimiento.';
+      }
+    });
+  }
+
+  cargarBancos(): void {
+    this.api.listarBancos().subscribe({
+      next: data => {
+        this.bancos = data || [];
+      },
+      error: err => {
+        this.error =
+          err?.error?.message
+          || 'No fue posible cargar el catálogo de bancos.';
       }
     });
   }
@@ -250,7 +266,7 @@ export class CapturaDepositosComponent {
 
   agregarCheque(): void {
     this.cheques.push({
-      codigoBanco: '',
+      codigoBanco: 0,
       numeroCheque: '',
       valorCheque: 0,
       observacion: ''
@@ -263,6 +279,42 @@ export class CapturaDepositosComponent {
     if (this.cheques.length === 0) {
       this.agregarCheque();
     }
+  }
+
+  onTipoMovimientoChange(): void {
+
+    this.previewData = null;
+    this.respuesta = null;
+    this.error = '';
+    this.mensaje = '';
+
+    if (this.esRetiro()) {
+
+      // El formato físico FJ es exclusivo de consignaciones.
+      this.tipoComprobante = 'CJ';
+
+      this.valorCheques = 0;
+
+      this.cheques = [
+        {
+          codigoBanco: 0,
+          numeroCheque: '',
+          valorCheque: 0,
+          observacion: ''
+        }
+      ];
+    }
+  }
+
+  onTipoComprobanteChange(): void {
+
+    this.previewData = null;
+    this.respuesta = null;
+    this.error = '';
+    this.mensaje = '';
+
+    // Al cambiar el soporte no debemos conservar el número anterior.
+    this.numeroComprobante = '';
   }
 
   generarPreview(): void {
@@ -304,7 +356,28 @@ export class CapturaDepositosComponent {
   }
 
   aplicar(): void {
+
+    // Evita doble ejecución por doble clic.
+    if (this.aplicando) {
+      return;
+    }
+
     this.limpiarMensajes();
+
+    // La operación debe tener un preview válido antes de aplicarse.
+    if (!this.previewData) {
+      this.error = 'Debe generar y validar la vista previa antes de aplicar el movimiento.';
+      return;
+    }
+
+    if (!this.previewData.permiteAplicar) {
+      this.error =
+        this.previewData.errores?.length
+          ? this.previewData.errores.join(' | ')
+          : 'El movimiento tiene validaciones pendientes y no puede aplicarse.';
+
+      return;
+    }
 
     const request = this.construirRequest();
 
@@ -319,6 +392,7 @@ export class CapturaDepositosComponent {
     this.aplicando = true;
 
     this.api.aplicar(request).subscribe({
+
       next: data => {
 
         const mensajeOk =
@@ -334,7 +408,8 @@ export class CapturaDepositosComponent {
             fechaTransaccion: data.fechaContable,
             fechaContable: data.fechaContable,
 
-            tipoTransaccion: esRetiroActual ? 'EGRESO' : 'INGRESO',
+            tipoTransaccion:
+              esRetiroActual ? 'EGRESO' : 'INGRESO',
 
             valorTransaccion: data.valorTotal,
 
@@ -352,10 +427,15 @@ export class CapturaDepositosComponent {
 
             numeroProducto:
               (cuentaActual.codigoCuenta || '').trim(),
-            numeroComprobante: numeroComprobanteActual,
 
-            documentoRealiza: data.documento,
-            nombreBeneficiario: data.nombreAsociado
+            numeroComprobante:
+              numeroComprobanteActual,
+
+            documentoRealiza:
+              data.documento,
+
+            nombreBeneficiario:
+              data.nombreAsociado
           };
 
           this.mostrarLavadoActivos = true;
@@ -373,7 +453,9 @@ export class CapturaDepositosComponent {
         this.mensaje = mensajeOk;
         this.aplicando = false;
       },
+
       error: err => {
+
         this.error =
           err?.error?.message
           || 'No fue posible aplicar el movimiento.';
@@ -405,7 +487,10 @@ export class CapturaDepositosComponent {
     }
 
     if (!this.numeroComprobante || !/^\d+$/.test(this.numeroComprobante.trim())) {
-      this.error = 'El número del desprendible/libreta u orden debe ser numérico.';
+      this.error = this.tipoComprobante === 'FJ'
+        ? 'El número del formato de consignación debe ser numérico.'
+        : 'El número del desprendible/libreta u orden debe ser numérico.';
+
       return null;
     }
 
@@ -423,8 +508,22 @@ export class CapturaDepositosComponent {
         ? 'CONSIGNACION_AHORRO'
         : 'RETIRO_AHORRO';
 
-    const valorChequesDigitado = Number(this.valorCheques || 0);
-    const totalDetalleCheques = this.totalCheques();
+    const retiro = codigoOperacion === 'RETIRO_AHORRO';
+
+    if (retiro && this.tipoComprobante === 'FJ') {
+      this.error = 'El formato físico de consignación solo puede utilizarse en ingresos.';
+      return null;
+    }
+
+    const valorChequesDigitado =
+      retiro
+        ? 0
+        : Number(this.valorCheques || 0);
+
+    const totalDetalleCheques =
+      retiro
+        ? 0
+        : this.totalCheques();
 
     if (valorChequesDigitado > 0 && totalDetalleCheques !== valorChequesDigitado) {
       this.error = 'El total del detalle de cheques debe coincidir con el valor digitado en cheques.';
@@ -438,7 +537,7 @@ export class CapturaDepositosComponent {
 
     const chequesValidos = valorChequesDigitado > 0
       ? this.cheques.filter(item =>
-          item.codigoBanco?.trim()
+          Number(item.codigoBanco || 0) > 0
           || item.numeroCheque?.trim()
           || Number(item.valorCheque || 0) > 0
         )
@@ -451,7 +550,7 @@ export class CapturaDepositosComponent {
       idCuentaAhorro: this.idCuentaAhorro,
       codigoOperacion,
       tipoMovimiento: this.tipoMovimiento,
-      tipoComprobante: 'CJ',
+      tipoComprobante: this.tipoComprobante,
       numeroComprobante: this.numeroComprobante.trim(),
       valorEfectivo: Number(this.valorEfectivo || 0),
       valorCheques: valorChequesDigitado,
@@ -466,6 +565,7 @@ export class CapturaDepositosComponent {
 
     this.idCuentaAhorro = null;
     this.tipoMovimiento = '';
+    this.tipoComprobante = 'CJ';
     this.numeroComprobante = '';
 
     this.valorEfectivo = 0;
@@ -473,13 +573,14 @@ export class CapturaDepositosComponent {
 
     this.cheques = [
       {
-        codigoBanco: '',
+        codigoBanco: 0,
         numeroCheque: '',
         valorCheque: 0,
         observacion: ''
       }
     ];
 
+    this.cuentas = [];
     this.cuenta = null;
     this.previewData = null;
     this.respuesta = null;

@@ -1,5 +1,5 @@
 export const cajasMenu = {
-  title: 'Tesorería',
+  title: 'Caja',
   icon: 'wallet',
 
   items: [
@@ -15,6 +15,11 @@ export const cajasMenu = {
           label: 'Inicio de caja',
           route: '/cajas/provisiones',
           permiso: 'CAJAS_VINCULAR_CAJA'
+        },
+
+        {
+          label: 'Caja / Ventanilla',
+          route: '/cajas/ventanilla'
         },
 
         {
@@ -41,6 +46,11 @@ export const cajasMenu = {
         {
           label: 'Cierre recaudos convenios',
           route: '/cajas/cierre-recaudos-convenios'
+        },
+
+        {
+          label: 'Cierre de caja',
+          route: '/cajas/cierres'
         }
 
       ]

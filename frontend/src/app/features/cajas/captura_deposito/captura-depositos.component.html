@@ -230,16 +230,16 @@
   </div>
 
   <section class="card" *ngIf="cuenta">
-    <h3>Datos del movimiento</h3>
+    <div class="movement-header">
+      <h3>Datos del movimiento</h3>
+
+      <div class="movement-date">
+        <span>Fecha contable</span>
+        <strong>{{ fechaContable }}</strong>
+      </div>
+    </div>
 
     <div class="movement-grid">
-      <div class="form-field">
-        <label>Fecha contable</label>
-        <input
-          type="date"
-          [ngModel]="fechaContable"
-          readonly>
-      </div>
 
       <div class="form-field">
         <label>Tipo de movimiento</label>
@@ -247,7 +247,7 @@
         <select
           [(ngModel)]="tipoMovimiento"
           name="tipoMovimiento"
-          (change)="generarPreview()">
+          (change)="onTipoMovimientoChange(); generarPreview()">
 
           <option value="">Seleccione...</option>
 
@@ -260,11 +260,45 @@
           </option>
 
         </select>
-
       </div>
 
+      <!-- =========================================================
+           TIPO DE SOPORTE
+           FJ solo está disponible para consignaciones.
+           Los retiros continúan utilizando CJ.
+           ========================================================= -->
+
+      <div class="form-field" *ngIf="esIngreso()">
+        <label>Soporte de la consignación</label>
+
+        <select
+          [(ngModel)]="tipoComprobante"
+          name="tipoComprobante"
+          (change)="onTipoComprobanteChange()">
+
+          <option value="CJ">
+            Documento de la cuenta
+          </option>
+
+          <option value="FJ">
+            Formato físico de consignación
+          </option>
+
+        </select>
+      </div>
+
+      <!-- =========================================================
+           NÚMERO DEL SOPORTE
+           ========================================================= -->
+
       <div class="form-field">
-        <label>Desprendible / libreta / orden</label>
+        <label>
+          {{
+          tipoComprobante === 'FJ'
+          ? 'Número formato de consignación'
+          : 'Desprendible / libreta / orden'
+          }}
+        </label>
 
         <input
           type="text"
@@ -272,11 +306,17 @@
           [(ngModel)]="numeroComprobante"
           name="numeroComprobante"
           (blur)="generarPreview()">
-
       </div>
 
-      <div class="form-field">
+    </div>
 
+    <!-- =========================================================
+         VALORES DEL MOVIMIENTO
+         ========================================================= -->
+
+    <div class="movement-values">
+
+      <div class="form-field movement-value-field">
         <label>Efectivo</label>
 
         <input
@@ -284,13 +324,14 @@
           name="valorEfectivo"
           numericFormat
           autocomplete="off"
-          class="input-number"
+          class="input-number movement-value-input"
           [(ngModel)]="valorEfectivo"
           (blur)="generarPreview()">
-
       </div>
 
-      <div class="form-field">
+      <div
+        class="form-field movement-value-field"
+        *ngIf="!esRetiro()">
 
         <label>Cheques</label>
 
@@ -299,46 +340,80 @@
           name="valorCheques"
           numericFormat
           autocomplete="off"
-          class="input-number"
+          class="input-number movement-value-input"
           [(ngModel)]="valorCheques"
           (blur)="generarPreview()">
-
       </div>
 
     </div>
 
     <div class="cheques-box" *ngIf="valorCheques > 0">
+
       <div class="cheques-header">
         <div>
           <h3>Cheques</h3>
-          <p>Opcional. Capture uno o varios cheques recibidos en caja.</p>
+          <p>Capture uno o varios cheques recibidos en caja.</p>
         </div>
 
-        <button type="button" class="btn btn--secondary btn-sm" (click)="mostrarCheques = !mostrarCheques">
+        <button
+          type="button"
+          class="btn btn--secondary btn-sm"
+          (click)="mostrarCheques = !mostrarCheques">
+
           {{ mostrarCheques ? 'Ocultar' : 'Mostrar' }}
+
         </button>
       </div>
 
       <div class="cheques-content" *ngIf="mostrarCheques">
-        <div class="cheque-row" *ngFor="let cheque of cheques; let i = index">
+
+        <div
+          class="cheque-row"
+          *ngFor="let cheque of cheques; let i = index">
+
+          <!-- BANCO -->
           <div class="form-field">
+
             <label>Banco</label>
+
+            <select
+              [(ngModel)]="cheque.codigoBanco"
+              name="codigoBanco{{ i }}"
+              (change)="generarPreview()">
+
+              <option [ngValue]="0">
+                Seleccione...
+              </option>
+
+              <option
+                *ngFor="let banco of bancos"
+                [ngValue]="banco.codigoBanco">
+
+                {{ banco.codigoBanco }} - {{ banco.nombreBanco }}
+
+              </option>
+
+            </select>
+
+          </div>
+
+          <!-- NÚMERO DEL CHEQUE -->
+          <div class="form-field">
+
+            <label>Número</label>
 
             <input
               type="text"
-              [(ngModel)]="cheque.codigoBanco"
-              name="codigoBanco{{ i }}"
+              [(ngModel)]="cheque.numeroCheque"
+              name="numeroCheque{{ i }}"
               autocomplete="off"
               (blur)="generarPreview()">
 
           </div>
 
+          <!-- VALOR -->
           <div class="form-field">
-            <label>Número</label>
-            <input type="text" [(ngModel)]="cheque.numeroCheque" name="numeroCheque{{ i }}" autocomplete="off">
-          </div>
 
-          <div class="form-field">
             <label>Valor</label>
 
             <input
@@ -352,19 +427,38 @@
 
           </div>
 
+          <!-- ACCIONES -->
           <div class="cheque-actions">
-            <button type="button" class="btn btn--ghost-danger btn-sm" (click)="eliminarCheque(i)" [disabled]="cheques.length === 1">
+
+            <button
+              type="button"
+              class="btn btn--ghost-danger btn-sm"
+              (click)="eliminarCheque(i)"
+              [disabled]="cheques.length === 1">
+
               Eliminar
+
             </button>
+
           </div>
+
         </div>
 
         <div class="form-actions">
-          <button type="button" class="btn btn--secondary btn-sm" (click)="agregarCheque()">
+
+          <button
+            type="button"
+            class="btn btn--secondary btn-sm"
+            (click)="agregarCheque()">
+
             + Agregar cheque
+
           </button>
+
         </div>
+
       </div>
+
     </div>
 
     <div class="saldo-resumen-preview">

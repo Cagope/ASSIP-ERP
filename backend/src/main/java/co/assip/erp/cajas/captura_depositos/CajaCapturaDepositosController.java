@@ -4,6 +4,8 @@ import co.assip.erp.cajas.captura_depositos.dto.CajaCapturaDepositosCuentaDTO;
 import co.assip.erp.cajas.captura_depositos.dto.CajaCapturaDepositosPreviewDTO;
 import co.assip.erp.cajas.captura_depositos.dto.CajaCapturaDepositosRequestDTO;
 import co.assip.erp.cajas.captura_depositos.dto.CajaCapturaDepositosResponseDTO;
+import co.assip.erp.cajas.captura_depositos.dto.CajaCapturaDepositosBancoDTO;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,6 +44,11 @@ public class CajaCapturaDepositosController {
     @GetMapping("/tipos_movimiento")
     public java.util.List<co.assip.erp.depositos.movimientos.cuentasahorro.dto.TipoMovimientoDTO> listarTiposMovimiento() {
         return repository.listarTiposMovimientoCaja();
+    }
+
+    @GetMapping("/bancos")
+    public java.util.List<CajaCapturaDepositosBancoDTO> listarBancos() {
+        return repository.listarBancosActivos();
     }
 
     @PostMapping("/preview")

@@ -39,10 +39,11 @@ public class CajaCapturaDepositosService {
 
     private static final String MEDIO_EFECTIVO = "EFECTIVO";
     private static final String MEDIO_CHEQUE = "CHEQUE";
-    private static final String MEDIO_TRANSFERENCIA = "TRANSFERENCIA";
     private static final String MODULO_CAJAS = "05";
     private static final String MODULO_DEPOSITOS = "02";
     private static final String TARJETA_NO = "N";
+    private static final String TIPO_COMPROBANTE_CAJA = "CJ";
+    private static final String TIPO_COMPROBANTE_FORMATO = "FJ";
 
 
     private final CajaCapturaDepositosRepository repository;
@@ -50,6 +51,7 @@ public class CajaCapturaDepositosService {
     private final SarlaftAlertaService sarlaftAlertaService;
     private final DepositosMovimientoService depositosMovimientoService;
     private final LavadoActivosService lavadoActivosService;
+    private final CajaCapturaDepositosContabilidadService contabilidadService;
 
     public CajaCapturaDepositosPreviewDTO preview(
             CajaCapturaDepositosRequestDTO request
@@ -82,9 +84,7 @@ public class CajaCapturaDepositosService {
                             + " - "
                             + cuenta.getNombreAgencia()
                             + ". "
-                            + "La operación será registrada normalmente y "
-                            + "será tratada como movimiento interagencia "
-                            + "durante el proceso de cierre diario.";
+                            + "La operación será procesada como movimiento interagencia.";
         }
 
         String naturaleza = repository.obtenerNaturalezaOperacion(
@@ -101,15 +101,37 @@ public class CajaCapturaDepositosService {
         BigDecimal valorCheques = nvl(request.getValorCheques());
         BigDecimal valorTransferencias = nvl(request.getValorTransferencias());
 
-        BigDecimal valorTotal = valorEfectivo
-                .add(valorCheques)
-                .add(valorTransferencias);
-
-        if (valorTotal.compareTo(BigDecimal.ZERO) <= 0) {
-            errores.add("El valor total del movimiento debe ser mayor a cero.");
+        if (valorTransferencias.compareTo(BigDecimal.ZERO) > 0) {
+            errores.add(
+                    "Las transferencias no se procesan por Caja. " +
+                            "Deben gestionarse desde el proceso de Depósitos."
+            );
         }
 
-        validarDocumentoSoportePreview(request, errores);
+        BigDecimal valorTotal = valorEfectivo
+                .add(valorCheques);
+
+        if (valorTotal.compareTo(BigDecimal.ZERO) <= 0) {
+            errores.add(
+                    "El valor total en efectivo y/o cheques debe ser mayor a cero."
+            );
+        }
+
+        if (NATURALEZA_EGRESO.equalsIgnoreCase(naturaleza)
+                && valorCheques.compareTo(BigDecimal.ZERO) > 0) {
+
+            errores.add(
+                    "Los retiros por Caja solo pueden realizarse en efectivo. " +
+                            "Los pagos mediante cheque deben gestionarse fuera de Caja."
+            );
+        }
+
+        validarDocumentoSoportePreview(
+                request,
+                cuenta,
+                naturaleza,
+                errores
+        );
         validarChequesPreview(request, valorCheques, errores);
 
         EvaluacionResultado sarlaft =
@@ -205,10 +227,72 @@ public class CajaCapturaDepositosService {
 
         Integer idUsuario = usuarioSesionService.idUsuario();
 
+        Long idProvisionBloqueada =
+                repository.obtenerProvisionAbiertaConLock(
+                        request.getIdCaja(),
+                        request.getFechaContable()
+                );
+
+        if (idProvisionBloqueada == null) {
+            throw new RuntimeException(
+                    "La caja ya no tiene una provisión abierta para la fecha contable. " +
+                            "La operación no puede ser aplicada."
+            );
+        }
+
+        if (!idProvisionBloqueada.equals(preview.getIdProvision())) {
+            throw new RuntimeException(
+                    "La provisión de la caja cambió durante la operación. " +
+                            "Actualice la información e intente nuevamente."
+            );
+        }
+
         CajaCapturaDepositosCuentaDTO cuenta =
                 repository.obtenerCuenta(
                         request.getIdCuentaAhorro()
                 );
+
+        if (TIPO_COMPROBANTE_FORMATO.equals(
+                trim(request.getTipoComprobante())
+        )) {
+
+            boolean bloqueado =
+                    repository.bloquearFormatoConsignacion(
+                            request.getIdAgencia(),
+                            trim(request.getNumeroComprobante())
+                    );
+
+            if (!bloqueado) {
+                throw new RuntimeException(
+                        "El formato de consignación no pertenece a un rango válido de la agencia de la caja."
+                );
+            }
+
+            List<Long[]> usos =
+                    repository.consultarUsosFormatoConsignacion(
+                            trim(request.getNumeroComprobante())
+                    );
+
+            for (Long[] uso : usos) {
+
+                Long idDatosPersonalUsado = uso[0];
+                Long idFormaAhorroUsada = uso[1];
+
+                if (!idDatosPersonalUsado.equals(cuenta.getIdDatosPersonal())) {
+                    throw new RuntimeException(
+                            "El formato de consignación ya fue utilizado por otro asociado."
+                    );
+                }
+
+                if (idFormaAhorroUsada.equals(
+                        cuenta.getIdFormaAhorro().longValue()
+                )) {
+                    throw new RuntimeException(
+                            "El formato de consignación ya fue utilizado por este asociado en la misma forma de ahorro."
+                    );
+                }
+            }
+        }
 
         evaluarSarlaftAplicando(
                 cuenta,
@@ -235,7 +319,17 @@ public class CajaCapturaDepositosService {
 
         movimientoDeposito.setFechaMovimiento(request.getFechaContable());
         movimientoDeposito.setTipoComprobante(request.getTipoComprobante());
-        movimientoDeposito.setNumeroComprobante(request.getNumeroComprobante());
+
+        String numeroDocumentoNormalizado =
+                String.format(
+                        "%010d",
+                        Long.parseLong(
+                                trim(request.getNumeroComprobante())
+                        )
+                );
+
+        movimientoDeposito.setNumeroComprobante(numeroDocumentoNormalizado);
+
         movimientoDeposito.setTipoMovimiento(request.getTipoMovimiento());
         movimientoDeposito.setModulo(MODULO_CAJAS);
         movimientoDeposito.setTarjeta(TARJETA_NO);
@@ -271,7 +365,7 @@ public class CajaCapturaDepositosService {
                     TABLA_ORIGEN,
                     request.getIdCuentaAhorro(),
                     request.getTipoComprobante(),
-                    request.getNumeroComprobante(),
+                    numeroDocumentoNormalizado,
                     referencia,
                     preview.getNaturaleza(),
                     MEDIO_EFECTIVO,
@@ -295,7 +389,7 @@ public class CajaCapturaDepositosService {
                     TABLA_ORIGEN,
                     request.getIdCuentaAhorro(),
                     request.getTipoComprobante(),
-                    request.getNumeroComprobante(),
+                    numeroDocumentoNormalizado,
                     referencia,
                     preview.getNaturaleza(),
                     MEDIO_CHEQUE,
@@ -314,7 +408,7 @@ public class CajaCapturaDepositosService {
                         cheque.getCodigoBanco(),
                         cheque.getNumeroCheque(),
                         nvl(cheque.getValorCheque()),
-                        request.getNumeroComprobante(),
+                        numeroDocumentoNormalizado,
                         referencia,
                         MODULO_ORIGEN,
                         PROCESO_ORIGEN,
@@ -334,28 +428,48 @@ public class CajaCapturaDepositosService {
             }
         }
 
-        if (preview.getValorTransferencias().compareTo(BigDecimal.ZERO) > 0) {
+        // =========================================================
+        // CONTABILIZACIÓN EN LÍNEA Y TRAZABILIDAD CAJA ↔ CONTABILIDAD
+        // =========================================================
+        //
+        // La operación física de Caja y el movimiento de Depósitos
+        // ya fueron registrados dentro de esta misma transacción.
+        //
+        // La contabilización genera el comprobante RC definitivo.
+        // Posteriormente se relacionan todos los movimientos físicos
+        // de Caja generados por esta operación con ese mismo RC.
+        //
+        // Si falla cualquiera de estos pasos, @Transactional revierte:
+        // - movimiento de Depósitos
+        // - movimientos de Caja
+        // - cheques recibidos
+        // - canje
+        // - consecutivo RC
+        // - auxiliares contables
+        // - asociación Caja ↔ RC
+        //
 
-            Long idMovimiento = repository.insertarMovimientoCaja(
-                    preview.getIdProvision(),
-                    request.getIdCaja(),
-                    idDepartamento,
-                    idOperacion,
-                    MODULO_ORIGEN,
-                    PROCESO_ORIGEN,
-                    TABLA_ORIGEN,
-                    request.getIdCuentaAhorro(),
-                    request.getTipoComprobante(),
-                    request.getNumeroComprobante(),
-                    referencia,
-                    preview.getNaturaleza(),
-                    MEDIO_TRANSFERENCIA,
-                    preview.getValorTransferencias(),
-                    concepto,
+        String numeroComprobanteContable =
+                contabilidadService.contabilizar(
+                        request,
+                        cuenta,
+                        idUsuario
+                );
+
+        if (isBlank(numeroComprobanteContable)) {
+            throw new IllegalStateException(
+                    "La contabilización no generó número de comprobante RC."
+            );
+        }
+
+        for (Long idMovimientoCaja : movimientosCaja) {
+
+            repository.asociarComprobanteContable(
+                    idMovimientoCaja,
+                    "RC",
+                    numeroComprobanteContable,
                     idUsuario
             );
-
-            movimientosCaja.add(idMovimiento);
         }
 
         boolean requiereLavado =
@@ -509,12 +623,6 @@ public class CajaCapturaDepositosService {
             );
         }
 
-        if (Boolean.FALSE.equals(cuenta.getEstadoOperativo())) {
-            throw new RuntimeException(
-                    cuenta.getMensajeOperativo()
-            );
-        }
-
         return cuenta;
     }
 
@@ -522,9 +630,23 @@ public class CajaCapturaDepositosService {
             CajaCapturaDepositosPreviewDTO preview
     ) {
 
-        return preview.getNombreOperacion()
+        String operacion;
+
+        if (OPERACION_CONSIGNACION.equals(preview.getCodigoOperacion())) {
+            operacion = "Consignación";
+
+        } else if (OPERACION_RETIRO.equals(preview.getCodigoOperacion())) {
+            operacion = "Retiro";
+
+        } else {
+            operacion = preview.getNombreOperacion();
+        }
+
+        return operacion
+                + " "
+                + preview.getNombreForma()
                 + " - Cuenta "
-                + preview.getCodigoCuenta()
+                + preview.getCodigoCuenta().trim()
                 + " - "
                 + preview.getNombreAsociado();
     }
@@ -613,41 +735,118 @@ public class CajaCapturaDepositosService {
 
     private void validarDocumentoSoportePreview(
             CajaCapturaDepositosRequestDTO request,
+            CajaCapturaDepositosCuentaDTO cuenta,
+            String naturaleza,
             List<String> errores
     ) {
-        String numero = request.getNumeroComprobante() == null
-                ? ""
-                : request.getNumeroComprobante().trim();
+
+        String numero = trim(request.getNumeroComprobante());
+        String tipoComprobante = trim(request.getTipoComprobante());
 
         if (numero.isEmpty()) {
-            errores.add("El número del desprendible/libreta u orden es obligatorio.");
+            errores.add(
+                    "El número del desprendible/libreta, orden o formato es obligatorio."
+            );
             return;
         }
 
         if (!numero.matches("\\d+")) {
-            errores.add("El número del desprendible/libreta u orden debe ser numérico.");
+            errores.add(
+                    "El número del desprendible/libreta, orden o formato debe ser numérico."
+            );
             return;
         }
 
-        boolean valido = repository.validarDocumentoSoporteCuenta(
-                request.getIdCuentaAhorro(),
-                numero
-        );
+        // =========================================================
+        // FORMATO FÍSICO DE CONSIGNACIÓN - FJ
+        // =========================================================
+
+        if (TIPO_COMPROBANTE_FORMATO.equals(tipoComprobante)) {
+
+            if (!NATURALEZA_INGRESO.equalsIgnoreCase(naturaleza)) {
+                errores.add(
+                        "El formato físico de consignación FJ solo puede utilizarse en ingresos."
+                );
+                return;
+            }
+
+            boolean formatoValido =
+                    repository.validarFormatoConsignacion(
+                            request.getIdAgencia(),
+                            numero
+                    );
+
+            if (!formatoValido) {
+                errores.add(
+                        "El número del formato de consignación no pertenece a un rango válido de la agencia de la caja."
+                );
+                return;
+            }
+
+            List<Long[]> usos =
+                    repository.consultarUsosFormatoConsignacion(numero);
+
+            for (Long[] uso : usos) {
+
+                Long idDatosPersonalUsado = uso[0];
+                Long idFormaAhorroUsada = uso[1];
+
+                if (!idDatosPersonalUsado.equals(cuenta.getIdDatosPersonal())) {
+                    errores.add(
+                            "El formato de consignación ya fue utilizado por otro asociado."
+                    );
+                    return;
+                }
+
+                if (idFormaAhorroUsada.equals(
+                        cuenta.getIdFormaAhorro().longValue()
+                )) {
+                    errores.add(
+                            "El formato de consignación ya fue utilizado por este asociado en la misma forma de ahorro."
+                    );
+                    return;
+                }
+            }
+
+            return;
+        }
+
+        // =========================================================
+        // DOCUMENTO PROPIO DE LA CUENTA - CJ
+        // =========================================================
+
+        if (!TIPO_COMPROBANTE_CAJA.equals(tipoComprobante)) {
+            errores.add(
+                    "El tipo de comprobante no es válido para la operación."
+            );
+            return;
+        }
+
+        boolean valido =
+                repository.validarDocumentoSoporteCuenta(
+                        request.getIdCuentaAhorro(),
+                        numero
+                );
 
         if (!valido) {
-            errores.add("El desprendible/libreta u orden no pertenece a la cuenta seleccionada.");
+            errores.add(
+                    "El desprendible/libreta u orden no pertenece a la cuenta seleccionada."
+            );
+            return;
         }
 
-        boolean usado = repository.existeDocumentoSoporteUsado(
-                request.getIdCuentaAhorro(),
-                request.getTipoComprobante(),
-                numero
-        );
+        boolean usado =
+                repository.existeDocumentoSoporteUsado(
+                        request.getIdCuentaAhorro(),
+                        TIPO_COMPROBANTE_CAJA,
+                        numero
+                );
 
         if (usado) {
-            errores.add("El desprendible/libreta u orden ya fue utilizado en un movimiento anterior.");
+            errores.add(
+                    "El desprendible/libreta u orden ya fue utilizado en un movimiento anterior."
+            );
         }
-
     }
 
     private void validarChequesPreview(
@@ -668,8 +867,13 @@ public class CajaCapturaDepositosService {
 
         for (CajaCapturaDepositosChequeDTO cheque : request.getCheques()) {
 
-            if (isBlank(cheque.getCodigoBanco())) {
+            if (cheque.getCodigoBanco() == null) {
                 errores.add("El banco del cheque es obligatorio.");
+
+            } else if (!repository.existeBancoActivo(cheque.getCodigoBanco())) {
+                errores.add(
+                        "El banco seleccionado para el cheque no existe o se encuentra inactivo."
+                );
             }
 
             if (isBlank(cheque.getNumeroCheque())) {
@@ -686,7 +890,9 @@ public class CajaCapturaDepositosService {
         }
 
         if (totalDetalle.compareTo(valorCheques) != 0) {
-            errores.add("El total del detalle de cheques no coincide con el valor de cheques.");
+            errores.add(
+                    "El total del detalle de cheques no coincide con el valor de cheques."
+            );
         }
     }
 

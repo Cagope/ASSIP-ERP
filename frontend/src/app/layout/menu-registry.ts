@@ -4,6 +4,8 @@ import { carteraMenu } from '../features/cartera/cartera-menu';
 import { cdatMenu } from '../features/cdat/cdat-menu';
 import { consultasMenu } from '../features/consultas/consultas-menu';
 import { cajasMenu } from '../features/cajas/cajas.menu';
+import { tesoreriaMenu } from '../features/tesoreria/tesoreria-menu';
+
 import { sarlaftMenu } from '../features/sarlaft/sarlaft-menu';
 import { contabilidadMenu } from '../features/contabilidad/contabilidad-menu';
 
@@ -26,6 +28,8 @@ export const MENU_REGISTRY = [
   { ...consultasMenu, icon: 'consultas' },
 
   { ...cajasMenu, icon: 'cajas' },
+
+  { ...tesoreriaMenu, icon: 'tesoreria' },
 
   { ...activosFijosMenu, icon: 'activos' },
 

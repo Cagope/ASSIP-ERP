@@ -1,5 +1,10 @@
+export interface CajaCapturaDepositosBanco {
+  codigoBanco: number;
+  nombreBanco: string;
+}
+
 export interface CajaCapturaDepositosCheque {
-  codigoBanco: string;
+  codigoBanco: number;
   numeroCheque: string;
   valorCheque: number;
 }
@@ -149,7 +154,6 @@ export interface CajaCapturaDepositosResponse {
   requiereFormatoLavadoActivos?: boolean;
   idFormatoLavadoActivos?: number;
   mensajeLavadoActivos?: string;
-
 }
 
 export interface TipoMovimientoDeposito {

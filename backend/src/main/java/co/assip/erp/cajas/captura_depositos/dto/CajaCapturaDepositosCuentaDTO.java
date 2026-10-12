@@ -25,6 +25,12 @@ public class CajaCapturaDepositosCuentaDTO {
     private Integer idFormaAhorro;
     private String codigoForma;
     private String nombreForma;
+    private String tipoCaptacionForma;
+
+    private Integer idCatalogoCuentaCorto;
+    private Integer idCatalogoCuentaLargo;
+    private Integer idCatalogoCuentaInteragencia;
+    private Integer plazoCuenta;
 
     private BigDecimal saldoActual;
     private BigDecimal valorCanje;
@@ -57,8 +63,5 @@ public class CajaCapturaDepositosCuentaDTO {
     private String celularPoder;
 
     private String fechaAperturaCuenta;
-
-
-
 
 }

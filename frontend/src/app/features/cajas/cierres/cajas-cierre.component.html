@@ -1,0 +1,1358 @@
+<div class="page">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO                                            -->
+  <!-- ===================================================== -->
+
+  <div class="page-header">
+
+    <div>
+      <h2>Caja — Cierre diario</h2>
+
+      <p>
+        Verificación de movimientos, comprobantes, arqueo físico
+        y cierre definitivo de la provisión diaria.
+      </p>
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJES                                              -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="mensajeError"
+    class="alert alert-error">
+    {{ mensajeError }}
+  </div>
+
+  <div
+    *ngIf="mensajeExito"
+    class="alert alert-success">
+    {{ mensajeExito }}
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- SELECCIÓN DE FECHA                                    -->
+  <!-- ===================================================== -->
+
+  <section class="card">
+
+    <div class="card-header">
+
+      <div>
+        <h3>Fecha de cierre</h3>
+
+        <p>
+          Seleccione la fecha contable que desea procesar.
+        </p>
+      </div>
+
+    </div>
+
+
+    <div class="filter-row">
+
+      <div class="form-field date-field">
+
+        <label for="fechaContable">
+          Fecha contable
+        </label>
+
+        <input
+          id="fechaContable"
+          type="date"
+          [(ngModel)]="fechaContable"
+          [disabled]="cargando || confirmando">
+
+      </div>
+
+
+      <div class="filter-actions">
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="preparar()"
+          [disabled]="
+          cargando
+          || confirmando
+          || !fechaContable
+        ">
+          Consultar
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- SELECCIÓN DE CAJA                                     -->
+  <!-- ===================================================== -->
+
+  <section
+    class="card caja-selector-card"
+    *ngIf="
+    mostrarSeleccionCaja
+    && cajasDisponibles.length > 0
+    && !resumen
+  ">
+
+    <div class="card-header">
+
+      <div>
+        <h3>Seleccionar caja</h3>
+
+        <p>
+          Seleccione la caja que desea trabajar para la fecha
+          {{ fechaContable }}.
+        </p>
+      </div>
+
+      <span class="caja-count">
+      {{ cajasDisponibles.length }}
+      {{ cajasDisponibles.length === 1 ? 'caja disponible' : 'cajas disponibles' }}
+    </span>
+
+    </div>
+
+
+    <div class="caja-selector-row">
+
+      <div class="form-field caja-selector-field">
+
+        <label for="cajaCierre">
+          Caja a cerrar
+        </label>
+
+        <select
+          id="cajaCierre"
+          [(ngModel)]="idProvisionSeleccionada"
+          [disabled]="cargando || confirmando">
+
+          <option [ngValue]="null">
+            Seleccione una caja
+          </option>
+
+          <option
+            *ngFor="let caja of cajasDisponibles"
+            [ngValue]="caja.idProvision">
+
+            {{ caja.codigoCaja }} — {{ caja.descripcionCaja }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="caja-selector-action">
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="seleccionarCaja()"
+          [disabled]="
+          cargando
+          || confirmando
+          || idProvisionSeleccionada == null
+        ">
+          Continuar
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- CARGANDO                                              -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="cargando"
+    class="loading">
+    Calculando cierre de caja...
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CIERRE                                                -->
+  <!-- ===================================================== -->
+
+  <ng-container *ngIf="resumen as cierre">
+
+
+    <!-- =================================================== -->
+    <!-- JORNADA                                             -->
+    <!-- =================================================== -->
+
+    <section class="card">
+
+      <div class="card-header">
+
+        <div>
+          <h3>Jornada de caja</h3>
+
+          <p>
+            Información de la provisión seleccionada.
+          </p>
+        </div>
+
+
+        <span
+          class="status"
+          [class.status-open]="cierre.estado === 'ABIERTA'"
+          [class.status-closed]="cierre.estado === 'CERRADA'">
+          {{ cierre.estado }}
+        </span>
+
+      </div>
+
+
+      <div class="summary-grid">
+
+        <div class="summary-item">
+
+          <span class="summary-label">
+            Caja
+          </span>
+
+          <strong>
+            {{ cierre.codigoCaja }}
+            -
+            {{ cierre.descripcionCaja }}
+          </strong>
+
+        </div>
+
+
+        <div class="summary-item">
+
+          <span class="summary-label">
+            Agencia
+          </span>
+
+          <strong>
+            {{ cierre.idAgencia }}
+          </strong>
+
+        </div>
+
+
+        <div class="summary-item">
+
+          <span class="summary-label">
+            Fecha contable
+          </span>
+
+          <strong>
+            {{ cierre.fechaContable }}
+          </strong>
+
+        </div>
+
+
+        <div class="summary-item">
+
+          <span class="summary-label">
+            Provisión
+          </span>
+
+          <strong>
+            #{{ cierre.idProvision }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- ENTRADAS Y SALIDAS                                  -->
+    <!-- =================================================== -->
+
+    <section class="card">
+
+      <div class="card-header">
+
+        <div>
+          <h3>Entradas y salidas</h3>
+
+          <p>
+            Resumen de los movimientos registrados durante
+            la fecha contable.
+          </p>
+        </div>
+
+      </div>
+
+
+      <!-- ------------------------------------------------- -->
+      <!-- PROVISIÓN INICIAL                                 -->
+      <!-- ------------------------------------------------- -->
+
+      <div class="movement-grid">
+
+        <div class="movement-panel">
+
+          <h4>Efectivo</h4>
+
+
+          <div class="movement-row">
+
+            <span>
+              Provisión inicial
+            </span>
+
+            <strong>
+              {{
+              cierre.efectivoInicio
+              | currency:'COP':'symbol-narrow':'1.0-0'
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="movement-row positive">
+
+            <span>
+              (+) Entradas
+            </span>
+
+            <strong>
+              {{
+              cierre.movimientos.entradasEfectivo
+              | currency:'COP':'symbol-narrow':'1.0-0'
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="movement-row negative">
+
+            <span>
+              (-) Salidas
+            </span>
+
+            <strong>
+              {{
+              cierre.movimientos.salidasEfectivo
+              | currency:'COP':'symbol-narrow':'1.0-0'
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="movement-row total">
+
+            <span>
+              Efectivo calculado
+            </span>
+
+            <strong>
+              {{
+              cierre.efectivoFinCalculado
+              | currency:'COP':'symbol-narrow':'1.0-0'
+              }}
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div class="movement-panel">
+
+          <h4>Cheques</h4>
+
+
+          <div class="movement-row">
+
+            <span>
+              Provisión inicial
+            </span>
+
+            <strong>
+              {{
+              cierre.chequesInicio
+              | currency:'COP':'symbol-narrow':'1.0-0'
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="movement-row positive">
+
+            <span>
+              (+) Entradas
+            </span>
+
+            <strong>
+              {{
+              cierre.movimientos.entradasCheques
+              | currency:'COP':'symbol-narrow':'1.0-0'
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="movement-row negative">
+
+            <span>
+              (-) Salidas
+            </span>
+
+            <strong>
+              {{
+              cierre.movimientos.salidasCheques
+              | currency:'COP':'symbol-narrow':'1.0-0'
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="movement-row total">
+
+            <span>
+              Cheques calculados
+            </span>
+
+            <strong>
+              {{
+              cierre.chequesFinCalculado
+              | currency:'COP':'symbol-narrow':'1.0-0'
+              }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ------------------------------------------------- -->
+      <!-- BLOQUES POR DEPARTAMENTO                          -->
+      <!-- ------------------------------------------------- -->
+
+      <div
+        class="department-list"
+        *ngIf="cierre.resumenMovimientos.length > 0">
+
+
+        <div
+          class="department-block"
+          *ngFor="let item of cierre.resumenMovimientos">
+
+
+          <div class="department-header">
+
+            <div>
+
+              <strong>
+                {{ item.codigoDepartamento }}
+                -
+                {{ item.nombreDepartamento }}
+              </strong>
+
+              <span
+                class="movement-nature"
+                [class.positive]="item.naturaleza === 'INGRESO'"
+                [class.negative]="item.naturaleza === 'EGRESO'">
+
+                {{ item.naturaleza }}
+
+              </span>
+
+            </div>
+
+
+            <strong>
+              {{
+              item.valorTotal
+              | currency:'COP':'symbol-narrow':'1.0-0'
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="summary-grid compact">
+
+            <div class="summary-item">
+
+              <span class="summary-label">
+                Efectivo
+              </span>
+
+              <strong>
+                {{
+                item.valorEfectivo
+                | currency:'COP':'symbol-narrow':'1.0-0'
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="summary-item">
+
+              <span class="summary-label">
+                Cheques
+              </span>
+
+              <strong>
+                {{
+                item.valorCheques
+                | currency:'COP':'symbol-narrow':'1.0-0'
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="summary-item">
+
+              <span class="summary-label">
+                Otros medios
+              </span>
+
+              <strong>
+                {{
+                item.valorOtros
+                | currency:'COP':'symbol-narrow':'1.0-0'
+                }}
+              </strong>
+
+            </div>
+
+
+            <div class="summary-item">
+
+              <span class="summary-label">
+                Movimientos
+              </span>
+
+              <strong>
+                {{ item.cantidadMovimientos }}
+              </strong>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ------------------------------------------------- -->
+      <!-- TOTALES                                           -->
+      <!-- ------------------------------------------------- -->
+
+      <div class="totals-grid">
+
+        <div class="total-box">
+
+          <span>
+            Total entradas
+          </span>
+
+          <strong>
+            {{
+            cierre.movimientos.totalIngresos
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="total-box">
+
+          <span>
+            Total salidas
+          </span>
+
+          <strong>
+            {{
+            cierre.movimientos.totalEgresos
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="total-box">
+
+          <span>
+            Movimientos registrados
+          </span>
+
+          <strong>
+            {{ cierre.movimientos.cantidadMovimientos }}
+          </strong>
+
+        </div>
+
+
+        <div
+          class="total-box"
+          [class.warning-box]="
+            cierre.movimientosPendientes > 0
+          ">
+
+          <span>
+            Movimientos pendientes
+          </span>
+
+          <strong>
+            {{ cierre.movimientosPendientes }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- COMPROBANTES                                        -->
+    <!-- =================================================== -->
+
+    <section class="card">
+
+      <div class="card-header">
+
+        <div>
+          <h3>Comprobantes de la jornada</h3>
+
+          <p>
+            Documentos generados por los módulos de origen
+            y comprobantes registrados por Caja.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div
+        *ngIf="
+          cierre.resumenComprobantes.length === 0
+        "
+        class="empty-state">
+
+        No existen comprobantes registrados
+        para esta provisión.
+
+      </div>
+
+
+      <div
+        class="voucher-list"
+        *ngIf="
+          cierre.resumenComprobantes.length > 0
+        ">
+
+
+        <div
+          class="voucher-block"
+          *ngFor="
+            let grupo of cierre.resumenComprobantes
+          ">
+
+
+          <div class="voucher-header">
+
+            <strong>
+              {{ grupo.codigoDepartamento }}
+              -
+              {{ grupo.nombreDepartamento }}
+            </strong>
+
+          </div>
+
+
+          <div class="voucher-columns">
+
+
+            <!-- DOCUMENTOS ORIGEN -->
+
+            <div class="voucher-column">
+
+              <h4>
+                Documentos origen
+              </h4>
+
+
+              <div
+                *ngIf="
+                  grupo.documentosOrigen.length === 0
+                "
+                class="empty-inline">
+
+                Sin documentos
+
+              </div>
+
+
+              <div class="voucher-tags">
+
+                <span
+                  class="voucher-tag"
+                  *ngFor="
+                    let documento
+                    of grupo.documentosOrigen
+                  ">
+
+                  <strong>
+                    {{ documento.tipo }}
+                  </strong>
+
+                  {{ documento.numero }}
+
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <!-- COMPROBANTES CAJA -->
+
+            <div class="voucher-column">
+
+              <h4>
+                Comprobantes Caja
+              </h4>
+
+
+              <div
+                *ngIf="
+                  grupo.comprobantesCaja.length === 0
+                "
+                class="empty-inline">
+
+                Sin comprobantes
+
+              </div>
+
+
+              <div class="voucher-tags">
+
+                <span
+                  class="voucher-tag"
+                  *ngFor="
+                    let comprobante
+                    of grupo.comprobantesCaja
+                  ">
+
+                  <strong>
+                    {{ comprobante.tipo }}
+                  </strong>
+
+                  {{ comprobante.numero }}
+
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- VENTANILLA                                          -->
+    <!-- =================================================== -->
+
+    <section
+      class="card"
+      *ngIf="
+        cierre.tipoCaja === 'OPERATIVA'
+      ">
+
+
+      <div class="card-header">
+
+        <div>
+          <h3>Control de ventanilla</h3>
+
+          <p>
+            Distribución del efectivo entre la caja interna
+            y la ventanilla.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="summary-grid">
+
+        <div class="summary-item">
+
+          <span class="summary-label">
+            Caja → Ventanilla
+          </span>
+
+          <strong>
+            {{
+            cierre.ventanilla.cajaAVentanilla
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="summary-item">
+
+          <span class="summary-label">
+            Ventanilla → Caja
+          </span>
+
+          <strong>
+            {{
+            cierre.ventanilla.ventanillaACaja
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="summary-item">
+
+          <span class="summary-label">
+            Entradas operaciones
+          </span>
+
+          <strong>
+            {{
+            cierre.ventanilla.entradasOperacionesEfectivo
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="summary-item">
+
+          <span class="summary-label">
+            Salidas operaciones
+          </span>
+
+          <strong>
+            {{
+            cierre.ventanilla.salidasOperacionesEfectivo
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="balance-grid">
+
+        <div class="balance-box">
+
+          <span>
+            Saldo en ventanilla
+          </span>
+
+          <strong>
+            {{
+            cierre.ventanilla.saldoVentanilla
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="balance-box">
+
+          <span>
+            Saldo caja interna
+          </span>
+
+          <strong>
+            {{
+            cierre.ventanilla.saldoCajaInterna
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="balance-box main-balance">
+
+          <span>
+            Efectivo total caja
+          </span>
+
+          <strong>
+            {{
+            cierre.efectivoFinCalculado
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- ARQUEO DE EFECTIVO                                  -->
+    <!-- =================================================== -->
+
+    <section class="card">
+
+      <div class="card-header">
+
+        <div>
+          <h3>Arqueo físico de efectivo</h3>
+
+          <p>
+            Registre la composición física del efectivo
+            disponible al finalizar la jornada.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="cash-table-wrap">
+
+        <table class="cash-table">
+
+          <thead>
+          <tr>
+            <th>Denominación</th>
+            <th>Cantidad</th>
+            <th>Valor</th>
+          </tr>
+          </thead>
+
+
+          <tbody>
+
+          <tr
+            *ngFor="let item of billetes">
+
+            <td>
+              {{
+              item.denominacion
+              | currency:'COP':'symbol-narrow':'1.0-0'
+              }}
+            </td>
+
+
+            <td>
+
+              <input
+                type="text"
+                numericFormat
+                class="input-number"
+                [(ngModel)]="item.cantidad"
+                [disabled]="
+                  confirmando
+                  || cierre.estado !== 'ABIERTA'
+                ">
+
+            </td>
+
+
+            <td>
+              <strong>
+                {{
+                valorBillete(item)
+                | currency:'COP':'symbol-narrow':'1.0-0'
+                }}
+              </strong>
+            </td>
+
+          </tr>
+
+
+          <tr>
+
+            <td>
+              Billetes varios
+            </td>
+
+            <td>
+              —
+            </td>
+
+            <td>
+
+              <input
+                type="text"
+                numericFormat
+                class="input-number"
+                [(ngModel)]="valorVarios"
+                [disabled]="
+                  confirmando
+                  || cierre.estado !== 'ABIERTA'
+                ">
+
+            </td>
+
+          </tr>
+
+
+          <tr>
+
+            <td>
+              Monedas
+            </td>
+
+            <td>
+              —
+            </td>
+
+            <td>
+
+              <input
+                type="text"
+                numericFormat
+                class="input-number"
+                [(ngModel)]="valorMonedas"
+                [disabled]="
+                  confirmando
+                  || cierre.estado !== 'ABIERTA'
+                ">
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+      <div class="cash-summary">
+
+        <div class="cash-summary-item">
+
+          <span>
+            Total billetes
+          </span>
+
+          <strong>
+            {{
+            totalBilletes
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="cash-summary-item">
+
+          <span>
+            Billetes varios
+          </span>
+
+          <strong>
+            {{
+            valorVarios
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="cash-summary-item">
+
+          <span>
+            Monedas
+          </span>
+
+          <strong>
+            {{
+            valorMonedas
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="cash-summary-item main">
+
+          <span>
+            Efectivo contado
+          </span>
+
+          <strong>
+            {{
+            totalEfectivoContado
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="cash-summary-item">
+
+          <span>
+            Efectivo calculado
+          </span>
+
+          <strong>
+            {{
+            cierre.efectivoFinCalculado
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div
+          class="cash-summary-item"
+          [class.cash-ok]="arqueoCuadrado"
+          [class.cash-error]="!arqueoCuadrado">
+
+          <span>
+            Diferencia
+          </span>
+
+          <strong>
+            {{
+            diferenciaEfectivo
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- RESULTADO FINAL                                     -->
+    <!-- =================================================== -->
+
+    <section class="card final-card">
+
+      <div class="card-header">
+
+        <div>
+          <h3>Resultado del cierre</h3>
+
+          <p>
+            Valores que quedarán registrados como saldo final
+            de la provisión.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="final-grid">
+
+        <div class="final-item">
+
+          <span>
+            Efectivo final
+          </span>
+
+          <strong>
+            {{
+            cierre.efectivoFinCalculado
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="final-item">
+
+          <span>
+            Cheques finales
+          </span>
+
+          <strong>
+            {{
+            cierre.chequesFinCalculado
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+
+        <div class="final-item final-total">
+
+          <span>
+            Total físico final
+          </span>
+
+          <strong>
+            {{
+            cierre.totalFisicoFinal
+            | currency:'COP':'symbol-narrow':'1.0-0'
+            }}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <!-- ------------------------------------------------- -->
+      <!-- PENDIENTES                                        -->
+      <!-- ------------------------------------------------- -->
+
+      <div
+        *ngIf="
+          cierre.movimientosPendientes > 0
+        "
+        class="alert alert-warning">
+
+        Existen
+        {{ cierre.movimientosPendientes }}
+        movimientos pendientes.
+
+        Deben ser atendidos antes de cerrar la caja.
+
+      </div>
+
+
+      <!-- ------------------------------------------------- -->
+      <!-- DESCUADRE                                         -->
+      <!-- ------------------------------------------------- -->
+
+      <div
+        *ngIf="
+          cierre.estado === 'ABIERTA'
+          && !arqueoCuadrado
+        "
+        class="alert alert-warning">
+
+        El arqueo físico todavía no coincide
+        con el efectivo calculado.
+
+      </div>
+
+
+      <!-- ------------------------------------------------- -->
+      <!-- OBSERVACIÓN                                       -->
+      <!-- ------------------------------------------------- -->
+
+      <div class="form-field">
+
+        <label for="observacionCierre">
+          Observación de cierre
+        </label>
+
+
+        <textarea
+          id="observacionCierre"
+          rows="3"
+          maxlength="500"
+          [(ngModel)]="observacion"
+          [disabled]="
+            confirmando
+            || cierre.estado !== 'ABIERTA'
+          "
+          placeholder="Observación opcional del cierre">
+        </textarea>
+
+
+        <small>
+          {{ observacion.length }}/500
+        </small>
+
+      </div>
+
+
+      <!-- ------------------------------------------------- -->
+      <!-- ACCIONES                                          -->
+      <!-- ------------------------------------------------- -->
+
+      <div class="actions">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="recalcular()"
+          [disabled]="
+            cargando
+            || confirmando
+          ">
+          Recalcular
+        </button>
+
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="confirmarCierre()"
+          [disabled]="
+            cargando
+            || confirmando
+            || cierre.estado !== 'ABIERTA'
+            || cierre.movimientosPendientes > 0
+            || !arqueoCuadrado
+          ">
+
+          {{
+          confirmando
+          ? 'Cerrando...'
+          : 'Confirmar cierre'
+          }}
+
+        </button>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+</div>

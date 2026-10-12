@@ -15,6 +15,8 @@ public class CajaAperturaDTO {
     private String codigoCaja;
     private String descripcionCaja;
 
+    private String tipoCaja;
+
     private LocalDate fechaJornada;
 
     private Long idProvision;
@@ -22,6 +24,17 @@ public class CajaAperturaDTO {
 
     private BigDecimal efectivoInicio;
     private BigDecimal chequesInicio;
+
+    // =========================================================
+    // Ventanilla
+    // =========================================================
+
+    private BigDecimal fondoSugeridoVentanilla;
+    private BigDecimal limiteMaximoVentanilla;
+
+    // =========================================================
+    // Estado de la jornada
+    // =========================================================
 
     private Boolean tieneProvision;
     private Boolean tieneCierreAnterior;

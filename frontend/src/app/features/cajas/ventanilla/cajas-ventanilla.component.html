@@ -1,0 +1,524 @@
+<div class="page">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <div class="page-header">
+    <div>
+      <h2>Caja / Ventanilla</h2>
+
+      <p class="page-subtitle">
+        Traslado interno de efectivo entre la caja y la ventanilla.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-secondary"
+      [disabled]="cargando || procesando"
+      (click)="cargarEstadoActual()">
+      Actualizar
+    </button>
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJES -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="mensajeError"
+    class="alert alert-error">
+    {{ mensajeError }}
+  </div>
+
+  <div
+    *ngIf="mensajeExito"
+    class="alert alert-success">
+    {{ mensajeExito }}
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CARGANDO -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="cargando"
+    class="card">
+    <div class="loading-state">
+      Consultando la caja de la jornada actual...
+    </div>
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- SIN PROVISIÓN ACTIVA -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="!cargando && !estado"
+    class="card">
+
+    <div class="empty-state">
+      <strong>No hay una caja disponible para operar.</strong>
+
+      <p>
+        El usuario debe tener una caja vinculada y una provisión
+        abierta para la jornada actual.
+      </p>
+    </div>
+
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- CONTENIDO -->
+  <!-- ===================================================== -->
+
+  <ng-container *ngIf="!cargando && estado as e">
+
+    <!-- =================================================== -->
+    <!-- JORNADA -->
+    <!-- =================================================== -->
+
+    <div class="card">
+
+      <div class="card-header">
+        <div>
+          <h3>Jornada actual</h3>
+          <p>Caja operativa asignada al usuario.</p>
+        </div>
+
+        <span class="status-badge">
+          {{ e.estadoProvision }}
+        </span>
+      </div>
+
+      <div class="summary-grid">
+
+        <div class="summary-item">
+          <span class="summary-label">Fecha contable</span>
+          <strong>
+            {{ e.fechaContable | date:'dd/MM/yyyy' }}
+          </strong>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">Caja</span>
+          <strong>
+            {{ e.codigoCaja }} - {{ e.descripcionCaja }}
+          </strong>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">Tipo</span>
+          <strong>
+            {{ e.tipoCaja }}
+          </strong>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">Efectivo total</span>
+          <strong>
+            {{ e.efectivoTotal | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </strong>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- SALDOS FÍSICOS -->
+    <!-- =================================================== -->
+
+    <div class="card">
+
+      <div class="card-header">
+        <div>
+          <h3>Distribución del efectivo</h3>
+          <p>
+            Saldos físicos actuales de la jornada.
+          </p>
+        </div>
+      </div>
+
+      <div class="balance-grid">
+
+        <div class="balance-card">
+          <span class="balance-label">
+            Caja interna
+          </span>
+
+          <strong class="balance-value">
+            {{ e.saldoCajaInterna
+            | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </strong>
+        </div>
+
+
+        <div class="balance-card">
+          <span class="balance-label">
+            Ventanilla
+          </span>
+
+          <strong class="balance-value">
+            {{ e.saldoVentanilla
+            | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </strong>
+
+          <div class="balance-detail">
+            Fondo sugerido:
+            <strong>
+              {{ e.fondoSugeridoVentanilla
+              | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </strong>
+          </div>
+
+          <div class="balance-detail">
+            Límite máximo:
+            <strong>
+              {{ e.limiteMaximoVentanilla
+              | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </strong>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- TRASLADO -->
+    <!-- =================================================== -->
+
+    <div class="card">
+
+      <div class="card-header">
+        <div>
+          <h3>Traslado de efectivo</h3>
+          <p>
+            El movimiento es interno y no genera comprobante contable.
+          </p>
+        </div>
+      </div>
+
+
+      <!-- SENTIDO DEL TRASLADO -->
+
+      <div class="movement-selector">
+
+        <button
+          type="button"
+          class="movement-option"
+          [class.active]="tipoMovimiento === 'CAJA_A_VENTANILLA'"
+          [disabled]="procesando"
+          (click)="seleccionarTipo('CAJA_A_VENTANILLA')">
+
+          <strong>Caja → Ventanilla</strong>
+
+          <span>
+            Entregar efectivo a ventanilla
+          </span>
+
+        </button>
+
+
+        <button
+          type="button"
+          class="movement-option"
+          [class.active]="tipoMovimiento === 'VENTANILLA_A_CAJA'"
+          [disabled]="procesando"
+          (click)="seleccionarTipo('VENTANILLA_A_CAJA')">
+
+          <strong>Ventanilla → Caja</strong>
+
+          <span>
+            Retornar efectivo a caja
+          </span>
+
+        </button>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- SALDOS DEL MOVIMIENTO -->
+      <!-- ================================================= -->
+
+      <div class="transfer-summary">
+
+        <div class="transfer-account">
+
+          <span>
+            Origen
+          </span>
+
+          <strong>
+            {{ nombreOrigen }}
+          </strong>
+
+          <div>
+            Disponible:
+            <strong>
+              {{ saldoOrigen
+              | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </strong>
+          </div>
+
+        </div>
+
+
+        <div class="transfer-arrow">
+          →
+        </div>
+
+
+        <div class="transfer-account">
+
+          <span>
+            Destino
+          </span>
+
+          <strong>
+            {{ nombreDestino }}
+          </strong>
+
+          <div>
+            Saldo actual:
+            <strong>
+              {{ saldoDestino
+              | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </strong>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- CAPTURA -->
+      <!-- ================================================= -->
+
+      <div class="transfer-form">
+
+        <div class="amount-field">
+
+          <label for="valor">
+            Valor del traslado
+          </label>
+
+          <div class="amount-input-wrap">
+
+            <span class="amount-prefix">$</span>
+
+            <input
+              id="valor"
+              name="valor"
+              type="text"
+              numericFormat
+              autocomplete="off"
+              [(ngModel)]="valor"
+              [disabled]="procesando"
+              placeholder="0">
+
+          </div>
+
+          <span class="amount-available">
+      Disponible:
+      <strong>
+        {{ saldoOrigen
+          | currency:'COP':'symbol-narrow':'1.0-0' }}
+      </strong>
+    </span>
+
+        </div>
+
+
+        <div class="observation-field">
+
+          <label for="observacion">
+            Observación
+          </label>
+
+          <input
+            id="observacion"
+            name="observacion"
+            type="text"
+            maxlength="500"
+            autocomplete="off"
+            [(ngModel)]="observacion"
+            [disabled]="procesando"
+            placeholder="Observación del traslado">
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- RESULTADO PROYECTADO -->
+      <!-- ================================================= -->
+
+      <div
+        *ngIf="valorNumerico > 0"
+        class="result-preview">
+
+        <div class="result-preview-title">
+          Resultado del traslado
+        </div>
+
+        <div class="result-preview-grid">
+
+          <div>
+            <span>
+              {{ nombreOrigen }}
+            </span>
+
+            <strong>
+              {{ saldoOrigenResultante
+              | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </strong>
+          </div>
+
+          <div>
+            <span>
+              {{ nombreDestino }}
+            </span>
+
+            <strong>
+              {{ saldoDestinoResultante
+              | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </strong>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- ACCIONES -->
+      <!-- ================================================= -->
+
+      <div class="actions">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          [disabled]="procesando"
+          (click)="limpiarCaptura()">
+          Limpiar
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="!puedeTrasladar"
+          (click)="trasladar()">
+
+          {{ procesando ? 'Procesando...' : 'Realizar traslado' }}
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- =================================================== -->
+    <!-- INFORMACIÓN DE CONTROL -->
+    <!-- =================================================== -->
+
+    <div class="card">
+
+      <div class="card-header">
+        <div>
+          <h3>Movimientos de la jornada</h3>
+          <p>
+            Composición del efectivo utilizada para determinar
+            los saldos actuales.
+          </p>
+        </div>
+      </div>
+
+      <div class="summary-grid">
+
+        <div class="summary-item">
+          <span class="summary-label">
+            Efectivo inicial
+          </span>
+
+          <strong>
+            {{ e.efectivoInicio
+            | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </strong>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">
+            Entradas por operaciones
+          </span>
+
+          <strong>
+            {{ e.entradasOperacionesEfectivo
+            | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </strong>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">
+            Salidas por operaciones
+          </span>
+
+          <strong>
+            {{ e.salidasOperacionesEfectivo
+            | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </strong>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">
+            Caja → Ventanilla
+          </span>
+
+          <strong>
+            {{ e.cajaAVentanilla
+            | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </strong>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">
+            Ventanilla → Caja
+          </span>
+
+          <strong>
+            {{ e.ventanillaACaja
+            | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </strong>
+        </div>
+
+        <div class="summary-item">
+          <span class="summary-label">
+            Efectivo total
+          </span>
+
+          <strong>
+            {{ e.efectivoTotal
+            | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </strong>
+        </div>
+
+      </div>
+
+    </div>
+
+  </ng-container>
+
+</div>

@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 import {
+  CajaCapturaDepositosBanco,
   CajaCapturaDepositosCuenta,
   CajaCapturaDepositosPreview,
   CajaCapturaDepositosRequest,
@@ -69,6 +70,12 @@ export class CapturaDepositosApi {
   listarTiposMovimiento(): Observable<TipoMovimientoDeposito[]> {
     return this.http.get<TipoMovimientoDeposito[]>(
       `${this.url}/tipos_movimiento`
+    );
+  }
+
+  listarBancos(): Observable<CajaCapturaDepositosBanco[]> {
+    return this.http.get<CajaCapturaDepositosBanco[]>(
+      `${this.url}/bancos`
     );
   }
 

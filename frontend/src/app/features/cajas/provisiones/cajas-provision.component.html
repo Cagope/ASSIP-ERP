@@ -282,8 +282,8 @@
             }}
           </strong>.
 
-          Durante esta etapa pueden ser modificados antes de
-          confirmar el inicio de caja.
+          Verifique los valores físicos antes de confirmar
+          el inicio de la caja.
         </p>
 
       </ng-container>
@@ -368,6 +368,79 @@
         </div>
 
       </div>
+
+
+      <!-- ================================================= -->
+      <!-- FONDO INICIAL DE VENTANILLA -->
+      <!-- ================================================= -->
+
+      <ng-container
+        *ngIf="apertura.tipoCaja === 'OPERATIVA'">
+
+        <div class="section-title">
+
+          <h4>Fondo de ventanilla</h4>
+
+          <p>
+            Indique el efectivo que se trasladará desde la caja
+            física hacia la ventanilla para iniciar operaciones.
+          </p>
+
+        </div>
+
+
+        <div class="opening-grid">
+
+          <div class="form-field">
+
+            <label for="valorInicialVentanilla">
+              Valor inicial de ventanilla
+            </label>
+
+            <input
+              id="valorInicialVentanilla"
+              type="text"
+              numericFormat
+              [(ngModel)]="valorInicialVentanilla"
+              [disabled]="abriendo">
+
+          </div>
+
+
+          <div class="summary-item">
+
+            <span class="summary-label">
+              Fondo sugerido
+            </span>
+
+            <strong class="summary-value">
+              {{
+              apertura.fondoSugeridoVentanilla
+              | number:'1.0-0'
+              }}
+            </strong>
+
+          </div>
+
+
+          <div class="summary-item">
+
+            <span class="summary-label">
+              Límite máximo de ventanilla
+            </span>
+
+            <strong class="summary-value">
+              {{
+              apertura.limiteMaximoVentanilla
+              | number:'1.0-0'
+              }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </ng-container>
 
 
       <div class="opening-actions">
