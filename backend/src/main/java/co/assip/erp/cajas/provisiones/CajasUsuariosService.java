@@ -4,6 +4,7 @@ import co.assip.erp.cajas.provisiones.dto.CajaDisponibleDTO;
 import co.assip.erp.cajas.provisiones.dto.CajaUsuarioDTO;
 import co.assip.erp.cajas.provisiones.dto.CajaUsuarioVincularDTO;
 import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuariosroles.UsuarioRolService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,68 +17,48 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CajasUsuariosService {
 
+    private static final Integer ROL_CAJERO = 13;
+    private static final Integer ROL_TESORERO_GENERAL = 17;
+    private static final Integer ROL_TESORERO_AGENCIA = 27;
+
+    private static final String CAJA_OPERATIVA = "OPERATIVA";
+    private static final String CAJA_CONTROL = "CONTROL";
+
     private final CajasUsuariosRepository repository;
     private final UsuarioSesionService usuarioSesionService;
+    private final UsuarioRolService usuarioRolService;
 
     // =========================================================
     // CAJAS DISPONIBLES
     // =========================================================
 
     /**
-     * Lista las cajas que el usuario autenticado puede seleccionar
-     * para iniciar su jornada.
-     *
-     * Solo se consultan las agencias autorizadas para el usuario.
-     * La disponibilidad de la caja depende exclusivamente de la
-     * vinculación diaria, no de provisiones.
+     * Lista las cajas disponibles de las agencias autorizadas,
+     * filtradas por el tipo de caja que puede operar el usuario.
      */
     public List<CajaDisponibleDTO> listarDisponibles() {
 
         Integer idUsuario = usuarioSesionService.idUsuario();
 
-        /*
-         * Si el usuario ya tuvo una caja durante la jornada actual,
-         * no puede iniciar una segunda jornada.
-         */
         if (repository.existeJornadaUsuario(idUsuario)) {
             return List.of();
         }
 
-        List<Integer> agencias = usuarioSesionService.agencias();
-
-        if (agencias == null || agencias.isEmpty()) {
-            return List.of();
-        }
-
-        List<CajaDisponibleDTO> resultado = new ArrayList<>();
-
-        for (Integer idAgencia : agencias) {
-            resultado.addAll(
-                    repository.listarDisponibles(idAgencia)
-            );
-        }
-
-        return resultado;
+        return consultarCajasDisponibles(idUsuario);
     }
 
     // =========================================================
-// CAJAS DISPONIBLES PARA CAMBIO
-// =========================================================
+    // CAJAS DISPONIBLES PARA CAMBIO
+    // =========================================================
 
     /**
-     * Lista las cajas disponibles para corregir la vinculación
-     * actual del usuario.
-     *
-     * A diferencia de listarDisponibles(), este método requiere
-     * que el usuario ya tenga una vinculación activa.
+     * Lista las cajas a las cuales puede cambiar el usuario,
+     * siempre que su caja actual no tenga movimientos.
      */
     public List<CajaDisponibleDTO> listarDisponiblesCambio() {
 
         Integer idUsuario = usuarioSesionService.idUsuario();
 
-        /*
-         * Para cambiar de caja debe existir una vinculación activa.
-         */
         CajaUsuarioDTO vinculacionActual = repository
                 .obtenerActivaPorUsuario(idUsuario)
                 .orElseThrow(() ->
@@ -86,44 +67,19 @@ public class CajasUsuariosService {
                         )
                 );
 
-        /*
-         * Si la caja actual ya tiene movimientos, no existe
-         * posibilidad de corregir la vinculación.
-         */
         if (repository.tieneMovimientosHoy(
                 vinculacionActual.getIdCaja()
         )) {
             return List.of();
         }
 
-        List<Integer> agencias = usuarioSesionService.agencias();
-
-        if (agencias == null || agencias.isEmpty()) {
-            return List.of();
-        }
-
-        List<CajaDisponibleDTO> resultado = new ArrayList<>();
-
-        for (Integer idAgencia : agencias) {
-            resultado.addAll(
-                    repository.listarDisponibles(idAgencia)
-            );
-        }
-
-        return resultado;
+        return consultarCajasDisponibles(idUsuario);
     }
 
     // =========================================================
     // VINCULACIÓN ACTIVA DEL USUARIO
     // =========================================================
 
-    /**
-     * Obtiene la caja que el usuario autenticado está operando
-     * durante la jornada actual.
-     *
-     * Este método debe utilizarse cuando una operación requiere
-     * obligatoriamente que el usuario tenga una caja vinculada.
-     */
     public CajaUsuarioDTO obtenerActivaUsuario() {
 
         Integer idUsuario = usuarioSesionService.idUsuario();
@@ -136,13 +92,6 @@ public class CajasUsuariosService {
                 );
     }
 
-    /**
-     * Consulta la caja activa del usuario sin generar excepción
-     * cuando todavía no existe una vinculación.
-     *
-     * Se utiliza principalmente para consultar el estado desde
-     * la pantalla de vinculación.
-     */
     public CajaUsuarioDTO obtenerActivaUsuarioSiExiste() {
 
         Integer idUsuario = usuarioSesionService.idUsuario();
@@ -152,19 +101,9 @@ public class CajasUsuariosService {
     }
 
     // =========================================================
-// CAJA TRABAJADA POR FECHA
-// =========================================================
+    // CAJA TRABAJADA POR FECHA
+    // =========================================================
 
-    /**
-     * Obtiene la caja trabajada por el usuario autenticado
-     * en una fecha de jornada determinada.
-     *
-     * La vinculación puede encontrarse ACTIVA o FINALIZADA.
-     *
-     * Se utiliza para determinar el alcance del usuario
-     * en procesos asociados a una jornada específica,
-     * como el cierre de caja.
-     */
     public CajaUsuarioDTO obtenerUsuarioPorFechaSiExiste(
             LocalDate fechaJornada
     ) {
@@ -189,24 +128,18 @@ public class CajasUsuariosService {
     // CONSULTA POR CAJA
     // =========================================================
 
-    /**
-     * Obtiene el usuario que actualmente está vinculado a una caja.
-     */
     public CajaUsuarioDTO obtenerActivaPorCaja(Long idCaja) {
 
         validarIdCaja(idCaja);
 
-        CajaDisponibleDTO caja = repository.obtenerCajaActiva(idCaja)
+        CajaDisponibleDTO caja = repository
+                .obtenerCajaActiva(idCaja)
                 .orElseThrow(() ->
                         new RuntimeException(
                                 "La caja no existe o se encuentra inactiva."
                         )
                 );
 
-        /*
-         * El usuario solamente puede consultar cajas de agencias
-         * a las cuales tiene acceso.
-         */
         usuarioSesionService.validarAgencia(
                 caja.getIdAgencia()
         );
@@ -236,9 +169,7 @@ public class CajasUsuariosService {
 
         Integer idUsuario = usuarioSesionService.idUsuario();
 
-        // -----------------------------------------------------
-        // 1. La caja debe existir y estar activa
-        // -----------------------------------------------------
+        // 1. Consultar la caja real.
 
         CajaDisponibleDTO caja = repository
                 .obtenerCajaActiva(dto.getIdCaja())
@@ -248,17 +179,18 @@ public class CajasUsuariosService {
                         )
                 );
 
-        // -----------------------------------------------------
-        // 2. El usuario debe tener acceso a la agencia
-        // -----------------------------------------------------
+        // 2. Validar agencia y autorización por tipo de caja.
 
         usuarioSesionService.validarAgencia(
                 caja.getIdAgencia()
         );
 
-        // -----------------------------------------------------
-        // 3. El usuario no puede tener otra jornada hoy
-        // -----------------------------------------------------
+        validarTipoCajaAutorizado(
+                idUsuario,
+                caja.getTipoCaja()
+        );
+
+        // 3. Impedir una segunda jornada del usuario.
 
         if (repository.existeJornadaUsuario(idUsuario)) {
 
@@ -279,9 +211,7 @@ public class CajasUsuariosService {
             );
         }
 
-        // -----------------------------------------------------
-        // 4. La caja no puede haber tenido otra jornada hoy
-        // -----------------------------------------------------
+        // 4. Impedir una segunda jornada de la caja.
 
         if (repository.existeJornadaCaja(dto.getIdCaja())) {
 
@@ -308,18 +238,14 @@ public class CajasUsuariosService {
             );
         }
 
-        // -----------------------------------------------------
-        // 5. Crear vinculación
-        // -----------------------------------------------------
+        // 5. Crear vinculación.
 
         Long idCajaUsuario = repository.crear(
                 dto.getIdCaja(),
                 idUsuario
         );
 
-        // -----------------------------------------------------
-        // 6. Retornar la vinculación creada
-        // -----------------------------------------------------
+        // 6. Consultar vinculación creada.
 
         return repository.obtenerPorId(idCajaUsuario)
                 .orElseThrow(() ->
@@ -333,16 +259,6 @@ public class CajasUsuariosService {
     // CAMBIAR CAJA VINCULADA
     // =========================================================
 
-    /**
-     * Corrige la caja seleccionada por el usuario durante la
-     * jornada actual.
-     *
-     * El cambio solamente se permite mientras la caja originalmente
-     * seleccionada no tenga movimientos registrados en la jornada.
-     *
-     * No se crea una nueva jornada. Se conserva el mismo
-     * id_caja_usuario y únicamente se modifica la caja vinculada.
-     */
     @Transactional
     public CajaUsuarioDTO cambiarCaja(CajaUsuarioVincularDTO dto) {
 
@@ -356,9 +272,7 @@ public class CajasUsuariosService {
 
         Integer idUsuario = usuarioSesionService.idUsuario();
 
-        // -----------------------------------------------------
-        // 1. El usuario debe tener una vinculación activa
-        // -----------------------------------------------------
+        // 1. Consultar vinculación actual.
 
         CajaUsuarioDTO vinculacionActual = repository
                 .obtenerActivaPorUsuario(idUsuario)
@@ -368,19 +282,17 @@ public class CajasUsuariosService {
                         )
                 );
 
-        // -----------------------------------------------------
-        // 2. La nueva caja debe ser diferente
-        // -----------------------------------------------------
+        // 2. Validar que sea otra caja.
 
-        if (dto.getIdCaja().equals(vinculacionActual.getIdCaja())) {
+        if (dto.getIdCaja().equals(
+                vinculacionActual.getIdCaja()
+        )) {
             throw new RuntimeException(
                     "La caja seleccionada corresponde a la caja actualmente vinculada."
             );
         }
 
-        // -----------------------------------------------------
-        // 3. La caja actual no puede tener movimientos
-        // -----------------------------------------------------
+        // 3. Impedir cambio cuando ya existen movimientos.
 
         if (repository.tieneMovimientosHoy(
                 vinculacionActual.getIdCaja()
@@ -390,9 +302,7 @@ public class CajasUsuariosService {
             );
         }
 
-        // -----------------------------------------------------
-        // 4. La nueva caja debe existir y estar activa
-        // -----------------------------------------------------
+        // 4. Consultar la nueva caja.
 
         CajaDisponibleDTO cajaNueva = repository
                 .obtenerCajaActiva(dto.getIdCaja())
@@ -402,17 +312,18 @@ public class CajasUsuariosService {
                         )
                 );
 
-        // -----------------------------------------------------
-        // 5. El usuario debe tener acceso a la agencia
-        // -----------------------------------------------------
+        // 5. Validar agencia y tipo de caja.
 
         usuarioSesionService.validarAgencia(
                 cajaNueva.getIdAgencia()
         );
 
-        // -----------------------------------------------------
-        // 6. La nueva caja no puede haber tenido jornada hoy
-        // -----------------------------------------------------
+        validarTipoCajaAutorizado(
+                idUsuario,
+                cajaNueva.getTipoCaja()
+        );
+
+        // 6. Verificar que la nueva caja no haya tenido jornada.
 
         if (repository.existeJornadaCaja(dto.getIdCaja())) {
 
@@ -439,9 +350,7 @@ public class CajasUsuariosService {
             );
         }
 
-        // -----------------------------------------------------
-        // 7. Cambiar la caja de la vinculación actual
-        // -----------------------------------------------------
+        // 7. Cambiar la vinculación.
 
         int actualizados = repository.cambiarCaja(
                 vinculacionActual.getIdCajaUsuario(),
@@ -455,9 +364,7 @@ public class CajasUsuariosService {
             );
         }
 
-        // -----------------------------------------------------
-        // 8. Retornar la misma vinculación con la nueva caja
-        // -----------------------------------------------------
+        // 8. Consultar la vinculación actualizada.
 
         return repository
                 .obtenerPorId(vinculacionActual.getIdCajaUsuario())
@@ -469,17 +376,9 @@ public class CajasUsuariosService {
     }
 
     // =========================================================
-    // VALIDAR QUE UNA OPERACIÓN PERTENEZCA A LA CAJA DEL USUARIO
+    // VALIDAR CAJA DEL USUARIO
     // =========================================================
 
-    /**
-     * Valida que la caja destino de una operación corresponda
-     * a la caja que está operando el usuario autenticado.
-     *
-     * Este método podrá ser utilizado posteriormente por CDAT,
-     * captura de depósitos, recaudos y demás procesos que sean
-     * terminados físicamente en caja.
-     */
     public CajaUsuarioDTO validarCajaUsuario(Long idCaja) {
 
         validarIdCaja(idCaja);
@@ -500,14 +399,6 @@ public class CajasUsuariosService {
     // FINALIZACIÓN POR CIERRE DEFINITIVO
     // =========================================================
 
-    /**
-     * Finaliza la vinculación del usuario autenticado.
-     *
-     * IMPORTANTE:
-     * Este método no debe exponerse como una acción normal de
-     * "desvincular caja". Su uso corresponde al cierre definitivo
-     * de la jornada.
-     */
     @Transactional
     public void finalizarPorCierreDefinitivo() {
 
@@ -535,7 +426,110 @@ public class CajasUsuariosService {
     }
 
     // =========================================================
-    // VALIDACIONES
+    // CONSULTA CENTRALIZADA DE CAJAS DISPONIBLES
+    // =========================================================
+
+    /**
+     * Aplica las mismas reglas de autorización para
+     * la vinculación inicial y el cambio de caja.
+     */
+    private List<CajaDisponibleDTO> consultarCajasDisponibles(
+            Integer idUsuario
+    ) {
+
+        List<Integer> agencias = usuarioSesionService.agencias();
+
+        if (agencias == null || agencias.isEmpty()) {
+            return List.of();
+        }
+
+        List<CajaDisponibleDTO> resultado = new ArrayList<>();
+
+        for (Integer idAgencia : agencias) {
+
+            if (idAgencia == null) {
+                continue;
+            }
+
+            if (!usuarioSesionService.perteneceA(idAgencia)) {
+                continue;
+            }
+
+            for (CajaDisponibleDTO caja :
+                    repository.listarDisponibles(idAgencia)) {
+
+                if (puedeOperarTipoCaja(
+                        idUsuario,
+                        caja.getTipoCaja()
+                )) {
+                    resultado.add(caja);
+                }
+            }
+        }
+
+        return resultado;
+    }
+
+    // =========================================================
+    // AUTORIZACIÓN POR TIPO DE CAJA
+    // =========================================================
+
+    private void validarTipoCajaAutorizado(
+            Integer idUsuario,
+            String tipoCaja
+    ) {
+
+        if (!puedeOperarTipoCaja(idUsuario, tipoCaja)) {
+            throw new SecurityException(
+                    "El usuario no está autorizado para operar una caja de tipo "
+                            + tipoCaja
+                            + "."
+            );
+        }
+    }
+
+    private boolean puedeOperarTipoCaja(
+            Integer idUsuario,
+            String tipoCaja
+    ) {
+
+        if (tipoCaja == null || tipoCaja.isBlank()) {
+            return false;
+        }
+
+        if (!CAJA_OPERATIVA.equalsIgnoreCase(tipoCaja)
+                && !CAJA_CONTROL.equalsIgnoreCase(tipoCaja)) {
+            return false;
+        }
+
+        // ADMIN conserva acceso administrativo total.
+
+        if (usuarioSesionService.tieneAccesoTotal()) {
+            return true;
+        }
+
+        // Las cajas operativas corresponden a CAJERO.
+
+        if (CAJA_OPERATIVA.equalsIgnoreCase(tipoCaja)) {
+            return usuarioRolService.tieneRolVigente(
+                    idUsuario,
+                    ROL_CAJERO
+            );
+        }
+
+        // CONTROL corresponde a los tesoreros.
+
+        return usuarioRolService.tieneRolVigente(
+                idUsuario,
+                ROL_TESORERO_AGENCIA
+        ) || usuarioRolService.tieneRolVigente(
+                idUsuario,
+                ROL_TESORERO_GENERAL
+        );
+    }
+
+    // =========================================================
+    // VALIDACIONES GENERALES
     // =========================================================
 
     private void validarIdCaja(Long idCaja) {

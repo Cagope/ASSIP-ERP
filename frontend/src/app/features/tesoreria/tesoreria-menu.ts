@@ -4,17 +4,17 @@ export const tesoreriaMenu = {
 
   items: [
 
-    // =============================
+    // =========================================================
     // OPERACIÓN
-    // =============================
+    // =========================================================
     {
       label: 'Operación',
       children: [
 
         {
-          label: 'Consignaciones bancarias',
-          route: '/tesoreria/consignaciones-bancarias',
-          permiso: 'TESORERIA_CONSIGNACIONES_BANCARIAS_VIEW'
+          label: 'Movimientos de Fondos',
+          route: '/tesoreria/movimientos-fondos',
+          permiso: 'TESORERIA_MOVIMIENTOS_FONDOS_VIEW'
         }
 
       ]

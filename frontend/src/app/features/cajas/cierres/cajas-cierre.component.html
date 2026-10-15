@@ -938,7 +938,9 @@
     <!-- ARQUEO DE EFECTIVO                                  -->
     <!-- =================================================== -->
 
-    <section class="card">
+    <section
+      class="card"
+      *ngIf="cierre.estado === 'ABIERTA'">
 
       <div class="card-header">
 
@@ -1284,11 +1286,9 @@
       <!-- OBSERVACIÓN                                       -->
       <!-- ------------------------------------------------- -->
 
-      <div class="form-field">
-
-        <label for="observacionCierre">
-          Observación de cierre
-        </label>
+      <div
+        class="form-field"
+        *ngIf="cierre.estado === 'ABIERTA'">
 
 
         <textarea
@@ -1315,31 +1315,28 @@
       <!-- ACCIONES                                          -->
       <!-- ------------------------------------------------- -->
 
-      <div class="actions">
+      <div
+        class="actions"
+        *ngIf="cierre.estado === 'ABIERTA'">
 
         <button
           type="button"
           class="btn btn-secondary"
           (click)="recalcular()"
-          [disabled]="
-            cargando
-            || confirmando
-          ">
+          [disabled]="cargando || confirmando">
           Recalcular
         </button>
-
 
         <button
           type="button"
           class="btn btn-primary"
           (click)="confirmarCierre()"
           [disabled]="
-            cargando
-            || confirmando
-            || cierre.estado !== 'ABIERTA'
-            || cierre.movimientosPendientes > 0
-            || !arqueoCuadrado
-          ">
+      cargando
+      || confirmando
+      || cierre.movimientosPendientes > 0
+      || !arqueoCuadrado
+    ">
 
           {{
           confirmando
@@ -1348,6 +1345,18 @@
           }}
 
         </button>
+
+      </div>
+
+      <!-- MENSAJE DE CIERRE CONFIRMADO -->
+
+      <div
+        *ngIf="cierre.estado === 'CERRADA'"
+        class="alert alert-success">
+
+        El cierre de caja fue realizado correctamente.
+        La provisión se encuentra cerrada y no admite
+        modificaciones.
 
       </div>
 

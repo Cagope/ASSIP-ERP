@@ -10,13 +10,34 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class ConsignacionBancariaRepository {
+public class ConsignacionesBancariasRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    // =========================================================
-    // PARÁMETROS OPERATIVOS DE CAJA
-    // =========================================================
+    public Integer obtenerIdDatosPersonalUsuario(Integer idUsuario) {
+
+        String sql = """
+        SELECT id_datos_personal
+        FROM seguridad.usuarios
+        WHERE id_usuario = ?
+          AND activo = TRUE
+          AND id_datos_personal IS NOT NULL
+        """;
+
+        List<Integer> datos = jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> rs.getInt("id_datos_personal"),
+                idUsuario
+        );
+
+        if (datos.isEmpty()) {
+            throw new IllegalStateException(
+                    "El usuario autenticado no tiene un tercero contable válido."
+            );
+        }
+
+        return datos.get(0);
+    }
 
     public Long obtenerDepartamentoConsignacionesBancarias() {
 
@@ -60,10 +81,6 @@ public class ConsignacionBancariaRepository {
                 : datos.get(0);
     }
 
-    // =========================================================
-    // CUENTAS BANCARIAS
-    // =========================================================
-
     public List<CuentaBancariaConsignacion> listarCuentasBancarias(
             Integer idAgencia
     ) {
@@ -102,7 +119,9 @@ public class ConsignacionBancariaRepository {
                    cba.id_cuenta_contable
 
             WHERE cba.id_agencia = ?
-
+                
+              AND cb.id_agencia_titular = cba.id_agencia
+    
               AND cba.activo = true
               AND cba.permite_consultar = true
               AND cba.permite_consignar = true
@@ -170,7 +189,9 @@ public class ConsignacionBancariaRepository {
 
             WHERE cba.id_cuenta_bancaria = ?
               AND cba.id_agencia = ?
-
+    
+              AND cb.id_agencia_titular = cba.id_agencia
+    
               AND cba.activo = true
               AND cba.permite_consignar = true
 
@@ -199,10 +220,6 @@ public class ConsignacionBancariaRepository {
                 ? null
                 : datos.get(0);
     }
-
-    // =========================================================
-    // CHEQUES DISPONIBLES
-    // =========================================================
 
     public List<ChequeDisponible> listarChequesRecibidos(
             Integer idAgencia
@@ -274,14 +291,6 @@ public class ConsignacionBancariaRepository {
         );
     }
 
-    /**
-     * Bloquea el cheque físico.
-     *
-     * No depende de que la provisión donde ingresó el cheque
-     * continúe abierta.
-     *
-     * El cheque puede haber sido recibido días antes.
-     */
     public ChequeDisponible obtenerChequeConLock(
             Long idChequeRecibido,
             Integer idAgencia
@@ -357,19 +366,6 @@ public class ConsignacionBancariaRepository {
                 : datos.get(0);
     }
 
-    // =========================================================
-    // PROVISIONES DE CAJA PARA LA FECHA DE CONSIGNACIÓN
-    // =========================================================
-
-    /**
-     * Lista las cajas de una agencia que tienen una provisión
-     * creada para la fecha indicada.
-     *
-     * La provisión puede estar ABIERTA o CERRADA.
-     *
-     * Para Tesorería lo importante es que exista la jornada
-     * operativa de Caja para esa fecha.
-     */
     public List<CajaEfectivoDisponible> listarCajasConProvision(
             Integer idAgencia,
             LocalDate fechaContable
@@ -388,7 +384,22 @@ public class ConsignacionBancariaRepository {
                 cc.nombre_cuenta AS nombre_cuenta_caja,
 
                 p.id_provision,
-                p.fecha_contable
+                p.fecha_contable,
+
+                COALESCE(p.efectivo_inicio, 0)
+                + COALESCE((
+                    SELECT SUM(
+                        CASE
+                            WHEN m.naturaleza = 'INGRESO' THEN m.valor
+                            WHEN m.naturaleza = 'EGRESO' THEN -m.valor
+                            ELSE 0
+                        END
+                    )
+                    FROM cajas.movimientos_caja m
+                    WHERE m.id_provision = p.id_provision
+                      AND m.estado = 'REGISTRADO'
+                      AND m.medio_pago = 'EFECTIVO'
+                ), 0) AS efectivo_disponible
 
             FROM cajas.cajas c
 
@@ -396,6 +407,7 @@ public class ConsignacionBancariaRepository {
                 ON p.id_caja =
                    c.id_caja
                AND p.fecha_contable = ?
+               AND p.estado = 'ABIERTA'
 
             INNER JOIN contabilidad.catalogo_cuentas cc
                 ON cc.id_catalogo_cuenta =
@@ -403,6 +415,8 @@ public class ConsignacionBancariaRepository {
 
             WHERE c.id_agencia = ?
               AND c.activa = true
+              AND c.permite_efectivo = true
+              AND c.tipo_caja = 'CONTROL'
 
               AND c.id_catalogo_cuenta_caja IS NOT NULL
 
@@ -422,16 +436,6 @@ public class ConsignacionBancariaRepository {
         );
     }
 
-    /**
-     * Obtiene y bloquea la provisión existente de una caja
-     * para la fecha de la consignación.
-     *
-     * IMPORTANTE:
-     *
-     * No exige estado ABIERTA.
-     *
-     * La provisión solamente debe existir.
-     */
     public CajaEfectivoDisponible obtenerCajaConProvisionConLock(
             Long idCaja,
             Integer idAgencia,
@@ -451,9 +455,24 @@ public class ConsignacionBancariaRepository {
                 cc.nombre_cuenta AS nombre_cuenta_caja,
 
                 p.id_provision,
-                p.fecha_contable
+                p.fecha_contable,
+  
+                COALESCE(p.efectivo_inicio, 0)
+                + COALESCE((
+                    SELECT SUM(
+                        CASE
+                            WHEN m.naturaleza = 'INGRESO' THEN m.valor
+                            WHEN m.naturaleza = 'EGRESO' THEN -m.valor
+                            ELSE 0
+                        END
+                    )
+                    FROM cajas.movimientos_caja m
+                    WHERE m.id_provision = p.id_provision
+                      AND m.estado = 'REGISTRADO'
+                      AND m.medio_pago = 'EFECTIVO'
+                ), 0) AS efectivo_disponible
 
-            FROM cajas.provisiones_diarias p
+                FROM cajas.provisiones_diarias p
 
             INNER JOIN cajas.cajas c
                 ON c.id_caja =
@@ -465,9 +484,12 @@ public class ConsignacionBancariaRepository {
 
             WHERE p.id_caja = ?
               AND p.fecha_contable = ?
+              AND p.estado = 'ABIERTA'
 
               AND c.id_agencia = ?
               AND c.activa = true
+              AND c.permite_efectivo = true
+              AND c.tipo_caja = 'CONTROL'
 
               AND c.id_catalogo_cuenta_caja IS NOT NULL
 
@@ -493,14 +515,43 @@ public class ConsignacionBancariaRepository {
     }
 
     // =========================================================
-    // MOVIMIENTOS FÍSICOS DE CAJA
-    // =========================================================
+// PROVISIÓN ABIERTA PARA SALIDA DE CHEQUES
+// =========================================================
 
-    /**
-     * Registra la salida física del cheque o efectivo.
-     *
-     * La provisión debe existir, pero no se exige que esté ABIERTA.
-     */
+    public Long obtenerProvisionChequeConLock(
+            Long idCaja,
+            Integer idAgencia,
+            LocalDate fechaContable
+    ) {
+
+        String sql = """
+        SELECT p.id_provision
+        FROM cajas.provisiones_diarias p
+        INNER JOIN cajas.cajas c
+            ON c.id_caja = p.id_caja
+        WHERE p.id_caja = ?
+          AND p.fecha_contable = ?
+          AND p.estado = 'ABIERTA'
+          AND c.id_agencia = ?
+          AND c.activa = true
+          AND c.permite_cheques = true
+          AND c.tipo_caja IN ('OPERATIVA', 'CONTROL')
+        FOR UPDATE OF p
+        """;
+
+        List<Long> datos = jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> rs.getLong("id_provision"),
+                idCaja,
+                fechaContable,
+                idAgencia
+        );
+
+        return datos.isEmpty()
+                ? null
+                : datos.get(0);
+    }
+
     public Long insertarMovimientoCaja(
             Long idProvision,
             Long idCaja,
@@ -574,7 +625,8 @@ public class ConsignacionBancariaRepository {
             FROM cajas.provisiones_diarias p
 
             WHERE p.id_provision = ?
-              AND p.id_caja = ?
+             AND p.id_caja = ?
+             AND p.estado = 'ABIERTA'
 
             RETURNING id_movimiento_caja
         """;
@@ -613,10 +665,6 @@ public class ConsignacionBancariaRepository {
         return datos.get(0);
     }
 
-    // =========================================================
-    // ASOCIACIÓN CAJA ↔ CONTABILIDAD
-    // =========================================================
-
     public void asociarComprobanteContable(
             Long idMovimientoCaja,
             String numeroComprobante,
@@ -650,10 +698,6 @@ public class ConsignacionBancariaRepository {
             );
         }
     }
-
-    // =========================================================
-    // ESTADO DEL CHEQUE
-    // =========================================================
 
     public void marcarChequeConsignado(
             Long idChequeRecibido,
@@ -693,10 +737,6 @@ public class ConsignacionBancariaRepository {
             );
         }
     }
-
-    // =========================================================
-    // MAPPERS
-    // =========================================================
 
     private CuentaBancariaConsignacion mapCuentaBancaria(
             java.sql.ResultSet rs
@@ -775,13 +815,11 @@ public class ConsignacionBancariaRepository {
                 rs.getObject(
                         "fecha_contable",
                         LocalDate.class
-                )
+                ),
+
+                nvl(rs.getBigDecimal("efectivo_disponible"))
         );
     }
-
-    // =========================================================
-    // RECORDS
-    // =========================================================
 
     public record CuentaBancariaConsignacion(
             Long idCuentaBancaria,
@@ -839,13 +877,10 @@ public class ConsignacionBancariaRepository {
             String nombreCuentaContableCaja,
 
             Long idProvision,
-            LocalDate fechaContable
+            LocalDate fechaContable,
+            BigDecimal efectivoDisponible
     ) {
     }
-
-    // =========================================================
-    // UTILIDADES
-    // =========================================================
 
     private BigDecimal nvl(
             BigDecimal valor
@@ -855,4 +890,5 @@ public class ConsignacionBancariaRepository {
                 ? valor
                 : BigDecimal.ZERO;
     }
+
 }

@@ -1,0 +1,503 @@
+
+/* =========================================================
+   PÁGINA
+   ========================================================= */
+
+.page {
+  padding: 1rem;
+  color: #1f2937;
+}
+
+/* =========================================================
+   ENCABEZADO
+   ========================================================= */
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+}
+
+.page-subtitle {
+  margin: 0.35rem 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   TARJETAS
+   ========================================================= */
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.65rem;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 4%);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #374151;
+  }
+}
+
+/* =========================================================
+   FORMULARIOS
+   ========================================================= */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+
+  label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    min-width: 0;
+    padding: 0.6rem 0.75rem;
+    font-family: inherit;
+    font-size: 0.88rem;
+    color: #1f2937;
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 0.4rem;
+    box-sizing: border-box;
+    outline: none;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+
+    &:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgb(37 99 235 / 10%);
+    }
+
+    &:disabled {
+      background: #f3f4f6;
+      color: #6b7280;
+      cursor: not-allowed;
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 85px;
+  }
+}
+
+.help-text {
+  margin: 0.9rem 0 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.observations {
+  margin-top: 1.25rem;
+}
+
+/* =========================================================
+   TABLA
+   ========================================================= */
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+
+  thead {
+    background: #f3f4f6;
+  }
+
+  th {
+    padding: 0.8rem 0.75rem;
+    text-align: left;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #4b5563;
+    white-space: nowrap;
+    border-bottom: 1px solid #d1d5db;
+  }
+
+  td {
+    padding: 0.75rem;
+    color: #374151;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  tbody {
+    tr {
+      transition: background-color 0.15s ease;
+
+      &:hover {
+        background: #f9fafb;
+      }
+
+      &:last-child td {
+        border-bottom: none;
+      }
+    }
+  }
+
+  .selected-row {
+    background: #eff6ff;
+
+    &:hover {
+      background: #dbeafe;
+    }
+  }
+
+  .col-check {
+    width: 110px;
+    text-align: center;
+  }
+
+  input[type='checkbox'] {
+    width: 16px;
+    height: 16px;
+    accent-color: #2563eb;
+    cursor: pointer;
+  }
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+.text-right {
+  text-align: right !important;
+}
+
+/* =========================================================
+   RESUMEN
+   ========================================================= */
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 78px;
+  padding: 0.9rem 1rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+
+  strong {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #111827;
+    overflow-wrap: anywhere;
+  }
+}
+
+.summary-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.summary-total {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+
+  strong {
+    color: #1d4ed8;
+    font-size: 1.35rem;
+  }
+}
+
+/* =========================================================
+   BOTONES
+   ========================================================= */
+
+.header-actions,
+.actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.actions {
+  justify-content: flex-end;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.4rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.25;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  color: #ffffff;
+  background: #2563eb;
+  border-color: #2563eb;
+
+  &:hover:not(:disabled) {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+  }
+}
+
+.btn-secondary {
+  color: #374151;
+  background: #ffffff;
+  border-color: #d1d5db;
+
+  &:hover:not(:disabled) {
+    background: #f3f4f6;
+  }
+}
+
+/* =========================================================
+   MENSAJES Y ESTADOS VACÍOS
+   ========================================================= */
+
+.alert {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid;
+  border-radius: 0.5rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.alert-danger {
+  color: #991b1b;
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.alert-success {
+  color: #166534;
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.empty-state {
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: 0.88rem;
+  color: #6b7280;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1100px) {
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 0.65rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+  }
+
+  .card {
+    padding: 0.85rem;
+  }
+
+  .card-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .form-grid,
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .header-actions,
+  .actions {
+    width: 100%;
+  }
+
+  .actions .btn {
+    width: 100%;
+  }
+
+  .data-table {
+    min-width: 520px;
+  }
+}
+
+
+/* =========================================================
+   VISTA PREVIA DEL COMPROBANTE CONTABLE RC
+   ========================================================= */
+
+/* Tabla de movimientos contables */
+
+.card:has(.data-table tfoot) {
+
+  .table-wrap {
+    margin-top: 1rem;
+  }
+
+  .data-table {
+    min-width: 850px;
+
+    th,
+    td {
+      vertical-align: middle;
+    }
+
+    td:nth-child(1) {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    td:nth-child(3) {
+      min-width: 220px;
+      line-height: 1.45;
+    }
+
+    td:nth-child(4),
+    td:nth-child(5) {
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    tfoot {
+      background: #f3f4f6;
+
+      th {
+        padding: 0.9rem 0.75rem;
+        border-top: 2px solid #d1d5db;
+        border-bottom: none;
+        color: #111827;
+        font-size: 0.85rem;
+        font-weight: 700;
+      }
+    }
+  }
+}
+
+/* Concepto contable */
+
+.card:has(.data-table tfoot) {
+
+  .observations textarea {
+    min-height: 75px;
+    resize: none;
+    background: #f9fafb;
+    color: #374151;
+    line-height: 1.5;
+  }
+}
+
+/* Totales y estado del comprobante */
+
+.card:has(.data-table tfoot) {
+
+  .summary-grid {
+    margin-top: 1rem;
+  }
+
+  .summary-item strong {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* =========================================================
+   AJUSTES RESPONSIVE DEL RC
+   ========================================================= */
+
+@media (max-width: 640px) {
+
+  .card:has(.data-table tfoot) {
+
+    .data-table {
+      min-width: 850px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+  }
+}

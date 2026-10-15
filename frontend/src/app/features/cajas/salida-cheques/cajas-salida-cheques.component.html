@@ -1,0 +1,627 @@
+
+<div class="page">
+
+  <!-- =============================================== -->
+  <!-- ENCABEZADO -->
+  <!-- =============================================== -->
+
+  <div class="page-header">
+    <div>
+      <h2>Salida de cheques</h2>
+
+      <p class="page-subtitle">
+        Entrega de cheques recibidos desde la caja operativa
+        vinculada al usuario hacia la caja CONTROL de la agencia.
+      </p>
+    </div>
+  </div>
+
+  <!-- =============================================== -->
+  <!-- MENSAJES -->
+  <!-- =============================================== -->
+
+  <div
+    class="alert alert-danger"
+    *ngIf="mensajeError">
+    {{ mensajeError }}
+  </div>
+
+  <div
+    class="alert alert-success"
+    *ngIf="mensajeExito">
+    {{ mensajeExito }}
+  </div>
+
+  <!-- =============================================== -->
+  <!-- DATOS DE LA ENTREGA -->
+  <!-- =============================================== -->
+
+  <section class="card">
+
+    <div class="card-header">
+      <h3>Datos de la entrega</h3>
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="cargarDatos()"
+        [disabled]="consultando ||
+                    consultandoPreview ||
+                    ejecutando ||
+                    resultado !== null">
+        Actualizar
+      </button>
+    </div>
+
+    <div *ngIf="consultando" class="empty-state">
+      Consultando caja vinculada y cheques disponibles...
+    </div>
+
+    <div
+      *ngIf="!consultando && !vinculacion"
+      class="empty-state">
+      No se encontró una caja vinculada activa para el usuario.
+    </div>
+
+    <ng-container *ngIf="vinculacion as caja">
+
+      <div class="form-grid">
+
+        <div class="form-field">
+          <label>Usuario responsable</label>
+
+          <input
+            type="text"
+            [value]="caja.nombreCompleto || caja.username"
+            disabled>
+        </div>
+
+        <div class="form-field">
+          <label>Agencia</label>
+
+          <input
+            type="text"
+            [value]="caja.idAgencia"
+            disabled>
+        </div>
+
+        <div class="form-field">
+          <label>Caja operativa</label>
+
+          <input
+            type="text"
+            [value]="caja.codigoCaja + ' - ' + caja.descripcionCaja"
+            disabled>
+        </div>
+
+        <div class="form-field">
+          <label>Fecha contable</label>
+
+          <input
+            type="date"
+            [value]="fechaContable"
+            disabled>
+        </div>
+
+        <div class="form-field">
+          <label>Destino</label>
+
+          <input
+            type="text"
+            value="Caja CONTROL de la agencia"
+            disabled>
+        </div>
+
+        <div class="form-field">
+          <label for="numeroDocumento">
+            Documento soporte
+          </label>
+
+          <input
+            id="numeroDocumento"
+            type="text"
+            maxlength="50"
+            [(ngModel)]="numeroDocumento"
+            [disabled]="consultando ||
+                        consultandoPreview ||
+                        ejecutando ||
+                        resultado !== null"
+            placeholder="Opcional">
+        </div>
+
+      </div>
+
+      <p class="help-text">
+        La caja origen se obtiene automáticamente de la vinculación
+        activa del usuario. La caja CONTROL se determina en el backend.
+        Ambas cajas deben tener provisión abierta para la jornada contable.
+      </p>
+
+    </ng-container>
+
+  </section>
+
+  <!-- =============================================== -->
+  <!-- CHEQUES DISPONIBLES -->
+  <!-- =============================================== -->
+
+  <section class="card">
+
+    <div class="card-header">
+      <h3>Cheques disponibles para entrega</h3>
+
+      <div class="header-actions">
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="seleccionarTodos()"
+          [disabled]="consultando ||
+                      consultandoPreview ||
+                      !vinculacion ||
+                      chequesDisponibles.length === 0 ||
+                      ejecutando ||
+                      resultado !== null">
+          Seleccionar todos
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="desmarcarTodos()"
+          [disabled]="cantidadSeleccionados === 0 ||
+                      consultando ||
+                      consultandoPreview ||
+                      ejecutando ||
+                      resultado !== null">
+          Desmarcar
+        </button>
+
+      </div>
+    </div>
+
+    <div
+      *ngIf="consultando"
+      class="empty-state">
+      Consultando cheques disponibles...
+    </div>
+
+    <div
+      *ngIf="!consultando && !vinculacion"
+      class="empty-state">
+      No hay una caja vinculada disponible para consultar cheques.
+    </div>
+
+    <div
+      *ngIf="!consultando &&
+             vinculacion &&
+             chequesDisponibles.length === 0"
+      class="empty-state">
+      La caja vinculada no tiene cheques disponibles para entrega.
+    </div>
+
+    <div
+      class="table-wrap"
+      *ngIf="!consultando &&
+             vinculacion &&
+             chequesDisponibles.length > 0">
+
+      <table class="data-table">
+
+        <thead>
+        <tr>
+          <th class="col-check">Seleccionar</th>
+          <th>Caja</th>
+          <th>Número de cheque</th>
+          <th class="text-right">Valor</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr
+          *ngFor="let cheque of chequesDisponibles"
+          [class.selected-row]="chequeSeleccionado(
+              cheque.idChequeRecibido
+            )">
+
+          <td class="text-center">
+            <input
+              type="checkbox"
+              [checked]="chequeSeleccionado(
+                  cheque.idChequeRecibido
+                )"
+              (change)="cambiarCheque(
+                  cheque.idChequeRecibido,
+                  $any($event.target).checked
+                )"
+              [disabled]="consultando ||
+                            consultandoPreview ||
+                            ejecutando ||
+                            resultado !== null">
+          </td>
+
+          <td>
+            {{ vinculacion.codigoCaja }}
+          </td>
+
+          <td>
+            {{ cheque.numeroCheque }}
+          </td>
+
+          <td class="text-right">
+            {{ formatearMoneda(cheque.valorCheque) }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+  <!-- =============================================== -->
+  <!-- RESUMEN DE ENTREGA -->
+  <!-- =============================================== -->
+
+  <section class="card">
+
+    <div class="card-header">
+      <h3>Resumen de la entrega</h3>
+    </div>
+
+    <div class="summary-grid">
+
+      <div class="summary-item">
+        <span class="summary-label">
+          Cheques disponibles
+        </span>
+
+        <strong>
+          {{ chequesDisponibles.length }}
+        </strong>
+      </div>
+
+      <div class="summary-item">
+        <span class="summary-label">
+          Cheques seleccionados
+        </span>
+
+        <strong>
+          {{ cantidadSeleccionados }}
+        </strong>
+      </div>
+
+      <div class="summary-item summary-total">
+        <span class="summary-label">
+          Valor total a entregar
+        </span>
+
+        <strong>
+          {{ formatearMoneda(valorTotalSeleccionado) }}
+        </strong>
+      </div>
+
+    </div>
+
+    <div
+      class="form-field observations"
+      *ngIf="resultado === null">
+
+      <label for="observacion">Observaciones</label>
+
+      <textarea
+        id="observacion"
+        rows="3"
+        maxlength="500"
+        [(ngModel)]="observacion"
+        [disabled]="consultando ||
+                    consultandoPreview ||
+                    ejecutando ||
+                    !vinculacion"
+        placeholder="Observaciones de la entrega de cheques">
+      </textarea>
+
+    </div>
+
+    <div
+      class="actions"
+      *ngIf="resultado === null">
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="consultarPreview()"
+        [disabled]="!puedeConsultarPreview">
+
+        {{
+        consultandoPreview
+        ? 'Consultando comprobante...'
+        : 'Consultar vista previa RC'
+        }}
+
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="ejecutar()"
+        [disabled]="!puedeEjecutar">
+
+        {{
+        ejecutando
+        ? 'Registrando entrega...'
+        : 'Confirmar entrega de cheques'
+        }}
+
+      </button>
+
+    </div>
+
+    <p
+      class="help-text"
+      *ngIf="resultado === null">
+
+      Antes de confirmar la entrega, consulte la vista previa
+      del comprobante RC y verifique que los movimientos
+      contables estén cuadrados.
+
+    </p>
+
+  </section>
+
+  <!-- =============================================== -->
+  <!-- VISTA PREVIA CONTABLE RC -->
+  <!-- =============================================== -->
+
+  <section
+    class="card"
+    *ngIf="resultado === null && previewVigente as rc">
+
+    <div class="card-header">
+      <h3>Vista previa del comprobante RC</h3>
+    </div>
+
+    <div class="summary-grid">
+
+      <div class="summary-item">
+        <span class="summary-label">
+          Tipo de comprobante
+        </span>
+
+        <strong>
+          {{ rc.tipoComprobante }}
+        </strong>
+      </div>
+
+      <div class="summary-item">
+        <span class="summary-label">
+          Fecha contable
+        </span>
+
+        <strong>
+          {{ rc.fechaContable }}
+        </strong>
+      </div>
+
+      <div class="summary-item">
+        <span class="summary-label">
+          Cheques incluidos
+        </span>
+
+        <strong>
+          {{ rc.cantidadCheques }}
+        </strong>
+      </div>
+
+      <div class="summary-item summary-total">
+        <span class="summary-label">
+          Valor de la entrega
+        </span>
+
+        <strong>
+          {{ formatearMoneda(rc.valorTotal) }}
+        </strong>
+      </div>
+
+    </div>
+
+    <div class="form-field observations">
+      <label>Concepto del comprobante</label>
+
+      <textarea
+        rows="3"
+        [value]="rc.conceptoComprobante"
+        disabled>
+      </textarea>
+    </div>
+
+    <div class="table-wrap">
+
+      <table class="data-table">
+
+        <thead>
+        <tr>
+          <th>Código cuenta</th>
+          <th>Nombre cuenta</th>
+          <th>Detalle</th>
+          <th class="text-right">Débito</th>
+          <th class="text-right">Crédito</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let movimiento of rc.movimientos">
+
+          <td>
+            {{ movimiento.codigoCuenta }}
+          </td>
+
+          <td>
+            {{ movimiento.nombreCuenta }}
+          </td>
+
+          <td>
+            {{ movimiento.detalleMovimiento }}
+          </td>
+
+          <td class="text-right">
+            {{ formatearMoneda(movimiento.valorDebito || 0) }}
+          </td>
+
+          <td class="text-right">
+            {{ formatearMoneda(movimiento.valorCredito || 0) }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+        <tfoot>
+        <tr>
+          <th colspan="3">Totales del comprobante</th>
+
+          <th class="text-right">
+            {{ formatearMoneda(rc.totalDebito) }}
+          </th>
+
+          <th class="text-right">
+            {{ formatearMoneda(rc.totalCredito) }}
+          </th>
+        </tr>
+        </tfoot>
+
+      </table>
+
+    </div>
+
+    <div class="summary-grid">
+
+      <div class="summary-item">
+        <span class="summary-label">
+          Diferencia contable
+        </span>
+
+        <strong>
+          {{ formatearMoneda(rc.diferencia) }}
+        </strong>
+      </div>
+
+      <div class="summary-item">
+        <span class="summary-label">
+          Estado del comprobante
+        </span>
+
+        <strong>
+          {{
+          rc.cuadrado
+          ? 'CUADRADO'
+          : 'DESCUADRADO'
+          }}
+        </strong>
+      </div>
+
+    </div>
+
+    <p class="help-text">
+      Esta es una vista previa. El número definitivo del
+      comprobante RC se asignará al confirmar la entrega.
+      La consulta no registra movimientos ni modifica
+      la custodia de los cheques.
+    </p>
+
+  </section>
+
+  <!-- =============================================== -->
+  <!-- RESULTADO DEL TRASLADO -->
+  <!-- =============================================== -->
+
+  <section
+    class="card"
+    *ngIf="resultado as res">
+
+    <div class="card-header">
+      <h3>Entrega registrada</h3>
+    </div>
+
+    <div class="summary-grid">
+
+      <div class="summary-item">
+        <span class="summary-label">
+          Caja origen
+        </span>
+
+        <strong>
+          {{ vinculacion?.descripcionCaja || res.idCajaOrigen }}
+        </strong>
+      </div>
+
+      <div class="summary-item">
+        <span class="summary-label">
+          Caja destino
+        </span>
+
+        <strong>
+          CONTROL
+        </strong>
+      </div>
+
+      <div class="summary-item">
+        <span class="summary-label">
+          Fecha contable
+        </span>
+
+        <strong>
+          {{ res.fechaContable }}
+        </strong>
+      </div>
+
+      <div class="summary-item">
+        <span class="summary-label">
+          Cantidad de cheques
+        </span>
+
+        <strong>
+          {{ res.cantidadCheques }}
+        </strong>
+      </div>
+
+      <div class="summary-item">
+        <span class="summary-label">
+          Comprobante contable
+        </span>
+
+        <strong>
+          {{ res.tipoComprobante }}
+          {{ res.numeroComprobante }}
+        </strong>
+      </div>
+
+      <div class="summary-item summary-total">
+        <span class="summary-label">
+          Valor entregado
+        </span>
+
+        <strong>
+          {{ formatearMoneda(res.valorTotal) }}
+        </strong>
+      </div>
+
+    </div>
+
+    <div class="actions">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="nuevaOperacion()">
+        Nueva entrega
+      </button>
+    </div>
+
+  </section>
+
+</div>

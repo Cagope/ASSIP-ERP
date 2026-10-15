@@ -12,6 +12,7 @@ public class CajaDisponibleDTO {
 
     private String codigoCaja;
     private String descripcionCaja;
+    private String tipoCaja;
 
     private Boolean permiteEfectivo;
     private Boolean permiteCheques;

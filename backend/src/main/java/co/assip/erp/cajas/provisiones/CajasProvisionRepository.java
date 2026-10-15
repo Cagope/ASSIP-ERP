@@ -520,8 +520,9 @@ public class CajasProvisionRepository {
         );
     }
 
-    public void cerrar(
+    public int cerrar(
             Long idProvision,
+            Long idCaja,
             BigDecimal efectivoFin,
             BigDecimal chequesFin,
             String observacion,
@@ -529,43 +530,39 @@ public class CajasProvisionRepository {
     ) {
 
         String sql = """
-            UPDATE cajas.provisiones_diarias
-            SET
-                estado = 'CERRADA',
-                efectivo_fin = :efectivoFin,
-                cheques_fin = :chequesFin,
-                observacion_cierre = :observacion,
-                fk_usuario_cierre = :idUsuario,
-                fecha_cierre = CURRENT_TIMESTAMP,
-                fk_seguridad_edicion = :idUsuario,
-                fecha_edicion = CURRENT_TIMESTAMP
-            WHERE id_provision = :idProvision
-              AND estado = 'ABIERTA'
-            """;
+        UPDATE cajas.provisiones_diarias
+        SET
+            estado = 'CERRADA',
+            efectivo_fin = :efectivoFin,
+            cheques_fin = :chequesFin,
+            observacion_cierre = :observacion,
+            fk_usuario_cierre = :idUsuario,
+            fecha_cierre = CURRENT_TIMESTAMP,
+            fk_seguridad_edicion = :idUsuario,
+            fecha_edicion = CURRENT_TIMESTAMP
+        WHERE id_provision = :idProvision
+          AND id_caja = :idCaja
+          AND fecha_contable = CURRENT_DATE
+          AND estado = 'ABIERTA'
+          AND EXISTS (
+              SELECT 1
+              FROM cajas.cajas_usuarios cu
+              WHERE cu.id_caja = :idCaja
+                AND cu.id_usuario = :idUsuario
+                AND cu.fecha_jornada = CURRENT_DATE
+                AND cu.estado = 'ACTIVA'
+          )
+        """;
 
-        jdbc.update(
+        return jdbc.update(
                 sql,
                 new MapSqlParameterSource()
-                        .addValue(
-                                "idProvision",
-                                idProvision
-                        )
-                        .addValue(
-                                "efectivoFin",
-                                efectivoFin
-                        )
-                        .addValue(
-                                "chequesFin",
-                                chequesFin
-                        )
-                        .addValue(
-                                "observacion",
-                                observacion
-                        )
-                        .addValue(
-                                "idUsuario",
-                                idUsuario
-                        )
+                        .addValue("idProvision", idProvision)
+                        .addValue("idCaja", idCaja)
+                        .addValue("efectivoFin", efectivoFin)
+                        .addValue("chequesFin", chequesFin)
+                        .addValue("observacion", observacion)
+                        .addValue("idUsuario", idUsuario)
         );
     }
 
@@ -636,20 +633,21 @@ public class CajasProvisionRepository {
     ) {
 
         String sql = """
-            SELECT
-                id_caja,
-                id_agencia,
-                codigo_caja,
-                descripcion,
-                permite_efectivo,
-                permite_cheques,
-                permite_tarjetas,
-                permite_transferencias
-            FROM cajas.cajas
-            WHERE id_agencia = :idAgencia
-              AND activa = TRUE
-            ORDER BY codigo_caja
-            """;
+        SELECT
+            id_caja,
+            id_agencia,
+            codigo_caja,
+            descripcion,
+            tipo_caja,
+            permite_efectivo,
+            permite_cheques,
+            permite_tarjetas,
+            permite_transferencias
+        FROM cajas.cajas
+        WHERE id_agencia = :idAgencia
+          AND activa = TRUE
+        ORDER BY codigo_caja
+        """;
 
         return jdbc.query(
                 sql,
@@ -658,12 +656,9 @@ public class CajasProvisionRepository {
                 (rs, rowNum) -> CajaDisponibleDTO.builder()
                         .idCaja(rs.getLong("id_caja"))
                         .idAgencia(rs.getInt("id_agencia"))
-                        .codigoCaja(
-                                rs.getString("codigo_caja")
-                        )
-                        .descripcionCaja(
-                                rs.getString("descripcion")
-                        )
+                        .codigoCaja(rs.getString("codigo_caja"))
+                        .descripcionCaja(rs.getString("descripcion"))
+                        .tipoCaja(rs.getString("tipo_caja"))
                         .permiteEfectivo(
                                 rs.getBoolean("permite_efectivo")
                         )
@@ -674,9 +669,7 @@ public class CajasProvisionRepository {
                                 rs.getBoolean("permite_tarjetas")
                         )
                         .permiteTransferencias(
-                                rs.getBoolean(
-                                        "permite_transferencias"
-                                )
+                                rs.getBoolean("permite_transferencias")
                         )
                         .build()
         );

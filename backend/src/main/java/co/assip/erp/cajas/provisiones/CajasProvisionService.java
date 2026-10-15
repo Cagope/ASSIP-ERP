@@ -106,26 +106,20 @@ public class CajasProvisionService {
     }
 
     /**
-     * Abre la provisión de la caja vinculada al usuario.
+     * Abre la provisión diaria de la caja vinculada al usuario.
      *
-     * El frontend no determina la fecha contable.
-     */
-    /**
-     * Abre la provisión de la caja vinculada al usuario.
+     * OPERATIVA:
+     * - Crea la provisión diaria.
+     * - Registra el traslado inicial a ventanilla, cuando corresponde.
      *
-     * El frontend no determina la fecha contable.
+     * CONTROL:
+     * - Crea la provisión diaria.
+     * - No registra movimientos iniciales de ventanilla.
      *
-     * Para cajas OPERATIVAS:
-     * - crea la provisión diaria;
-     * - registra el valor inicial llevado a ventanilla.
-     *
-     * La apertura y el movimiento inicial de ventanilla
-     * quedan dentro de la misma transacción.
+     * La fecha de jornada es determinada por PostgreSQL.
      */
     @Transactional
-    public Long abrirCaja(
-            CajasProvisionSaveDTO dto
-    ) {
+    public Long abrirCaja(CajasProvisionSaveDTO dto) {
 
         if (dto == null) {
             throw new RuntimeException(
@@ -136,13 +130,8 @@ public class CajasProvisionService {
         CajaUsuarioDTO vinculacion =
                 cajasUsuariosService.obtenerActivaUsuario();
 
-        Long idCaja =
-                vinculacion.getIdCaja();
+        Long idCaja = vinculacion.getIdCaja();
 
-        /*
-         * Evita que el cliente intente abrir una caja distinta
-         * de la vinculada al usuario.
-         */
         if (dto.getIdCaja() == null
                 || !dto.getIdCaja().equals(idCaja)) {
 
@@ -157,97 +146,103 @@ public class CajasProvisionService {
         );
 
         /*
-         * Bloqueo pesimista de la caja.
-         *
-         * Dos solicitudes concurrentes para la misma caja
-         * no pueden comprobar y crear la provisión al mismo tiempo.
+         * Evita aperturas concurrentes sobre la misma caja.
          */
         repository.bloquearCajaParaApertura(idCaja);
 
-        /*
-         * La preparación se consulta después de adquirir el bloqueo.
-         * Así conocemos el estado definitivo de la jornada antes
-         * de intentar crear una nueva provisión.
-         */
-        CajaAperturaDTO apertura =
-                repository
-                        .prepararApertura(idCaja)
-                        .orElseThrow(() ->
-                                new RuntimeException(
-                                        "No se encontró la caja vinculada al usuario."
-                                )
-                        );
+        CajaAperturaDTO apertura = repository
+                .prepararApertura(idCaja)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "No se encontró la caja vinculada al usuario."
+                        )
+                );
 
-        /*
-         * Este flujo corresponde exclusivamente a cajas
-         * operativas con ventanilla.
-         */
-        if (!"OPERATIVA".equalsIgnoreCase(
-                apertura.getTipoCaja()
-        )) {
+        String tipoCaja = apertura.getTipoCaja();
+
+        boolean esOperativa =
+                "OPERATIVA".equalsIgnoreCase(tipoCaja);
+
+        boolean esControl =
+                "CONTROL".equalsIgnoreCase(tipoCaja);
+
+        if (!esOperativa && !esControl) {
             throw new RuntimeException(
-                    "La caja vinculada no es una caja operativa."
+                    "El tipo de caja no permite apertura de jornada."
             );
         }
 
         /*
-         * Ya existe provisión para la jornada.
+         * Si la provisión ya existe, no se vuelve a crear.
          */
-        if (Boolean.TRUE.equals(
-                apertura.getTieneProvision()
-        )) {
+        if (Boolean.TRUE.equals(apertura.getTieneProvision())) {
 
-            if ("CERRADA".equalsIgnoreCase(
-                    apertura.getEstado()
-            )) {
+            if ("CERRADA".equalsIgnoreCase(apertura.getEstado())) {
                 throw new RuntimeException(
                         "La caja ya fue cerrada para la jornada actual."
                 );
             }
 
-            if (!"ABIERTA".equalsIgnoreCase(
-                    apertura.getEstado()
-            )) {
+            if (!"ABIERTA".equalsIgnoreCase(apertura.getEstado())) {
                 throw new RuntimeException(
                         "La provisión de caja se encuentra en un estado no válido."
                 );
             }
 
-            /*
-             * Apertura idempotente.
-             *
-             * Si la caja ya estaba abierta, no volvemos a crear
-             * provisión ni movimiento inicial de ventanilla.
-             */
             return apertura.getIdProvision();
         }
 
+        /*
+         * El valor inicial de ventanilla solamente aplica
+         * para cajas OPERATIVAS.
+         */
         BigDecimal valorInicialVentanilla =
                 dto.getValorInicialVentanilla();
 
-        validarValorInicialVentanilla(
-                valorInicialVentanilla,
-                dto.getEfectivoInicio()
-        );
+        if (esOperativa) {
+
+            validarValorInicialVentanilla(
+                    valorInicialVentanilla,
+                    dto.getEfectivoInicio()
+            );
+
+        } else {
+
+            /*
+             * CONTROL no maneja apertura de ventanilla.
+             * Rechazamos cualquier valor diferente de cero.
+             */
+            if (valorInicialVentanilla != null
+                    && valorInicialVentanilla.compareTo(
+                    BigDecimal.ZERO
+            ) != 0) {
+
+                throw new RuntimeException(
+                        "La caja CONTROL no permite asignar un valor inicial a ventanilla."
+                );
+            }
+        }
 
         Integer idUsuario =
                 usuarioSesionService.idUsuario();
 
-        Long idProvision =
-                repository.crearApertura(
-                        idCaja,
-                        dto.getEfectivoInicio(),
-                        dto.getChequesInicio(),
-                        idUsuario
-                );
+        /*
+         * Ambas cajas utilizan la misma tabla
+         * de provisiones diarias.
+         */
+        Long idProvision = repository.crearApertura(
+                idCaja,
+                dto.getEfectivoInicio(),
+                dto.getChequesInicio(),
+                idUsuario
+        );
 
         /*
-         * El traslado inicial Caja -> Ventanilla solamente
-         * se registra cuando existe un valor real a trasladar.
-         *
-         * No genera movimiento de caja ni contabilización.
+         * Solo OPERATIVA registra el movimiento
+         * inicial hacia ventanilla.
          */
-        if (valorInicialVentanilla.compareTo(
+        if (esOperativa
+                && valorInicialVentanilla.compareTo(
                 BigDecimal.ZERO
         ) > 0) {
 
@@ -262,46 +257,50 @@ public class CajasProvisionService {
     }
 
     @Transactional
-    public void cerrar(
-            CajasProvisionCerrarDTO dto
-    ) {
+    public void cerrar(CajasProvisionCerrarDTO dto) {
 
-        if (dto == null
-                || dto.getIdProvision() == null) {
-
+        if (dto == null || dto.getIdProvision() == null) {
             throw new RuntimeException(
                     "Debe indicar la provisión a cerrar."
             );
         }
 
         if (dto.getEfectivoFin() == null
-                || dto.getEfectivoFin()
-                .compareTo(BigDecimal.ZERO) < 0) {
-
+                || dto.getEfectivoFin().compareTo(BigDecimal.ZERO) < 0) {
             throw new RuntimeException(
                     "El efectivo final no puede ser negativo."
             );
         }
 
         if (dto.getChequesFin() == null
-                || dto.getChequesFin()
-                .compareTo(BigDecimal.ZERO) < 0) {
-
+                || dto.getChequesFin().compareTo(BigDecimal.ZERO) < 0) {
             throw new RuntimeException(
                     "El valor final de cheques no puede ser negativo."
             );
         }
 
-        Integer idUsuario =
-                usuarioSesionService.idUsuario();
+        CajaUsuarioDTO vinculacion =
+                cajasUsuariosService.obtenerActivaUsuario();
 
-        repository.cerrar(
+        Integer idUsuario = usuarioSesionService.idUsuario();
+
+        int actualizados = repository.cerrar(
                 dto.getIdProvision(),
+                vinculacion.getIdCaja(),
                 dto.getEfectivoFin(),
                 dto.getChequesFin(),
                 dto.getObservacion(),
                 idUsuario
         );
+
+        if (actualizados != 1) {
+            throw new RuntimeException(
+                    "No fue posible cerrar la provisión. "
+                            + "Verifique que corresponda a la caja vinculada, "
+                            + "que pertenezca a la jornada actual "
+                            + "y que se encuentre abierta."
+            );
+        }
     }
 
     public List<CajasProvisionListDTO> listarCajasAbiertas(

@@ -6,9 +6,10 @@ import co.assip.erp.contabilidad.auxiliares_contables.dto.MovimientoContablePrev
 import co.assip.erp.contabilidad.consecutivos_comprobantes.ConsecutivosComprobantesService;
 import co.assip.erp.contabilidad.origen_comprobantes.dto.OrigenComprobanteDTO;
 import co.assip.erp.seguridad.sesion.UsuarioSesionService;
-import co.assip.erp.tesoreria.consignaciones_bancarias.dto.ConsignacionBancariaPreviewResponse;
-import co.assip.erp.tesoreria.consignaciones_bancarias.dto.ConsignacionBancariaRequest;
-import co.assip.erp.tesoreria.consignaciones_bancarias.dto.ConsignacionBancariaResponse;
+import co.assip.erp.tesoreria.movimientos_fondos.dto.MovimientoFondoPreviewDTO;
+import co.assip.erp.tesoreria.consignaciones_bancarias.ConsignacionesBancariasRepository;
+import co.assip.erp.tesoreria.movimientos_fondos.dto.MovimientoFondoRequestDTO;
+import co.assip.erp.tesoreria.movimientos_fondos.dto.MovimientoFondoResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,14 +17,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class ConsignacionBancariaService {
+public class ConsignacionesBancariasService {
 
     private static final String TIPO_COMPROBANTE = "CE";
 
@@ -33,7 +33,7 @@ public class ConsignacionBancariaService {
     private static final String MEDIO_CHEQUE = "CHEQUE";
     private static final String MEDIO_EFECTIVO = "EFECTIVO";
 
-    private final ConsignacionBancariaRepository repository;
+    private final ConsignacionesBancariasRepository repository;
     private final ConsecutivosComprobantesService consecutivosComprobantesService;
     private final ContabilidadRegistroService contabilidadRegistroService;
     private final UsuarioSesionService usuarioSesionService;
@@ -42,7 +42,7 @@ public class ConsignacionBancariaService {
     // CONSULTAS
     // =========================================================
 
-    public List<ConsignacionBancariaRepository.CuentaBancariaConsignacion>
+    public List<ConsignacionesBancariasRepository.CuentaBancariaConsignacion>
     listarCuentasBancarias(
             Integer idAgencia
     ) {
@@ -54,7 +54,7 @@ public class ConsignacionBancariaService {
         );
     }
 
-    public List<ConsignacionBancariaRepository.ChequeDisponible>
+    public List<ConsignacionesBancariasRepository.ChequeDisponible>
     listarChequesRecibidos(
             Integer idAgencia
     ) {
@@ -66,7 +66,7 @@ public class ConsignacionBancariaService {
         );
     }
 
-    public List<ConsignacionBancariaRepository.CajaEfectivoDisponible>
+    public List<ConsignacionesBancariasRepository.CajaEfectivoDisponible>
     listarCajasConProvision(
             Integer idAgencia,
             LocalDate fechaConsignacion
@@ -86,13 +86,17 @@ public class ConsignacionBancariaService {
         );
     }
 
+
+
+
+
     // =========================================================
     // PREVIEW CONTABLE
     // =========================================================
 
     @Transactional(readOnly = true)
-    public ConsignacionBancariaPreviewResponse preview(
-            ConsignacionBancariaRequest request
+    public MovimientoFondoPreviewDTO previewConsignacion(
+            MovimientoFondoRequestDTO request
     ) {
 
         validarRequest(request);
@@ -101,23 +105,23 @@ public class ConsignacionBancariaService {
                 request.getIdAgencia();
 
         LocalDate fechaConsignacion =
-                request.getFechaConsignacion();
+                request.getFechaMovimiento();
 
         String numeroConsignacion =
-                trim(request.getNumeroConsignacion());
+                trim(request.getNumeroSoporte());
 
         // =====================================================
         // CUENTA BANCARIA DESTINO
         // =====================================================
 
-        ConsignacionBancariaRepository.CuentaBancariaConsignacion
+        ConsignacionesBancariasRepository.CuentaBancariaConsignacion
                 cuentaBancaria =
                 repository.listarCuentasBancarias(idAgencia)
                         .stream()
                         .filter(
                                 cuenta ->
                                         cuenta.idCuentaBancaria()
-                                                .equals(request.getIdCuentaBancaria())
+                                                .equals(request.getIdCuentaBancariaDestino())
                         )
                         .findFirst()
                         .orElseThrow(
@@ -136,11 +140,11 @@ public class ConsignacionBancariaService {
                         request.getIdsCheques()
                 );
 
-        Map<Long, ConsignacionBancariaRepository.ChequeDisponible>
+        Map<Long, ConsignacionesBancariasRepository.ChequeDisponible>
                 chequesDisponibles =
                 new HashMap<>();
 
-        for (ConsignacionBancariaRepository.ChequeDisponible cheque
+        for (ConsignacionesBancariasRepository.ChequeDisponible cheque
                 : repository.listarChequesRecibidos(idAgencia)) {
 
             chequesDisponibles.put(
@@ -149,7 +153,7 @@ public class ConsignacionBancariaService {
             );
         }
 
-        List<ConsignacionBancariaRepository.ChequeDisponible>
+        List<ConsignacionesBancariasRepository.ChequeDisponible>
                 cheques =
                 new ArrayList<>();
 
@@ -158,7 +162,7 @@ public class ConsignacionBancariaService {
 
         for (Long idCheque : idsCheques) {
 
-            ConsignacionBancariaRepository.ChequeDisponible cheque =
+            ConsignacionesBancariasRepository.ChequeDisponible cheque =
                     chequesDisponibles.get(idCheque);
 
             if (cheque == null) {
@@ -197,7 +201,7 @@ public class ConsignacionBancariaService {
         // EFECTIVO
         // =====================================================
 
-        List<ConsignacionBancariaRequest.EfectivoCajaRequest>
+        List<MovimientoFondoRequestDTO.EfectivoCajaDTO>
                 efectivos =
                 normalizarEfectivos(
                         request.getEfectivos()
@@ -226,13 +230,13 @@ public class ConsignacionBancariaService {
         // CAJAS PARA EFECTIVO
         // =====================================================
 
-        Map<Long, ConsignacionBancariaRepository.CajaEfectivoDisponible>
+        Map<Long, ConsignacionesBancariasRepository.CajaEfectivoDisponible>
                 cajasEfectivo =
                 new HashMap<>();
 
         if (!efectivos.isEmpty()) {
 
-            for (ConsignacionBancariaRepository.CajaEfectivoDisponible caja
+            for (ConsignacionesBancariasRepository.CajaEfectivoDisponible caja
                     : repository.listarCajasConProvision(
                     idAgencia,
                     fechaConsignacion
@@ -244,10 +248,10 @@ public class ConsignacionBancariaService {
                 );
             }
 
-            for (ConsignacionBancariaRequest.EfectivoCajaRequest efectivo
+            for (MovimientoFondoRequestDTO.EfectivoCajaDTO efectivo
                     : efectivos) {
 
-                ConsignacionBancariaRepository.CajaEfectivoDisponible caja =
+                ConsignacionesBancariasRepository.CajaEfectivoDisponible caja =
                         cajasEfectivo.get(
                                 efectivo.getIdCaja()
                         );
@@ -256,7 +260,7 @@ public class ConsignacionBancariaService {
                     throw new IllegalStateException(
                             "La caja "
                                     + efectivo.getIdCaja()
-                                    + " no tiene una provisión creada para la fecha "
+                                    + " no tiene provisión ABIERTA para la fecha "
                                     + fechaConsignacion
                                     + "."
                     );
@@ -267,6 +271,12 @@ public class ConsignacionBancariaService {
                             "No se pueden mezclar cajas de diferentes agencias."
                     );
                 }
+
+                validarEfectivoDisponible(
+                        caja,
+                        efectivo.getValor()
+                );
+
             }
         }
 
@@ -310,7 +320,7 @@ public class ConsignacionBancariaService {
 
         // Crédito por cada cheque
 
-        for (ConsignacionBancariaRepository.ChequeDisponible cheque
+        for (ConsignacionesBancariasRepository.ChequeDisponible cheque
                 : cheques) {
 
             movimientos.add(
@@ -336,10 +346,10 @@ public class ConsignacionBancariaService {
 
         // Crédito por efectivo
 
-        for (ConsignacionBancariaRequest.EfectivoCajaRequest efectivo
+        for (MovimientoFondoRequestDTO.EfectivoCajaDTO efectivo
                 : efectivos) {
 
-            ConsignacionBancariaRepository.CajaEfectivoDisponible caja =
+            ConsignacionesBancariasRepository.CajaEfectivoDisponible caja =
                     cajasEfectivo.get(
                             efectivo.getIdCaja()
                     );
@@ -386,7 +396,17 @@ public class ConsignacionBancariaService {
         BigDecimal diferencia =
                 totalDebito.subtract(totalCredito);
 
-        return ConsignacionBancariaPreviewResponse.builder()
+        return MovimientoFondoPreviewDTO.builder()
+                .tipoMovimiento(request.getTipoMovimiento())
+                .modalidadTrasladoCaja(request.getModalidadTrasladoCaja())
+                .idAgencia(request.getIdAgencia())
+                .fechaMovimiento(request.getFechaMovimiento())
+                .numeroSoporte(request.getNumeroSoporte())
+                .idCuentaBancariaOrigen(request.getIdCuentaBancariaOrigen())
+                .idCuentaBancariaDestino(request.getIdCuentaBancariaDestino())
+                .idCajaOrigen(request.getIdCajaOrigen())
+                .idCajaDestino(request.getIdCajaDestino())
+                .tipoComprobante(TIPO_COMPROBANTE)
                 .movimientos(movimientos)
                 .totalDebito(totalDebito)
                 .totalCredito(totalCredito)
@@ -406,8 +426,8 @@ public class ConsignacionBancariaService {
     // =========================================================
 
     @Transactional
-    public ConsignacionBancariaResponse aplicar(
-            ConsignacionBancariaRequest request
+    public MovimientoFondoResponseDTO aplicarConsignacion(
+            MovimientoFondoRequestDTO request
     ) {
 
         validarRequest(request);
@@ -415,14 +435,17 @@ public class ConsignacionBancariaService {
         Integer idUsuario =
                 usuarioSesionService.idUsuario();
 
+        Integer idDatosPersonal =
+                repository.obtenerIdDatosPersonalUsuario(idUsuario);
+
         Integer idAgencia =
                 request.getIdAgencia();
 
         LocalDate fechaConsignacion =
-                request.getFechaConsignacion();
+                request.getFechaMovimiento();
 
         String numeroConsignacion =
-                trim(request.getNumeroConsignacion());
+                trim(request.getNumeroSoporte());
 
         // =====================================================
         // PARÁMETROS DE CAJA
@@ -452,10 +475,10 @@ public class ConsignacionBancariaService {
         // CUENTA BANCARIA DESTINO
         // =====================================================
 
-        ConsignacionBancariaRepository.CuentaBancariaConsignacion
+        ConsignacionesBancariasRepository.CuentaBancariaConsignacion
                 cuentaBancaria =
                 repository.obtenerCuentaBancariaConLock(
-                        request.getIdCuentaBancaria(),
+                        request.getIdCuentaBancariaDestino(),
                         idAgencia
                 );
 
@@ -477,7 +500,7 @@ public class ConsignacionBancariaService {
                         request.getIdsCheques()
                 );
 
-        List<ConsignacionBancariaRepository.ChequeDisponible>
+        List<ConsignacionesBancariasRepository.ChequeDisponible>
                 cheques =
                 new ArrayList<>();
 
@@ -486,7 +509,7 @@ public class ConsignacionBancariaService {
 
         for (Long idCheque : idsCheques) {
 
-            ConsignacionBancariaRepository.ChequeDisponible cheque =
+            ConsignacionesBancariasRepository.ChequeDisponible cheque =
                     repository.obtenerChequeConLock(
                             idCheque,
                             idAgencia
@@ -534,7 +557,7 @@ public class ConsignacionBancariaService {
         // El DTO permite varias cajas.
         // =====================================================
 
-        List<ConsignacionBancariaRequest.EfectivoCajaRequest>
+        List<MovimientoFondoRequestDTO.EfectivoCajaDTO>
                 efectivos =
                 normalizarEfectivos(
                         request.getEfectivos()
@@ -561,78 +584,111 @@ public class ConsignacionBancariaService {
             );
         }
 
+
         // =====================================================
-        // CAJAS QUE PARTICIPAN
-        //
-        // Se bloquean en orden de idCaja para mantener
-        // un orden determinístico de concurrencia.
-        // =====================================================
+// CAJAS PARTICIPANTES Y BLOQUEO ORDENADO
+// =====================================================
 
-        List<Long> idsCajas =
-                new ArrayList<>();
+        Map<Long, Long> provisionesCheques = new HashMap<>();
 
-        for (ConsignacionBancariaRepository.ChequeDisponible cheque
-                : cheques) {
+        Map<Long, ConsignacionesBancariasRepository.CajaEfectivoDisponible>
+                cajasBloqueadas = new HashMap<>();
 
-            if (!idsCajas.contains(
-                    cheque.idCaja()
-            )) {
-                idsCajas.add(
-                        cheque.idCaja()
-                );
-            }
-        }
+        List<Long> idsCajasCheques = cheques.stream()
+                .map(ConsignacionesBancariasRepository.ChequeDisponible::idCaja)
+                .distinct()
+                .toList();
 
-        for (ConsignacionBancariaRequest.EfectivoCajaRequest efectivo
-                : efectivos) {
+        List<Long> idsCajasEfectivo = efectivos.stream()
+                .map(MovimientoFondoRequestDTO.EfectivoCajaDTO::getIdCaja)
+                .distinct()
+                .toList();
 
-            if (!idsCajas.contains(
-                    efectivo.getIdCaja()
-            )) {
-                idsCajas.add(
-                        efectivo.getIdCaja()
-                );
-            }
-        }
+        List<Long> idsCajasParticipantes =
+                java.util.stream.Stream.concat(
+                                idsCajasCheques.stream(),
+                                idsCajasEfectivo.stream()
+                        )
+                        .distinct()
+                        .sorted()
+                        .toList();
 
-        idsCajas.sort(
-                Comparator.naturalOrder()
-        );
+        for (Long idCaja : idsCajasParticipantes) {
 
-        Map<Long, ConsignacionBancariaRepository.CajaEfectivoDisponible>
-                cajasBloqueadas =
-                new HashMap<>();
+            boolean tieneCheques = idsCajasCheques.contains(idCaja);
+            boolean tieneEfectivo = idsCajasEfectivo.contains(idCaja);
 
-        for (Long idCaja : idsCajas) {
+            // La caja se bloquea primero por efectivo si participa
+            // con ambos medios, reutilizando su provisión.
 
-            ConsignacionBancariaRepository.CajaEfectivoDisponible caja =
-                    repository.obtenerCajaConProvisionConLock(
-                            idCaja,
-                            idAgencia,
-                            fechaConsignacion
+            if (tieneEfectivo) {
+
+                ConsignacionesBancariasRepository.CajaEfectivoDisponible caja =
+                        repository.obtenerCajaConProvisionConLock(
+                                idCaja,
+                                idAgencia,
+                                fechaConsignacion
+                        );
+
+                if (caja == null) {
+                    throw new IllegalStateException(
+                            "La caja " + idCaja
+                                    + " no tiene provisión ABIERTA "
+                                    + "para consignar efectivo en "
+                                    + fechaConsignacion + "."
                     );
+                }
+
+                cajasBloqueadas.put(idCaja, caja);
+
+                if (tieneCheques) {
+                    provisionesCheques.put(
+                            idCaja,
+                            caja.idProvision()
+                    );
+                }
+
+            } else if (tieneCheques) {
+
+                Long idProvision =
+                        repository.obtenerProvisionChequeConLock(
+                                idCaja,
+                                idAgencia,
+                                fechaConsignacion
+                        );
+
+                if (idProvision == null) {
+                    throw new IllegalStateException(
+                            "La caja " + idCaja
+                                    + " no tiene provisión ABIERTA "
+                                    + "para consignar cheques en "
+                                    + fechaConsignacion + "."
+                    );
+                }
+
+                provisionesCheques.put(idCaja, idProvision);
+            }
+        }
+
+        // =====================================================
+        // VALIDAR EFECTIVO DISPONIBLE ANTES DE REGISTRAR
+        // =====================================================
+
+        for (MovimientoFondoRequestDTO.EfectivoCajaDTO efectivo : efectivos) {
+
+            ConsignacionesBancariasRepository.CajaEfectivoDisponible caja =
+                    cajasBloqueadas.get(efectivo.getIdCaja());
 
             if (caja == null) {
                 throw new IllegalStateException(
-                        "La caja "
-                                + idCaja
-                                + " no tiene una provisión creada para la fecha "
-                                + fechaConsignacion
-                                + "."
+                        "No fue posible validar el efectivo de la caja "
+                                + efectivo.getIdCaja() + "."
                 );
             }
 
-            if (!idAgencia.equals(
-                    caja.idAgencia()
-            )) {
-                throw new IllegalStateException(
-                        "No se pueden mezclar cajas de diferentes agencias."
-                );
-            }
-
-            cajasBloqueadas.put(
-                    idCaja,
-                    caja
+            validarEfectivoDisponible(
+                    caja,
+                    efectivo.getValor()
             );
         }
 
@@ -666,25 +722,23 @@ public class ConsignacionBancariaService {
         // SALIDA INDIVIDUAL DE CADA CHEQUE
         // -----------------------------------------------------
 
-        for (ConsignacionBancariaRepository.ChequeDisponible cheque
+        for (ConsignacionesBancariasRepository.ChequeDisponible cheque
                 : cheques) {
 
-            ConsignacionBancariaRepository.CajaEfectivoDisponible caja =
-                    cajasBloqueadas.get(
-                            cheque.idCaja()
-                    );
+            Long idProvision =
+                    provisionesCheques.get(cheque.idCaja());
 
-            if (caja == null) {
+            if (idProvision == null) {
                 throw new IllegalStateException(
-                        "No fue posible determinar la caja del cheque "
-                                + cheque.numeroCheque()
-                                + "."
+                        "No se encontró la provisión de la jornada "
+                                + "para la salida del cheque "
+                                + cheque.numeroCheque() + "."
                 );
             }
 
             Long idMovimientoCaja =
                     repository.insertarMovimientoCaja(
-                            caja.idProvision(),
+                            idProvision,
                             cheque.idCaja(),
                             idDepartamento,
                             idOperacion,
@@ -720,10 +774,10 @@ public class ConsignacionBancariaService {
         // SALIDA DE EFECTIVO
         // -----------------------------------------------------
 
-        for (ConsignacionBancariaRequest.EfectivoCajaRequest efectivo
+        for (MovimientoFondoRequestDTO.EfectivoCajaDTO efectivo
                 : efectivos) {
 
-            ConsignacionBancariaRepository.CajaEfectivoDisponible caja =
+            ConsignacionesBancariasRepository.CajaEfectivoDisponible caja =
                     cajasBloqueadas.get(
                             efectivo.getIdCaja()
                     );
@@ -796,7 +850,8 @@ public class ConsignacionBancariaService {
                                 + valorSeguro(
                                 cuentaBancaria.nombreBanco()
                         ),
-                        numeroConsignacion
+                        numeroConsignacion,
+                        idDatosPersonal
                 )
         );
 
@@ -804,7 +859,7 @@ public class ConsignacionBancariaService {
         // CRÉDITO POR CADA CHEQUE
         // -----------------------------------------------------
 
-        for (ConsignacionBancariaRepository.ChequeDisponible cheque
+        for (ConsignacionesBancariasRepository.ChequeDisponible cheque
                 : cheques) {
 
             movimientosContables.add(
@@ -823,7 +878,8 @@ public class ConsignacionBancariaService {
                                     + valorSeguro(
                                     cheque.codigoCaja()
                             ),
-                            numeroConsignacion
+                            numeroConsignacion,
+                            idDatosPersonal
                     )
             );
         }
@@ -832,10 +888,10 @@ public class ConsignacionBancariaService {
         // CRÉDITO POR EFECTIVO DE CADA CAJA
         // -----------------------------------------------------
 
-        for (ConsignacionBancariaRequest.EfectivoCajaRequest efectivo
+        for (MovimientoFondoRequestDTO.EfectivoCajaDTO efectivo
                 : efectivos) {
 
-            ConsignacionBancariaRepository.CajaEfectivoDisponible caja =
+            ConsignacionesBancariasRepository.CajaEfectivoDisponible caja =
                     cajasBloqueadas.get(
                             efectivo.getIdCaja()
                     );
@@ -852,7 +908,8 @@ public class ConsignacionBancariaService {
                                     + valorSeguro(
                                     caja.codigoCaja()
                             ),
-                            numeroConsignacion
+                            numeroConsignacion,
+                            idDatosPersonal
                     )
             );
         }
@@ -922,7 +979,7 @@ public class ConsignacionBancariaService {
         // CHEQUES: RECIBIDO -> CONSIGNADO
         // =====================================================
 
-        for (ConsignacionBancariaRepository.ChequeDisponible cheque
+        for (ConsignacionesBancariasRepository.ChequeDisponible cheque
                 : cheques) {
 
             repository.marcarChequeConsignado(
@@ -937,15 +994,20 @@ public class ConsignacionBancariaService {
         // RESPUESTA
         // =====================================================
 
-        return new ConsignacionBancariaResponse(
+        return new MovimientoFondoResponseDTO(
+                null, // No existe todavía ID persistido de movimiento general.
+                request.getTipoMovimiento(),
                 idAgencia,
                 fechaConsignacion,
                 numeroConsignacion,
+                request.getObservacion(),
+                null, null, null, null, null,
                 cuentaBancaria.idCuentaBancaria(),
                 cuentaBancaria.codigoBanco(),
                 cuentaBancaria.nombreBanco(),
                 cuentaBancaria.numeroCuenta(),
                 cuentaBancaria.nombreCuenta(),
+                null, null, null, null, null,
                 cheques.size(),
                 valorCheques,
                 valorEfectivo,
@@ -955,6 +1017,12 @@ public class ConsignacionBancariaService {
                 conceptoComprobante
         );
     }
+
+    // =========================================================
+    // TRASLADOS DE EFECTIVO ENTRE CONTROL Y OPERATIVA
+    // =========================================================
+
+
 
     // =========================================================
     // MOVIMIENTO CONTABLE
@@ -968,11 +1036,14 @@ public class ConsignacionBancariaService {
             BigDecimal debito,
             BigDecimal credito,
             String detalle,
-            String documentoSoporte
+            String documentoSoporte,
+            Integer idDatosPersonal
     ) {
 
         MovimientoContableDTO movimiento =
                 new MovimientoContableDTO();
+
+        movimiento.setIdDatosPersonal(idDatosPersonal);
 
         movimiento.setIdCatalogoCuenta(
                 idCatalogoCuenta
@@ -1092,9 +1163,9 @@ public class ConsignacionBancariaService {
     // =========================================================
 
     private String construirConceptoComprobante(
-            ConsignacionBancariaRequest request,
+            MovimientoFondoRequestDTO request,
             String numeroConsignacion,
-            ConsignacionBancariaRepository.CuentaBancariaConsignacion cuentaBancaria
+            ConsignacionesBancariasRepository.CuentaBancariaConsignacion cuentaBancaria
     ) {
 
         return limitar(
@@ -1117,11 +1188,33 @@ public class ConsignacionBancariaService {
     }
 
     // =========================================================
+    // VALIDAR QUE EL RETIRO NO SE MAYOR QUE EL VALOR EN CAJA
+    // =========================================================
+
+    private void validarEfectivoDisponible(
+            ConsignacionesBancariasRepository.CajaEfectivoDisponible caja,
+            BigDecimal valorSolicitado
+    ) {
+
+        BigDecimal disponible = nvl(caja.efectivoDisponible());
+        BigDecimal solicitado = nvl(valorSolicitado);
+
+        if (solicitado.compareTo(disponible) > 0) {
+            throw new IllegalStateException(
+                    "La caja " + caja.codigoCaja()
+                            + " tiene $" + disponible.toPlainString()
+                            + " disponibles. No puede consignar $"
+                            + solicitado.toPlainString() + "."
+            );
+        }
+    }
+
+    // =========================================================
     // VALIDACIONES
     // =========================================================
 
     private void validarRequest(
-            ConsignacionBancariaRequest request
+            MovimientoFondoRequestDTO request
     ) {
 
         if (request == null) {
@@ -1130,24 +1223,30 @@ public class ConsignacionBancariaService {
             );
         }
 
+        if (request.getTipoMovimiento() != MovimientoFondoRequestDTO.TipoMovimiento.CONSIGNACION) {
+            throw new IllegalArgumentException(
+                    "Esta operación aún no está implementada. Solo se admite CONSIGNACION."
+            );
+        }
+
         validarAgencia(
                 request.getIdAgencia()
         );
 
-        if (request.getIdCuentaBancaria() == null) {
+        if (request.getIdCuentaBancariaDestino() == null) {
             throw new IllegalArgumentException(
                     "La cuenta bancaria destino es obligatoria."
             );
         }
 
-        if (request.getFechaConsignacion() == null) {
+        if (request.getFechaMovimiento() == null) {
             throw new IllegalArgumentException(
                     "La fecha de consignación es obligatoria."
             );
         }
 
         if (isBlank(
-                request.getNumeroConsignacion()
+                request.getNumeroSoporte()
         )) {
             throw new IllegalArgumentException(
                     "El número de consignación es obligatorio."
@@ -1155,7 +1254,7 @@ public class ConsignacionBancariaService {
         }
 
         if (trim(
-                request.getNumeroConsignacion()
+                request.getNumeroSoporte()
         ).length() > 20) {
 
             throw new IllegalArgumentException(
@@ -1243,9 +1342,9 @@ public class ConsignacionBancariaService {
     // NORMALIZAR EFECTIVO
     // =========================================================
 
-    private List<ConsignacionBancariaRequest.EfectivoCajaRequest>
+    private List<MovimientoFondoRequestDTO.EfectivoCajaDTO>
     normalizarEfectivos(
-            List<ConsignacionBancariaRequest.EfectivoCajaRequest> efectivos
+            List<MovimientoFondoRequestDTO.EfectivoCajaDTO> efectivos
     ) {
 
         if (efectivos == null
@@ -1257,7 +1356,7 @@ public class ConsignacionBancariaService {
         Map<Long, BigDecimal> valoresPorCaja =
                 new HashMap<>();
 
-        for (ConsignacionBancariaRequest.EfectivoCajaRequest item
+        for (MovimientoFondoRequestDTO.EfectivoCajaDTO item
                 : efectivos) {
 
             if (item == null) {
@@ -1302,14 +1401,14 @@ public class ConsignacionBancariaService {
                         .sorted()
                         .toList();
 
-        List<ConsignacionBancariaRequest.EfectivoCajaRequest>
+        List<MovimientoFondoRequestDTO.EfectivoCajaDTO>
                 resultado =
                 new ArrayList<>();
 
         for (Long idCaja : idsCajas) {
 
-            ConsignacionBancariaRequest.EfectivoCajaRequest item =
-                    new ConsignacionBancariaRequest.EfectivoCajaRequest();
+            MovimientoFondoRequestDTO.EfectivoCajaDTO item =
+                    new MovimientoFondoRequestDTO.EfectivoCajaDTO();
 
             item.setIdCaja(
                     idCaja

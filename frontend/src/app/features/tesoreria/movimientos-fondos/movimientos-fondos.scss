@@ -1,0 +1,562 @@
+
+/* =========================================================
+   ASSIP ERP - TESORERÍA
+   MOVIMIENTOS DE FONDOS
+   ========================================================= */
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.page {
+  padding: 1rem;
+  color: #1f2937;
+}
+
+/* =========================================================
+   ENCABEZADO
+   ========================================================= */
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.35rem 0 0;
+    font-size: 0.88rem;
+    color: #6b7280;
+    line-height: 1.5;
+  }
+}
+
+.badge-preview {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   TARJETAS
+   ========================================================= */
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.65rem;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 4%);
+}
+
+.card-header {
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.3rem 0 0;
+    font-size: 0.83rem;
+    color: #6b7280;
+    line-height: 1.5;
+  }
+}
+
+/* =========================================================
+   FORMULARIOS
+   ========================================================= */
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem 1.15rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+
+  label {
+    font-size: 0.81rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    min-width: 0;
+    padding: 0.58rem 0.7rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.4rem;
+    outline: none;
+    background: #ffffff;
+    color: #1f2937;
+    font-family: inherit;
+    font-size: 0.87rem;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+
+    &:focus {
+      border-color: #64748b;
+      box-shadow: 0 0 0 3px rgb(100 116 139 / 12%);
+    }
+
+    &:disabled {
+      background: #f9fafb;
+      color: #9ca3af;
+      cursor: not-allowed;
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 65px;
+    line-height: 1.5;
+  }
+
+  select {
+    cursor: pointer;
+  }
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+/* =========================================================
+   INFORMACIÓN Y MENSAJES
+   ========================================================= */
+
+.alert {
+  margin-bottom: 1rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid;
+  border-radius: 0.45rem;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.alert-error {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.alert-info {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.info-box {
+  margin-top: 1rem;
+  padding: 0.8rem 0.9rem;
+  border-left: 3px solid #64748b;
+  border-radius: 0.35rem;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 0.84rem;
+  line-height: 1.55;
+
+  strong {
+    color: #334155;
+  }
+}
+
+.empty-state {
+  margin: 0.75rem 0;
+  padding: 0.85rem;
+  border: 1px dashed #cbd5e1;
+  border-radius: 0.4rem;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.84rem;
+  text-align: center;
+}
+
+/* =========================================================
+   SUBSECCIONES
+   ========================================================= */
+
+.subsection {
+  margin-top: 1.25rem;
+
+  h4 {
+    margin: 0 0 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #334155;
+  }
+}
+
+/* =========================================================
+   TABLAS
+   ========================================================= */
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.45rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.83rem;
+
+  thead {
+    background: #f8fafc;
+  }
+
+  th,
+  td {
+    padding: 0.7rem 0.8rem;
+    border-bottom: 1px solid #e5e7eb;
+    vertical-align: middle;
+  }
+
+  th {
+    color: #475569;
+    font-weight: 700;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  td {
+    color: #374151;
+  }
+
+  tbody tr {
+    transition: background-color 0.15s ease;
+
+    &:hover {
+      background: #f8fafc;
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+
+  tfoot {
+    background: #f1f5f9;
+
+    th {
+      border-top: 2px solid #cbd5e1;
+      border-bottom: none;
+      color: #1e293b;
+    }
+  }
+}
+
+.col-check {
+  width: 100px;
+}
+
+.text-right {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+.input-valor {
+  display: block;
+  width: 100%;
+  min-width: 110px;
+  max-width: 190px;
+  margin-left: auto;
+  padding: 0.48rem 0.6rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.35rem;
+  outline: none;
+  background: #ffffff;
+  color: #1f2937;
+  font-family: inherit;
+  font-size: 0.85rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+
+  &:focus {
+    border-color: #64748b;
+    box-shadow: 0 0 0 3px rgb(100 116 139 / 12%);
+  }
+}
+
+input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: #334155;
+  cursor: pointer;
+}
+
+/* =========================================================
+   TOTALES DE CONSIGNACIÓN
+   ========================================================= */
+
+.totales-consignacion {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.1rem;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 155px;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.4rem;
+    background: #f8fafc;
+
+    span {
+      color: #64748b;
+      font-size: 0.77rem;
+    }
+
+    strong {
+      color: #1f2937;
+      font-size: 1rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .total-principal {
+    border-color: #cbd5e1;
+    background: #f1f5f9;
+
+    strong {
+      font-size: 1.12rem;
+    }
+  }
+}
+
+/* =========================================================
+   BOTONES Y ACCIONES
+   ========================================================= */
+
+.actions-card {
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 36px;
+  padding: 0.55rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.4rem;
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  border-color: #334155;
+  background: #334155;
+  color: #ffffff;
+
+  &:not(:disabled):hover {
+    background: #1e293b;
+    border-color: #1e293b;
+  }
+}
+
+.btn-secondary {
+  border-color: #d1d5db;
+  background: #ffffff;
+  color: #475569;
+
+  &:not(:disabled):hover {
+    background: #f8fafc;
+  }
+}
+
+.actions-note {
+  margin: 0.65rem 0 0;
+  color: #64748b;
+  font-size: 0.77rem;
+  text-align: right;
+}
+
+/* =========================================================
+   VISTA PREVIA CONTABLE
+   ========================================================= */
+
+.preview-info {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.4rem;
+    background: #f8fafc;
+    min-width: 0;
+
+    span {
+      color: #64748b;
+      font-size: 0.76rem;
+    }
+
+    strong {
+      color: #1e293b;
+      font-size: 0.88rem;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+}
+
+.tabla-contable {
+  min-width: 740px;
+}
+
+.cuadre {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid;
+  border-radius: 0.45rem;
+  font-size: 0.84rem;
+
+  strong {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.cuadre-ok {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.cuadre-error {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .preview-info {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 0.65rem;
+  }
+
+  .page-header {
+    h2 {
+      font-size: 1.2rem;
+    }
+  }
+
+  .card {
+    padding: 0.85rem;
+  }
+
+  .form-grid,
+  .preview-info {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .totales-consignacion {
+    flex-direction: column;
+
+    > div {
+      width: 100%;
+    }
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+
+    .btn {
+      width: 100%;
+    }
+  }
+
+  .actions-note {
+    text-align: center;
+  }
+
+  .table-wrap {
+    th,
+    td {
+      padding: 0.6rem;
+    }
+  }
+}

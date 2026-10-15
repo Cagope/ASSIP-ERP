@@ -1,0 +1,569 @@
+
+<div class="page">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <div class="page-header">
+    <div>
+      <h2>Movimientos de Fondos</h2>
+      <p>
+        Consignaciones bancarias y movimientos entre cajas.
+        Consulta y validación contable sin registrar operaciones.
+      </p>
+    </div>
+
+    <span class="badge-preview">Modo consulta</span>
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- MENSAJES -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="mensajeError"
+    class="alert alert-error"
+    role="alert"
+  >
+    {{ mensajeError }}
+  </div>
+
+  <div
+    *ngIf="mensajeInformativo"
+    class="alert alert-info"
+    role="status"
+  >
+    {{ mensajeInformativo }}
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- DATOS GENERALES -->
+  <!-- ===================================================== -->
+
+  <section class="card">
+
+    <div class="card-header">
+      <h3>Datos del movimiento</h3>
+      <p>Seleccione la operación que desea consultar.</p>
+    </div>
+
+    <div class="form-grid">
+
+      <div class="form-field">
+        <label for="idAgencia">Agencia</label>
+
+        <select
+          id="idAgencia"
+          name="idAgencia"
+          [(ngModel)]="idAgencia"
+          (ngModelChange)="cambiarAgencia()"
+        >
+          <option [ngValue]="null">
+            Seleccione una agencia
+          </option>
+
+          <option
+            *ngFor="let agencia of agencias"
+            [ngValue]="agencia.idAgencia"
+          >
+            {{ agencia.codigoAgencia }} - {{ agencia.nombreAgencia }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="tipoMovimiento">Tipo de movimiento</label>
+
+        <select
+          id="tipoMovimiento"
+          name="tipoMovimiento"
+          [(ngModel)]="tipoMovimiento"
+          (ngModelChange)="cambiarTipoMovimiento()"
+        >
+          <option
+            *ngFor="let tipo of tiposMovimiento"
+            [ngValue]="tipo.valor"
+            [disabled]="!tipo.disponible"
+          >
+            {{ tipo.etiqueta }}
+            {{ tipo.disponible ? '' : '(próximamente)' }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="fechaMovimiento">Fecha del movimiento</label>
+
+        <input
+          id="fechaMovimiento"
+          type="date"
+          name="fechaMovimiento"
+          [(ngModel)]="fechaMovimiento"
+          (ngModelChange)="cambiarFecha()"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="numeroSoporte">Número de soporte</label>
+
+        <input
+          id="numeroSoporte"
+          type="text"
+          name="numeroSoporte"
+          maxlength="20"
+          [(ngModel)]="numeroSoporte"
+          (ngModelChange)="cambiarDatos()"
+          placeholder="Número de documento"
+        />
+      </div>
+
+      <div class="form-field full-width">
+        <label for="observacion">Observaciones adicionales</label>
+
+        <textarea
+          id="observacion"
+          name="observacion"
+          rows="2"
+          [(ngModel)]="observacion"
+          (ngModelChange)="cambiarDatos()"
+          placeholder="Información adicional del movimiento (opcional)"
+        ></textarea>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- MOVIMIENTO ENTRE CAJAS -->
+  <!-- ===================================================== -->
+
+  <section class="card" *ngIf="esTrasladoCajas">
+
+    <div class="card-header">
+      <h3>Movimiento entre cajas</h3>
+      <p>
+        Provisión de fondos o reembolso entre caja CONTROL
+        y caja OPERATIVA.
+      </p>
+    </div>
+
+    <div class="form-grid">
+
+      <div class="form-field">
+        <label for="modalidadTraslado">Modalidad</label>
+
+        <select
+          id="modalidadTraslado"
+          name="modalidadTraslado"
+          [(ngModel)]="modalidadTrasladoCaja"
+          (ngModelChange)="cambiarModalidadTraslado()"
+        >
+          <option
+            *ngFor="let modalidad of modalidadesTraslado"
+            [ngValue]="modalidad.valor"
+          >
+            {{ modalidad.etiqueta }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="valorMovimiento">Valor del movimiento</label>
+
+        <input
+          id="valorMovimiento"
+          name="valorMovimiento"
+          type="text"
+          numericFormat
+          class="input-number"
+          [(ngModel)]="valor"
+          (ngModelChange)="cambiarDatos()"
+          placeholder="0"
+        />
+      </div>
+
+      <div class="form-field">
+        <p class="empty-state" *ngIf="provisionesConsultadas && cajasOrigen.length === 0">
+          No hay cajas de origen con provisión ABIERTA para esta fecha.
+        </p>
+        <label for="cajaOrigen">Caja origen</label>
+        <small>Solo cajas con provisión abierta para la fecha.</small>
+
+        <select
+          id="cajaOrigen"
+          name="cajaOrigen"
+          [(ngModel)]="idCajaOrigen"
+          (ngModelChange)="cambiarDatos()"
+        >
+          <option [ngValue]="null">
+            Seleccione una caja
+          </option>
+
+          <option
+            *ngFor="let caja of cajasOrigen"
+            [ngValue]="caja.idCaja"
+          >
+            {{ caja.codigoCaja }} - {{ caja.nombreCaja }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <p class="empty-state" *ngIf="provisionesConsultadas && cajasDestino.length === 0">
+          No hay cajas de destino con provisión ABIERTA para esta fecha.
+        </p>
+        <label for="cajaDestino">Caja destino</label>
+        <small>Solo cajas con provisión abierta para la fecha.</small>
+
+        <select
+          id="cajaDestino"
+          name="cajaDestino"
+          [(ngModel)]="idCajaDestino"
+          (ngModelChange)="cambiarDatos()"
+        >
+          <option [ngValue]="null">
+            Seleccione una caja
+          </option>
+
+          <option
+            *ngFor="let caja of cajasDestino"
+            [ngValue]="caja.idCaja"
+          >
+            {{ caja.codigoCaja }} - {{ caja.nombreCaja }}
+          </option>
+        </select>
+      </div>
+
+    </div>
+
+    <div class="info-box" *ngIf="modalidadTrasladoCaja === 'PROVISION'">
+      <strong>Provisión:</strong>
+      salida de fondos de la caja CONTROL e ingreso
+      a la caja OPERATIVA.
+    </div>
+
+    <div class="info-box" *ngIf="modalidadTrasladoCaja === 'REEMBOLSO'">
+      <strong>Reembolso:</strong>
+      salida de fondos de la caja OPERATIVA
+      y retorno a la caja CONTROL.
+    </div>
+
+    <p class="empty-state" *ngIf="!consultando && cajasMovimiento.length === 0">
+      No hay cajas cargadas. Seleccione una agencia válida.
+    </p>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- CONSIGNACIÓN BANCARIA -->
+  <!-- ===================================================== -->
+
+  <section class="card" *ngIf="esConsignacion">
+
+    <div class="card-header">
+      <h3>Consignación bancaria</h3>
+      <p>
+        Seleccione la cuenta destino y los valores
+        que serán consignados.
+      </p>
+    </div>
+
+    <div class="form-grid">
+
+      <div class="form-field full-width">
+        <label for="cuentaDestino">Cuenta bancaria destino</label>
+
+        <select
+          id="cuentaDestino"
+          name="cuentaDestino"
+          [(ngModel)]="idCuentaBancariaDestino"
+          (ngModelChange)="cambiarDatos()"
+        >
+          <option [ngValue]="null">
+            Seleccione una cuenta
+          </option>
+
+          <option
+            *ngFor="let cuenta of cuentasBancarias"
+            [ngValue]="cuenta.idCuentaBancaria"
+          >
+            {{ cuenta.nombreBanco }}
+            - {{ cuenta.numeroCuenta }}
+            - {{ cuenta.nombreCuenta }}
+          </option>
+        </select>
+      </div>
+
+    </div>
+
+    <!-- CHEQUES -->
+
+    <div class="subsection">
+      <h4>Cheques disponibles</h4>
+
+      <div class="table-wrap" *ngIf="chequesDisponibles.length > 0">
+        <table>
+          <thead>
+          <tr>
+            <th class="col-check">Seleccionar</th>
+            <th>Cheque</th>
+            <th>Caja</th>
+            <th class="text-right">Valor</th>
+          </tr>
+          </thead>
+
+          <tbody>
+          <tr *ngFor="let cheque of chequesDisponibles">
+            <td class="text-center">
+              <input
+                type="checkbox"
+                [checked]="chequeSeleccionado(cheque.idChequeRecibido)"
+                (change)="cambiarCheque(
+                    cheque.idChequeRecibido,
+                    $any($event.target).checked
+                  )"
+              />
+            </td>
+
+            <td>{{ cheque.numeroCheque }}</td>
+            <td>{{ cheque.codigoCaja }}</td>
+
+            <td class="text-right">
+              {{ cheque.valorCheque | number:'1.0-2' }}
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="empty-state" *ngIf="chequesDisponibles.length === 0">
+        No hay cheques disponibles para la agencia seleccionada.
+      </p>
+    </div>
+
+    <!-- EFECTIVO -->
+
+    <div class="subsection">
+      <h4>Efectivo por caja (provisión ABIERTA)</h4>
+
+      <div class="table-wrap" *ngIf="cajasConProvision.length > 0">
+        <table>
+          <thead>
+          <tr>
+            <th>Caja</th>
+            <th>Nombre</th>
+            <th class="text-right">Efectivo disponible</th>
+            <th class="text-right">Valor a consignar</th>
+          </tr>
+          </thead>
+
+          <tbody>
+          <tr *ngFor="let caja of cajasConProvision">
+            <td>{{ caja.codigoCaja }}</td>
+            <td>{{ caja.nombreCaja }}</td>
+
+            <td class="text-right">
+              <strong>
+                {{ caja.efectivoDisponible | number:'1.0-2' }}
+              </strong>
+            </td>
+
+            <td>
+              <input
+                class="input-valor"
+                type="text"
+                numericFormat
+                autocomplete="off"
+                [ngModel]="obtenerValorEfectivo(caja.idCaja)"
+                (ngModelChange)="cambiarValorEfectivo(caja.idCaja, $event)"
+                [ngModelOptions]="{ standalone: true }"
+                placeholder="0"
+              />
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="empty-state" *ngIf="cajasConProvision.length === 0">
+        No hay cajas con provisión ABIERTA para la agencia y fecha seleccionadas. No se permite consignar efectivo.
+      </p>
+    </div>
+
+    <!-- TOTALES -->
+
+    <div class="totales-consignacion">
+
+      <div>
+        <span>Cheques seleccionados</span>
+        <strong>
+          {{ valorChequesSeleccionados | number:'1.0-2' }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Efectivo</span>
+        <strong>
+          {{ valorEfectivoConsignacion | number:'1.0-2' }}
+        </strong>
+      </div>
+
+      <div class="total-principal">
+        <span>Total consignación</span>
+        <strong>
+          {{ valorTotalConsignacion | number:'1.0-2' }}
+        </strong>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- ACCIONES -->
+  <!-- ===================================================== -->
+
+  <section class="card actions-card">
+
+    <div class="actions">
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="limpiarFormulario()"
+        [disabled]="cargando || aplicando"
+      >
+        Limpiar
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="consultarPreview()"
+        [disabled]="cargando || aplicando || consultando || consultandoProvisiones || !provisionesConsultadas || !idAgencia"
+      >
+        {{ cargando ? 'Consultando...' : 'Vista previa contable' }}
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        *ngIf="preview?.cuadrado && !movimientoAplicado"
+        (click)="aplicarMovimiento()"
+        [disabled]="cargando || aplicando || consultando || consultandoProvisiones || !provisionesConsultadas"
+      >
+        {{ aplicando ? 'Registrando...' : 'Confirmar y registrar movimiento' }}
+      </button>
+
+    </div>
+
+    <p class="actions-note">
+      La vista previa no registra movimientos. El botón «Confirmar y registrar movimiento»
+      ejecuta el registro definitivo y genera el comprobante contable.
+    </p>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- VISTA PREVIA CONTABLE -->
+  <!-- ===================================================== -->
+
+  <section class="card" *ngIf="preview as resultado">
+
+    <div class="card-header">
+      <h3>Vista previa del comprobante</h3>
+      <p>{{ resultado.conceptoComprobante }}</p>
+    </div>
+
+    <div class="preview-info">
+
+      <div>
+        <span>Tipo de comprobante</span>
+        <strong>{{ resultado.tipoComprobante }}</strong>
+      </div>
+
+      <div>
+        <span>Fecha</span>
+        <strong>{{ resultado.fechaMovimiento }}</strong>
+      </div>
+
+      <div>
+        <span>Documento soporte</span>
+        <strong>{{ resultado.numeroSoporte }}</strong>
+      </div>
+
+      <div>
+        <span>Valor total</span>
+        <strong>{{ resultado.valorTotal | number:'1.0-2' }}</strong>
+      </div>
+
+    </div>
+
+    <div class="table-wrap">
+      <table class="tabla-contable">
+
+        <thead>
+        <tr>
+          <th>Código cuenta</th>
+          <th>Nombre cuenta</th>
+          <th>Detalle</th>
+          <th class="text-right">Débito</th>
+          <th class="text-right">Crédito</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let movimiento of resultado.movimientos">
+          <td>{{ movimiento.codigoCuenta }}</td>
+          <td>{{ movimiento.nombreCuenta }}</td>
+          <td>{{ movimiento.detalleMovimiento }}</td>
+
+          <td class="text-right">
+            {{ movimiento.valorDebito | number:'1.0-2' }}
+          </td>
+
+          <td class="text-right">
+            {{ movimiento.valorCredito | number:'1.0-2' }}
+          </td>
+        </tr>
+        </tbody>
+
+        <tfoot>
+        <tr>
+          <th colspan="3">Totales</th>
+
+          <th class="text-right">
+            {{ resultado.totalDebito | number:'1.0-2' }}
+          </th>
+
+          <th class="text-right">
+            {{ resultado.totalCredito | number:'1.0-2' }}
+          </th>
+        </tr>
+        </tfoot>
+
+      </table>
+    </div>
+
+    <div
+      class="cuadre"
+      [class.cuadre-ok]="resultado.cuadrado"
+      [class.cuadre-error]="!resultado.cuadrado"
+    >
+      <span>
+        {{ resultado.cuadrado
+          ? 'Comprobante contablemente cuadrado'
+          : 'El comprobante presenta diferencias' }}
+      </span>
+
+      <strong>
+        Diferencia:
+        {{ resultado.diferencia | number:'1.0-2' }}
+      </strong>
+    </div>
+
+  </section>
+
+</div>

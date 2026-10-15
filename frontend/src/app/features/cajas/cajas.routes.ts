@@ -1,3 +1,4 @@
+
 import { Routes } from '@angular/router';
 
 import { permisoGuard } from '../../core/auth/permiso.guard';
@@ -11,7 +12,6 @@ import { MOVIMIENTOS_INTERAGENCIA_ROUTES } from './movimientos-interagencia/movi
 import { OPERACIONES_PENDIENTES_ROUTES } from './operaciones-pendientes/operaciones-pendientes.routes';
 import { CAJAS_CIERRE_ROUTES } from './cierres/cajas-cierre.routes';
 import { CAJAS_VENTANILLA_ROUTES } from './ventanilla/cajas-ventanilla.routes';
-
 
 export const CAJAS_ROUTES: Routes = [
 
@@ -62,6 +62,24 @@ export const CAJAS_ROUTES: Routes = [
   {
     path: 'cierres',
     children: CAJAS_CIERRE_ROUTES
+  },
+
+  // =========================================================
+  // SALIDA DE CHEQUES HACIA CAJA CONTROL
+  // =========================================================
+
+  {
+    path: 'salida-cheques',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CAJAS_SALIDA_CHEQUES_EJECUTAR'
+    },
+    loadComponent: () =>
+      import(
+        './salida-cheques/cajas-salida-cheques.component'
+      ).then(
+        m => m.CajasSalidaChequesComponent
+      )
   }
 
 ];

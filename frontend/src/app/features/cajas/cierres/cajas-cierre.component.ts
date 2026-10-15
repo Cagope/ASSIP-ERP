@@ -444,6 +444,10 @@ export class CajasCierreComponent {
           this.resumen = resumen;
           this.confirmando = false;
 
+          // Limpiar los valores del arqueo.
+          this.limpiarArqueo();
+
+          this.mensajeError = '';
           this.mensajeExito =
             'La caja fue cerrada correctamente.';
         },
@@ -581,7 +585,12 @@ export class CajasCierreComponent {
 
     this.valorVarios = 0;
     this.valorMonedas = 0;
-    this.observacion = '';
+
+    this.observacion =
+      this.resumen?.estado === 'ABIERTA'
+        ? 'Cierre diario de caja con movimientos verificados y arqueo de efectivo realizado.'
+        : '';
+
   }
 
 

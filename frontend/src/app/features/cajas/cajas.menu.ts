@@ -1,3 +1,4 @@
+
 export const cajasMenu = {
   title: 'Caja',
   icon: 'wallet',
@@ -20,6 +21,12 @@ export const cajasMenu = {
         {
           label: 'Caja / Ventanilla',
           route: '/cajas/ventanilla'
+        },
+
+        {
+          label: 'Salida de cheques',
+          route: '/cajas/salida-cheques',
+          permiso: 'CAJAS_SALIDA_CHEQUES_EJECUTAR'
         },
 
         {

@@ -64,6 +64,14 @@ export class CajasProvisionComponent implements OnInit {
   chequesInicio = 0;
   valorInicialVentanilla = 0;
 
+  get esCajaOperativa(): boolean {
+    return this.apertura?.tipoCaja?.toUpperCase() === 'OPERATIVA';
+  }
+
+  get esCajaControl(): boolean {
+    return this.apertura?.tipoCaja?.toUpperCase() === 'CONTROL';
+  }
+
   constructor(
     private readonly api: CajasProvisionApi
   ) {}
@@ -267,10 +275,9 @@ export class CajasProvisionComponent implements OnInit {
          * Para una caja OPERATIVA proponemos el fondo configurado.
          * El usuario podrá modificar este valor antes de abrir.
          */
-        this.valorInicialVentanilla =
-          apertura.tipoCaja === 'OPERATIVA'
-            ? Number(apertura.fondoSugeridoVentanilla ?? 0)
-            : 0;
+        this.valorInicialVentanilla = this.esCajaOperativa
+          ? Number(apertura.fondoSugeridoVentanilla ?? 0)
+          : 0;
 
         this.cargando = false;
       },
@@ -313,56 +320,55 @@ export class CajasProvisionComponent implements OnInit {
       return;
     }
 
-
     if (
       this.efectivoInicio === null ||
+      !Number.isFinite(Number(this.efectivoInicio)) ||
       Number(this.efectivoInicio) < 0
     ) {
-
       this.mensajeError =
-        'El efectivo inicial no puede ser negativo.';
+        'El efectivo inicial debe ser un valor válido y no negativo.';
 
       return;
     }
-
 
     if (
       this.chequesInicio === null ||
+      !Number.isFinite(Number(this.chequesInicio)) ||
       Number(this.chequesInicio) < 0
     ) {
-
       this.mensajeError =
-        'El valor inicial de cheques no puede ser negativo.';
+        'El valor inicial de cheques debe ser un valor válido y no negativo.';
 
       return;
     }
 
-    if (
-      this.valorInicialVentanilla === null ||
-      Number(this.valorInicialVentanilla) < 0
-    ) {
+    if (this.esCajaOperativa) {
 
-      this.mensajeError =
-        'El valor inicial de ventanilla no puede ser negativo.';
+      if (
+        this.valorInicialVentanilla === null ||
+        !Number.isFinite(Number(this.valorInicialVentanilla)) ||
+        Number(this.valorInicialVentanilla) < 0
+      ) {
+        this.mensajeError =
+          'El valor inicial de ventanilla no puede ser negativo.';
 
-      return;
-    }
+        return;
+      }
 
-    if (
-      Number(this.valorInicialVentanilla) >
-      Number(this.efectivoInicio)
-    ) {
+      if (
+        Number(this.valorInicialVentanilla) >
+        Number(this.efectivoInicio)
+      ) {
+        this.mensajeError =
+          'El valor inicial de ventanilla no puede superar el efectivo disponible de la caja.';
 
-      this.mensajeError =
-        'El valor inicial de ventanilla no puede superar el efectivo disponible de la caja.';
-
-      return;
+        return;
+      }
     }
 
     if (this.abriendo) {
       return;
     }
-
 
     this.abriendo = true;
 
@@ -374,15 +380,15 @@ export class CajasProvisionComponent implements OnInit {
       idCaja: this.cajaActiva.idCaja,
 
       efectivoInicio:
-        Number(this.efectivoInicio || 0),
+        Number(this.efectivoInicio),
 
       chequesInicio:
-        Number(this.chequesInicio || 0),
+        Number(this.chequesInicio),
 
-      valorInicialVentanilla:
-        Number(this.valorInicialVentanilla || 0)
+      valorInicialVentanilla: this.esCajaOperativa
+        ? Number(this.valorInicialVentanilla)
+        : 0
     };
-
 
     this.api.abrirCaja(request).subscribe({
 

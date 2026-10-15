@@ -32,19 +32,20 @@ public class CajasUsuariosRepository {
     public Optional<CajaDisponibleDTO> obtenerCajaActiva(Long idCaja) {
 
         String sql = """
-            SELECT
-                c.id_caja,
-                c.id_agencia,
-                c.codigo_caja,
-                c.descripcion,
-                c.permite_efectivo,
-                c.permite_cheques,
-                c.permite_tarjetas,
-                c.permite_transferencias
-            FROM cajas.cajas c
-            WHERE c.id_caja = :idCaja
-              AND c.activa = TRUE
-            """;
+        SELECT
+            c.id_caja,
+            c.id_agencia,
+            c.codigo_caja,
+            c.descripcion,
+            c.tipo_caja,
+            c.permite_efectivo,
+            c.permite_cheques,
+            c.permite_tarjetas,
+            c.permite_transferencias
+        FROM cajas.cajas c
+        WHERE c.id_caja = :idCaja
+          AND c.activa = TRUE
+        """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("idCaja", idCaja);
@@ -71,28 +72,29 @@ public class CajasUsuariosRepository {
     public List<CajaDisponibleDTO> listarDisponibles(Integer idAgencia) {
 
         String sql = """
-            SELECT
-                c.id_caja,
-                c.id_agencia,
-                c.codigo_caja,
-                c.descripcion,
-                c.permite_efectivo,
-                c.permite_cheques,
-                c.permite_tarjetas,
-                c.permite_transferencias
-            FROM cajas.cajas c
-            WHERE c.id_agencia = :idAgencia
-              AND c.activa = TRUE
-              AND NOT EXISTS (
-                    SELECT 1
-                    FROM cajas.cajas_usuarios cu
-                    WHERE cu.id_caja = c.id_caja
-                      AND cu.fecha_jornada = CURRENT_DATE
-              )
-            ORDER BY
-                c.codigo_caja,
-                c.id_caja
-            """;
+        SELECT
+            c.id_caja,
+            c.id_agencia,
+            c.codigo_caja,
+            c.descripcion,
+            c.tipo_caja,
+            c.permite_efectivo,
+            c.permite_cheques,
+            c.permite_tarjetas,
+            c.permite_transferencias
+        FROM cajas.cajas c
+        WHERE c.id_agencia = :idAgencia
+          AND c.activa = TRUE
+          AND NOT EXISTS (
+                SELECT 1
+                FROM cajas.cajas_usuarios cu
+                WHERE cu.id_caja = c.id_caja
+                  AND cu.fecha_jornada = CURRENT_DATE
+          )
+        ORDER BY
+            c.codigo_caja,
+            c.id_caja
+        """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("idAgencia", idAgencia);
@@ -538,6 +540,7 @@ public class CajasUsuariosRepository {
                 .idAgencia(rs.getInt("id_agencia"))
                 .codigoCaja(rs.getString("codigo_caja"))
                 .descripcionCaja(rs.getString("descripcion"))
+                .tipoCaja(rs.getString("tipo_caja"))
                 .permiteEfectivo(rs.getBoolean("permite_efectivo"))
                 .permiteCheques(rs.getBoolean("permite_cheques"))
                 .permiteTarjetas(rs.getBoolean("permite_tarjetas"))

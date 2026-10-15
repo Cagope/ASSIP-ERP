@@ -3,13 +3,14 @@ import { Routes } from '@angular/router';
 export const TESORERIA_ROUTES: Routes = [
 
   // =========================================================
-  // CONSIGNACIONES BANCARIAS
+  // MOVIMIENTOS DE FONDOS
+  // Consignaciones, retiros y traslados
   // =========================================================
   {
-    path: 'consignaciones-bancarias',
+    path: 'movimientos-fondos',
     loadComponent: () =>
-      import('./consignaciones-bancarias/consignaciones-bancarias.component')
-        .then(m => m.ConsignacionesBancariasComponent)
+      import('./movimientos-fondos/movimientos-fondos')
+        .then(m => m.MovimientosFondosComponent)
   }
 
 ];
