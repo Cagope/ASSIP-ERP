@@ -17,6 +17,9 @@ import co.assip.erp.depositos.movimientos.dto.DepositosMovimientoDTO;
 import co.assip.erp.cajas.medios_pago.dto.MedioPagoDepositoDTO;
 import co.assip.erp.cajas.medios_pago.dto.MediosPagoDTO;
 import co.assip.erp.cdat.cancelacion.dto.CdatCancelacionFiltroDTO;
+
+import co.assip.erp.tesoreria.operaciones_pendientes.TesoreriaOperacionesPendientesService;
+
 import java.util.List;
 import java.util.Map;
 import java.math.BigDecimal;
@@ -31,6 +34,7 @@ public class CdatCancelacionService {
     private final CdatMovimientoService cdatMovimientoService;
     private final DepositosMovimientoService depositosMovimientoService;
     private final CajasMovimientosService cajasMovimientosService;
+    private final TesoreriaOperacionesPendientesService tesoreriaOperacionesPendientesService;
 
     public CdatCancelacionItemDTO obtenerPorId(Long idCuentaCdat) {
 
@@ -122,6 +126,29 @@ public class CdatCancelacionService {
                 dto.getFechaProceso(),
                 idUsuario
         );
+
+        // ==========================================
+// PUBLICAR CUENTA POR PAGAR EN TESORERÍA
+// ==========================================
+        if (mayorCero(dto.getValorCuentaPorPagar())) {
+
+            tesoreriaOperacionesPendientesService.publicar(
+                    cdat.getIdAgencia(),
+                    "CDAT",
+                    "CANCELACION_CDAT",
+                    "cdat.cuentas_cdats",
+                    cdat.getIdCuentaCdat(),
+                    cdat.getIdDatosPersonal(),
+                    "SALIDA",
+                    dto.getFechaProceso(),
+                    "CUENTA POR PAGAR CANCELACION CDAT "
+                            + cdat.getCodigoCdat(),
+                    dto.getValorCuentaPorPagar(),
+                    idUsuario
+            );
+        }
+
+
     }
 
     // =========================

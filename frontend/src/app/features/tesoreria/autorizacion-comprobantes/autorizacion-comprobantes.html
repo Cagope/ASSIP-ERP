@@ -1,0 +1,770 @@
+<div class="page">
+
+  <!-- =====================================================
+       ENCABEZADO
+       ===================================================== -->
+
+  <header class="page-header">
+
+    <div>
+      <h2>Autorización de comprobantes</h2>
+
+      <p class="page-subtitle">
+        Consulte y revise los comprobantes pendientes
+        de Tesorería antes de autorizar, rechazar o anular.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-outline"
+      [disabled]="cargando || procesandoDecision"
+      (click)="consultarPendientes()">
+      Actualizar bandeja
+    </button>
+
+  </header>
+
+  <!-- =====================================================
+       MENSAJES
+       ===================================================== -->
+
+  <div
+    *ngIf="mensajeError"
+    class="alert alert-error"
+    role="alert">
+    {{ mensajeError }}
+  </div>
+
+  <div
+    *ngIf="mensajeInformativo"
+    class="alert alert-success"
+    role="status">
+    {{ mensajeInformativo }}
+  </div>
+
+  <!-- =====================================================
+       FILTROS
+       ===================================================== -->
+
+  <section class="card">
+
+    <div class="card-header">
+      <h3>Filtros de consulta</h3>
+      <p>
+        Seleccione una agencia y filtre los comprobantes
+        pendientes disponibles.
+      </p>
+    </div>
+
+    <div class="form-grid">
+
+      <div class="form-field">
+
+        <label for="idAgencia">
+          Agencia
+        </label>
+
+        <select
+          id="idAgencia"
+          name="idAgencia"
+          [(ngModel)]="idAgencia"
+          [disabled]="cargando || procesandoDecision"
+          (ngModelChange)="cambiarAgencia()">
+
+          <option [ngValue]="null">
+            Seleccione una agencia
+          </option>
+
+          <option
+            *ngFor="let agencia of agencias"
+            [ngValue]="agencia.idAgencia">
+            {{ agencia.nombreAgencia }}
+          </option>
+
+        </select>
+
+      </div>
+
+      <div class="form-field">
+
+        <label for="filtroProceso">
+          Proceso de origen
+        </label>
+
+        <input
+          id="filtroProceso"
+          name="filtroProceso"
+          type="text"
+          [(ngModel)]="filtroProceso"
+          placeholder="Ej. RETIRO_BANCARIO"
+          autocomplete="off">
+
+      </div>
+
+      <div class="form-field">
+
+        <label for="filtroSoporte">
+          Documento soporte
+        </label>
+
+        <input
+          id="filtroSoporte"
+          name="filtroSoporte"
+          type="text"
+          [(ngModel)]="filtroSoporte"
+          placeholder="Número de soporte"
+          autocomplete="off">
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- =====================================================
+       RESUMEN
+       ===================================================== -->
+
+  <section class="summary-grid">
+
+    <div class="summary-card">
+
+      <span class="summary-label">
+        Comprobantes pendientes
+      </span>
+
+      <strong class="summary-value">
+        {{ comprobantes.length }}
+      </strong>
+
+    </div>
+
+    <div class="summary-card">
+
+      <span class="summary-label">
+        Resultados filtrados
+      </span>
+
+      <strong class="summary-value">
+        {{ comprobantesFiltrados.length }}
+      </strong>
+
+    </div>
+
+    <div class="summary-card">
+
+      <span class="summary-label">
+        Valor pendiente filtrado
+      </span>
+
+      <strong class="summary-value">
+        {{ valorTotalFiltrado | currency:'COP':'symbol':'1.0-0' }}
+      </strong>
+
+    </div>
+
+  </section>
+
+  <!-- =====================================================
+       BANDEJA DE COMPROBANTES
+       ===================================================== -->
+
+  <section class="card">
+
+    <div class="card-header">
+
+      <h3>Comprobantes pendientes</h3>
+
+      <p>
+        Seleccione un comprobante para revisar
+        sus partidas contables y movimientos de caja.
+      </p>
+
+    </div>
+
+    <div
+      *ngIf="cargando"
+      class="loading-state">
+      Consultando comprobantes pendientes...
+    </div>
+
+    <div
+      *ngIf="!cargando && idAgencia === null"
+      class="empty-state">
+      Seleccione una agencia para consultar los comprobantes.
+    </div>
+
+    <div
+      *ngIf="
+        !cargando &&
+        idAgencia !== null &&
+        comprobantesFiltrados.length === 0
+      "
+      class="empty-state">
+      No se encontraron comprobantes pendientes
+      para los filtros seleccionados.
+    </div>
+
+    <div
+      *ngIf="!cargando && comprobantesFiltrados.length > 0"
+      class="table-wrap">
+
+      <table class="data-table">
+
+        <thead>
+        <tr>
+          <th>Comprobante</th>
+          <th>Fecha</th>
+          <th>Proceso</th>
+          <th>Soporte</th>
+          <th>Concepto</th>
+          <th class="text-right">Valor</th>
+          <th>Elaborado por</th>
+          <th>Estado</th>
+          <th class="text-center">Acción</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr
+          *ngFor="let comprobante of comprobantesFiltrados"
+          [class.row-selected]="
+              comprobanteSeleccionado?.idComprobante ===
+              comprobante.idComprobante
+            ">
+
+          <td>
+            <strong>
+              #{{ comprobante.idComprobante }}
+            </strong>
+
+            <div class="cell-secondary">
+              {{ comprobante.tipoComprobante }}
+              {{ comprobante.numeroComprobante || 'Sin número' }}
+            </div>
+          </td>
+
+          <td>
+            {{ comprobante.fechaDocumento }}
+          </td>
+
+          <td>
+            {{ nombreProceso(comprobante.procesoOrigen) }}
+          </td>
+
+          <td>
+            {{ comprobante.documentoSoporte || '—' }}
+          </td>
+
+          <td>
+            <div class="concepto-cell">
+              {{ comprobante.concepto }}
+            </div>
+          </td>
+
+          <td class="text-right amount">
+            {{ comprobante.totalDebito | currency:'COP':'symbol':'1.0-0' }}
+          </td>
+
+          <td>
+            Usuario {{ comprobante.idUsuarioElaboracion }}
+
+            <div class="cell-secondary">
+              {{ comprobante.fechaElaboracion | date:'dd/MM/yyyy HH:mm' }}
+            </div>
+          </td>
+
+          <td>
+              <span
+                class="status-badge"
+                [class.status-pending]="comprobante.estado === 'PENDIENTE'">
+                {{ comprobante.estado }}
+              </span>
+          </td>
+
+          <td class="text-center">
+
+            <button
+              type="button"
+              class="btn btn-sm btn-outline"
+              [disabled]="cargandoDetalle || procesandoDecision"
+              (click)="seleccionarComprobante(comprobante)">
+              Revisar
+            </button>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+  <!-- =====================================================
+       CARGA DEL DETALLE
+       ===================================================== -->
+
+  <div
+    *ngIf="cargandoDetalle"
+    class="loading-state">
+    Consultando detalle del comprobante...
+  </div>
+
+  <!-- =====================================================
+       DETALLE DEL COMPROBANTE
+       ===================================================== -->
+
+  <ng-container *ngIf="comprobanteSeleccionado as comprobante">
+
+    <section class="card detail-card">
+
+      <div class="card-header detail-header">
+
+        <div>
+
+          <h3>
+            Detalle del comprobante #{{ comprobante.idComprobante }}
+          </h3>
+
+          <p>
+            {{ nombreProceso(comprobante.procesoOrigen) }}
+          </p>
+
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-outline btn-sm"
+          [disabled]="procesandoDecision"
+          (click)="cerrarDetalle()">
+          Cerrar detalle
+        </button>
+
+      </div>
+
+      <!-- DATOS GENERALES -->
+
+      <div class="detail-grid">
+
+        <div class="detail-field">
+          <span>Agencia</span>
+          <strong>{{ comprobante.idAgencia }}</strong>
+        </div>
+
+        <div class="detail-field">
+          <span>Tipo de comprobante</span>
+          <strong>{{ comprobante.tipoComprobante }}</strong>
+        </div>
+
+        <div class="detail-field">
+          <span>Número de comprobante</span>
+          <strong>
+            {{ comprobante.numeroComprobante || 'Pendiente de asignación' }}
+          </strong>
+        </div>
+
+        <div class="detail-field">
+          <span>Fecha del documento</span>
+          <strong>{{ comprobante.fechaDocumento }}</strong>
+        </div>
+
+        <div class="detail-field">
+          <span>Documento soporte</span>
+          <strong>{{ comprobante.documentoSoporte || '—' }}</strong>
+        </div>
+
+        <div class="detail-field">
+          <span>Estado</span>
+          <strong>{{ comprobante.estado }}</strong>
+        </div>
+
+        <div class="detail-field">
+          <span>Usuario elaborador</span>
+          <strong>{{ comprobante.idUsuarioElaboracion }}</strong>
+        </div>
+
+        <div class="detail-field">
+          <span>Fecha de elaboración</span>
+          <strong>
+            {{ comprobante.fechaElaboracion | date:'dd/MM/yyyy HH:mm' }}
+          </strong>
+        </div>
+
+      </div>
+
+      <div class="concepto-box">
+
+        <span>Concepto del comprobante</span>
+
+        <p>
+          {{ comprobante.concepto }}
+        </p>
+
+      </div>
+
+    </section>
+
+    <!-- ===================================================
+         PARTIDAS CONTABLES
+         =================================================== -->
+
+    <section class="card">
+
+      <div class="card-header">
+        <h3>Partidas contables</h3>
+        <p>
+          Movimientos preparados que se contabilizarán
+          únicamente cuando el comprobante sea autorizado.
+        </p>
+      </div>
+
+      <div class="table-wrap">
+
+        <table class="data-table">
+
+          <thead>
+          <tr>
+            <th class="text-center">Línea</th>
+            <th>Cuenta contable</th>
+            <th>Detalle</th>
+            <th class="text-right">Débito</th>
+            <th class="text-right">Crédito</th>
+          </tr>
+          </thead>
+
+          <tbody>
+
+          <tr *ngFor="let partida of comprobante.partidasContables">
+
+            <td class="text-center">
+              {{ partida.numeroLinea }}
+            </td>
+
+            <td>
+              {{ partida.idCatalogoCuenta }}
+            </td>
+
+            <td>
+              {{ partida.detalleMovimiento }}
+            </td>
+
+            <td class="text-right amount">
+              {{ partida.valorDebito | currency:'COP':'symbol':'1.0-0' }}
+            </td>
+
+            <td class="text-right amount">
+              {{ partida.valorCredito | currency:'COP':'symbol':'1.0-0' }}
+            </td>
+
+          </tr>
+
+          <tr
+            *ngIf="comprobante.partidasContables.length === 0">
+            <td colspan="5" class="empty-table">
+              El comprobante no contiene partidas contables.
+            </td>
+          </tr>
+
+          </tbody>
+
+          <tfoot>
+
+          <tr class="total-row">
+
+            <th colspan="3">
+              Totales
+            </th>
+
+            <th class="text-right">
+              {{ comprobante.totalDebito | currency:'COP':'symbol':'1.0-0' }}
+            </th>
+
+            <th class="text-right">
+              {{ comprobante.totalCredito | currency:'COP':'symbol':'1.0-0' }}
+            </th>
+
+          </tr>
+
+          </tfoot>
+
+        </table>
+
+      </div>
+
+      <div
+        class="balance-message"
+        [class.balance-ok]="comprobanteCuadrado"
+        [class.balance-error]="!comprobanteCuadrado">
+
+        <ng-container *ngIf="comprobanteCuadrado; else diferencia">
+          Comprobante contablemente cuadrado.
+        </ng-container>
+
+        <ng-template #diferencia>
+          Diferencia contable:
+          {{ diferenciaContable | currency:'COP':'symbol':'1.0-0' }}
+        </ng-template>
+
+      </div>
+
+    </section>
+
+    <!-- ===================================================
+         MOVIMIENTOS DE CAJA
+         =================================================== -->
+
+    <section
+      class="card"
+      *ngIf="comprobante.movimientosCaja.length > 0">
+
+      <div class="card-header">
+
+        <h3>Movimientos de caja previstos</h3>
+
+        <p>
+          Estos movimientos no afectan el efectivo
+          mientras el comprobante permanezca pendiente.
+        </p>
+
+      </div>
+
+      <div class="table-wrap">
+
+        <table class="data-table">
+
+          <thead>
+          <tr>
+            <th>Línea</th>
+            <th>Caja</th>
+            <th>Naturaleza</th>
+            <th>Medio de pago</th>
+            <th>Referencia</th>
+            <th class="text-right">Valor</th>
+          </tr>
+          </thead>
+
+          <tbody>
+
+          <tr
+            *ngFor="let movimiento of comprobante.movimientosCaja">
+
+            <td>
+              {{ movimiento.numeroLinea }}
+            </td>
+
+            <td>
+              {{ movimiento.idCaja }}
+            </td>
+
+            <td>
+                <span
+                  class="movement-badge"
+                  [class.movement-in]="movimiento.naturaleza === 'INGRESO'"
+                  [class.movement-out]="movimiento.naturaleza === 'EGRESO'">
+                  {{ movimiento.naturaleza }}
+                </span>
+            </td>
+
+            <td>
+              {{ movimiento.medioPago }}
+            </td>
+
+            <td>
+              {{ movimiento.codigoReferencia }}
+            </td>
+
+            <td class="text-right amount">
+              {{ movimiento.valor | currency:'COP':'symbol':'1.0-0' }}
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+    <!-- ===================================================
+         DECISIONES
+         =================================================== -->
+
+    <section class="card">
+
+      <div class="card-header">
+
+        <h3>Decisión del comprobante</h3>
+
+        <p>
+          Revise la información antes de tomar una decisión.
+          El sistema verificará nuevamente las condiciones
+          de autorización en el servidor.
+        </p>
+
+      </div>
+
+      <div
+        *ngIf="!puedeEjecutar"
+        class="alert alert-info">
+        Su usuario tiene acceso de consulta,
+        pero no dispone del permiso para autorizar comprobantes.
+      </div>
+
+      <div
+        *ngIf="puedeEjecutar && comprobante.estado !== 'PENDIENTE'"
+        class="alert alert-info">
+        Este comprobante ya no se encuentra pendiente.
+      </div>
+
+      <div class="actions">
+
+        <!-- LIMPIAR Y REGRESAR A LA BANDEJA -->
+        <button
+          type="button"
+          class="btn btn-outline"
+          [disabled]="procesandoDecision"
+          (click)="volverABandeja()">
+          Limpiar / Volver a bandeja
+        </button>
+
+        <!-- RECHAZAR -->
+        <button
+          type="button"
+          class="btn btn-danger-outline"
+          [disabled]="!puedeDecidir"
+          (click)="iniciarDecision('RECHAZAR')">
+          Rechazar
+        </button>
+
+        <!-- ANULAR -->
+        <button
+          type="button"
+          class="btn btn-outline"
+          [disabled]="!puedeDecidir"
+          (click)="iniciarDecision('ANULAR')">
+          Anular
+        </button>
+
+        <!-- AUTORIZAR -->
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="!puedeDecidir || !comprobanteCuadrado"
+          (click)="iniciarDecision('AUTORIZAR')">
+          Autorizar comprobante
+        </button>
+
+      </div>
+
+    </section>
+
+  </ng-container>
+
+  <!-- =====================================================
+       CONFIRMACIÓN DE DECISIÓN
+       ===================================================== -->
+
+  <section
+    *ngIf="
+      mostrarConfirmacion &&
+      comprobanteSeleccionado &&
+      decisionSeleccionada
+    "
+    class="card confirmation-card">
+
+    <div class="card-header">
+
+      <h3>
+        Confirmar {{ decisionSeleccionada | lowercase }}
+      </h3>
+
+      <p>
+        Comprobante #{{ comprobanteSeleccionado.idComprobante }}
+        por
+        {{ comprobanteSeleccionado.totalDebito | currency:'COP':'symbol':'1.0-0' }}
+      </p>
+
+    </div>
+
+    <div
+      *ngIf="decisionSeleccionada === 'AUTORIZAR'"
+      class="alert alert-warning">
+
+      Al autorizar, el backend realizará la contabilización
+      definitiva y aplicará los movimientos de caja
+      correspondientes.
+
+      Esta operación no debe ejecutarse sin verificar
+      previamente el comprobante.
+
+    </div>
+
+    <div
+      *ngIf="
+        decisionSeleccionada === 'RECHAZAR' ||
+        decisionSeleccionada === 'ANULAR'
+      "
+      class="form-field">
+
+      <label for="motivoDecision">
+        Motivo de la decisión
+      </label>
+
+      <textarea
+        id="motivoDecision"
+        name="motivoDecision"
+        [(ngModel)]="motivoDecision"
+        maxlength="500"
+        rows="3"
+        placeholder="Describa el motivo de la decisión">
+      </textarea>
+
+      <small>
+        Obligatorio. Máximo 500 caracteres.
+      </small>
+
+    </div>
+
+    <div class="actions">
+
+      <button
+        type="button"
+        class="btn btn-outline"
+        [disabled]="procesandoDecision"
+        (click)="cancelarDecision()">
+        Cancelar
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="!puedeConfirmarDecision"
+        (click)="confirmarDecision()">
+        Confirmar decisión
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- =====================================================
+       PROCESAMIENTO
+       ===================================================== -->
+
+  <div
+    *ngIf="procesandoDecision"
+    class="alert alert-info"
+    role="status">
+    Procesando la decisión del comprobante.
+    Espere la respuesta del servidor.
+  </div>
+
+</div>

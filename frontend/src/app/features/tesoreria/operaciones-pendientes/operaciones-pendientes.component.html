@@ -1,0 +1,602 @@
+
+<div class="page">
+
+  <!-- ================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ================================================== -->
+
+  <div class="page-header">
+    <div>
+      <h2>Operaciones pendientes</h2>
+      <p>
+        Consulta y distribución de pagos de obligaciones
+        generadas por los diferentes módulos del ERP.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-outline-primary"
+      (click)="consultarOperaciones()"
+      [disabled]="cargando || !idAgencia">
+      Actualizar
+    </button>
+  </div>
+
+  <!-- ================================================== -->
+  <!-- MENSAJES -->
+  <!-- ================================================== -->
+
+  <div
+    *ngIf="mensajeError"
+    class="alert alert-danger"
+    role="alert">
+    {{ mensajeError }}
+  </div>
+
+  <div
+    *ngIf="mensajeInformativo"
+    class="alert alert-info"
+    role="status">
+    {{ mensajeInformativo }}
+  </div>
+
+  <!-- ================================================== -->
+  <!-- INDICADORES -->
+  <!-- ================================================== -->
+
+  <div class="resumen-grid">
+
+    <div class="card resumen-card">
+      <span class="resumen-label">Obligaciones pendientes</span>
+      <strong class="resumen-valor">
+        {{ operaciones.length }}
+      </strong>
+    </div>
+
+    <div class="card resumen-card">
+      <span class="resumen-label">Saldo pendiente</span>
+      <strong class="resumen-valor">
+        {{ totalPendiente | currency:'COP':'symbol':'1.0-0':'es-CO' }}
+      </strong>
+    </div>
+
+    <div class="card resumen-card">
+      <span class="resumen-label">Valor ejecutado</span>
+      <strong class="resumen-valor">
+        {{ totalEjecutado | currency:'COP':'symbol':'1.0-0':'es-CO' }}
+      </strong>
+    </div>
+
+  </div>
+
+  <!-- ================================================== -->
+  <!-- LISTADO DE OBLIGACIONES -->
+  <!-- ================================================== -->
+
+  <section class="card">
+
+    <div class="card-header">
+      <div>
+        <h3>Obligaciones disponibles</h3>
+        <p>
+          Agencia {{ idAgencia || 'Sin seleccionar' }}
+        </p>
+      </div>
+    </div>
+
+    <div *ngIf="cargando" class="estado-vacio">
+      Consultando obligaciones...
+    </div>
+
+    <div
+      *ngIf="!cargando && operaciones.length === 0"
+      class="estado-vacio">
+      No existen obligaciones pendientes para esta agencia.
+    </div>
+
+    <div
+      *ngIf="!cargando && operaciones.length > 0"
+      class="table-wrap">
+
+      <table class="data-table">
+
+        <thead>
+        <tr>
+          <th>Operación</th>
+          <th>Origen</th>
+          <th>Fecha</th>
+          <th>Concepto</th>
+          <th class="text-end">Valor original</th>
+          <th class="text-end">Ejecutado</th>
+          <th class="text-end">Pendiente</th>
+          <th>Estado</th>
+          <th class="text-center">Acción</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr
+          *ngFor="
+              let operacion of operaciones;
+              trackBy: trackOperacion
+            "
+          [class.fila-seleccionada]="
+              operacionSeleccionada?.id_operacion_pendiente ===
+              operacion.id_operacion_pendiente
+            ">
+
+          <td>
+            {{ operacion.id_operacion_pendiente }}
+          </td>
+
+          <td>
+            <strong>{{ operacion.modulo_origen }}</strong>
+            <small class="d-block">
+              {{ operacion.proceso_origen }}
+            </small>
+          </td>
+
+          <td>
+            {{ operacion.fecha_documento }}
+          </td>
+
+          <td>
+            {{ operacion.concepto }}
+          </td>
+
+          <td class="text-end">
+            {{ operacion.valor_original |
+            currency:'COP':'symbol':'1.0-0':'es-CO' }}
+          </td>
+
+          <td class="text-end">
+            {{ operacion.valor_ejecutado |
+            currency:'COP':'symbol':'1.0-0':'es-CO' }}
+          </td>
+
+          <td class="text-end valor-destacado">
+            {{ operacion.saldo_pendiente |
+            currency:'COP':'symbol':'1.0-0':'es-CO' }}
+          </td>
+
+          <td>
+              <span
+                class="estado"
+                [class.estado-pendiente]="
+                  operacion.estado === 'PENDIENTE'
+                "
+                [class.estado-parcial]="
+                  operacion.estado === 'PARCIAL'
+                ">
+                {{ operacion.estado }}
+              </span>
+          </td>
+
+          <td class="text-center">
+            <button
+              type="button"
+              class="btn btn-sm btn-primary"
+              (click)="seleccionarOperacion(operacion)">
+              Seleccionar
+            </button>
+          </td>
+
+        </tr>
+        </tbody>
+
+      </table>
+    </div>
+
+  </section>
+
+  <!-- ================================================== -->
+  <!-- DETALLE DE LA OBLIGACIÓN -->
+  <!-- ================================================== -->
+
+  <ng-container *ngIf="operacionSeleccionada as operacion">
+
+    <section class="card">
+
+      <div class="card-header">
+        <div>
+          <h3>
+            Detalle de obligación N.º
+            {{ operacion.id_operacion_pendiente }}
+          </h3>
+          <p>{{ operacion.concepto }}</p>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-outline-secondary btn-sm"
+          (click)="limpiarSeleccion()">
+          Cerrar detalle
+        </button>
+      </div>
+
+      <div class="detalle-grid">
+
+        <div class="detalle-campo">
+          <span>Origen</span>
+          <strong>{{ operacion.modulo_origen }}</strong>
+        </div>
+
+        <div class="detalle-campo">
+          <span>Proceso</span>
+          <strong>{{ operacion.proceso_origen }}</strong>
+        </div>
+
+        <div class="detalle-campo">
+          <span>Beneficiario (ID)</span>
+          <strong>
+            {{ operacion.id_datos_personal || 'No registrado' }}
+          </strong>
+        </div>
+
+        <div class="detalle-campo">
+          <span>Fecha documento</span>
+          <strong>{{ operacion.fecha_documento }}</strong>
+        </div>
+
+        <div class="detalle-campo">
+          <span>Valor original</span>
+          <strong>
+            {{ operacion.valor_original |
+            currency:'COP':'symbol':'1.0-0':'es-CO' }}
+          </strong>
+        </div>
+
+        <div class="detalle-campo">
+          <span>Valor ejecutado</span>
+          <strong>
+            {{ operacion.valor_ejecutado |
+            currency:'COP':'symbol':'1.0-0':'es-CO' }}
+          </strong>
+        </div>
+
+        <div class="detalle-campo">
+          <span>Saldo disponible</span>
+          <strong class="valor-destacado">
+            {{ saldoDisponible |
+            currency:'COP':'symbol':'1.0-0':'es-CO' }}
+          </strong>
+        </div>
+
+        <div class="detalle-campo">
+          <span>Estado</span>
+          <strong>{{ operacion.estado }}</strong>
+        </div>
+
+      </div>
+
+      <div *ngIf="cargandoDetalle" class="estado-vacio">
+        Consultando saldo y ejecuciones...
+      </div>
+
+    </section>
+
+
+    <!-- ================================================ -->
+    <!-- DISTRIBUCIÓN DEL PAGO -->
+    <!-- ================================================ -->
+
+    <section
+      *ngIf="operacion.naturaleza === 'SALIDA'"
+      class="card distribucion-card">
+
+      <div class="card-header">
+        <div>
+          <h3>Distribución del pago</h3>
+          <p>
+            Distribuya el valor de la obligación entre
+            diferentes cuentas bancarias, cheques o transferencias.
+          </p>
+        </div>
+
+        <div class="header-actions">
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            (click)="agregarLineaPago()"
+            [disabled]="cargandoDetalle || cargandoCuentas || !!errorCuentas">
+            + Agregar línea
+          </button>
+        </div>
+      </div>
+
+      <!-- ESTADO DEL CATÁLOGO BANCARIO -->
+
+      <div
+        *ngIf="cargandoCuentas"
+        class="alert alert-info">
+        Consultando cuentas bancarias habilitadas para pagos...
+      </div>
+
+      <div
+        *ngIf="errorCuentas"
+        class="alert alert-danger">
+        {{ errorCuentas }}
+        <button
+          type="button"
+          class="btn btn-outline-danger btn-sm ms-2"
+          (click)="consultarCuentasParaPago()">
+          Reintentar
+        </button>
+      </div>
+
+      <div
+        *ngIf="!cargandoCuentas && !errorCuentas && cuentasParaPago.length === 0"
+        class="alert alert-warning">
+        No hay cuentas bancarias habilitadas para pagos en esta agencia.
+      </div>
+
+      <!-- SIN LÍNEAS -->
+
+      <div
+        *ngIf="lineasPago.length === 0"
+        class="estado-vacio">
+        No se han agregado líneas de pago.
+        Utilice <strong>Agregar línea</strong> para comenzar la distribución.
+      </div>
+
+      <!-- LÍNEAS DE DISTRIBUCIÓN -->
+
+      <div
+        *ngIf="lineasPago.length > 0"
+        class="distribucion-lineas">
+
+        <div
+          class="linea-pago"
+          *ngFor="
+        let linea of lineasPago;
+        let i = index;
+        trackBy: trackLinea
+      ">
+
+          <div class="linea-pago-header">
+            <div class="linea-pago-titulo">
+              <span class="linea-numero">{{ i + 1 }}</span>
+              <strong>Línea de pago</strong>
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-outline-danger btn-sm"
+              (click)="eliminarLineaPago(linea.idTemporal)">
+              Quitar línea
+            </button>
+          </div>
+
+          <div class="linea-pago-grid">
+
+            <div class="campo-pago">
+              <label>Medio de pago</label>
+              <select
+                class="form-select form-select-sm"
+                [ngModel]="linea.medioPago"
+                (ngModelChange)="cambiarMedioPago(linea, $event); sugerirObservacion(linea)">
+
+                <option
+                  *ngFor="let medio of mediosPago"
+                  [ngValue]="medio.valor">
+                  {{ medio.etiqueta }}
+                </option>
+
+              </select>
+            </div>
+
+            <div class="campo-pago campo-cuenta">
+              <label>Cuenta bancaria de origen</label>
+
+              <select
+                class="form-select form-select-sm"
+                [(ngModel)]="linea.idCuentaBancaria"
+                (ngModelChange)="distribucionModificada(); sugerirObservacion(linea)"
+                [disabled]="cargandoCuentas || cuentasParaPago.length === 0">
+
+                <option [ngValue]="null">
+                  Seleccione una cuenta bancaria
+                </option>
+
+                <option
+                  *ngFor="let cuenta of cuentasParaPago"
+                  [ngValue]="cuenta.id_cuenta_bancaria">
+                  {{ cuenta.nombre_banco }}
+                  — {{ cuenta.numero_cuenta }}
+                  — {{ cuenta.nombre_cuenta }}
+                </option>
+
+              </select>
+            </div>
+
+            <div class="campo-pago campo-documento">
+              <label>
+                {{
+                linea.medioPago === 'CHEQUE'
+                ? 'Número de cheque'
+                : 'Referencia de transferencia'
+                }}
+              </label>
+
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                [placeholder]="
+              linea.medioPago === 'CHEQUE'
+                ? 'Número del cheque'
+                : 'Referencia bancaria'
+            "
+                [(ngModel)]="linea.numeroDocumento"
+                (ngModelChange)="distribucionModificada(); sugerirObservacion(linea)">
+            </div>
+
+            <div class="campo-pago campo-valor">
+              <label>Valor del pago</label>
+
+              <div class="input-group input-group-sm">
+                <span class="input-group-text">$</span>
+                <input
+                  type="text"
+                  numericFormat
+                  class="form-control text-end"
+                  inputmode="decimal"
+                  autocomplete="off"
+                  placeholder="0"
+                  [(ngModel)]="linea.valor"
+                  (ngModelChange)="distribucionModificada()">
+              </div>
+            </div>
+
+            <div class="campo-pago campo-observaciones">
+              <label>Observaciones</label>
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                placeholder="Observaciones opcionales"
+                [(ngModel)]="linea.observaciones"
+                (ngModelChange)="distribucionModificada()">
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- RESUMEN FINANCIERO -->
+
+      <div class="distribucion-resumen">
+
+        <div>
+          <span>Saldo disponible</span>
+          <strong>
+            {{ saldoDisponible |
+            currency:'COP':'symbol':'1.0-0':'es-CO' }}
+          </strong>
+        </div>
+
+        <div>
+          <span>Total distribuido</span>
+          <strong>
+            {{ totalDistribuido |
+            currency:'COP':'symbol':'1.0-0':'es-CO' }}
+          </strong>
+        </div>
+
+        <div class="resumen-saldo">
+          <span>Saldo sin distribuir</span>
+          <strong [class.text-danger]="saldoSinDistribuir < 0">
+            {{ saldoSinDistribuir |
+            currency:'COP':'symbol':'1.0-0':'es-CO' }}
+          </strong>
+        </div>
+
+        <div>
+          <span>Cantidad de líneas</span>
+          <strong>{{ lineasPago.length }}</strong>
+        </div>
+
+        <div
+          class="resumen-diferencia"
+          [class.diferencia-cuadrada]="diferenciaDistribucion === 0"
+          [class.diferencia-excedida]="diferenciaDistribucion > 0">
+
+          <span>Diferencia de cuadre</span>
+
+          <strong>
+            {{ diferenciaDistribucion |
+            currency:'COP':'symbol':'1.0-0':'es-CO' }}
+          </strong>
+
+          <small>
+            {{
+            diferenciaDistribucion === 0
+            ? 'Distribución completa'
+            : diferenciaDistribucion > 0
+            ? 'Excede el saldo disponible'
+            : 'Pendiente por distribuir'
+            }}
+          </small>
+
+        </div>
+
+      </div>
+
+      <!-- ACCIONES -->
+      <div class="card-actions">
+        <span class="nota-informativa">
+          La vista previa no registra pagos ni movimientos contables.
+        </span>
+        <button type="button" class="btn btn-primary"
+                [disabled]="cargandoDetalle || cargandoCuentas || !!errorCuentas ||
+            cuentasParaPago.length === 0 || lineasPago.length === 0 ||
+            cargandoVistaPrevia || confirmandoPago"
+                (click)="generarComprobante()">
+          {{ cargandoVistaPrevia ? 'Generando comprobante...' : 'Generar comprobante' }}
+        </button>
+      </div>
+    </section>
+
+    <!-- VISTA PREVIA CONTABLE -->
+    <section class="card" *ngIf="vistaPrevia as comprobante">
+      <div class="card-header">
+        <div>
+          <h3>Vista previa del comprobante contable</h3>
+          <p>Revise las cuentas y los valores antes de confirmar el pago.</p>
+        </div>
+      </div>
+
+      <div class="distribucion-resumen">
+        <div><span>Valor a pagar</span>
+          <strong>{{ comprobante.totalPago | currency:'COP':'symbol':'1.0-0':'es-CO' }}</strong>
+        </div>
+        <div><span>Saldo restante</span>
+          <strong>{{ comprobante.saldoRestante | currency:'COP':'symbol':'1.0-0':'es-CO' }}</strong>
+        </div>
+        <div><span>Total débito</span>
+          <strong>{{ comprobante.totalDebito | currency:'COP':'symbol':'1.0-0':'es-CO' }}</strong>
+        </div>
+        <div><span>Total crédito</span>
+          <strong>{{ comprobante.totalCredito | currency:'COP':'symbol':'1.0-0':'es-CO' }}</strong>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+          <tr>
+            <th>Cuenta contable</th>
+            <th>Detalle</th>
+            <th>Soporte</th>
+            <th class="text-end">Débito</th>
+            <th class="text-end">Crédito</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let movimiento of comprobante.movimientos">
+            <td>{{ comprobante.cuentasContables[movimiento.idCatalogoCuenta] || movimiento.idCatalogoCuenta }}</td>
+            <td>{{ movimiento.detalleMovimiento }}</td>
+            <td>{{ movimiento.documentoSoporte || '—' }}</td>
+            <td class="text-end">{{ movimiento.valorDebito | currency:'COP':'symbol':'1.0-0':'es-CO' }}</td>
+            <td class="text-end">{{ movimiento.valorCredito | currency:'COP':'symbol':'1.0-0':'es-CO' }}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card-actions">
+        <span class="nota-informativa">
+          Al confirmar se registrará el comprobante y se actualizará el saldo de la obligación.
+        </span>
+        <button type="button" class="btn btn-primary"
+                [disabled]="!comprobante.cuadrado || confirmandoPago || cargandoVistaPrevia"
+                (click)="confirmarPago()">
+          {{ confirmandoPago ? 'Contabilizando...' : 'Confirmar y contabilizar pago' }}
+        </button>
+      </div>
+    </section>
+
+  </ng-container>
+
+</div>

@@ -99,6 +99,81 @@ public class TrasladosCajasRepository {
     }
 
     // =========================================================
+    // CATÁLOGO DE CAJAS CON PROVISIÓN ABIERTA PARA TRASLADOS
+    // No depende del usuario vinculado a cada caja.
+    // =========================================================
+
+    public record CajaTrasladoAbierta(
+            Long idCaja,
+            Integer idAgencia,
+            String codigoCaja,
+            String nombreCaja,
+            String tipoCaja,
+            Long idProvision,
+            LocalDate fechaContable,
+            BigDecimal efectivoDisponible
+    ) {
+    }
+
+    public List<CajaTrasladoAbierta> listarCajasTrasladoAbiertas(
+            Integer idAgencia,
+            LocalDate fechaContable
+    ) {
+        String sql = """
+            SELECT
+                c.id_caja,
+                c.id_agencia,
+                c.codigo_caja,
+                c.descripcion AS nombre_caja,
+                c.tipo_caja,
+                p.id_provision,
+                p.fecha_contable,
+                COALESCE(p.efectivo_inicio, 0)
+                + COALESCE((
+                    SELECT SUM(CASE
+                        WHEN m.naturaleza = 'INGRESO' THEN m.valor
+                        WHEN m.naturaleza = 'EGRESO' THEN -m.valor
+                        ELSE 0
+                    END)
+                    FROM cajas.movimientos_caja m
+                    WHERE m.id_provision = p.id_provision
+                      AND m.estado = 'REGISTRADO'
+                      AND m.medio_pago = 'EFECTIVO'
+                ), 0) AS efectivo_disponible
+            FROM cajas.cajas c
+            INNER JOIN cajas.provisiones_diarias p
+                ON p.id_caja = c.id_caja
+               AND p.fecha_contable = ?
+               AND p.estado = 'ABIERTA'
+            INNER JOIN contabilidad.catalogo_cuentas cc
+                ON cc.id_catalogo_cuenta = c.id_catalogo_cuenta_caja
+            WHERE c.id_agencia = ?
+              AND c.activa = TRUE
+              AND c.permite_efectivo = TRUE
+              AND c.tipo_caja IN ('CONTROL', 'OPERATIVA')
+              AND cc.id_agencia = c.id_agencia
+              AND cc.cuenta_operable = TRUE
+            ORDER BY c.tipo_caja, c.codigo_caja
+            """;
+
+        return jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> new CajaTrasladoAbierta(
+                        rs.getLong("id_caja"),
+                        rs.getInt("id_agencia"),
+                        rs.getString("codigo_caja"),
+                        rs.getString("nombre_caja"),
+                        rs.getString("tipo_caja"),
+                        rs.getLong("id_provision"),
+                        rs.getObject("fecha_contable", LocalDate.class),
+                        rs.getBigDecimal("efectivo_disponible")
+                ),
+                fechaContable,
+                idAgencia
+        );
+    }
+
+    // =========================================================
     // OBTENER CAJA CON BLOQUEO
     // =========================================================
 

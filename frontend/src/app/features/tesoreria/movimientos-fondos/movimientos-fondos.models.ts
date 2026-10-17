@@ -18,6 +18,11 @@ export type ModalidadTrasladoCaja =
   | 'REEMBOLSO'
   | 'TRASLADO';
 
+export type MedioTrasladoBancario =
+  | 'EFECTIVO'
+  | 'BRE_B'
+  | 'TRANSFERENCIA_NORMAL';
+
 export interface EfectivoCaja {
   idCaja: number;
   valor: number;
@@ -33,6 +38,8 @@ export interface MovimientoFondoRequest {
 
   idCuentaBancariaOrigen?: number | null;
   idCuentaBancariaDestino?: number | null;
+
+  medioTrasladoBancario?: MedioTrasladoBancario | null;
 
   idCajaOrigen?: number | null;
   idCajaDestino?: number | null;
@@ -170,4 +177,86 @@ export interface ChequeDisponible {
   idCuentaContableCaja: number;
   codigoCuentaContableCaja: string;
   nombreCuentaContableCaja: string;
+}
+
+
+/**
+ * Cuenta bancaria habilitada para realizar retiros
+ * desde la agencia seleccionada.
+ */
+export interface CuentaBancariaRetiro {
+  idCuentaBancaria: number;
+  idAgencia: number;
+  nombreBanco: string;
+  numeroCuenta: string;
+  nombreCuenta: string;
+  idCuentaContable: number;
+  codigoCuentaContable: string;
+  nombreCuentaContable: string;
+}
+
+/**
+ * Caja CONTROL que recibirá el efectivo
+ * procedente del retiro bancario.
+ */
+export interface CajaControlRetiro {
+  idCaja: number;
+  idAgencia: number;
+  codigoCaja: string;
+  descripcion: string;
+  idCatalogoCuentaCaja: number;
+  codigoCuentaCaja: string;
+  nombreCuentaCaja: string;
+}
+
+/**
+ * Respuesta al preparar un retiro bancario.
+ *
+ * El comprobante queda PENDIENTE.
+ * Todavía no genera consecutivo definitivo,
+ * contabilización ni movimiento físico de caja.
+ */
+export interface RetiroBancarioPendienteResponse {
+  idComprobante: number;
+  idAgencia: number;
+  procesoOrigen: string;
+  estado: string;
+  fechaDocumento: string;
+  numeroSoporte: string;
+  valor: number;
+  mensaje: string;
+}
+
+/**
+ * Cuenta bancaria habilitada para traslados.
+ *
+ * El origen requiere permite_trasladar.
+ * El destino requiere permite_consignar.
+ */
+export interface CuentaBancariaTraslado {
+  idCuentaBancaria: number;
+  idAgencia: number;
+  nombreBanco: string;
+  numeroCuenta: string;
+  nombreCuenta: string;
+  idCuentaContable: number;
+  codigoCuentaContable: string;
+  nombreCuentaContable: string;
+}
+
+/**
+ * Comprobante pendiente de autorización.
+ *
+ * La preparación no genera contabilización definitiva
+ * ni movimientos físicos de caja.
+ */
+export interface TrasladoBancarioPendienteResponse {
+  idComprobante: number;
+  idAgencia: number;
+  procesoOrigen: string;
+  estado: string;
+  fechaDocumento: string;
+  numeroSoporte: string;
+  valor: number;
+  mensaje: string;
 }

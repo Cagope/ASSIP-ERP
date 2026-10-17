@@ -12,7 +12,6 @@ import co.assip.erp.tesoreria.movimientos_fondos.dto.MovimientoFondoResponseDTO;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +27,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class TrasladosCajasService {
 
-    private static final String TIPO_COMPROBANTE = "CE";
+    private static final String TIPO_COMPROBANTE = "TS";
     private static final String MODULO_ORIGEN = "TESORERIA";
     private static final String PROCESO_ORIGEN = "TRASLADO_CAJAS";
 
@@ -37,12 +36,6 @@ public class TrasladosCajasService {
 
     private static final String NATURALEZA_INGRESO = "INGRESO";
     private static final String NATURALEZA_EGRESO = "EGRESO";
-
-    @Value("${assip.tesoreria.traslados.departamento:}")
-    private String codigoDepartamentoTraslado;
-
-    @Value("${assip.tesoreria.traslados.operacion:}")
-    private String codigoOperacionTraslado;
 
     private final TrasladosCajasRepository repository;
 
@@ -71,14 +64,6 @@ public class TrasladosCajasService {
         if (request.getFechaMovimiento() == null) {
             throw new IllegalArgumentException(
                     "La fecha del traslado es obligatoria."
-            );
-        }
-
-        if (isBlank(request.getNumeroSoporte())
-                || request.getNumeroSoporte().trim().length() > 20) {
-
-            throw new IllegalArgumentException(
-                    "El número de soporte es obligatorio y debe tener máximo 20 caracteres."
             );
         }
 
@@ -226,10 +211,7 @@ public class TrasladosCajasService {
             MovimientoFondoRequestDTO request
     ) {
 
-        String concepto =
-                request.getModalidadTrasladoCaja()
-                        + " de efectivo No. "
-                        + trim(request.getNumeroSoporte());
+        String concepto = request.getModalidadTrasladoCaja() + " de efectivo entre cajas";
 
         if (!isBlank(request.getObservacion())) {
             concepto += " - " + trim(request.getObservacion());
@@ -341,7 +323,7 @@ public class TrasladosCajasService {
                 .modalidadTrasladoCaja(request.getModalidadTrasladoCaja())
                 .idAgencia(agencia)
                 .fechaMovimiento(fecha)
-                .numeroSoporte(request.getNumeroSoporte())
+                .numeroSoporte(null)
                 .idCajaOrigen(cajas.origen().idCaja())
                 .idCajaDestino(cajas.destino().idCaja())
                 .tipoComprobante(TIPO_COMPROBANTE)
@@ -368,15 +350,6 @@ public class TrasladosCajasService {
 
         validarTrasladoCajas(request);
 
-        if (isBlank(codigoDepartamentoTraslado)
-                || isBlank(codigoOperacionTraslado)) {
-
-            throw new IllegalStateException(
-                    "Configure assip.tesoreria.traslados.departamento "
-                            + "y assip.tesoreria.traslados.operacion."
-            );
-        }
-
         // -----------------------------------------------------
         // 1. Usuario autenticado y datos generales
         // -----------------------------------------------------
@@ -391,8 +364,6 @@ public class TrasladosCajasService {
         LocalDate fecha = request.getFechaMovimiento();
 
         BigDecimal valor = request.getValor();
-
-        String numeroSoporte = trim(request.getNumeroSoporte());
 
         String concepto = conceptoTraslado(request);
 
@@ -459,15 +430,14 @@ public class TrasladosCajasService {
         // 5. Obtener departamento y operación de cajas
         // -----------------------------------------------------
 
-        Long departamento =
-                repository.obtenerDepartamentoOperativo(
-                        codigoDepartamentoTraslado.trim()
-                );
+        boolean esProvision = request.getModalidadTrasladoCaja()
+                == MovimientoFondoRequestDTO.ModalidadTrasladoCaja.PROVISION;
 
-        Long operacion =
-                repository.obtenerOperacionCaja(
-                        codigoOperacionTraslado.trim()
-                );
+        String codigoDepartamento = esProvision ? "22" : "27";
+        String codigoOperacion = esProvision ? "PROVISION_CAJA" : "REEMBOLSO_CAJA";
+
+        Long departamento = repository.obtenerDepartamentoOperativo(codigoDepartamento);
+        Long operacion = repository.obtenerOperacionCaja(codigoOperacion);
 
         if (departamento == null || operacion == null) {
 
@@ -494,6 +464,9 @@ public class TrasladosCajasService {
                     "No fue posible generar el comprobante contable."
             );
         }
+
+        // El consecutivo TS es el soporte de ambos movimientos físicos.
+        String numeroSoporte = comprobante;
 
         String referencia =
                 limitar(
@@ -605,7 +578,7 @@ public class TrasladosCajasService {
         );
 
         // -----------------------------------------------------
-        // 11. Asociar el mismo CE a ambos movimientos físicos
+        // 11. Asociar el mismo TS a ambos movimientos físicos
         // -----------------------------------------------------
 
         repository.asociarComprobanteContable(

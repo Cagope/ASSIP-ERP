@@ -69,6 +69,7 @@ export class CdatCancelacionComponent extends CdatCancelacionValores {
     this.error = '';
     this.preview = null;
     this.cdat = cdat;
+    this.resultados = [];
 
     this.model.idCuentaCdat = cdat.idCuentaCdat;
     this.model.idAgencia = cdat.idAgencia;

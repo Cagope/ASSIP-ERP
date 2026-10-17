@@ -5,52 +5,52 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d0577d07-00ee-4562-af4b-c1a4484e8934" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/salida_cheques/CajasSalidaChequesController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/salida_cheques/CajasSalidaChequesRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/salida_cheques/CajasSalidaChequesService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/salida_cheques/dto/CajasSalidaChequesChequeDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/salida_cheques/dto/CajasSalidaChequesPreviewDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/salida_cheques/dto/CajasSalidaChequesRequestDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/salida_cheques/dto/CajasSalidaChequesResponseDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/movimientos_fondos/MovimientosFondosController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/movimientos_fondos/MovimientosFondosService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/movimientos_fondos/dto/MovimientoFondoPreviewDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/movimientos_fondos/dto/MovimientoFondoRequestDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/movimientos_fondos/dto/MovimientoFondoResponseDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/traslados_cajas/TrasladosCajasService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cajas/salida-cheques/cajas-salida-cheques.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cajas/salida-cheques/cajas-salida-cheques.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cajas/salida-cheques/cajas-salida-cheques.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cajas/salida-cheques/cajas-salida-cheques.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/cajas/salida-cheques/cajas-salida-cheques.models.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/tesoreria/movimientos-fondos/movimientos-fondos.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/tesoreria/movimientos-fondos/movimientos-fondos.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/tesoreria/movimientos-fondos/movimientos-fondos.models.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/tesoreria/movimientos-fondos/movimientos-fondos.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/tesoreria/movimientos-fondos/movimientos-fondos.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/provisiones/CajasProvisionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/provisiones/CajasProvisionRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/provisiones/CajasProvisionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/provisiones/CajasProvisionService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/provisiones/CajasUsuariosRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/provisiones/CajasUsuariosRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/provisiones/CajasUsuariosService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/provisiones/CajasUsuariosService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/provisiones/dto/CajaDisponibleDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/provisiones/dto/CajaDisponibleDTO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/consignaciones_bancarias/ConsignacionBancariaController.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/consignaciones_bancarias/ConsignacionBancariaRepository.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/consignaciones_bancarias/ConsignacionBancariaService.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/consignaciones_bancarias/dto/ConsignacionBancariaPreviewResponse.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/consignaciones_bancarias/dto/ConsignacionBancariaRequest.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/consignaciones_bancarias/dto/ConsignacionBancariaResponse.java" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/autorizacion_comprobantes/AutorizacionComprobantesController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/autorizacion_comprobantes/AutorizacionComprobantesRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/autorizacion_comprobantes/AutorizacionComprobantesService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/autorizacion_comprobantes/dto/ComprobanteDecisionRequestDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/autorizacion_comprobantes/dto/ComprobanteDecisionResponseDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/autorizacion_comprobantes/dto/ComprobanteDetalleDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/autorizacion_comprobantes/dto/ComprobanteMovimientoCajaDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/autorizacion_comprobantes/dto/ComprobantePartidaDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/autorizacion_comprobantes/dto/ComprobanteResumenDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/operaciones_pendientes/TesoreriaOperacionesController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/operaciones_pendientes/TesoreriaOperacionesEjecucionesRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/operaciones_pendientes/TesoreriaOperacionesEjecucionesService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/operaciones_pendientes/TesoreriaOperacionesPendientesRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/operaciones_pendientes/TesoreriaOperacionesPendientesService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/operaciones_pendientes/dto/OperacionComprobantePreviewDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/operaciones_pendientes/dto/OperacionPagoLineaDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/operaciones_pendientes/dto/OperacionPagoRequestDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/operaciones_pendientes/dto/OperacionPagoResponseDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/retiros_bancarios/RetirosBancariosRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/retiros_bancarios/RetirosBancariosService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/traslados_bancarios/TrasladosBancariosRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/traslados_bancarios/TrasladosBancariosService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/tesoreria/autorizacion-comprobantes/autorizacion-comprobantes.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/tesoreria/autorizacion-comprobantes/autorizacion-comprobantes.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/tesoreria/autorizacion-comprobantes/autorizacion-comprobantes.models.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/tesoreria/autorizacion-comprobantes/autorizacion-comprobantes.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/tesoreria/autorizacion-comprobantes/autorizacion-comprobantes.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/tesoreria/operaciones-pendientes/operaciones-pendientes.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/tesoreria/operaciones-pendientes/operaciones-pendientes.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/tesoreria/operaciones-pendientes/operaciones-pendientes.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/tesoreria/operaciones-pendientes/operaciones-pendientes.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/tesoreria/operaciones-pendientes/operaciones-pendientes.models.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cdat/cancelacion/CdatCancelacionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cdat/cancelacion/CdatCancelacionRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cdat/cancelacion/CdatCancelacionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cdat/cancelacion/CdatCancelacionService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/movimientos_fondos/MovimientosFondosController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/movimientos_fondos/MovimientosFondosController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/movimientos_fondos/MovimientosFondosService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/movimientos_fondos/MovimientosFondosService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/movimientos_fondos/dto/MovimientoFondoRequestDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/movimientos_fondos/dto/MovimientoFondoRequestDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/traslados_cajas/TrasladosCajasRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/traslados_cajas/TrasladosCajasRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/traslados_cajas/TrasladosCajasService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/traslados_cajas/TrasladosCajasService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/cajas/cajas.menu.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cajas/cajas.menu.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/cajas/cajas.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cajas/cajas.routes.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/cajas/cierres/cajas-cierre.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cajas/cierres/cajas-cierre.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/cajas/cierres/cajas-cierre.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cajas/cierres/cajas-cierre.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/cajas/provisiones/cajas-provision.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cajas/provisiones/cajas-provision.component.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/cajas/provisiones/cajas-provision.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cajas/provisiones/cajas-provision.component.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/tesoreria/consignaciones-bancarias/consignaciones-bancarias.api.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/tesoreria/consignaciones-bancarias/consignaciones-bancarias.component.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/tesoreria/consignaciones-bancarias/consignaciones-bancarias.component.scss" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/tesoreria/consignaciones-bancarias/consignaciones-bancarias.component.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/tesoreria/consignaciones-bancarias/consignaciones-bancarias.models.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cdat/cancelacion/cdat-cancelacion.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cdat/cancelacion/cdat-cancelacion.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cdat/cancelacion/cdat-cancelacion.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cdat/cancelacion/cdat-cancelacion.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/tesoreria/movimientos-fondos/movimientos-fondos.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/tesoreria/movimientos-fondos/movimientos-fondos.api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/tesoreria/movimientos-fondos/movimientos-fondos.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/tesoreria/movimientos-fondos/movimientos-fondos.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/tesoreria/movimientos-fondos/movimientos-fondos.models.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/tesoreria/movimientos-fondos/movimientos-fondos.models.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/tesoreria/movimientos-fondos/movimientos-fondos.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/tesoreria/movimientos-fondos/movimientos-fondos.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/features/tesoreria/tesoreria-menu.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/tesoreria/tesoreria-menu.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/features/tesoreria/tesoreria.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/tesoreria/tesoreria.routes.ts" afterDir="false" />
     </list>

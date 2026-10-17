@@ -42,14 +42,10 @@ public class MovimientoFondoRequestDTO {
     // DATOS GENERALES
     // =========================================================
 
-    /**
-     * Agencia responsable del movimiento.
-     */
+    /** Agencia responsable del movimiento. */
     private Integer idAgencia;
 
-    /**
-     * Fecha efectiva del movimiento.
-     */
+    /** Fecha del documento o movimiento. */
     private LocalDate fechaMovimiento;
 
     /**
@@ -58,9 +54,7 @@ public class MovimientoFondoRequestDTO {
      */
     private String numeroSoporte;
 
-    /**
-     * Descripción u observaciones.
-     */
+    /** Descripción u observaciones. */
     private String observacion;
 
     /**
@@ -94,12 +88,37 @@ public class MovimientoFondoRequestDTO {
     private Long idCuentaBancariaDestino;
 
     // =========================================================
+    // MEDIO DE TRASLADO BANCARIO
+    // =========================================================
+
+    /**
+     * Medio utilizado para trasladar recursos entre bancos.
+     *
+     * EFECTIVO:
+     *   Transporte físico de efectivo entre entidades bancarias.
+     *
+     * BRE_B:
+     *   Transferencia electrónica mediante Bre-B.
+     *
+     * TRANSFERENCIA_NORMAL:
+     *   Transferencia bancaria electrónica tradicional.
+     *
+     * Este campo aplica exclusivamente a TRASLADO_BANCARIO.
+     */
+    private MedioTrasladoBancario medioTrasladoBancario;
+
+    public enum MedioTrasladoBancario {
+        EFECTIVO,
+        BRE_B,
+        TRANSFERENCIA_NORMAL
+    }
+
+    // =========================================================
     // CAJAS
     // =========================================================
 
     /**
      * Caja física desde la cual salen los fondos.
-     *
      * Utilizada en traslados entre cajas.
      */
     private Long idCajaOrigen;
@@ -117,12 +136,12 @@ public class MovimientoFondoRequestDTO {
      * Modalidad del traslado entre cajas.
      *
      * PROVISION:
-     *   Débito  Caja OPERATIVA
-     *   Crédito Caja CONTROL
+     *   Débito  Caja OPERATIVA.
+     *   Crédito Caja CONTROL.
      *
      * REEMBOLSO:
-     *   Débito  Caja CONTROL
-     *   Crédito Caja OPERATIVA
+     *   Débito  Caja CONTROL.
+     *   Crédito Caja OPERATIVA.
      *
      * TRASLADO:
      *   Entre cajas autorizadas.
@@ -163,14 +182,10 @@ public class MovimientoFondoRequestDTO {
     @Setter
     public static class EfectivoCajaDTO {
 
-        /**
-         * Caja física de origen.
-         */
+        /** Caja física de origen. */
         private Long idCaja;
 
-        /**
-         * Valor de efectivo entregado.
-         */
+        /** Valor de efectivo entregado. */
         private BigDecimal valor;
     }
 }

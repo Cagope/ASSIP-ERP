@@ -1,0 +1,683 @@
+/* =========================================================
+   ASSIP ERP
+   TESORERÍA - OPERACIONES PENDIENTES
+   ========================================================= */
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.page {
+  padding: 1rem;
+  min-width: 0;
+  color: #1f2937;
+}
+
+/* =========================================================
+   ENCABEZADO PRINCIPAL
+   ========================================================= */
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.35rem 0 0;
+    font-size: 0.88rem;
+    color: #64748b;
+    line-height: 1.5;
+  }
+}
+
+/* =========================================================
+   TARJETAS
+   ========================================================= */
+
+.card {
+  min-width: 0;
+  margin-bottom: 1rem;
+  padding: 1.15rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.65rem;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgb(15 23 42 / 4%);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0 0 0.85rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: transparent;
+
+  h3 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  p {
+    margin: 0.3rem 0 0;
+    font-size: 0.82rem;
+    color: #64748b;
+    line-height: 1.45;
+  }
+}
+
+/* =========================================================
+   INDICADORES
+   ========================================================= */
+
+.resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.resumen-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0;
+  min-height: 105px;
+  padding: 1.15rem 1.25rem;
+  border-left: 4px solid #2563eb;
+}
+
+.resumen-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.resumen-valor {
+  font-size: 1.45rem;
+  font-weight: 750;
+  color: #0f172a;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================
+   TABLAS
+   ========================================================= */
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+
+  thead {
+    background: #f1f5f9;
+  }
+
+  th {
+    padding: 0.8rem 0.7rem;
+    color: #475569;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-align: left;
+    white-space: nowrap;
+    border-bottom: 1px solid #cbd5e1;
+  }
+
+  td {
+    padding: 0.7rem;
+    color: #334155;
+    vertical-align: middle;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  tbody tr {
+    transition: background-color 0.15s ease;
+  }
+
+  tbody tr:hover {
+    background: #f8fafc;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  small {
+    font-size: 0.72rem;
+    color: #64748b;
+  }
+
+  .form-control,
+  .form-select {
+    min-width: 125px;
+    font-size: 0.8rem;
+  }
+
+  input[type='number'] {
+    min-width: 120px;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.fila-seleccionada,
+.data-table tbody tr.fila-seleccionada:hover {
+  background: #eff6ff;
+}
+
+.valor-destacado {
+  font-weight: 700;
+  color: #1d4ed8 !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.text-end {
+  text-align: right !important;
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+.text-danger {
+  color: #dc2626 !important;
+}
+
+/* =========================================================
+   ESTADOS
+   ========================================================= */
+
+.estado {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+}
+
+.estado-pendiente {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.estado-parcial {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+/* =========================================================
+   DETALLE DE LA OBLIGACIÓN
+   ========================================================= */
+
+.detalle-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.detalle-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+
+  span {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #64748b;
+  }
+
+  strong {
+    font-size: 0.9rem;
+    font-weight: 650;
+    color: #1e293b;
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* =========================================================
+   DISTRIBUCIÓN DEL PAGO
+   ========================================================= */
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.distribucion-resumen {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    min-width: 0;
+    padding: 0.85rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    background: #f8fafc;
+  }
+
+  span {
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+
+  strong {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+    overflow-wrap: anywhere;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* =========================================================
+   BOTONES Y ACCIONES
+   ========================================================= */
+
+.card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.nota-informativa {
+  flex: 1;
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.btn {
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn-sm {
+  font-size: 0.76rem;
+}
+
+/* =========================================================
+   MENSAJES Y ESTADOS VACÍOS
+   ========================================================= */
+
+.estado-vacio {
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 0.5rem;
+}
+
+.alert {
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1200px) {
+  .detalle-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .distribucion-resumen {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .resumen-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .detalle-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 0.75rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+
+    h2 {
+      font-size: 1.2rem;
+    }
+  }
+
+  .resumen-grid,
+  .detalle-grid,
+  .distribucion-resumen {
+    grid-template-columns: 1fr;
+  }
+
+  .resumen-card {
+    min-height: 85px;
+  }
+
+  .resumen-valor {
+    font-size: 1.25rem;
+  }
+
+  .card {
+    padding: 0.85rem;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-actions {
+    width: 100%;
+
+    .btn {
+      flex: 1;
+    }
+  }
+
+  .card-actions {
+    flex-direction: column;
+    align-items: stretch;
+
+    .btn {
+      width: 100%;
+    }
+  }
+}
+
+
+/* =========================================================
+   DISTRIBUCIÓN DE PAGOS - DISEÑO POR LÍNEAS
+   ========================================================= */
+
+.distribucion-card {
+  .card-header {
+    align-items: center;
+  }
+}
+
+.distribucion-lineas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.linea-pago {
+  min-width: 0;
+  padding: 1rem 1.15rem;
+  background: #f8fafc;
+  border: 1px solid #dbe3ed;
+  border-radius: 0.65rem;
+}
+
+.linea-pago-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.85rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.linea-pago-titulo {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+
+  strong {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #334155;
+  }
+}
+
+.linea-numero {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 0.4rem;
+  background: #e0eaff;
+  color: #1d4ed8;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.linea-pago-grid {
+  display: grid;
+  grid-template-columns:
+    minmax(150px, 1fr)
+    minmax(260px, 2fr)
+    minmax(170px, 1.2fr)
+    minmax(150px, 1fr);
+  gap: 0.9rem;
+  align-items: end;
+}
+
+.campo-pago {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+
+  label {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 650;
+    color: #475569;
+  }
+
+  .form-control,
+  .form-select {
+    width: 100%;
+    min-width: 0;
+    min-height: 35px;
+    font-size: 0.82rem;
+    border-color: #cbd5e1;
+    background-color: #ffffff;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 0.15rem rgb(37 99 235 / 10%);
+  }
+
+  .input-group-text {
+    font-size: 0.82rem;
+    font-weight: 600;
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+  }
+}
+
+.campo-observaciones {
+  grid-column: 1 / -1;
+}
+
+.campo-valor {
+  input {
+    font-variant-numeric: tabular-nums;
+    font-weight: 650;
+  }
+}
+
+.distribucion-card .distribucion-resumen {
+  margin-top: 1.15rem;
+}
+
+.distribucion-card .resumen-saldo {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+
+  strong {
+    color: #1d4ed8;
+  }
+
+  strong.text-danger {
+    color: #dc2626;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1200px) {
+  .linea-pago-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .campo-cuenta {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 650px) {
+  .linea-pago {
+    padding: 0.85rem;
+  }
+
+  .linea-pago-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .campo-observaciones {
+    grid-column: auto;
+  }
+
+  .linea-pago-header {
+    align-items: flex-start;
+  }
+}
+.distribucion-card .distribucion-resumen {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.resumen-diferencia {
+  background: #fff7ed !important;
+  border-color: #fed7aa !important;
+
+  strong {
+    color: #c2410c !important;
+  }
+
+  small {
+    font-size: 0.7rem;
+    color: #9a3412;
+  }
+}
+
+.resumen-diferencia.diferencia-cuadrada {
+  background: #f0fdf4 !important;
+  border-color: #bbf7d0 !important;
+
+  strong,
+  small {
+    color: #15803d !important;
+  }
+}
+
+.resumen-diferencia.diferencia-excedida {
+  background: #fef2f2 !important;
+  border-color: #fecaca !important;
+
+  strong,
+  small {
+    color: #b91c1c !important;
+  }
+}
+
+@media (max-width: 1200px) {
+  .distribucion-card .distribucion-resumen {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .distribucion-card .distribucion-resumen {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* =========================================================
+   VISTA PREVIA DEL COMPROBANTE CONTABLE
+   ========================================================= */
+
+/* Se reutilizan .card, .card-header, .detalle-grid,
+   .table-wrap, .data-table y .card-actions del módulo. */
+
+.data-table td.text-end,
+.data-table th.text-end {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.card .detalle-grid + .table-wrap {
+  margin-top: 1rem;
+}
+
+.card .table-wrap + .card-actions {
+  margin-top: 1rem;
+}
+
+.card-actions .btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+

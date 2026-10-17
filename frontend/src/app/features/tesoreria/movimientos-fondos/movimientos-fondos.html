@@ -1,4 +1,3 @@
-
 <div class="page">
 
   <!-- ===================================================== -->
@@ -8,13 +7,16 @@
   <div class="page-header">
     <div>
       <h2>Movimientos de Fondos</h2>
+
       <p>
-        Consignaciones bancarias y movimientos entre cajas.
-        Consulta y validación contable sin registrar operaciones.
+        Consignaciones, retiros, traslados entre cajas y traslados
+        bancarios. Vista previa contable, registro de operaciones
+        y preparación de comprobantes para autorización.
       </p>
+
     </div>
 
-    <span class="badge-preview">Modo consulta</span>
+    <span class="badge-preview">Validación previa</span>
   </div>
 
   <!-- ===================================================== -->
@@ -104,7 +106,7 @@
         />
       </div>
 
-      <div class="form-field">
+      <div class="form-field" *ngIf="!esTrasladoCajas">
         <label for="numeroSoporte">Número de soporte</label>
 
         <input
@@ -191,7 +193,13 @@
         <label for="cajaOrigen">Caja origen</label>
         <small>Solo cajas con provisión abierta para la fecha.</small>
 
+        <div class="info-box" *ngIf="provisionesConsultadas && cajasOrigen.length === 1">
+          <strong>{{ cajasOrigen[0].codigoCaja }} - {{ cajasOrigen[0].nombreCaja }}</strong>
+          <small>Única caja de origen habilitada en esta agencia.</small>
+        </div>
+
         <select
+          *ngIf="cajasOrigen.length > 1"
           id="cajaOrigen"
           name="cajaOrigen"
           [(ngModel)]="idCajaOrigen"
@@ -217,7 +225,13 @@
         <label for="cajaDestino">Caja destino</label>
         <small>Solo cajas con provisión abierta para la fecha.</small>
 
+        <div class="info-box" *ngIf="provisionesConsultadas && cajasDestino.length === 1">
+          <strong>{{ cajasDestino[0].codigoCaja }} - {{ cajasDestino[0].nombreCaja }}</strong>
+          <small>Única caja de destino habilitada en esta agencia.</small>
+        </div>
+
         <select
+          *ngIf="cajasDestino.length > 1"
           id="cajaDestino"
           name="cajaDestino"
           [(ngModel)]="idCajaDestino"
@@ -254,6 +268,282 @@
       No hay cajas cargadas. Seleccione una agencia válida.
     </p>
 
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- RETIRO BANCARIO -->
+  <!-- ===================================================== -->
+
+  <section class="card" *ngIf="esRetiro">
+
+    <div class="card-header">
+      <h3>Retiro bancario</h3>
+      <p>
+        Registre la salida de fondos de una cuenta bancaria
+        hacia una caja CONTROL de la agencia.
+        La operación requiere autorización posterior.
+      </p>
+    </div>
+
+    <div class="form-grid">
+
+      <!-- CUENTA BANCARIA ORIGEN -->
+
+      <div class="form-field full-width">
+
+        <label for="cuentaRetiro">
+          Cuenta bancaria de origen
+        </label>
+
+        <select
+          id="cuentaRetiro"
+          name="cuentaRetiro"
+          [(ngModel)]="idCuentaBancariaOrigen"
+          (ngModelChange)="cambiarDatos()"
+          [disabled]="consultando || retiroPreparado"
+        >
+          <option [ngValue]="null">
+            Seleccione una cuenta bancaria
+          </option>
+
+          <option
+            *ngFor="let cuenta of cuentasRetiro"
+            [ngValue]="cuenta.idCuentaBancaria"
+          >
+            {{ cuenta.nombreBanco }}
+            - {{ cuenta.numeroCuenta }}
+            - {{ cuenta.nombreCuenta }}
+          </option>
+
+        </select>
+
+        <small>
+          Cuenta desde la cual se retirarán los fondos.
+        </small>
+
+        <p
+          class="empty-state"
+          *ngIf="!consultando && cuentasRetiro.length === 0"
+        >
+          No hay cuentas bancarias habilitadas para retiro
+          en la agencia seleccionada.
+        </p>
+
+      </div>
+
+      <!-- CAJA CONTROL DESTINO -->
+
+      <div class="form-field full-width">
+
+        <label for="cajaControlRetiro">
+          Caja CONTROL de destino
+        </label>
+
+        <div
+          class="info-box"
+          *ngIf="cajasControlRetiro.length === 1"
+        >
+          <strong>
+            {{ cajasControlRetiro[0].codigoCaja }}
+            - {{ cajasControlRetiro[0].descripcion }}
+          </strong>
+
+          <small>
+            Única caja CONTROL disponible en esta agencia.
+          </small>
+        </div>
+
+        <select
+          *ngIf="cajasControlRetiro.length !== 1"
+          id="cajaControlRetiro"
+          name="cajaControlRetiro"
+          [(ngModel)]="idCajaDestino"
+          (ngModelChange)="cambiarDatos()"
+          [disabled]="consultando || retiroPreparado"
+        >
+          <option [ngValue]="null">
+            Seleccione una caja CONTROL
+          </option>
+
+          <option
+            *ngFor="let caja of cajasControlRetiro"
+            [ngValue]="caja.idCaja"
+          >
+            {{ caja.codigoCaja }}
+            - {{ caja.descripcion }}
+          </option>
+        </select>
+
+        <small>
+          El efectivo ingresará a esta caja después
+          de autorizar el comprobante.
+        </small>
+
+        <p
+          class="empty-state"
+          *ngIf="!consultando && cajasControlRetiro.length === 0"
+        >
+          No hay cajas CONTROL disponibles
+          en la agencia seleccionada.
+        </p>
+
+      </div>
+
+      <!-- VALOR DEL RETIRO -->
+
+      <div class="form-field">
+
+        <label for="valorRetiro">
+          Valor del retiro
+        </label>
+
+        <input
+          id="valorRetiro"
+          name="valorRetiro"
+          type="text"
+          numericFormat
+          class="input-number"
+          autocomplete="off"
+          [(ngModel)]="valor"
+          (ngModelChange)="cambiarDatos()"
+          [disabled]="retiroPreparado"
+          placeholder="0"
+        />
+
+      </div>
+
+    </div>
+
+    <!-- INFORMACIÓN DEL PROCESO -->
+
+    <div class="info-box">
+
+      <strong>
+        Preparación y autorización
+      </strong>
+
+      <p>
+        La vista previa permite verificar las cuentas
+        contables y el valor del retiro.
+      </p>
+
+      <p>
+        Al preparar la operación se genera un comprobante
+        PENDIENTE de autorización.
+      </p>
+
+      <p>
+        El retiro no modifica definitivamente la contabilidad
+        ni la provisión de la caja CONTROL hasta completar
+        el proceso de autorización.
+      </p>
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- TRASLADO BANCARIO -->
+  <!-- ===================================================== -->
+
+  <section class="card" *ngIf="esTrasladoBancario">
+    <div class="card-header">
+      <h3>Traslado bancario</h3>
+      <p>
+        Traslade recursos entre cuentas bancarias habilitadas.
+        La preparación genera un comprobante pendiente de autorización.
+      </p>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-field full-width">
+        <label for="medioTrasladoBancario">Medio de traslado</label>
+        <select
+          id="medioTrasladoBancario"
+          name="medioTrasladoBancario"
+          [(ngModel)]="medioTrasladoBancario"
+          (ngModelChange)="cambiarDatos()"
+          [disabled]="aplicando || trasladoBancarioPreparado"
+        >
+          <option *ngFor="let medio of mediosTrasladoBancario" [ngValue]="medio.valor">
+            {{ medio.etiqueta }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-field full-width">
+        <label for="cuentaOrigenTraslado">Cuenta bancaria de origen</label>
+        <select
+          id="cuentaOrigenTraslado"
+          name="cuentaOrigenTraslado"
+          [(ngModel)]="idCuentaBancariaOrigen"
+          (ngModelChange)="cambiarDatos()"
+          [disabled]="consultando || aplicando || trasladoBancarioPreparado"
+        >
+          <option [ngValue]="null">Seleccione una cuenta de origen</option>
+          <option *ngFor="let cuenta of cuentasOrigenTraslado" [ngValue]="cuenta.idCuentaBancaria">
+            {{ cuenta.nombreBanco }} - {{ cuenta.numeroCuenta }} - {{ cuenta.nombreCuenta }}
+          </option>
+        </select>
+        <small>Solo cuentas habilitadas para trasladar recursos.</small>
+        <p class="empty-state" *ngIf="!consultando && cuentasOrigenTraslado.length === 0">
+          No hay cuentas habilitadas como origen en esta agencia.
+        </p>
+      </div>
+
+      <div class="form-field full-width">
+        <label for="cuentaDestinoTraslado">Cuenta bancaria de destino</label>
+        <select
+          id="cuentaDestinoTraslado"
+          name="cuentaDestinoTraslado"
+          [(ngModel)]="idCuentaBancariaDestino"
+          (ngModelChange)="cambiarDatos()"
+          [disabled]="consultando || aplicando || trasladoBancarioPreparado"
+        >
+          <option [ngValue]="null">Seleccione una cuenta de destino</option>
+          <option
+            *ngFor="let cuenta of cuentasDestinoTraslado"
+            [ngValue]="cuenta.idCuentaBancaria"
+            [disabled]="cuenta.idCuentaBancaria === idCuentaBancariaOrigen"
+          >
+            {{ cuenta.nombreBanco }} - {{ cuenta.numeroCuenta }} - {{ cuenta.nombreCuenta }}
+          </option>
+        </select>
+        <small>La cuenta de destino debe ser diferente de la cuenta de origen.</small>
+        <p class="empty-state" *ngIf="!consultando && cuentasDestinoTraslado.length === 0">
+          No hay cuentas habilitadas como destino en esta agencia.
+        </p>
+      </div>
+
+      <div class="form-field">
+        <label for="valorTrasladoBancario">Valor del traslado</label>
+        <input
+          id="valorTrasladoBancario"
+          name="valorTrasladoBancario"
+          type="text"
+          numericFormat
+          class="input-number"
+          autocomplete="off"
+          [(ngModel)]="valor"
+          (ngModelChange)="cambiarDatos()"
+          [disabled]="trasladoBancarioPreparado"
+          placeholder="0"
+        />
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>Preparación y autorización</strong>
+      <p>
+        La vista previa permite verificar el débito a la cuenta bancaria de destino
+        y el crédito a la cuenta bancaria de origen.
+      </p>
+      <p>
+        Al preparar se genera un comprobante PENDIENTE. La contabilización
+        definitiva se realizará al autorizarlo, sin afectar provisiones ni cajas.
+      </p>
+    </div>
   </section>
 
   <!-- ===================================================== -->
@@ -421,6 +711,7 @@
 
   </section>
 
+
   <!-- ===================================================== -->
   <!-- ACCIONES -->
   <!-- ===================================================== -->
@@ -428,6 +719,8 @@
   <section class="card actions-card">
 
     <div class="actions">
+
+      <!-- LIMPIAR FORMULARIO -->
 
       <button
         type="button"
@@ -438,33 +731,158 @@
         Limpiar
       </button>
 
+      <!-- VISTA PREVIA CONTABLE -->
+
       <button
         type="button"
         class="btn btn-primary"
         (click)="consultarPreview()"
-        [disabled]="cargando || aplicando || consultando || consultandoProvisiones || !provisionesConsultadas || !idAgencia"
+        [disabled]="
+          cargando ||
+          aplicando ||
+          consultando ||
+          retiroPreparado ||
+          trasladoBancarioPreparado ||
+          !idAgencia ||
+          (!esRetiro && !esTrasladoBancario &&
+            (consultandoProvisiones || !provisionesConsultadas))
+        "
       >
-        {{ cargando ? 'Consultando...' : 'Vista previa contable' }}
+        {{
+        cargando
+        ? 'Consultando...'
+        : 'Vista previa contable'
+        }}
       </button>
+
+      <!-- REGISTRO DEFINITIVO:
+           CONSIGNACIÓN Y TRASLADO ENTRE CAJAS -->
 
       <button
         type="button"
         class="btn btn-primary"
-        *ngIf="preview?.cuadrado && !movimientoAplicado"
+        *ngIf="
+          !esRetiro && !esTrasladoBancario &&
+          preview?.cuadrado &&
+          !movimientoAplicado
+        "
         (click)="aplicarMovimiento()"
-        [disabled]="cargando || aplicando || consultando || consultandoProvisiones || !provisionesConsultadas"
+        [disabled]="
+          cargando ||
+          aplicando ||
+          consultando ||
+          consultandoProvisiones ||
+          !provisionesConsultadas
+        "
       >
-        {{ aplicando ? 'Registrando...' : 'Confirmar y registrar movimiento' }}
+        {{
+        aplicando
+        ? 'Registrando...'
+        : 'Confirmar y registrar movimiento'
+        }}
+      </button>
+
+      <!-- PREPARACIÓN DE RETIRO BANCARIO -->
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        *ngIf="
+          esRetiro &&
+          preview?.cuadrado &&
+          !retiroPreparado
+        "
+        (click)="prepararRetiro()"
+        [disabled]="
+          cargando ||
+          aplicando ||
+          consultando
+        "
+      >
+        {{
+        aplicando
+        ? 'Preparando retiro...'
+        : 'Preparar retiro bancario'
+        }}
+      </button>
+
+      <!-- PREPARACIÓN DE TRASLADO BANCARIO -->
+      <button
+        type="button"
+        class="btn btn-primary"
+        *ngIf="esTrasladoBancario && preview?.cuadrado && !trasladoBancarioPreparado"
+        (click)="prepararTrasladoBancario()"
+        [disabled]="cargando || aplicando || consultando"
+      >
+        {{ aplicando ? 'Preparando traslado...' : 'Preparar traslado bancario' }}
       </button>
 
     </div>
 
-    <p class="actions-note">
-      La vista previa no registra movimientos. El botón «Confirmar y registrar movimiento»
-      ejecuta el registro definitivo y genera el comprobante contable.
+    <!-- INFORMACIÓN SEGÚN LA OPERACIÓN -->
+
+    <p
+      class="actions-note"
+      *ngIf="!esRetiro && !esTrasladoBancario"
+    >
+      La vista previa no registra movimientos.
+      El botón «Confirmar y registrar movimiento»
+      ejecuta el registro definitivo y genera
+      el comprobante contable.
     </p>
 
+    <p
+      class="actions-note"
+      *ngIf="esRetiro"
+    >
+      La vista previa no registra movimientos.
+      El botón «Preparar retiro bancario»
+      genera un comprobante PENDIENTE.
+      La contabilización definitiva y el ingreso
+      del efectivo a la caja CONTROL se realizan
+      después de la autorización.
+    </p>
+
+    <p class="actions-note" *ngIf="esTrasladoBancario">
+      La vista previa no registra movimientos. Preparar el traslado
+      genera un comprobante PENDIENTE de autorización, sin contabilización
+      definitiva ni movimientos de caja.
+    </p>
+
+    <div class="info-box" *ngIf="esTrasladoBancario && trasladoBancarioPreparado">
+      <strong>Traslado bancario preparado correctamente</strong>
+      <p>Comprobante interno: <strong>{{ idComprobantePendiente }}</strong></p>
+      <p>Estado: PENDIENTE de autorización.</p>
+      <p>La operación todavía no ha sido contabilizada definitivamente.</p>
+    </div>
+
+    <!-- RETIRO PREPARADO -->
+
+    <div
+      class="info-box"
+      *ngIf="esRetiro && retiroPreparado"
+    >
+      <strong>
+        Retiro bancario preparado correctamente
+      </strong>
+
+      <p>
+        Comprobante interno:
+        <strong>{{ idComprobantePendiente }}</strong>
+      </p>
+
+      <p>
+        Estado: PENDIENTE de autorización.
+      </p>
+
+      <p>
+        La operación todavía no ha sido
+        contabilizada definitivamente.
+      </p>
+    </div>
+
   </section>
+
 
   <!-- ===================================================== -->
   <!-- VISTA PREVIA CONTABLE -->
@@ -491,7 +909,7 @@
 
       <div>
         <span>Documento soporte</span>
-        <strong>{{ resultado.numeroSoporte }}</strong>
+        <strong>{{ resultado.numeroSoporte || (esTrasladoCajas ? 'Se asignará al registrar' : '—') }}</strong>
       </div>
 
       <div>

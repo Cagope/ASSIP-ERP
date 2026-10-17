@@ -1,0 +1,794 @@
+package co.assip.erp.tesoreria.operaciones_pendientes;
+
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.cdat.cancelacion.CdatCancelacionRepository;
+import co.assip.erp.contabilidad.auxiliares_contables.ContabilidadRegistroService;
+import co.assip.erp.contabilidad.consecutivos_comprobantes.ConsecutivosComprobantesService;
+import co.assip.erp.contabilidad.origen_comprobantes.dto.OrigenComprobanteDTO;
+import co.assip.erp.tesoreria.operaciones_pendientes.dto.OperacionPagoResponseDTO;
+import co.assip.erp.contabilidad.auxiliares_contables.dto.MovimientoContableDTO;
+import co.assip.erp.tesoreria.operaciones_pendientes.dto.OperacionPagoRequestDTO;
+import co.assip.erp.tesoreria.operaciones_pendientes.dto.OperacionPagoLineaDTO;
+import co.assip.erp.tesoreria.operaciones_pendientes.dto.OperacionComprobantePreviewDTO;
+import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.Objects;
+
+@Service
+@RequiredArgsConstructor
+public class TesoreriaOperacionesEjecucionesService {
+
+    private static final String PENDIENTE = "PENDIENTE";
+    private static final String PARCIAL = "PARCIAL";
+    private static final String TRANSFERENCIA = "TRANSFERENCIA";
+
+    private final TesoreriaOperacionesEjecucionesRepository repository;
+    private final UsuarioSesionService usuarioSesionService;
+    private final JdbcTemplate jdbcTemplate;
+    private final CdatCancelacionRepository cdatCancelacionRepository;
+    private final ContabilidadRegistroService contabilidadRegistroService;
+    private final ConsecutivosComprobantesService consecutivosComprobantesService;
+
+    private static final String CHEQUE = "CHEQUE";
+
+    // =========================================================
+    // CONSULTAS
+    // =========================================================
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> listarEjecuciones(
+            Long idOperacion
+    ) {
+        validarId(idOperacion, "La operación");
+
+        Map<String, Object> operacion =
+                obtenerOperacion(idOperacion);
+
+        validarAgencia(operacion);
+
+        return repository.listarEjecuciones(idOperacion);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> consultarEjecucion(
+            Long idEjecucion
+    ) {
+        validarId(idEjecucion, "La ejecución");
+
+        Map<String, Object> ejecucion =
+                repository.buscarEjecucion(idEjecucion);
+
+        if (ejecucion == null) {
+            throw new IllegalArgumentException(
+                    "La ejecución no existe."
+            );
+        }
+
+        Long idOperacion = numeroLong(
+                ejecucion,
+                "id_operacion_pendiente"
+        );
+
+        validarAgencia(obtenerOperacion(idOperacion));
+
+        return ejecucion;
+    }
+
+    @Transactional(readOnly = true)
+    public BigDecimal consultarSaldoDisponible(
+            Long idOperacion
+    ) {
+        validarId(idOperacion, "La operación");
+
+        Map<String, Object> operacion =
+                obtenerOperacion(idOperacion);
+
+        validarAgencia(operacion);
+
+        return calcularSaldoDisponible(idOperacion, operacion);
+    }
+
+
+    // =========================================================
+    // VISTA PREVIA CONTABLE - NO PERSISTE
+    // =========================================================
+
+    @Transactional(readOnly = true)
+    public OperacionComprobantePreviewDTO generarVistaPrevia(
+            OperacionPagoRequestDTO request
+    ) {
+        if (request == null) {
+            throw new IllegalArgumentException("La solicitud es obligatoria.");
+        }
+        Long idOperacion = request.idOperacion();
+        validarId(idOperacion, "La operación");
+        if (request.lineas() == null || request.lineas().isEmpty()) {
+            throw new IllegalArgumentException("Debe agregar líneas de pago.");
+        }
+
+        Map<String, Object> operacion = obtenerOperacion(idOperacion);
+        validarAgencia(operacion);
+        validarEstadoPreparacion(operacion);
+
+        Integer idAgencia = numeroEntero(operacion, "id_agencia");
+        Integer idBeneficiario = numeroEntero(operacion, "id_datos_personal");
+        BigDecimal original = numeroDecimal(operacion, "valor_original");
+        BigDecimal ejecutado = numeroDecimal(operacion, "valor_ejecutado");
+        BigDecimal disponible = calcularSaldoDisponible(idOperacion, operacion);
+        if (disponible.signum() <= 0) {
+            throw new IllegalStateException("La obligación no tiene saldo disponible.");
+        }
+
+        // La integración contable habilitada en esta etapa es CDAT.
+        String modulo = Objects.toString(operacion.get("modulo_origen"), "");
+        if (!"CDAT".equalsIgnoreCase(modulo)) {
+            throw new IllegalStateException(
+                    "El origen " + modulo + " aún no tiene contabilización de pagos."
+            );
+        }
+        Integer cuentaPorPagar =
+                cdatCancelacionRepository.obtenerCuentaConceptoCancelacionCdat(
+                        idAgencia, "CUENTA_POR_PAGAR_CDAT"
+                );
+
+        BigDecimal total = BigDecimal.ZERO;
+        List<MovimientoContableDTO> movimientos = new ArrayList<>();
+        for (OperacionPagoLineaDTO linea : request.lineas()) {
+            if (linea == null) {
+                throw new IllegalArgumentException("Hay una línea de pago vacía.");
+            }
+            validarValor(linea.valor());
+            validarBeneficiario(operacion, linea.idBeneficiario());
+            String medio = normalizarMedioPago(linea.medioPago());
+            if (!TRANSFERENCIA.equals(medio) && !CHEQUE.equals(medio)) {
+                throw new IllegalArgumentException("Medio de pago no permitido: " + medio);
+            }
+            if (CHEQUE.equals(medio) && limpiar(linea.numeroDocumento()) == null) {
+                throw new IllegalArgumentException("El número de cheque es obligatorio.");
+            }
+            validarId(linea.idCuentaBancaria(), "La cuenta bancaria");
+
+            // Misma parametrización bancaria que la validación de preparación.
+            List<Integer> cuentas = jdbcTemplate.queryForList("""
+                    SELECT cba.id_cuenta_contable
+                    FROM tesoreria.cuentas_bancarias_agencias cba
+                    JOIN tesoreria.cuentas_bancarias cb
+                      ON cb.id_cuenta_bancaria = cba.id_cuenta_bancaria
+                    JOIN tesoreria.bancos b ON b.codigo_banco = cb.codigo_banco
+                    JOIN contabilidad.catalogo_cuentas cc
+                      ON cc.id_catalogo_cuenta = cba.id_cuenta_contable
+                    WHERE cba.id_agencia = ?
+                      AND cba.id_cuenta_bancaria = ?
+                      AND cba.activo = TRUE
+                      AND cba.permite_pagar = TRUE
+                      AND cb.activo = TRUE
+                      AND cb.estado_cuenta = 'ACTIVA'
+                      AND b.activo = TRUE
+                      AND cc.id_agencia = cba.id_agencia
+                      AND cc.cuenta_operable = TRUE
+                    """, Integer.class, idAgencia, linea.idCuentaBancaria());
+            if (cuentas.size() != 1 || cuentas.get(0) == null) {
+                throw new IllegalArgumentException(
+                        "La cuenta bancaria no está habilitada para pagos en esta agencia."
+                );
+            }
+            MovimientoContableDTO credito = movimiento(
+                    idAgencia, idBeneficiario, cuentas.get(0),
+                    BigDecimal.ZERO, linea.valor(),
+                    detallePagoCdat(medio, limpiar(linea.numeroDocumento())),
+                    limpiar(linea.numeroDocumento()), idOperacion
+            );
+            movimientos.add(credito);
+            total = total.add(linea.valor());
+        }
+        if (total.compareTo(disponible) > 0) {
+            throw new IllegalArgumentException(
+                    "El pago supera el saldo disponible: " + disponible.toPlainString()
+            );
+        }
+        movimientos.add(0, movimiento(
+                idAgencia, idBeneficiario, cuentaPorPagar,
+                total, BigDecimal.ZERO,
+                "Cancelación de obligación CDAT - Pago al beneficiario",
+                null, idOperacion
+        ));
+
+        return new OperacionComprobantePreviewDTO(
+                idOperacion, idAgencia, idBeneficiario,
+                original, ejecutado, disponible, total,
+                disponible.subtract(total), total, total,
+                true, List.copyOf(movimientos),
+                consultarCuentasContables(idAgencia, movimientos)
+        );
+    }
+
+    private String detallePagoCdat(String medio, String referencia) {
+        String detalle = CHEQUE.equals(medio)
+                ? "Pago de CDAT mediante cheque"
+                : "Pago de CDAT mediante transferencia bancaria";
+        return referencia == null ? detalle : detalle + " N.º " + referencia;
+    }
+
+    /** Datos de presentación; no altera los movimientos enviados a Contabilidad. */
+    private Map<Integer, String> consultarCuentasContables(
+            Integer idAgencia,
+            List<MovimientoContableDTO> movimientos
+    ) {
+        Map<Integer, String> cuentas = new LinkedHashMap<>();
+        for (MovimientoContableDTO movimiento : movimientos) {
+            Integer idCuenta = movimiento.getIdCatalogoCuenta();
+            if (cuentas.containsKey(idCuenta)) {
+                continue;
+            }
+            List<Map<String, Object>> filas = jdbcTemplate.queryForList("""
+                    SELECT codigo_cuenta, nombre_cuenta
+                    FROM contabilidad.catalogo_cuentas
+                    WHERE id_catalogo_cuenta = ? AND id_agencia = ?
+                    """, idCuenta, idAgencia);
+            if (filas.size() != 1) {
+                throw new IllegalStateException(
+                        "No se encontró la cuenta contable " + idCuenta
+                                + " para la agencia " + idAgencia);
+            }
+            Map<String, Object> fila = filas.get(0);
+            cuentas.put(idCuenta,
+                    fila.get("codigo_cuenta") + " - " + fila.get("nombre_cuenta"));
+        }
+        return cuentas;
+    }
+
+    private MovimientoContableDTO movimiento(
+            Integer idAgencia,
+            Integer idBeneficiario,
+            Integer idCuenta,
+            BigDecimal debito,
+            BigDecimal credito,
+            String detalle,
+            String soporte,
+            Long idOperacion
+    ) {
+        MovimientoContableDTO m = new MovimientoContableDTO();
+        m.setIdAgencia(idAgencia);
+        m.setIdDatosPersonal(idBeneficiario);
+        m.setIdCatalogoCuenta(idCuenta);
+        m.setFechaAuxiliar(LocalDate.now());
+        m.setValorDebito(debito);
+        m.setValorCredito(credito);
+        m.setDetalleMovimiento(detalle);
+        m.setDocumentoSoporte(soporte);
+        m.setOrigenModulo("TESORERIA");
+        m.setDocumentoOrigen("OPERACION-" + idOperacion);
+        return m;
+    }
+
+    // =========================================================
+    // CONFIRMACIÓN DEFINITIVA - TRANSACCIÓN ÚNICA
+    // =========================================================
+
+    @Transactional
+    public OperacionPagoResponseDTO confirmarPago(OperacionPagoRequestDTO request) {
+        if (request == null) {
+            throw new IllegalArgumentException("La solicitud es obligatoria.");
+        }
+        validarId(request.idOperacion(), "La operación");
+        if (request.lineas() == null || request.lineas().isEmpty()) {
+            throw new IllegalArgumentException("Debe agregar líneas de pago.");
+        }
+
+        Long idOperacion = request.idOperacion();
+        Map<String, Object> operacion = repository.bloquearOperacion(idOperacion);
+        validarAgencia(operacion);
+        validarEstadoPreparacion(operacion);
+
+        // La vista previa comparte las validaciones contables y bancarias.
+        // El bloqueo de la obligación permanece hasta el commit.
+        OperacionComprobantePreviewDTO preview = generarVistaPrevia(request);
+        Integer idAgencia = numeroEntero(operacion, "id_agencia");
+        Integer idUsuario = usuarioSesionService.idUsuario();
+        BigDecimal total = preview.totalPago();
+        BigDecimal ejecutado = numeroDecimal(operacion, "valor_ejecutado");
+        BigDecimal original = numeroDecimal(operacion, "valor_original");
+        BigDecimal nuevoEjecutado = ejecutado.add(total);
+        BigDecimal saldo = original.subtract(nuevoEjecutado);
+        if (saldo.signum() < 0) {
+            throw new IllegalStateException("El pago supera el saldo de la obligación.");
+        }
+
+        // CE: comprobante de egreso, según la convención usada por Tesorería.
+        String tipo = "CE";
+        String numero = consecutivosComprobantesService.generarNumeroDefinitivo(
+                tipo, idAgencia, idUsuario);
+        OrigenComprobanteDTO origen = new OrigenComprobanteDTO();
+        origen.setOrigenTipo("AUTO");
+        origen.setModuloOrigen("TESORERIA");
+        origen.setProcesoOrigen("OPERACIONES_PENDIENTES");
+        origen.setTablaOrigen("tesoreria.operaciones_pendientes");
+        origen.setIdOrigen(idOperacion);
+
+        String conceptoOperacion = Objects.toString(
+                operacion.get("concepto"), ""
+        ).trim();
+
+        String conceptoComprobante =
+                "PAGO TESORERÍA - " + conceptoOperacion
+                        + " - VALOR $" + total.toPlainString();
+
+        contabilidadRegistroService.registrarComprobante(
+                idAgencia,
+                tipo,
+                numero,
+                conceptoComprobante,
+                origen,
+                preview.movimientos(),
+                idUsuario
+        );
+
+        List<Long> ids = new ArrayList<>();
+        for (OperacionPagoLineaDTO linea : request.lineas()) {
+            Integer numeroLinea = repository.siguienteNumeroLinea(idOperacion);
+            Long idEjecucion = repository.insertarPreparada(
+                    idOperacion, numeroLinea, linea.idBeneficiario(),
+                    linea.idCuentaBancaria(), normalizarMedioPago(linea.medioPago()),
+                    limpiar(linea.numeroDocumento()), linea.valor(),
+                    limpiar(linea.observaciones()), idUsuario);
+            repository.confirmarEjecucion(idEjecucion, tipo, numero, idUsuario);
+            ids.add(idEjecucion);
+        }
+
+        String estado = saldo.signum() == 0 ? "COMPLETADA" : PARCIAL;
+
+        repository.actualizarSaldoOperacion(
+                idOperacion,
+                nuevoEjecutado,
+                estado,
+                idUsuario
+        );
+
+        return new OperacionPagoResponseDTO(
+                idOperacion, idAgencia, tipo, numero, LocalDateTime.now(),
+                total, nuevoEjecutado, saldo, estado, ids.size(),
+                List.copyOf(ids), "Pago contabilizado correctamente.");
+    }
+
+    // =========================================================
+    // PREPARACIÓN DE EJECUCIONES
+    // =========================================================
+
+    /**
+     * Prepara una ejecución bancaria.
+     *
+     * No contabiliza ni confirma el pago.
+     *
+     * La obligación se bloquea antes de validar el saldo
+     * y permanece bloqueada hasta finalizar la transacción.
+     */
+    @Transactional
+    public Long preparar(
+            Long idOperacion,
+            Integer idBeneficiario,
+            Long idCuentaBancaria,
+            String medioPago,
+            String numeroDocumento,
+            BigDecimal valor,
+            String observaciones
+    ) {
+        validarId(idOperacion, "La operación");
+        validarValor(valor);
+
+        String medioNormalizado =
+                normalizarMedioPago(medioPago);
+
+        if (!TRANSFERENCIA.equals(medioNormalizado)
+                && !CHEQUE.equals(medioNormalizado)) {
+            throw new IllegalArgumentException(
+                    "El medio de pago debe ser TRANSFERENCIA o CHEQUE."
+            );
+        }
+
+        if (CHEQUE.equals(medioNormalizado)
+                && limpiar(numeroDocumento) == null) {
+            throw new IllegalArgumentException(
+                    "El número de cheque es obligatorio."
+            );
+        }
+
+        Map<String, Object> operacion =
+                repository.bloquearOperacion(idOperacion);
+
+        validarAgencia(operacion);
+        validarEstadoPreparacion(operacion);
+
+        Integer idAgencia = numeroEntero(
+                operacion,
+                "id_agencia"
+        );
+
+        validarBeneficiario(
+                operacion,
+                idBeneficiario
+        );
+
+        validarCuentaBancaria(
+                idCuentaBancaria,
+                idAgencia
+        );
+
+        BigDecimal disponible =
+                calcularSaldoDisponible(
+                        idOperacion,
+                        operacion
+                );
+
+        if (valor.compareTo(disponible) > 0) {
+            throw new IllegalArgumentException(
+                    "El valor solicitado supera el saldo "
+                            + "disponible de la obligación. "
+                            + "Disponible: "
+                            + disponible.toPlainString()
+            );
+        }
+
+        Integer numeroLinea =
+                repository.siguienteNumeroLinea(idOperacion);
+
+        if (numeroLinea == null || numeroLinea <= 0) {
+            throw new IllegalStateException(
+                    "No fue posible determinar el número "
+                            + "de línea de la ejecución."
+            );
+        }
+
+        Integer idUsuario =
+                usuarioSesionService.idUsuario();
+
+        return repository.insertarPreparada(
+                idOperacion,
+                numeroLinea,
+                idBeneficiario,
+                idCuentaBancaria,
+                medioNormalizado,
+                limpiar(numeroDocumento),
+                valor,
+                limpiar(observaciones),
+                idUsuario
+        );
+    }
+
+    // =========================================================
+    // VALIDACIONES DE LA OPERACIÓN
+    // =========================================================
+
+    private Map<String, Object> obtenerOperacion(
+            Long idOperacion
+    ) {
+        Map<String, Object> operacion =
+                repository.buscarOperacion(idOperacion);
+
+        if (operacion == null) {
+            throw new IllegalArgumentException(
+                    "La operación pendiente no existe."
+            );
+        }
+
+        return operacion;
+    }
+
+    private void validarAgencia(
+            Map<String, Object> operacion
+    ) {
+        Integer idAgencia =
+                numeroEntero(operacion, "id_agencia");
+
+        usuarioSesionService.validarAgencia(idAgencia);
+    }
+
+    private void validarEstadoPreparacion(
+            Map<String, Object> operacion
+    ) {
+        String estado = Objects.toString(
+                operacion.get("estado"),
+                ""
+        );
+
+        if (!PENDIENTE.equals(estado)
+                && !PARCIAL.equals(estado)) {
+            throw new IllegalStateException(
+                    "La obligación no permite nuevas "
+                            + "ejecuciones. Estado: "
+                            + estado
+            );
+        }
+
+        String naturaleza = Objects.toString(
+                operacion.get("naturaleza"),
+                ""
+        );
+
+        if (!"SALIDA".equals(naturaleza)) {
+            throw new IllegalStateException(
+                    "Esta preparación corresponde únicamente "
+                            + "a operaciones de salida."
+            );
+        }
+    }
+
+    // =========================================================
+    // VALIDACIÓN DEL BENEFICIARIO
+    // =========================================================
+
+    /**
+     * Por seguridad, el beneficiario debe corresponder
+     * al tercero de la obligación.
+     *
+     * El pago a terceros diferentes requerirá
+     * una funcionalidad de autorización específica.
+     */
+    private void validarBeneficiario(
+            Map<String, Object> operacion,
+            Integer idBeneficiario
+    ) {
+        if (idBeneficiario == null
+                || idBeneficiario <= 0) {
+            throw new IllegalArgumentException(
+                    "Debe seleccionar un beneficiario válido."
+            );
+        }
+
+        Object terceroOrigen =
+                operacion.get("id_datos_personal");
+
+        if (!(terceroOrigen instanceof Number numero)) {
+            throw new IllegalStateException(
+                    "La obligación no tiene un beneficiario "
+                            + "identificado."
+            );
+        }
+
+        if (numero.intValue() != idBeneficiario) {
+            throw new IllegalArgumentException(
+                    "El beneficiario debe corresponder "
+                            + "al tercero de la obligación."
+            );
+        }
+
+        Integer cantidad = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM hoja_vida.datos_personales
+                WHERE id_datos_personal = ?
+                """,
+                Integer.class,
+                idBeneficiario
+        );
+
+        if (cantidad == null || cantidad != 1) {
+            throw new IllegalArgumentException(
+                    "El beneficiario no existe."
+            );
+        }
+    }
+
+    // =========================================================
+    // VALIDACIÓN BANCARIA
+    // =========================================================
+
+    /**
+     * Valida la cuenta bancaria de salida.
+     *
+     * Reglas:
+     * - Cuenta bancaria activa.
+     * - Banco activo.
+     * - Agencia autorizada.
+     * - Permiso explícito para pagar.
+     * - Cuenta contable operable de la misma agencia.
+     *
+     * Bloquea la configuración bancaria para evitar
+     * cambios concurrentes durante la preparación.
+     */
+    private void validarCuentaBancaria(
+            Long idCuentaBancaria,
+            Integer idAgencia
+    ) {
+        validarId(
+                idCuentaBancaria,
+                "La cuenta bancaria"
+        );
+
+        List<Long> cuentas = jdbcTemplate.query(
+                """
+                SELECT cb.id_cuenta_bancaria
+                FROM tesoreria.cuentas_bancarias_agencias cba
+                JOIN tesoreria.cuentas_bancarias cb
+                  ON cb.id_cuenta_bancaria =
+                     cba.id_cuenta_bancaria
+                JOIN tesoreria.bancos b
+                  ON b.codigo_banco = cb.codigo_banco
+                JOIN contabilidad.catalogo_cuentas cc
+                  ON cc.id_catalogo_cuenta =
+                     cba.id_cuenta_contable
+                WHERE cb.id_cuenta_bancaria = ?
+                  AND cba.id_agencia = ?
+                  AND cba.activo = TRUE
+                  AND cba.permite_pagar = TRUE
+                  AND cb.activo = TRUE
+                  AND cb.estado_cuenta = 'ACTIVA'
+                  AND b.activo = TRUE
+                  AND cc.id_agencia = cba.id_agencia
+                  AND cc.cuenta_operable = TRUE
+                FOR UPDATE OF cba
+                """,
+                (rs, rowNum) ->
+                        rs.getLong("id_cuenta_bancaria"),
+                idCuentaBancaria,
+                idAgencia
+        );
+
+        if (cuentas.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "La cuenta bancaria no está habilitada "
+                            + "para realizar pagos desde "
+                            + "la agencia seleccionada."
+            );
+        }
+    }
+
+    // =========================================================
+    // CONTROL DE SALDOS
+    // =========================================================
+
+    private BigDecimal calcularSaldoDisponible(
+            Long idOperacion,
+            Map<String, Object> operacion
+    ) {
+        BigDecimal valorOriginal =
+                numeroDecimal(
+                        operacion,
+                        "valor_original"
+                );
+
+        BigDecimal valorEjecutado =
+                numeroDecimal(
+                        operacion,
+                        "valor_ejecutado"
+                );
+
+        BigDecimal valorPreparado =
+                repository.sumarPreparadas(idOperacion);
+
+        if (valorPreparado == null) {
+            valorPreparado = BigDecimal.ZERO;
+        }
+
+        BigDecimal disponible =
+                valorOriginal
+                        .subtract(valorEjecutado)
+                        .subtract(valorPreparado);
+
+        if (disponible.signum() < 0) {
+            throw new IllegalStateException(
+                    "La obligación presenta ejecuciones "
+                            + "preparadas superiores al saldo "
+                            + "pendiente."
+            );
+        }
+
+        return disponible;
+    }
+
+    // =========================================================
+    // VALIDACIONES GENERALES
+    // =========================================================
+
+    private void validarValor(BigDecimal valor) {
+        if (valor == null || valor.signum() <= 0) {
+            throw new IllegalArgumentException(
+                    "El valor debe ser mayor que cero."
+            );
+        }
+
+        if (valor.stripTrailingZeros().scale() > 2) {
+            throw new IllegalArgumentException(
+                    "El valor no puede superar dos decimales."
+            );
+        }
+    }
+
+    private void validarId(
+            Long id,
+            String descripcion
+    ) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException(
+                    descripcion
+                            + " debe tener un identificador válido."
+            );
+        }
+    }
+
+    private String normalizarMedioPago(
+            String medioPago
+    ) {
+        if (medioPago == null || medioPago.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Debe indicar el medio de pago."
+            );
+        }
+
+        return medioPago.trim()
+                .toUpperCase(Locale.ROOT);
+    }
+
+    private String limpiar(String valor) {
+        if (valor == null) {
+            return null;
+        }
+
+        String limpio = valor.trim();
+
+        return limpio.isEmpty() ? null : limpio;
+    }
+
+    // =========================================================
+    // CONVERSIÓN DE RESULTADOS SQL
+    // =========================================================
+
+    private Long numeroLong(
+            Map<String, Object> registro,
+            String columna
+    ) {
+        Object valor = registro.get(columna);
+
+        if (!(valor instanceof Number numero)) {
+            throw new IllegalStateException(
+                    "Falta el identificador: " + columna
+            );
+        }
+
+        return numero.longValue();
+    }
+
+    private Integer numeroEntero(
+            Map<String, Object> registro,
+            String columna
+    ) {
+        Object valor = registro.get(columna);
+
+        if (!(valor instanceof Number numero)) {
+            throw new IllegalStateException(
+                    "Falta el campo obligatorio: " + columna
+            );
+        }
+
+        return numero.intValue();
+    }
+
+    private BigDecimal numeroDecimal(
+            Map<String, Object> registro,
+            String columna
+    ) {
+        Object valor = registro.get(columna);
+
+        if (valor instanceof BigDecimal decimal) {
+            return decimal;
+        }
+
+        if (valor instanceof Number numero) {
+            return new BigDecimal(numero.toString());
+        }
+
+        throw new IllegalStateException(
+                "Falta el valor monetario: " + columna
+        );
+    }
+}

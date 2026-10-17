@@ -10,7 +10,9 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
 
 @Repository
 @RequiredArgsConstructor
@@ -65,7 +67,7 @@ public class CdatCancelacionRepository {
         return jdbc.query(sql, params, (rs, rowNum) -> mapItem(rs));
     }
 
-    public List<java.util.Map<String, Object>> buscarCuentasAhorroDisponibles(
+    public List<Map<String, Object>> buscarCuentasAhorroDisponibles(
             Integer idDatosPersonal,
             Integer idAgencia
     ) {
@@ -76,7 +78,7 @@ public class CdatCancelacionRepository {
           AND id_agencia = :idAgencia
           AND UPPER(TRIM(COALESCE(codigo_estado, ''))) = 'A'
           AND id_forma_ahorro <> 1
-        ORDER BY codigo_forma, codigo_cuenta
+        ORDER BY id_forma_ahorro, codigo_cuenta
         """;
 
         MapSqlParameterSource params = new MapSqlParameterSource()

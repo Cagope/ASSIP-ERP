@@ -1,0 +1,614 @@
+// =========================================================
+// PÁGINA
+// =========================================================
+
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.page {
+  padding: 1rem;
+  min-width: 0;
+  color: #1f2937;
+}
+
+// =========================================================
+// ENCABEZADO
+// =========================================================
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+}
+
+.page-subtitle {
+  margin: 0.35rem 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+// =========================================================
+// TARJETAS
+// =========================================================
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.65rem;
+  min-width: 0;
+}
+
+.card-header {
+  margin-bottom: 1rem;
+
+  h3 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0.35rem 0 0;
+    color: #6b7280;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+}
+
+// =========================================================
+// FILTROS Y FORMULARIOS
+// =========================================================
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+
+  label {
+    color: #374151;
+    font-size: 0.83rem;
+    font-weight: 600;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.45rem;
+    background: #ffffff;
+    color: #1f2937;
+    font-family: inherit;
+    font-size: 0.88rem;
+    outline: none;
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+
+    &:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    &:disabled {
+      background: #f3f4f6;
+      color: #9ca3af;
+      cursor: not-allowed;
+    }
+  }
+
+  textarea {
+    min-height: 90px;
+    resize: vertical;
+    line-height: 1.5;
+  }
+
+  small {
+    color: #6b7280;
+    font-size: 0.75rem;
+  }
+}
+
+// =========================================================
+// TARJETAS DE RESUMEN
+// =========================================================
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 1rem;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.65rem;
+}
+
+.summary-label {
+  color: #6b7280;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.summary-value {
+  color: #111827;
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+// =========================================================
+// TABLAS
+// =========================================================
+
+.table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+
+  th,
+  td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  thead {
+    background: #f8fafc;
+
+    th {
+      color: #475569;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+  }
+
+  tbody {
+    tr {
+      transition: background-color 0.15s ease;
+
+      &:hover {
+        background: #f8fafc;
+      }
+
+      &:last-child td {
+        border-bottom: none;
+      }
+    }
+  }
+
+  tfoot {
+    background: #f8fafc;
+  }
+
+  .text-right {
+    text-align: right;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .amount {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.row-selected {
+  background: #eff6ff !important;
+}
+
+.cell-secondary {
+  margin-top: 0.2rem;
+  color: #6b7280;
+  font-size: 0.74rem;
+}
+
+.concepto-cell {
+  min-width: 180px;
+  max-width: 350px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.total-row {
+  th {
+    color: #111827;
+    font-weight: 700;
+    border-top: 2px solid #cbd5e1;
+  }
+}
+
+.empty-table {
+  padding: 1.5rem !important;
+  color: #6b7280;
+  text-align: center !important;
+}
+
+// =========================================================
+// ESTADOS
+// =========================================================
+
+.status-badge,
+.movement-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-badge {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+
+.status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.movement-in {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.movement-out {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+// =========================================================
+// DETALLE DEL COMPROBANTE
+// =========================================================
+
+.detail-card {
+  border-left: 3px solid #2563eb;
+}
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.detail-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+
+  span {
+    color: #6b7280;
+    font-size: 0.78rem;
+  }
+
+  strong {
+    color: #1f2937;
+    font-size: 0.86rem;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+}
+
+.concepto-box {
+  margin-top: 1.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background: #f9fafb;
+
+  span {
+    color: #6b7280;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0.45rem 0 0;
+    color: #374151;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+}
+
+// =========================================================
+// CUADRE CONTABLE
+// =========================================================
+
+.balance-message {
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.45rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.balance-ok {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.balance-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+// =========================================================
+// BOTONES
+// =========================================================
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.45rem;
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.btn-sm {
+  padding: 0.4rem 0.7rem;
+  font-size: 0.76rem;
+}
+
+.btn-primary {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+
+  &:not(:disabled):hover {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+  }
+}
+
+.btn-outline {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #334155;
+
+  &:not(:disabled):hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+  }
+}
+
+.btn-danger-outline {
+  background: #ffffff;
+  border-color: #fca5a5;
+  color: #b91c1c;
+
+  &:not(:disabled):hover {
+    background: #fef2f2;
+    border-color: #ef4444;
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+// =========================================================
+// MENSAJES
+// =========================================================
+
+.alert {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.alert-error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.alert-success {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.alert-warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.alert-info {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1e40af;
+}
+
+// =========================================================
+// ESTADOS DE CARGA
+// =========================================================
+
+.loading-state,
+.empty-state {
+  padding: 2rem 1rem;
+  color: #6b7280;
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+.loading-state {
+  color: #2563eb;
+}
+
+// =========================================================
+// CONFIRMACIÓN DE DECISIONES
+// =========================================================
+
+.confirmation-card {
+  border: 1px solid #fbbf24;
+  background: #fffdf5;
+
+  .card-header {
+    h3 {
+      color: #92400e;
+    }
+  }
+
+  .form-field {
+    margin-top: 1rem;
+  }
+}
+
+// =========================================================
+// RESPONSIVE
+// =========================================================
+
+@media (max-width: 1100px) {
+
+  .detail-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+
+  .page {
+    padding: 0.75rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+
+    .btn {
+      width: 100%;
+    }
+  }
+
+  .card {
+    padding: 0.85rem;
+  }
+
+  .form-grid,
+  .detail-grid,
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-value {
+    font-size: 1.15rem;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+
+    .btn {
+      width: 100%;
+    }
+  }
+
+  .detail-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .data-table {
+    font-size: 0.78rem;
+
+    th,
+    td {
+      padding: 0.6rem;
+    }
+  }
+}
