@@ -101,8 +101,8 @@ public class TesoreriaOperacionesEjecucionesService {
 
 
     // =========================================================
-    // VISTA PREVIA CONTABLE - NO PERSISTE
-    // =========================================================
+// VISTA PREVIA CONTABLE - NO PERSISTE
+// =========================================================
 
     @Transactional(readOnly = true)
     public OperacionComprobantePreviewDTO generarVistaPrevia(
@@ -111,8 +111,10 @@ public class TesoreriaOperacionesEjecucionesService {
         if (request == null) {
             throw new IllegalArgumentException("La solicitud es obligatoria.");
         }
+
         Long idOperacion = request.idOperacion();
         validarId(idOperacion, "La operación");
+
         if (request.lineas() == null || request.lineas().isEmpty()) {
             throw new IllegalArgumentException("Debe agregar líneas de pago.");
         }
@@ -123,101 +125,256 @@ public class TesoreriaOperacionesEjecucionesService {
 
         Integer idAgencia = numeroEntero(operacion, "id_agencia");
         Integer idBeneficiario = numeroEntero(operacion, "id_datos_personal");
+
         BigDecimal original = numeroDecimal(operacion, "valor_original");
         BigDecimal ejecutado = numeroDecimal(operacion, "valor_ejecutado");
         BigDecimal disponible = calcularSaldoDisponible(idOperacion, operacion);
-        if (disponible.signum() <= 0) {
-            throw new IllegalStateException("La obligación no tiene saldo disponible.");
-        }
 
-        // La integración contable habilitada en esta etapa es CDAT.
-        String modulo = Objects.toString(operacion.get("modulo_origen"), "");
-        if (!"CDAT".equalsIgnoreCase(modulo)) {
+        if (disponible.signum() <= 0) {
             throw new IllegalStateException(
-                    "El origen " + modulo + " aún no tiene contabilización de pagos."
+                    "La obligación no tiene saldo disponible."
             );
         }
-        Integer cuentaPorPagar =
-                cdatCancelacionRepository.obtenerCuentaConceptoCancelacionCdat(
-                        idAgencia, "CUENTA_POR_PAGAR_CDAT"
-                );
+
+        // =========================================================
+        // IDENTIFICACIÓN DEL ORIGEN FINANCIERO
+        // =========================================================
+
+        String modulo = Objects.toString(
+                operacion.get("modulo_origen"), ""
+        ).trim();
+
+        String proceso = Objects.toString(
+                operacion.get("proceso_origen"), ""
+        ).trim();
+
+        String tabla = Objects.toString(
+                operacion.get("tabla_origen"), ""
+        ).trim();
+
+        boolean esCdat = "CDAT".equals(modulo)
+                && "CANCELACION_CDAT".equals(proceso)
+                && "cdat.cuentas_cdats".equals(tabla);
+
+        boolean esRetiroAsociado = "DEPOSITOS".equals(modulo)
+                && "RETIRO_ASOCIADO".equals(proceso)
+                && "depositos.cuentas_ahorro".equals(tabla);
+
+        if (!esCdat && !esRetiroAsociado) {
+            throw new IllegalStateException(
+                    "No existe contabilización de pagos para "
+                            + modulo + " / " + proceso
+            );
+        }
+
+        // =========================================================
+        // RESOLUCIÓN DE LA CUENTA POR PAGAR
+        // =========================================================
+
+        Integer cuentaPorPagar;
+
+        if (esCdat) {
+            cuentaPorPagar =
+                    cdatCancelacionRepository.obtenerCuentaConceptoCancelacionCdat(
+                            idAgencia,
+                            "CUENTA_POR_PAGAR_CDAT"
+                    );
+        } else {
+            cuentaPorPagar = obtenerCuentaPorPagarRetiroAsociado(
+                    numeroLong(operacion, "id_origen"),
+                    idAgencia,
+                    idBeneficiario
+            );
+        }
+
+        // =========================================================
+        // CONSTRUCCIÓN DE MOVIMIENTOS CONTABLES
+        // =========================================================
 
         BigDecimal total = BigDecimal.ZERO;
         List<MovimientoContableDTO> movimientos = new ArrayList<>();
-        for (OperacionPagoLineaDTO linea : request.lineas()) {
-            if (linea == null) {
-                throw new IllegalArgumentException("Hay una línea de pago vacía.");
-            }
-            validarValor(linea.valor());
-            validarBeneficiario(operacion, linea.idBeneficiario());
-            String medio = normalizarMedioPago(linea.medioPago());
-            if (!TRANSFERENCIA.equals(medio) && !CHEQUE.equals(medio)) {
-                throw new IllegalArgumentException("Medio de pago no permitido: " + medio);
-            }
-            if (CHEQUE.equals(medio) && limpiar(linea.numeroDocumento()) == null) {
-                throw new IllegalArgumentException("El número de cheque es obligatorio.");
-            }
-            validarId(linea.idCuentaBancaria(), "La cuenta bancaria");
 
-            // Misma parametrización bancaria que la validación de preparación.
-            List<Integer> cuentas = jdbcTemplate.queryForList("""
-                    SELECT cba.id_cuenta_contable
-                    FROM tesoreria.cuentas_bancarias_agencias cba
-                    JOIN tesoreria.cuentas_bancarias cb
-                      ON cb.id_cuenta_bancaria = cba.id_cuenta_bancaria
-                    JOIN tesoreria.bancos b ON b.codigo_banco = cb.codigo_banco
-                    JOIN contabilidad.catalogo_cuentas cc
-                      ON cc.id_catalogo_cuenta = cba.id_cuenta_contable
-                    WHERE cba.id_agencia = ?
-                      AND cba.id_cuenta_bancaria = ?
-                      AND cba.activo = TRUE
-                      AND cba.permite_pagar = TRUE
-                      AND cb.activo = TRUE
-                      AND cb.estado_cuenta = 'ACTIVA'
-                      AND b.activo = TRUE
-                      AND cc.id_agencia = cba.id_agencia
-                      AND cc.cuenta_operable = TRUE
-                    """, Integer.class, idAgencia, linea.idCuentaBancaria());
-            if (cuentas.size() != 1 || cuentas.get(0) == null) {
+        String conceptoPago = esRetiroAsociado
+                ? "retiro integral de asociado"
+                : "CDAT";
+
+        for (OperacionPagoLineaDTO linea : request.lineas()) {
+
+            if (linea == null) {
                 throw new IllegalArgumentException(
-                        "La cuenta bancaria no está habilitada para pagos en esta agencia."
+                        "Hay una línea de pago vacía."
                 );
             }
-            MovimientoContableDTO credito = movimiento(
-                    idAgencia, idBeneficiario, cuentas.get(0),
-                    BigDecimal.ZERO, linea.valor(),
-                    detallePagoCdat(medio, limpiar(linea.numeroDocumento())),
-                    limpiar(linea.numeroDocumento()), idOperacion
+
+            validarValor(linea.valor());
+            validarBeneficiario(operacion, linea.idBeneficiario());
+
+            String medio = normalizarMedioPago(linea.medioPago());
+
+            if (!TRANSFERENCIA.equals(medio) && !CHEQUE.equals(medio)) {
+                throw new IllegalArgumentException(
+                        "Medio de pago no permitido: " + medio
+                );
+            }
+
+            String referencia = limpiar(linea.numeroDocumento());
+
+            if (CHEQUE.equals(medio) && referencia == null) {
+                throw new IllegalArgumentException(
+                        "El número de cheque es obligatorio."
+                );
+            }
+
+            validarId(linea.idCuentaBancaria(), "La cuenta bancaria");
+
+            // =====================================================
+            // VALIDACIÓN DE LA CUENTA BANCARIA
+            // =====================================================
+
+            List<Integer> cuentas = jdbcTemplate.queryForList("""
+                SELECT cba.id_cuenta_contable
+                FROM tesoreria.cuentas_bancarias_agencias cba
+                JOIN tesoreria.cuentas_bancarias cb
+                  ON cb.id_cuenta_bancaria = cba.id_cuenta_bancaria
+                JOIN tesoreria.bancos b
+                  ON b.codigo_banco = cb.codigo_banco
+                JOIN contabilidad.catalogo_cuentas cc
+                  ON cc.id_catalogo_cuenta = cba.id_cuenta_contable
+                WHERE cba.id_agencia = ?
+                  AND cba.id_cuenta_bancaria = ?
+                  AND cba.activo = TRUE
+                  AND cba.permite_pagar = TRUE
+                  AND cb.activo = TRUE
+                  AND cb.estado_cuenta = 'ACTIVA'
+                  AND b.activo = TRUE
+                  AND cc.id_agencia = cba.id_agencia
+                  AND cc.cuenta_operable = TRUE
+                """,
+                    Integer.class,
+                    idAgencia,
+                    linea.idCuentaBancaria()
             );
+
+            if (cuentas.size() != 1 || cuentas.get(0) == null) {
+                throw new IllegalArgumentException(
+                        "La cuenta bancaria no está habilitada "
+                                + "para pagos en esta agencia."
+                );
+            }
+
+            // =====================================================
+            // CRÉDITO A LA CUENTA BANCARIA
+            // =====================================================
+
+            MovimientoContableDTO credito = movimiento(
+                    idAgencia,
+                    idBeneficiario,
+                    cuentas.get(0),
+                    BigDecimal.ZERO,
+                    linea.valor(),
+                    detallePago(conceptoPago, medio, referencia),
+                    referencia,
+                    idOperacion
+            );
+
             movimientos.add(credito);
             total = total.add(linea.valor());
         }
+
+        // =========================================================
+        // VALIDACIÓN DEL TOTAL A PAGAR
+        // =========================================================
+
         if (total.compareTo(disponible) > 0) {
             throw new IllegalArgumentException(
-                    "El pago supera el saldo disponible: " + disponible.toPlainString()
+                    "El pago supera el saldo disponible: "
+                            + disponible.toPlainString()
             );
         }
+
+        // =========================================================
+        // DÉBITO A LA CUENTA POR PAGAR
+        // =========================================================
+
+        String detalleObligacion = esRetiroAsociado
+                ? "Pago de cuenta por pagar - Retiro integral de asociado"
+                : "Cancelación de obligación CDAT - Pago al beneficiario";
+
         movimientos.add(0, movimiento(
-                idAgencia, idBeneficiario, cuentaPorPagar,
-                total, BigDecimal.ZERO,
-                "Cancelación de obligación CDAT - Pago al beneficiario",
-                null, idOperacion
+                idAgencia,
+                idBeneficiario,
+                cuentaPorPagar,
+                total,
+                BigDecimal.ZERO,
+                detalleObligacion,
+                null,
+                idOperacion
         ));
 
+        // =========================================================
+        // RESULTADO DE LA VISTA PREVIA
+        // =========================================================
+
         return new OperacionComprobantePreviewDTO(
-                idOperacion, idAgencia, idBeneficiario,
-                original, ejecutado, disponible, total,
-                disponible.subtract(total), total, total,
-                true, List.copyOf(movimientos),
+                idOperacion,
+                idAgencia,
+                idBeneficiario,
+                original,
+                ejecutado,
+                disponible,
+                total,
+                disponible.subtract(total),
+                total,
+                total,
+                true,
+                List.copyOf(movimientos),
                 consultarCuentasContables(idAgencia, movimientos)
         );
     }
 
-    private String detallePagoCdat(String medio, String referencia) {
-        String detalle = CHEQUE.equals(medio)
-                ? "Pago de CDAT mediante cheque"
-                : "Pago de CDAT mediante transferencia bancaria";
+    private String detallePago(
+            String concepto,
+            String medio,
+            String referencia
+    ) {
+        String detalle = "Pago de " + concepto
+                + (CHEQUE.equals(medio)
+                ? " mediante cheque"
+                : " mediante transferencia bancaria");
         return referencia == null ? detalle : detalle + " N.º " + referencia;
+    }
+
+    private Integer obtenerCuentaPorPagarRetiroAsociado(
+            Long idCuentaAhorro,
+            Integer idAgencia,
+            Integer idBeneficiario
+    ) {
+        List<Integer> cuentas = jdbcTemplate.queryForList("""
+                SELECT cc.id_catalogo_cuenta
+                FROM depositos.cuentas_ahorro ca
+                JOIN depositos.formas_ahorro fa
+                  ON fa.id_forma_ahorro = ca.id_forma_ahorro
+                JOIN contabilidad.catalogo_cuentas cc
+                  ON cc.id_agencia = ca.id_agencia
+                 AND cc.codigo_cuenta = CASE
+                     WHEN TRIM(fa.codigo_forma) = '01'
+                         THEN '24650501'
+                     ELSE '24651001'
+                 END
+                WHERE ca.id_cuenta_ahorro = ?
+                  AND ca.id_agencia = ?
+                  AND ca.id_datos_personal = ?
+                  AND cc.naturaleza_cuenta = 'C'
+                  AND cc.cuenta_operable = TRUE
+                """, Integer.class, idCuentaAhorro, idAgencia, idBeneficiario);
+
+        if (cuentas.size() != 1 || cuentas.get(0) == null) {
+            throw new IllegalStateException(
+                    "No se encontró una única cuenta por pagar "
+                            + "para el retiro integral de la cuenta " + idCuentaAhorro
+            );
+        }
+        return cuentas.get(0);
     }
 
     /** Datos de presentación; no altera los movimientos enviados a Contabilidad. */

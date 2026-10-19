@@ -1,3 +1,4 @@
+
 export const depositosMenu = {
   title: 'Depósitos',
   items: [
@@ -44,9 +45,21 @@ export const depositosMenu = {
         },
 
         {
-          label: 'Revalorización de aportes',
-          route: '/depositos/procesos/revalorizacion',
-          permiso: 'DEPOSITOS_REVALORIZACION_EXECUTE'
+          label: 'Transferencia de fondos entre cuentas',
+          route: '/depositos/movimientos/transferencia-cuentas',
+          permiso: 'DEPOSITOS_TRANSFERENCIA_CUENTAS'
+        },
+
+        {
+          label: 'Transferencia de cuentas entre agencias',
+          route: '/depositos/movimientos/traslado-cuentas',
+          permiso: 'DEPOSITOS_TRASLADO_CUENTAS'
+        },
+
+        {
+          label: 'Retiro integral del asociado',
+          route: '/depositos/movimientos/retiro-asociado',
+          permiso: 'DEPOSITOS_RETIRO_ASOCIADO'
         },
 
         {
@@ -69,6 +82,12 @@ export const depositosMenu = {
               label: 'Interés mensual TAC',
               route: '/depositos/procesos/interes-mensual-tac',
               permiso: 'DEPOSITOS_INTERESES_EXECUTE'
+            },
+
+            {
+              label: 'Revalorización de aportes',
+              route: '/depositos/procesos/revalorizacion',
+              permiso: 'DEPOSITOS_REVALORIZACION_EXECUTE'
             }
 
           ]

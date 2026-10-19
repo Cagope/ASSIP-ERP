@@ -1,0 +1,606 @@
+
+/* =========================================================
+   PÁGINA PRINCIPAL
+   ========================================================= */
+
+.page {
+  padding: 1rem;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+
+// =========================================================
+// ENCABEZADO
+// =========================================================
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+
+  margin-bottom: 1.25rem;
+
+  h2 {
+    margin: 0;
+
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.35rem 0 0;
+
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #6b7280;
+  }
+}
+
+
+// =========================================================
+// TARJETAS
+// =========================================================
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1.25rem;
+
+  background: #ffffff;
+
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+
+  box-sizing: border-box;
+
+  h3 {
+    margin: 0 0 1rem;
+
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  h4 {
+    margin: 1rem 0 0.75rem;
+
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  p {
+    margin: 0.5rem 0 1rem;
+
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #6b7280;
+  }
+}
+
+
+// =========================================================
+// FILTROS DE BÚSQUEDA
+// =========================================================
+
+.filters {
+  display: grid;
+
+  grid-template-columns: repeat(
+    4,
+    minmax(0, 1fr)
+  );
+
+  gap: 1rem;
+
+  margin-bottom: 1rem;
+}
+
+
+// =========================================================
+// CAMPOS DE FORMULARIO
+// =========================================================
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+
+  gap: 0.35rem;
+
+  min-width: 0;
+
+  label {
+    margin: 0;
+
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+  }
+
+  input,
+  select,
+  textarea {
+    display: block;
+
+    width: 100%;
+    min-width: 0;
+
+    padding: 0.6rem 0.75rem;
+
+    font-family: inherit;
+    font-size: 0.875rem;
+
+    color: #1f2937;
+    background: #ffffff;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+
+    box-sizing: border-box;
+
+    outline: none;
+
+    transition:
+      border-color 0.15s ease,
+      box-shadow 0.15s ease;
+
+    &:focus {
+      border-color: #2563eb;
+
+      box-shadow: 0 0 0 3px
+        rgba(37, 99, 235, 0.12);
+    }
+
+    &:disabled {
+      background: #f3f4f6;
+      color: #6b7280;
+      cursor: not-allowed;
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 85px;
+  }
+
+  small {
+    align-self: flex-end;
+
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+}
+
+.form-field.full {
+  grid-column: 1 / -1;
+}
+
+
+// =========================================================
+// DATOS DEL TRASLADO
+// =========================================================
+
+.movement-grid {
+  display: grid;
+
+  grid-template-columns: repeat(
+    3,
+    minmax(0, 1fr)
+  );
+
+  gap: 1rem;
+
+  margin-bottom: 1rem;
+}
+
+
+// =========================================================
+// ASOCIADO SELECCIONADO
+// =========================================================
+
+.selected-card {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.selected-grid {
+  display: grid;
+
+  grid-template-columns: repeat(
+    2,
+    minmax(0, 1fr)
+  );
+
+  gap: 1rem;
+
+  margin-bottom: 1rem;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+
+    gap: 0.35rem;
+
+    padding: 0.75rem 1rem;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+  }
+
+  span {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6b7280;
+  }
+
+  strong {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #1f2937;
+
+    overflow-wrap: anywhere;
+  }
+}
+
+
+// =========================================================
+// BOTONES
+// =========================================================
+
+.form-actions {
+  display: flex;
+  align-items: center;
+
+  flex-wrap: wrap;
+
+  gap: 0.75rem;
+
+  margin-top: 1rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 36px;
+
+  padding: 0.55rem 1rem;
+
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  border: 1px solid transparent;
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+
+// =========================================================
+// BOTÓN PRINCIPAL
+// =========================================================
+
+.btn--primary {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+
+  &:hover:not(:disabled) {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+  }
+}
+
+
+// =========================================================
+// BOTÓN SECUNDARIO
+// =========================================================
+
+.btn--secondary {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #374151;
+
+  &:hover:not(:disabled) {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+  }
+}
+
+
+// =========================================================
+// CONTENEDOR DE TABLAS
+// =========================================================
+
+.table-wrap {
+  width: 100%;
+
+  overflow-x: auto;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
+
+
+// =========================================================
+// TABLAS
+// =========================================================
+
+.data-table {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  font-size: 0.825rem;
+
+  th,
+  td {
+    padding: 0.7rem 0.85rem;
+
+    border-bottom: 1px solid #e2e8f0;
+
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  thead {
+    background: #f1f5f9;
+
+    th {
+      font-weight: 700;
+      color: #334155;
+
+      white-space: nowrap;
+    }
+  }
+
+  tbody {
+    tr {
+      &:hover {
+        background: #f8fafc;
+      }
+
+      &:last-child td {
+        border-bottom: none;
+      }
+    }
+
+    td {
+      color: #374151;
+    }
+  }
+
+  tfoot {
+    background: #f1f5f9;
+
+    th,
+    td {
+      font-weight: 700;
+      color: #1f2937;
+
+      border-top: 1px solid #cbd5e1;
+      border-bottom: none;
+    }
+  }
+
+  .right {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .btn {
+    min-height: 30px;
+    padding: 0.35rem 0.7rem;
+
+    font-size: 0.75rem;
+  }
+}
+
+
+// =========================================================
+// RESUMEN DE SALDOS
+// =========================================================
+
+.saldo-resumen {
+  display: grid;
+
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(200px, 1fr)
+  );
+
+  gap: 1rem;
+
+  margin-bottom: 1.25rem;
+}
+
+.saldo-item {
+  display: flex;
+  flex-direction: column;
+
+  gap: 0.5rem;
+
+  padding: 1rem;
+
+  background: #f8fafc;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+
+  span {
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+
+  strong {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+}
+
+.saldo-principal {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+
+  strong {
+    color: #1d4ed8;
+  }
+}
+
+
+// =========================================================
+// VISTA PREVIA CONTABLE
+// =========================================================
+
+.comprobante-preview {
+  margin-bottom: 1.25rem;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+
+  overflow: hidden;
+
+  .table-wrap {
+    border: none;
+    border-radius: 0;
+  }
+}
+
+.comprobante-preview__encabezado {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 0.75rem;
+
+  padding: 0.85rem 1rem;
+
+  background: #f1f5f9;
+
+  border-bottom: 1px solid #e2e8f0;
+
+  strong {
+    font-size: 0.875rem;
+    color: #1f2937;
+  }
+
+  span {
+    font-size: 0.8rem;
+    color: #475569;
+  }
+}
+
+
+// =========================================================
+// MENSAJES
+// =========================================================
+
+.alert {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+
+  font-size: 0.875rem;
+  line-height: 1.5;
+
+  border: 1px solid transparent;
+  border-radius: 6px;
+}
+
+.alert--error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.alert--success {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+
+// =========================================================
+// RESPONSIVE — TABLET
+// =========================================================
+
+@media (max-width: 1024px) {
+
+  .filters {
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  }
+
+  .movement-grid {
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  }
+
+}
+
+
+// =========================================================
+// RESPONSIVE — MÓVIL
+// =========================================================
+
+@media (max-width: 640px) {
+
+  .page {
+    padding: 0.75rem;
+  }
+
+  .card {
+    padding: 1rem;
+  }
+
+  .filters,
+  .movement-grid,
+  .selected-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+  }
+
+  .page-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .data-table {
+    min-width: 650px;
+  }
+
+  .comprobante-preview__encabezado {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+}

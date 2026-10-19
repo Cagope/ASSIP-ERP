@@ -33,7 +33,11 @@ public class TesoreriaOperacionesEjecucionesRepository {
                 id_agencia,
                 id_datos_personal,
                 modulo_origen,
+                proceso_origen,
+                tabla_origen,
+                id_origen,
                 naturaleza,
+                concepto,
                 valor_original,
                 valor_ejecutado,
                 estado
@@ -42,10 +46,7 @@ public class TesoreriaOperacionesEjecucionesRepository {
             """;
 
         List<Map<String, Object>> resultados =
-                jdbcTemplate.queryForList(
-                        sql,
-                        idOperacion
-                );
+                jdbcTemplate.queryForList(sql, idOperacion);
 
         return resultados.isEmpty()
                 ? null
@@ -67,7 +68,11 @@ public class TesoreriaOperacionesEjecucionesRepository {
                 id_agencia,
                 id_datos_personal,
                 modulo_origen,
+                proceso_origen,
+                tabla_origen,
+                id_origen,
                 naturaleza,
+                concepto,
                 valor_original,
                 valor_ejecutado,
                 estado
@@ -77,10 +82,7 @@ public class TesoreriaOperacionesEjecucionesRepository {
             """;
 
         List<Map<String, Object>> resultados =
-                jdbcTemplate.queryForList(
-                        sql,
-                        idOperacion
-                );
+                jdbcTemplate.queryForList(sql, idOperacion);
 
         if (resultados.isEmpty()) {
             throw new IllegalArgumentException(

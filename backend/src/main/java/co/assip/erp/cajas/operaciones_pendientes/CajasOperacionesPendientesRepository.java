@@ -52,7 +52,7 @@ public class CajasOperacionesPendientesRepository {
                     m.tipo_comprobante,
                     m.numero_comprobante,
 
-                    c.id_datos_personal,
+                    dp.id_datos_personal,
                     dp.tipo_documento,
                     dp.documento,
 
@@ -70,17 +70,27 @@ public class CajasOperacionesPendientesRepository {
                 INNER JOIN cajas.operaciones_caja o
                     ON o.id_operacion_caja = m.id_operacion_caja
 
-                INNER JOIN cdat.cuentas_cdats c
-                    ON c.id_cuenta_cdat = m.id_origen
+                LEFT JOIN cdat.cuentas_cdats c
+                    ON m.tabla_origen = 'cdat.cuentas_cdats'
+                   AND c.id_cuenta_cdat = m.id_origen
 
-                INNER JOIN hoja_vida.datos_personales dp
-                    ON dp.id_datos_personal = c.id_datos_personal
+                LEFT JOIN depositos.cuentas_ahorro ca
+                    ON m.tabla_origen = 'depositos.cuentas_ahorro'
+                   AND ca.id_cuenta_ahorro = m.id_origen
+
+                LEFT JOIN hoja_vida.datos_personales dp
+                    ON dp.id_datos_personal = COALESCE(
+                        CASE
+                            WHEN m.tabla_origen = 'hoja_vida.datos_personales'
+                            THEN m.id_origen
+                        END,
+                        c.id_datos_personal,
+                        ca.id_datos_personal
+                    )
 
                 WHERE m.id_caja = :idCaja
                   AND m.fecha_contable = :fechaContable
                   AND m.estado = 'PENDIENTE'
-                  AND m.modulo_origen = 'CDAT'
-                  AND m.tabla_origen = 'cdat.cuentas_cdats'
 
                 ORDER BY
                     m.hora_movimiento,
@@ -227,8 +237,6 @@ public class CajasOperacionesPendientesRepository {
                 WHERE id_movimiento_caja = :idMovimientoCaja
                   AND id_caja = :idCaja
                   AND estado = 'PENDIENTE'
-                  AND modulo_origen = 'CDAT'
-                  AND tabla_origen = 'cdat.cuentas_cdats'
                 """;
 
         MapSqlParameterSource params =

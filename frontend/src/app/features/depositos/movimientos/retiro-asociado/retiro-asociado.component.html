@@ -1,0 +1,546 @@
+<div class="page">
+
+  <!-- ENCABEZADO -->
+  <div class="page-header">
+    <div>
+      <h2>Retiro integral del asociado</h2>
+      <p>
+        Consulta, validación y ejecución del retiro integral
+        de las cuentas de ahorro del asociado.
+      </p>
+    </div>
+  </div>
+
+  <!-- MENSAJES -->
+  <div *ngIf="error" class="alert alert--error" role="alert">
+    {{ error }}
+  </div>
+
+  <div *ngIf="mensaje" class="alert alert--success" role="status">
+    {{ mensaje }}
+  </div>
+
+  <!-- FILTROS -->
+  <section class="card">
+    <h3>Buscar asociado</h3>
+
+    <div class="filters">
+
+      <div class="form-field">
+        <label for="documento">Documento</label>
+        <input
+          id="documento"
+          name="documento"
+          type="text"
+          [(ngModel)]="filtros.documento"
+          (keyup.enter)="buscar()">
+      </div>
+
+      <div class="form-field">
+        <label for="nombres">Nombres</label>
+        <input
+          id="nombres"
+          name="nombres"
+          type="text"
+          [(ngModel)]="filtros.nombres"
+          (keyup.enter)="buscar()">
+      </div>
+
+      <div class="form-field">
+        <label for="primerApellido">Primer apellido</label>
+        <input
+          id="primerApellido"
+          name="primerApellido"
+          type="text"
+          [(ngModel)]="filtros.primerApellido"
+          (keyup.enter)="buscar()">
+      </div>
+
+      <div class="form-field">
+        <label for="segundoApellido">Segundo apellido</label>
+        <input
+          id="segundoApellido"
+          name="segundoApellido"
+          type="text"
+          [(ngModel)]="filtros.segundoApellido"
+          (keyup.enter)="buscar()">
+      </div>
+
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="buscar()"
+        [disabled]="cargando">
+        {{ cargando ? 'Buscando...' : 'Buscar' }}
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="limpiar()"
+        [disabled]="cargando">
+        Limpiar
+      </button>
+    </div>
+  </section>
+
+  <!-- RESULTADOS DE BÚSQUEDA -->
+  <section
+    *ngIf="resultadosBusqueda.length > 0 && !asociado"
+    class="card">
+
+    <h3>Resultados de búsqueda</h3>
+
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+        <tr>
+          <th>Documento</th>
+          <th>Nombre completo</th>
+          <th>Acción</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let persona of resultadosBusqueda">
+          <td>{{ persona.documento }}</td>
+          <td>{{ persona.nombreCompleto }}</td>
+          <td>
+            <button
+              type="button"
+              class="btn btn--primary"
+              (click)="seleccionarAsociado(persona)"
+              [disabled]="cargando">
+              Seleccionar
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ASOCIADO SELECCIONADO -->
+  <section *ngIf="asociado" class="card selected-card">
+
+    <h3>Asociado seleccionado</h3>
+
+    <div class="selected-grid">
+      <div>
+        <span>Documento</span>
+        <strong>{{ asociado.documento }}</strong>
+      </div>
+
+      <div>
+        <span>Nombre completo</span>
+        <strong>{{ asociado.nombreCompleto }}</strong>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="buscar()"
+        [disabled]="cargando">
+        Cambiar asociado
+      </button>
+    </div>
+  </section>
+
+  <!-- CONSULTA AUTOMÁTICA -->
+  <section *ngIf="asociado && cargando" class="card">
+    <p>Consultando las cuentas del asociado...</p>
+  </section>
+
+  <!-- CUENTAS PENDIENTES DE RETIRO -->
+  <section *ngIf="cuentas.length > 0" class="card">
+
+    <h3>Cuentas pendientes de retiro</h3>
+
+    <p>
+      Se muestran las cuentas pendientes de retiro, incluidas las de saldo cero.
+      Las cuentas sin saldo se cancelarán sin movimientos financieros.
+    </p>
+
+    <div class="table-wrap">
+      <table class="data-table">
+
+        <thead>
+        <tr>
+          <th>Cuenta</th>
+          <th>Forma de ahorro</th>
+          <th>Estado</th>
+          <th>Operativa</th>
+          <th class="right">Saldo actual</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr
+          *ngFor="let cuenta of cuentas"
+          [class.row-disabled]="cuenta.saldoActual > 0 && !cuentaOperativa(cuenta)">
+
+          <td>{{ cuenta.codigoCuenta }}</td>
+
+          <td>
+            {{ cuenta.codigoForma }} -
+            {{ cuenta.nombreForma }}
+          </td>
+
+          <td>{{ cuenta.estadoCuenta || 'Sin estado' }}</td>
+
+          <td>
+              <span
+                class="badge"
+                [class.badge--ok]="cuentaOperativa(cuenta)"
+                [class.badge--warn]="!cuentaOperativa(cuenta)">
+                {{
+                  cuentaOperativa(cuenta)
+                    ? 'Operativa'
+                    : 'No operativa'
+                }}
+              </span>
+          </td>
+
+          <td class="right">
+            {{ cuenta.saldoActual | number:'1.2-2' }}
+          </td>
+        </tr>
+        </tbody>
+
+        <tfoot>
+        <tr>
+          <th colspan="4">Total saldos</th>
+          <th class="right">
+            {{ totalSaldos() | number:'1.2-2' }}
+          </th>
+        </tr>
+        </tfoot>
+
+      </table>
+    </div>
+
+    <ng-container *ngFor="let cuenta of cuentas">
+      <div
+        *ngIf="cuenta.saldoActual > 0 && !cuentaOperativa(cuenta)"
+        class="alert alert--error">
+
+        La cuenta
+        <strong>{{ cuenta.codigoCuenta }}</strong>
+        presenta estado
+        <strong>{{ cuenta.estadoCuenta || 'Sin estado' }}</strong>,
+        que no está habilitado para realizar movimientos.
+        El retiro integral no puede continuar mientras
+        esta situación no sea resuelta.
+
+      </div>
+    </ng-container>
+  </section>
+
+  <!-- DATOS DEL RETIRO: DESPUÉS DE LAS CUENTAS -->
+  <section *ngIf="cuentas.length > 0" class="card">
+
+    <h3>Datos del retiro</h3>
+
+    <div class="movement-grid">
+
+      <div class="form-field">
+        <label for="agenciaOperacion">Agencia de operación</label>
+
+        <select
+          id="agenciaOperacion"
+          name="agenciaOperacion"
+          [(ngModel)]="idAgenciaOperacion"
+          (ngModelChange)="actualizarAgenciaOFecha()"
+          [disabled]="cargandoAgencias">
+
+          <option [ngValue]="null">
+            Seleccione una agencia
+          </option>
+
+          <option
+            *ngFor="let agencia of agencias"
+            [ngValue]="agencia.idAgencia">
+            {{ agencia.codigoAgencia }} -
+            {{ agencia.nombreAgencia }}
+          </option>
+
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="fechaProceso">Fecha del proceso</label>
+
+        <input
+          id="fechaProceso"
+          name="fechaProceso"
+          type="date"
+          [(ngModel)]="fechaProceso"
+          (ngModelChange)="actualizarAgenciaOFecha()">
+      </div>
+
+      <div class="form-field">
+        <label for="estadoFinal">
+          Estado final de las cuentas
+        </label>
+
+        <select
+          id="estadoFinal"
+          name="estadoFinal"
+          [(ngModel)]="estadoFinal"
+          (ngModelChange)="actualizarDatosAdministrativos()">
+
+          <option value="R">R - Retirado</option>
+          <option value="C">C - Cancelado</option>
+
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="numeroActa">Número de acta</label>
+        <input
+          id="numeroActa"
+          name="numeroActa"
+          type="text"
+          maxlength="50"
+          [(ngModel)]="numeroActa"
+          (ngModelChange)="actualizarDatosAdministrativos()"
+          placeholder="Número de acta (opcional)">
+      </div>
+
+      <div class="form-field">
+        <label for="fechaActa">Fecha del acta</label>
+        <input
+          id="fechaActa"
+          name="fechaActa"
+          type="date"
+          [(ngModel)]="fechaActa"
+          (ngModelChange)="actualizarDatosAdministrativos()">
+      </div>
+
+      <div class="form-field full">
+        <label for="comentarioCuentas">Motivo del retiro</label>
+
+        <textarea
+          id="comentarioCuentas"
+          name="comentarioCuentas"
+          rows="3"
+          maxlength="500"
+          [(ngModel)]="comentarioCuentas"
+          (ngModelChange)="actualizarDistribucion()"
+          placeholder="Describa el motivo del retiro integral">
+        </textarea>
+
+        <small>
+          {{ comentarioCuentas.length }} / 500 caracteres
+        </small>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- DISTRIBUCIÓN -->
+  <section *ngIf="cuentas.length > 0" class="card">
+
+    <h3>Distribución del retiro</h3>
+
+    <p>
+      El retiro comprende el saldo completo de cada cuenta. Indique un único valor
+      para pago en Caja; el restante se destina automáticamente a cuentas por pagar.
+    </p>
+
+    <div class="movement-grid">
+      <div class="form-field">
+        <label for="valorCaja">Valor total para Caja</label>
+        <input
+          id="valorCaja"
+          name="valorCaja"
+          type="text"
+          numericFormat
+          class="input-number"
+          [(ngModel)]="valorCaja"
+          (ngModelChange)="actualizarValorCaja()"
+          [disabled]="cargando">
+      </div>
+
+      <div class="form-field" *ngIf="totalCaja() > 0">
+        <label for="idCaja">Caja que atenderá el pago</label>
+        <select id="idCaja" name="idCaja" [(ngModel)]="idCaja"
+                (ngModelChange)="actualizarDistribucion()"
+                [disabled]="cargando || cargandoCajas">
+          <option [ngValue]="null">Seleccione una caja abierta</option>
+          <option *ngFor="let caja of cajasAbiertas" [ngValue]="caja.idCaja">
+            {{ caja.codigoCaja }} - {{ caja.descripcionCaja }}
+          </option>
+        </select>
+        <small *ngIf="cargandoCajas">Consultando cajas abiertas...</small>
+        <small *ngIf="!cargandoCajas && cajasAbiertas.length === 0">
+          No hay cajas abiertas para la agencia y fecha seleccionadas.
+        </small>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="data-table">
+
+        <thead>
+        <tr>
+          <th>Cuenta</th>
+          <th class="right">Saldo a retirar</th>
+          <th class="right">Caja</th>
+          <th class="right">Cuenta por pagar</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let cuenta of cuentas">
+
+          <td>{{ cuenta.codigoCuenta }}</td>
+
+          <td class="right">
+            {{ cuenta.saldoActual | number:'1.2-2' }}
+          </td>
+
+          <td class="right">
+            {{ distribucionCuenta(cuenta.idCuentaAhorro)?.valorCaja | number:'1.2-2' }}
+          </td>
+
+          <td class="right">
+            {{ distribucionCuenta(cuenta.idCuentaAhorro)?.valorCxp | number:'1.2-2' }}
+          </td>
+
+        </tr>
+        </tbody>
+
+        <tfoot>
+        <tr>
+          <th>Total</th>
+
+          <th class="right">
+            {{ totalSaldos() | number:'1.2-2' }}
+          </th>
+
+          <th class="right">
+            {{ totalCaja() | number:'1.2-2' }}
+          </th>
+
+          <th class="right">
+            {{ totalCxp() | number:'1.2-2' }}
+          </th>
+        </tr>
+        </tfoot>
+
+      </table>
+    </div>
+
+    <div class="saldo-resumen">
+
+      <div class="saldo-item saldo-principal">
+        <span>Total a retirar</span>
+        <strong>{{ totalSaldos() | number:'1.2-2' }}</strong>
+      </div>
+
+      <div class="saldo-item">
+        <span>Pago por caja</span>
+        <strong>{{ totalCaja() | number:'1.2-2' }}</strong>
+      </div>
+
+      <div class="saldo-item">
+        <span>Cuenta por pagar</span>
+        <strong>{{ totalCxp() | number:'1.2-2' }}</strong>
+      </div>
+
+      <div class="saldo-item saldo-disponible">
+        <span>Diferencia</span>
+        <strong>{{ diferencia() | number:'1.2-2' }}</strong>
+      </div>
+
+    </div>
+
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="consultarPreview()"
+        [disabled]="!puedeConsultar() || tieneCuentasNoOperativas()">
+
+        {{ cargando ? 'Validando...' : 'Validar retiro integral' }}
+
+      </button>
+    </div>
+
+  </section>
+
+  <!-- VISTA PREVIA CONTABLE: SIN REGISTRO NI CONSECUTIVO -->
+  <section *ngIf="preview" class="card">
+    <h3>Vista previa del comprobante contable</h3>
+    <p>Asociado: <strong>{{ asociado?.nombreCompleto }}</strong> · Fecha: {{ fechaProceso }}</p>
+
+    <div *ngFor="let comprobante of preview.comprobantes" class="comprobante-preview">
+      <div class="comprobante-preview__encabezado">
+        <strong>{{ comprobante.tipoComprobante === 'CE' ? 'CE - Comprobante de egreso' : comprobante.tipoComprobante === 'CA' ? 'CA - Comprobante entre agencias' : 'NC - Nota de contabilidad' }}</strong>
+        <span>{{ comprobante.nombreAgencia }} (Agencia {{ comprobante.idAgencia }}) · {{ comprobante.concepto }}</span>
+        <span>Vista previa - sin consecutivo</span>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr>
+            <th>Código cuenta</th>
+            <th>Nombre de la cuenta</th>
+            <th>Detalle</th>
+            <th class="right">Débito</th>
+            <th class="right">Crédito</th>
+          </tr></thead>
+          <tbody>
+          <tr *ngFor="let movimiento of comprobante.movimientos">
+            <td>{{ movimiento.codigoCuenta }}</td>
+            <td>{{ movimiento.nombreCuenta }}</td>
+            <td>{{ movimiento.detalle }}</td>
+            <td class="right">{{ movimiento.valorDebito | number:'1.2-2' }}</td>
+            <td class="right">{{ movimiento.valorCredito | number:'1.2-2' }}</td>
+          </tr>
+          </tbody>
+          <tfoot><tr>
+            <th colspan="3">Totales del comprobante</th>
+            <th class="right">{{ comprobante.totalDebito | number:'1.2-2' }}</th>
+            <th class="right">{{ comprobante.totalCredito | number:'1.2-2' }}</th>
+          </tr></tfoot>
+        </table>
+      </div>
+    </div>
+    <div class="alert alert--success" *ngIf="preview.comprobantes.length > 0">
+      Vista previa contable cuadrada. No se han generado consecutivos ni registrado movimientos.
+    </div>
+    <p *ngIf="preview.comprobantes.length === 0">
+      Retiro administrativo sin movimientos financieros: las cuentas pendientes tienen saldo cero.
+    </p>
+  </section>
+
+  <!-- CONFIRMACIÓN -->
+  <section *ngIf="preview" class="card">
+
+    <h3>Confirmación del retiro</h3>
+
+    <p>
+      Al ejecutar se cancelarán las cuentas pendientes y se registrará el retiro
+      administrativo del asociado. Los comprobantes y pagos de Caja y/o Tesorería
+      se generarán únicamente cuando existan saldos positivos.
+    </p>
+
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="ejecutar()"
+        [disabled]="!puedeEjecutar()">
+        Ejecutar retiro integral
+      </button>
+    </div>
+
+  </section>
+
+</div>

@@ -1,0 +1,689 @@
+
+<div class="page">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+
+  <div class="page-header">
+    <div>
+      <h2>Traslado integral de cuentas entre agencias</h2>
+
+      <p>
+        Consulta, validación y ejecución del traslado integral
+        de las cuentas de ahorro de un asociado entre agencias.
+      </p>
+    </div>
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJES -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="error"
+    class="alert alert--error"
+    role="alert">
+    {{ error }}
+  </div>
+
+  <div
+    *ngIf="mensaje"
+    class="alert alert--success"
+    role="status">
+    {{ mensaje }}
+  </div>
+
+
+  <!-- ===================================================== -->
+  <!-- BÚSQUEDA DEL ASOCIADO -->
+  <!-- ===================================================== -->
+
+  <section class="card">
+
+    <h3>Buscar asociado</h3>
+
+    <div class="filters">
+
+      <div class="form-field">
+        <label for="documento">Documento</label>
+
+        <input
+          id="documento"
+          name="documento"
+          type="text"
+          [(ngModel)]="filtros.documento"
+          (keyup.enter)="buscar()">
+      </div>
+
+      <div class="form-field">
+        <label for="nombres">Nombres</label>
+
+        <input
+          id="nombres"
+          name="nombres"
+          type="text"
+          [(ngModel)]="filtros.nombres"
+          (keyup.enter)="buscar()">
+      </div>
+
+      <div class="form-field">
+        <label for="primerApellido">Primer apellido</label>
+
+        <input
+          id="primerApellido"
+          name="primerApellido"
+          type="text"
+          [(ngModel)]="filtros.primerApellido"
+          (keyup.enter)="buscar()">
+      </div>
+
+      <div class="form-field">
+        <label for="segundoApellido">Segundo apellido</label>
+
+        <input
+          id="segundoApellido"
+          name="segundoApellido"
+          type="text"
+          [(ngModel)]="filtros.segundoApellido"
+          (keyup.enter)="buscar()">
+      </div>
+
+    </div>
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="buscar()"
+        [disabled]="cargando">
+        {{ cargando ? 'Buscando...' : 'Buscar' }}
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="limpiar()"
+        [disabled]="cargando">
+        Limpiar
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- RESULTADOS DE BÚSQUEDA -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="resultados.length > 0 && !asociado"
+    class="card">
+
+    <h3>Resultados de búsqueda</h3>
+
+    <div class="table-wrap">
+
+      <table class="data-table">
+
+        <thead>
+        <tr>
+          <th>Documento</th>
+          <th>Nombre completo</th>
+          <th>Acción</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let persona of resultados">
+
+          <td>
+            {{ persona.documento }}
+          </td>
+
+          <td>
+            {{ persona.nombreCompleto }}
+          </td>
+
+          <td>
+            <button
+              type="button"
+              class="btn btn--primary"
+              (click)="seleccionar(persona)"
+              [disabled]="cargando">
+              Seleccionar
+            </button>
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- ASOCIADO SELECCIONADO -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="asociado"
+    class="card selected-card">
+
+    <h3>Asociado seleccionado</h3>
+
+    <div class="selected-grid">
+
+      <div>
+        <span>Documento</span>
+
+        <strong>
+          {{ asociado.documento }}
+        </strong>
+      </div>
+
+      <div>
+        <span>Nombre completo</span>
+
+        <strong>
+          {{ asociado.nombreCompleto }}
+        </strong>
+      </div>
+
+    </div>
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn btn--secondary"
+        (click)="cambiarAsociado()"
+        [disabled]="cargando">
+        Cambiar asociado
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- CONSULTA DE CUENTAS -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="asociado && cargando && cuentas.length === 0"
+    class="card">
+
+    <p>Consultando las cuentas del asociado...</p>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- CUENTAS DEL ASOCIADO -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="asociado && cuentas.length > 0"
+    class="card">
+
+    <h3>Cuentas del asociado</h3>
+
+    <p>
+      Se muestran las cuentas registradas del asociado.
+      El traslado financiero comprende las cuentas con saldo
+      positivo de la agencia de origen.
+    </p>
+
+    <div class="table-wrap">
+
+      <table class="data-table">
+
+        <thead>
+        <tr>
+          <th>Agencia</th>
+          <th>Cuenta</th>
+          <th>Forma de ahorro</th>
+          <th>Estado</th>
+          <th class="right">Saldo actual</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let cuenta of cuentas">
+
+          <td>
+            {{ cuenta.idAgencia }}
+          </td>
+
+          <td>
+            {{ cuenta.codigoCuenta }}
+          </td>
+
+          <td>
+            {{ cuenta.nombreForma }}
+          </td>
+
+          <td>
+            {{ cuenta.estadoCuenta || 'Sin estado' }}
+          </td>
+
+          <td class="right">
+            {{ cuenta.saldoActual | number:'1.2-2' }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+        <tfoot>
+        <tr>
+
+          <th colspan="4">
+            Total saldos
+          </th>
+
+          <th class="right">
+            {{ totalSaldos() | number:'1.2-2' }}
+          </th>
+
+        </tr>
+        </tfoot>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- DATOS DEL TRASLADO -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="asociado && cuentas.length > 0"
+    class="card">
+
+    <h3>Datos del traslado</h3>
+
+    <div class="movement-grid">
+
+      <!-- ================================================= -->
+      <!-- AGENCIA ORIGEN -->
+      <!-- ================================================= -->
+
+      <div class="form-field">
+
+        <label for="agenciaOrigen">
+          Agencia origen
+        </label>
+
+        <select
+          id="agenciaOrigen"
+          name="agenciaOrigen"
+          [(ngModel)]="origen"
+          (ngModelChange)="cambiarAgencia()"
+          [disabled]="cargando">
+
+          <option [ngValue]="null">
+            Seleccione una agencia
+          </option>
+
+          <option
+            *ngFor="let agencia of agencias"
+            [ngValue]="agencia.idAgencia">
+
+            {{ agencia.nombreAgencia }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- AGENCIA DESTINO -->
+      <!-- ================================================= -->
+
+      <div class="form-field">
+
+        <label for="agenciaDestino">
+          Agencia destino
+        </label>
+
+        <select
+          id="agenciaDestino"
+          name="agenciaDestino"
+          [(ngModel)]="destino"
+          (ngModelChange)="cambiarAgencia()"
+          [disabled]="cargando">
+
+          <option [ngValue]="null">
+            Seleccione una agencia
+          </option>
+
+          <option
+            *ngFor="let agencia of agencias"
+            [ngValue]="agencia.idAgencia">
+
+            {{ agencia.nombreAgencia }}
+
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- FECHA DEL PROCESO -->
+      <!-- ================================================= -->
+
+      <div class="form-field">
+
+        <label for="fechaProceso">
+          Fecha del proceso
+        </label>
+
+        <input
+          id="fechaProceso"
+          name="fechaProceso"
+          type="date"
+          [(ngModel)]="fechaProceso"
+          (ngModelChange)="vista = null"
+          [disabled]="cargando">
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- COMENTARIO DEL TRASLADO -->
+      <!-- ================================================= -->
+
+      <div class="form-field full">
+
+        <label for="comentario">
+          Comentario del traslado
+        </label>
+
+        <textarea
+          id="comentario"
+          name="comentario"
+          rows="3"
+          maxlength="350"
+          [(ngModel)]="comentario"
+          (ngModelChange)="comentarioModificado()"
+          [disabled]="cargando"
+          placeholder="Seleccione las agencias para generar el comentario sugerido">
+        </textarea>
+
+        <div class="form-actions">
+
+          <small>
+            {{ comentario.length }} / 350 caracteres
+          </small>
+
+          <button
+            type="button"
+            class="btn btn--secondary"
+            (click)="restablecerComentario()"
+            [disabled]="
+              cargando ||
+              !comentarioSugerido
+            ">
+            Restablecer sugerencia
+          </button>
+
+        </div>
+
+        <small *ngIf="comentarioPersonalizado">
+          Comentario personalizado por el funcionario.
+        </small>
+
+      </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- ACCIONES -->
+    <!-- ================================================= -->
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="verPreview()"
+        [disabled]="
+          cargando ||
+          !origen ||
+          !destino ||
+          origen === destino ||
+          !comentario.trim()
+        ">
+
+        {{ cargando ? 'Procesando...' : 'Vista previa' }}
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- VISTA PREVIA DEL TRASLADO -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="vista"
+    class="card">
+
+    <h3>Vista previa del traslado</h3>
+
+    <div class="saldo-resumen">
+
+      <div class="saldo-item saldo-principal">
+
+        <span>
+          Valor total del traslado
+        </span>
+
+        <strong>
+          {{ vista.totalTraslado | number:'1.2-2' }}
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- VALIDACIONES -->
+    <!-- ================================================= -->
+
+    <div
+      *ngFor="let mensajeValidacion of vista.validacion.mensajes"
+      class="alert alert--error">
+
+      {{ mensajeValidacion }}
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- COMPROBANTES CONTABLES -->
+    <!-- ================================================= -->
+
+    <div
+      *ngFor="let comprobante of vista.comprobantes"
+      class="comprobante-preview">
+
+      <div class="comprobante-preview__encabezado">
+
+        <strong>
+          Agencia {{ comprobante.idAgencia }}
+        </strong>
+
+        <span>
+          {{ comprobante.tipoComprobante }}
+        </span>
+
+        <span>
+          {{ comprobante.concepto }}
+        </span>
+
+      </div>
+
+      <div class="table-wrap">
+
+        <table class="data-table">
+
+          <thead>
+          <tr>
+            <th>Cuenta contable</th>
+            <th>Nombre de cuenta</th>
+            <th class="right">Débito</th>
+            <th class="right">Crédito</th>
+          </tr>
+          </thead>
+
+          <tbody>
+
+          <tr *ngFor="let movimiento of comprobante.movimientos">
+
+            <td>
+              {{ movimiento.codigoCuenta }}
+            </td>
+
+            <td>
+              {{ movimiento.nombreCuenta }}
+            </td>
+
+            <td class="right">
+              {{ movimiento.valorDebito | number:'1.2-2' }}
+            </td>
+
+            <td class="right">
+              {{ movimiento.valorCredito | number:'1.2-2' }}
+            </td>
+
+          </tr>
+
+          </tbody>
+
+          <tfoot>
+          <tr>
+
+            <th colspan="2">
+              Totales del comprobante
+            </th>
+
+            <th class="right">
+              {{ comprobante.totalDebito | number:'1.2-2' }}
+            </th>
+
+            <th class="right">
+              {{ comprobante.totalCredito | number:'1.2-2' }}
+            </th>
+
+          </tr>
+          </tfoot>
+
+        </table>
+
+      </div>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- CONFIRMACIÓN -->
+    <!-- ================================================= -->
+
+    <div class="form-actions">
+
+      <button
+        type="button"
+        class="btn btn--primary"
+        (click)="aplicar()"
+        [disabled]="
+          cargando ||
+          !vista.validacion.permitido
+        ">
+
+        {{
+        cargando
+        ? 'Ejecutando traslado...'
+        : 'Confirmar traslado'
+        }}
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- RESULTADO DE LA OPERACIÓN -->
+  <!-- ===================================================== -->
+
+  <section
+    *ngIf="resultado"
+    class="card">
+
+    <h3>Comprobantes generados</h3>
+
+    <div class="table-wrap">
+
+      <table class="data-table">
+
+        <thead>
+        <tr>
+          <th>Agencia</th>
+          <th>Tipo comprobante</th>
+          <th>Número comprobante</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let comprobante of resultado.comprobantes">
+
+          <td>
+            {{ comprobante.idAgencia }}
+          </td>
+
+          <td>
+            {{ comprobante.tipoComprobante }}
+          </td>
+
+          <td>
+            {{ comprobante.numeroComprobante }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</div>

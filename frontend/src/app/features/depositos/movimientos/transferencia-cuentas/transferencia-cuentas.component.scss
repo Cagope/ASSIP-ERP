@@ -1,0 +1,774 @@
+
+/* =========================================================
+   PÁGINA
+   ========================================================= */
+
+.page {
+  padding: 1rem;
+}
+
+
+/* =========================================================
+   ENCABEZADO
+   ========================================================= */
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  margin-bottom: 1rem;
+
+  h2 {
+    margin: 0;
+
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  p {
+    margin: 0.35rem 0 0;
+
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: #64748b;
+  }
+}
+
+
+/* =========================================================
+   TARJETAS
+   ========================================================= */
+
+.card {
+  margin-bottom: 1rem;
+  padding: 1rem;
+
+  background: #ffffff;
+
+  border: 1px solid #dce2e9;
+  border-radius: 8px;
+
+  h3 {
+    margin: 0 0 1rem;
+
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+
+  h4 {
+    margin: 0.5rem 0;
+
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #334155;
+  }
+}
+
+
+/* =========================================================
+   DESCRIPCIONES DE SECCIONES
+   ========================================================= */
+
+.section-description {
+  margin: 0 0 1rem;
+
+  font-size: 0.87rem;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+
+/* =========================================================
+   DISTRIBUCIÓN DE FORMULARIOS
+   ========================================================= */
+
+.grid {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.filtros {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.dos {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+
+/* =========================================================
+   ETIQUETAS DE CAMPOS
+   ========================================================= */
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  margin-bottom: 0.7rem;
+
+  font-size: 0.87rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+
+/* =========================================================
+   CAMPOS DE CAPTURA
+   ========================================================= */
+
+input,
+select,
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 0.55rem;
+
+  font: inherit;
+  font-weight: 400;
+  color: #1f2937;
+
+  background: #ffffff;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:focus {
+    outline: none;
+
+    border-color: #176a48;
+
+    box-shadow: 0 0 0 2px rgba(23, 106, 72, 0.12);
+  }
+
+  &:disabled {
+    background: #f1f5f9;
+    color: #64748b;
+    cursor: not-allowed;
+  }
+
+  &[readonly] {
+    background: #f8fafc;
+    color: #475569;
+    cursor: default;
+  }
+}
+
+textarea {
+  min-height: 65px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   BOTONES
+   ========================================================= */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+
+  padding: 0.55rem 0.85rem;
+
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.3;
+
+  border: 1px solid transparent;
+  border-radius: 5px;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    opacity 0.15s ease;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+
+/* =========================================================
+   BOTÓN PRINCIPAL
+   ========================================================= */
+
+.btn-primary {
+  background: #176a48;
+  color: #ffffff;
+
+  &:hover:not(:disabled) {
+    background: #12563a;
+  }
+}
+
+
+/* =========================================================
+   BOTÓN SECUNDARIO
+   ========================================================= */
+
+.btn-outline {
+  background: #ffffff;
+  color: #176a48;
+
+  border-color: #176a48;
+
+  &:hover:not(:disabled) {
+    background: #f0fdf4;
+  }
+}
+
+
+/* =========================================================
+   CONTENEDOR DE ACCIONES
+   ========================================================= */
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+
+  margin-top: 0.75rem;
+}
+
+
+/* =========================================================
+   TABLAS DE RESULTADOS
+   ========================================================= */
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+
+  margin-top: 0.75rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+
+  font-size: 0.85rem;
+  color: #334155;
+
+  th,
+  td {
+    padding: 0.6rem;
+
+    text-align: left;
+    vertical-align: middle;
+
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  thead {
+    background: #f8fafc;
+
+    th {
+      font-weight: 700;
+      color: #334155;
+      white-space: nowrap;
+    }
+  }
+
+  tbody {
+    tr {
+      &:hover {
+        background: #f8fafc;
+      }
+    }
+  }
+
+  tfoot {
+    background: #f8fafc;
+
+    th {
+      font-weight: 700;
+      border-top: 1px solid #cbd5e1;
+    }
+  }
+}
+
+
+/* =========================================================
+   ALINEACIÓN DE VALORES MONETARIOS
+   ========================================================= */
+
+.right {
+  text-align: right !important;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* =========================================================
+   INFORMACIÓN DE CUENTAS SELECCIONADAS
+   ========================================================= */
+
+.cuenta-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #334155;
+
+  strong {
+    font-weight: 700;
+    color: #1f2937;
+  }
+}
+
+
+/* =========================================================
+   SALDOS DE CUENTAS
+   ========================================================= */
+
+.saldo {
+  margin: 0.7rem 0;
+
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1f2937;
+
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* =========================================================
+   CUENTA DESTINO SELECCIONADA
+   ========================================================= */
+
+.cuenta-seleccionada {
+  margin-top: 1rem;
+  padding: 1rem;
+
+  background: #f8fafc;
+
+  border: 1px solid #dce2e9;
+  border-radius: 6px;
+
+  h4 {
+    margin: 0 0 0.85rem;
+
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #176a48;
+  }
+}
+
+
+/* =========================================================
+   RESUMEN DE LA TRANSFERENCIA
+   ========================================================= */
+
+.resumen-transferencia {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+
+  margin-bottom: 1rem;
+
+  p {
+    margin: 0;
+    padding: 0.8rem;
+
+    font-size: 0.88rem;
+    line-height: 1.5;
+
+    background: #f8fafc;
+
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+
+    strong {
+      display: block;
+      margin-bottom: 0.3rem;
+
+      font-weight: 700;
+      color: #334155;
+    }
+  }
+}
+
+
+/* =========================================================
+   COMPROBANTES CONTABLES
+   ========================================================= */
+
+.comprobante {
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+
+  border-top: 1px solid #e2e8f0;
+
+  h4 {
+    margin: 0 0 0.6rem;
+
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #176a48;
+  }
+
+  p {
+    margin: 0.5rem 0 0.8rem;
+
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #475569;
+  }
+
+  table {
+    td:nth-child(3) {
+      min-width: 260px;
+      line-height: 1.5;
+      white-space: normal;
+    }
+  }
+}
+
+
+/* =========================================================
+   MENSAJES
+   ========================================================= */
+
+.alert {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+
+  font-size: 0.88rem;
+  line-height: 1.5;
+
+  border-radius: 5px;
+}
+
+
+/* =========================================================
+   MENSAJE DE ERROR
+   ========================================================= */
+
+.error {
+  background: #fff1f2;
+  color: #9f1239;
+}
+
+
+/* =========================================================
+   MENSAJE DE ÉXITO
+   ========================================================= */
+
+.success {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+
+/* =========================================================
+   DISEÑO RESPONSIVO
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+  .filtros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .resumen-transferencia {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+@media (max-width: 900px) {
+
+  .dos {
+    grid-template-columns: 1fr;
+  }
+
+  .page-header {
+    align-items: stretch;
+  }
+}
+
+
+/* =========================================================
+   ENCABEZADO DE CUENTAS SELECCIONADAS
+   ========================================================= */
+
+.cuenta-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+
+  margin-bottom: 1rem;
+
+  h3,
+  h4 {
+    margin: 0;
+  }
+
+  .btn {
+    flex-shrink: 0;
+  }
+}
+
+
+/* =========================================================
+   RESUMEN COMPACTO DE CUENTAS
+   ========================================================= */
+
+.cuenta-resumen {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1.5fr)
+    minmax(0, 1.1fr)
+    minmax(0, 0.9fr)
+    minmax(0, 1fr);
+
+  gap: 0;
+  align-items: stretch;
+
+  background: #f8fafc;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+
+  overflow: hidden;
+}
+
+
+/* =========================================================
+   INFORMACIÓN INDIVIDUAL DE CADA COLUMNA
+   ========================================================= */
+
+.cuenta-dato {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.3rem;
+
+  min-width: 0;
+  padding: 0.85rem 1rem;
+
+  border-right: 1px solid #e2e8f0;
+
+  &:last-child {
+    border-right: none;
+  }
+}
+
+
+/* =========================================================
+   ETIQUETAS Y VALORES
+   ========================================================= */
+
+.cuenta-etiqueta {
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.3;
+
+  text-transform: uppercase;
+  letter-spacing: 0.035em;
+
+  color: #64748b;
+}
+
+.cuenta-valor {
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.4;
+
+  color: #1f2937;
+
+  overflow-wrap: anywhere;
+}
+
+.cuenta-secundario {
+  font-size: 0.8rem;
+  line-height: 1.4;
+
+  color: #64748b;
+
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   NÚMERO DE CUENTA
+   ========================================================= */
+
+.cuenta-numero {
+  font-size: 1.05rem;
+  font-weight: 700;
+
+  color: #176a48;
+
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* =========================================================
+   SALDO DE LA CUENTA
+   ========================================================= */
+
+.cuenta-dato--saldo {
+  background: #f0f7f3;
+}
+
+.cuenta-saldo {
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.4;
+
+  color: #176a48;
+
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   CUENTA DESTINO SELECCIONADA
+   ========================================================= */
+
+.cuenta-seleccionada {
+  margin-top: 1rem;
+  padding: 0;
+
+  background: transparent;
+
+  border: none;
+  border-radius: 0;
+
+  .cuenta-header {
+    margin-bottom: 0.75rem;
+
+    h4 {
+      color: #1f2937;
+    }
+  }
+}
+
+
+/* =========================================================
+   ADAPTACIÓN A PANTALLAS MEDIANAS
+   ========================================================= */
+
+@media (max-width: 1100px) {
+
+  .cuenta-resumen {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cuenta-dato {
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+
+    &:nth-child(2n) {
+      border-right: none;
+    }
+
+    &:nth-last-child(-n + 2) {
+      border-bottom: none;
+    }
+  }
+}
+
+
+/* =========================================================
+   ADAPTACIÓN A PANTALLAS PEQUEÑAS
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  .cuenta-resumen {
+    grid-template-columns: 1fr;
+  }
+
+  .cuenta-dato {
+    padding: 0.75rem;
+
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+
+    &:nth-last-child(-n + 2) {
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .cuenta-header {
+    align-items: flex-start;
+
+    .btn {
+      width: auto;
+    }
+  }
+
+  .cuenta-saldo {
+    font-size: 1.05rem;
+  }
+}
+
+
+
+@media (max-width: 600px) {
+
+  .page {
+    padding: 0.75rem;
+  }
+
+  .card {
+    padding: 0.85rem;
+  }
+
+  .filtros {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    justify-content: stretch;
+
+    .btn {
+      width: 100%;
+    }
+  }
+
+  .page-header {
+    .btn {
+      width: 100%;
+    }
+  }
+
+  table {
+    font-size: 0.8rem;
+
+    th,
+    td {
+      padding: 0.5rem;
+    }
+  }
+}

@@ -64,6 +64,7 @@ import { DOCUMENTOS_SOPORTE_INFORME_ROUTES } from './informes/documentos-soporte
 
 import { MOVIMIENTO_CUENTA_AHORRO_ROUTES } from './movimientos/cuentas-ahorro/movimiento-cuenta-ahorro.routes';
 
+
 import { CONCENTRACION_DEPOSITOS_ROUTES } from './analisis/concentracion/concentracion-depositos.routes';
 
 import { permisoGuard } from '../../core/auth/permiso.guard';
@@ -248,6 +249,42 @@ export const DEPOSITOS_ROUTES: Routes = [
   {
     path: 'movimientos/cuentas-ahorro',
     children: MOVIMIENTO_CUENTA_AHORRO_ROUTES
+  },
+
+  // =========================================================
+  // OPERACIÓN — RETIRO INTEGRAL DEL ASOCIADO
+  // =========================================================
+  {
+    path: 'movimientos/retiro-asociado',
+    canActivate: [permisoGuard],
+    data: { permiso: 'DEPOSITOS_RETIRO_ASOCIADO' },
+    loadComponent: () =>
+      import('./movimientos/retiro-asociado/retiro-asociado.component')
+        .then(m => m.RetiroAsociadoComponent)
+  },
+
+  // =========================================================
+  // TRANSFERENCIA DE FONDOS ENTRE CUENTAS
+  // =========================================================
+  {
+    path: 'movimientos/transferencia-cuentas',
+    canActivate: [permisoGuard],
+    data: { permiso: 'DEPOSITOS_TRANSFERENCIA_CUENTAS' },
+    loadComponent: () =>
+      import('./movimientos/transferencia-cuentas/transferencia-cuentas.component')
+        .then(m => m.TransferenciaCuentasComponent)
+  },
+
+  // =========================================================
+  // OPERACIÓN — TRASLADO INTEGRAL DE CUENTAS ENTRE AGENCIAS
+  // =========================================================
+  {
+    path: 'movimientos/traslado-cuentas',
+    canActivate: [permisoGuard],
+    data: { permiso: 'DEPOSITOS_TRASLADO_CUENTAS' },
+    loadComponent: () =>
+      import('./movimientos/traslado-cuentas/traslado-cuentas.component')
+        .then(m => m.TrasladoCuentasComponent)
   },
 
   // Análisis — Dashboard Depósitos

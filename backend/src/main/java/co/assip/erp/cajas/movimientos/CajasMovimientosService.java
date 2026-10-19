@@ -428,6 +428,35 @@ public class CajasMovimientosService {
         );
     }
 
+    public void registrarRetiroIntegralAsociado(
+            Long idCaja, BigDecimal valorCaja, LocalDate fechaContable,
+            Integer idDatosPersonal, String codigoReferencia,
+            String tipoComprobante, String numeroComprobante, Integer idUsuario) {
+        if (valorCaja == null || valorCaja.signum() <= 0) {
+            throw new IllegalArgumentException("El valor de Caja debe ser positivo.");
+        }
+        if (idCaja == null || idCaja <= 0 || fechaContable == null
+                || idDatosPersonal == null || idDatosPersonal <= 0
+                || idUsuario == null || idUsuario <= 0) {
+            throw new IllegalArgumentException("Datos incompletos para el retiro en Caja.");
+        }
+        Long idProvision = repository.obtenerProvisionAbierta(idCaja, fechaContable);
+        if (idProvision == null) {
+            throw new IllegalStateException("La caja no tiene provisión ABIERTA para la fecha.");
+        }
+        Long departamento = repository.obtenerIdDepartamento("00");
+        Long operacion = repository.obtenerIdOperacion("RETIRO_AHORRO");
+        if (departamento == null || operacion == null) {
+            throw new IllegalStateException("Falta parametrizar el retiro de ahorro en Caja.");
+        }
+        repository.insertarMovimientoCaja(
+                idProvision, idCaja, fechaContable, departamento, operacion,
+                "DEPOSITOS", "RETIRO_INTEGRAL_ASOCIADO", "hoja_vida.datos_personales",
+                idDatosPersonal.longValue(), codigoReferencia, "EGRESO", "EFECTIVO",
+                valorCaja, "Retiro integral asociado " + idDatosPersonal,
+                "PENDIENTE", tipoComprobante, numeroComprobante, idUsuario);
+    }
+
     private void validarCheques(List<MedioPagoChequeDTO> cheques, BigDecimal valorCheques) {
         if (cheques == null || cheques.isEmpty()) {
             throw new RuntimeException("Debe ingresar el detalle de los cheques.");

@@ -82,6 +82,77 @@ public class DepositosMovimientoService {
         );
     }
 
+
+    /**
+     * Descarga el saldo completo de una cuenta durante
+     * el proceso de retiro integral del asociado.
+     *
+     * Exige que la cuenta esté operativa según el catálogo de estados.
+     * No altera las reglas de los movimientos normales.
+     */
+    @Transactional
+    public DepositosMovimientoResultadoDTO registrarRetiroIntegral(
+            DepositosMovimientoDTO dto,
+            Integer idUsuario
+    ) {
+        validarUsuario(idUsuario);
+        validarBase(dto);
+
+        if (!"551".equals(dto.getTipoMovimiento())
+                || !"DEPOSITOS".equals(dto.getModuloOrigen())
+                || !"RETIRO_ASOCIADO".equals(dto.getProcesoOrigen())) {
+            throw new IllegalArgumentException(
+                    "Movimiento no autorizado para retiro integral."
+            );
+        }
+
+        BigDecimal valor = nvl(dto.getValorDebito());
+
+        if (valor.signum() <= 0) {
+            throw new IllegalArgumentException(
+                    "El valor del retiro debe ser mayor a cero."
+            );
+        }
+
+        var cuenta = repository.obtenerCuentaConLock(
+                dto.getIdCuentaAhorro()
+        );
+
+        if (cuenta == null) {
+            throw new IllegalStateException(
+                    "La cuenta de ahorro no existe."
+            );
+        }
+
+        validarCuentaOperativa(cuenta);
+
+        BigDecimal saldoAnterior = nvl(cuenta.saldoActual());
+
+        if (saldoAnterior.compareTo(valor) != 0) {
+            throw new IllegalStateException(
+                    "El retiro integral debe corresponder "
+                            + "al saldo total de la cuenta."
+            );
+        }
+
+        dto.setValorDebito(valor);
+        dto.setValorCredito(BigDecimal.ZERO);
+
+        repository.actualizarSaldo(
+                dto.getIdCuentaAhorro(),
+                BigDecimal.ZERO,
+                idUsuario
+        );
+
+        repository.insertarExtracto(dto, idUsuario);
+
+        return new DepositosMovimientoResultadoDTO(
+                dto.getIdCuentaAhorro(),
+                saldoAnterior,
+                BigDecimal.ZERO
+        );
+    }
+
     @Transactional
     public DepositosMovimientoResultadoDTO registrarCredito(
             DepositosMovimientoDTO dto,

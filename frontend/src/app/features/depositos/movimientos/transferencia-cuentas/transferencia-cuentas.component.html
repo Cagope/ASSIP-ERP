@@ -1,0 +1,901 @@
+
+<div class="page">
+
+  <!-- =====================================================
+       ENCABEZADO
+       ===================================================== -->
+
+  <header class="page-header">
+
+    <div>
+      <h2>Transferencia de fondos entre cuentas</h2>
+
+      <p>
+        Transferencia de recursos entre cuentas de depósitos,
+        del mismo asociado o de asociados diferentes,
+        dentro de una agencia o entre agencias.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-outline"
+      (click)="nueva()"
+      [disabled]="cargando">
+      Nueva transferencia
+    </button>
+
+  </header>
+
+
+  <!-- =====================================================
+       MENSAJES
+       ===================================================== -->
+
+  <div
+    class="alert error"
+    *ngIf="error">
+    {{ error }}
+  </div>
+
+  <div
+    class="alert success"
+    *ngIf="mensaje && resultado">
+    {{ mensaje }}
+  </div>
+
+
+  <!-- =====================================================
+       1. BUSCAR CUENTA ORIGEN
+       ===================================================== -->
+
+  <section class="card">
+
+    <h3>1. Buscar cuenta origen</h3>
+
+    <p class="section-description">
+      Busque y seleccione la cuenta desde la cual se
+      transferirán los fondos. Solo se permiten cuentas
+      habilitadas para movimientos de débito.
+    </p>
+
+
+    <!-- FILTROS DE ORIGEN -->
+
+    <div class="grid filtros">
+
+      <label>
+        Documento
+
+        <input
+          type="text"
+          name="documentoOrigen"
+          autocomplete="on"
+          [(ngModel)]="filtrosOrigen.documento"
+          autocomplete="on"
+          [disabled]="cargando || !!resultado">
+      </label>
+
+      <label>
+        Nombres
+
+        <input
+          type="text"
+          name="nombresOrigen"
+          autocomplete="on"
+          [(ngModel)]="filtrosOrigen.nombres"
+          [disabled]="cargando || !!resultado">
+      </label>
+
+      <label>
+        Primer apellido
+
+        <input
+          type="text"
+          name="primerApellidoOrigen"
+          autocomplete="on"
+          [(ngModel)]="filtrosOrigen.primerApellido"
+          [disabled]="cargando || !!resultado">
+      </label>
+
+      <label>
+        Segundo apellido
+
+        <input
+          type="text"
+          name="segundoApellidoOrigen"
+          autocomplete="on"
+          [(ngModel)]="filtrosOrigen.segundoApellido"
+          [disabled]="cargando || !!resultado">
+      </label>
+
+    </div>
+
+
+    <!-- ACCIONES DE BÚSQUEDA -->
+
+    <div class="actions">
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="buscarOrigen()"
+        [disabled]="cargando || !!resultado">
+
+        {{ buscandoOrigen
+        ? 'Buscando cuentas...'
+        : 'Buscar cuentas origen' }}
+
+      </button>
+
+    </div>
+
+
+    <!-- RESULTADOS ORIGEN -->
+
+    <div
+      class="table-wrap"
+      *ngIf="resultadosOrigen.length > 0">
+
+      <table>
+
+        <thead>
+        <tr>
+          <th>Documento</th>
+          <th>Asociado</th>
+          <th>Agencia</th>
+          <th>Cuenta</th>
+          <th>Producto</th>
+          <th class="right">Saldo actual</th>
+          <th>Acción</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let cuenta of resultadosOrigen">
+
+          <td>
+            {{ cuenta.documento }}
+          </td>
+
+          <td>
+            {{ cuenta.nombreCompleto }}
+          </td>
+
+          <td>
+            {{ cuenta.codigoAgencia }} - {{ cuenta.nombreAgencia }}
+          </td>
+
+          <td>
+            {{ cuenta.codigoCuenta }}
+          </td>
+
+          <td>
+            {{ cuenta.nombreForma }}
+          </td>
+
+          <td class="right">
+            {{ dinero.format(cuenta.saldoActual) }}
+          </td>
+
+          <td>
+
+            <button
+              type="button"
+              class="btn btn-outline"
+              (click)="seleccionarOrigen(cuenta)"
+              [disabled]="cargando || !cuenta.permiteDebito">
+
+              Seleccionar origen
+
+            </button>
+
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+
+  <!-- =====================================================
+       2. CUENTA ORIGEN SELECCIONADA
+       ===================================================== -->
+
+  <section class="card">
+
+    <div class="cuenta-header">
+
+      <h3>2. Cuenta origen seleccionada</h3>
+
+      <button
+        *ngIf="origen && !resultado"
+        type="button"
+        class="btn btn-outline"
+        (click)="cambiarOrigen()"
+        [disabled]="cargando">
+        Cambiar origen
+      </button>
+
+    </div>
+
+
+    <ng-container *ngIf="origen as cuenta; else sinOrigen">
+
+      <div class="cuenta-resumen">
+
+        <!-- TITULAR -->
+
+        <div class="cuenta-dato cuenta-dato--titular">
+
+        <span class="cuenta-etiqueta">
+          Titular
+        </span>
+
+          <strong class="cuenta-valor">
+            {{ cuenta.nombreCompleto }}
+          </strong>
+
+          <span class="cuenta-secundario">
+          Documento {{ cuenta.documento }}
+        </span>
+
+        </div>
+
+
+        <!-- CUENTA Y PRODUCTO -->
+
+        <div class="cuenta-dato">
+
+        <span class="cuenta-etiqueta">
+          Cuenta / Producto
+        </span>
+
+          <strong class="cuenta-valor cuenta-numero">
+            {{ cuenta.codigoCuenta }}
+          </strong>
+
+          <span class="cuenta-secundario">
+          {{ cuenta.nombreForma }}
+        </span>
+
+        </div>
+
+
+        <!-- =====================================================
+       AGENCIA Y ESTADO - CUENTA DESTINO
+       ===================================================== -->
+
+        <div class="cuenta-dato">
+
+          <span class="cuenta-etiqueta">
+            Agencia / Estado
+          </span>
+
+          <strong class="cuenta-valor">
+            {{ cuenta.codigoAgencia }} - {{ cuenta.nombreAgencia }}
+          </strong>
+
+          <span class="cuenta-secundario">
+            Estado: {{ cuenta.descripcionEstadoCuenta || cuenta.estadoCuenta }}
+          </span>
+
+        </div>
+
+        <!-- SALDO -->
+
+        <div class="cuenta-dato cuenta-dato--saldo">
+
+        <span class="cuenta-etiqueta">
+          Saldo actual
+        </span>
+
+          <strong class="cuenta-saldo">
+            {{ dinero.format(cuenta.saldoActual) }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </ng-container>
+
+
+    <ng-template #sinOrigen>
+
+      <p class="section-description">
+        Seleccione una cuenta en la búsqueda anterior
+        para continuar con la transferencia.
+      </p>
+
+    </ng-template>
+
+  </section>
+
+  <!-- =====================================================
+       3. BUSCAR Y SELECCIONAR CUENTA DESTINO
+       ===================================================== -->
+
+  <section class="card">
+
+    <h3>3. Buscar y seleccionar cuenta destino</h3>
+
+    <p class="section-description">
+      Seleccione la cuenta que recibirá los fondos.
+      Puede pertenecer al mismo asociado, a otro asociado
+      o a una agencia diferente.
+    </p>
+
+
+    <!-- CUENTA ORIGEN REQUERIDA -->
+
+    <ng-container *ngIf="origen; else destinoBloqueado">
+
+
+      <!-- FILTROS DE DESTINO -->
+
+      <div class="grid filtros">
+
+        <label>
+          Documento
+
+          <input
+            type="text"
+            name="documentoDestino"
+            autocomplete="on"
+            [(ngModel)]="filtrosDestino.documento"
+            autocomplete="on"
+            [disabled]="!puedeBuscarDestino || cargando">
+        </label>
+
+        <label>
+          Nombres
+
+          <input
+            type="text"
+            name="nombresDestino"
+            autocomplete="on"
+            [(ngModel)]="filtrosDestino.nombres"
+            [disabled]="!puedeBuscarDestino || cargando">
+        </label>
+
+        <label>
+          Primer apellido
+
+          <input
+            type="text"
+            name="primerApellidoDestino"
+            autocomplete="on"
+            [(ngModel)]="filtrosDestino.primerApellido"
+            [disabled]="!puedeBuscarDestino || cargando">
+        </label>
+
+        <label>
+          Segundo apellido
+
+          <input
+            type="text"
+            name="segundoApellidoDestino"
+            autocomplete="on"
+            [(ngModel)]="filtrosDestino.segundoApellido"
+            [disabled]="!puedeBuscarDestino || cargando">
+        </label>
+
+      </div>
+
+
+      <!-- ACCIONES DE BÚSQUEDA DESTINO -->
+
+      <div class="actions">
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="buscarDestino()"
+          [disabled]="!puedeBuscarDestino || cargando">
+
+          {{ buscandoDestino
+          ? 'Buscando cuentas...'
+          : 'Buscar cuentas destino' }}
+
+        </button>
+
+      </div>
+
+
+      <!-- RESULTADOS DESTINO -->
+
+      <div
+        class="table-wrap"
+        *ngIf="resultadosDestino.length > 0">
+
+        <table>
+
+          <thead>
+          <tr>
+            <th>Documento</th>
+            <th>Asociado</th>
+            <th>Agencia</th>
+            <th>Cuenta</th>
+            <th>Producto</th>
+            <th class="right">Saldo actual</th>
+            <th>Acción</th>
+          </tr>
+          </thead>
+
+          <tbody>
+
+          <tr *ngFor="let cuenta of resultadosDestino">
+
+            <td>
+              {{ cuenta.documento }}
+            </td>
+
+            <td>
+              {{ cuenta.nombreCompleto }}
+            </td>
+
+            <td>
+              {{ cuenta.codigoAgencia }} - {{ cuenta.nombreAgencia }}
+            </td>
+
+            <td>
+              {{ cuenta.codigoCuenta }}
+            </td>
+
+            <td>
+              {{ cuenta.nombreForma }}
+            </td>
+
+            <td class="right">
+              {{ dinero.format(cuenta.saldoActual) }}
+            </td>
+
+            <td>
+
+              <button
+                type="button"
+                class="btn btn-outline"
+                (click)="seleccionarDestino(cuenta)"
+                [disabled]="cargando || !cuenta.operativa">
+
+                Seleccionar destino
+
+              </button>
+
+            </td>
+
+          </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+
+
+      <!-- =====================================================
+           CUENTA DESTINO SELECCIONADA
+           ===================================================== -->
+
+      <div
+        class="cuenta-seleccionada"
+        *ngIf="destino as cuenta">
+
+        <div class="cuenta-header">
+
+          <h4>Cuenta destino seleccionada</h4>
+
+          <button
+            *ngIf="!resultado"
+            type="button"
+            class="btn btn-outline"
+            (click)="cambiarDestino()"
+            [disabled]="cargando">
+            Cambiar destino
+          </button>
+
+        </div>
+
+
+        <div class="cuenta-resumen">
+
+          <!-- TITULAR -->
+
+          <div class="cuenta-dato cuenta-dato--titular">
+
+            <span class="cuenta-etiqueta">
+              Titular
+            </span>
+
+            <strong class="cuenta-valor">
+              {{ cuenta.nombreCompleto }}
+            </strong>
+
+            <span class="cuenta-secundario">
+              Documento {{ cuenta.documento }}
+            </span>
+
+          </div>
+
+
+          <!-- CUENTA Y PRODUCTO -->
+
+          <div class="cuenta-dato">
+
+            <span class="cuenta-etiqueta">
+              Cuenta / Producto
+            </span>
+
+            <strong class="cuenta-valor cuenta-numero">
+              {{ cuenta.codigoCuenta }}
+            </strong>
+
+            <span class="cuenta-secundario">
+              {{ cuenta.nombreForma }}
+            </span>
+
+          </div>
+
+
+          <!-- =====================================================
+         AGENCIA Y ESTADO - CUENTA ORIGEN
+         ===================================================== -->
+
+          <div class="cuenta-dato">
+
+            <span class="cuenta-etiqueta">
+              Agencia / Estado
+            </span>
+
+            <strong class="cuenta-valor">
+              {{ cuenta.codigoAgencia }} - {{ cuenta.nombreAgencia }}
+            </strong>
+
+            <span class="cuenta-secundario">
+              Estado: {{ cuenta.descripcionEstadoCuenta || cuenta.estadoCuenta }}
+            </span>
+
+          </div>
+
+          <!-- SALDO -->
+
+          <div class="cuenta-dato cuenta-dato--saldo">
+
+            <span class="cuenta-etiqueta">
+              Saldo actual
+            </span>
+
+            <strong class="cuenta-saldo">
+              {{ dinero.format(cuenta.saldoActual) }}
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- SIN DESTINO -->
+
+      <p
+        class="section-description"
+        *ngIf="!destino">
+
+        Todavía no ha seleccionado una cuenta destino.
+
+      </p>
+
+    </ng-container>
+
+
+    <ng-template #destinoBloqueado>
+
+      <p class="section-description">
+        Primero debe seleccionar una cuenta origen
+        para habilitar la búsqueda del destino.
+      </p>
+
+    </ng-template>
+
+  </section>
+
+
+  <!-- =====================================================
+       4. DATOS DE LA TRANSFERENCIA
+       ===================================================== -->
+
+  <section class="card">
+
+    <h3>4. Datos de la transferencia</h3>
+
+    <p class="section-description">
+      Indique el valor a transferir y el motivo de la
+      operación. El concepto será incluido en los
+      comprobantes y movimientos contables.
+    </p>
+
+
+    <div class="grid dos">
+
+      <!-- =====================================================
+     VALOR DE LA TRANSFERENCIA
+     ===================================================== -->
+
+      <label>
+        Valor a transferir
+
+        <input
+          type="text"
+          name="valor"
+          numericFormat
+          inputmode="decimal"
+          [(ngModel)]="valor"
+          (ngModelChange)="invalidarPreview()"
+          [disabled]="!origen || !destino || cargando || !!resultado">
+
+      </label>
+
+
+      <label>
+        Fecha de trabajo
+
+        <input
+          type="date"
+          name="fechaProceso"
+          [(ngModel)]="fechaProceso"
+          readonly>
+      </label>
+
+    </div>
+
+
+    <label>
+      Concepto de la transferencia
+
+      <textarea
+        name="concepto"
+        [(ngModel)]="concepto"
+        rows="2"
+        maxlength="200"
+        (ngModelChange)="invalidarPreview()"
+        [disabled]="!origen || !destino || cargando || !!resultado">
+      </textarea>
+    </label>
+
+
+    <div class="actions">
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="verPreview()"
+        [disabled]="!puedeConsultarPreview">
+
+        {{ procesando
+        ? 'Preparando vista previa...'
+        : 'Vista previa' }}
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       5. VISTA PREVIA CONTABLE
+       ===================================================== -->
+
+  <section
+    class="card"
+    *ngIf="vista as vistaPrevia">
+
+    <h3>5. Vista previa de la transferencia</h3>
+
+
+    <!-- RESUMEN FINANCIERO -->
+
+    <div class="resumen-transferencia">
+
+      <p>
+        <strong>Valor a transferir:</strong>
+        {{ dinero.format(vistaPrevia.valor) }}
+      </p>
+
+      <p>
+        <strong>Saldo final cuenta origen:</strong>
+        {{ dinero.format(vistaPrevia.saldoOrigenFinal) }}
+      </p>
+
+      <p>
+        <strong>Saldo final cuenta destino:</strong>
+        {{ dinero.format(vistaPrevia.saldoDestinoFinal) }}
+      </p>
+
+    </div>
+
+
+    <!-- COMPROBANTES CONTABLES -->
+
+    <div
+      class="comprobante"
+      *ngFor="let comprobante of vistaPrevia.comprobantes">
+
+      <h4>
+        Comprobante {{ comprobante.tipoComprobante }}
+        · Agencia {{ comprobante.idAgencia }}
+        — {{ comprobante.nombreAgencia }}
+      </h4>
+
+
+      <!-- CONCEPTO GENERAL DEL COMPROBANTE -->
+
+      <p>
+        <strong>Concepto contable:</strong>
+        {{ comprobante.concepto }}
+      </p>
+
+
+      <!-- DETALLE DE MOVIMIENTOS -->
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+          <tr>
+            <th>Cuenta contable</th>
+            <th>Nombre de cuenta</th>
+            <th>Detalle del movimiento</th>
+            <th class="right">Débito</th>
+            <th class="right">Crédito</th>
+          </tr>
+          </thead>
+
+          <tbody>
+
+          <tr *ngFor="let movimiento of comprobante.movimientos">
+
+            <td>
+              {{ movimiento.codigoCuenta }}
+            </td>
+
+            <td>
+              {{ movimiento.nombreCuenta }}
+            </td>
+
+            <td>
+              {{ movimiento.detalle }}
+            </td>
+
+            <td class="right">
+              {{ dinero.format(movimiento.valorDebito) }}
+            </td>
+
+            <td class="right">
+              {{ dinero.format(movimiento.valorCredito) }}
+            </td>
+
+          </tr>
+
+          </tbody>
+
+
+          <tfoot>
+
+          <tr>
+
+            <th colspan="3">
+              Totales del comprobante
+            </th>
+
+            <th class="right">
+              {{ dinero.format(comprobante.totalDebito) }}
+            </th>
+
+            <th class="right">
+              {{ dinero.format(comprobante.totalCredito) }}
+            </th>
+
+          </tr>
+
+          </tfoot>
+
+        </table>
+
+      </div>
+
+    </div>
+
+
+    <!-- CONFIRMAR TRANSFERENCIA -->
+
+    <div class="actions">
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="aplicar()"
+        [disabled]="!puedeAplicar">
+
+        {{ procesando
+        ? 'Registrando transferencia...'
+        : 'Confirmar transferencia' }}
+
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- =====================================================
+       RESULTADO DE LA TRANSFERENCIA
+       ===================================================== -->
+
+  <section
+    class="card"
+    *ngIf="resultado as transferencia">
+
+    <h3>Transferencia registrada</h3>
+
+
+    <p>
+      Se transfirieron
+
+      <strong>
+        {{ dinero.format(transferencia.valor) }}
+      </strong>
+
+      desde la cuenta
+      <strong>
+        {{ origen?.codigoCuenta }}
+      </strong>
+
+      hacia la cuenta
+      <strong>
+        {{ destino?.codigoCuenta }}
+      </strong>.
+    </p>
+
+
+    <h4>Comprobantes generados</h4>
+
+
+    <div
+      *ngFor="let comprobante of transferencia.comprobantes">
+
+      Agencia {{ comprobante.idAgencia }}
+      ·
+      {{ comprobante.tipoComprobante }}
+      {{ comprobante.numeroComprobante }}
+
+    </div>
+
+
+    <div class="actions">
+
+      <button
+        type="button"
+        class="btn btn-outline"
+        (click)="nueva()"
+        [disabled]="cargando">
+
+        Realizar otra transferencia
+
+      </button>
+
+    </div>
+
+  </section>
+
+</div>
