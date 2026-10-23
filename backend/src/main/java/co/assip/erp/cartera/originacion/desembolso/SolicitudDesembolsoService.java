@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import co.assip.erp.cajas.movimientos.CajasMovimientosService;
 
+import co.assip.erp.tesoreria.operaciones_pendientes.TesoreriaOperacionesPendientesService;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
@@ -44,6 +46,9 @@ public class SolicitudDesembolsoService {
     private final CajasMovimientosService
             cajasMovimientosService;
 
+    private final TesoreriaOperacionesPendientesService
+            tesoreriaOperacionesPendientesService;
+
     private static final String CONCEPTO_CENTRAL_RIESGO =
             "CENTRAL_RIESGO";
 
@@ -61,13 +66,16 @@ public class SolicitudDesembolsoService {
             UsuarioSesionService usuarioSesionService,
             SolicitudDesembolsoContabilizacionService contabilizacionService,
             DepositosMovimientoService depositosMovimientoService,
-            CajasMovimientosService cajasMovimientosService
+            CajasMovimientosService cajasMovimientosService,
+            TesoreriaOperacionesPendientesService tesoreriaOperacionesPendientesService
     ) {
         this.repository = repository;
         this.usuarioSesionService = usuarioSesionService;
         this.contabilizacionService = contabilizacionService;
         this.depositosMovimientoService = depositosMovimientoService;
         this.cajasMovimientosService = cajasMovimientosService;
+        this.tesoreriaOperacionesPendientesService =
+                tesoreriaOperacionesPendientesService;
     }
 
     // =========================================================
@@ -717,15 +725,6 @@ public class SolicitudDesembolsoService {
             );
         }
 
-        if (distribucion.idCaja() == null
-                || distribucion.idCaja() <= 0) {
-
-            throw new IllegalArgumentException(
-                    "Debe seleccionar la Caja que atenderá "
-                            + "el desembolso."
-            );
-        }
-
         // =====================================================
         // DEPÓSITOS
         // =====================================================
@@ -1259,22 +1258,171 @@ public class SolicitudDesembolsoService {
 
 
     // =========================================================
-// EJECUTAR DESEMBOLSO
-//
-// Ejecuta toda la operación dentro de una sola transacción:
-//
-// 1. Bloquea el crédito.
-// 2. Recalcula liquidación.
-// 3. Valida distribución.
-// 4. Resuelve cuentas contables.
-// 5. Genera comprobante(s).
-// 6. Registra Caja.
-// 7. Registra depósitos.
-// 8. Registra aportes.
-// 9. Activa el crédito.
-//
-// Cualquier error revierte toda la operación.
-// =========================================================
+    // EJECUTAR DESEMBOLSO
+    //
+    // Ejecuta toda la operación dentro de una sola transacción:
+    //
+    // 1. Bloquea el crédito.
+    // 2. Recalcula liquidación.
+    // 3. Valida distribución.
+    // 4. Resuelve cuentas contables.
+    // 5. Genera comprobante(s).
+    // 6. Publica la cuenta por pagar en Tesorería.
+    // 7. Registra Caja.
+    // 8. Registra depósitos.
+    // 9. Registra aportes.
+    // 10. Activa el crédito.
+    //
+    // Cualquier error revierte toda la operación.
+    // =========================================================
+
+    // Vista previa sin bloqueo, movimientos ni consecutivos definitivos.
+    @Transactional(readOnly = true)
+    public List<co.assip.erp.cartera.originacion.desembolso.dto.ComprobanteDesembolsoPreviewDTO> verificarComprobantes(
+            Integer idCarteraCredito,
+            Long idCaja,
+            LocalDate fechaContable,
+            String tipoComprobanteDesembolso,
+            String tipoComprobanteCobros,
+            Integer cantidadCentral,
+            BigDecimal valorEfectivo,
+            List<DepositoDistribucion> depositos,
+            BigDecimal valorCuentaPorPagar
+    ) {
+        validarIdCarteraCredito(idCarteraCredito);
+        if (fechaContable == null) {
+            throw new IllegalArgumentException("La fecha contable es obligatoria.");
+        }
+        validarTexto(tipoComprobanteDesembolso,
+                "El tipo de comprobante de desembolso es obligatorio.");
+        if (cantidadCentral == null || cantidadCentral < 0) {
+            throw new IllegalArgumentException("La cantidad de consultas a Central de Riesgo no es válida.");
+        }
+        List<DepositoDistribucion> depositosNormalizados =
+                depositos == null ? List.of() : depositos;
+        var credito = obtenerCreditoPendiente(idCarteraCredito);
+        usuarioSesionService.validarAgencia(credito.idAgencia());
+        validarIntegridadPendiente(credito);
+        Integer idUsuario = usuarioSesionService.idUsuario();
+        LiquidacionDesembolso liquidacion = calcularLiquidacion(idCarteraCredito, cantidadCentral);
+        boolean requiereCaja = normalizar(valorEfectivo).signum() > 0
+                || liquidacion.totalComprobante2().signum() > 0;
+        if (requiereCaja && (idCaja == null || idCaja <= 0)) {
+            throw new IllegalArgumentException("Debe seleccionar una caja para el efectivo o los cobros.");
+        }
+        var distribucion = new DistribucionDesembolso(
+                idCaja, valorEfectivo, depositosNormalizados, valorCuentaPorPagar);
+        var validacion = validarDistribucion(idCarteraCredito, distribucion);
+        if (!validacion.cuadra()) {
+            throw new IllegalStateException(validacion.mensaje()
+                    + " Diferencia: " + validacion.diferencia());
+        }
+        if (liquidacion.totalComprobante2().signum() > 0) {
+            validarTexto(tipoComprobanteCobros,
+                    "El tipo de comprobante de cobros es obligatorio.");
+        }
+        String edadRiesgo = determinarEdadRiesgoInicial(
+                credito.idCarteraCredito(), credito.idDatosPersonal());
+        // CUENTA CAPITAL
+        // =====================================================
+
+        Integer idCuentaCapital =
+                resolverCuentaCapital(
+                        credito,
+                        edadRiesgo
+                );
+
+        // =====================================================
+        // CUENTAS DEL COMPROBANTE 2
+        //
+        // Solo se resuelven cuando el concepto realmente
+        // genera movimiento.
+        // =====================================================
+
+        Integer idCuentaCentral = null;
+
+        if (liquidacion.valorCentral()
+                .compareTo(BigDecimal.ZERO) > 0) {
+
+            idCuentaCentral =
+                    resolverParametroContable(
+                            credito,
+                            CONCEPTO_CENTRAL_RIESGO
+                    );
+        }
+
+        Integer idCuentaPapeleria = null;
+
+        if (liquidacion.valorPapeleria()
+                .compareTo(BigDecimal.ZERO) > 0) {
+
+            idCuentaPapeleria =
+                    resolverParametroContable(
+                            credito,
+                            CONCEPTO_PAPELERIA
+                    );
+        }
+
+        Integer idCuentaIva = null;
+
+        if (liquidacion.ivaPapeleria()
+                .compareTo(BigDecimal.ZERO) > 0) {
+
+            idCuentaIva =
+                    resolverParametroContable(
+                            credito,
+                            CONCEPTO_IVA
+                    );
+        }
+
+        Integer idCuentaPorPagar = null;
+
+        if (normalizar(valorCuentaPorPagar)
+                .compareTo(BigDecimal.ZERO) > 0) {
+
+            idCuentaPorPagar =
+                    resolverParametroContable(
+                            credito,
+                            CONCEPTO_CUENTA_POR_PAGAR
+                    );
+        }
+
+        // =====================================================
+        // DEPÓSITOS PARA CONTABILIZACIÓN
+        // =====================================================
+
+        List<SolicitudDesembolsoContabilizacionService.DepositoContabilizacion>
+                depositosContables =
+                depositosNormalizados
+                        .stream()
+                        .map(deposito ->
+                                new SolicitudDesembolsoContabilizacionService
+                                        .DepositoContabilizacion(
+                                        deposito.idCuentaAhorro(),
+                                        normalizar(
+                                                deposito.valor()
+                                        )
+                                )
+                        )
+                        .toList();
+
+        // =====================================================
+        return contabilizacionService.verificarComprobantes(
+                new SolicitudDesembolsoContabilizacionService.DatosContabilizacion(
+                        credito.idCarteraCredito(), credito.idAgencia(), idCaja,
+                        fechaContable, idUsuario,
+                        tipoComprobanteDesembolso.trim(),
+                        liquidacion.totalComprobante2().signum() > 0
+                                ? tipoComprobanteCobros.trim() : null,
+                        idCuentaCapital, idCuentaCentral, idCuentaPapeleria,
+                        idCuentaIva, idCuentaPorPagar,
+                        liquidacion.valorCredito(), liquidacion.valorFondo(),
+                        liquidacion.ivaFondo(), normalizar(valorEfectivo),
+                        depositosContables, normalizar(valorCuentaPorPagar),
+                        liquidacion.valorCentral(), liquidacion.valorPapeleria(),
+                        liquidacion.ivaPapeleria(), liquidacion.valorAportes(),
+                        liquidacion.totalComprobante2()));
+    }
 
     @Transactional
     public ResultadoEjecucionDesembolso ejecutarDesembolso(
@@ -1291,12 +1439,6 @@ public class SolicitudDesembolsoService {
     ) {
 
         validarIdCarteraCredito(idCarteraCredito);
-
-        if (idCaja == null || idCaja <= 0) {
-            throw new IllegalArgumentException(
-                    "Debe seleccionar la caja que atenderá el desembolso."
-            );
-        }
 
         if (fechaContable == null) {
             throw new IllegalArgumentException(
@@ -1361,6 +1503,17 @@ public class SolicitudDesembolsoService {
                         idCarteraCredito,
                         cantidadCentral
                 );
+
+        boolean requiereCaja =
+                normalizar(valorEfectivo).signum() > 0
+                        || liquidacion.totalComprobante2().signum() > 0;
+
+        if (requiereCaja && (idCaja == null || idCaja <= 0)) {
+            throw new IllegalArgumentException(
+                    "Debe seleccionar una caja porque el desembolso "
+                            + "genera movimientos de efectivo."
+            );
+        }
 
         // =====================================================
         // VALIDAR DISTRIBUCIÓN
@@ -1543,6 +1696,27 @@ public class SolicitudDesembolsoService {
                 );
 
         // =====================================================
+// TESORERÍA - CUENTA POR PAGAR DEL DESEMBOLSO
+// =====================================================
+
+        if (normalizar(valorCuentaPorPagar).signum() > 0) {
+
+            tesoreriaOperacionesPendientesService.publicar(
+                    credito.idAgencia(),
+                    "CARTERA",
+                    "DESEMBOLSO_CREDITO",
+                    "cartera.carteras_creditos",
+                    credito.idCarteraCredito().longValue(),
+                    credito.idDatosPersonal(),
+                    "SALIDA",
+                    fechaContable,
+                    "DESEMBOLSO CREDITO " + credito.pagareCartera(),
+                    normalizar(valorCuentaPorPagar),
+                    idUsuario
+            );
+        }
+
+        // =====================================================
         // CAJA - EGRESO DEL DESEMBOLSO
         // =====================================================
 
@@ -1687,103 +1861,6 @@ public class SolicitudDesembolsoService {
                 novacion.codigoModificacionCredito(),
                 novacion.numeroNovaciones()
         );
-    }
-
-    @Transactional
-    public void activarCredito(
-            Integer idCarteraCredito,
-            String tipoComprobante,
-            String numeroComprobante,
-            LocalDate fechaContable,
-            LocalDate fechaDesembolso
-    ) {
-
-        validarIdCarteraCredito(
-                idCarteraCredito
-        );
-
-        validarTexto(
-                tipoComprobante,
-                "El tipo de comprobante es obligatorio."
-        );
-
-        validarTexto(
-                numeroComprobante,
-                "El número de comprobante es obligatorio."
-        );
-
-        if (fechaContable == null) {
-            throw new IllegalArgumentException(
-                    "La fecha contable es obligatoria."
-            );
-        }
-
-        if (fechaDesembolso == null) {
-            throw new IllegalArgumentException(
-                    "La fecha de desembolso es obligatoria."
-            );
-        }
-
-        SolicitudDesembolsoRepository.CreditoDesembolsoDatos credito =
-                repository.bloquearCredito(
-                        idCarteraCredito
-                ).orElseThrow(() ->
-                        new IllegalStateException(
-                                "El crédito no existe o ya no se encuentra "
-                                        + "pendiente de desembolso."
-                        )
-                );
-
-        usuarioSesionService.validarAgencia(
-                credito.idAgencia()
-        );
-
-        validarIntegridadPendiente(
-                credito
-        );
-
-        String edadRiesgo =
-                determinarEdadRiesgoInicial(
-                        credito.idCarteraCredito(),
-                        credito.idDatosPersonal()
-                );
-
-        DatosNovacion novacion =
-                determinarNovacion(
-                        credito.idCarteraCredito(),
-                        credito.idDatosPersonal(),
-                        fechaDesembolso
-                );
-
-        Integer idUsuario =
-                usuarioSesionService.idUsuario();
-
-        int actualizados =
-                repository.activarCredito(
-                        credito.idCarteraCredito(),
-
-                        tipoComprobante.trim(),
-                        numeroComprobante.trim(),
-
-                        fechaContable,
-                        fechaDesembolso,
-
-                        edadRiesgo,
-                        edadRiesgo,
-
-                        novacion.codigoModificacionCredito(),
-                        novacion.numeroNovaciones(),
-
-                        idUsuario
-                );
-
-        if (actualizados != 1) {
-            throw new IllegalStateException(
-                    "No fue posible activar el crédito "
-                            + credito.idCarteraCredito()
-                            + "."
-            );
-        }
     }
 
     // =========================================================

@@ -1,4 +1,4 @@
-import {
+ import {
   CommonModule
 } from '@angular/common';
 
@@ -36,12 +36,13 @@ import {
 } from '../../../../core/auth/session.service';
 
 import {
+  ComprobanteDesembolsoPreview,
   DepositoDesembolso,
   EjecutarDesembolsoRequest,
   LiquidacionDesembolso,
   PreparacionDesembolso,
   ResultadoEjecucionDesembolso,
-  ResultadoValidacionDistribucion,
+  VerificarComprobantesRequest,
 
 } from './originacion-desembolso.models';
 
@@ -137,8 +138,9 @@ export class OriginacionDesembolsoComponent
 
   liquidacion: LiquidacionDesembolso | null = null;
 
-  validacionDistribucion:
-    ResultadoValidacionDistribucion | null = null;
+  comprobantesPreview: ComprobanteDesembolsoPreview[] | null = null;
+
+  private revisionVerificacion = 0;
 
   resultado:
     ResultadoEjecucionDesembolso | null = null;
@@ -222,8 +224,7 @@ export class OriginacionDesembolsoComponent
         // ---------------------------------------------------
 
         idCaja: [
-          null,
-          Validators.required
+          null
         ],
 
         // ---------------------------------------------------
@@ -273,6 +274,12 @@ export class OriginacionDesembolsoComponent
 
         depositos: this.fb.array([])
 
+      });
+
+      // Cualquier cambio en los parámetros invalida la vista previa.
+      this.form.valueChanges.subscribe(() => {
+        this.invalidarDistribucion();
+        this.actualizarValidadorCaja();
       });
     }
 
@@ -330,6 +337,17 @@ export class OriginacionDesembolsoComponent
       return;
     }
 
+    const sugerido = Math.max(0,
+      (this.liquidacion?.valorDistribuir ?? 0) -
+      this.totalDepositosLocal -
+      this.numero(this.form.get('valorEfectivo')?.value)
+    );
+
+    if (sugerido <= 0) {
+      this.error = 'No hay saldo pendiente para agregar otra cuenta de ahorro.';
+      return;
+    }
+
     this.depositos.push(
       this.fb.group({
         idCuentaAhorro: [
@@ -341,7 +359,7 @@ export class OriginacionDesembolsoComponent
         ],
 
         valor: [
-          0,
+          sugerido,
           [
             Validators.required,
             Validators.min(0.01)
@@ -350,6 +368,7 @@ export class OriginacionDesembolsoComponent
       })
     );
 
+    this.ajustarCuentaPorPagar();
     this.invalidarDistribucion();
   }
 
@@ -371,6 +390,7 @@ export class OriginacionDesembolsoComponent
 
     this.depositos.removeAt(index);
 
+    this.ajustarCuentaPorPagar();
     this.invalidarDistribucion();
   }
 
@@ -468,10 +488,8 @@ export class OriginacionDesembolsoComponent
           `${environment.apiUrl}/cajas/provisiones/abiertas`,
           {
             params: {
-              idAgencia:
-                String(idAgencia),
-
-              fechaContable
+              idAgencia: String(idAgencia),
+              fecha: fechaContable
             }
           }
         )
@@ -602,6 +620,8 @@ export class OriginacionDesembolsoComponent
             liquidacion;
 
           this.actualizarValidadorComprobanteCobros();
+          this.ajustarCuentaPorPagar();
+          this.actualizarValidadorCaja();
         },
 
         error: (
@@ -618,116 +638,78 @@ export class OriginacionDesembolsoComponent
 
 
   // =======================================================
-  // VALIDAR DISTRIBUCIÓN
+  // VERIFICAR COMPROBANTES CONTABLES
+  // No registra movimientos ni genera consecutivos.
   // =======================================================
 
- validarDistribucion(): void {
+  verificarComprobantes(): void {
 
-   if (!this.puedeDesembolsar) {
-
-     this.error =
-       'El usuario no tiene permiso para validar distribuciones de desembolso.';
-
-     return;
-   }
-
-   if (
-     !this.preparacion ||
-     !this.liquidacion ||
-     this.desembolsoEjecutado
-   ) {
-     return;
-   }
-
-    const idCaja =
-      this.numero(
-        this.form.get(
-          'idCaja'
-        )?.value
-      );
-
-    if (idCaja <= 0) {
-      this.error =
-        'Debe seleccionar la caja.';
-
+    if (!this.puedeValidarDistribucion) {
       return;
     }
 
-    const depositos =
-      this.obtenerDepositos();
+    this.actualizarValidadorComprobanteCobros();
+    this.actualizarValidadorCaja();
 
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.error = 'Revise los datos requeridos antes de verificar los comprobantes.';
+      return;
+    }
+
+    const depositos = this.obtenerDepositos();
     if (depositos === null) {
       return;
     }
 
+    const request: VerificarComprobantesRequest = {
+      idCaja: this.idCajaSeleccionada(),
+      fechaContable: this.texto(this.form.get('fechaContable')?.value),
+      tipoComprobanteDesembolso: this.texto(
+        this.form.get('tipoComprobanteDesembolso')?.value
+      ),
+      tipoComprobanteCobros: this.tieneCobros
+        ? this.texto(this.form.get('tipoComprobanteCobros')?.value)
+        : null,
+      cantidadCentral: this.numero(this.form.get('cantidadCentral')?.value),
+      valorEfectivo: this.numero(this.form.get('valorEfectivo')?.value),
+      depositos,
+      valorCuentaPorPagar: this.numero(this.form.get('valorCuentaPorPagar')?.value)
+    };
+
+    this.invalidarDistribucion();
+    const revision = this.revisionVerificacion;
     this.error = '';
-    this.mensaje = '';
     this.validando = true;
 
-    this.api
-      .validarDistribucion(
-        this.idCarteraCredito,
-        {
-          idCaja,
-
-          valorEfectivo:
-            this.numero(
-              this.form.get(
-                'valorEfectivo'
-              )?.value
-            ),
-
-          depositos,
-
-          valorCuentaPorPagar:
-            this.numero(
-              this.form.get(
-                'valorCuentaPorPagar'
-              )?.value
-            )
-        }
-      )
-      .pipe(
-        finalize(
-          () => {
-            this.validando = false;
-          }
-        )
-      )
+    this.api.verificarComprobantes(this.idCarteraCredito, request)
+      .pipe(finalize(() => { this.validando = false; }))
       .subscribe({
-
-        next: (
-          resultado:
-            ResultadoValidacionDistribucion
-        ) => {
-
-          this.validacionDistribucion =
-            resultado;
-
-          if (resultado.cuadra) {
-            this.mensaje =
-              resultado.mensaje ||
-              'La distribución del desembolso cuadra correctamente.';
-          } else {
-            this.error =
-              resultado.mensaje ||
-              'La distribución del desembolso no cuadra.';
+        next: (comprobantes: ComprobanteDesembolsoPreview[]) => {
+          if (revision !== this.revisionVerificacion) {
+            return;
           }
+
+          this.comprobantesPreview = comprobantes;
+          if (!comprobantes.length || comprobantes.some(c => !c.cuadrado)) {
+            this.error = 'Uno o más comprobantes no están cuadrados.';
+            return;
+          }
+          this.mensaje = 'Los comprobantes contables están cuadrados y listos para ejecutar.';
         },
-
-        error: (
-          error: unknown
-        ) => {
-          this.validacionDistribucion =
-            null;
-
-          this.error =
-            this.obtenerMensajeError(
-              error
-            );
+        error: (error: unknown) => {
+          if (revision !== this.revisionVerificacion) {
+            return;
+          }
+          this.comprobantesPreview = null;
+          this.error = this.obtenerMensajeError(error);
         }
-
       });
+  }
+
+  // Compatibilidad con la plantilla anterior mientras se actualiza el HTML.
+  validarDistribucion(): void {
+    this.verificarComprobantes();
   }
 
 
@@ -754,16 +736,17 @@ export class OriginacionDesembolsoComponent
     }
 
     if (
-      !this.validacionDistribucion ||
-      !this.validacionDistribucion.cuadra
+      !this.comprobantesPreview?.length ||
+      !this.comprobantesPreview.every(c => c.cuadrado)
     ) {
       this.error =
-        'Debe validar una distribución correcta antes de ejecutar el desembolso.';
+        'Debe verificar los comprobantes contables antes de ejecutar el desembolso.';
 
       return;
     }
 
     this.actualizarValidadorComprobanteCobros();
+    this.actualizarValidadorCaja();
 
     if (this.form.invalid) {
 
@@ -794,12 +777,7 @@ export class OriginacionDesembolsoComponent
     const request:
       EjecutarDesembolsoRequest = {
 
-      idCaja:
-        this.numero(
-          this.form.get(
-            'idCaja'
-          )?.value
-        ),
+      idCaja: this.idCajaSeleccionada(),
 
       fechaContable:
         this.texto(
@@ -909,12 +887,40 @@ export class OriginacionDesembolsoComponent
 
   private invalidarDistribucion(): void {
 
-    this.validacionDistribucion =
-      null;
+    this.revisionVerificacion++;
+    this.comprobantesPreview = null;
 
     if (!this.desembolsoEjecutado) {
       this.mensaje = '';
     }
+  }
+
+
+  // =======================================================
+  // CAJA OBLIGATORIA SOLO SI HAY EFECTIVO O COBROS
+  // =======================================================
+
+  private idCajaSeleccionada(): number | null {
+    const id = this.numero(this.form.get('idCaja')?.value);
+    return id > 0 ? id : null;
+  }
+
+  private actualizarValidadorCaja(): void {
+    const control = this.form.get('idCaja');
+    if (!control) {
+      return;
+    }
+
+    const requiereCaja =
+      this.numero(this.form.get('valorEfectivo')?.value) > 0 ||
+      this.tieneCobros;
+
+    if (requiereCaja) {
+      control.setValidators([Validators.required, Validators.min(1)]);
+    } else {
+      control.clearValidators();
+    }
+    control.updateValueAndValidity({ emitEvent: false });
   }
 
 
@@ -1200,8 +1206,8 @@ export class OriginacionDesembolsoComponent
     return (
       this.puedeDesembolsar &&
       this.puedeValidarDistribucion &&
-      !!this.validacionDistribucion &&
-      this.validacionDistribucion.cuadra &&
+      !!this.comprobantesPreview?.length &&
+      this.comprobantesPreview.every(c => c.cuadrado) &&
       this.form.valid
     );
   }
@@ -1527,55 +1533,55 @@ export class OriginacionDesembolsoComponent
       });
   }
 
-  cambiarValorEfectivo(
-    valor: number
-  ): void {
+  // =======================================================
+  // DISTRIBUCIÓN ASISTIDA
+  // Ahorros -> efectivo -> cuenta por pagar (remanente).
+  // =======================================================
 
-    this.form.get(
-      'valorEfectivo'
-    )?.setValue(
-      this.numero(valor),
-      {
-        emitEvent: false
-      }
+  private ajustarCuentaPorPagar(): void {
+    if (!this.liquidacion) {
+      return;
+    }
+
+    const remanente = Math.max(0,
+      this.liquidacion.valorDistribuir -
+      this.totalDepositosLocal -
+      this.numero(this.form.get('valorEfectivo')?.value)
     );
 
+    this.form.get('valorCuentaPorPagar')?.setValue(remanente, {
+      emitEvent: false
+    });
+  }
+
+  cambiarValorEfectivo(valor: number): void {
+    const disponible = Math.max(0,
+      (this.liquidacion?.valorDistribuir ?? 0) - this.totalDepositosLocal
+    );
+    const efectivo = Math.min(Math.max(0, this.numero(valor)), disponible);
+    this.form.get('valorEfectivo')?.setValue(efectivo, { emitEvent: false });
+    this.ajustarCuentaPorPagar();
+    this.invalidarDistribucion();
+    this.actualizarValidadorCaja();
+  }
+
+  cambiarValorCuentaPorPagar(valor: number): void {
+    // El valor de cuenta por pagar es el remanente automático.
+    this.ajustarCuentaPorPagar();
     this.invalidarDistribucion();
   }
 
-  cambiarValorCuentaPorPagar(
-    valor: number
-  ): void {
-
-    this.form.get(
-      'valorCuentaPorPagar'
-    )?.setValue(
-      this.numero(valor),
-      {
-        emitEvent: false
-      }
+  cambiarValorDeposito(index: number, valor: number): void {
+    const grupo = this.depositos.at(index);
+    const otrosDepositos = this.totalDepositosLocal -
+      this.numero(grupo.get('valor')?.value);
+    const disponible = Math.max(0,
+      (this.liquidacion?.valorDistribuir ?? 0) - otrosDepositos -
+      this.numero(this.form.get('valorEfectivo')?.value)
     );
-
-    this.invalidarDistribucion();
-  }
-
-  cambiarValorDeposito(
-    index: number,
-    valor: number
-  ): void {
-
-    const grupo =
-      this.depositos.at(index);
-
-    grupo.get(
-      'valor'
-    )?.setValue(
-      this.numero(valor),
-      {
-        emitEvent: false
-      }
-    );
-
+    const importe = Math.min(Math.max(0, this.numero(valor)), disponible);
+    grupo.get('valor')?.setValue(importe, { emitEvent: false });
+    this.ajustarCuentaPorPagar();
     this.invalidarDistribucion();
   }
 

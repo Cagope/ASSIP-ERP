@@ -77,16 +77,21 @@ public class CajasOperacionesPendientesRepository {
                 LEFT JOIN depositos.cuentas_ahorro ca
                     ON m.tabla_origen = 'depositos.cuentas_ahorro'
                    AND ca.id_cuenta_ahorro = m.id_origen
+                   
+                LEFT JOIN cartera.carteras_creditos cc
+                    ON m.tabla_origen = 'cartera.carteras_creditos'
+                   AND cc.id_cartera_credito = m.id_origen
 
                 LEFT JOIN hoja_vida.datos_personales dp
-                    ON dp.id_datos_personal = COALESCE(
-                        CASE
-                            WHEN m.tabla_origen = 'hoja_vida.datos_personales'
-                            THEN m.id_origen
-                        END,
-                        c.id_datos_personal,
-                        ca.id_datos_personal
-                    )
+                     ON dp.id_datos_personal = COALESCE(
+                         CASE
+                             WHEN m.tabla_origen = 'hoja_vida.datos_personales'
+                             THEN m.id_origen
+                         END,
+                         c.id_datos_personal,
+                         ca.id_datos_personal,
+                         cc.id_datos_personal
+                     )
 
                 WHERE m.id_caja = :idCaja
                   AND m.fecha_contable = :fechaContable

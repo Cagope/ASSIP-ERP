@@ -4,6 +4,8 @@ import co.assip.erp.shared.financiero.tablaamortizacion.dto.TablaAmortizacionReq
 import co.assip.erp.shared.financiero.tablaamortizacion.dto.TablaAmortizacionResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,9 +22,14 @@ public class TablaAmortizacionController {
     public ResponseEntity<TablaAmortizacionResponseDTO> calcular(
             @RequestBody TablaAmortizacionRequestDTO request
     ) {
+        return ResponseEntity.ok(service.calcular(request));
+    }
 
-        return ResponseEntity.ok(
-                service.calcular(request)
-        );
+    /** Parámetros financieros; seguros reales pendientes de integrar. */
+    @GetMapping("/credito/{idCarteraCredito}/parametros")
+    public ResponseEntity<TablaAmortizacionRequestDTO> parametrosCredito(
+            @PathVariable Integer idCarteraCredito
+    ) {
+        return ResponseEntity.ok(service.prepararCredito(idCarteraCredito));
     }
 }

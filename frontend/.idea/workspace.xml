@@ -5,26 +5,40 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d0577d07-00ee-4562-af4b-c1a4484e8934" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/retiro_asociado/RetiroAsociadoContabilizacionService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/retiro_asociado/RetiroAsociadoController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/retiro_asociado/RetiroAsociadoRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/retiro_asociado/RetiroAsociadoService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/retiro_asociado/dto/RetiroAsociadoDistribucionDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/retiro_asociado/dto/RetiroAsociadoEntradaDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/retiro_asociado/dto/RetiroAsociadoPreviewDTO.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/movimientos/retiro-asociado/retiro-asociado.api.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/movimientos/retiro-asociado/retiro-asociado.component.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/movimientos/retiro-asociado/retiro-asociado.component.scss" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/movimientos/retiro-asociado/retiro-asociado.component.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/app/features/depositos/movimientos/retiro-asociado/retiro-asociado.models.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/desembolso/dto/ComprobanteDesembolsoPreviewDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/desembolso/dto/ResultadoVerificacionComprobantesDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/pago_cuotas_v1/PagoCuotasV1Controller.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/pago_cuotas_v1/PagoCuotasV1Repository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/pago_cuotas_v1/PagoCuotasV1Service.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/pago-cuotas_v1/pago-cuotas_v1.api.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/pago-cuotas_v1/pago-cuotas_v1.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/pago-cuotas_v1/pago-cuotas_v1.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/pago-cuotas_v1/pago-cuotas_v1.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/pago-cuotas_v1/pago-cuotas_v1.models.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/features/cartera/pago-cuotas_v1/pago-cuotas_v1.routes.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/movimientos/CajasMovimientosService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/movimientos/CajasMovimientosService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/operaciones_pendientes/CajasOperacionesPendientesRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cajas/operaciones_pendientes/CajasOperacionesPendientesRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/movimientos/DepositosMovimientoService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/depositos/movimientos/DepositosMovimientoService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/desembolso/SolicitudDesembolsoContabilizacionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/desembolso/SolicitudDesembolsoContabilizacionService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/desembolso/SolicitudDesembolsoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/desembolso/SolicitudDesembolsoController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/desembolso/SolicitudDesembolsoRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/desembolso/SolicitudDesembolsoRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/desembolso/SolicitudDesembolsoService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/originacion/desembolso/SolicitudDesembolsoService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/tablaamortizacion/TablaAmortizacionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/tablaamortizacion/TablaAmortizacionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/tablaamortizacion/TablaAmortizacionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/tablaamortizacion/TablaAmortizacionRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/tablaamortizacion/TablaAmortizacionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/cartera/tablaamortizacion/TablaAmortizacionService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/operaciones_pendientes/TesoreriaOperacionesEjecucionesRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/operaciones_pendientes/TesoreriaOperacionesEjecucionesRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/operaciones_pendientes/TesoreriaOperacionesEjecucionesService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/co/assip/erp/tesoreria/operaciones_pendientes/TesoreriaOperacionesEjecucionesService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/depositos-menu.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/depositos-menu.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/features/depositos/depositos.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/depositos/depositos.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/cartera-menu.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/cartera-menu.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/cartera.routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/cartera.routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/consulta-creditos/buscador/consulta-creditos-buscador.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/consulta-creditos/buscador/consulta-creditos-buscador.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/consulta-creditos/consulta-creditos.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/consulta-creditos/consulta-creditos.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/originacion/desembolso/originacion-desembolso.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/desembolso/originacion-desembolso.api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/originacion/desembolso/originacion-desembolso.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/desembolso/originacion-desembolso.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/originacion/desembolso/originacion-desembolso.component.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/desembolso/originacion-desembolso.component.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/originacion/desembolso/originacion-desembolso.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/desembolso/originacion-desembolso.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/features/cartera/originacion/desembolso/originacion-desembolso.models.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/features/cartera/originacion/desembolso/originacion-desembolso.models.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/shared/financiero/tabla-amortizacion/tabla-amortizacion.api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/shared/financiero/tabla-amortizacion/tabla-amortizacion.api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/shared/financiero/tabla-amortizacion/tabla-amortizacion.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/shared/financiero/tabla-amortizacion/tabla-amortizacion.component.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

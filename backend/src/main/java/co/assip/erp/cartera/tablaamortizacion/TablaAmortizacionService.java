@@ -1,5 +1,6 @@
-package co.assip.erp.shared.financiero.tablaamortizacion;
+ package co.assip.erp.shared.financiero.tablaamortizacion;
 
+import co.assip.erp.cartera.tablaamortizacion.TablaAmortizacionRepository;
 import co.assip.erp.shared.financiero.CuotasFinancieras;
 import co.assip.erp.shared.financiero.dto.CuotaVariableResultado;
 import co.assip.erp.shared.financiero.tablaamortizacion.dto.TablaAmortizacionDetalleDTO;
@@ -16,6 +17,39 @@ import java.util.List;
 
 @Service
 public class TablaAmortizacionService {
+
+    private final TablaAmortizacionRepository repository;
+
+    public TablaAmortizacionService(TablaAmortizacionRepository repository) {
+        this.repository = repository;
+    }
+
+    /**
+     * Recupera las condiciones financieras registradas del crédito.
+     * No representa el plan histórico si hubo cambios posteriores.
+     * Los seguros no se proyectan hasta integrar sus reglas de cobro.
+     */
+    public TablaAmortizacionRequestDTO prepararCredito(Integer idCarteraCredito) {
+        var credito = repository.buscarCredito(idCarteraCredito)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No se encontró el crédito " + idCarteraCredito + "."));
+
+        TablaAmortizacionRequestDTO request = new TablaAmortizacionRequestDTO();
+        request.setValorCredito(credito.valorInicialCredito());
+        request.setTasaColocacion(credito.tasaNominalAnual());
+        request.setPlazoMeses(credito.plazo());
+        request.setAmortizacionCapitalMeses(credito.amortizacionCapital());
+        request.setPeriodoInteresMeses(credito.periodoInteresMeses());
+        request.setTipoModalidadInteres(credito.tipoModalidadInteres());
+        request.setCodigoTipoCuota(credito.codigoTipoCuota());
+        request.setFechaDesembolso(credito.fechaDesembolso());
+        request.setFechaPrimeraCuotaCapital(credito.fechaPrimeraCuotaCapital());
+        request.setFechaPrimeraCuotaInteres(credito.fechaPrimeraCuotaInteres());
+        request.setPorcentajeSeguroCredito(BigDecimal.ZERO);
+        request.setPorcentajeSeguroEntidad(BigDecimal.ZERO);
+        validarRequest(request);
+        return request;
+    }
 
     private static final BigDecimal CERO =
             BigDecimal.ZERO.setScale(0, RoundingMode.HALF_UP);
@@ -768,3 +802,4 @@ public class TablaAmortizacionService {
                 + (diaFinal - diaInicial);
     }
 }
+

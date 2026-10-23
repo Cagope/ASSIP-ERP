@@ -135,7 +135,7 @@ export interface DepositoDesembolso {
 }
 
 export interface DistribucionDesembolsoRequest {
-  idCaja: number;
+  idCaja: number | null;
   valorEfectivo: number;
   depositos: DepositoDesembolso[];
   valorCuentaPorPagar: number;
@@ -151,7 +151,7 @@ export interface ResultadoValidacionDistribucion {
 
   valorDistribuir: number;
 
-  idCaja: number;
+  idCaja: number | null;
 
   valorEfectivo: number;
   totalDepositos: number;
@@ -170,7 +170,8 @@ export interface ResultadoValidacionDistribucion {
 // =========================================================
 
 export interface EjecutarDesembolsoRequest {
-  idCaja: number;
+
+  idCaja: number | null;
 
   fechaContable: string;
   fechaDesembolso: string;
@@ -212,3 +213,69 @@ export interface ResultadoEjecucionDesembolso {
   codigoModificacionCredito: string;
   numeroNovaciones: number;
 }
+
+
+// =========================================================
+// VERIFICACIÓN DE COMPROBANTES CONTABLES
+// Vista previa antes de ejecutar el desembolso.
+// No genera movimientos ni consecutivos.
+// =========================================================
+
+ // =========================================================
+ // SOLICITUD DE VERIFICACIÓN
+ // =========================================================
+
+ export interface VerificarComprobantesRequest {
+   idCaja: number | null;
+   fechaContable: string;
+
+   tipoComprobanteDesembolso: string;
+   tipoComprobanteCobros: string | null;
+
+   cantidadCentral: number;
+
+   valorEfectivo: number;
+   depositos: DepositoDesembolso[];
+   valorCuentaPorPagar: number;
+ }
+
+
+ // =========================================================
+ // MOVIMIENTOS CONTABLES DEL COMPROBANTE
+ // =========================================================
+
+ export interface MovimientoContablePreview {
+   idAgencia: number | null;
+   fechaAuxiliar: string | null;
+
+   idCatalogoCuenta: number;
+   codigoCuenta: string;
+   nombreCuenta: string;
+
+   idDatosPersonal: number | null;
+   documentoTercero: string | null;
+   nombreTercero: string | null;
+
+   detalleMovimiento: string;
+
+   valorDebito: number;
+   valorCredito: number;
+ }
+
+
+ // =========================================================
+ // COMPROBANTE CONTABLE Y RESULTADO DEL CUADRE
+ // =========================================================
+
+ export interface ComprobanteDesembolsoPreview {
+   tipoComprobante: string;
+   concepto: string;
+
+   movimientos: MovimientoContablePreview[];
+
+   totalDebitos: number;
+   totalCreditos: number;
+   diferencia: number;
+
+   cuadrado: boolean;
+ }

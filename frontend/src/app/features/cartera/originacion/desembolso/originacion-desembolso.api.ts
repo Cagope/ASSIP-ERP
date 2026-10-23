@@ -1,3 +1,4 @@
+
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -6,13 +7,15 @@ import { environment } from '../../../../../environments/environment';
 
 import {
   CalcularDesembolsoRequest,
+  ComprobanteDesembolsoPreview,
   CreditoPendienteDesembolso,
   DistribucionDesembolsoRequest,
   EjecutarDesembolsoRequest,
   LiquidacionDesembolso,
   PreparacionDesembolso,
   ResultadoEjecucionDesembolso,
-  ResultadoValidacionDistribucion
+  ResultadoValidacionDistribucion,
+  VerificarComprobantesRequest
 } from './originacion-desembolso.models';
 
 
@@ -114,6 +117,30 @@ export class OriginacionDesembolsoApi {
 
 
   // =========================================================
+  // VERIFICAR COMPROBANTES CONTABLES
+  //
+  // POST
+  // /cartera/originacion/desembolso/{id}/verificar-comprobantes
+  //
+  // Construye la vista previa de los comprobantes de
+  // desembolso y cobros, incluyendo movimientos y cuadre.
+  //
+  // No contabiliza ni genera consecutivos.
+  // =========================================================
+
+  verificarComprobantes(
+    idCarteraCredito: number,
+    request: VerificarComprobantesRequest
+  ): Observable<ComprobanteDesembolsoPreview[]> {
+
+    return this.http.post<ComprobanteDesembolsoPreview[]>(
+      `${this.baseUrl}/${idCarteraCredito}/verificar-comprobantes`,
+      request
+    );
+  }
+
+
+  // =========================================================
   // EJECUTAR DESEMBOLSO
   //
   // POST
@@ -141,6 +168,11 @@ export class OriginacionDesembolsoApi {
       request
     );
   }
+
+
+  // =========================================================
+  // CONSULTAR CUENTAS DE AHORRO DEL ASOCIADO
+  // =========================================================
 
   buscarCuentasAsociado(
     documento: string

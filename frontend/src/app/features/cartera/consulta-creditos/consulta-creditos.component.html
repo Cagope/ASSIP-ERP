@@ -1224,6 +1224,26 @@
 
         </article>
 
+        <!-- =================================================== -->
+        <!-- TABLA DE AMORTIZACIÓN -->
+        <article
+          class="modulo-card modulo-card--accion"
+          [class.modulo-card--activo]="moduloRelacionadoAbierto('tablaAmortizacion')">
+          <strong>
+            <span aria-hidden="true">▤</span>
+          </strong>
+          <span>
+            Plan de amortización al desembolso
+          </span>
+          <button
+            type="button"
+            class="btn btn--primary btn-sm modulo-card__accion"
+            (click)="abrirModuloRelacionado('tablaAmortizacion')">
+            {{ moduloRelacionadoAbierto('tablaAmortizacion')
+            ? 'Cerrar tabla' : 'Ver amortización' }}
+          </button>
+        </article>
+
 
         <!-- =================================================== -->
         <!-- SEGUROS -->
@@ -1258,8 +1278,6 @@
 
         </article>
 
-
-        <!-- =================================================== -->
         <!-- ALIVIOS -->
         <!-- =================================================== -->
 
@@ -1413,6 +1431,13 @@
 
 
     <!-- ===================================================== -->
+    <app-tabla-amortizacion
+      *ngIf="moduloRelacionadoAbierto('tablaAmortizacion')"
+      #tablaAmortizacion
+      titulo="Tabla de amortización - Crédito"
+      (cerrado)="cerrarModuloRelacionado()">
+    </app-tabla-amortizacion>
+
     <!-- EXTRACTO DEL CRÉDITO                                  -->
     <!-- ===================================================== -->
 

@@ -29,4 +29,13 @@ export class TablaAmortizacionApi {
       request
     );
   }
+
+  consultarParametrosCredito(
+    idCarteraCredito: number
+  ): Observable<TablaAmortizacionRequest> {
+
+    return this.http.get<TablaAmortizacionRequest>(
+      `${this.url}/credito/${idCarteraCredito}/parametros`
+    );
+  }
 }

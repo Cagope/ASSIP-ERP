@@ -346,17 +346,34 @@ public class TesoreriaOperacionesEjecucionesRepository {
     }
 
 
-    public void confirmarEjecucion(Long idEjecucion, String tipoComprobante,
-                                   String numeroComprobante, Integer idUsuario) {
+    public void confirmarEjecucion(
+            Long idEjecucion,
+            String tipoComprobante,
+            String numeroComprobante,
+            Integer idUsuario
+    ) {
+
         int actualizadas = jdbcTemplate.update("""
-                UPDATE tesoreria.operaciones_ejecuciones
-                   SET estado = 'CONFIRMADA',
-                       fecha_ejecucion = CURRENT_TIMESTAMP,
-                       tipo_comprobante = ?, numero_comprobante = ?
-                 WHERE id_operacion_ejecucion = ? AND estado = 'PREPARADA'
-                """, tipoComprobante, numeroComprobante, idEjecucion);
+            UPDATE tesoreria.operaciones_ejecuciones
+               SET estado = 'CONFIRMADA',
+                   fecha_ejecucion = CURRENT_TIMESTAMP,
+                   tipo_comprobante = ?,
+                   numero_comprobante = ?,
+                   fk_seguridad_edicion = ?,
+                   fecha_edicion = CURRENT_TIMESTAMP
+             WHERE id_operacion_ejecucion = ?
+               AND estado = 'PREPARADA'
+            """,
+                tipoComprobante,
+                numeroComprobante,
+                idUsuario,
+                idEjecucion
+        );
+
         if (actualizadas != 1) {
-            throw new IllegalStateException("La ejecución no pudo confirmarse.");
+            throw new IllegalStateException(
+                    "La ejecución no pudo confirmarse."
+            );
         }
     }
 

@@ -222,7 +222,7 @@ public class CajasMovimientosService {
                 "EFECTIVO",
                 efectivo,
                 concepto,
-                "REGISTRADO",
+                "PENDIENTE",
                 tipoComprobante,
                 numeroComprobante,
                 idUsuario
@@ -324,7 +324,7 @@ public class CajasMovimientosService {
                 "EFECTIVO",
                 cobros,
                 concepto,
-                "REGISTRADO",
+                "PENDIENTE",
                 tipoComprobante,
                 numeroComprobante,
                 idUsuario

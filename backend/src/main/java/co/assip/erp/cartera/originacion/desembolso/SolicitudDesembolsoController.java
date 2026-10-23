@@ -6,6 +6,7 @@ import co.assip.erp.seguridad.usuarios.Usuario;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import co.assip.erp.cartera.originacion.desembolso.dto.ComprobanteDesembolsoPreviewDTO;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -118,7 +119,7 @@ public class SolicitudDesembolsoController {
     //
     // Valida:
     //
-    // - Caja seleccionada
+    // - Efectivo y caja cuando corresponda
     // - Efectivo
     // - Una o varias cuentas de depósito
     // - Cuenta por pagar
@@ -182,6 +183,7 @@ public class SolicitudDesembolsoController {
     // - Caja
     // - Depósitos
     // - Aportes
+    // - Publicación de operaciones pendientes en Tesorería
     // - Activación del crédito
     //
     // Todo se ejecuta dentro de la transacción controlada
@@ -231,46 +233,49 @@ public class SolicitudDesembolsoController {
     }
 
     // =========================================================
-    // ACTIVAR MAESTRO
-    //
-    // TEMPORAL.
-    //
-    // Este endpoint NO debe utilizarse desde Angular como
-    // ejecución final del desembolso.
-    //
-    // Se retirará cuando quede terminado ejecutarDesembolso().
+    // SEGURIDAD
     // =========================================================
 
-    @PostMapping("/{idCarteraCredito}/activar")
-    public ResponseEntity<Void> activar(
+    @PostMapping("/{idCarteraCredito}/verificar-comprobantes")
+    public ResponseEntity<List<ComprobanteDesembolsoPreviewDTO>>
+    verificarComprobantes(
             @PathVariable Integer idCarteraCredito,
-            @RequestBody ActivarCreditoRequest request
+            @RequestBody VerificarComprobantesRequest request
     ) {
 
         validarDesembolso();
 
         if (request == null) {
             throw new IllegalArgumentException(
-                    "Los datos de activación son obligatorios."
+                    "Los datos de verificación son obligatorios."
             );
         }
 
-        service.activarCredito(
-                idCarteraCredito,
-
-                request.tipoComprobante(),
-                request.numeroComprobante(),
-
-                request.fechaContable(),
-                request.fechaDesembolso()
+        return ResponseEntity.ok(
+                service.verificarComprobantes(
+                        idCarteraCredito,
+                        request.idCaja(),
+                        request.fechaContable(),
+                        request.tipoComprobanteDesembolso(),
+                        request.tipoComprobanteCobros(),
+                        request.cantidadCentral(),
+                        request.valorEfectivo(),
+                        convertirDepositos(request.depositos()),
+                        request.valorCuentaPorPagar()
+                )
         );
-
-        return ResponseEntity.noContent().build();
     }
 
-    // =========================================================
-    // SEGURIDAD
-    // =========================================================
+    public record VerificarComprobantesRequest(
+            Long idCaja,
+            LocalDate fechaContable,
+            String tipoComprobanteDesembolso,
+            String tipoComprobanteCobros,
+            Integer cantidadCentral,
+            BigDecimal valorEfectivo,
+            List<DepositoDesembolsoRequest> depositos,
+            BigDecimal valorCuentaPorPagar
+    ) {}
 
     private void validarConsulta() {
 
@@ -336,11 +341,9 @@ public class SolicitudDesembolsoController {
     // REQUEST - DISTRIBUCIÓN
     //
     // idCaja:
-    // Caja que atenderá el desembolso.
-    //
-    // La Caja es obligatoria aunque valorEfectivo sea cero,
-    // porque también es la contrapartida del comprobante
-    // de cobros cuando corresponda.
+    // Caja que atenderá los movimientos de efectivo.
+    // Obligatoria únicamente cuando exista efectivo por
+    // entregar o cobros por recibir.
     //
     // valorEfectivo:
     // Valor realmente entregado físicamente en efectivo.
@@ -398,18 +401,4 @@ public class SolicitudDesembolsoController {
     ) {
     }
 
-    // =========================================================
-    // REQUEST - ACTIVAR
-    //
-    // TEMPORAL.
-    // Se eliminará al terminar la ejecución integral.
-    // =========================================================
-
-    public record ActivarCreditoRequest(
-            String tipoComprobante,
-            String numeroComprobante,
-            LocalDate fechaContable,
-            LocalDate fechaDesembolso
-    ) {
-    }
 }

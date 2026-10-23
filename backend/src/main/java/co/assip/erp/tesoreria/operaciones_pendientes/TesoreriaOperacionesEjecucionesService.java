@@ -160,7 +160,12 @@ public class TesoreriaOperacionesEjecucionesService {
                 && "RETIRO_ASOCIADO".equals(proceso)
                 && "depositos.cuentas_ahorro".equals(tabla);
 
-        if (!esCdat && !esRetiroAsociado) {
+        boolean esDesembolsoCredito =
+                "CARTERA".equals(modulo)
+                        && "DESEMBOLSO_CREDITO".equals(proceso)
+                        && "cartera.carteras_creditos".equals(tabla);
+
+        if (!esCdat && !esRetiroAsociado && !esDesembolsoCredito) {
             throw new IllegalStateException(
                     "No existe contabilización de pagos para "
                             + modulo + " / " + proceso
@@ -179,11 +184,18 @@ public class TesoreriaOperacionesEjecucionesService {
                             idAgencia,
                             "CUENTA_POR_PAGAR_CDAT"
                     );
-        } else {
+        } else if (esRetiroAsociado) {
             cuentaPorPagar = obtenerCuentaPorPagarRetiroAsociado(
                     numeroLong(operacion, "id_origen"),
                     idAgencia,
                     idBeneficiario
+            );
+        } else {
+            cuentaPorPagar = obtenerCuentaPorPagarDesembolsoCredito(
+                    numeroLong(operacion, "id_origen"),
+                    idAgencia,
+                    idBeneficiario,
+                    original
             );
         }
 
@@ -196,6 +208,8 @@ public class TesoreriaOperacionesEjecucionesService {
 
         String conceptoPago = esRetiroAsociado
                 ? "retiro integral de asociado"
+                : esDesembolsoCredito
+                ? "desembolso de crédito"
                 : "CDAT";
 
         for (OperacionPagoLineaDTO linea : request.lineas()) {
@@ -298,6 +312,8 @@ public class TesoreriaOperacionesEjecucionesService {
 
         String detalleObligacion = esRetiroAsociado
                 ? "Pago de cuenta por pagar - Retiro integral de asociado"
+                : esDesembolsoCredito
+                ? "Pago de cuenta por pagar - Desembolso de crédito"
                 : "Cancelación de obligación CDAT - Pago al beneficiario";
 
         movimientos.add(0, movimiento(
@@ -372,6 +388,50 @@ public class TesoreriaOperacionesEjecucionesService {
             throw new IllegalStateException(
                     "No se encontró una única cuenta por pagar "
                             + "para el retiro integral de la cuenta " + idCuentaAhorro
+            );
+        }
+        return cuentas.get(0);
+    }
+
+    /** Recupera la cuenta efectivamente acreditada en el desembolso original. */
+    private Integer obtenerCuentaPorPagarDesembolsoCredito(
+            Long idCredito,
+            Integer idAgencia,
+            Integer idBeneficiario,
+            BigDecimal valorOriginal
+    ) {
+        List<Integer> cuentas = jdbcTemplate.queryForList("""
+                SELECT ac.id_catalogo_cuenta
+                FROM cartera.carteras_creditos cr
+                JOIN contabilidad.origen_comprobantes oc
+                  ON oc.id_agencia = cr.id_agencia
+                 AND oc.modulo_origen = 'CARTERA'
+                 AND oc.proceso_origen = 'DESEMBOLSO_CREDITO'
+                 AND oc.tabla_origen = 'cartera.carteras_creditos'
+                 AND oc.id_origen = cr.id_cartera_credito
+                JOIN contabilidad.auxiliares_contables ac
+                  ON ac.id_agencia = oc.id_agencia
+                 AND ac.tipo_comprobante = oc.tipo_comprobante
+                 AND ac.numero_comprobante = oc.numero_comprobante
+                 AND ac.id_datos_personal = cr.id_datos_personal
+                JOIN contabilidad.catalogo_cuentas cc
+                  ON cc.id_catalogo_cuenta = ac.id_catalogo_cuenta
+                 AND cc.id_agencia = cr.id_agencia
+                WHERE cr.id_cartera_credito = ?
+                  AND cr.id_agencia = ?
+                  AND cr.id_datos_personal = ?
+                  AND ac.valor_credito = ?
+                  AND ac.valor_debito = 0
+                  AND ac.detalle_movimiento LIKE '% - cuenta por pagar'
+                  AND ac.estado_movimiento = 'A'
+                  AND cc.naturaleza_cuenta = 'C'
+                """, Integer.class,
+                idCredito, idAgencia, idBeneficiario, valorOriginal);
+
+        if (cuentas.size() != 1 || cuentas.get(0) == null) {
+            throw new IllegalStateException(
+                    "No se encontró una única cuenta por pagar contabilizada "
+                            + "para el desembolso del crédito " + idCredito + "."
             );
         }
         return cuentas.get(0);
@@ -519,110 +579,6 @@ public class TesoreriaOperacionesEjecucionesService {
     }
 
     // =========================================================
-    // PREPARACIÓN DE EJECUCIONES
-    // =========================================================
-
-    /**
-     * Prepara una ejecución bancaria.
-     *
-     * No contabiliza ni confirma el pago.
-     *
-     * La obligación se bloquea antes de validar el saldo
-     * y permanece bloqueada hasta finalizar la transacción.
-     */
-    @Transactional
-    public Long preparar(
-            Long idOperacion,
-            Integer idBeneficiario,
-            Long idCuentaBancaria,
-            String medioPago,
-            String numeroDocumento,
-            BigDecimal valor,
-            String observaciones
-    ) {
-        validarId(idOperacion, "La operación");
-        validarValor(valor);
-
-        String medioNormalizado =
-                normalizarMedioPago(medioPago);
-
-        if (!TRANSFERENCIA.equals(medioNormalizado)
-                && !CHEQUE.equals(medioNormalizado)) {
-            throw new IllegalArgumentException(
-                    "El medio de pago debe ser TRANSFERENCIA o CHEQUE."
-            );
-        }
-
-        if (CHEQUE.equals(medioNormalizado)
-                && limpiar(numeroDocumento) == null) {
-            throw new IllegalArgumentException(
-                    "El número de cheque es obligatorio."
-            );
-        }
-
-        Map<String, Object> operacion =
-                repository.bloquearOperacion(idOperacion);
-
-        validarAgencia(operacion);
-        validarEstadoPreparacion(operacion);
-
-        Integer idAgencia = numeroEntero(
-                operacion,
-                "id_agencia"
-        );
-
-        validarBeneficiario(
-                operacion,
-                idBeneficiario
-        );
-
-        validarCuentaBancaria(
-                idCuentaBancaria,
-                idAgencia
-        );
-
-        BigDecimal disponible =
-                calcularSaldoDisponible(
-                        idOperacion,
-                        operacion
-                );
-
-        if (valor.compareTo(disponible) > 0) {
-            throw new IllegalArgumentException(
-                    "El valor solicitado supera el saldo "
-                            + "disponible de la obligación. "
-                            + "Disponible: "
-                            + disponible.toPlainString()
-            );
-        }
-
-        Integer numeroLinea =
-                repository.siguienteNumeroLinea(idOperacion);
-
-        if (numeroLinea == null || numeroLinea <= 0) {
-            throw new IllegalStateException(
-                    "No fue posible determinar el número "
-                            + "de línea de la ejecución."
-            );
-        }
-
-        Integer idUsuario =
-                usuarioSesionService.idUsuario();
-
-        return repository.insertarPreparada(
-                idOperacion,
-                numeroLinea,
-                idBeneficiario,
-                idCuentaBancaria,
-                medioNormalizado,
-                limpiar(numeroDocumento),
-                valor,
-                limpiar(observaciones),
-                idUsuario
-        );
-    }
-
-    // =========================================================
     // VALIDACIONES DE LA OPERACIÓN
     // =========================================================
 
@@ -736,69 +692,6 @@ public class TesoreriaOperacionesEjecucionesService {
         }
     }
 
-    // =========================================================
-    // VALIDACIÓN BANCARIA
-    // =========================================================
-
-    /**
-     * Valida la cuenta bancaria de salida.
-     *
-     * Reglas:
-     * - Cuenta bancaria activa.
-     * - Banco activo.
-     * - Agencia autorizada.
-     * - Permiso explícito para pagar.
-     * - Cuenta contable operable de la misma agencia.
-     *
-     * Bloquea la configuración bancaria para evitar
-     * cambios concurrentes durante la preparación.
-     */
-    private void validarCuentaBancaria(
-            Long idCuentaBancaria,
-            Integer idAgencia
-    ) {
-        validarId(
-                idCuentaBancaria,
-                "La cuenta bancaria"
-        );
-
-        List<Long> cuentas = jdbcTemplate.query(
-                """
-                SELECT cb.id_cuenta_bancaria
-                FROM tesoreria.cuentas_bancarias_agencias cba
-                JOIN tesoreria.cuentas_bancarias cb
-                  ON cb.id_cuenta_bancaria =
-                     cba.id_cuenta_bancaria
-                JOIN tesoreria.bancos b
-                  ON b.codigo_banco = cb.codigo_banco
-                JOIN contabilidad.catalogo_cuentas cc
-                  ON cc.id_catalogo_cuenta =
-                     cba.id_cuenta_contable
-                WHERE cb.id_cuenta_bancaria = ?
-                  AND cba.id_agencia = ?
-                  AND cba.activo = TRUE
-                  AND cba.permite_pagar = TRUE
-                  AND cb.activo = TRUE
-                  AND cb.estado_cuenta = 'ACTIVA'
-                  AND b.activo = TRUE
-                  AND cc.id_agencia = cba.id_agencia
-                  AND cc.cuenta_operable = TRUE
-                FOR UPDATE OF cba
-                """,
-                (rs, rowNum) ->
-                        rs.getLong("id_cuenta_bancaria"),
-                idCuentaBancaria,
-                idAgencia
-        );
-
-        if (cuentas.isEmpty()) {
-            throw new IllegalArgumentException(
-                    "La cuenta bancaria no está habilitada "
-                            + "para realizar pagos desde "
-                            + "la agencia seleccionada."
-            );
-        }
-    }
 
     // =========================================================
     // CONTROL DE SALDOS

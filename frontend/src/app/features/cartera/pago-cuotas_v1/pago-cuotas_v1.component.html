@@ -1,0 +1,790 @@
+<div class="pago-cuotas-page">
+
+  <!-- =======================================================
+       ENCABEZADO
+       ======================================================= -->
+
+  <header class="page-header">
+
+    <div>
+      <h2>Pago de Cuotas</h2>
+      <p class="page-subtitle">
+        Consulta, liquidación y simulación de pagos de cartera · Versión 1
+      </p>
+    </div>
+
+    <span class="estado-proceso">
+      Modo consulta · Sin registro financiero
+    </span>
+
+  </header>
+
+
+  <!-- =======================================================
+       BÚSQUEDA DEL ASOCIADO
+       ======================================================= -->
+
+  <app-consulta-creditos-buscador
+    *ngIf="idCarteraCreditoSeleccionado === null"
+    [bloqueado]="ocupado"
+    (asociadoSeleccionado)="seleccionarAsociado($event)"
+    (busquedaLimpiada)="limpiarBusqueda()">
+  </app-consulta-creditos-buscador>
+
+
+  <!-- =======================================================
+       MENSAJES
+       ======================================================= -->
+
+  <div
+    *ngIf="error"
+    class="alert alert--danger"
+    role="alert">
+    <strong>No fue posible completar la operación.</strong>
+    <span>{{ error }}</span>
+  </div>
+
+  <div
+    *ngIf="aviso"
+    class="alert alert--info"
+    role="status">
+    {{ aviso }}
+  </div>
+
+
+  <!-- =======================================================
+       ASOCIADO SELECCIONADO
+       ======================================================= -->
+
+  <section
+    *ngIf="asociadoSeleccionado as asociado"
+    class="consulta-bloque asociado-seleccionado">
+
+    <div class="bloque-encabezado">
+
+      <div>
+        <span class="bloque-etiqueta">Asociado seleccionado</span>
+        <h2>{{ asociado.nombreCompleto }}</h2>
+        <span>Documento: {{ asociado.documento || '—' }}</span>
+      </div>
+
+      <div class="asociado-datos">
+        <span *ngIf="asociado.nombreTipoDocumento || asociado.tipoDocumento">
+          {{ asociado.nombreTipoDocumento || asociado.tipoDocumento }}
+        </span>
+        <span>Créditos con saldo: {{ creditos.length }}</span>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =======================================================
+       CRÉDITOS DEL ASOCIADO
+       ======================================================= -->
+
+  <section
+    *ngIf="asociadoSeleccionado && idCarteraCreditoSeleccionado === null"
+    class="consulta-bloque">
+
+    <div class="bloque-encabezado">
+
+      <div>
+        <h2>Créditos del asociado</h2>
+        <span>Seleccione el pagaré para consultar su liquidación.</span>
+      </div>
+
+      <span class="contador-registros">
+        {{ creditos.length }} crédito(s)
+      </span>
+
+    </div>
+
+    <div
+      *ngIf="cargandoCreditos"
+      class="estado-consulta">
+      Consultando créditos del asociado...
+    </div>
+
+    <p
+      *ngIf="!cargandoCreditos && creditos.length === 0"
+      class="estado-vacio">
+      El asociado no tiene créditos con saldo de capital pendiente.
+    </p>
+
+    <div
+      *ngIf="creditos.length > 0"
+      class="tabla-contenedor">
+
+      <table class="tabla-creditos">
+
+        <thead>
+        <tr>
+          <th>Pagaré</th>
+          <th>Tipo de cuota</th>
+          <th>Estado</th>
+          <th>Próximo capital</th>
+          <th class="columna-numero">Valor cuota</th>
+          <th class="columna-numero">Saldo capital</th>
+          <th class="columna-accion">Acción</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr
+          *ngFor="let credito of creditos; trackBy: trackByCredito"
+          [class.fila-seleccionada]="
+              credito.idCarteraCredito === idCarteraCreditoSeleccionado
+            ">
+
+          <td>
+            <strong>{{ credito.pagareCartera }}</strong>
+          </td>
+
+          <td>
+            {{ credito.codigoTipoCuota === '1'
+            ? 'Fija'
+            : credito.codigoTipoCuota === '2' ? 'Variable' : '—' }}
+          </td>
+
+          <td>{{ credito.codigoEstadoCartera || '—' }}</td>
+
+          <td>
+            {{ credito.proximaFechaCapital
+            ? (credito.proximaFechaCapital | date:'dd/MM/yyyy')
+            : '—' }}
+          </td>
+
+          <td class="columna-numero">
+            {{ credito.valorCuota | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+          </td>
+
+          <td class="columna-numero">
+            {{ credito.saldoActual | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+          </td>
+
+          <td class="columna-accion">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              [disabled]="ocupado"
+              (click)="seleccionarCredito(credito)">
+              {{ credito.idCarteraCredito === idCarteraCreditoSeleccionado
+              ? 'Seleccionado'
+              : 'Seleccionar' }}
+            </button>
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+
+  <!-- =======================================================
+       CARGANDO DETALLE
+       ======================================================= -->
+
+  <section
+    *ngIf="cargandoDetalle"
+    class="estado-consulta">
+    Consultando información del pagaré...
+  </section>
+
+
+  <ng-container *ngIf="creditoSeleccionado as credito">
+
+    <!-- =====================================================
+         IDENTIFICACIÓN Y CONDICIONES DEL CRÉDITO
+         ===================================================== -->
+
+    <section class="consulta-bloque">
+
+      <div class="bloque-encabezado encabezado-credito">
+
+        <div>
+          <span class="bloque-etiqueta">Crédito seleccionado</span>
+          <h2>Pagaré {{ credito.pagareCartera }}</h2>
+          <span>Condiciones contractuales y situación actual</span>
+        </div>
+
+        <div class="acciones-consulta">
+
+          <button
+            type="button"
+            class="btn btn-secondary"
+            [disabled]="ocupado"
+            (click)="cambiarCredito()">
+            Cambiar crédito
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-secondary"
+            [disabled]="ocupado"
+            (click)="verPagosRealizados()">
+            {{ mostrarPagosRealizados ? 'Ocultar pagos' : 'Pagos realizados' }}
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-secondary"
+            [disabled]="ocupado"
+            (click)="verTablaAmortizacion()">
+            Tabla de amortización
+          </button>
+
+        </div>
+
+      </div>
+
+      <!-- Resumen financiero -->
+
+      <div class="datos-credito-grid resumen-credito-grid">
+
+        <div class="dato-financiero">
+          <span>Valor inicial del crédito</span>
+          <strong>{{ credito.valorInicialCredito == null ? '—' : (credito.valorInicialCredito | currency:'COP':'symbol-narrow':'1.0-0':'es-CO') }}</strong>
+        </div>
+
+        <div class="dato-financiero dato-financiero--principal">
+          <span>Saldo actual de capital</span>
+          <strong>{{ credito.saldoActual | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong>
+        </div>
+
+        <div class="dato-financiero">
+          <span>Primera cuota</span>
+          <strong>{{ credito.valorPrimeraCuota == null ? '—' : (credito.valorPrimeraCuota | currency:'COP':'symbol-narrow':'1.0-0':'es-CO') }}</strong>
+        </div>
+
+        <div class="dato-financiero">
+          <span>Valor de las demás cuotas</span>
+          <strong>{{ credito.valorCuota == null ? '—' : (credito.valorCuota | currency:'COP':'symbol-narrow':'1.0-0':'es-CO') }}</strong>
+        </div>
+
+      </div>
+
+      <!-- Condiciones contractuales -->
+
+      <h3 class="subtitulo-datos">Condiciones del crédito</h3>
+
+      <div class="datos-credito-grid datos-credito-grid--detalle">
+
+        <div class="dato-financiero">
+          <span>Línea de crédito</span>
+          <strong>{{ credito.codigoLineaCredito || '—' }}{{ credito.nombreLineaCredito ? ' · ' + credito.nombreLineaCredito : '' }}</strong>
+        </div>
+
+        <div class="dato-financiero">
+          <span>Clasificación</span>
+          <strong>{{ credito.descripcionClasificacionCredito || credito.codigoClasificacionCredito || '—' }}</strong>
+        </div>
+
+        <div class="dato-financiero">
+          <span>Garantía</span>
+          <strong>{{ credito.descripcionGarantiaCredito || credito.codigoGarantiaCredito || '—' }}</strong>
+        </div>
+
+        <div class="dato-financiero">
+          <span>Tipo de cuota</span>
+          <strong>{{ credito.codigoTipoCuota === '1' ? 'Fija' : credito.codigoTipoCuota === '2' ? 'Variable' : '—' }}</strong>
+        </div>
+
+        <div class="dato-financiero">
+          <span>Amortización de capital</span>
+          <strong>{{ credito.amortizacionCapital ?? '—' }}</strong>
+        </div>
+
+        <div class="dato-financiero">
+          <span>Plazo</span>
+          <strong>{{ credito.plazo ?? '—' }}</strong>
+        </div>
+
+        <div class="dato-financiero">
+          <span>Altura de cuota</span>
+          <strong>{{ credito.alturaCuota ?? '—' }}</strong>
+        </div>
+
+        <div class="dato-financiero">
+          <span>Tasa nominal anual</span>
+          <strong>{{ credito.tasaNominalAnual == null ? '—' : (credito.tasaNominalAnual | number:'1.0-4':'es-CO') + ' %' }}</strong>
+        </div>
+
+        <div class="dato-financiero">
+          <span>Tasa efectiva anual</span>
+          <strong>{{ credito.tasaEfectivaAnual == null ? '—' : (credito.tasaEfectivaAnual | number:'1.0-4':'es-CO') + ' %' }}</strong>
+        </div>
+
+        <div class="dato-financiero">
+          <span>Estado de cartera</span>
+          <strong>{{ credito.codigoEstadoCartera || '—' }}</strong>
+        </div>
+
+      </div>
+
+      <!-- Condiciones especiales: indicadores independientes de la liquidación -->
+
+      <h3 class="subtitulo-datos">Condiciones especiales</h3>
+
+      <div class="datos-credito-grid datos-credito-grid--detalle">
+
+        <div class="dato-financiero">
+          <span>Crédito evaluado</span>
+          <strong>{{ credito.creditoEvaluado == null ? '—' : credito.creditoEvaluado ? 'Sí' : 'No' }}</strong>
+        </div>
+
+
+        <div class="dato-financiero">
+          <span>Reestructurado</span>
+          <strong>{{ credito.creditoReestructurado == null ? '—' : credito.creditoReestructurado ? 'Sí' : 'No' }}</strong>
+        </div>
+
+        <div class="dato-financiero">
+          <span>Novado</span>
+          <strong>{{ credito.codigoModificacionCredito == null ? '—' : credito.codigoModificacionCredito === '3' ? 'Sí' : 'No' }}</strong>
+        </div>
+
+        <div class="dato-financiero">
+          <span>Prorrogado</span>
+          <strong>{{ credito.tieneProrrogas ? 'Sí' : 'No' }}</strong>
+        </div>
+
+        <div class="dato-financiero">
+          <span>Tiene alivios</span>
+          <strong>{{ credito.tieneAlivios ? 'Sí' : 'No' }}</strong>
+        </div>
+
+      </div>
+
+      <!-- Fechas relevantes -->
+
+      <h3 class="subtitulo-datos">Fechas y vencimientos</h3>
+
+      <div class="datos-credito-grid datos-credito-grid--detalle">
+
+        <div class="dato-financiero">
+          <span>Desembolso</span>
+          <strong>
+            {{ credito.fechaDesembolso
+            ? (credito.fechaDesembolso | date:'dd/MM/yyyy') : '—' }}
+          </strong>
+        </div>
+
+        <div class="dato-financiero">
+          <span>Vencimiento final</span>
+          <strong>
+            {{ credito.fechaFinal
+            ? (credito.fechaFinal | date:'dd/MM/yyyy') : '—' }}
+          </strong>
+        </div>
+
+        <div class="dato-financiero">
+          <span>Último capital</span>
+          <strong>
+            {{ credito.ultimaFechaCapital
+            ? (credito.ultimaFechaCapital | date:'dd/MM/yyyy') : '—' }}
+          </strong>
+        </div>
+
+        <div class="dato-financiero">
+          <span>Próximo capital</span>
+          <strong>
+            {{ credito.proximaFechaCapital
+            ? (credito.proximaFechaCapital | date:'dd/MM/yyyy') : '—' }}
+          </strong>
+        </div>
+
+        <div class="dato-financiero">
+          <span>Último interés</span>
+          <strong>
+            {{ credito.ultimaFechaInteres
+            ? (credito.ultimaFechaInteres | date:'dd/MM/yyyy') : '—' }}
+          </strong>
+        </div>
+
+        <div class="dato-financiero">
+          <span>Próximo interés</span>
+          <strong>
+            {{ credito.proximaFechaInteres
+            ? (credito.proximaFechaInteres | date:'dd/MM/yyyy') : '—' }}
+          </strong>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PAGOS REALIZADOS
+         ===================================================== -->
+
+    <section *ngIf="cargandoPagos || mostrarPagosRealizados" class="consulta-bloque">
+      <div class="bloque-encabezado">
+        <div>
+          <h2>Pagos realizados</h2>
+          <span>Comprobantes de pago consolidados del crédito.</span>
+        </div>
+        <button type="button" class="btn btn-secondary"
+                [disabled]="cargandoPagos" (click)="cerrarConsultas()">
+          Cerrar consulta
+        </button>
+      </div>
+
+      <div *ngIf="cargandoPagos" class="estado-consulta">
+        Consultando pagos realizados...
+      </div>
+
+      <p *ngIf="!cargandoPagos && pagosRealizados.length === 0" class="estado-vacio">
+        No hay pagos realizados para mostrar.
+      </p>
+
+      <div *ngIf="!cargandoPagos && pagosRealizados.length > 0" class="tabla-contenedor">
+        <table class="tabla-creditos">
+          <thead>
+          <tr>
+            <th>Fecha de pago</th>
+            <th>Comprobante</th>
+            <th class="columna-numero">Capital</th>
+            <th class="columna-numero">Interés causado</th>
+            <th class="columna-numero">Interés ingreso</th>
+            <th class="columna-numero">Interés de mora</th>
+            <th class="columna-numero">Seguros</th>
+            <th class="columna-numero">Valor alivios</th>
+            <th class="columna-numero">Otros conceptos</th>
+            <th class="columna-numero">Total pagado</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let pago of pagosRealizados; trackBy: trackByPago">
+            <td>{{ pago.fechaPago ? (pago.fechaPago | date:'dd/MM/yyyy') : '—' }}</td>
+            <td>{{ pago.tipoComprobante && pago.numeroComprobante
+              ? pago.tipoComprobante + '-' + pago.numeroComprobante
+              : (pago.numeroComprobante || '—') }}</td>
+            <td class="columna-numero">{{ pago.capital | number:'1.0-0':'es-CO' }}</td>
+            <td class="columna-numero">{{ pago.interesCausado | number:'1.0-0':'es-CO' }}</td>
+            <td class="columna-numero">{{ pago.interesIngreso | number:'1.0-0':'es-CO' }}</td>
+            <td class="columna-numero">{{ pago.mora | number:'1.0-0':'es-CO' }}</td>
+            <td class="columna-numero">{{ pago.seguros | number:'1.0-0':'es-CO' }}</td>
+            <td class="columna-numero">{{ 0 | number:'1.0-0':'es-CO' }}</td>
+            <td class="columna-numero">{{ totalOtrosConceptos(pago) | number:'1.0-0':'es-CO' }}</td>
+            <td class="columna-numero">{{ pago.totalPagado | number:'1.0-0':'es-CO' }}</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+
+    <!-- =====================================================
+         PARÁMETROS DE LIQUIDACIÓN
+         ===================================================== -->
+
+    <section class="consulta-bloque">
+
+      <div class="bloque-encabezado">
+        <div>
+          <h2>Liquidación de cuotas</h2>
+          <span>Seleccione la fecha de pago. El sistema determinará automáticamente las cuotas a liquidar.</span>
+        </div>
+      </div>
+
+      <div class="formulario-grid formulario-grid--liquidacion">
+
+        <!-- Fecha de pago -->
+
+        <label class="campo-formulario">
+          <span>Fecha de pago</span>
+          <input
+            type="date"
+            name="fechaPago"
+            [(ngModel)]="fechaPago"
+            (ngModelChange)="cambiarFechaPago()"
+            [disabled]="ocupado">
+        </label>
+
+        <!-- Cuotas determinadas por el backend -->
+
+        <label class="campo-formulario">
+          <span>Cuotas a cancelar</span>
+          <input
+            type="number"
+            name="cuotasACancelar"
+            min="1"
+            step="1"
+            [(ngModel)]="cuotasACancelar"
+            (change)="recalcularCuotas()"
+            placeholder="Automático"
+            [disabled]="ocupado">
+        </label>
+
+        <!-- Acción de liquidación -->
+
+        <div class="acciones-formulario acciones-formulario--liquidacion">
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="!puedeLiquidar"
+            (click)="liquidar()">
+            {{ cargandoLiquidacion ? 'Calculando...' : 'Calcular liquidación' }}
+          </button>
+        </div>
+
+      </div>
+
+      <p class="nota-operativa">
+        La cantidad se calcula automáticamente. Puede modificarla y, al confirmar el cambio, se actualizará la liquidación.
+      </p>
+
+    </section>
+
+
+    <!-- =====================================================
+         RESULTADO DE LA LIQUIDACIÓN
+         ===================================================== -->
+
+    <section
+      *ngIf="liquidacion as liq"
+      class="consulta-bloque">
+
+      <div class="bloque-encabezado">
+        <div>
+          <h2>Resultado de la liquidación</h2>
+          <span>
+            {{ liq.cuotasConsideradas }} cuota(s) · {{ liq.tipoCuota }}
+            <ng-container *ngIf="liq.vencimientoFinal">
+              · Vencimiento final
+            </ng-container>
+          </span>
+        </div>
+      </div>
+
+      <div class="resultado-financiero">
+
+        <div class="tabla-contenedor">
+          <table class="tabla-conceptos">
+
+            <tbody>
+
+            <tr>
+              <th>Capital exigible</th>
+              <td>
+                {{ liq.capitalExigible | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+              </td>
+            </tr>
+
+            <tr>
+              <th>Intereses corrientes</th>
+              <td>
+                {{ liq.interesesCorrientes | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+              </td>
+            </tr>
+
+            <tr>
+              <th>Intereses de mora ({{ liq.mora.diasMora }} días)</th>
+              <td>
+                {{ liq.mora.interesesMora | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+              </td>
+            </tr>
+
+            <tr>
+              <th>Seguros pendientes</th>
+              <td>
+                {{ liq.segurosPendientes | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+              </td>
+            </tr>
+
+            <tr>
+              <th>Cuota de alivios</th>
+              <td>
+                {{ liq.cuotaAlivios | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+              </td>
+            </tr>
+
+            </tbody>
+
+          </table>
+        </div>
+
+        <div class="total-destacado">
+          <span>Total liquidado</span>
+          <strong>
+            {{ liq.totalLiquidacion | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+          </strong>
+          <small>Valor calculado para las cuotas seleccionadas</small>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         SIMULACIÓN DEL PAGO
+         ===================================================== -->
+
+    <section
+      *ngIf="liquidacion"
+      class="consulta-bloque">
+
+      <div class="bloque-encabezado">
+        <div>
+          <h2>Simulación del pago</h2>
+          <span>Ingrese el valor recibido para conocer cómo se distribuiría.</span>
+        </div>
+      </div>
+
+      <div class="simulacion-formulario">
+
+        <label class="campo-formulario campo-formulario--importe">
+          <span>Valor recibido (COP)</span>
+          <input
+            type="number"
+            name="valorPago"
+            min="0"
+            step="1"
+            [(ngModel)]="valorPago"
+            (ngModelChange)="invalidarSimulacion()"
+            [disabled]="ocupado">
+        </label>
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="!puedeSimular"
+          (click)="simularPago()">
+          {{ cargandoSimulacion ? 'Simulando...' : 'Simular aplicación' }}
+        </button>
+
+      </div>
+
+      <p class="nota-operativa">
+        Esta operación es informativa: no registra pagos, no genera
+        comprobantes y no modifica saldos.
+      </p>
+
+    </section>
+
+
+    <!-- =====================================================
+         DISTRIBUCIÓN SIMULADA
+         ===================================================== -->
+
+    <section
+      *ngIf="simulacion as sim"
+      class="consulta-bloque">
+
+      <div class="bloque-encabezado">
+        <div>
+          <h2>Distribución simulada del pago</h2>
+          <span>Valores aplicados por concepto y saldo proyectado.</span>
+        </div>
+      </div>
+
+      <div class="indicadores-pago">
+
+        <div class="indicador-pago">
+          <span>Valor recibido</span>
+          <strong>
+            {{ sim.valorPago | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+          </strong>
+        </div>
+
+        <div class="indicador-pago">
+          <span>Pago mínimo</span>
+          <strong>
+            {{ sim.pagoMinimo | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+          </strong>
+        </div>
+
+        <div class="indicador-pago indicador-pago--principal">
+          <span>Saldo capital proyectado</span>
+          <strong>
+            {{ sim.saldoCapitalProyectado | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+          </strong>
+        </div>
+
+      </div>
+
+      <div class="tabla-contenedor">
+        <table class="tabla-conceptos">
+
+          <tbody>
+
+          <tr>
+            <th>Capital aplicado</th>
+            <td>
+              {{ sim.capitalAplicado | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+            </td>
+          </tr>
+
+          <tr>
+            <th>Intereses corrientes</th>
+            <td>
+              {{ sim.interesesCorrientesAplicados | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+            </td>
+          </tr>
+
+          <tr>
+            <th>Intereses de mora</th>
+            <td>
+              {{ sim.interesesMoraAplicados | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+            </td>
+          </tr>
+
+          <tr>
+            <th>Seguros</th>
+            <td>
+              {{ sim.segurosAplicados | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+            </td>
+          </tr>
+
+          <tr>
+            <th>Alivios</th>
+            <td>
+              {{ sim.aliviosAplicados | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+            </td>
+          </tr>
+
+          <tr class="fila-subtotal">
+            <th>Capital liquidado no aplicado</th>
+            <td>
+              {{ sim.diferenciaCapitalLiquidado | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+            </td>
+          </tr>
+
+          </tbody>
+
+        </table>
+      </div>
+
+      <p
+        *ngIf="sim.capitalInferiorAlLiquidado"
+        class="alert alert--info">
+        El capital aplicado es inferior al calculado para las cuotas seleccionadas.
+      </p>
+
+      <p
+        *ngIf="sim.abonoAdicionalCapital"
+        class="alert alert--info">
+        La simulación incluye un abono adicional a capital.
+      </p>
+
+    </section>
+
+    <!-- Informe compartido de amortización -->
+    <app-tabla-amortizacion
+      #tablaAmortizacion
+      titulo="Tabla de amortización - Crédito">
+    </app-tabla-amortizacion>
+
+  </ng-container>
+
+</div>

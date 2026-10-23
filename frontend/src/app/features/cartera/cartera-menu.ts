@@ -51,6 +51,7 @@ export const carteraMenu = {
           ]
         },
 
+
         // =====================================================
         // CONSULTA DE CRÉDITOS
         // =====================================================
@@ -58,10 +59,21 @@ export const carteraMenu = {
           label: 'Consulta de Créditos',
           route: '/cartera/consulta-creditos',
           permiso: 'CARTERA_VIEW'
+        },
+
+
+        // =====================================================
+        // PAGO DE CUOTAS V1
+        // =====================================================
+        {
+          label: 'Pago de Cuotas',
+          route: '/cartera/pago-cuotas',
+          permiso: 'CARTERA_PAGO_CUOTAS'
         }
 
       ]
     },
+
 
     // =========================================================
     // PROCESOS
@@ -104,6 +116,7 @@ export const carteraMenu = {
           ]
         },
 
+
         // =====================================================
         // EVALUACIÓN DE CARTERA
         // =====================================================
@@ -129,6 +142,7 @@ export const carteraMenu = {
       ]
     },
 
+
     // =========================================================
     // ANÁLISIS DE CARTERA
     // =========================================================
@@ -144,6 +158,7 @@ export const carteraMenu = {
           route: '/cartera/analisis/dashboard-cartera',
           permiso: 'CARTERA_DASHBOARD_VIEW'
         },
+
 
         // =====================================================
         // VECTOR DE COMPORTAMIENTO
@@ -167,6 +182,7 @@ export const carteraMenu = {
           ]
         },
 
+
         // =====================================================
         // MORA TEMPRANA
         // =====================================================
@@ -175,6 +191,7 @@ export const carteraMenu = {
           route: '/cartera/analisis/mora-temprana',
           permiso: 'CARTERA_ANALISIS_VIEW'
         },
+
 
         // =====================================================
         // RIESGO Y DETERIORO
@@ -185,6 +202,7 @@ export const carteraMenu = {
           permiso: 'CARTERA_ANALISIS_VIEW'
         },
 
+
         // =====================================================
         // CONCENTRACIÓN DE CARTERA
         // =====================================================
@@ -193,6 +211,7 @@ export const carteraMenu = {
           route: '/cartera/analisis/concentracion-cartera',
           permiso: 'CARTERA_ANALISIS_VIEW'
         },
+
 
         // =====================================================
         // GARANTÍAS Y COBERTURA
@@ -203,6 +222,7 @@ export const carteraMenu = {
           permiso: 'CARTERA_ANALISIS_VIEW'
         },
 
+
         // =====================================================
         // RECIPROCIDAD DE APORTES
         // =====================================================
@@ -211,6 +231,7 @@ export const carteraMenu = {
           route: '/cartera/analisis/reciprocidad-aportes',
           permiso: 'CARTERA_ANALISIS_VIEW'
         },
+
 
         // =====================================================
         // MATRIZ DE RODAMIENTO
@@ -221,6 +242,7 @@ export const carteraMenu = {
           permiso: 'CARTERA_ANALISIS_VIEW'
         },
 
+
         // =====================================================
         // ANÁLISIS DE COSECHAS
         // =====================================================
@@ -229,6 +251,7 @@ export const carteraMenu = {
           route: '/cartera/analisis/cosechas',
           permiso: 'CARTERA_ANALISIS_VIEW'
         },
+
 
         // =====================================================
         // CURACIÓN Y REINCIDENCIA
@@ -239,6 +262,7 @@ export const carteraMenu = {
           permiso: 'CARTERA_ANALISIS_VIEW'
         },
 
+
         // =====================================================
         // CANCELACIÓN Y PREPAGO
         // =====================================================
@@ -247,6 +271,7 @@ export const carteraMenu = {
           route: '/cartera/analisis/cancelacion-prepago',
           permiso: 'CARTERA_ANALISIS_VIEW'
         },
+
 
         // =====================================================
         // ROLL FORWARD
@@ -259,6 +284,7 @@ export const carteraMenu = {
 
       ]
     },
+
 
     // =========================================================
     // INFORMES

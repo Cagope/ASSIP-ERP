@@ -394,6 +394,7 @@ public class SolicitudDesembolsoRepository {
     private static final String SQL_CUENTA_AHORRO_DESEMBOLSO = """
         SELECT
             ca.id_cuenta_ahorro,
+            TRIM(ca.codigo_cuenta) AS codigo_cuenta,
             ca.id_datos_personal,
             ca.id_forma_ahorro,
 
@@ -956,6 +957,7 @@ public class SolicitudDesembolsoRepository {
                                         rs.getInt(
                                                 "id_cuenta_ahorro"
                                         ),
+                                        rs.getString("codigo_cuenta"),
                                         rs.getInt(
                                                 "id_datos_personal"
                                         ),
@@ -1220,6 +1222,7 @@ public class SolicitudDesembolsoRepository {
 
     public record CuentaAhorroDesembolsoDatos(
             Integer idCuentaAhorro,
+            String codigoCuenta,
             Integer idDatosPersonal,
             Integer idFormaAhorro,
 

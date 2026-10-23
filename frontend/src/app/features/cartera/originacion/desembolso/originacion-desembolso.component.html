@@ -10,7 +10,7 @@
       <h2>Desembolso de Cartera</h2>
 
       <p>
-        Validación, distribución y ejecución del desembolso del crédito.
+        Liquidación, distribución, verificación contable y ejecución del desembolso.
       </p>
     </div>
 
@@ -26,7 +26,6 @@
     </div>
 
   </div>
-
 
   <!-- =======================================================
        MENSAJES
@@ -540,54 +539,8 @@
               <strong>
                 {{ moneda(liquidacion.valorDistribuir) }}
               </strong>
-              entre efectivo, cuentas de ahorro y cuenta por pagar.
+              entre cuentas de ahorro, efectivo y cuenta por pagar.
             </p>
-          </div>
-
-        </div>
-
-
-        <div class="distribution-grid">
-
-          <!-- Efectivo -->
-
-          <div class="form-field">
-
-            <label for="valorEfectivo">
-              Efectivo
-            </label>
-
-            <input
-              id="valorEfectivo"
-              type="text"
-              numericFormat
-              inputmode="decimal"
-              class="input-number"
-              [ngModel]="form.get('valorEfectivo')?.value"
-              [ngModelOptions]="{ standalone: true }"
-              (ngModelChange)="cambiarValorEfectivo($event)">
-
-          </div>
-
-
-          <!-- Cuenta por pagar -->
-
-          <div class="form-field">
-
-            <label for="valorCuentaPorPagar">
-              Cuenta por pagar
-            </label>
-
-            <input
-              id="valorCuentaPorPagar"
-              type="text"
-              numericFormat
-              inputmode="decimal"
-              class="input-number"
-              [ngModel]="form.get('valorCuentaPorPagar')?.value"
-              [ngModelOptions]="{ standalone: true }"
-              (ngModelChange)="cambiarValorCuentaPorPagar($event)">
-
           </div>
 
         </div>
@@ -719,6 +672,53 @@
         </div>
 
 
+
+        <div class="distribution-grid">
+
+          <!-- Efectivo -->
+
+          <div class="form-field">
+
+            <label for="valorEfectivo">
+              Efectivo
+            </label>
+
+            <input
+              id="valorEfectivo"
+              type="text"
+              numericFormat
+              inputmode="decimal"
+              class="input-number"
+              [ngModel]="form.get('valorEfectivo')?.value"
+              [ngModelOptions]="{ standalone: true }"
+              (ngModelChange)="cambiarValorEfectivo($event)">
+
+          </div>
+
+
+          <!-- Cuenta por pagar -->
+
+          <div class="form-field">
+
+            <label for="valorCuentaPorPagar">
+              Cuenta por pagar
+            </label>
+
+            <input
+              id="valorCuentaPorPagar"
+              type="text"
+              numericFormat
+              inputmode="decimal"
+              class="input-number"
+              [ngModel]="form.get('valorCuentaPorPagar')?.value"
+              [ngModelOptions]="{ standalone: true }"
+              readonly>
+
+          </div>
+
+        </div>
+
+
         <!-- ===============================================
              RESUMEN DISTRIBUCIÓN
              =============================================== -->
@@ -735,6 +735,15 @@
             </strong>
           </div>
 
+          <div>
+            <span>
+              Cuentas de ahorro
+            </span>
+
+            <strong>
+              {{ moneda(totalDepositosLocal) }}
+            </strong>
+          </div>
 
           <div>
             <span>
@@ -750,18 +759,6 @@
             </strong>
           </div>
 
-
-          <div>
-            <span>
-              Cuentas de ahorro
-            </span>
-
-            <strong>
-              {{ moneda(totalDepositosLocal) }}
-            </strong>
-          </div>
-
-
           <div>
             <span>
               Cuenta por pagar
@@ -775,7 +772,6 @@
               }}
             </strong>
           </div>
-
 
           <div class="distribution-summary__total">
             <span>
@@ -807,52 +803,82 @@
 
 
         <!-- ===============================================
-             VALIDACIÓN BACKEND
+             VERIFICACIÓN CONTABLE
              =============================================== -->
 
-        <div
-          *ngIf="validacionDistribucion"
-          class="validation-result"
-          [class.validation-result--ok]="
-            validacionDistribucion.cuadra
-          "
-          [class.validation-result--error]="
-            !validacionDistribucion.cuadra
-          ">
-
-          <strong>
-            {{
-            validacionDistribucion.cuadra
-            ? 'Distribución validada'
-            : 'Distribución con diferencias'
-            }}
-          </strong>
-
-          <span>
-            {{
-              validacionDistribucion.mensaje
-            }}
-          </span>
-
-        </div>
-
-
         <div class="card-actions">
-
           <button
             type="button"
             class="btn btn--secondary"
             [disabled]="!puedeValidarDistribucion"
-            (click)="validarDistribucion()">
-
-            {{
-            validando
-            ? 'Validando...'
-            : 'Validar distribución'
-            }}
-
+            (click)="verificarComprobantes()">
+            {{ validando ? 'Verificando...' : 'Verificar comprobantes' }}
           </button>
+        </div>
 
+      </section>
+
+
+      <!-- ===================================================
+           VISTA PREVIA DE COMPROBANTES CONTABLES
+           =================================================== -->
+
+      <section
+        *ngIf="comprobantesPreview as comprobantes"
+        class="card">
+
+        <div class="card-header">
+          <div>
+            <h3>Verificación de comprobantes contables</h3>
+            <p>
+              Movimientos previstos para el desembolso. Esta consulta no
+              registra movimientos ni asigna consecutivos.
+            </p>
+          </div>
+        </div>
+
+        <div *ngFor="let comprobante of comprobantes" class="deposit-section">
+          <div class="section-title section-title--separated">
+            <h4>{{ comprobante.tipoComprobante }} - {{ comprobante.concepto }}</h4>
+          </div>
+
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+              <tr>
+                <th>Cuenta</th>
+                <th>Nombre de la cuenta</th>
+                <th>Detalle</th>
+                <th class="text-right">Débito</th>
+                <th class="text-right">Crédito</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let movimiento of comprobante.movimientos">
+                <td>{{ movimiento.codigoCuenta }}</td>
+                <td>{{ movimiento.nombreCuenta }}</td>
+                <td>{{ movimiento.detalleMovimiento }}</td>
+                <td class="text-right">{{ moneda(movimiento.valorDebito) }}</td>
+                <td class="text-right">{{ moneda(movimiento.valorCredito) }}</td>
+              </tr>
+              </tbody>
+              <tfoot>
+              <tr>
+                <th colspan="3">Totales</th>
+                <th class="text-right">{{ moneda(comprobante.totalDebitos) }}</th>
+                <th class="text-right">{{ moneda(comprobante.totalCreditos) }}</th>
+              </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <div
+            class="validation-result"
+            [class.validation-result--ok]="comprobante.cuadrado"
+            [class.validation-result--error]="!comprobante.cuadrado">
+            <strong>{{ comprobante.cuadrado ? 'Comprobante cuadrado' : 'Comprobante descuadrado' }}</strong>
+            <span>Diferencia: {{ moneda(comprobante.diferencia) }}</span>
+          </div>
         </div>
 
       </section>

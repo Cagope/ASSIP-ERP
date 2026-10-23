@@ -1,6 +1,10 @@
 package co.assip.erp.cartera.originacion.desembolso;
 
 import co.assip.erp.cajas.movimientos.CajasMovimientosService;
+import co.assip.erp.cartera.originacion.desembolso.dto.ComprobanteDesembolsoPreviewDTO;
+import co.assip.erp.contabilidad.auxiliares_contables.dto.MovimientoContablePreviewDTO;
+import co.assip.erp.contabilidad.plan_cuentas.PlanCuenta;
+import co.assip.erp.contabilidad.plan_cuentas.PlanCuentaRepository;
 import co.assip.erp.contabilidad.auxiliares_contables.ContabilidadRegistroService;
 import co.assip.erp.contabilidad.auxiliares_contables.dto.MovimientoContableDTO;
 import co.assip.erp.contabilidad.consecutivos_comprobantes.ConsecutivosComprobantesService;
@@ -13,6 +17,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 @Service
 public class SolicitudDesembolsoContabilizacionService {
@@ -20,17 +26,20 @@ public class SolicitudDesembolsoContabilizacionService {
     private static final BigDecimal CERO = BigDecimal.ZERO;
 
     private final SolicitudDesembolsoRepository repository;
+    private final PlanCuentaRepository planCuentaRepository;
     private final CajasMovimientosService cajasMovimientosService;
     private final ContabilidadRegistroService contabilidadRegistroService;
     private final ConsecutivosComprobantesService consecutivosComprobantesService;
 
     public SolicitudDesembolsoContabilizacionService(
             SolicitudDesembolsoRepository repository,
+            PlanCuentaRepository planCuentaRepository,
             CajasMovimientosService cajasMovimientosService,
             ContabilidadRegistroService contabilidadRegistroService,
             ConsecutivosComprobantesService consecutivosComprobantesService
     ) {
         this.repository = repository;
+        this.planCuentaRepository = planCuentaRepository;
         this.cajasMovimientosService = cajasMovimientosService;
         this.contabilidadRegistroService = contabilidadRegistroService;
         this.consecutivosComprobantesService =
@@ -73,10 +82,16 @@ public class SolicitudDesembolsoContabilizacionService {
             );
         }
 
-        Integer cuentaCaja =
-                cajasMovimientosService.obtenerCuentaContableCaja(
-                        datos.idCaja()
-                );
+        Integer cuentaCaja = null;
+
+        if (datos.valorEfectivo().compareTo(CERO) > 0
+                || datos.totalCobros().compareTo(CERO) > 0) {
+
+            cuentaCaja =
+                    cajasMovimientosService.obtenerCuentaContableCaja(
+                            datos.idCaja()
+                    );
+        }
 
         String numeroComprobanteDesembolso =
                 contabilizarDesembolso(
@@ -107,6 +122,95 @@ public class SolicitudDesembolsoContabilizacionService {
         );
     }
 
+    /** Construye los mismos movimientos de la ejecución, sin generar consecutivos ni registrar. */
+    @Transactional(readOnly = true)
+    public VistaPreviaMovimientos verificarMovimientos(DatosContabilizacion datos) {
+        validarDatos(datos);
+        var credito = repository.buscarCredito(datos.idCarteraCredito())
+                .orElseThrow(() -> new IllegalArgumentException("No existe el crédito."));
+        if (!"P".equals(credito.codigoEstadoCartera())) {
+            throw new IllegalStateException("El crédito no está pendiente de desembolso.");
+        }
+        if (!credito.idAgencia().equals(datos.idAgencia())) {
+            throw new IllegalArgumentException("La agencia del crédito no coincide.");
+        }
+        Integer cuentaCaja = null;
+        if (datos.valorEfectivo().signum() > 0 || datos.totalCobros().signum() > 0) {
+            cuentaCaja = cajasMovimientosService.obtenerCuentaContableCaja(datos.idCaja());
+        }
+        var desembolso = construirMovimientosDesembolso(credito, cuentaCaja, datos);
+        List<MovimientoContableDTO> cobros = List.of();
+        if (datos.totalCobros().signum() > 0) {
+            if (datos.tipoComprobanteCobros() == null || datos.tipoComprobanteCobros().isBlank()) {
+                throw new IllegalArgumentException("El tipo de comprobante de cobros es obligatorio.");
+            }
+            cobros = construirMovimientosCobros(credito, cuentaCaja, datos);
+        }
+        return new VistaPreviaMovimientos(
+                construirConceptoDesembolso(credito, datos, desembolso),
+                desembolso,
+                cobros.isEmpty() ? null : construirConceptoCobros(credito, datos),
+                cobros
+        );
+    }
+
+    public record VistaPreviaMovimientos(
+            String conceptoDesembolso,
+            List<MovimientoContableDTO> movimientosDesembolso,
+            String conceptoCobros,
+            List<MovimientoContableDTO> movimientosCobros
+    ) {}
+
+    /** Vista previa con cuentas legibles y totales; no registra movimientos. */
+    @Transactional(readOnly = true)
+    public List<ComprobanteDesembolsoPreviewDTO> verificarComprobantes(DatosContabilizacion datos) {
+        VistaPreviaMovimientos vista = verificarMovimientos(datos);
+        List<ComprobanteDesembolsoPreviewDTO> comprobantes = new ArrayList<>();
+        comprobantes.add(construirComprobantePreview(
+                datos.idAgencia(), datos.tipoComprobanteDesembolso(),
+                vista.conceptoDesembolso(), vista.movimientosDesembolso()));
+        if (!vista.movimientosCobros().isEmpty()) {
+            comprobantes.add(construirComprobantePreview(
+                    datos.idAgencia(), datos.tipoComprobanteCobros(),
+                    vista.conceptoCobros(), vista.movimientosCobros()));
+        }
+        return List.copyOf(comprobantes);
+    }
+
+    private ComprobanteDesembolsoPreviewDTO construirComprobantePreview(
+            Integer idAgencia, String tipoComprobante, String concepto,
+            List<MovimientoContableDTO> movimientos) {
+        List<MovimientoContablePreviewDTO> detalle = new ArrayList<>();
+        BigDecimal debitos = CERO;
+        BigDecimal creditos = CERO;
+        for (MovimientoContableDTO movimiento : movimientos) {
+            PlanCuenta cuenta = planCuentaRepository.findById(movimiento.getIdCatalogoCuenta())
+                    .orElseThrow(() -> new IllegalStateException(
+                            "No existe la cuenta contable " + movimiento.getIdCatalogoCuenta() + "."));
+            if (!idAgencia.equals(cuenta.getIdAgencia())) {
+                throw new IllegalStateException("La cuenta " + cuenta.getCodigoCuenta()
+                        + " no pertenece a la agencia del desembolso.");
+            }
+            MovimientoContablePreviewDTO linea = new MovimientoContablePreviewDTO();
+            linea.setIdAgencia(idAgencia);
+            linea.setFechaAuxiliar(movimiento.getFechaAuxiliar());
+            linea.setIdCatalogoCuenta(cuenta.getId());
+            linea.setCodigoCuenta(cuenta.getCodigoCuenta());
+            linea.setNombreCuenta(cuenta.getNombre());
+            linea.setIdDatosPersonal(movimiento.getIdDatosPersonal());
+            linea.setDetalleMovimiento(movimiento.getDetalleMovimiento());
+            linea.setValorDebito(nvl(movimiento.getValorDebito()));
+            linea.setValorCredito(nvl(movimiento.getValorCredito()));
+            debitos = debitos.add(linea.getValorDebito());
+            creditos = creditos.add(linea.getValorCredito());
+            detalle.add(linea);
+        }
+        BigDecimal diferencia = debitos.subtract(creditos);
+        return new ComprobanteDesembolsoPreviewDTO(
+                tipoComprobante, concepto, List.copyOf(detalle),
+                debitos, creditos, diferencia, diferencia.signum() == 0);
+    }
+
     // =========================================================
     // COMPROBANTE 1 - DESEMBOLSO
     // =========================================================
@@ -125,6 +229,28 @@ public class SolicitudDesembolsoContabilizacionService {
                                 datos.idUsuario()
                         );
 
+        List<MovimientoContableDTO> movimientos = construirMovimientosDesembolso(credito, cuentaCaja, datos);
+
+        String concepto = construirConceptoDesembolso(credito, datos, movimientos);
+
+        contabilidadRegistroService.registrarComprobante(
+                datos.idAgencia(),
+                datos.tipoComprobanteDesembolso(),
+                numeroComprobante,
+                concepto,
+                construirOrigen(credito.idCarteraCredito()),
+                movimientos,
+                datos.idUsuario()
+        );
+
+        return numeroComprobante;
+    }
+
+    private List<MovimientoContableDTO> construirMovimientosDesembolso(
+            SolicitudDesembolsoRepository.CreditoDesembolsoDatos credito,
+            Integer cuentaCaja,
+            DatosContabilizacion datos
+    ) {
         List<MovimientoContableDTO> movimientos =
                 new ArrayList<>();
 
@@ -253,10 +379,8 @@ public class SolicitudDesembolsoContabilizacionService {
                     cuentaAhorro.idCatalogoCuenta(),
                     credito.idDatosPersonal(),
                     datos.fechaContable(),
-                    "Desembolso crédito "
-                            + credito.pagareCartera()
-                            + " - abono cuenta "
-                            + deposito.idCuentaAhorro(),
+                    "ABONO AHORROS CTA " + cuentaAhorro.codigoCuenta()
+                            + " - PAGARÉ " + credito.pagareCartera(),
                     CERO,
                     deposito.valor(),
                     deposito.valor(),
@@ -295,21 +419,7 @@ public class SolicitudDesembolsoContabilizacionService {
                 "desembolso"
         );
 
-        String concepto =
-                "Desembolso crédito "
-                        + credito.pagareCartera();
-
-        contabilidadRegistroService.registrarComprobante(
-                datos.idAgencia(),
-                datos.tipoComprobanteDesembolso(),
-                numeroComprobante,
-                concepto,
-                construirOrigen(credito.idCarteraCredito()),
-                movimientos,
-                datos.idUsuario()
-        );
-
-        return numeroComprobante;
+        return movimientos;
     }
 
     // =========================================================
@@ -338,6 +448,28 @@ public class SolicitudDesembolsoContabilizacionService {
                                 datos.idUsuario()
                         );
 
+        List<MovimientoContableDTO> movimientos = construirMovimientosCobros(credito, cuentaCaja, datos);
+
+        String concepto = construirConceptoCobros(credito, datos);
+
+        contabilidadRegistroService.registrarComprobante(
+                datos.idAgencia(),
+                datos.tipoComprobanteCobros(),
+                numeroComprobante,
+                concepto,
+                construirOrigen(credito.idCarteraCredito()),
+                movimientos,
+                datos.idUsuario()
+        );
+
+        return numeroComprobante;
+    }
+
+    private List<MovimientoContableDTO> construirMovimientosCobros(
+            SolicitudDesembolsoRepository.CreditoDesembolsoDatos credito,
+            Integer cuentaCaja,
+            DatosContabilizacion datos
+    ) {
         List<MovimientoContableDTO> movimientos =
                 new ArrayList<>();
 
@@ -491,21 +623,82 @@ public class SolicitudDesembolsoContabilizacionService {
                 "cobros del desembolso"
         );
 
-        String concepto =
-                "Cobros desembolso crédito "
-                        + credito.pagareCartera();
+        return movimientos;
+    }
 
-        contabilidadRegistroService.registrarComprobante(
-                datos.idAgencia(),
-                datos.tipoComprobanteCobros(),
-                numeroComprobante,
-                concepto,
-                construirOrigen(credito.idCarteraCredito()),
-                movimientos,
-                datos.idUsuario()
-        );
+    // =========================================================
+    // CONCEPTOS DE LOS COMPROBANTES
+    // =========================================================
 
-        return numeroComprobante;
+    private String encabezadoConcepto(
+            SolicitudDesembolsoRepository.CreditoDesembolsoDatos credito
+    ) {
+        return "LÍNEA " + credito.codigoLineaCredito()
+                + " - PAGARÉ " + credito.pagareCartera()
+                + " - ASOCIADO " + credito.documento()
+                + " " + credito.nombreCompleto();
+    }
+
+    private String moneda(BigDecimal valor) {
+        NumberFormat formato = NumberFormat.getNumberInstance(new Locale("es", "CO"));
+        formato.setMinimumFractionDigits(0);
+        formato.setMaximumFractionDigits(2);
+        return "$" + formato.format(nvl(valor));
+    }
+
+    private String construirConceptoDesembolso(
+            SolicitudDesembolsoRepository.CreditoDesembolsoDatos credito,
+            DatosContabilizacion datos,
+            List<MovimientoContableDTO> movimientos
+    ) {
+        StringBuilder concepto = new StringBuilder("DESEMBOLSO CRÉDITO ")
+                .append(encabezadoConcepto(credito))
+                .append(" - VALOR CRÉDITO ").append(moneda(datos.valorCredito()));
+
+        for (MovimientoContableDTO movimiento : movimientos) {
+            if (movimiento.getDetalleMovimiento().startsWith("ABONO AHORROS CTA ")) {
+                String numeroCuenta = movimiento.getDetalleMovimiento()
+                        .substring("ABONO AHORROS CTA ".length())
+                        .split(" - PAGARÉ ", 2)[0];
+                concepto.append(" - ABONO AHORROS CTA ").append(numeroCuenta)
+                        .append(" ").append(moneda(movimiento.getValorCredito()));
+            }
+        }
+        if (datos.valorEfectivo().signum() > 0) {
+            concepto.append(" - EFECTIVO CAJA ").append(moneda(datos.valorEfectivo()));
+        }
+        if (datos.valorCuentaPorPagar().signum() > 0) {
+            concepto.append(" - CUENTA POR PAGAR ").append(moneda(datos.valorCuentaPorPagar()));
+        }
+        if (datos.valorFondoGarantia().signum() > 0) {
+            concepto.append(" - FONDO GARANTÍAS ").append(moneda(datos.valorFondoGarantia()));
+        }
+        if (datos.valorIvaFondo().signum() > 0) {
+            concepto.append(" - IVA FONDO GARANTÍAS ").append(moneda(datos.valorIvaFondo()));
+        }
+        return concepto.toString();
+    }
+
+    private String construirConceptoCobros(
+            SolicitudDesembolsoRepository.CreditoDesembolsoDatos credito,
+            DatosContabilizacion datos
+    ) {
+        StringBuilder concepto = new StringBuilder("RECAUDO COBROS DESEMBOLSO CRÉDITO ")
+                .append(encabezadoConcepto(credito));
+        if (datos.valorCentralRiesgo().signum() > 0) {
+            concepto.append(" - CENTRAL DE RIESGO ").append(moneda(datos.valorCentralRiesgo()));
+        }
+        if (datos.valorPapeleria().signum() > 0) {
+            concepto.append(" - PAPELERÍA ").append(moneda(datos.valorPapeleria()));
+        }
+        if (datos.valorIvaPapeleria().signum() > 0) {
+            concepto.append(" - IVA PAPELERÍA ").append(moneda(datos.valorIvaPapeleria()));
+        }
+        if (datos.valorAportes().signum() > 0) {
+            concepto.append(" - APORTES ").append(moneda(datos.valorAportes()));
+        }
+        return concepto.append(" - TOTAL RECAUDADO ").append(moneda(datos.totalCobros()))
+                .append(" - EFECTIVO CAJA").toString();
     }
 
     // =========================================================
@@ -596,12 +789,16 @@ public class SolicitudDesembolsoContabilizacionService {
             );
         }
 
-        if (datos.idCaja() == null
-                || datos.idCaja() <= 0) {
+        boolean requiereCaja =
+                nvl(datos.valorEfectivo()).compareTo(CERO) > 0
+                        || nvl(datos.totalCobros()).compareTo(CERO) > 0;
+
+        if (requiereCaja
+                && (datos.idCaja() == null || datos.idCaja() <= 0)) {
 
             throw new IllegalArgumentException(
-                    "Debe seleccionar la caja que atenderá "
-                            + "el desembolso."
+                    "Debe seleccionar una caja cuando exista desembolso "
+                            + "en efectivo o cobros asociados."
             );
         }
 

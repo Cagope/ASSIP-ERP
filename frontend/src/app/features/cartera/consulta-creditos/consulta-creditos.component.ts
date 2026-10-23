@@ -1,5 +1,6 @@
 import {
-  Component
+  Component,
+  ViewChild
 } from '@angular/core';
 
 import {
@@ -51,6 +52,8 @@ import {
 } from './resultados-mensuales/consulta-creditos-resultados-mensuales.component';
 
 
+import { TablaAmortizacionComponent } from '../../../shared/financiero/tabla-amortizacion/tabla-amortizacion.component';
+
 type ModuloRelacionado =
   | 'extracto'
   | 'seguros'
@@ -58,7 +61,8 @@ type ModuloRelacionado =
   | 'intereses'
   | 'evaluaciones'
   | 'prorrogas'
-  | 'resultadosMensuales';
+  | 'resultadosMensuales'
+  | 'tablaAmortizacion';
 
 @Component({
   selector: 'app-consulta-creditos',
@@ -72,7 +76,8 @@ type ModuloRelacionado =
     ConsultaCreditosInteresesComponent,
     ConsultaCreditosEvaluacionesComponent,
     ConsultaCreditosProrrogasComponent,
-    ConsultaCreditosResultadosMensualesComponent
+    ConsultaCreditosResultadosMensualesComponent,
+    TablaAmortizacionComponent
   ],
 
   templateUrl:
@@ -467,6 +472,16 @@ export class ConsultaCreditosComponent {
   // =========================================================
   // INFORMACIÓN RELACIONADA
   // =========================================================
+
+  // La tabla se crea únicamente al abrir su módulo.
+  @ViewChild('tablaAmortizacion')
+  set componenteTablaAmortizacion(componente: TablaAmortizacionComponent | undefined) {
+    if (!componente || this.moduloRelacionadoActivo !== 'tablaAmortizacion') return;
+    const id = this.creditoSeleccionado.credito?.idCarteraCredito;
+    if (id != null && Number(id) > 0) {
+      componente.abrirCredito(Number(id));
+    }
+  }
 
   abrirModuloRelacionado(
     modulo: ModuloRelacionado
