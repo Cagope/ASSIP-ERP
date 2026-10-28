@@ -236,6 +236,26 @@ export class OperacionesPendientesComponent implements OnInit {
   // SELECCIONAR OBLIGACIÓN
   // =====================================================
 
+  /** Consulta cuentas según naturaleza y evita ofrecer cuentas de egreso en recaudos. */
+  private consultarCuentasParaOperacion(): void {
+    if (!this.idAgencia || !this.operacionSeleccionada) return;
+    const idAgencia = this.idAgencia;
+    this.cargandoCuentas = true;
+    this.errorCuentas = '';
+    this.cuentasParaPago = [];
+    const consulta = this.operacionSeleccionada.naturaleza === 'ENTRADA'
+      ? this.api.listarCuentasParaRecaudo(idAgencia)
+      : this.api.listarCuentasParaPago(idAgencia);
+    consulta.pipe(takeUntilDestroyed(this.destroyRef), finalize(() => {
+      this.cargandoCuentas = false;
+    })).subscribe({
+      next: cuentas => { this.cuentasParaPago = cuentas ?? []; },
+      error: error => {
+        this.errorCuentas = error?.error?.message ?? 'No fue posible consultar las cuentas bancarias.';
+      }
+    });
+  }
+
   seleccionarOperacion(
     operacion: OperacionPendiente
   ): void {
@@ -245,6 +265,8 @@ export class OperacionesPendientesComponent implements OnInit {
     const versionActual = this.versionDetalle;
 
     this.operacionSeleccionada = operacion;
+    // Carga cuentas aptas para ingresos, incluso si no están habilitadas para pagos.
+    this.consultarCuentasParaOperacion();
 
     this.ejecuciones = [];
     this.lineasPago = [];
@@ -328,7 +350,7 @@ export class OperacionesPendientesComponent implements OnInit {
     if (
       !this.operacionSeleccionada ||
       this.cargandoDetalle ||
-      this.operacionSeleccionada.naturaleza !== 'SALIDA'
+      !['SALIDA', 'ENTRADA'].includes(this.operacionSeleccionada.naturaleza)
     ) {
       return;
     }
@@ -433,7 +455,9 @@ export class OperacionesPendientesComponent implements OnInit {
 
     const origen = operacion.modulo_origen || 'ERP';
 
-    let observacion = `Pago de obligación ${origen}`;
+    let observacion = operacion.naturaleza === 'ENTRADA'
+      ? `Recaudo de cuenta por cobrar ${origen}`
+      : `Pago de obligación ${origen}`;
 
     if (linea.medioPago === 'CHEQUE') {
 
@@ -610,7 +634,7 @@ export class OperacionesPendientesComponent implements OnInit {
       if (!cuentaValida) {
 
         this.mensajeError =
-          'La cuenta bancaria seleccionada no está habilitada para pagos.';
+          'La cuenta bancaria seleccionada no está habilitada para esta operación.';
 
         return false;
       }
@@ -678,7 +702,9 @@ export class OperacionesPendientesComponent implements OnInit {
     const version = this.versionVistaPrevia;
     const solicitud = this.construirSolicitudPago();
     this.cargandoVistaPrevia = true;
-    this.api.generarVistaPrevia(solicitud)
+    (this.operacionSeleccionada?.naturaleza === 'ENTRADA'
+        ? this.api.generarVistaPreviaRecaudo(solicitud)
+        : this.api.generarVistaPrevia(solicitud))
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         finalize(() => { this.cargandoVistaPrevia = false; })
@@ -692,7 +718,7 @@ export class OperacionesPendientesComponent implements OnInit {
           }
           this.vistaPrevia = preview;
           this.mensajeInformativo =
-            'Revise los movimientos contables antes de confirmar el pago.';
+            'Revise los movimientos contables antes de confirmar la operación.';
         },
         error: error => {
           if (version !== this.versionVistaPrevia) return;
@@ -714,7 +740,9 @@ export class OperacionesPendientesComponent implements OnInit {
       return;
     }
     this.confirmandoPago = true;
-    this.api.confirmarPago(solicitud)
+    (this.operacionSeleccionada?.naturaleza === 'ENTRADA'
+        ? this.api.confirmarRecaudo(solicitud)
+        : this.api.confirmarPago(solicitud))
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         finalize(() => { this.confirmandoPago = false; })
@@ -731,7 +759,7 @@ export class OperacionesPendientesComponent implements OnInit {
             this.limpiarSeleccion();
           }
           this.mensajeInformativo =
-            `Pago contabilizado. Comprobante ${resultado.tipoComprobante} ` +
+            `Operación contabilizada. Comprobante ${resultado.tipoComprobante} ` +
             `${resultado.numeroComprobante}. Saldo: ${resultado.saldoPendiente}.`;
         },
         error: error => {

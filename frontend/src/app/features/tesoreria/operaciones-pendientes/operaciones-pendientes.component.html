@@ -9,7 +9,7 @@
     <div>
       <h2>Operaciones pendientes</h2>
       <p>
-        Consulta y distribución de pagos de obligaciones
+        Consulta de recaudos y distribución de pagos de obligaciones
         generadas por los diferentes módulos del ERP.
       </p>
     </div>
@@ -48,7 +48,7 @@
   <div class="resumen-grid">
 
     <div class="card resumen-card">
-      <span class="resumen-label">Obligaciones pendientes</span>
+      <span class="resumen-label">Operaciones pendientes</span>
       <strong class="resumen-valor">
         {{ operaciones.length }}
       </strong>
@@ -78,7 +78,7 @@
 
     <div class="card-header">
       <div>
-        <h3>Obligaciones disponibles</h3>
+        <h3>Operaciones disponibles</h3>
         <p>
           Agencia {{ idAgencia || 'Sin seleccionar' }}
         </p>
@@ -92,7 +92,7 @@
     <div
       *ngIf="!cargando && operaciones.length === 0"
       class="estado-vacio">
-      No existen obligaciones pendientes para esta agencia.
+      No existen operaciones pendientes para esta agencia.
     </div>
 
     <div
@@ -104,6 +104,7 @@
         <thead>
         <tr>
           <th>Operación</th>
+          <th>Naturaleza</th>
           <th>Origen</th>
           <th>Fecha</th>
           <th>Concepto</th>
@@ -201,7 +202,7 @@
       <div class="card-header">
         <div>
           <h3>
-            Detalle de obligación N.º
+            Detalle de operación N.º
             {{ operacion.id_operacion_pendiente }}
           </h3>
           <p>{{ operacion.concepto }}</p>
@@ -282,15 +283,15 @@
     <!-- ================================================ -->
 
     <section
-      *ngIf="operacion.naturaleza === 'SALIDA'"
+      *ngIf="operacion.naturaleza === 'SALIDA' || operacion.naturaleza === 'ENTRADA'"
       class="card distribucion-card">
 
       <div class="card-header">
         <div>
-          <h3>Distribución del pago</h3>
+          <h3>{{ operacion.naturaleza === 'ENTRADA' ? 'Distribución del recaudo bancario' : 'Distribución del pago' }}</h3>
           <p>
-            Distribuya el valor de la obligación entre
-            diferentes cuentas bancarias, cheques o transferencias.
+            Distribuya el valor de la operación entre
+            cuentas bancarias y referencias de transferencias o cheques.
           </p>
         </div>
 
@@ -310,7 +311,7 @@
       <div
         *ngIf="cargandoCuentas"
         class="alert alert-info">
-        Consultando cuentas bancarias habilitadas para pagos...
+        Consultando cuentas bancarias habilitadas...
       </div>
 
       <div
@@ -328,7 +329,7 @@
       <div
         *ngIf="!cargandoCuentas && !errorCuentas && cuentasParaPago.length === 0"
         class="alert alert-warning">
-        No hay cuentas bancarias habilitadas para pagos en esta agencia.
+        No hay cuentas bancarias habilitadas para esta operación en la agencia.
       </div>
 
       <!-- SIN LÍNEAS -->
@@ -336,7 +337,7 @@
       <div
         *ngIf="lineasPago.length === 0"
         class="estado-vacio">
-        No se han agregado líneas de pago.
+        No se han agregado líneas.
         Utilice <strong>Agregar línea</strong> para comenzar la distribución.
       </div>
 
@@ -357,7 +358,7 @@
           <div class="linea-pago-header">
             <div class="linea-pago-titulo">
               <span class="linea-numero">{{ i + 1 }}</span>
-              <strong>Línea de pago</strong>
+              <strong>{{ operacion.naturaleza === 'ENTRADA' ? 'Línea de recaudo' : 'Línea de pago' }}</strong>
             </div>
 
             <button
@@ -371,7 +372,7 @@
           <div class="linea-pago-grid">
 
             <div class="campo-pago">
-              <label>Medio de pago</label>
+              <label>{{ operacion.naturaleza === 'ENTRADA' ? 'Medio de recaudo' : 'Medio de pago' }}</label>
               <select
                 class="form-select form-select-sm"
                 [ngModel]="linea.medioPago"
@@ -387,7 +388,7 @@
             </div>
 
             <div class="campo-pago campo-cuenta">
-              <label>Cuenta bancaria de origen</label>
+              <label>{{ operacion.naturaleza === 'ENTRADA' ? 'Cuenta bancaria receptora' : 'Cuenta bancaria de origen' }}</label>
 
               <select
                 class="form-select form-select-sm"
@@ -432,7 +433,7 @@
             </div>
 
             <div class="campo-pago campo-valor">
-              <label>Valor del pago</label>
+              <label>{{ operacion.naturaleza === 'ENTRADA' ? 'Valor recibido' : 'Valor del pago' }}</label>
 
               <div class="input-group input-group-sm">
                 <span class="input-group-text">$</span>
@@ -587,12 +588,12 @@
 
       <div class="card-actions">
         <span class="nota-informativa">
-          Al confirmar se registrará el comprobante y se actualizará el saldo de la obligación.
+          Al confirmar se registrará el comprobante y se actualizará únicamente el saldo pendiente de Tesorería.
         </span>
         <button type="button" class="btn btn-primary"
                 [disabled]="!comprobante.cuadrado || confirmandoPago || cargandoVistaPrevia"
                 (click)="confirmarPago()">
-          {{ confirmandoPago ? 'Contabilizando...' : 'Confirmar y contabilizar pago' }}
+          {{ confirmandoPago ? 'Contabilizando...' : (operacion.naturaleza === 'ENTRADA' ? 'Confirmar recaudo bancario' : 'Confirmar y contabilizar pago') }}
         </button>
       </div>
     </section>

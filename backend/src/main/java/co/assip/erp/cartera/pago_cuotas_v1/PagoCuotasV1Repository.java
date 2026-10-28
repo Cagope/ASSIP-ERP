@@ -86,8 +86,8 @@ public class PagoCuotasV1Repository {
     // =========================================================
 
     /**
-     * Recupera las condiciones contractuales y financieras
-     * necesarias para liquidar una cuota.
+     * Recupera las condiciones contractuales y financieras para liquidar una cuota.
+     * Incluye la descripción de la modalidad de intereses sin alterar los cálculos.
      */
     public Optional<CreditoLiquidacion> buscarCredito(
             Integer idCarteraCredito
@@ -106,6 +106,7 @@ public class PagoCuotasV1Repository {
                     c.codigo_forma_pago,
                     c.tipo_modalidad_interes,
                     c.periodo_codigo_interes,
+                    mi.descripcion_modalidad_interes,
                     c.amortizacion_capital,
                     c.plazo,
                     c.altura_cuota,
@@ -156,6 +157,9 @@ public class PagoCuotasV1Repository {
                 FROM cartera.carteras_creditos c
                 LEFT JOIN cartera.lineas_creditos l
                     ON l.id_linea_credito = c.id_linea_credito
+                LEFT JOIN cartera.modalidades_intereses mi
+                    ON mi.periodo_codigo = c.periodo_codigo_interes
+                   AND mi.tipo_modalidad = c.tipo_modalidad_interes
                 LEFT JOIN cartera.clasificaciones_creditos cl
                     ON cl.codigo_clasificacion_credito = c.codigo_clasificacion_credito
                 LEFT JOIN cartera.garantias_creditos g
@@ -194,8 +198,8 @@ public class PagoCuotasV1Repository {
     }
 
     // =========================================================
-// CONSULTAR SALDO PENDIENTE DE SEGUROS
-// =========================================================
+    // CONSULTAR SALDO PENDIENTE DE SEGUROS
+    // =========================================================
 
     public BigDecimal consultarSaldoSeguros(Integer idCarteraCredito) {
 
@@ -226,6 +230,65 @@ public class PagoCuotasV1Repository {
         );
 
         return saldo != null ? saldo : BigDecimal.ZERO;
+    }
+
+    // =========================================================
+    // CONSULTAR SALDO PENDIENTE DE COSTAS JUDICIALES
+    // =========================================================
+
+    /**
+     * Consulta el saldo pendiente de costas judiciales del crédito.
+     *
+     * Las costas se causan en un proceso independiente.
+     * Este método únicamente consulta los valores pendientes
+     * de recaudo, sin generar causaciones ni movimientos.
+     */
+    public BigDecimal consultarSaldoCostasJudiciales(
+            Integer idCarteraCredito) {
+
+        if (idCarteraCredito == null || idCarteraCredito <= 0) {
+            throw new IllegalArgumentException(
+                    "Debe indicar un crédito válido.");
+        }
+
+        final String sql = """
+            SELECT
+                COALESCE(
+                    SUM(
+                        COALESCE(d.valor_debito, 0)
+                        - COALESCE(d.valor_credito, 0)
+                    ),
+                    0
+                ) AS saldo_costas_judiciales
+
+            FROM cartera.creditos_costas_judiciales c
+
+            INNER JOIN cartera.creditos_costas_judiciales_detalle d
+                ON d.id_credito_costa_judicial =
+                   c.id_credito_costa_judicial
+
+            WHERE c.id_cartera_credito = ?
+              AND c.activo = TRUE
+              AND d.estado = 'A'
+            """;
+
+        BigDecimal saldo = jdbc.queryForObject(
+                sql,
+                BigDecimal.class,
+                idCarteraCredito
+        );
+
+        if (saldo == null) {
+            return BigDecimal.ZERO;
+        }
+
+        if (saldo.signum() < 0) {
+            throw new IllegalStateException(
+                    "El crédito presenta un saldo negativo "
+                            + "de costas judiciales.");
+        }
+
+        return saldo;
     }
 
     // =========================================================
@@ -395,6 +458,7 @@ public class PagoCuotasV1Repository {
                 r.getString("codigo_forma_pago"),
                 r.getString("tipo_modalidad_interes"),
                 r.getString("periodo_codigo_interes"),
+                r.getString("descripcion_modalidad_interes"),
 
                 nullableInt(r, "amortizacion_capital"),
                 nullableInt(r, "plazo"),
@@ -511,6 +575,7 @@ public class PagoCuotasV1Repository {
             String codigoFormaPago,
             String tipoModalidadInteres,
             String periodoCodigoInteres,
+            String descripcionModalidadInteres,
 
             Integer amortizacionCapital,
             Integer plazo,

@@ -578,6 +578,163 @@ public class TesoreriaOperacionesEjecucionesService {
                 List.copyOf(ids), "Pago contabilizado correctamente.");
     }
 
+    /** Previsualiza el recaudo de una CxC de Cartera sin modificar saldos ni comprobantes. */
+    @Transactional(readOnly = true)
+    public OperacionComprobantePreviewDTO generarVistaPreviaRecaudo(OperacionPagoRequestDTO request) {
+        if (request == null || request.lineas() == null || request.lineas().isEmpty()) {
+            throw new IllegalArgumentException("Debe indicar al menos una línea de recaudo.");
+        }
+        validarId(request.idOperacion(), "La operación");
+        Map<String, Object> operacion = obtenerOperacion(request.idOperacion());
+        validarAgencia(operacion);
+        validarEntradaCartera(operacion);
+        Integer agencia = numeroEntero(operacion, "id_agencia");
+        Integer tercero = numeroEntero(operacion, "id_datos_personal");
+        BigDecimal original = numeroDecimal(operacion, "valor_original");
+        BigDecimal ejecutado = numeroDecimal(operacion, "valor_ejecutado");
+        BigDecimal disponible = calcularSaldoDisponible(request.idOperacion(), operacion);
+        if (disponible.signum() <= 0) {
+            throw new IllegalStateException("La cuenta por cobrar no tiene saldo pendiente.");
+        }
+
+        // Utiliza la misma parametrización general que el comprobante de Cartera.
+        List<Integer> cuentasCxC = jdbcTemplate.queryForList("""
+                SELECT pc.id_catalogo_cuenta
+                FROM cartera.parametros_contables pc
+                JOIN contabilidad.catalogo_cuentas cc
+                  ON cc.id_catalogo_cuenta = pc.id_catalogo_cuenta
+                 AND cc.id_agencia = pc.id_agencia
+                WHERE pc.id_agencia = ? AND pc.concepto = 'RECAUDO_BANCARIO'
+                  AND pc.activo = TRUE AND pc.id_linea_credito IS NULL
+                  AND cc.cuenta_operable = TRUE
+                """, Integer.class, agencia);
+        if (cuentasCxC.size() != 1 || cuentasCxC.get(0) == null) {
+            throw new IllegalStateException("La cuenta CxC RECAUDO_BANCARIO no está parametrizada de forma única.");
+        }
+
+        BigDecimal total = BigDecimal.ZERO;
+        List<MovimientoContableDTO> movimientos = new ArrayList<>();
+        for (OperacionPagoLineaDTO linea : request.lineas()) {
+            if (linea == null) {
+                throw new IllegalArgumentException("Hay una línea de recaudo vacía.");
+            }
+            validarValor(linea.valor());
+            validarBeneficiario(operacion, linea.idBeneficiario());
+            validarId(linea.idCuentaBancaria(), "La cuenta bancaria");
+            String medio = normalizarMedioPago(linea.medioPago());
+            if (!TRANSFERENCIA.equals(medio) && !CHEQUE.equals(medio)) {
+                throw new IllegalArgumentException("Medio de recaudo no permitido: " + medio);
+            }
+            String referencia = limpiar(linea.numeroDocumento());
+            if (referencia == null) {
+                throw new IllegalArgumentException("Debe indicar la referencia del recaudo bancario.");
+            }
+            // No se usa permite_pagar: es un ingreso, no un egreso bancario.
+            List<Integer> cuentasBanco = jdbcTemplate.queryForList("""
+                    SELECT cba.id_cuenta_contable
+                    FROM tesoreria.cuentas_bancarias_agencias cba
+                    JOIN tesoreria.cuentas_bancarias cb
+                      ON cb.id_cuenta_bancaria = cba.id_cuenta_bancaria
+                    JOIN tesoreria.bancos b ON b.codigo_banco = cb.codigo_banco
+                    JOIN contabilidad.catalogo_cuentas cc
+                      ON cc.id_catalogo_cuenta = cba.id_cuenta_contable
+                    WHERE cba.id_agencia = ? AND cba.id_cuenta_bancaria = ?
+                      AND cba.activo = TRUE AND cb.activo = TRUE
+                      AND cb.estado_cuenta = 'ACTIVA' AND b.activo = TRUE
+                      AND cc.id_agencia = cba.id_agencia AND cc.cuenta_operable = TRUE
+                    """, Integer.class, agencia, linea.idCuentaBancaria());
+            if (cuentasBanco.size() != 1 || cuentasBanco.get(0) == null) {
+                throw new IllegalArgumentException("La cuenta bancaria no está activa para recaudos en esta agencia.");
+            }
+            movimientos.add(movimiento(agencia, tercero, cuentasBanco.get(0),
+                    linea.valor(), BigDecimal.ZERO, "Recaudo bancario de cuotas Cartera",
+                    referencia, request.idOperacion()));
+            total = total.add(linea.valor());
+        }
+        if (total.compareTo(disponible) > 0) {
+            throw new IllegalArgumentException("El recaudo supera el saldo de la cuenta por cobrar.");
+        }
+        movimientos.add(movimiento(agencia, tercero, cuentasCxC.get(0),
+                BigDecimal.ZERO, total, "Cancelación CxC de recaudo bancario Cartera",
+                "OPERACION-" + request.idOperacion(), request.idOperacion()));
+        return new OperacionComprobantePreviewDTO(request.idOperacion(), agencia, tercero,
+                original, ejecutado, disponible, total, disponible.subtract(total),
+                total, total, true, List.copyOf(movimientos),
+                consultarCuentasContables(agencia, movimientos));
+    }
+
+    /** Confirma un ingreso bancario, cancela la CxC y actualiza solo la operación de Tesorería. */
+    @Transactional
+    public OperacionPagoResponseDTO confirmarRecaudo(OperacionPagoRequestDTO request) {
+        if (request == null) {
+            throw new IllegalArgumentException("La solicitud es obligatoria.");
+        }
+        validarId(request.idOperacion(), "La operación");
+        Map<String, Object> operacion = repository.bloquearOperacion(request.idOperacion());
+        validarAgencia(operacion);
+        validarEntradaCartera(operacion);
+        OperacionComprobantePreviewDTO preview = generarVistaPreviaRecaudo(request);
+        Integer agencia = numeroEntero(operacion, "id_agencia");
+        Integer usuario = usuarioSesionService.idUsuario();
+        BigDecimal total = preview.totalPago();
+        BigDecimal acumulado = numeroDecimal(operacion, "valor_ejecutado").add(total);
+        BigDecimal saldo = numeroDecimal(operacion, "valor_original").subtract(acumulado);
+        if (saldo.signum() < 0) {
+            throw new IllegalStateException("El recaudo supera el saldo disponible.");
+        }
+        String tipo = "CI";
+        String numero = consecutivosComprobantesService.generarNumeroDefinitivo(tipo, agencia, usuario);
+        OrigenComprobanteDTO origen = new OrigenComprobanteDTO();
+        origen.setOrigenTipo("AUTO");
+        origen.setModuloOrigen("TESORERIA");
+        origen.setProcesoOrigen("OPERACIONES_PENDIENTES");
+        origen.setTablaOrigen("tesoreria.operaciones_pendientes");
+        origen.setIdOrigen(request.idOperacion());
+        // Conserva el concepto de Cartera e identifica el valor de esta ejecución bancaria.
+        String conceptoOrigen = Objects.toString(operacion.get("concepto"), "").trim();
+        String conceptoComprobante = conceptoOrigen
+                + " - RECAUDO BANCARIO $" + total.toPlainString();
+
+        contabilidadRegistroService.registrarComprobante(
+                agencia,
+                tipo,
+                numero,
+                conceptoComprobante,
+                origen,
+                preview.movimientos(),
+                usuario
+        );
+        List<Long> ids = new ArrayList<>();
+        for (OperacionPagoLineaDTO linea : request.lineas()) {
+            Integer lineaNumero = repository.siguienteNumeroLinea(request.idOperacion());
+            Long id = repository.insertarPreparada(request.idOperacion(), lineaNumero,
+                    linea.idBeneficiario(), linea.idCuentaBancaria(),
+                    normalizarMedioPago(linea.medioPago()), limpiar(linea.numeroDocumento()),
+                    linea.valor(), limpiar(linea.observaciones()), usuario);
+            repository.confirmarEjecucion(id, tipo, numero, usuario);
+            ids.add(id);
+        }
+        String estado = saldo.signum() == 0 ? "COMPLETADA" : PARCIAL;
+        repository.actualizarSaldoOperacion(request.idOperacion(), acumulado, estado, usuario);
+        return new OperacionPagoResponseDTO(request.idOperacion(), agencia, tipo, numero,
+                LocalDateTime.now(), total, acumulado, saldo, estado, ids.size(),
+                List.copyOf(ids), "Recaudo contabilizado correctamente.");
+    }
+
+    /** Limita el recaudo a entradas de Pago de Cuotas aún pendientes de ejecución. */
+    private void validarEntradaCartera(Map<String, Object> operacion) {
+        String estado = Objects.toString(operacion.get("estado"), "");
+        if (!PENDIENTE.equals(estado) && !PARCIAL.equals(estado)) {
+            throw new IllegalStateException("La operación no admite recaudos en estado " + estado);
+        }
+        if (!"ENTRADA".equals(Objects.toString(operacion.get("naturaleza"), ""))
+                || !"CARTERA".equals(Objects.toString(operacion.get("modulo_origen"), ""))
+                || !"PAGO_CUOTAS".equals(Objects.toString(operacion.get("proceso_origen"), ""))
+                || !"cartera.pagos_cuotas".equals(Objects.toString(operacion.get("tabla_origen"), ""))) {
+            throw new IllegalStateException("El recaudo solo admite CxC originadas en Pago de Cuotas.");
+        }
+    }
+
     // =========================================================
     // VALIDACIONES DE LA OPERACIÓN
     // =========================================================

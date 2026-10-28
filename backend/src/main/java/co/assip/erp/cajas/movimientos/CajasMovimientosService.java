@@ -457,6 +457,116 @@ public class CajasMovimientosService {
                 "PENDIENTE", tipoComprobante, numeroComprobante, idUsuario);
     }
 
+    /**
+     * Registra un recaudo de cuotas de Cartera pendiente
+     * de confirmación por el cajero.
+     *
+     * No aplica el pago al crédito ni genera el extracto.
+     *
+     * La aplicación financiera debe realizarse cuando
+     * se confirme el recaudo, dentro de la misma transacción.
+     *
+     * @return identificador del movimiento pendiente de Caja.
+     */
+    /**
+     * Registra un recaudo de cuotas de Cartera pendiente
+     * de confirmación por el cajero.
+     *
+     * La referencia de origen es idPago, no el identificador
+     * del crédito. Esto permite varios pagos sobre un mismo
+     * crédito sin confundir las operaciones.
+     *
+     * El valorRecaudo corresponde únicamente al efectivo.
+     *
+     * No actualiza el crédito ni genera comprobantes.
+     */
+    public Long registrarRecaudoCuotasCartera(
+            Long idCaja,
+            BigDecimal valorRecaudo,
+            LocalDate fechaContable,
+            Long idPago,
+            String pagareCartera,
+            String tipoComprobante,
+            String numeroComprobante,
+            Integer idUsuario
+    ) {
+
+        if (idCaja == null || idCaja <= 0) {
+            throw new IllegalArgumentException(
+                    "Debe seleccionar una caja válida.");
+        }
+
+        if (valorRecaudo == null
+                || valorRecaudo.signum() <= 0
+                || valorRecaudo.stripTrailingZeros().scale() > 0) {
+            throw new IllegalArgumentException(
+                    "El recaudo en efectivo debe ser positivo y expresado en pesos enteros.");
+        }
+
+        if (fechaContable == null) {
+            throw new IllegalArgumentException(
+                    "Debe indicar la fecha contable.");
+        }
+
+        if (idPago == null || idPago <= 0) {
+            throw new IllegalArgumentException(
+                    "Debe indicar una operación de pago válida.");
+        }
+
+        if (idUsuario == null || idUsuario <= 0) {
+            throw new IllegalArgumentException(
+                    "El usuario de sesión es obligatorio.");
+        }
+
+        Long idProvision = repository.obtenerProvisionAbierta(
+                idCaja,
+                fechaContable
+        );
+
+        if (idProvision == null) {
+            throw new IllegalStateException(
+                    "La caja seleccionada no tiene provisión ABIERTA para la fecha contable.");
+        }
+
+        Long idDepartamento = repository.obtenerIdDepartamento("12");
+
+        if (idDepartamento == null) {
+            throw new IllegalStateException(
+                    "No existe el departamento operativo 12 - MOVIMIENTOS CARTERA.");
+        }
+
+        Long idOperacion = repository.obtenerIdOperacion("PAGO_CUOTAS");
+
+        if (idOperacion == null) {
+            throw new IllegalStateException(
+                    "No existe la operación de Caja PAGO_CUOTAS.");
+        }
+
+        String concepto = "Pago de cuotas crédito "
+                + (pagareCartera == null ? "" : pagareCartera);
+
+        return repository.insertarMovimientoCaja(
+                idProvision,
+                idCaja,
+                fechaContable,
+                idDepartamento,
+                idOperacion,
+                "CARTERA",
+                "PAGO_CUOTAS",
+                "cartera.pagos_cuotas",
+                idPago,
+                pagareCartera,
+                "INGRESO",
+                "EFECTIVO",
+                valorRecaudo,
+                concepto,
+                "PENDIENTE",
+                tipoComprobante,
+                numeroComprobante,
+                idUsuario
+        );
+    }
+
     private void validarCheques(List<MedioPagoChequeDTO> cheques, BigDecimal valorCheques) {
         if (cheques == null || cheques.isEmpty()) {
             throw new RuntimeException("Debe ingresar el detalle de los cheques.");

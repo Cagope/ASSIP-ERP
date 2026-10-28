@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication // ✅ elimina scanBasePackages
 public class
-AssipErpApplication {
+	AssipErpApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(AssipErpApplication.class, args);
 	}

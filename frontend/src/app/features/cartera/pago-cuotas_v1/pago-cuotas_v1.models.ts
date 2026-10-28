@@ -35,6 +35,7 @@ export interface PagoCuotasCreditoDetalle {
   codigoFormaPago: string | null;
   tipoModalidadInteres: string | null;
   periodoCodigoInteres: string | null;
+  descripcionModalidadInteres: string | null;
   amortizacionCapital: number | null;
   plazo: number | null;
   alturaCuota: number | null;
@@ -104,6 +105,7 @@ export interface PagoCuotasLiquidacion {
   segurosPendientes: number;
   saldoAlivios: number;
   cuotaAlivios: number;
+  costasJudicialesPendientes: number;
   totalLiquidacion: number;
   vencimientoFinal: boolean;
   capitalAnticipadoSugerido: number;
@@ -120,6 +122,7 @@ export interface PagoCuotasSimulacion {
   interesesMoraAplicados: number;
   segurosAplicados: number;
   aliviosAplicados: number;
+  costasJudicialesAplicadas: number;
   diferenciaCapitalLiquidado: number;
   saldoCapitalProyectado: number;
   abonoAdicionalCapital: boolean;
@@ -144,23 +147,124 @@ export interface PagoCuotasPagoRealizado {
   tipoComprobante: string;
   numeroComprobante: string;
   cantidadRegistros: number;
-
   capital: number;
   interesCausado: number;
   interesIngreso: number;
   interesAnticipado: number;
   mora: number;
-
   seguros: number;
-
   aportes: number;
   papeleria: number;
   fondoGarantia: number;
   otrosValores: number;
-
   totalComponentes: number;
   totalPagado: number;
 }
 
 // La búsqueda de asociados y la tabla de amortización reutilizan
 // los contratos de sus módulos existentes.
+
+// Contratos del motor de recaudos (backend PagoCuotasMotorService).
+export interface PagoCuotasCajaRecaudo {
+  idCaja: number;
+  idAgencia: number;
+  codigoCaja: string;
+  descripcion: string;
+}
+
+export interface PagoCuotasMedioRecaudo {
+  tipoMedio: 'CAJA' | 'AHORROS' | 'CXP';
+  valor: number;
+  idCaja: number | null;
+  idCuentaAhorro: number | null;
+  idCuentaPorPagar: number | null;
+}
+
+export interface PagoCuotasRecaudoValidado {
+  total: number;
+  medios: PagoCuotasMedioRecaudo[];
+  requiereConfirmacionCaja: boolean;
+}
+
+/** Proyección de aplicación; no es un pago confirmado. */
+export interface PagoCuotasResultadoAplicacion {
+  idCarteraCredito: number;
+  saldoAnterior: number;
+  capitalAplicado: number;
+  saldoNuevo: number;
+  codigoEstadoCarteraProyectado: string;
+  cancelaCredito: boolean;
+  cubreCapitalExigible: boolean;
+  abonoAdicionalCapital: boolean;
+  capitalInferiorAlLiquidado: boolean;
+  consultarProrrogaVigente: boolean;
+  candidatoRegularizacionProrroga: boolean;
+  alturaCuotaActual: number | null;
+  ultimaFechaCapitalActual: string | null;
+  ultimaFechaInteresActual: string | null;
+  proximaFechaCapitalActual: string | null;
+  proximaFechaInteresActual: string | null;
+  alturaCuotaNueva: number;
+  ultimaFechaCapitalNueva: string | null;
+  ultimaFechaInteresNueva: string | null;
+  proximaFechaCapitalNueva: string | null;
+  proximaFechaInteresNueva: string | null;
+}
+
+export interface PagoCuotasOperacionPreparada {
+  idCarteraCredito: number;
+  fechaPago: string;
+  periodoInteresMeses: number;
+  cuotasACancelar: number | null;
+  idAgenciaReceptora: number;
+  pagoTotal: boolean;
+  simulacion: PagoCuotasSimulacion;
+  recaudo: PagoCuotasRecaudoValidado;
+  aplicacion: PagoCuotasResultadoAplicacion;
+  requiereConfirmacionCaja: boolean;
+}
+
+/** Solicitud utilizada tanto para preparar como para enviar a Caja. */
+export interface PagoCuotasSolicitudPreparacion {
+  idCarteraCredito: number;
+  fechaPago: string;
+  periodoInteresMeses: number;
+  cuotasACancelar: number | null;
+  valorPago: number;
+  idAgenciaReceptora: number;
+  medios: PagoCuotasMedioRecaudo[];
+  pagoTotal: boolean;
+}
+
+/** Cuenta elegible de ahorro retornada por el motor de Cartera. */
+export interface PagoCuotasCuentaAhorro {
+  idCuentaAhorro: number;
+  idAgencia: number;
+  codigoCuenta: string;
+  nombreForma: string;
+  saldoActual: number;
+}
+
+/** Asiento previo sin consecutivo ni aplicación financiera. */
+/** Asiento previo sin consecutivo ni aplicación financiera. */
+export interface PagoCuotasComprobantePrevio {
+  idMovimientoCaja: number | null;
+  idPago: number | null;
+  tipoComprobante: string;
+  fechaContable: string;
+
+  // Concepto general del comprobante contable CC.
+  concepto?: string;
+
+  totalDebitos: number;
+  totalCreditos: number;
+
+  movimientos: {
+    idCatalogoCuenta: number;
+    codigoCuenta: string;
+    nombreCuenta: string;
+    concepto: string;
+    debito: number;
+    credito: number;
+  }[];
+}

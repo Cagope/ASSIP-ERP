@@ -58,6 +58,8 @@
 // =========================================================
 
 .consulta-bloque {
+  box-sizing: border-box;
+  width: 100%;
   min-width: 0;
   padding: 1rem;
   border: 1px solid #e5e7eb;
@@ -630,5 +632,214 @@
   .acciones-consulta {
     flex-direction: column;
     align-items: stretch;
+  }
+}
+
+
+// =========================================================
+// DISTRIBUCIÓN DEL RECAUDO
+// =========================================================
+.distribucion-recaudo {
+  // El ancho exterior debe coincidir con las demás secciones.
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+
+  .captura-fila,
+  .captura-cuenta,
+  .captura-cxp {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 175px 82px;
+    align-items: end;
+    column-gap: .85rem;
+    row-gap: .6rem;
+    width: 100%;
+    min-width: 0;
+    padding: .9rem;
+    margin-bottom: .8rem;
+    border: 1px solid #e2e8f0;
+    border-radius: .5rem;
+    background: #f8fafc;
+  }
+
+  .captura-subtitulo {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .75rem;
+    margin: 1.1rem 0 .7rem;
+    padding-top: .9rem;
+    border-top: 1px solid #e2e8f0;
+
+    strong {
+      color: #334155;
+      font-size: .85rem;
+    }
+  }
+
+  .campo-formulario {
+    width: 100%;
+    min-width: 0;
+    flex: initial;
+
+    > span {
+      font-weight: 600;
+      font-size: .8rem;
+      color: #374151;
+    }
+
+    input,
+    select {
+      box-sizing: border-box;
+      width: 100%;
+      min-width: 0;
+      min-height: 38px;
+    }
+
+    input[numericFormat] {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  // Los tres importes se alinean en la segunda columna.
+  .captura-fila > .campo-formulario:nth-child(2),
+  .captura-cuenta > .campo-formulario:nth-child(2),
+  .captura-cxp > .campo-formulario {
+    grid-column: 2;
+  }
+
+  .captura-fila > .campo-formulario:first-child,
+  .captura-cuenta > .campo-formulario:first-child,
+  .captura-cxp > .captura-cxp-descripcion {
+    grid-column: 1;
+    min-width: 0;
+  }
+
+  .captura-espacio-accion,
+  .captura-cuenta > .btn {
+    grid-column: 3;
+  }
+
+  .captura-espacio-accion {
+    width: 82px;
+  }
+
+  .captura-cxp-descripcion {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: stretch;
+    gap: .35rem;
+    min-width: 0;
+
+    strong {
+      font-size: .82rem;
+      color: #334155;
+    }
+
+    .nota-operativa {
+      margin: 0;
+    }
+  }
+
+  .captura-cuenta > .btn {
+    min-height: 38px;
+    width: 82px;
+    padding: .4rem;
+  }
+
+  .captura-resumen {
+    box-sizing: border-box;
+    width: 100%;
+    margin: .85rem 0;
+    padding: .8rem 1rem;
+    border: 1px solid #a7f3d0;
+    border-radius: .5rem;
+    background: #ecfdf5;
+    color: #065f46;
+    font-size: .84rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .captura-resumen--error {
+    border-color: #fecaca;
+    background: #fef2f2;
+    color: #991b1b;
+  }
+
+  .captura-error {
+    color: #991b1b;
+  }
+}
+
+@media (max-width: 760px) {
+  .distribucion-recaudo {
+    .captura-fila,
+    .captura-cuenta,
+    .captura-cxp {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .captura-fila > .campo-formulario,
+    .captura-cuenta > .campo-formulario,
+    .captura-cxp > .campo-formulario,
+    .captura-cxp > .captura-cxp-descripcion,
+    .captura-cuenta > .btn {
+      grid-column: 1;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .captura-espacio-accion {
+      display: none;
+    }
+
+    .captura-cuenta > .btn {
+      width: auto;
+      justify-self: start;
+    }
+  }
+}
+
+// Distribución compacta de Caja, AHORROS y CxC.
+.distribucion-recaudo {
+  .recaudo-encabezado { align-items: center; margin-bottom: .65rem; }
+  .recaudo-total { display: flex; flex-direction: column; align-items: flex-end; gap: .15rem; }
+  .recaudo-total small, .recaudo-ayuda { color: #64748b; font-size: .78rem; }
+  .recaudo-total strong { font-size: 1.2rem; color: #1f2937; }
+  .recaudo-seccion { padding: .7rem 0; border-top: 1px solid #e2e8f0; }
+  .recaudo-seccion-titulo { font-size: .86rem; font-weight: 700; color: #334155; }
+  .recaudo-seccion-cabecera { display: flex; align-items: center; gap: .75rem; margin-bottom: .5rem; }
+  .recaudo-cxc { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+  .recaudo-importe { font-size: 1.05rem; color: #334155; }
+  .captura-fila { margin-top: .4rem; }
+  .captura-cuenta { margin-top: .45rem; }
+  .nota-operativa { margin: .4rem 0; }
+}
+
+.comprobante-concepto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.75rem 0 1rem;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #334155;
+
+  strong {
+    color: #1e293b;
+    font-weight: 600;
+  }
+
+  span {
+    overflow-wrap: anywhere;
   }
 }

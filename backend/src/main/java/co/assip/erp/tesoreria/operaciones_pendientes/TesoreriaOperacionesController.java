@@ -63,6 +63,15 @@ public class TesoreriaOperacionesController {
     // CUENTAS BANCARIAS PARA PAGOS
     // =========================================================
 
+    /** Lista cuentas bancarias para recaudos, sin exigir habilitación para egresos. */
+    @GetMapping("/cuentas-para-recaudo")
+    public ResponseEntity<List<Map<String, Object>>> listarCuentasParaRecaudo(
+            @RequestParam Integer idAgencia) {
+        validarAcceso(PERMISO_VIEW);
+        usuarioSesionService.validarAgencia(idAgencia);
+        return ResponseEntity.ok(operacionesPendientesService.listarCuentasParaRecaudo(idAgencia));
+    }
+
     @GetMapping("/cuentas-para-pago")
     public ResponseEntity<List<Map<String, Object>>>
     listarCuentasParaPago(
@@ -155,6 +164,28 @@ public class TesoreriaOperacionesController {
                 operacionesEjecucionesService.confirmarPago(
                         request
                 )
+        );
+    }
+
+    /** Previsualiza el comprobante de entrada bancaria sin registrar movimientos. */
+    @PostMapping("/preview-recaudo")
+    public ResponseEntity<OperacionComprobantePreviewDTO> generarVistaPreviaRecaudo(
+            @RequestBody OperacionPagoRequestDTO request
+    ) {
+        validarAcceso(PERMISO_VIEW);
+        return ResponseEntity.ok(
+                operacionesEjecucionesService.generarVistaPreviaRecaudo(request)
+        );
+    }
+
+    /** Confirma el recaudo bancario de Cartera y registra su ejecución en Tesorería. */
+    @PostMapping("/confirmar-recaudo")
+    public ResponseEntity<OperacionPagoResponseDTO> confirmarRecaudo(
+            @RequestBody OperacionPagoRequestDTO request
+    ) {
+        validarAcceso(PERMISO_EXECUTE);
+        return ResponseEntity.ok(
+                operacionesEjecucionesService.confirmarRecaudo(request)
         );
     }
 

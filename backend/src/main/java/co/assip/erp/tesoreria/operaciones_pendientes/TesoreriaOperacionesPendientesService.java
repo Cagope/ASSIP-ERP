@@ -112,6 +112,14 @@ public class TesoreriaOperacionesPendientesService {
      * el acceso del usuario a la agencia solicitada.
      */
     @Transactional(readOnly = true)
+    /** Consulta cuentas de ingreso para la agencia previamente autorizada. */
+    public List<Map<String, Object>> listarCuentasParaRecaudo(Integer idAgencia) {
+        if (idAgencia == null || idAgencia <= 0) {
+            throw new IllegalArgumentException("La agencia es obligatoria.");
+        }
+        return repository.listarCuentasParaRecaudo(idAgencia);
+    }
+
     public List<Map<String, Object>> listarCuentasParaPago(
             Integer idAgencia
     ) {

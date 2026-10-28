@@ -313,9 +313,20 @@ public class PagoCuotasV1Service {
         BigDecimal cuotaAlivios = calcularCuotaAlivios(
                 saldoAlivios, totalCuotas - pagadas);
 
+        // Las costas se causan en un proceso independiente.
+        // Aquí se cobra el saldo pendiente, igual que los seguros.
+        BigDecimal costasJudicialesPendientes =
+                repository.consultarSaldoCostasJudiciales(c.idCarteraCredito());
+        if (costasJudicialesPendientes == null
+                || costasJudicialesPendientes.signum() < 0) {
+            throw new IllegalStateException(
+                    "Saldo inválido de costas judiciales para el crédito "
+                            + c.idCarteraCredito() + ".");
+        }
+
         BigDecimal total = capitalExigible.add(intereses)
                 .add(mora.interesesMora()).add(segurosPendientes)
-                .add(cuotaAlivios);
+                .add(cuotaAlivios).add(costasJudicialesPendientes);
 
         // Sugerencia informativa para cuota variable no vencida.
         // No modifica el capital exigible ni la liquidación validada.
@@ -331,8 +342,65 @@ public class PagoCuotasV1Service {
         return new LiquidacionCuotas(c.idCarteraCredito(), c.pagareCartera(),
                 fechaPago, fija ? "FIJA" : "VARIABLE", cantidad,
                 saldo, capitalExigible, intereses, mora, segurosPendientes,
-                saldoAlivios, cuotaAlivios, total, vencimientoFinal,
+                saldoAlivios, cuotaAlivios, costasJudicialesPendientes,
+                total, vencimientoFinal,
                 capitalAnticipadoSugerido, valorPagoSugerido);
+    }
+
+    /**
+     * Liquidación especial para cancelar completamente el crédito.
+     * Reutiliza los intereses y la mora calculados a la fecha de pago,
+     * sin liquidar intereses futuros de cuotas aún no vencidas.
+     * Incluye el saldo íntegro de los alivios pendientes.
+     */
+    public LiquidacionCuotas liquidarPagoTotal(Integer idCarteraCredito,
+                                               LocalDate fechaPago,
+                                               int periodoInteresMeses) {
+        LiquidacionCuotas ordinaria = liquidar(
+                idCarteraCredito, fechaPago, periodoInteresMeses, null);
+
+        BigDecimal capitalTotal = ordinaria.saldoInicial();
+        BigDecimal aliviosTotales = ordinaria.saldoAlivios();
+        BigDecimal total = capitalTotal
+                .add(ordinaria.interesesCorrientes())
+                .add(ordinaria.mora().interesesMora())
+                .add(aliviosTotales)
+                .add(ordinaria.segurosPendientes())
+                .add(ordinaria.costasJudicialesPendientes());
+
+        return new LiquidacionCuotas(
+                ordinaria.idCarteraCredito(), ordinaria.pagareCartera(),
+                ordinaria.fechaPago(), ordinaria.tipoCuota(),
+                ordinaria.cuotasConsideradas(), ordinaria.saldoInicial(),
+                capitalTotal, ordinaria.interesesCorrientes(), ordinaria.mora(),
+                ordinaria.segurosPendientes(), aliviosTotales, aliviosTotales,
+                ordinaria.costasJudicialesPendientes(), total,
+                ordinaria.vencimientoFinal(),
+                CERO, total);
+    }
+
+    /** Simula exclusivamente una cancelación total, sin permitir pagos parciales. */
+    public SimulacionPago simularPagoTotal(Integer idCarteraCredito,
+                                           LocalDate fechaPago,
+                                           int periodoInteresMeses,
+                                           BigDecimal valorPago) {
+        LiquidacionCuotas liquidacion = liquidarPagoTotal(
+                idCarteraCredito, fechaPago, periodoInteresMeses);
+        BigDecimal recibido = positivo(valorPago);
+        BigDecimal total = liquidacion.totalLiquidacion();
+        if (recibido.compareTo(total) != 0) {
+            throw new IllegalArgumentException(
+                    "El pago total debe corresponder exactamente a la liquidación: "
+                            + total + ".");
+        }
+        return new SimulacionPago(
+                liquidacion, recibido, total, total,
+                liquidacion.saldoInicial(), liquidacion.interesesCorrientes(),
+                liquidacion.mora().interesesMora(), liquidacion.segurosPendientes(),
+                liquidacion.saldoAlivios(), liquidacion.costasJudicialesPendientes(),
+                CERO, CERO,
+                liquidacion.saldoInicial().compareTo(
+                        liquidacion.capitalExigible()) > 0, false);
     }
 
     /**
@@ -378,7 +446,9 @@ public class PagoCuotasV1Service {
         BigDecimal mora = liquidacion.mora().interesesMora();
         BigDecimal seguros = liquidacion.segurosPendientes();
         BigDecimal alivios = liquidacion.cuotaAlivios();
-        BigDecimal otrosConceptos = intereses.add(mora).add(seguros).add(alivios);
+        BigDecimal costasJudiciales = liquidacion.costasJudicialesPendientes();
+        BigDecimal otrosConceptos = intereses.add(mora).add(seguros)
+                .add(alivios).add(costasJudiciales);
         boolean cuotaFija = "FIJA".equals(liquidacion.tipoCuota());
         BigDecimal minimo = cuotaFija
                 ? liquidacion.totalLiquidacion()
@@ -402,7 +472,7 @@ public class PagoCuotasV1Service {
         return new SimulacionPago(
                 liquidacion, recibido, minimo, maximo,
                 capitalAplicado, intereses, mora, seguros, alivios,
-                capitalLiquidado.subtract(capitalAplicado),
+                costasJudiciales, capitalLiquidado.subtract(capitalAplicado),
                 saldoCapitalFinal,
                 capitalAplicado.compareTo(capitalLiquidado) > 0,
                 capitalAplicado.compareTo(capitalLiquidado) < 0);
@@ -419,6 +489,7 @@ public class PagoCuotasV1Service {
             BigDecimal interesesMoraAplicados,
             BigDecimal segurosAplicados,
             BigDecimal aliviosAplicados,
+            BigDecimal costasJudicialesAplicadas,
             BigDecimal diferenciaCapitalLiquidado,
             BigDecimal saldoCapitalProyectado,
             boolean abonoAdicionalCapital,
@@ -450,6 +521,7 @@ public class PagoCuotasV1Service {
                                     BigDecimal segurosPendientes,
                                     BigDecimal saldoAlivios,
                                     BigDecimal cuotaAlivios,
+                                    BigDecimal costasJudicialesPendientes,
                                     BigDecimal totalLiquidacion,
                                     boolean vencimientoFinal,
                                     BigDecimal capitalAnticipadoSugerido,

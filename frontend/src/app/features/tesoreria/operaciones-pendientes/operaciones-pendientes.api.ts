@@ -149,6 +149,22 @@ export class OperacionesPendientesApi {
     return this.http.post<OperacionComprobantePreview>(`${this.baseUrl}/preview`, request);
   }
 
+  /** Lista cuentas bancarias activas de la agencia para recibir ingresos. */
+  listarCuentasParaRecaudo(idAgencia: number): Observable<CuentaBancariaParaPago[]> {
+    const params = new HttpParams().set('idAgencia', String(idAgencia));
+    return this.http.get<CuentaBancariaParaPago[]>(`${this.baseUrl}/cuentas-para-recaudo`, { params });
+  }
+
+  /** Previsualiza la cancelación de la CxC sin afectar saldos. */
+  generarVistaPreviaRecaudo(request: OperacionPagoRequest): Observable<OperacionComprobantePreview> {
+    return this.http.post<OperacionComprobantePreview>(`${this.baseUrl}/preview-recaudo`, request);
+  }
+
+  /** Confirma el ingreso bancario en Tesorería sin reaplicar Cartera. */
+  confirmarRecaudo(request: OperacionPagoRequest): Observable<OperacionPagoResponse> {
+    return this.http.post<OperacionPagoResponse>(`${this.baseUrl}/confirmar-recaudo`, request);
+  }
+
   confirmarPago(request: OperacionPagoRequest): Observable<OperacionPagoResponse> {
     return this.http.post<OperacionPagoResponse>(`${this.baseUrl}/confirmar-pago`, request);
   }

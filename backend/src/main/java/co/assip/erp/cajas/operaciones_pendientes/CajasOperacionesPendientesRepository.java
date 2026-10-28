@@ -78,9 +78,18 @@ public class CajasOperacionesPendientesRepository {
                     ON m.tabla_origen = 'depositos.cuentas_ahorro'
                    AND ca.id_cuenta_ahorro = m.id_origen
                    
+                LEFT JOIN cartera.pagos_cuotas pc
+                    ON m.modulo_origen = 'CARTERA'
+                   AND m.proceso_origen = 'PAGO_CUOTAS'
+                   AND m.tabla_origen = 'cartera.pagos_cuotas'
+                   AND pc.id_pago = m.id_origen
+                   AND pc.id_movimiento_caja = m.id_movimiento_caja
+
                 LEFT JOIN cartera.carteras_creditos cc
-                    ON m.tabla_origen = 'cartera.carteras_creditos'
-                   AND cc.id_cartera_credito = m.id_origen
+                    ON (m.tabla_origen = 'cartera.carteras_creditos'
+                        AND cc.id_cartera_credito = m.id_origen)
+                    OR (pc.id_pago IS NOT NULL
+                        AND cc.id_cartera_credito = pc.id_cartera_credito)
 
                 LEFT JOIN hoja_vida.datos_personales dp
                      ON dp.id_datos_personal = COALESCE(
@@ -222,7 +231,6 @@ public class CajasOperacionesPendientesRepository {
         );
     }
 
-
     // =========================================================
     // CONFIRMAR
     // =========================================================
@@ -234,34 +242,131 @@ public class CajasOperacionesPendientesRepository {
     ) {
 
         String sql = """
-                UPDATE cajas.movimientos_caja
-                SET
-                    estado = 'REGISTRADO',
-                    fk_seguridad_edicion = :idUsuario,
-                    fecha_edicion = CURRENT_TIMESTAMP
-                WHERE id_movimiento_caja = :idMovimientoCaja
-                  AND id_caja = :idCaja
-                  AND estado = 'PENDIENTE'
-                """;
+            UPDATE cajas.movimientos_caja
+            SET
+                estado = 'REGISTRADO',
+                fk_seguridad_edicion = :idUsuario,
+                fecha_edicion = CURRENT_TIMESTAMP
+            WHERE id_movimiento_caja = :idMovimientoCaja
+              AND id_caja = :idCaja
+              AND estado = 'PENDIENTE'
+
+              -- El pago de cuotas requiere aplicación financiera
+              -- integral antes de confirmar el movimiento.
+              AND NOT (
+                  UPPER(COALESCE(modulo_origen, '')) = 'CARTERA'
+                  AND UPPER(COALESCE(proceso_origen, '')) = 'PAGO_CUOTAS'
+              )
+            """;
 
         MapSqlParameterSource params =
                 new MapSqlParameterSource()
-                        .addValue(
-                                "idMovimientoCaja",
-                                idMovimientoCaja
-                        )
-                        .addValue(
-                                "idCaja",
-                                idCaja
-                        )
-                        .addValue(
-                                "idUsuario",
-                                idUsuario
-                        );
+                        .addValue("idMovimientoCaja", idMovimientoCaja)
+                        .addValue("idCaja", idCaja)
+                        .addValue("idUsuario", idUsuario);
 
-        return jdbc.update(
+        return jdbc.update(sql, params);
+    }
+
+    /**
+     * Confirma exclusivamente un recaudo de cuotas ya aplicado por Cartera.
+     * Debe ejecutarse en la misma transacción que registra el comprobante,
+     * el extracto y la actualización financiera del crédito.
+     */
+    public int confirmarPagoCuotasCartera(
+            Long idMovimientoCaja,
+            Long idCaja,
+            Long idPago,
+            Integer idUsuario) {
+
+        if (idMovimientoCaja == null || idMovimientoCaja <= 0
+                || idCaja == null || idCaja <= 0
+                || idPago == null || idPago <= 0
+                || idUsuario == null || idUsuario <= 0) {
+            throw new IllegalArgumentException(
+                    "Datos inválidos para confirmar el pago de cuotas en Caja.");
+        }
+
+        String sql = """
+                UPDATE cajas.movimientos_caja AS m
+                SET estado = 'REGISTRADO',
+                    fk_seguridad_edicion = :idUsuario,
+                    fecha_edicion = CURRENT_TIMESTAMP
+                WHERE m.id_movimiento_caja = :idMovimientoCaja
+                  AND m.id_caja = :idCaja
+                  AND m.estado = 'PENDIENTE'
+                  AND m.modulo_origen = 'CARTERA'
+                  AND m.proceso_origen = 'PAGO_CUOTAS'
+                  AND m.tabla_origen = 'cartera.pagos_cuotas'
+                  AND m.id_origen = :idPago
+                  AND EXISTS (
+                      SELECT 1
+                      FROM cartera.pagos_cuotas pc
+                      WHERE pc.id_pago = :idPago
+                        AND pc.id_movimiento_caja = m.id_movimiento_caja
+                        AND pc.id_caja = m.id_caja
+                        AND pc.estado = 'APLICADO'
+                  )
+                """;
+
+        return jdbc.update(sql, new MapSqlParameterSource()
+                .addValue("idMovimientoCaja", idMovimientoCaja)
+                .addValue("idCaja", idCaja)
+                .addValue("idPago", idPago)
+                .addValue("idUsuario", idUsuario));
+    }
+
+    /**
+     * Obtiene el origen de una operación pendiente y bloquea
+     * el movimiento durante su confirmación.
+     */
+    public OperacionPendienteBloqueada bloquearOperacionPendiente(
+            Long idMovimientoCaja,
+            Long idCaja) {
+
+        String sql = """
+            SELECT
+                id_movimiento_caja,
+                modulo_origen,
+                proceso_origen,
+                tabla_origen,
+                id_origen,
+                estado
+            FROM cajas.movimientos_caja
+            WHERE id_movimiento_caja = :idMovimientoCaja
+              AND id_caja = :idCaja
+              AND estado = 'PENDIENTE'
+            FOR UPDATE
+            """;
+
+        var params = new MapSqlParameterSource()
+                .addValue("idMovimientoCaja", idMovimientoCaja)
+                .addValue("idCaja", idCaja);
+
+        return jdbc.query(
                 sql,
-                params
+                params,
+                (rs, fila) -> new OperacionPendienteBloqueada(
+                        rs.getLong("id_movimiento_caja"),
+                        rs.getString("modulo_origen"),
+                        rs.getString("proceso_origen"),
+                        rs.getString("tabla_origen"),
+                        rs.getObject("id_origen", Long.class),
+                        rs.getString("estado")
+                )
+        ).stream().findFirst().orElseThrow(
+                () -> new IllegalStateException(
+                        "La operación no está pendiente o no pertenece a la caja seleccionada."
+                )
         );
     }
+
+    public record OperacionPendienteBloqueada(
+            Long idMovimientoCaja,
+            String moduloOrigen,
+            String procesoOrigen,
+            String tablaOrigen,
+            Long idOrigen,
+            String estado
+    ) {}
 }

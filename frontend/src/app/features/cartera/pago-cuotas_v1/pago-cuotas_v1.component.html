@@ -1,3 +1,4 @@
+```
 <div class="pago-cuotas-page">
 
   <!-- =======================================================
@@ -9,12 +10,12 @@
     <div>
       <h2>Pago de Cuotas</h2>
       <p class="page-subtitle">
-        Consulta, liquidación y simulación de pagos de cartera · Versión 1
+        Liquidación, simulación y preparación de recaudos de cartera · Versión 1
       </p>
     </div>
 
     <span class="estado-proceso">
-      Modo consulta · Sin registro financiero
+      Aplicación financiera en Cartera · Confirmación física en Caja
     </span>
 
   </header>
@@ -297,6 +298,12 @@
           <strong>{{ credito.codigoTipoCuota === '1' ? 'Fija' : credito.codigoTipoCuota === '2' ? 'Variable' : '—' }}</strong>
         </div>
 
+        <!-- Descripción contractual de la modalidad de intereses. -->
+        <div class="dato-financiero">
+          <span>Modalidad de intereses</span>
+          <strong>{{ credito.descripcionModalidadInteres || '—' }}</strong>
+        </div>
+
         <div class="dato-financiero">
           <span>Amortización de capital</span>
           <strong>{{ credito.amortizacionCapital ?? '—' }}</strong>
@@ -492,7 +499,7 @@
       <div class="bloque-encabezado">
         <div>
           <h2>Liquidación de cuotas</h2>
-          <span>Seleccione la fecha de pago. El sistema determinará automáticamente las cuotas a liquidar.</span>
+          <span>El sistema liquida automáticamente al seleccionar el crédito o cambiar la fecha.</span>
         </div>
       </div>
 
@@ -507,7 +514,7 @@
             name="fechaPago"
             [(ngModel)]="fechaPago"
             (ngModelChange)="cambiarFechaPago()"
-            [disabled]="ocupado">
+            [disabled]="ocupado || idPagoPendiente != null">
         </label>
 
         <!-- Cuotas determinadas por el backend -->
@@ -522,25 +529,24 @@
             [(ngModel)]="cuotasACancelar"
             (change)="recalcularCuotas()"
             placeholder="Automático"
-            [disabled]="ocupado">
+            [disabled]="ocupado || pagoTotal || idPagoPendiente != null">
         </label>
 
-        <!-- Acción de liquidación -->
-
         <div class="acciones-formulario acciones-formulario--liquidacion">
-          <button
-            type="button"
-            class="btn btn-primary"
-            [disabled]="!puedeLiquidar"
-            (click)="liquidar()">
-            {{ cargandoLiquidacion ? 'Calculando...' : 'Calcular liquidación' }}
-          </button>
+          <button type="button" class="btn btn-primary"
+                  *ngIf="!pagoTotal" [disabled]="ocupado || !creditoSeleccionado || idPagoPendiente != null"
+                  (click)="activarPagoTotal()">Pago total</button>
+          <button type="button" class="btn btn-secondary"
+                  *ngIf="pagoTotal" [disabled]="ocupado || idPagoPendiente != null"
+                  (click)="volverACuotas()">Volver a cuotas</button>
         </div>
 
       </div>
 
       <p class="nota-operativa">
-        La cantidad se calcula automáticamente. Puede modificarla y, al confirmar el cambio, se actualizará la liquidación.
+        {{ pagoTotal
+        ? 'Pago total: se liquidan capital, intereses, mora, alivios, seguros y costas pendientes. El pago se aplicará en Cartera y el recaudo se enviará a Caja para su confirmación física.'
+        : 'La cantidad se calcula automáticamente. Puede modificarla y, al confirmar el cambio, se actualizará la liquidación.' }}
       </p>
 
     </section>
@@ -558,7 +564,7 @@
         <div>
           <h2>Resultado de la liquidación</h2>
           <span>
-            {{ liq.cuotasConsideradas }} cuota(s) · {{ liq.tipoCuota }}
+            {{ pagoTotal ? 'Cancelación total del crédito' : (liq.cuotasConsideradas + ' cuota(s) · ' + liq.tipoCuota) }}
             <ng-container *ngIf="liq.vencimientoFinal">
               · Vencimiento final
             </ng-container>
@@ -601,6 +607,11 @@
               </td>
             </tr>
 
+            <tr *ngIf="(liq.costasJudicialesPendientes || 0) > 0">
+              <th>Costas judiciales pendientes</th>
+              <td>{{ liq.costasJudicialesPendientes | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</td>
+            </tr>
+
             <tr>
               <th>Cuota de alivios</th>
               <td>
@@ -618,7 +629,7 @@
           <strong>
             {{ liq.totalLiquidacion | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
           </strong>
-          <small>Valor calculado para las cuotas seleccionadas</small>
+          <small>{{ pagoTotal ? 'Valor para cancelar el crédito' : 'Valor calculado para las cuotas seleccionadas' }}</small>
         </div>
 
       </div>
@@ -636,8 +647,8 @@
 
       <div class="bloque-encabezado">
         <div>
-          <h2>Simulación del pago</h2>
-          <span>Ingrese el valor recibido para conocer cómo se distribuiría.</span>
+          <h2>Valor del pago</h2>
+          <span>El sistema calcula automáticamente la distribución. Si modifica el importe, se recalcula al salir del campo.</span>
         </div>
       </div>
 
@@ -646,28 +657,20 @@
         <label class="campo-formulario campo-formulario--importe">
           <span>Valor recibido (COP)</span>
           <input
-            type="number"
+            type="text"
             name="valorPago"
-            min="0"
-            step="1"
-            [(ngModel)]="valorPago"
-            (ngModelChange)="invalidarSimulacion()"
-            [disabled]="ocupado">
+            inputmode="numeric"
+            autocomplete="off"
+            [ngModel]="valorPagoFormateado"
+            (ngModelChange)="cambiarValorPago($event)"
+            (blur)="simularPago()"
+            [disabled]="ocupado || pagoTotal || idPagoPendiente != null">
         </label>
-
-        <button
-          type="button"
-          class="btn btn-primary"
-          [disabled]="!puedeSimular"
-          (click)="simularPago()">
-          {{ cargandoSimulacion ? 'Simulando...' : 'Simular aplicación' }}
-        </button>
 
       </div>
 
       <p class="nota-operativa">
-        Esta operación es informativa: no registra pagos, no genera
-        comprobantes y no modifica saldos.
+        La liquidación se valida en el servidor. Al enviar el pago, Cartera registra el comprobante y aplica el pago; Caja confirma únicamente el recaudo físico.
       </p>
 
     </section>
@@ -683,8 +686,8 @@
 
       <div class="bloque-encabezado">
         <div>
-          <h2>Distribución simulada del pago</h2>
-          <span>Valores aplicados por concepto y saldo proyectado.</span>
+          <h2>Distribución del pago</h2>
+          <span>Conceptos calculados por el motor y saldo proyectado después de aplicar el pago.</span>
         </div>
       </div>
 
@@ -746,6 +749,11 @@
             </td>
           </tr>
 
+          <tr *ngIf="(sim.costasJudicialesAplicadas || 0) > 0">
+            <th>Costas judiciales</th>
+            <td>{{ sim.costasJudicialesAplicadas | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</td>
+          </tr>
+
           <tr>
             <th>Alivios</th>
             <td>
@@ -788,3 +796,167 @@
   </ng-container>
 
 </div>
+
+<section *ngIf="simulacion" class="consulta-bloque distribucion-recaudo">
+  <div class="bloque-encabezado recaudo-encabezado">
+    <div>
+      <h2>Distribución del recaudo</h2>
+      <span>Distribuya el recaudo entre Caja y AHORROS. El valor restante se registrará como CxC para recaudo en Tesorería.</span>
+    </div>
+    <div class="recaudo-total">
+      <small>Total liquidado</small>
+      <strong>{{ simulacion.valorPago | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong>
+    </div>
+  </div>
+  <div class="recaudo-seccion">
+    <div class="recaudo-seccion-titulo">1. Efectivo en Caja</div>
+    <div class="simulacion-formulario captura-fila">
+      <label class="campo-formulario"><span>Caja receptora</span>
+        <select name="idCajaRecaudo" [(ngModel)]="idCajaRecaudo"
+                (ngModelChange)="cambiarCajaRecaudo()" [disabled]="ocupado || idPagoPendiente != null">
+          <option [ngValue]="null">Sin Caja</option>
+          <option *ngFor="let caja of cajasRecaudo" [ngValue]="caja.idCaja">
+            {{ caja.codigoCaja }} - {{ caja.descripcion }}
+          </option>
+        </select>
+      </label>
+      <label class="campo-formulario"><span>Valor en efectivo</span>
+        <input type="text" numericFormat inputmode="decimal" name="valorEfectivo"
+               [(ngModel)]="valorEfectivo" (ngModelChange)="cambiarEfectivo()"
+               [disabled]="ocupado || idPagoPendiente != null">
+      </label>
+    </div>
+    <p *ngIf="valorEfectivo > 0 && idCajaRecaudo == null" class="nota-operativa captura-error">Seleccione la Caja que recibirá el efectivo.</p>
+    <p *ngIf="idCajaRecaudo != null && valorEfectivo <= 0" class="nota-operativa captura-error">Una Caja seleccionada requiere un valor mayor que cero.</p>
+  </div>
+  <div class="recaudo-seccion">
+    <div class="recaudo-seccion-cabecera">
+      <div class="recaudo-seccion-titulo">2. Débitos a cuentas de ahorro</div>
+      <button type="button" class="btn" (click)="agregarCuentaAhorro()"
+              [disabled]="!puedeAgregarCuentaAhorro">Agregar cuenta</button>
+    </div>
+    <p *ngIf="cargandoAhorros" class="nota-operativa">Consultando cuentas de ahorro...</p>
+    <p *ngIf="!cargandoAhorros && cuentasAhorroDisponibles.length === 0" class="nota-operativa">No hay cuentas de ahorro disponibles para este crédito.</p>
+    <div class="simulacion-formulario captura-cuenta" *ngFor="let abono of abonosAhorros; let i = index">
+      <label class="campo-formulario"><span>Cuenta de ahorro</span>
+        <select [name]="'cuentaAhorro'+i" [(ngModel)]="abono.idCuentaAhorro"
+                (ngModelChange)="cambiarCuentaAhorro(i)" [disabled]="ocupado || idPagoPendiente != null">
+          <option [ngValue]="null">Seleccione cuenta</option>
+          <option *ngFor="let cuenta of cuentasDisponiblesParaFila(i)" [ngValue]="cuenta.idCuentaAhorro">
+            {{ cuenta.codigoCuenta }} - {{ cuenta.nombreForma }}
+            (Disponible: {{ cuenta.saldoActual | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }})
+          </option>
+        </select>
+      </label>
+      <label class="campo-formulario"><span>Valor a debitar</span>
+        <input type="text" numericFormat inputmode="decimal" [name]="'valorAhorro'+i"
+               [(ngModel)]="abono.valor" (ngModelChange)="cambiarValorAhorro()"
+               [disabled]="ocupado || idPagoPendiente != null">
+      </label>
+      <button type="button" class="btn" (click)="quitarCuentaAhorro(i)"
+              [disabled]="ocupado || idPagoPendiente != null">Quitar</button>
+    </div>
+  </div>
+  <div class="recaudo-seccion recaudo-cxc">
+    <div>
+      <div class="recaudo-seccion-titulo">3. Cuenta por cobrar (CxC)</div>
+      <span class="recaudo-ayuda">Faltante calculado automáticamente después de Caja y AHORROS.</span>
+    </div>
+    <strong class="recaudo-importe">{{ valorCxp | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong>
+  </div>
+  <div class="captura-resumen" [class.captura-resumen--error]="excedeTotalRecaudo">
+    <span>Distribuido: {{ totalDistribuido | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }} ·
+      Diferencia: {{ saldoPorDistribuir | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</span>
+  </div>
+  <p *ngIf="excedeTotalRecaudo" class="nota-operativa captura-error">La distribución supera el valor total del pago.</p>
+  <p *ngIf="valorCxp > 0" class="nota-operativa">El valor CxC se aplicará en Cartera y se enviará a Tesorería como operación de entrada pendiente de recaudo bancario.</p>
+  <p *ngIf="!distribucionValida && valorCxp === 0 && !excedeTotalRecaudo" class="nota-operativa">Verifique la Caja, los importes y el saldo disponible de las cuentas.</p>
+  <div class="simulacion-formulario">
+    <button type="button" class="btn btn-primary"
+            [disabled]="!puedePrepararOperacion" (click)="prepararYEnviarCaja()">
+      {{ preparandoOperacion ? 'Consultando comprobante...' : 'Ver comprobante contable' }}
+    </button>
+  </div>
+  <section *ngIf="comprobantePrevio as comprobante" class="consulta-bloque">
+    <div class="bloque-encabezado">
+      <div>
+        <h2>Comprobante contable previo · {{ comprobante.tipoComprobante }}</h2>
+        <span>
+        Fecha contable: {{ comprobante.fechaContable | date:'dd/MM/yyyy' }}
+        · Sin consecutivo definitivo
+      </span>
+      </div>
+    </div>
+
+    <!-- Concepto general del comprobante contable -->
+    <div class="comprobante-concepto" *ngIf="comprobante.concepto">
+      <strong>Concepto del comprobante:</strong>
+      <span>{{ comprobante.concepto }}</span>
+    </div>
+
+    <p class="nota-operativa">
+      Revise las cuentas e importes antes de confirmar.
+      La vista previa no registra movimientos.
+    </p>
+
+    <div class="tabla-contenedor">
+      <table class="tabla-creditos">
+        <thead>
+        <tr>
+          <th>Cuenta contable</th>
+          <th>Detalle</th>
+          <th class="columna-numero">Débito</th>
+          <th class="columna-numero">Crédito</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let linea of comprobante.movimientos">
+          <td>{{ linea.codigoCuenta }} - {{ linea.nombreCuenta }}</td>
+          <td>{{ linea.concepto }}</td>
+          <td class="columna-numero">
+            {{ linea.debito | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+          </td>
+          <td class="columna-numero">
+            {{ linea.credito | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+          </td>
+        </tr>
+
+        <tr class="fila-subtotal">
+          <th colspan="2">Totales</th>
+          <td class="columna-numero">
+            {{ comprobante.totalDebitos | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+          </td>
+          <td class="columna-numero">
+            {{ comprobante.totalCreditos | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p *ngIf="!puedeEnviarPagoRevisado" class="nota-operativa">
+      El comprobante no está vigente, el asiento no cuadra o la distribución
+      no es válida. Verifique los importes y consulte nuevamente el comprobante.
+    </p>
+
+    <button
+      type="button"
+      class="btn btn-primary"
+      [disabled]="!puedeEnviarPagoRevisado"
+      (click)="enviarPagoRevisado()">
+      {{ (enviandoCaja || ejecutandoAhorros)
+      ? 'Aplicando pago...'
+      : (valorEfectivo > 0
+      ? 'Aplicar pago y enviar efectivo a Caja'
+      : 'Aplicar pago en Cartera') }}
+    </button>
+  </section>
+  <p *ngIf="idPagoPendiente != null" class="nota-operativa">
+    Pago N.º {{ idPagoPendiente }} aplicado en Cartera y enviado a la bandeja de Caja. Pendiente de confirmación física.
+  </p>
+  <p *ngIf="cajasRecaudo.length === 0 && !cargandoCajas" class="nota-operativa">
+    No hay cajas disponibles para esta agencia.
+  </p>
+
+</section>

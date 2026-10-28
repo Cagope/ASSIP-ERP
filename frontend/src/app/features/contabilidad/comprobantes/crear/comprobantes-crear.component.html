@@ -1,0 +1,301 @@
+<div class="comprobantes-page">
+  <header class="page-header">
+    <div>
+      <h2>Crear comprobante contable</h2>
+      <p>Registro manual de movimientos contables por agencia.</p>
+    </div>
+  </header>
+
+  <div class="mensaje mensaje-error" *ngIf="error" role="alert">{{ error }}</div>
+  <div class="mensaje mensaje-exito" *ngIf="mensaje" role="status">
+    {{ mensaje }}
+    <strong *ngIf="numeroComprobanteCreado">Comprobante: {{ numeroComprobanteCreado }}</strong>
+  </div>
+
+  <!-- =======================================================
+       CAPTURA DEL COMPROBANTE
+       ======================================================= -->
+  <form #comprobanteForm="ngForm" (ngSubmit)="guardar()" novalidate>
+    <section class="card">
+      <div class="section-header">
+        <h3>Datos del comprobante</h3>
+      </div>
+      <div class="datos-generales">
+        <div class="campo">
+          <label for="agencia">Agencia</label>
+          <select
+            id="agencia"
+            name="agencia"
+            [(ngModel)]="formulario.idAgencia"
+            (ngModelChange)="cambiarAgencia()"
+            [disabled]="guardando" required>
+            <option [ngValue]="null">Seleccione agencia</option>
+            <option *ngFor="let agencia of agencias" [ngValue]="agencia.idAgencia">
+              {{ agencia.codigoAgencia }} - {{ agencia.nombreAgencia }}
+            </option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="tipoComprobante">Tipo de comprobante</label>
+          <select
+            id="tipoComprobante"
+            name="tipoComprobante"
+            [(ngModel)]="formulario.tipoComprobante"
+            [disabled]="guardando || cargandoTipos" required>
+            <option value="">{{ cargandoTipos ? 'Cargando tipos...' : 'Seleccione tipo' }}</option>
+            <option *ngFor="let tipo of tiposComprobante" [value]="tipo.tipoComprobante">
+              {{ tipo.tipoComprobante }} - {{ tipo.nombreTipo }}
+            </option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="fechaContable">Fecha contable</label>
+          <input
+            id="fechaContable"
+            name="fechaContable"
+            type="date"
+            [(ngModel)]="formulario.fechaContable"
+            [disabled]="guardando" required>
+        </div>
+        <div class="campo campo-concepto">
+          <label for="conceptoComprobante">Concepto general</label>
+          <input
+            id="conceptoComprobante"
+            name="conceptoComprobante"
+            type="text"
+            maxlength="500"
+            [(ngModel)]="formulario.conceptoComprobante"
+            [disabled]="guardando"
+            placeholder="Descripción general del comprobante" required>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================
+         MOVIMIENTOS Y CONTROLES AUXILIARES
+         ======================================================= -->
+    <section class="card">
+      <div class="section-header">
+        <div>
+          <h3>Movimientos contables</h3>
+          <p>Busque y seleccione una cuenta y un tercero para cada movimiento.</p>
+        </div>
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="agregarMovimiento()"
+          [disabled]="guardando">+ Agregar movimiento</button>
+      </div>
+      <div class="tabla-contenedor">
+        <table class="tabla-movimientos">
+          <thead>
+          <tr>
+            <th class="col-numero">#</th>
+            <th class="col-cuenta">Cuenta contable</th>
+            <th class="col-tercero">Tercero</th>
+            <th class="col-detalle">Detalle</th>
+            <th class="col-importe">Base</th>
+            <th class="col-importe">Débito</th>
+            <th class="col-importe">Crédito</th>
+            <th class="col-acciones"></th>
+          </tr>
+          </thead>
+          <tbody>
+          <ng-container *ngFor="let fila of formulario.movimientos; let i = index">
+            <tr>
+              <td class="numero-fila">{{ i + 1 }}</td>
+              <td>
+                <div class="campo-busqueda">
+                  <input
+                    type="text"
+                    [name]="'buscarCuenta_' + fila.idFila"
+                    #busquedaCuenta
+                    placeholder="Código o nombre de cuenta"
+                    [value]="fila.codigoCuenta ? fila.codigoCuenta + ' - ' + fila.nombreCuenta : ''"
+                    (input)="activarBusquedaCuenta(fila.idFila, busquedaCuenta.value)"
+                    [disabled]="guardando || !formulario.idAgencia"
+                    autocomplete="off">
+                  <div class="resultados-busqueda" *ngIf="filaBusquedaCuenta === fila.idFila && cuentas.length > 0 && !guardando">
+                    <button
+                      type="button"
+                      *ngFor="let cuenta of cuentas"
+                      (click)="
+                        seleccionarCuenta(fila, cuenta);
+                        busquedaCuenta.value = cuenta.codigoCuenta + ' - ' + cuenta.nombreCuenta;
+                        cuentas = [];
+                        filaBusquedaCuenta = null
+                      ">
+                      {{ cuenta.codigoCuenta }} - {{ cuenta.nombreCuenta }}
+                    </button>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="campo-busqueda">
+                  <input
+                    type="text"
+                    [name]="'buscarTercero_' + fila.idFila"
+                    #busquedaTercero
+                    placeholder="Documento o nombre"
+                    [value]="fila.documentoTercero ? fila.documentoTercero + ' - ' + fila.nombreTercero : ''"
+                    (input)="activarBusquedaTercero(fila.idFila, busquedaTercero.value)"
+                    [disabled]="guardando"
+                    autocomplete="off">
+                  <div class="resultados-busqueda" *ngIf="filaBusquedaTercero === fila.idFila && terceros.length > 0 && !guardando">
+                    <button
+                      type="button"
+                      *ngFor="let tercero of terceros"
+                      (click)="
+                        seleccionarTercero(fila, tercero);
+                        busquedaTercero.value = tercero.documento + ' - ' + tercero.nombreCompleto;
+                        terceros = [];
+                        filaBusquedaTercero = null
+                      ">
+                      {{ tercero.documento }} - {{ tercero.nombreCompleto }}
+                    </button>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <input
+                  type="text"
+                  [name]="'detalle_' + fila.idFila"
+                  [(ngModel)]="fila.detalleMovimiento"
+                  [disabled]="guardando"
+                  placeholder="Detalle del movimiento" required>
+              </td>
+              <td>
+                <input
+                  type="text"
+                  numericFormat
+                  inputmode="decimal"
+                  class="importe"
+                  [name]="'base_' + fila.idFila"
+                  [(ngModel)]="fila.valorBase"
+                  [disabled]="guardando">
+              </td>
+              <td>
+                <input
+                  type="text"
+                  numericFormat
+                  inputmode="decimal"
+                  class="importe"
+                  [name]="'debito_' + fila.idFila"
+                  [(ngModel)]="fila.valorDebito"
+                  [disabled]="guardando">
+              </td>
+              <td>
+                <input
+                  type="text"
+                  numericFormat
+                  inputmode="decimal"
+                  class="importe"
+                  [name]="'credito_' + fila.idFila"
+                  [(ngModel)]="fila.valorCredito"
+                  [disabled]="guardando">
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="btn-action-delete"
+                  (click)="eliminarMovimiento(fila.idFila)"
+                  [disabled]="guardando || formulario.movimientos.length <= 2"
+                  [attr.aria-label]="'Eliminar movimiento ' + (i + 1)"
+                  title="Eliminar">
+                  🗑️
+                </button>
+              </td>
+            </tr>
+            <tr class="fila-control" *ngIf="fila.requiereControlEntradaSalida">
+              <td></td>
+              <td colspan="3">
+                <div class="control-documental">
+                  <div class="campo">
+                    <label [for]="'tipoControl_' + fila.idFila">Tipo de control</label>
+                    <select
+                      [id]="'tipoControl_' + fila.idFila"
+                      [name]="'tipoControl_' + fila.idFila"
+                      [(ngModel)]="fila.idTiposControl"
+                      (ngModelChange)="cambiarTipoControl(fila)"
+                      [disabled]="guardando" required>
+                      <option [ngValue]="null">Seleccione control</option>
+                      <option *ngFor="let tipo of tiposControl" [ngValue]="tipo.idTiposControl">
+                        {{ tipo.nombreTipoControl }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="campo">
+                    <label [for]="'documento_' + fila.idFila">Documento / referencia</label>
+                    <input
+                      type="text"
+                      [id]="'documento_' + fila.idFila"
+                      [name]="'documento_' + fila.idFila"
+                      [(ngModel)]="fila.documentoSoporte"
+                      [disabled]="guardando"
+                      [required]="fila.requiereDocumentoSoporte"
+                      maxlength="20"
+                      placeholder="Número de documento">
+                  </div>
+                </div>
+              </td>
+              <td colspan="4"></td>
+            </tr>
+          </ng-container>
+          </tbody>
+          <tfoot>
+          <tr class="fila-totales">
+            <td colspan="5"><strong>Totales</strong></td>
+            <td class="importe">{{ totales.totalDebito | number:'1.2-2':'en-US' }}</td>
+            <td class="importe">{{ totales.totalCredito | number:'1.2-2':'en-US' }}</td>
+            <td></td>
+          </tr>
+          </tfoot>
+        </table>
+      </div>
+      <!-- =====================================================
+           CUADRE DEL COMPROBANTE
+           ===================================================== -->
+      <div class="resumen-contable">
+        <div>
+          <span>Diferencia</span>
+          <strong>{{ totales.diferencia | number:'1.2-2':'en-US' }}</strong>
+        </div>
+        <div
+          class="estado-cuadre"
+          [class.cuadrado]="totales.cuadrado"
+          [class.descuadrado]="!totales.cuadrado">
+          {{ totales.cuadrado ? 'Comprobante cuadrado' : 'Comprobante pendiente de cuadre' }}
+        </div>
+      </div>
+    </section>
+    <!-- =======================================================
+         ACCIONES
+         ======================================================= -->
+    <div class="acciones">
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="agregarMovimiento()"
+        [disabled]="guardando">
+        Agregar línea
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="cancelarComprobante()"
+        [disabled]="guardando">
+        Cancelar
+      </button>
+
+      <button
+        type="submit"
+        class="btn btn-primary"
+        [disabled]="guardando || !formularioValido">
+
+        {{ guardando ? 'Registrando comprobante...' : 'Guardar comprobante' }}
+
+      </button>
+    </div>
+  </form>
+</div>

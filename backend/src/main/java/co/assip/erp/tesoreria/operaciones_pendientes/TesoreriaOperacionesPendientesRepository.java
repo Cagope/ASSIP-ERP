@@ -302,6 +302,23 @@ public class TesoreriaOperacionesPendientesRepository {
      *
      * No consulta saldos ni ejecuta pagos.
      */
+    /** Lista las cuentas bancarias operables de la agencia para recibir recaudos. */
+    public List<Map<String, Object>> listarCuentasParaRecaudo(Integer idAgencia) {
+        return jdbcTemplate.queryForList("""
+                SELECT cb.id_cuenta_bancaria, cba.id_agencia, b.nombre_banco,
+                       cb.numero_cuenta, cb.nombre_cuenta, cba.id_cuenta_contable,
+                       cc.codigo_cuenta, cc.nombre_cuenta AS nombre_cuenta_contable
+                FROM tesoreria.cuentas_bancarias_agencias cba
+                JOIN tesoreria.cuentas_bancarias cb ON cb.id_cuenta_bancaria = cba.id_cuenta_bancaria
+                JOIN tesoreria.bancos b ON b.codigo_banco = cb.codigo_banco
+                JOIN contabilidad.catalogo_cuentas cc ON cc.id_catalogo_cuenta = cba.id_cuenta_contable
+                WHERE cba.id_agencia = ? AND cba.activo = TRUE AND cb.activo = TRUE
+                  AND cb.estado_cuenta = 'ACTIVA' AND b.activo = TRUE
+                  AND cc.id_agencia = cba.id_agencia AND cc.cuenta_operable = TRUE
+                ORDER BY b.nombre_banco, cb.numero_cuenta
+                """, idAgencia);
+    }
+
     public List<Map<String, Object>> listarCuentasParaPago(
             Integer idAgencia
     ) {

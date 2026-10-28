@@ -1094,8 +1094,8 @@ public class CausacionInteresesRepository {
             CROSS JOIN cierre c
 
             LEFT JOIN cartera.creditos_intereses_causados ic
-                ON ic.id_cartera_credito =
-                   bc.id_cartera_credito
+                ON ic.id_cartera_credito = bc.id_cartera_credito
+               AND ic.estado = 'A'
 
             GROUP BY
                 bc.id_cierre_cartera_credito
@@ -1164,8 +1164,8 @@ public class CausacionInteresesRepository {
             CROSS JOIN cierre c
 
             LEFT JOIN cartera.creditos_intereses_contingentes ict
-                ON ict.id_cartera_credito =
-                   bc.id_cartera_credito
+                ON ict.id_cartera_credito = bc.id_cartera_credito
+               AND ict.estado = 'A'
 
             GROUP BY
                 bc.id_cierre_cartera_credito
