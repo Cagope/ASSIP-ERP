@@ -1,0 +1,247 @@
+
+<div class="libro-diario-resumido">
+  <!-- ENCABEZADO -->
+  <header class="encabezado">
+    <div>
+      <h2>Libro diario resumido</h2>
+      <p>
+        Consulta de movimientos contables agrupados por fecha,
+        cuenta contable o tipo de comprobante.
+      </p>
+    </div>
+  </header>
+
+  <!-- FILTROS -->
+  <section class="panel-filtros">
+    <h3>Parámetros de consulta</h3>
+    <form (ngSubmit)="consultar()" #formConsulta="ngForm">
+      <div class="filtros-grid">
+        <!-- AGENCIA -->
+        <div class="campo campo-agencia">
+          <label for="idAgencia">Agencia</label>
+          <select
+            id="idAgencia"
+            name="idAgencia"
+            [(ngModel)]="filtros.idAgencia"
+            (ngModelChange)="cambiarAgencia()"
+            [disabled]="cargando"
+            required
+          >
+            <option [ngValue]="0">Seleccione una agencia</option>
+            <option
+              *ngFor="let agencia of agencias"
+              [ngValue]="agencia.idAgencia"
+            >
+              {{ agencia.codigoAgencia }} - {{ agencia.nombreAgencia }}
+            </option>
+          </select>
+        </div>
+
+        <!-- FECHA INICIAL -->
+        <div class="campo">
+          <label for="fechaInicial">Fecha inicial</label>
+          <input
+            id="fechaInicial"
+            type="date"
+            name="fechaInicial"
+            [(ngModel)]="filtros.fechaInicial"
+            (ngModelChange)="cambiarFiltros()"
+            [disabled]="cargando"
+            required
+          />
+        </div>
+
+        <!-- FECHA FINAL -->
+        <div class="campo">
+          <label for="fechaFinal">Fecha final</label>
+          <input
+            id="fechaFinal"
+            type="date"
+            name="fechaFinal"
+            [(ngModel)]="filtros.fechaFinal"
+            (ngModelChange)="cambiarFiltros()"
+            [disabled]="cargando"
+            required
+          />
+        </div>
+
+        <!-- MODALIDAD -->
+        <div class="campo campo-modalidad">
+          <label for="modalidad">Agrupación del informe</label>
+          <select
+            id="modalidad"
+            name="modalidad"
+            [(ngModel)]="filtros.modalidad"
+            (ngModelChange)="cambiarFiltros()"
+            [disabled]="cargando"
+            required
+          >
+            <option
+              *ngFor="let modalidad of modalidades"
+              [ngValue]="modalidad.value"
+            >
+              {{ modalidad.label }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="acciones">
+        <button
+          type="submit"
+          class="btn-consultar"
+          [disabled]="cargando || !formConsulta.valid"
+        >
+          {{ cargando ? 'Consultando...' : 'Consultar' }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- MENSAJE DE ERROR -->
+  <div
+    *ngIf="mensajeError"
+    class="mensaje-error"
+    role="alert"
+  >
+    {{ mensajeError }}
+  </div>
+
+  <!-- ESTADO DE CARGA -->
+  <div *ngIf="cargando" class="mensaje-estado">
+    Consultando movimientos contables...
+  </div>
+
+  <!-- RESULTADO -->
+  <section
+    *ngIf="resultadoVigente && informe as resultado"
+    class="panel-resultados"
+  >
+    <div class="resultado-encabezado">
+      <div>
+        <h3>Resultado de la consulta</h3>
+        <p class="resultado-agencia">
+          <strong>Agencia:</strong>
+          {{ nombreAgenciaInforme }}
+        </p>
+        <p>
+          <strong>Período:</strong>
+          {{ resultado.fechaInicial | date:'dd/MM/yyyy':'UTC' }}
+          al
+          {{ resultado.fechaFinal | date:'dd/MM/yyyy':'UTC' }}
+        </p>
+        <p>
+          <strong>Agrupación:</strong>
+          {{ nombreModalidadInforme }}
+        </p>
+      </div>
+
+      <!-- EXPORTACIÓN DEL INFORME -->
+      <div *ngIf="tieneResultados" class="acciones-exportacion">
+        <button
+          type="button"
+          class="btn-exportar"
+          (click)="exportarExcel()"
+          [disabled]="cargando || !resultadoVigente || !tieneResultados"
+          title="Exportar el Libro diario resumido a Excel"
+        >
+          Exportar a Excel
+        </button>
+      </div>
+    </div>
+
+    <!-- TABLA -->
+    <div
+      *ngIf="tieneResultados; else sinResultados"
+      class="tabla-contenedor"
+    >
+      <table class="tabla-informe">
+        <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>
+            {{
+            resultado.modalidad === 'CUENTA'
+            ? 'Código cuenta'
+            : 'Tipo comprobante'
+            }}
+          </th>
+          <th>
+            {{
+            resultado.modalidad === 'CUENTA'
+            ? 'Nombre cuenta'
+            : 'Descripción comprobante'
+            }}
+          </th>
+          <th class="numero">Débitos</th>
+          <th class="numero">Créditos</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let fila of resultado.filas">
+          <td>
+            {{ fila.fecha | date:'dd/MM/yyyy':'UTC' }}
+          </td>
+          <td class="codigo">
+            {{ fila.codigoAgrupacion }}
+          </td>
+          <td>
+            {{ fila.nombreAgrupacion }}
+          </td>
+          <td class="numero">
+            {{ fila.totalDebitos | number:'1.2-2':'es-CO' }}
+          </td>
+          <td class="numero">
+            {{ fila.totalCreditos | number:'1.2-2':'es-CO' }}
+          </td>
+        </tr>
+        </tbody>
+        <tfoot>
+        <tr class="fila-totales">
+          <td colspan="3">
+            TOTALES GENERALES
+          </td>
+          <td class="numero">
+            {{ resultado.totalDebitos | number:'1.2-2':'es-CO' }}
+          </td>
+          <td class="numero">
+            {{ resultado.totalCreditos | number:'1.2-2':'es-CO' }}
+          </td>
+        </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- SIN RESULTADOS -->
+    <ng-template #sinResultados>
+      <div class="mensaje-estado">
+        No se encontraron movimientos contables para los filtros seleccionados.
+      </div>
+    </ng-template>
+
+    <!-- RESUMEN CONTABLE -->
+    <div class="resumen-contable">
+      <div class="resumen-item">
+        <span>Total débitos</span>
+        <strong>
+          {{ resultado.totalDebitos | number:'1.2-2':'es-CO' }}
+        </strong>
+      </div>
+      <div class="resumen-item">
+        <span>Total créditos</span>
+        <strong>
+          {{ resultado.totalCreditos | number:'1.2-2':'es-CO' }}
+        </strong>
+      </div>
+      <div
+        class="resumen-item"
+        [class.con-diferencia]="resultado.diferencia !== 0"
+      >
+        <span>Diferencia contable</span>
+        <strong>
+          {{ resultado.diferencia | number:'1.2-2':'es-CO' }}
+        </strong>
+      </div>
+    </div>
+  </section>
+</div>

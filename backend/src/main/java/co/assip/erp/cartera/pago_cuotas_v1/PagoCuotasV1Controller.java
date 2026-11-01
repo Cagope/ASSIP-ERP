@@ -4,6 +4,8 @@ import co.assip.erp.cartera.pago_cuotas_v1.motor.PagoCuotasMotorRepository;
 import co.assip.erp.cartera.pago_cuotas_v1.motor.PagoCuotasMotorService;
 import co.assip.erp.cartera.pago_cuotas_v1.motor.dto.PagoCuotasMedioRecaudoDTO;
 import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.usuarios.Usuario;
 
 import lombok.RequiredArgsConstructor;
 
@@ -34,10 +36,14 @@ public class PagoCuotasV1Controller {
     private final PagoCuotasV1Service service;
     private final PagoCuotasMotorService motorService;
     private final UsuarioSesionService usuarioSesionService;
+    private final AccessValidator accessValidator;
+    private static final String PERMISO_VIEW = "CARTERA_PAGO_CUOTAS_VIEW";
+    private static final String PERMISO_EXECUTE = "CARTERA_PAGO_CUOTAS_EXECUTE";
 
     @GetMapping("/asociados/{idDatosPersonal}/creditos")
     public List<PagoCuotasV1Repository.CreditoResumen> listarCreditosPorAsociado(
             @PathVariable Integer idDatosPersonal) {
+        validarPermiso(PERMISO_VIEW);
 
         return service.listarCreditosPorAsociado(idDatosPersonal);
     }
@@ -45,6 +51,7 @@ public class PagoCuotasV1Controller {
     @GetMapping("/creditos/{idCarteraCredito}")
     public PagoCuotasV1Repository.CreditoLiquidacion consultarCredito(
             @PathVariable Integer idCarteraCredito) {
+        validarPermiso(PERMISO_VIEW);
 
         return service.consultarCredito(idCarteraCredito);
     }
@@ -55,6 +62,7 @@ public class PagoCuotasV1Controller {
     @GetMapping("/creditos/{idCarteraCredito}/pagos-realizados")
     public List<PagoCuotasV1Repository.PagoRealizado> listarPagosRealizados(
             @PathVariable Integer idCarteraCredito) {
+        validarPermiso(PERMISO_VIEW);
 
         return service.listarPagosRealizados(idCarteraCredito);
     }
@@ -65,6 +73,7 @@ public class PagoCuotasV1Controller {
             @RequestParam
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate fechaPago) {
+        validarPermiso(PERMISO_VIEW);
 
         return service.consultarDatosPrevios(
                 idCarteraCredito,
@@ -83,6 +92,7 @@ public class PagoCuotasV1Controller {
             LocalDate fechaPago,
             @RequestParam Integer periodoInteresMeses,
             @RequestParam(required = false) Integer cuotasACancelar) {
+        validarPermiso(PERMISO_VIEW);
 
         return service.liquidar(
                 idCarteraCredito,
@@ -107,6 +117,7 @@ public class PagoCuotasV1Controller {
             @RequestParam Integer periodoInteresMeses,
             @RequestParam(required = false) Integer cuotasACancelar,
             @RequestParam BigDecimal valorPago) {
+        validarPermiso(PERMISO_VIEW);
 
         return service.simularPago(
                 idCarteraCredito,
@@ -128,6 +139,7 @@ public class PagoCuotasV1Controller {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate fechaPago,
             @RequestParam Integer periodoInteresMeses) {
+        validarPermiso(PERMISO_VIEW);
 
         return service.liquidarPagoTotal(
                 idCarteraCredito,
@@ -148,6 +160,7 @@ public class PagoCuotasV1Controller {
             LocalDate fechaPago,
             @RequestParam Integer periodoInteresMeses,
             @RequestParam BigDecimal valorPago) {
+        validarPermiso(PERMISO_VIEW);
 
         return service.simularPagoTotal(
                 idCarteraCredito,
@@ -163,6 +176,7 @@ public class PagoCuotasV1Controller {
     @GetMapping("/medios-recaudo/cajas")
     public List<PagoCuotasMotorRepository.CajaRecaudo> listarCajasRecaudo(
             @RequestParam Integer idAgenciaReceptora) {
+        validarPermiso(PERMISO_VIEW);
 
         usuarioSesionService.validarAgencia(idAgenciaReceptora);
 
@@ -180,6 +194,7 @@ public class PagoCuotasV1Controller {
     @GetMapping("/creditos/{idCarteraCredito}/cuentas-ahorro-recaudo")
     public List<PagoCuotasMotorRepository.CuentaAhorroRecaudo> listarCuentasAhorroRecaudo(
             @PathVariable Integer idCarteraCredito) {
+        validarPermiso(PERMISO_VIEW);
 
         return motorService.listarCuentasAhorroRecaudo(idCarteraCredito);
     }
@@ -194,6 +209,7 @@ public class PagoCuotasV1Controller {
     public PagoCuotasMedioRecaudoDTO validarMedioRecaudo(
             @RequestParam Integer idAgenciaReceptora,
             @RequestBody PagoCuotasMedioRecaudoDTO medio) {
+        validarPermiso(PERMISO_VIEW);
 
         usuarioSesionService.validarAgencia(idAgenciaReceptora);
 
@@ -215,6 +231,7 @@ public class PagoCuotasV1Controller {
     public PagoCuotasMotorService.OperacionRecaudoValidada validarOperacionRecaudo(
             @RequestParam Integer idAgenciaReceptora,
             @RequestBody SolicitudValidacionOperacion solicitud) {
+        validarPermiso(PERMISO_VIEW);
 
         usuarioSesionService.validarAgencia(idAgenciaReceptora);
 
@@ -249,6 +266,7 @@ public class PagoCuotasV1Controller {
     @PostMapping("/operaciones/preparar")
     public PagoCuotasMotorService.OperacionPagoPreparada prepararOperacionPago(
             @RequestBody SolicitudPreparacionPago solicitud) {
+        validarPermiso(PERMISO_VIEW);
 
         if (solicitud == null) {
             throw new IllegalArgumentException(
@@ -274,6 +292,7 @@ public class PagoCuotasV1Controller {
     @PostMapping("/operaciones/comprobante-previo")
     public PagoCuotasMotorService.ComprobantePrevio comprobantePrevio(
             @RequestBody SolicitudPreparacionPago solicitud) {
+        validarPermiso(PERMISO_VIEW);
         if (solicitud == null) {
             throw new IllegalArgumentException("Debe indicar los datos del pago.");
         }
@@ -292,6 +311,7 @@ public class PagoCuotasV1Controller {
      */
     @PostMapping("/operaciones/enviar-caja")
     public Long enviarPagoCaja(@RequestBody SolicitudPreparacionPago solicitud) {
+        validarPermiso(PERMISO_EXECUTE);
         if (solicitud == null) {
             throw new IllegalArgumentException("Debe indicar los datos del pago.");
         }
@@ -320,6 +340,7 @@ public class PagoCuotasV1Controller {
      */
     @PostMapping("/operaciones/ejecutar-ahorros")
     public Long ejecutarPagoAhorros(@RequestBody SolicitudPreparacionPago solicitud) {
+        validarPermiso(PERMISO_EXECUTE);
         if (solicitud == null) {
             throw new IllegalArgumentException("Debe indicar los datos del pago.");
         }
@@ -376,6 +397,13 @@ public class PagoCuotasV1Controller {
                 validado.pago().valorPago(),
                 validado.efectivo(),
                 validado.aplicacion().saldoNuevo());
+    }
+
+    /** Comprueba el permiso efectivo del usuario autenticado para la operación. */
+    private void validarPermiso(String codigoPermiso) {
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(usuarioSesionService.idUsuario());
+        accessValidator.validarAcceso(usuario, codigoPermiso);
     }
 
     public record SolicitudValidacionPendiente(Long idMovimientoCaja, Long idCaja) { }

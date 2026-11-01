@@ -1,0 +1,255 @@
+
+<div class="resumen-diario-detallado">
+  <!-- ENCABEZADO -->
+  <header class="encabezado">
+    <div>
+      <h2>Resumen diario detallado</h2>
+      <p>
+        Consulta de movimientos contables individuales,
+        agrupados por fecha, con subtotales diarios y totales generales.
+      </p>
+    </div>
+  </header>
+
+  <!-- FILTROS -->
+  <section class="panel-filtros">
+    <h3>Parámetros de consulta</h3>
+
+    <form (ngSubmit)="consultar()" #formConsulta="ngForm">
+      <div class="filtros-grid">
+        <div class="campo campo-agencia">
+          <label for="idAgencia">Agencia</label>
+          <select
+            id="idAgencia"
+            name="idAgencia"
+            [(ngModel)]="filtros.idAgencia"
+            (ngModelChange)="cambiarAgencia()"
+            [disabled]="cargando"
+            required
+          >
+            <option [ngValue]="0">Seleccione una agencia</option>
+            <option
+              *ngFor="let agencia of agencias"
+              [ngValue]="agencia.idAgencia"
+            >
+              {{ agencia.codigoAgencia }} - {{ agencia.nombreAgencia }}
+            </option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="fechaInicial">Fecha inicial</label>
+          <input
+            id="fechaInicial"
+            name="fechaInicial"
+            type="date"
+            [(ngModel)]="filtros.fechaInicial"
+            (ngModelChange)="cambiarFiltros()"
+            [disabled]="cargando"
+            required
+          />
+        </div>
+
+        <div class="campo">
+          <label for="fechaFinal">Fecha final</label>
+          <input
+            id="fechaFinal"
+            name="fechaFinal"
+            type="date"
+            [(ngModel)]="filtros.fechaFinal"
+            (ngModelChange)="cambiarFiltros()"
+            [disabled]="cargando"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="acciones">
+        <button
+          type="submit"
+          class="btn-consultar"
+          [disabled]="cargando || !formConsulta.valid"
+        >
+          {{ cargando ? 'Consultando...' : 'Consultar' }}
+        </button>
+
+        <button
+          type="button"
+          class="btn-consultar"
+          (click)="exportarExcel()"
+          [disabled]="cargando || !tieneResultados"
+          title="Exportar los movimientos consultados a Excel"
+        >
+          Exportar Excel
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- MENSAJES -->
+  <div
+    *ngIf="mensajeError"
+    class="mensaje-error"
+    role="alert"
+  >
+    {{ mensajeError }}
+  </div>
+
+  <div *ngIf="cargando" class="mensaje-estado">
+    Consultando movimientos contables...
+  </div>
+
+  <!-- RESULTADOS -->
+  <section
+    *ngIf="resultadoVigente && informe as resultado"
+    class="panel-resultados"
+  >
+    <div class="resultado-encabezado">
+      <div>
+        <h3>Resultado de la consulta</h3>
+        <p class="resultado-agencia">
+          <strong>Agencia:</strong>
+          {{ nombreAgenciaInforme }}
+        </p>
+        <p>
+          <strong>Período:</strong>
+          {{ resultado.fechaInicial | date:'dd/MM/yyyy':'UTC' }}
+          al
+          {{ resultado.fechaFinal | date:'dd/MM/yyyy':'UTC' }}
+        </p>
+        <p>
+          <strong>Movimientos:</strong>
+          {{ resultado.cantidadMovimientos | number:'1.0-0':'es-CO' }}
+        </p>
+      </div>
+    </div>
+
+    <!-- DETALLE AGRUPADO POR FECHA -->
+    <div
+      *ngIf="tieneResultados; else sinResultados"
+      class="tabla-contenedor"
+    >
+      <table class="tabla-informe">
+        <thead>
+        <tr>
+          <th>Comprobante</th>
+          <th>Código cuenta</th>
+          <th>Nombre cuenta</th>
+          <th>Documento tercero</th>
+          <th>Nombre tercero</th>
+          <th>Detalle del movimiento</th>
+          <th class="numero">Débitos</th>
+          <th class="numero">Créditos</th>
+        </tr>
+        </thead>
+
+        <tbody *ngFor="let dia of resultado.dias">
+        <tr class="fila-fecha">
+          <th colspan="8" scope="rowgroup">
+            Fecha:
+            {{ dia.fecha | date:'dd/MM/yyyy':'UTC' }}
+          </th>
+        </tr>
+
+        <tr *ngFor="let movimiento of dia.movimientos">
+          <td class="codigo">
+            {{ movimiento.tipoComprobante }}
+            {{ movimiento.numeroComprobante }}
+          </td>
+          <td class="codigo">
+            {{ movimiento.codigoCuenta }}
+          </td>
+          <td>
+            {{ movimiento.nombreCuenta }}
+          </td>
+          <td class="codigo">
+            {{ movimiento.documentoTercero || '—' }}
+          </td>
+          <td>
+            {{ movimiento.nombreTercero || '—' }}
+          </td>
+          <td>
+            {{ movimiento.detalleMovimiento || '—' }}
+          </td>
+          <td class="numero">
+            {{ movimiento.valorDebito | number:'1.2-2':'es-CO' }}
+          </td>
+          <td class="numero">
+            {{ movimiento.valorCredito | number:'1.2-2':'es-CO' }}
+          </td>
+        </tr>
+
+        <tr class="fila-subtotal">
+          <td colspan="6">
+            <strong>
+              TOTAL DEL DÍA
+              {{ dia.fecha | date:'dd/MM/yyyy':'UTC' }}
+            </strong>
+          </td>
+          <td class="numero">
+            <strong>
+              {{ dia.totalDebitos | number:'1.2-2':'es-CO' }}
+            </strong>
+          </td>
+          <td class="numero">
+            <strong>
+              {{ dia.totalCreditos | number:'1.2-2':'es-CO' }}
+            </strong>
+          </td>
+        </tr>
+        </tbody>
+
+        <tfoot>
+        <tr class="fila-totales">
+          <td colspan="6">
+            <strong>TOTALES GENERALES</strong>
+          </td>
+          <td class="numero">
+            <strong>
+              {{ resultado.totalDebitos | number:'1.2-2':'es-CO' }}
+            </strong>
+          </td>
+          <td class="numero">
+            <strong>
+              {{ resultado.totalCreditos | number:'1.2-2':'es-CO' }}
+            </strong>
+          </td>
+        </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <ng-template #sinResultados>
+      <div class="mensaje-estado">
+        No se encontraron movimientos contables para los filtros seleccionados.
+      </div>
+    </ng-template>
+
+    <!-- RESUMEN CONTABLE -->
+    <div class="resumen-contable">
+      <div class="resumen-item">
+        <span>Total débitos</span>
+        <strong>
+          {{ resultado.totalDebitos | number:'1.2-2':'es-CO' }}
+        </strong>
+      </div>
+
+      <div class="resumen-item">
+        <span>Total créditos</span>
+        <strong>
+          {{ resultado.totalCreditos | number:'1.2-2':'es-CO' }}
+        </strong>
+      </div>
+
+      <div
+        class="resumen-item"
+        [class.con-diferencia]="resultado.diferencia !== 0"
+      >
+        <span>Diferencia contable</span>
+        <strong>
+          {{ resultado.diferencia | number:'1.2-2':'es-CO' }}
+        </strong>
+      </div>
+    </div>
+  </section>
+</div>

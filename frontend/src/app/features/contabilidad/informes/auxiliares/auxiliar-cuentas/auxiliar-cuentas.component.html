@@ -1,0 +1,533 @@
+
+<div class="auxiliar-cuentas">
+  <header class="pagina-encabezado">
+    <h2>Auxiliar por cuentas</h2>
+    <p>Consulta de movimientos, saldos contables y trazabilidad por cuenta y período.</p>
+  </header>
+
+  <section class="panel-filtros">
+    <h3>Parámetros de consulta</h3>
+
+    <form #formulario="ngForm" (ngSubmit)="consultar()">
+      <div class="filtros-grid">
+        <div class="campo campo-agencia">
+          <label for="idAgencia">Agencia</label>
+          <select
+            id="idAgencia"
+            name="idAgencia"
+            [(ngModel)]="filtros.idAgencia"
+            (ngModelChange)="cambiarAgencia()"
+            [disabled]="cargando"
+            required
+          >
+            <option [ngValue]="0">Seleccione una agencia</option>
+            <option
+              *ngFor="let agencia of agencias"
+              [ngValue]="agencia.idAgencia"
+            >
+              {{ agencia.codigoAgencia }} - {{ agencia.nombreAgencia }}
+            </option>
+          </select>
+        </div>
+
+        <div class="campo campo-busqueda">
+          <label for="cuentaInicial">Cuenta inicial</label>
+          <input
+            id="cuentaInicial"
+            name="cuentaInicial"
+            type="text"
+            autocomplete="off"
+            placeholder="Buscar por código o nombre"
+            [ngModel]="textoCuentaInicial"
+            (ngModelChange)="buscarCuentasIniciales($event)"
+            [disabled]="cargando || !filtros.idAgencia"
+            required
+          />
+
+          <small
+            *ngIf="buscandoCuentaInicial"
+            class="ayuda-busqueda"
+          >
+            Buscando cuentas...
+          </small>
+
+          <div
+            *ngIf="cuentasIniciales.length > 0"
+            class="lista-resultados"
+          >
+            <button
+              *ngFor="let cuenta of cuentasIniciales"
+              type="button"
+              class="opcion-cuenta"
+              (click)="seleccionarCuentaInicial(cuenta)"
+            >
+              <strong>{{ cuenta.codigoCuenta }}</strong>
+              <span>{{ cuenta.nombreCuenta }}</span>
+            </button>
+          </div>
+
+          <small
+            *ngIf="filtros.cuentaInicial"
+            class="ayuda-seleccion"
+          >
+            Cuenta inicial seleccionada
+          </small>
+        </div>
+
+        <div class="campo campo-busqueda">
+          <label for="cuentaFinal">Cuenta final</label>
+          <input
+            id="cuentaFinal"
+            name="cuentaFinal"
+            type="text"
+            autocomplete="off"
+            placeholder="Buscar por código o nombre"
+            [ngModel]="textoCuentaFinal"
+            (ngModelChange)="buscarCuentasFinales($event)"
+            [disabled]="cargando || !filtros.idAgencia"
+            required
+          />
+
+          <small
+            *ngIf="buscandoCuentaFinal"
+            class="ayuda-busqueda"
+          >
+            Buscando cuentas...
+          </small>
+
+          <div
+            *ngIf="cuentasFinales.length > 0"
+            class="lista-resultados"
+          >
+            <button
+              *ngFor="let cuenta of cuentasFinales"
+              type="button"
+              class="opcion-cuenta"
+              (click)="seleccionarCuentaFinal(cuenta)"
+            >
+              <strong>{{ cuenta.codigoCuenta }}</strong>
+              <span>{{ cuenta.nombreCuenta }}</span>
+            </button>
+          </div>
+
+          <small
+            *ngIf="filtros.cuentaFinal"
+            class="ayuda-seleccion"
+          >
+            Cuenta final seleccionada
+          </small>
+        </div>
+
+        <div class="campo">
+          <label for="fechaInicial">Fecha inicial</label>
+          <input
+            id="fechaInicial"
+            name="fechaInicial"
+            type="date"
+            [(ngModel)]="filtros.fechaInicial"
+            [disabled]="cargando"
+            required
+          />
+        </div>
+
+        <div class="campo">
+          <label for="fechaFinal">Fecha final</label>
+          <input
+            id="fechaFinal"
+            name="fechaFinal"
+            type="date"
+            [(ngModel)]="filtros.fechaFinal"
+            [disabled]="cargando"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="acciones-filtros">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="cargando || formulario.invalid || !filtros.cuentaInicial || !filtros.cuentaFinal"
+        >
+          {{ cargando ? 'Consultando...' : 'Consultar auxiliar' }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <div
+    *ngIf="mensajeError"
+    class="mensaje mensaje-error"
+    role="alert"
+  >
+    {{ mensajeError }}
+  </div>
+
+  <div
+    *ngIf="cargando"
+    class="mensaje mensaje-informativo"
+    role="status"
+  >
+    Consultando movimientos y calculando saldos contables...
+  </div>
+
+  <section
+    *ngIf="consultado && informe && !cargando"
+    class="panel-resultados"
+  >
+    <header class="resultado-encabezado">
+      <div>
+        <h3>Resultado de la consulta</h3>
+
+        <p>
+          Período:
+          {{ informe.fechaInicial | date:'dd/MM/yyyy':'UTC' }}
+          al
+          {{ informe.fechaFinal | date:'dd/MM/yyyy':'UTC' }}
+        </p>
+
+        <p>
+          Rango de cuentas:
+          {{ informe.cuentaInicial }} - {{ informe.cuentaFinal }}
+        </p>
+      </div>
+
+      <div class="resultado-acciones">
+        <div class="resultado-cantidad">
+          {{ informe.cuentas.length }}
+          {{ informe.cuentas.length === 1 ? 'cuenta' : 'cuentas' }}
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="exportarExcel()"
+          [disabled]="cargando || !tieneResultados"
+        >
+          Exportar Excel
+        </button>
+      </div>
+    </header>
+
+    <div
+      *ngIf="!tieneResultados"
+      class="mensaje mensaje-vacio"
+    >
+      No se encontraron cuentas con saldo inicial o movimientos
+      para los filtros seleccionados.
+    </div>
+
+    <div
+      *ngIf="tieneResultados"
+      class="cuentas-listado"
+    >
+      <article
+        *ngFor="let cuenta of informe.cuentas"
+        class="cuenta-panel"
+      >
+        <header class="cuenta-encabezado">
+          <div class="cuenta-identificacion">
+            <span class="cuenta-codigo">
+              {{ cuenta.codigoCuenta }}
+            </span>
+
+            <span class="cuenta-nombre">
+              {{ cuenta.nombreCuenta }}
+            </span>
+          </div>
+
+          <span class="cuenta-naturaleza">
+            Naturaleza: {{ cuenta.naturalezaCuenta }}
+          </span>
+        </header>
+
+        <div class="tabla-contenedor">
+          <table class="tabla-auxiliar">
+            <thead>
+            <tr>
+              <th scope="col">Fecha</th>
+              <th scope="col">Comprobante</th>
+              <th scope="col">Detalle del movimiento</th>
+              <th scope="col">Tercero</th>
+              <th scope="col" class="numero">Débito</th>
+              <th scope="col" class="numero">Crédito</th>
+              <th scope="col" class="numero">Saldo</th>
+              <th
+                *ngIf="puedeVerAuditoria"
+                scope="col"
+              >
+                Auditoría
+              </th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr class="fila-saldo-inicial">
+              <td colspan="6">
+                <strong>Saldo inicial</strong>
+              </td>
+
+              <td class="numero">
+                <strong>
+                  {{ cuenta.saldoInicial | number:'1.2-2':'es-CO' }}
+                </strong>
+              </td>
+
+              <td *ngIf="puedeVerAuditoria"></td>
+            </tr>
+
+            <ng-container
+              *ngFor="let movimiento of cuenta.movimientos"
+            >
+              <tr>
+                <td class="fecha">
+                  {{ movimiento.fechaAuxiliar | date:'dd/MM/yyyy':'UTC' }}
+                </td>
+
+                <td class="comprobante">
+                  {{ movimiento.tipoComprobante || '—' }}
+                  {{ movimiento.numeroComprobante || '' }}
+                </td>
+
+                <td class="detalle">
+                  {{ movimiento.detalleMovimiento || 'Sin detalle' }}
+                </td>
+
+                <td class="tercero">
+                  <div
+                    *ngIf="movimiento.documentoTercero || movimiento.nombreTercero; else sinTercero"
+                  >
+                    <strong>
+                      {{ movimiento.documentoTercero || '—' }}
+                    </strong>
+
+                    <span>
+                        {{ movimiento.nombreTercero || '' }}
+                      </span>
+                  </div>
+
+                  <ng-template #sinTercero>—</ng-template>
+                </td>
+
+                <td class="numero">
+                  {{ movimiento.valorDebito | number:'1.2-2':'es-CO' }}
+                </td>
+
+                <td class="numero">
+                  {{ movimiento.valorCredito | number:'1.2-2':'es-CO' }}
+                </td>
+
+                <td class="numero">
+                  {{ movimiento.saldoAcumulado | number:'1.2-2':'es-CO' }}
+                </td>
+
+                <td
+                  *ngIf="puedeVerAuditoria"
+                  class="celda-auditoria"
+                >
+                  <button
+                    type="button"
+                    class="btn btn-secondary"
+                    (click)="alternarAuditoria(movimiento.idAuxiliarContable)"
+                    [attr.aria-expanded]="auditoriaAbierta === movimiento.idAuxiliarContable"
+                  >
+                    {{
+                    auditoriaAbierta === movimiento.idAuxiliarContable
+                    ? 'Ocultar'
+                    : 'Ver detalle'
+                    }}
+                  </button>
+                </td>
+              </tr>
+
+              <tr
+                *ngIf="puedeVerAuditoria && auditoriaAbierta === movimiento.idAuxiliarContable"
+                class="fila-auditoria"
+              >
+                <td colspan="8">
+                  <div class="auditoria-contenido">
+                    <h4>Detalle de auditoría del movimiento</h4>
+
+                    <div class="auditoria-grid">
+                      <div class="auditoria-campo">
+                          <span class="auditoria-etiqueta">
+                            ID del movimiento
+                          </span>
+                        <strong>
+                          {{ movimiento.idAuxiliarContable }}
+                        </strong>
+                      </div>
+
+                      <div class="auditoria-campo">
+                          <span class="auditoria-etiqueta">
+                            Concepto del movimiento
+                          </span>
+                        <strong>
+                          {{ movimiento.detalleMovimiento || 'No registrado' }}
+                        </strong>
+                      </div>
+
+                      <div class="auditoria-campo">
+                          <span class="auditoria-etiqueta">
+                            Estado
+                          </span>
+                        <strong>
+                          {{ movimiento.estadoMovimiento || '—' }}
+                        </strong>
+                      </div>
+
+                      <div class="auditoria-campo">
+                          <span class="auditoria-etiqueta">
+                            Valor base
+                          </span>
+                        <strong>
+                          {{ movimiento.valorBase | number:'1.2-2':'es-CO' }}
+                        </strong>
+                      </div>
+
+                      <div class="auditoria-campo">
+                          <span class="auditoria-etiqueta">
+                            Módulo de origen
+                          </span>
+                        <strong>
+                          {{ movimiento.origenModulo || 'No registrado' }}
+                        </strong>
+                      </div>
+
+                      <div class="auditoria-campo">
+                          <span class="auditoria-etiqueta">
+                            Documento de origen
+                          </span>
+                        <strong>
+                          {{ movimiento.documentoOrigen || 'No registrado' }}
+                        </strong>
+                      </div>
+
+                      <div class="auditoria-campo">
+                          <span class="auditoria-etiqueta">
+                            Documento soporte
+                          </span>
+                        <strong>
+                          {{ movimiento.documentoSoporte || 'No registrado' }}
+                        </strong>
+                      </div>
+
+                      <div class="auditoria-campo">
+                          <span class="auditoria-etiqueta">
+                            Usuario de creación
+                          </span>
+
+                        <strong>
+                          {{
+                          movimiento.nombreUsuarioCreacion
+                          || movimiento.usernameCreacion
+                          || 'No disponible'
+                          }}
+                        </strong>
+
+                        <small *ngIf="movimiento.usernameCreacion">
+                          {{ movimiento.usernameCreacion }}
+                        </small>
+                      </div>
+
+                      <div class="auditoria-campo">
+                          <span class="auditoria-etiqueta">
+                            Fecha de creación
+                          </span>
+
+                        <strong>
+                          {{
+                          movimiento.fechaCreacion
+                          ? (movimiento.fechaCreacion | date:'dd/MM/yyyy HH:mm:ss')
+                          : 'No registrada'
+                          }}
+                        </strong>
+                      </div>
+
+                      <div class="auditoria-campo">
+                          <span class="auditoria-etiqueta">
+                            Usuario de edición
+                          </span>
+
+                        <strong>
+                          {{
+                          movimiento.fechaEdicion
+                          ? (
+                          movimiento.nombreUsuarioEdicion
+                          || movimiento.usernameEdicion
+                          || 'No disponible'
+                          )
+                          : 'Sin edición registrada'
+                          }}
+                        </strong>
+
+                        <small
+                          *ngIf="movimiento.fechaEdicion && movimiento.usernameEdicion"
+                        >
+                          {{ movimiento.usernameEdicion }}
+                        </small>
+                      </div>
+
+                      <div class="auditoria-campo">
+                          <span class="auditoria-etiqueta">
+                            Fecha de edición
+                          </span>
+
+                        <strong>
+                          {{
+                          movimiento.fechaEdicion
+                          ? (movimiento.fechaEdicion | date:'dd/MM/yyyy HH:mm:ss')
+                          : 'Sin edición registrada'
+                          }}
+                        </strong>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+            </tbody>
+
+            <tfoot>
+            <tr class="fila-totales">
+              <td colspan="4">
+                <strong>Totales del período</strong>
+              </td>
+
+              <td class="numero">
+                <strong>
+                  {{ cuenta.totalDebitos | number:'1.2-2':'es-CO' }}
+                </strong>
+              </td>
+
+              <td class="numero">
+                <strong>
+                  {{ cuenta.totalCreditos | number:'1.2-2':'es-CO' }}
+                </strong>
+              </td>
+
+              <td class="numero"></td>
+
+              <td *ngIf="puedeVerAuditoria"></td>
+            </tr>
+
+            <tr class="fila-saldo-final">
+              <td colspan="6">
+                <strong>Saldo final</strong>
+              </td>
+
+              <td class="numero">
+                <strong>
+                  {{ cuenta.saldoFinal | number:'1.2-2':'es-CO' }}
+                </strong>
+              </td>
+
+              <td *ngIf="puedeVerAuditoria"></td>
+            </tr>
+            </tfoot>
+          </table>
+        </div>
+      </article>
+    </div>
+  </section>
+</div>

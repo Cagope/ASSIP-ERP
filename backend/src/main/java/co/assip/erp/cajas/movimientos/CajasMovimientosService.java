@@ -567,6 +567,144 @@ public class CajasMovimientosService {
         );
     }
 
+
+    /** Registra el recaudo de prórroga en Caja sin modificar el crédito ni crear otro comprobante. */
+    public Long registrarRecaudoProrroga(
+            Long idCaja, BigDecimal valorRecaudo, LocalDate fechaContable,
+            Long idProrroga, String pagareCartera, String tipoComprobante,
+            String numeroComprobante, Integer idUsuario) {
+        if (idCaja == null || idCaja <= 0 || idProrroga == null || idProrroga <= 0
+                || fechaContable == null || idUsuario == null || idUsuario <= 0
+                || valorRecaudo == null || valorRecaudo.signum() <= 0
+                || valorRecaudo.stripTrailingZeros().scale() > 0
+                || tipoComprobante == null || tipoComprobante.isBlank()
+                || numeroComprobante == null || numeroComprobante.isBlank()) {
+            throw new IllegalArgumentException("Datos inválidos para el recaudo de prórroga en Caja.");
+        }
+        Long idProvision = repository.obtenerProvisionAbierta(idCaja, fechaContable);
+        if (idProvision == null) {
+            throw new IllegalStateException("La caja no tiene provisión ABIERTA para la fecha contable.");
+        }
+        Long idDepartamento = repository.obtenerIdDepartamento("12");
+        if (idDepartamento == null) {
+            throw new IllegalStateException("No existe el departamento 12 - MOVIMIENTOS CARTERA.");
+        }
+        Long idOperacion = repository.obtenerIdOperacion("PRORROGA");
+        if (idOperacion == null) {
+            throw new IllegalStateException("No está parametrizada la operación de Caja PRORROGA.");
+        }
+        String concepto = "Recaudo prórroga crédito " + (pagareCartera == null ? "" : pagareCartera);
+        return repository.insertarMovimientoCaja(
+                idProvision, idCaja, fechaContable, idDepartamento, idOperacion,
+                "CARTERA", "PRORROGA", "cartera.creditos_prorrogas", idProrroga,
+                pagareCartera, "INGRESO", "EFECTIVO", valorRecaudo, concepto,
+                "PENDIENTE", tipoComprobante, numeroComprobante, idUsuario);
+    }
+
+    /**
+     * Registra la devolución en efectivo de un pago de cuotas
+     * como egreso pendiente de confirmación por Caja.
+     *
+     * Reutiliza la provisión diaria, la operación parametrizada
+     * y el CC generado por Cartera. No entrega efectivo ni
+     * modifica directamente el saldo de Caja.
+     */
+    public Long registrarReversionPagoCuotasCartera(
+            Long idCaja,
+            BigDecimal valorDevolucion,
+            LocalDate fechaContable,
+            Long idPagoOriginal,
+            String pagareCartera,
+            String numeroComprobanteReversion,
+            Integer idUsuario
+    ) {
+        if (idCaja == null || idCaja <= 0) {
+            throw new IllegalArgumentException(
+                    "Debe seleccionar una caja válida."
+            );
+        }
+        if (valorDevolucion == null
+                || valorDevolucion.signum() <= 0
+                || valorDevolucion.stripTrailingZeros().scale() > 0) {
+            throw new IllegalArgumentException(
+                    "La devolución en efectivo debe ser positiva y expresada en pesos enteros."
+            );
+        }
+        if (fechaContable == null) {
+            throw new IllegalArgumentException(
+                    "Debe indicar la fecha contable de reversión."
+            );
+        }
+        if (idPagoOriginal == null || idPagoOriginal <= 0) {
+            throw new IllegalArgumentException(
+                    "Debe indicar el pago original que se reversa."
+            );
+        }
+        if (numeroComprobanteReversion == null
+                || numeroComprobanteReversion.isBlank()) {
+            throw new IllegalArgumentException(
+                    "El comprobante CC de reversión es obligatorio."
+            );
+        }
+        if (idUsuario == null || idUsuario <= 0) {
+            throw new IllegalArgumentException(
+                    "El usuario de sesión es obligatorio."
+            );
+        }
+
+        Long idProvision = repository.obtenerProvisionAbierta(
+                idCaja,
+                fechaContable
+        );
+        if (idProvision == null) {
+            throw new IllegalStateException(
+                    "La caja seleccionada no tiene provisión ABIERTA para la fecha contable."
+            );
+        }
+
+        Long idDepartamento = repository.obtenerIdDepartamento("12");
+        if (idDepartamento == null) {
+            throw new IllegalStateException(
+                    "No existe el departamento operativo 12 - MOVIMIENTOS CARTERA."
+            );
+        }
+
+        Long idOperacion = repository.obtenerIdOperacion(
+                "REVERSA_PAGO_CUOTAS"
+        );
+        if (idOperacion == null) {
+            throw new IllegalStateException(
+                    "No existe la operación activa de Caja REVERSA_PAGO_CUOTAS."
+            );
+        }
+
+        String concepto = "Reversión pago de cuotas crédito "
+                + (pagareCartera == null ? "" : pagareCartera)
+                + " / Pago original " + idPagoOriginal;
+
+        return repository.insertarMovimientoCaja(
+                idProvision,
+                idCaja,
+                fechaContable,
+                idDepartamento,
+                idOperacion,
+                "CARTERA",
+                "REVERSION_PAGO_CUOTAS",
+                "cartera.pagos_cuotas",
+                idPagoOriginal,
+                pagareCartera,
+                "EGRESO",
+                "EFECTIVO",
+                valorDevolucion,
+                concepto,
+                "PENDIENTE",
+                "CC",
+                numeroComprobanteReversion,
+                idUsuario
+        );
+    }
+
+
     private void validarCheques(List<MedioPagoChequeDTO> cheques, BigDecimal valorCheques) {
         if (cheques == null || cheques.isEmpty()) {
             throw new RuntimeException("Debe ingresar el detalle de los cheques.");

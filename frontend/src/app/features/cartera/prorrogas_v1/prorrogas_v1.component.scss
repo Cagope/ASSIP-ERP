@@ -1,0 +1,64 @@
+.prorrogas-page { padding: 1.25rem; max-width: 1350px; margin: 0 auto; color: var(--text-color, #273447); }
+.encabezado { display: flex; justify-content: space-between; gap: 1rem; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.encabezado h2 { margin: 0 0 .25rem; font-size: 1.55rem; }
+.encabezado p { margin: 0; color: #64748b; }
+.estado { font-size: .8rem; padding: .45rem .75rem; border: 1px solid #cbd5e1; border-radius: 999px; }
+.bloque { background: var(--surface-card, #fff); border: 1px solid #e2e8f0; border-radius: .65rem; padding: 1.25rem; margin-bottom: 1rem; }
+.bloque h3 { font-size: 1.1rem; margin: 0 0 1rem; }
+.bloque h4 { font-size: .95rem; margin: 1rem 0 .65rem; }
+label { display: flex; flex-direction: column; gap: .4rem; font-weight: 600; font-size: .9rem; }
+input, select, textarea { width: 100%; padding: .65rem .7rem; border: 1px solid #cbd5e1; border-radius: .4rem; background: var(--surface-card, #fff); color: inherit; font: inherit; box-sizing: border-box; }
+.campos, .datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(205px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.datos div { padding: .7rem; background: #f8fafc; border-radius: .4rem; display: flex; flex-direction: column; gap: .35rem; }
+.datos small, .nota { color: #64748b; font-size: .85rem; }
+.total { margin-top: 1rem; padding: .85rem; border-top: 1px solid #e2e8f0; font-weight: 700; text-align: right; }
+.mensaje { padding: .7rem .9rem; background: #f1f5f9; border-radius: .4rem; margin: .7rem 0; }
+.mensaje.error { background: #fef2f2; color: #991b1b; }
+.fila-ahorro { display: grid; grid-template-columns: minmax(180px, 1fr) 160px auto; gap: .6rem; margin-bottom: .6rem; }
+button { padding: .65rem 1rem; border: 0; border-radius: .4rem; background: #1d4ed8; color: white; margin: .4rem .5rem .4rem 0; cursor: pointer; }
+button.secundario { background: #475569; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+th, td { border-bottom: 1px solid #e2e8f0; padding: .7rem; text-align: left; }
+@media(max-width: 650px) { .fila-ahorro { grid-template-columns: 1fr; } .prorrogas-page { padding: .6rem; } }
+
+/* Presentación consistente con Pago de Cuotas V1. */
+.asociado-seleccionado { border-left: 3px solid #008663; }
+.asociado-resumen, .creditos-encabezado { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.asociado-resumen h3 { margin: .2rem 0; font-size: .95rem; }
+.asociado-resumen p, .creditos-encabezado p { margin: .25rem 0 0; font-size: .82rem; color: #64748b; }
+.etiqueta { color: #008663; font-weight: 700; font-size: .72rem; }
+.asociado-indicadores { display: flex; flex-direction: column; align-items: flex-end; gap: .45rem; }
+.asociado-indicadores span, .contador { border-radius: 999px; padding: .4rem .7rem; background: #f7fafc; border: 1px solid #e2e8f0; font-size: .78rem; }
+.contador { background: #ecfdf5; color: #047857; border: none; font-weight: 700; }
+.tabla-contenedor { overflow-x: auto; }
+.tabla-creditos { margin: .8rem 0 0; font-size: .85rem; }
+.tabla-creditos th { background: #f0f4f8; font-size: .76rem; white-space: nowrap; }
+.tabla-creditos td { padding: .65rem .75rem; }
+.tabla-creditos .numero { text-align: right; white-space: nowrap; }
+button.seleccionar { background: white; color: #183153; border: 1px solid #cbd5e1; border-radius: .3rem; font-size: .75rem; font-weight: 700; margin: 0; }
+button.seleccionar:hover:not(:disabled) { background: #f1f5f9; }
+@media(max-width:650px) { .asociado-resumen,.creditos-encabezado { align-items: flex-start; flex-direction: column; } .asociado-indicadores { align-items: flex-start; } }
+
+/* Distribución de recaudo: disposición equivalente a Pago de Cuotas V1. */
+.distribucion-recaudo .recaudo-encabezado { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; border-bottom:1px solid #e2e8f0; padding-bottom:.75rem; }
+.distribucion-recaudo .recaudo-encabezado h3 { margin:0 0 .3rem; }
+.distribucion-recaudo .recaudo-encabezado p { margin:0; }
+.distribucion-recaudo .recaudo-total { text-align:right; white-space:nowrap; display:flex; flex-direction:column; gap:.2rem; }
+.distribucion-recaudo .recaudo-total small { color:#64748b; }
+.distribucion-recaudo .recaudo-total strong { font-size:1.25rem; }
+.distribucion-recaudo .recaudo-seccion { padding:.95rem 0; border-bottom:1px solid #e2e8f0; }
+.distribucion-recaudo .recaudo-seccion-titulo { font-weight:700; font-size:.9rem; margin-bottom:.55rem; }
+.distribucion-recaudo .recaudo-fila { display:grid; grid-template-columns:minmax(0, 3fr) minmax(160px, 1fr); gap:.7rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:.4rem; padding:.8rem; align-items:end; }
+.distribucion-recaudo .recaudo-fila-ahorro { grid-template-columns:minmax(0, 3fr) minmax(140px, 1fr) auto; margin-bottom:.5rem; }
+.distribucion-recaudo .recaudo-fila input { text-align:right; background:#f0fdf4; border-color:#86efac; }
+.distribucion-recaudo .recaudo-fila button { margin:0; }
+.distribucion-recaudo .recaudo-seccion-cabecera { display:flex; align-items:center; gap:1rem; flex-wrap:wrap; margin-bottom:.6rem; }
+.distribucion-recaudo .recaudo-seccion-cabecera .recaudo-seccion-titulo { margin:0; }
+.distribucion-recaudo .recaudo-cxc { display:flex; justify-content:space-between; gap:1rem; align-items:center; }
+.distribucion-recaudo .recaudo-cxc .recaudo-seccion-titulo { margin-bottom:.25rem; }
+.distribucion-recaudo .recaudo-importe { font-size:1rem; white-space:nowrap; }
+.distribucion-recaudo .recaudo-resumen { margin-top:1rem; padding:.8rem; border:1px solid #86efac; border-radius:.4rem; background:#ecfdf5; color:#065f46; }
+.distribucion-recaudo .recaudo-resumen-error { background:#fef2f2; border-color:#fca5a5; color:#991b1b; }
+.distribucion-recaudo .recaudo-error { color:#b91c1c; font-size:.82rem; }
+@media(max-width:650px) { .distribucion-recaudo .recaudo-fila, .distribucion-recaudo .recaudo-fila-ahorro { grid-template-columns:1fr; } .distribucion-recaudo .recaudo-encabezado { flex-wrap:wrap; } }

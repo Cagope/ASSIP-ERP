@@ -1,0 +1,399 @@
+
+/* =========================================================
+   CARTERA - REVERSIÓN DE PAGOS DE CUOTAS V1
+   Diseño institucional compartido con Consulta de Créditos.
+   ========================================================= */
+.reversion-pagos-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  min-width: 0;
+  color: #111827;
+}
+
+/* ENCABEZADO */
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  h2 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #111827;
+  }
+}
+.page-subtitle {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+.estado-proceso {
+  max-width: 390px;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid #a7f3d0;
+  border-radius: 8px;
+  background: #ecfdf5;
+  color: #065f46;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* BLOQUES */
+.consulta-bloque {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+}
+.bloque-encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+  }
+  span {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.82rem;
+    color: #6b7280;
+  }
+}
+.bloque-etiqueta {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #047857 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.asociado-seleccionado {
+  border-left: 4px solid #047857;
+}
+.asociado-datos {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 0.3rem;
+  span {
+    margin: 0;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    background: #f8fafc;
+    font-size: 0.75rem;
+    color: #475569;
+  }
+}
+.contador-registros {
+  flex-shrink: 0;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid #a7f3d0;
+  border-radius: 999px;
+  background: #ecfdf5;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #047857;
+}
+
+/* BOTONES */
+.btn {
+  min-height: 34px;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease,
+              border-color 0.15s ease,
+              opacity 0.15s ease;
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+.btn--primary {
+  border-color: #047857;
+  background: #047857;
+  color: #ffffff;
+  &:hover:not(:disabled) {
+    border-color: #065f46;
+    background: #065f46;
+  }
+}
+.btn--cancel {
+  border-color: #cbd5e1;
+  background: #ffffff;
+  color: #374151;
+  &:hover:not(:disabled) {
+    background: #f3f4f6;
+  }
+}
+
+/* ALERTAS */
+.alert {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.85rem 1rem;
+  border-radius: 8px;
+  line-height: 1.5;
+  strong {
+    font-size: 0.88rem;
+  }
+  span {
+    font-size: 0.82rem;
+  }
+}
+.alert--danger {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+.alert--info {
+  border: 1px solid #a7f3d0;
+  background: #ecfdf5;
+  color: #065f46;
+}
+.estado-consulta,
+.estado-vacio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 90px;
+  padding: 1.5rem;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #475569;
+}
+.estado-vacio {
+  margin: 0;
+}
+
+/* TABLAS */
+.tabla-contenedor {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+.tabla-creditos {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  th,
+  td {
+    padding: 0.65rem 0.7rem;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+  thead th {
+    background: #f8fafc;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #374151;
+  }
+  tbody tr {
+    background: #ffffff;
+    transition: background-color 0.15s ease;
+    &:hover {
+      background: #f8fafc;
+    }
+    &:last-child td {
+      border-bottom: 0;
+    }
+  }
+  tbody td {
+    color: #334155;
+    strong {
+      color: #111827;
+    }
+  }
+  tfoot th {
+    padding: 0.8rem 0.7rem;
+    border-top: 2px solid #cbd5e1;
+    background: #f8fafc;
+    font-weight: 700;
+    color: #0f172a;
+  }
+}
+.columna-numero {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+.columna-accion {
+  width: 130px;
+  text-align: center !important;
+}
+.fila-seleccionada {
+  background: #ecfdf5 !important;
+  td {
+    border-bottom-color: #a7f3d0;
+  }
+}
+
+/* INDICADORES FINANCIEROS */
+.datos-credito-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.dato-financiero {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 0.85rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  span {
+    font-size: 0.77rem;
+    color: #64748b;
+  }
+  strong {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* FORMULARIO DE CONFIRMACIÓN */
+.filtros-grid {
+  display: grid;
+  grid-template-columns: minmax(180px, 260px) minmax(0, 1fr);
+  align-items: start;
+  gap: 1rem;
+}
+.f-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+  label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #374151;
+  }
+  input,
+  textarea {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #111827;
+    font: inherit;
+    font-size: 0.88rem;
+    outline: none;
+    transition: border-color 0.15s ease,
+                box-shadow 0.15s ease;
+    &:focus {
+      border-color: #047857;
+      box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.12);
+    }
+    &:disabled {
+      background: #f1f5f9;
+      color: #94a3b8;
+      cursor: not-allowed;
+    }
+  }
+  input {
+    min-height: 38px;
+  }
+  textarea {
+    min-height: 100px;
+    resize: vertical;
+    line-height: 1.5;
+  }
+}
+.confirmacion-control {
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  background: #fffbeb;
+  label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+    font-size: 0.83rem;
+    line-height: 1.6;
+    color: #92400e;
+    cursor: pointer;
+  }
+  input[type='checkbox'] {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    margin-top: 0.2rem;
+    accent-color: #047857;
+  }
+}
+.filtros-acciones {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* ADAPTACIÓN A PANTALLAS */
+@media (max-width: 1100px) {
+  .datos-credito-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .reversion-pagos-page {
+    padding: 0.75rem;
+  }
+  .page-header,
+  .bloque-encabezado {
+    align-items: flex-start;
+  }
+  .filtros-grid {
+    grid-template-columns: 1fr;
+  }
+  .asociado-datos {
+    align-items: flex-start;
+  }
+}
+@media (max-width: 480px) {
+  .datos-credito-grid {
+    grid-template-columns: 1fr;
+  }
+  .filtros-acciones .btn {
+    width: 100%;
+  }
+  .estado-proceso {
+    width: 100%;
+  }
+}

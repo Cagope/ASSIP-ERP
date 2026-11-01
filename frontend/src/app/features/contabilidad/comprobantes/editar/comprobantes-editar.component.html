@@ -1,0 +1,302 @@
+
+<div class="comprobantes-page">
+  <!-- ENCABEZADO -->
+  <header class="page-header">
+    <div>
+      <h2>Editar comprobante manual</h2>
+      <p>Modifique el concepto general o los movimientos del comprobante seleccionado.</p>
+    </div>
+    <a routerLink="/contabilidad/comprobantes/consultar" class="btn btn-secondary">
+      Consultar
+    </a>
+  </header>
+  <!-- MENSAJES -->
+  <div class="mensaje mensaje-error" role="alert" *ngIf="error">
+    {{ error }}
+  </div>
+  <div class="mensaje mensaje-exito" role="status" *ngIf="mensaje">
+    {{ mensaje }}
+  </div>
+  <!-- SELECCIÓN DEL COMPROBANTE -->
+  <app-comprobantes-consulta
+    *ngIf="!comprobante"
+    [modoSeleccion]="true"
+    (comprobanteSeleccionado)="cargar($event)">
+  </app-comprobantes-consulta>
+  <!-- DATOS DEL COMPROBANTE -->
+  <section class="card" *ngIf="comprobante">
+    <div class="section-header">
+      <div>
+        <h3>Datos del comprobante</h3>
+        <p>Los datos de identificación y la fecha contable son de solo lectura.</p>
+      </div>
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="comprobante = null; filas = []; mensaje = ''; error = ''"
+        [disabled]="guardando">
+        Buscar otro
+      </button>
+    </div>
+    <div class="datos-generales">
+      <div class="campo">
+        <label>Agencia</label>
+        <input
+          type="text"
+          [value]="(comprobante.cabecera.codigoAgencia || comprobante.cabecera.idAgencia) + ' - ' + (comprobante.cabecera.nombreAgencia || 'Sin descripción')"
+          readonly />
+      </div>
+      <div class="campo">
+        <label>Tipo de comprobante</label>
+        <input
+          type="text"
+          [value]="comprobante.cabecera.tipoComprobante + ' - ' + (comprobante.cabecera.nombreTipoComprobante || 'Comprobante contable')"
+          readonly />
+      </div>
+      <div class="campo">
+        <label>Fecha contable</label>
+        <input
+          type="date"
+          [value]="comprobante.cabecera.fechaContable"
+          readonly />
+      </div>
+      <div class="campo">
+        <label>Número</label>
+        <input
+          type="text"
+          [value]="comprobante.cabecera.numeroComprobante"
+          readonly />
+      </div>
+      <div class="campo campo-concepto">
+        <label for="conceptoEditar">Concepto general</label>
+        <input
+          id="conceptoEditar"
+          name="conceptoEditar"
+          type="text"
+          [(ngModel)]="concepto"
+          maxlength="500"
+          placeholder="Descripción general del comprobante"
+          [disabled]="guardando"
+          required />
+      </div>
+    </div>
+    <p class="aviso">
+      Solo se permite modificar comprobantes manuales activos.
+      El backend validará que el período contable permita la modificación.
+    </p>
+  </section>
+  <!-- MOVIMIENTOS CONTABLES -->
+  <section class="card" *ngIf="comprobante">
+    <div class="section-header">
+      <div>
+        <h3>Movimientos contables</h3>
+        <p>Modifique directamente los campos de cada movimiento, como en Crear comprobante.</p>
+      </div>
+    </div>
+    <div class="tabla-contenedor">
+      <table class="tabla-movimientos">
+        <thead>
+        <tr>
+          <th class="col-numero">#</th>
+          <th class="col-cuenta">Cuenta contable</th>
+          <th class="col-tercero">Tercero</th>
+          <th class="col-detalle">Detalle</th>
+          <th class="col-importe">Base</th>
+          <th class="col-importe">Débito</th>
+          <th class="col-importe">Crédito</th>
+        </tr>
+        </thead>
+        <tbody>
+        <ng-container *ngFor="let f of filas; let i = index">
+          <tr>
+            <td class="numero-fila">{{ i + 1 }}</td>
+            <!-- CUENTA CONTABLE -->
+            <td>
+              <div class="campo-busqueda">
+                <input
+                  type="text"
+                  [name]="'cuenta_' + f.idAuxiliarContable"
+                  [ngModel]="f.cuentaTexto"
+                  (ngModelChange)="buscarCuenta(f, $event)"
+                  (focus)="seleccionarFila(f)"
+                  [disabled]="guardando"
+                  placeholder="Código o nombre de cuenta"
+                  autocomplete="off" />
+                <div
+                  class="resultados-busqueda"
+                  *ngIf="buscandoCuenta === f.idAuxiliarContable && cuentas.length > 0 && !guardando">
+                  <button
+                    type="button"
+                    *ngFor="let cuenta of cuentas"
+                    (click)="elegirCuenta(f, cuenta)">
+                    {{ cuenta.codigoCuenta }} - {{ cuenta.nombre }}
+                  </button>
+                </div>
+              </div>
+            </td>
+            <!-- TERCERO -->
+            <td>
+              <div class="campo-busqueda">
+                <input
+                  type="text"
+                  [name]="'tercero_' + f.idAuxiliarContable"
+                  [ngModel]="f.terceroTexto"
+                  (ngModelChange)="buscarTercero(f, $event)"
+                  (focus)="seleccionarFila(f)"
+                  [disabled]="guardando"
+                  placeholder="Documento o nombre"
+                  autocomplete="off" />
+                <div
+                  class="resultados-busqueda"
+                  *ngIf="buscandoTercero === f.idAuxiliarContable && terceros.length > 0 && !guardando">
+                  <button
+                    type="button"
+                    *ngFor="let tercero of terceros"
+                    (click)="elegirTercero(f, tercero)">
+                    {{ tercero.documento }} - {{ tercero.nombreCompleto }}
+                  </button>
+                </div>
+              </div>
+            </td>
+            <!-- DETALLE -->
+            <td>
+              <input
+                type="text"
+                [name]="'detalle_' + f.idAuxiliarContable"
+                [(ngModel)]="f.detalleMovimiento"
+                [disabled]="guardando"
+                placeholder="Detalle del movimiento"
+                required />
+            </td>
+            <!-- BASE -->
+            <td>
+              <input
+                type="text"
+                numericFormat
+                inputmode="decimal"
+                class="importe"
+                [name]="'base_' + f.idAuxiliarContable"
+                [(ngModel)]="f.valorBase"
+                [disabled]="guardando" />
+            </td>
+            <!-- DÉBITO -->
+            <td>
+              <input
+                type="text"
+                numericFormat
+                inputmode="decimal"
+                class="importe"
+                [name]="'debito_' + f.idAuxiliarContable"
+                [(ngModel)]="f.valorDebito"
+                [disabled]="guardando" />
+            </td>
+            <!-- CRÉDITO -->
+            <td>
+              <input
+                type="text"
+                numericFormat
+                inputmode="decimal"
+                class="importe"
+                [name]="'credito_' + f.idAuxiliarContable"
+                [(ngModel)]="f.valorCredito"
+                [disabled]="guardando" />
+            </td>
+          </tr>
+          <!-- CONTROL DOCUMENTAL -->
+          <tr class="fila-control" *ngIf="f.requiereControl">
+            <td></td>
+            <td colspan="3">
+              <div class="control-documental">
+                <div class="campo">
+                  <label [for]="'control_' + f.idAuxiliarContable">
+                    Tipo de control
+                  </label>
+                  <select
+                    [id]="'control_' + f.idAuxiliarContable"
+                    [name]="'control_' + f.idAuxiliarContable"
+                    [(ngModel)]="f.idTiposControl"
+                    [disabled]="guardando"
+                    required>
+                    <option [ngValue]="null">Seleccione control</option>
+                    <option
+                      *ngFor="let tipo of tiposControl"
+                      [ngValue]="tipo.idTiposControl">
+                      {{ tipo.nombreTipoControl }}
+                    </option>
+                  </select>
+                </div>
+                <div class="campo">
+                  <label [for]="'documento_' + f.idAuxiliarContable">
+                    Documento / referencia
+                  </label>
+                  <input
+                    type="text"
+                    [id]="'documento_' + f.idAuxiliarContable"
+                    [name]="'documento_' + f.idAuxiliarContable"
+                    [(ngModel)]="f.numeroDocumento"
+                    [disabled]="guardando"
+                    [required]="pideDocumento(f)"
+                    maxlength="20"
+                    placeholder="Número de documento" />
+                </div>
+              </div>
+            </td>
+            <td colspan="3"></td>
+          </tr>
+          <tr class="fila-control" *ngIf="!f.controlConocido">
+            <td></td>
+            <td colspan="6">
+              <p class="aviso">
+                Para actualizar el control documental de esta cuenta,
+                selecciónela desde la búsqueda.
+              </p>
+            </td>
+          </tr>
+        </ng-container>
+        </tbody>
+        <tfoot>
+        <tr class="fila-totales">
+          <td colspan="4"><strong>Totales</strong></td>
+          <td></td>
+          <td class="importe">{{ totalDebito | number:'1.2-2':'en-US' }}</td>
+          <td class="importe">{{ totalCredito | number:'1.2-2':'en-US' }}</td>
+        </tr>
+        </tfoot>
+      </table>
+    </div>
+    <!-- CUADRE DEL COMPROBANTE -->
+    <div class="resumen-contable">
+      <div>
+        <span>Diferencia</span>
+        <strong>{{ diferencia | number:'1.2-2':'en-US' }}</strong>
+      </div>
+      <div
+        class="estado-cuadre"
+        [class.cuadrado]="diferencia === 0"
+        [class.descuadrado]="diferencia !== 0">
+        {{ diferencia === 0 ? 'Comprobante cuadrado' : 'Comprobante pendiente de cuadre' }}
+      </div>
+    </div>
+    <p class="aviso">
+      La edición modifica únicamente los movimientos existentes.
+      No permite agregar ni eliminar líneas contables.
+    </p>
+  </section>
+  <!-- ACCIONES DE EDICIÓN -->
+  <div class="acciones" *ngIf="comprobante">
+    <button
+      type="button"
+      class="btn btn-secondary"
+      (click)="comprobante = null; filas = []; mensaje = ''; error = ''"
+      [disabled]="guardando">
+      Buscar otro comprobante
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="guardar()"
+      [disabled]="guardando || diferencia !== 0">
+      {{ guardando ? 'Guardando modificaciones...' : 'Guardar modificaciones' }}
+    </button>
+  </div>
+</div>

@@ -15,6 +15,10 @@ import {
   PAGO_CUOTAS_V1_ROUTES
 } from './pago-cuotas_v1/pago-cuotas_v1.routes';
 
+import {
+  PRORROGAS_V1_ROUTES
+} from './prorrogas_v1/prorrogas_v1.routes';
+
 
 // =========================================================
 // CONSULTA DE CRÉDITOS
@@ -175,6 +179,15 @@ import {
 
 
 // =========================================================
+// INFORME DE REVERSIÓN DE PAGOS
+// =========================================================
+
+import {
+  INFORME_REVERSION_ROUTES
+} from './informes/reversiones/informe-reversion.routes';
+
+
+// =========================================================
 // RUTAS DE CARTERA
 // =========================================================
 
@@ -188,9 +201,38 @@ export const CARTERA_ROUTES: Routes = [
     path: 'pago-cuotas',
     canActivate: [permisoGuard],
     data: {
-      permiso: 'CARTERA_PAGO_CUOTAS'
+      permiso: 'CARTERA_PAGO_CUOTAS_VIEW'
     },
     children: PAGO_CUOTAS_V1_ROUTES
+  },
+
+  // =======================================================
+  // PRÓRROGAS V1
+  // =======================================================
+  {
+    path: 'prorrogas',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_PAGO_CUOTAS_VIEW'
+    },
+    children: PRORROGAS_V1_ROUTES
+  },
+
+  // =======================================================
+  // REVERSIÓN DE PAGOS DE CUOTAS V1
+  // =======================================================
+  {
+    path: 'reversion-pagos',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_PAGO_CUOTAS_REVERSION_VIEW'
+    },
+    loadComponent: () =>
+      import(
+        './reversion-pagos/reversion-pagos.component'
+      ).then(
+        m => m.ReversionPagosComponent
+      )
   },
 
 
@@ -380,6 +422,19 @@ export const CARTERA_ROUTES: Routes = [
   {
     path: 'analisis/roll-forward',
     children: ROLL_FORWARD_ROUTES
+  },
+
+  // =======================================================
+  // INFORMES - REVERSIÓN DE PAGOS
+  // =======================================================
+
+  {
+    path: 'informes/reversiones-pagos',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_INFORMES_ESPECIALES_VIEW'
+    },
+    children: INFORME_REVERSION_ROUTES
   }
 
 ];

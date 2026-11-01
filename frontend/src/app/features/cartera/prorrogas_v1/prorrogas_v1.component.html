@@ -1,0 +1,186 @@
+<div class="prorrogas-page">
+  <header class="encabezado">
+    <div><h2>Prórrogas de Cartera</h2><p>Liquidación, recaudo y comprobante contable · V1</p></div>
+    <span class="estado">Prórrogas V1</span>
+  </header>
+
+  <div *ngIf="error" class="mensaje error" role="alert">{{ error }}</div>
+  <div *ngIf="aviso" class="mensaje" role="status">{{ aviso }}</div>
+
+  <section class="bloque">
+    <h3>1. Asociado</h3>
+    <app-consulta-creditos-buscador
+      [bloqueado]="cargando"
+      (asociadoSeleccionado)="seleccionarAsociado($event)"
+      (busquedaLimpiada)="limpiarBusqueda()">
+    </app-consulta-creditos-buscador>
+  </section>
+
+  <section class="bloque asociado-seleccionado" *ngIf="asociado as a">
+    <div class="asociado-resumen">
+      <div>
+        <span class="etiqueta">ASOCIADO SELECCIONADO</span>
+        <h3>{{ a.nombreCompleto }}</h3>
+        <p>Documento: {{ a.documento }}</p>
+      </div>
+      <div class="asociado-indicadores">
+        <span>{{ a.nombreTipoDocumento || a.tipoDocumento || '—' }}</span>
+        <span>Créditos con saldo: {{ creditos.length }}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="bloque" *ngIf="asociado && idCreditoSeleccionado === null">
+    <div class="creditos-encabezado">
+      <div><h3>Créditos del asociado</h3><p>Seleccione el pagaré para consultar las condiciones de la prórroga.</p></div>
+      <span class="contador">{{ creditos.length }} crédito(s)</span>
+    </div>
+    <p *ngIf="cargando">Consultando créditos del asociado…</p>
+    <p *ngIf="!cargando && creditos.length === 0">El asociado no tiene créditos con saldo pendiente.</p>
+    <div class="tabla-contenedor" *ngIf="creditos.length > 0">
+      <table class="tabla-creditos">
+        <thead><tr>
+          <th>Pagaré</th><th>Tipo de cuota</th><th>Estado</th><th>Próximo capital</th>
+          <th class="numero">Valor cuota</th><th class="numero">Saldo capital</th><th>Acción</th>
+        </tr></thead>
+        <tbody>
+          <tr *ngFor="let item of creditos">
+            <td><strong>{{ item.pagareCartera }}</strong></td>
+            <td>{{ item.codigoTipoCuota === '1' ? 'Fija' : item.codigoTipoCuota === '2' ? 'Variable' : '—' }}</td>
+            <td>{{ item.codigoEstadoCartera || '—' }}</td>
+            <td>{{ item.proximaFechaCapital ? (item.proximaFechaCapital | date:'dd/MM/yyyy') : '—' }}</td>
+            <td class="numero">{{ item.valorCuota | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</td>
+            <td class="numero">{{ item.saldoActual | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</td>
+            <td><button type="button" class="seleccionar" [disabled]="cargando" (click)="seleccionarCredito(item.idCarteraCredito)">SELECCIONAR</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="bloque" *ngIf="asociado && idCreditoSeleccionado !== null">
+    <div class="creditos-encabezado">
+      <h3>Crédito seleccionado</h3>
+      <button type="button" class="seleccionar" (click)="limpiarCredito()">CAMBIAR CRÉDITO</button>
+    </div>
+    <p *ngIf="cargando">Consultando información…</p>
+    <div class="datos" *ngIf="credito as c">
+      <div><small>Pagaré</small><strong>{{ c.pagareCartera }}</strong></div>
+      <div><small>Saldo de capital</small><strong>{{ c.saldoActual | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong></div>
+      <div><small>Valor cuota</small><strong>{{ c.valorCuota | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong></div>
+      <div><small>Altura de cuota</small><strong>{{ c.alturaCuota ?? '—' }}</strong></div>
+      <div><small>Plazo original</small><strong>{{ c.plazo ?? '—' }}</strong></div>
+      <div><small>Estado</small><strong>{{ c.codigoEstadoCartera }}</strong></div>
+    </div>
+  </section>
+
+  <ng-container *ngIf="credito as c">
+    <section class="bloque">
+      <h3>3. Condiciones de la prórroga</h3>
+      <label for="meses">Tiempo de prórroga</label>
+      <select id="meses" [(ngModel)]="mesesProrroga" (ngModelChange)="cambiarPlazoProrroga()">
+        <option [ngValue]="1">30 días</option><option [ngValue]="2">60 días</option><option [ngValue]="3">90 días</option>
+      </select>
+      <table>
+        <thead><tr><th>Fecha</th><th>Actual</th><th>Proyectada (+{{ diasProrroga }} días)</th></tr></thead>
+        <tbody>
+          <tr><td>Próximo capital</td><td>{{ c.proximaFechaCapital || '—' }}</td><td>{{ fechaProyectada(c.proximaFechaCapital) || '—' }}</td></tr>
+          <tr><td>Próximo interés</td><td>{{ c.proximaFechaInteres || '—' }}</td><td>{{ fechaProyectada(c.proximaFechaInteres) || '—' }}</td></tr>
+          <tr><td>Vencimiento final</td><td>{{ c.fechaFinal || '—' }}</td><td>{{ fechaProyectada(c.fechaFinal) || '—' }}</td></tr>
+        </tbody>
+      </table>
+      <p class="nota">Las fechas son informativas. El plazo y la altura de cuota no se modifican. La validación definitiva corresponde al backend.</p>
+    </section>
+
+    <section class="bloque">
+      <h3>4. Conceptos del recaudo</h3>
+      <label>Fecha contable <input type="date" [(ngModel)]="fechaContable" (ngModelChange)="liquidar()"></label>
+      <button type="button" class="secundario" [disabled]="cargando" (click)="liquidar()">Liquidar prórroga</button>
+      <p class="nota">Intereses y mora calculados por el backend. Capital opcional.</p>
+      <div class="campos">
+        <label>Intereses corrientes *<input type="text" [value]="formatoPesos(interesCorriente)" readonly></label>
+        <label>Intereses de mora<input type="text" [value]="formatoPesos(interesMora)" readonly></label>
+        <label>Abono a capital<input type="text" prorrogasNumericFormat inputmode="decimal" [(ngModel)]="capital" (ngModelChange)="actualizarConceptos()"></label>
+        <label>Seguros<input type="text" prorrogasNumericFormat inputmode="decimal" [(ngModel)]="seguro" (ngModelChange)="actualizarConceptos()"></label>
+        <label>Aportes<input type="text" prorrogasNumericFormat inputmode="decimal" [(ngModel)]="aportes" (ngModelChange)="actualizarConceptos()"></label>
+        <label>Fondo de garantía<input type="text" prorrogasNumericFormat inputmode="decimal" [(ngModel)]="fondoGarantia" (ngModelChange)="actualizarConceptos()"></label>
+        <label>Otros conceptos<input type="text" prorrogasNumericFormat inputmode="decimal" [(ngModel)]="otrosConceptos" (ngModelChange)="actualizarConceptos()"></label>
+      </div>
+      <div class="total">Total conceptos: {{ totalConceptos | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</div>
+    </section>
+
+    <section class="bloque distribucion-recaudo">
+      <div class="recaudo-encabezado">
+        <div>
+          <h3>5. Medios de recaudo</h3>
+          <p class="nota">Distribuya el recaudo entre Caja y AHORROS. El valor restante se registrará como CxC para recaudo en Tesorería.</p>
+        </div>
+        <div class="recaudo-total"><small>Total liquidado</small><strong>{{ totalConceptos | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong></div>
+      </div>
+      <div class="recaudo-seccion">
+        <div class="recaudo-seccion-titulo">1. Efectivo en Caja</div>
+        <div class="recaudo-fila">
+          <label><span>Caja receptora</span>
+            <select [(ngModel)]="idCaja" (ngModelChange)="cambiarCaja()">
+              <option [ngValue]="null">Sin Caja</option>
+              <option *ngFor="let caja of cajas" [ngValue]="caja.idCaja">{{ caja.codigoCaja }} - {{ caja.descripcion }}</option>
+            </select>
+          </label>
+          <label><span>Valor en efectivo</span>
+            <input type="text" prorrogasNumericFormat inputmode="decimal" [(ngModel)]="efectivo" (ngModelChange)="cambiarEfectivo()">
+          </label>
+        </div>
+        <p *ngIf="efectivo > 0 && idCaja == null" class="recaudo-error">Seleccione la Caja que recibirá el efectivo.</p>
+        <p *ngIf="idCaja != null && efectivo <= 0" class="recaudo-error">Una Caja seleccionada requiere un valor mayor que cero.</p>
+      </div>
+      <div class="recaudo-seccion">
+        <div class="recaudo-seccion-cabecera">
+          <div class="recaudo-seccion-titulo">2. Débitos a cuentas de ahorro</div>
+          <button type="button" class="secundario" [disabled]="ahorros.length >= cuentasAhorro.length" (click)="agregarCuenta()">Agregar cuenta</button>
+        </div>
+        <p *ngIf="cuentasAhorro.length === 0" class="nota">No hay cuentas de ahorro disponibles para este crédito.</p>
+        <div class="recaudo-fila recaudo-fila-ahorro" *ngFor="let item of ahorros; let i = index">
+          <label><span>Cuenta de ahorro</span>
+            <select [(ngModel)]="item.idCuentaAhorro" (ngModelChange)="cambiarCuentaAhorro(i)">
+              <option [ngValue]="null">Seleccione cuenta</option>
+              <option *ngFor="let cuenta of cuentasDisponiblesParaFila(i)" [ngValue]="cuenta.idCuentaAhorro">
+                {{ cuenta.codigoCuenta }} - {{ cuenta.nombreForma }} (Disponible: {{ cuenta.saldoActual | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }})
+              </option>
+            </select>
+          </label>
+          <label><span>Valor a debitar</span>
+            <input type="text" prorrogasNumericFormat inputmode="decimal" [(ngModel)]="item.valor" (ngModelChange)="cambiarValorAhorro()">
+          </label>
+          <button type="button" class="secundario" (click)="quitarCuenta(i)">Quitar</button>
+        </div>
+      </div>
+      <div class="recaudo-seccion recaudo-cxc">
+        <div><div class="recaudo-seccion-titulo">3. Cuenta por cobrar (CxC)</div>
+          <span class="nota">Faltante calculado automáticamente después de Caja y AHORROS.</span>
+        </div>
+        <strong class="recaudo-importe">{{ transferencia | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong>
+      </div>
+      <div class="recaudo-resumen" [class.recaudo-resumen-error]="diferenciaRecaudo !== 0">
+        Distribuido: {{ totalMedios | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }} · Diferencia: {{ diferenciaRecaudo | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+      </div>
+      <p class="nota">Verifique la Caja, los importes y el saldo disponible de las cuentas.</p>
+      <p *ngIf="validacionLocal as validacion" class="mensaje">{{ validacion }}</p>
+    </section>
+
+    <section class="bloque">
+      <h3>6. Comprobante y confirmación</h3>
+      <label>Concepto<textarea rows="3" [(ngModel)]="observacion" (ngModelChange)="importeModificado()" placeholder="Concepto de la prórroga (opcional)"></textarea></label>
+      <button type="button" [disabled]="cargando || !!validacionLocal || !!resultado" (click)="previsualizar()">Previsualizar comprobante CC</button>
+      <div *ngIf="movimientos.length && vistaPreviaVigente" class="tabla-contenedor">
+        <table><thead><tr><th>Código cuenta</th><th>Nombre de la cuenta</th><th>Detalle</th><th>Débito</th><th>Crédito</th></tr></thead>
+          <tbody><tr *ngFor="let m of movimientos"><td>{{ m.codigoCuenta }}</td><td>{{ m.nombreCuenta }}</td><td>{{ m.detalleMovimiento }}</td>
+            <td>{{ m.valorDebito | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</td>
+            <td>{{ m.valorCredito | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</td></tr></tbody>
+        </table>
+      </div>
+      <p class="nota" *ngIf="vistaPreviaVigente">Si modifica los valores o medios, genere nuevamente la vista previa. El servidor valida todo al confirmar.</p>
+      <button type="button" [disabled]="cargando || !vistaPreviaVigente || !!validacionLocal || !!resultado" (click)="confirmar()">Confirmar prórroga</button>
+      <p *ngIf="resultado" class="mensaje">Prórroga {{ resultado.numeroProrroga }} registrada. Comprobante {{ resultado.tipoComprobante }}-{{ resultado.numeroComprobante }}.</p>
+    </section>
+  </ng-container>
+</div>

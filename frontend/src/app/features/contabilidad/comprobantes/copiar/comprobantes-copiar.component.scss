@@ -1,0 +1,27 @@
+:host { display:block; }
+.comprobantes-page { padding:1rem; color:#1f2937; }
+.page-header,.section-header { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; margin-bottom:1rem; }
+h2 { font-size:1.35rem; margin:0; } h3 { font-size:1rem; margin:0 0 .8rem; } p { color:#64748b; font-size:.85rem; margin:.3rem 0; }
+.card { background:#fff; border:1px solid #e5e7eb; border-radius:8px; padding:1rem; margin-bottom:1rem; }
+.filtros { display:grid; grid-template-columns:repeat(3,minmax(140px,1fr)); gap:.8rem; align-items:end; }
+.campo { display:flex; flex-direction:column; gap:.3rem; min-width:0; }
+.campo label { font-size:.8rem; font-weight:600; }
+.campo input,.campo select { width:100%; min-height:36px; border:1px solid #cbd5e1; border-radius:5px; padding:.45rem; box-sizing:border-box; background:#fff; }
+.campo-concepto { grid-column:span 2; }
+.btn { border:1px solid #cbd5e1; padding:.5rem .8rem; border-radius:5px; cursor:pointer; font-size:.83rem; text-decoration:none; display:inline-block; }
+.btn-primary { background:#1d4ed8; border-color:#1d4ed8; color:#fff; } .btn-secondary { background:#fff; color:#1f2937; }
+.btn:disabled { opacity:.55; cursor:not-allowed; }
+.tabla-contenedor { overflow-x:auto; } table { width:100%; border-collapse:collapse; font-size:.81rem; }
+th,td { padding:.6rem; border-bottom:1px solid #e5e7eb; text-align:left; } th { background:#f8fafc; white-space:nowrap; }
+.importe { text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.mensaje { padding:.7rem; margin-bottom:1rem; border-radius:5px; } .mensaje-error { background:#fef2f2; color:#991b1b; }
+@media(max-width:760px) { .filtros { grid-template-columns:1fr; } .campo-concepto { grid-column:auto; } .page-header { flex-wrap:wrap; } }
+
+/* Ajustes exclusivos de Copiar: se conserva el diseño de Consultar. */
+.campo textarea { width:100%; min-height:68px; border:1px solid #cbd5e1; border-radius:5px; padding:.45rem; box-sizing:border-box; font:inherit; resize:vertical; }
+.mensaje-exito { background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; }
+.acciones-superiores { justify-content:center; margin-bottom:1rem; }
+.solo-lectura { font-size:.8rem; color:#64748b; font-weight:600; white-space:nowrap; }
+@media(max-width:760px) { .solo-lectura { white-space:normal; } }
+
+.acciones { display:flex; justify-content:center; align-items:center; gap:.6rem; }

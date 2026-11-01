@@ -1,0 +1,123 @@
+<div class="comprobantes-page">
+  <header class="page-header">
+    <h2>Importar comprobante desde Excel</h2>
+    <p>Valide los movimientos antes de generar un único comprobante manual. El consecutivo lo asigna el ERP.</p>
+  </header>
+
+  <div *ngIf="error" class="mensaje mensaje-error" role="alert">{{ error }}</div>
+  <div *ngIf="resultado" class="mensaje mensaje-exito" role="status">
+    Comprobante registrado correctamente. Número asignado: <strong>{{ resultado }}</strong>
+  </div>
+
+  <section class="card">
+    <h3>1. Datos generales y archivo</h3>
+    <div class="datos-generales">
+      <div class="campo">
+        <label for="importarAgencia">Agencia</label>
+        <select id="importarAgencia" name="agencia" [(ngModel)]="idAgencia"
+                (ngModelChange)="cambiarAgencia()" [disabled]="validando || confirmando || !!resultado">
+          <option [ngValue]="null">Seleccione una agencia</option>
+          <option *ngFor="let a of agencias" [ngValue]="a.idAgencia">
+            {{ a.codigoAgencia }} - {{ a.nombreAgencia }}
+          </option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="importarTipo">Tipo de comprobante</label>
+        <select id="importarTipo" name="tipo" [(ngModel)]="tipoComprobante"
+                (ngModelChange)="invalidarValidacion()" [disabled]="cargandoTipos || confirmando || !!resultado">
+          <option value="">{{ cargandoTipos ? 'Cargando...' : 'Seleccione un tipo' }}</option>
+          <option *ngFor="let t of tipos" [value]="t.tipoComprobante">
+            {{ t.tipoComprobante }} - {{ t.nombreTipoComprobante }}
+          </option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="importarFecha">Fecha contable</label>
+        <input id="importarFecha" name="fecha" type="date" [(ngModel)]="fechaContable"
+               (ngModelChange)="invalidarValidacion()" [disabled]="confirmando || !!resultado" />
+      </div>
+      <div class="campo campo-ancho">
+        <label for="importarConcepto">Concepto general</label>
+        <textarea id="importarConcepto" name="concepto" rows="2" [(ngModel)]="conceptoComprobante"
+                  (ngModelChange)="invalidarValidacion()" [disabled]="confirmando || !!resultado"
+                  placeholder="Describa el comprobante que se va a contabilizar"></textarea>
+      </div>
+      <div class="campo campo-ancho">
+        <label for="importarArchivo">Archivo Excel (.xlsx o .xls)</label>
+        <input id="importarArchivo" type="file" accept=".xlsx,.xls" (change)="seleccionarArchivo($event)"
+               [disabled]="validando || confirmando || !!resultado" />
+        <small>La primera hoja debe contener los movimientos en ocho columnas: cuenta, tercero, detalle, débito, crédito, base, tipo de control y documento soporte.</small>
+        <small *ngIf="archivo">Archivo seleccionado: {{ archivo.name }}</small>
+      </div>
+    </div>
+    <div class="acciones">
+      <button type="button" class="btn btn-primary" (click)="validar()"
+              [disabled]="!archivo || !idAgencia || validando || confirmando || !!resultado">
+        {{ validando ? 'Validando archivo...' : 'Validar Excel' }}
+      </button>
+    </div>
+  </section>
+
+  <section class="card" *ngIf="vistaPrevia as vista">
+    <h3>2. Resultado de validación</h3>
+    <div class="resumen">
+      <div><span>Filas revisadas</span><strong>{{ vista.totalFilas }}</strong></div>
+      <div><span>Filas válidas</span><strong>{{ vista.filasValidas }}</strong></div>
+      <div><span>Filas con errores</span><strong>{{ vista.filasConErrores }}</strong></div>
+      <div><span>Débitos</span><strong>{{ moneda.format(vista.totalDebitos) }}</strong></div>
+      <div><span>Créditos</span><strong>{{ moneda.format(vista.totalCreditos) }}</strong></div>
+      <div><span>Diferencia</span><strong>{{ moneda.format(vista.diferencia) }}</strong></div>
+    </div>
+    <p class="estado" [class.correcto]="vista.puedeGrabar" [class.incorrecto]="!vista.puedeGrabar">
+      {{ vista.puedeGrabar ? 'Validación correcta. El comprobante está listo para confirmar.' : 'Hay errores que deben corregirse en el Excel antes de contabilizar.' }}
+    </p>
+
+    <div *ngIf="vista.errores.length" class="errores">
+      <h4>Observaciones de validación ({{ vista.errores.length }})</h4>
+      <ul>
+        <li *ngFor="let e of vista.errores">
+          <strong>{{ e.numeroFila ? 'Fila ' + e.numeroFila : 'General' }} · {{ e.columna }}:</strong>
+          {{ e.mensaje }}
+        </li>
+      </ul>
+    </div>
+
+    <h4>Movimientos leídos</h4>
+    <div class="tabla-contenedor">
+      <table class="tabla-movimientos">
+        <thead>
+          <tr>
+            <th>Fila</th><th>Cuenta</th><th>Documento tercero</th><th>Detalle</th>
+            <th class="importe">Débito</th><th class="importe">Crédito</th>
+            <th class="importe">Base</th><th>Tipo de control</th><th>Documento soporte</th><th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let m of vista.movimientos" [class.fila-error]="erroresFila(m.numeroFila).length > 0">
+            <td>{{ m.numeroFila }}</td>
+            <td>{{ m.codigoCuenta }}</td>
+            <td>{{ m.documentoTercero }}</td>
+            <td>{{ m.detalleMovimiento }}</td>
+            <td class="importe">{{ m.valorDebito === null ? 'Inválido' : moneda.format(m.valorDebito) }}</td>
+            <td class="importe">{{ m.valorCredito === null ? 'Inválido' : moneda.format(m.valorCredito) }}</td>
+            <td class="importe">{{ m.valorBase === null ? 'Inválido' : moneda.format(m.valorBase) }}</td>
+            <td>{{ m.idTiposControl ?? '—' }}</td>
+            <td>{{ m.documentoSoporte || '—' }}</td>
+            <td>
+              <span *ngIf="!erroresFila(m.numeroFila).length">Válida</span>
+              <span *ngIf="erroresFila(m.numeroFila).length" class="texto-error">
+                {{ erroresFila(m.numeroFila).length }} error(es)
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="acciones">
+      <button type="button" class="btn btn-primary" (click)="confirmar()" [disabled]="!puedeConfirmar">
+        {{ confirmando ? 'Registrando comprobante...' : 'Confirmar y contabilizar' }}
+      </button>
+    </div>
+  </section>
+</div>

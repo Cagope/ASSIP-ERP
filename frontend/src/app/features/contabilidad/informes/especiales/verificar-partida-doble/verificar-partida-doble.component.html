@@ -1,0 +1,92 @@
+<div class="verificar-partida-doble">
+  <header class="encabezado">
+    <h2>Verificar la partida doble</h2>
+    <p>Comprobantes contables del período y verificación de débitos y créditos.</p>
+  </header>
+
+  <section class="panel">
+    <h3>Parámetros de verificación</h3>
+    <form #formConsulta="ngForm" (ngSubmit)="ejecutar()">
+      <div class="filtros-grid">
+        <div class="campo agencia">
+          <label for="idAgencia">Agencia</label>
+          <select id="idAgencia" name="idAgencia" [(ngModel)]="filtros.idAgencia"
+                  (ngModelChange)="cambiarFiltros()" [disabled]="cargando" required>
+            <option [ngValue]="0">Seleccione una agencia</option>
+            <option *ngFor="let agencia of agencias" [ngValue]="agencia.idAgencia">
+              {{ agencia.codigoAgencia }} - {{ agencia.nombreAgencia }}
+            </option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="fechaInicial">Fecha inicial</label>
+          <input id="fechaInicial" name="fechaInicial" type="date"
+                 [(ngModel)]="filtros.fechaInicial" (ngModelChange)="cambiarFiltros()"
+                 [disabled]="cargando" required />
+        </div>
+        <div class="campo">
+          <label for="fechaFinal">Fecha final</label>
+          <input id="fechaFinal" name="fechaFinal" type="date"
+                 [(ngModel)]="filtros.fechaFinal" (ngModelChange)="cambiarFiltros()"
+                 [disabled]="cargando" required />
+        </div>
+      </div>
+      <div class="acciones">
+        <button class="btn-principal" type="submit" [disabled]="cargando || formConsulta.invalid">
+          {{ cargando ? 'Verificando...' : 'Ejecutar' }}
+        </button>
+        <button class="btn-secundario" type="button" (click)="exportarExcel()"
+                [disabled]="cargando || !resultadoVigente || !informe?.filas?.length">
+          Exportar Excel
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <div *ngIf="mensajeError" class="mensaje-error" role="alert">{{ mensajeError }}</div>
+  <div *ngIf="cargando" class="mensaje-estado">Verificando comprobantes contables...</div>
+
+  <section *ngIf="resultadoVigente && informe as resultado" class="panel">
+    <h3>Resultado de la verificación</h3>
+    <p><strong>Agencia:</strong> {{ nombreAgenciaInforme }}</p>
+    <p><strong>Período:</strong> {{ resultado.fechaInicial | date:'dd/MM/yyyy':'UTC' }}
+      al {{ resultado.fechaFinal | date:'dd/MM/yyyy':'UTC' }}</p>
+    <div class="indicadores">
+      <div><span>Comprobantes</span><strong>{{ resultado.cantidadComprobantes }}</strong></div>
+      <div><span>Cuadrados</span><strong>{{ resultado.cantidadCuadrados }}</strong></div>
+      <div [class.alerta]="resultado.cantidadDescuadrados > 0">
+        <span>Descuadrados</span><strong>{{ resultado.cantidadDescuadrados }}</strong>
+      </div>
+    </div>
+    <div *ngIf="resultado.filas.length; else sinMovimientos" class="tabla-contenedor">
+      <table>
+        <thead><tr>
+          <th>Fecha</th><th>Tipo</th><th>Nombre tipo</th><th>Número comprobante</th>
+          <th class="numero">Débitos</th><th class="numero">Créditos</th>
+          <th class="numero">Diferencia</th><th>Estado</th>
+        </tr></thead>
+        <tbody>
+          <tr *ngFor="let fila of resultado.filas" [class.descuadrado]="fila.descuadrado"
+              [title]="fila.descuadrado ? 'El comprobante no cumple la partida doble.' : 'Comprobante cuadrado.'">
+            <td>{{ fila.fecha | date:'dd/MM/yyyy':'UTC' }}</td>
+            <td>{{ fila.tipoComprobante }}</td>
+            <td>{{ fila.nombreTipoComprobante }}</td>
+            <td class="codigo">{{ fila.numeroComprobante }}</td>
+            <td class="numero">{{ fila.totalDebitos | number:'1.2-2':'es-CO' }}</td>
+            <td class="numero">{{ fila.totalCreditos | number:'1.2-2':'es-CO' }}</td>
+            <td class="numero">{{ fila.diferencia | number:'1.2-2':'es-CO' }}</td>
+            <td>{{ fila.descuadrado ? 'DESCUADRADO' : 'Cuadrado' }}</td>
+          </tr>
+        </tbody>
+        <tfoot><tr>
+          <td colspan="4"><strong>TOTALES GENERALES</strong></td>
+          <td class="numero">{{ resultado.totalDebitos | number:'1.2-2':'es-CO' }}</td>
+          <td class="numero">{{ resultado.totalCreditos | number:'1.2-2':'es-CO' }}</td>
+          <td class="numero">{{ resultado.diferencia | number:'1.2-2':'es-CO' }}</td>
+          <td></td>
+        </tr></tfoot>
+      </table>
+    </div>
+    <ng-template #sinMovimientos><div class="mensaje-estado">No hay comprobantes en el período consultado.</div></ng-template>
+  </section>
+</div>

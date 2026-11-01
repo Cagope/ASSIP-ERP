@@ -1,0 +1,261 @@
+
+<div class="secuencial-comprobantes">
+  <header class="encabezado">
+    <h1>Secuencial de comprobantes</h1>
+    <p>
+      Consulta de comprobantes contables organizados por tipo,
+      consecutivo y período.
+    </p>
+  </header>
+
+  <!-- Filtros de consulta -->
+  <section class="panel filtros-panel">
+    <h2>Parámetros de consulta</h2>
+    <form
+      #formConsulta="ngForm"
+      (ngSubmit)="consultar()"
+      novalidate
+    >
+      <div class="filtros-grid">
+        <div class="campo">
+          <label for="idAgencia">Agencia</label>
+          <select
+            id="idAgencia"
+            name="idAgencia"
+            [(ngModel)]="filtros.idAgencia"
+            (ngModelChange)="cambiarAgencia()"
+            [disabled]="cargando"
+            required
+          >
+            <option [ngValue]="0">Seleccione una agencia</option>
+            <option
+              *ngFor="let agencia of agencias"
+              [ngValue]="agencia.idAgencia"
+            >
+              {{ agencia.codigoAgencia }} - {{ agencia.nombreAgencia }}
+            </option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="fechaInicial">Fecha inicial</label>
+          <input
+            id="fechaInicial"
+            name="fechaInicial"
+            type="date"
+            [(ngModel)]="filtros.fechaInicial"
+            (ngModelChange)="cambiarFiltros()"
+            [disabled]="cargando"
+            required
+          />
+        </div>
+
+        <div class="campo">
+          <label for="fechaFinal">Fecha final</label>
+          <input
+            id="fechaFinal"
+            name="fechaFinal"
+            type="date"
+            [(ngModel)]="filtros.fechaFinal"
+            (ngModelChange)="cambiarFiltros()"
+            [disabled]="cargando"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="acciones">
+        <button
+          type="submit"
+          class="btn-consultar"
+          [disabled]="cargando || formConsulta.invalid"
+        >
+          {{ cargando ? 'Consultando...' : 'Consultar informe' }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Mensajes de consulta -->
+  <div
+    *ngIf="mensajeError"
+    class="mensaje mensaje-error"
+    role="alert"
+  >
+    {{ mensajeError }}
+  </div>
+
+  <div
+    *ngIf="cargando"
+    class="mensaje mensaje-cargando"
+    role="status"
+  >
+    Consultando comprobantes contables...
+  </div>
+
+  <!-- Resultado del informe -->
+  <section
+    *ngIf="resultadoVigente && informe"
+    class="panel resultado-panel"
+  >
+    <div class="resultado-encabezado">
+      <div>
+        <h2>Secuencial de comprobantes</h2>
+        <p>
+          <strong>Agencia:</strong>
+          {{ nombreAgenciaInforme }}
+        </p>
+        <p>
+          <strong>Período:</strong>
+          {{ informe.fechaInicial | date:'dd/MM/yyyy':'UTC' }}
+          al
+          {{ informe.fechaFinal | date:'dd/MM/yyyy':'UTC' }}
+        </p>
+      </div>
+
+      <div class="resultado-resumen">
+        <span>Tipos de comprobante: {{ grupos.length }}</span>
+      </div>
+    </div>
+
+    <!-- Acciones del resultado -->
+    <div
+      *ngIf="tieneResultados"
+      class="acciones acciones-resultado"
+    >
+      <button
+        type="button"
+        class="btn-exportar"
+        (click)="exportarExcel()"
+        [disabled]="cargando || !resultadoVigente || !tieneResultados"
+        title="Exportar el secuencial de comprobantes a Excel"
+      >
+        Exportar a Excel
+      </button>
+    </div>
+
+    <ng-container *ngIf="tieneResultados; else sinResultados">
+      <!-- Un corte por cada tipo de comprobante -->
+      <section
+        *ngFor="let grupo of grupos"
+        class="grupo-comprobante"
+      >
+        <div class="grupo-encabezado">
+          <div class="grupo-titulo">
+            <h3>
+              {{ grupo.tipoComprobante }}
+              -
+              {{ grupo.nombreTipoComprobante }}
+            </h3>
+          </div>
+          <span class="grupo-cantidad">
+            {{ grupo.cantidadComprobantes }}
+            comprobante(s)
+          </span>
+        </div>
+
+        <div class="tabla-contenedor">
+          <table class="tabla-comprobantes">
+            <thead>
+            <tr>
+              <th scope="col">Número</th>
+              <th scope="col">Fecha</th>
+              <th scope="col" class="columna-valor">Débitos</th>
+              <th scope="col" class="columna-valor">Créditos</th>
+              <th scope="col" class="columna-valor">Diferencia</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr
+              *ngFor="let comprobante of grupo.comprobantes"
+              [class.fila-salto-consecutivo]="tieneSaltoConsecutivo(comprobante)"
+              [attr.title]="descripcionSaltoConsecutivo(comprobante) || null"
+            >
+              <td class="numero-comprobante">
+                {{ comprobante.numeroComprobante }}
+              </td>
+              <td>
+                {{ comprobante.fecha | date:'dd/MM/yyyy':'UTC' }}
+              </td>
+              <td class="columna-valor">
+                {{ comprobante.totalDebitos | number:'1.2-2':'es-CO' }}
+              </td>
+              <td class="columna-valor">
+                {{ comprobante.totalCreditos | number:'1.2-2':'es-CO' }}
+              </td>
+              <td
+                class="columna-valor"
+                [class.con-diferencia]="
+                    comprobante.totalDebitos !== comprobante.totalCreditos
+                  "
+              >
+                {{
+                (comprobante.totalDebitos - comprobante.totalCreditos)
+                | number:'1.2-2':'es-CO'
+                }}
+              </td>
+            </tr>
+            </tbody>
+
+            <tfoot>
+            <tr class="fila-subtotal">
+              <th colspan="2" scope="row">
+                Subtotal {{ grupo.tipoComprobante }}
+                ({{ grupo.cantidadComprobantes }} comprobantes)
+              </th>
+              <td class="columna-valor">
+                {{ grupo.totalDebitos | number:'1.2-2':'es-CO' }}
+              </td>
+              <td class="columna-valor">
+                {{ grupo.totalCreditos | number:'1.2-2':'es-CO' }}
+              </td>
+              <td
+                class="columna-valor"
+                [class.con-diferencia]="grupo.diferencia !== 0"
+              >
+                {{ grupo.diferencia | number:'1.2-2':'es-CO' }}
+              </td>
+            </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+
+      <!-- Totales generales -->
+      <section class="totales-generales">
+        <h3>Totales generales del período</h3>
+        <div class="totales-grid">
+          <div class="total-item">
+            <span>Total débitos</span>
+            <strong>
+              {{ informe.totalDebitos | number:'1.2-2':'es-CO' }}
+            </strong>
+          </div>
+          <div class="total-item">
+            <span>Total créditos</span>
+            <strong>
+              {{ informe.totalCreditos | number:'1.2-2':'es-CO' }}
+            </strong>
+          </div>
+          <div
+            class="total-item"
+            [class.con-diferencia]="informe.diferencia !== 0"
+          >
+            <span>Diferencia general</span>
+            <strong>
+              {{ informe.diferencia | number:'1.2-2':'es-CO' }}
+            </strong>
+          </div>
+        </div>
+      </section>
+    </ng-container>
+
+    <ng-template #sinResultados>
+      <div class="mensaje mensaje-vacio">
+        No se encontraron comprobantes activos para la agencia
+        y el período seleccionados.
+      </div>
+    </ng-template>
+  </section>
+</div>

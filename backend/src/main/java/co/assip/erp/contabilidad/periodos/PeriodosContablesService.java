@@ -65,13 +65,13 @@ public class PeriodosContablesService {
     }
 
     /**
-     * Bloquea y verifica un período abierto.
+     * Garantiza que el período contable esté abierto.
      *
-     * Exige una transacción externa para mantener
-     * el bloqueo hasta finalizar la contabilización.
+     * Si no existe, lo crea automáticamente con el usuario
+     * que registra el primer movimiento contable.
      *
-     * La autorización funcional del comprobante debe
-     * realizarla el servicio que invoca este método.
+     * Bloquea el período durante la transacción y registra
+     * el historial cuando ocurre una apertura automática.
      */
     @Transactional(propagation = Propagation.MANDATORY)
     public void validarPeriodoAbierto(
@@ -84,26 +84,49 @@ public class PeriodosContablesService {
             );
         }
 
-        validarPeriodo(
-                fechaContable.getYear(),
-                fechaContable.getMonthValue()
-        );
+        int ano = fechaContable.getYear();
+        int mes = fechaContable.getMonthValue();
 
+        validarPeriodo(ano, mes);
         validarAlcanceAgencia(idAgencia);
 
+        Integer idUsuario = usuarioSesionService.idUsuario();
+
+        // 1. Crea el período si no existe.
+        boolean periodoCreado = repository.crearPeriodoSiNoExiste(
+                idAgencia,
+                ano,
+                mes,
+                idUsuario
+        );
+
+        // 2. Bloquea el período durante la contabilización.
         var periodo = repository.bloquearPeriodo(
                 idAgencia,
-                fechaContable.getYear(),
-                fechaContable.getMonthValue()
+                ano,
+                mes
         ).orElseThrow(() -> new IllegalStateException(
-                "No existe un período contable para "
-                        + "la agencia y fecha seleccionadas."
+                "No fue posible obtener el período contable."
         ));
 
+        // 3. Impide contabilizar en períodos cerrados.
         if (!ABIERTO.equals(periodo.estado())) {
             throw new IllegalStateException(
                     "El período contable está cerrado. "
                             + "No se permite contabilizar."
+            );
+        }
+
+        // 4. Registra el historial solo si el período fue creado.
+        // Registra la apertura del período creado por el primer movimiento.
+        if (periodoCreado) {
+            repository.registrarHistorial(
+                    periodo.idPeriodoContable(),
+                    null,
+                    ABIERTO,
+                    "APERTURA",
+                    "Apertura automática por primera contabilización",
+                    idUsuario
             );
         }
     }

@@ -228,6 +228,47 @@ public class PeriodosContablesRepository {
     }
 
     /**
+     * Crea automáticamente el período al registrar su primer comprobante.
+     *
+     * Devuelve true únicamente cuando se inserta un período nuevo.
+     * Si ya existe, conserva su estado y el usuario creador original.
+     *
+     * Debe ejecutarse dentro de la transacción de contabilización.
+     */
+    public boolean crearPeriodoSiNoExiste(
+            Integer idAgencia,
+            int ano,
+            int mes,
+            Integer idUsuario
+    ) {
+        String sql = """
+        INSERT INTO contabilidad.periodos_contables (
+            id_agencia,
+            ano,
+            mes,
+            estado,
+            fk_seguridad_creacion
+        ) VALUES (
+            :idAgencia,
+            :ano,
+            :mes,
+            'ABIERTO',
+            :idUsuario
+        )
+        ON CONFLICT (id_agencia, ano, mes)
+        DO NOTHING
+        """;
+
+        int insertados = jdbc.update(
+                sql,
+                parametrosPeriodo(idAgencia, ano, mes)
+                        .addValue("idUsuario", idUsuario)
+        );
+
+        return insertados == 1;
+    }
+
+    /**
      * Construye los parámetros comunes de agencia y período.
      */
     private MapSqlParameterSource parametrosPeriodo(

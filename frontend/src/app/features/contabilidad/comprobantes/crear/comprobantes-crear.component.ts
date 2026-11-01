@@ -7,7 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { NumericFormatDirective } from '../../../../shared/utils/numeric-format.directive';
 
-import { ComprobantesCrearService } from './comprobantes-crear.service';
+import { ComprobantesCrearService } from './comprobantes-crear.api';
 
 import {
   ComprobanteAgenciaOpcion,

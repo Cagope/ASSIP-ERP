@@ -1,0 +1,306 @@
+
+<div class="comprobantes-page">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO -->
+  <!-- ===================================================== -->
+  <header class="page-header" *ngIf="!seleccionado || modoSeleccion">
+    <div>
+      <h2>{{ modoSeleccion ? 'Ubicar comprobante para editar' : 'Consultar comprobantes' }}</h2>
+      <p>Busque comprobantes de todos los módulos por agencia, tipo, número, fechas o concepto general.</p>
+    </div>
+  </header>
+
+
+  <!-- ===================================================== -->
+  <!-- MENSAJES -->
+  <!-- ===================================================== -->
+  <div *ngIf="error" class="mensaje mensaje-error" role="alert">
+    {{ error }}
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- FILTROS DE BÚSQUEDA -->
+  <!-- ===================================================== -->
+  <section class="card" *ngIf="!seleccionado || modoSeleccion">
+    <h3>Buscar comprobante</h3>
+    <form class="filtros" (ngSubmit)="buscar()">
+      <!-- AGENCIA -->
+      <div class="campo">
+        <label for="consultaAgencia">Agencia</label>
+        <select id="consultaAgencia" name="agencia"
+                [(ngModel)]="filtros.idAgencia"
+                (ngModelChange)="cargarTiposComprobantes()">
+          <option [ngValue]="undefined">Todas las autorizadas</option>
+          <option *ngFor="let agencia of agencias" [ngValue]="agencia.idAgencia">
+            {{ agencia.codigoAgencia }} - {{ agencia.nombreAgencia }}
+          </option>
+        </select>
+      </div>
+
+      <!-- TIPO DE COMPROBANTE -->
+      <div class="campo">
+        <label for="consultaTipo">Tipo de comprobante</label>
+        <select id="consultaTipo" name="tipo"
+                [(ngModel)]="filtros.tipoComprobante"
+                [disabled]="cargandoTipos">
+          <option [ngValue]="undefined">
+            {{ cargandoTipos ? 'Cargando tipos...' : 'Todos los tipos' }}
+          </option>
+          <option *ngFor="let tipo of tiposComprobantes" [ngValue]="tipo.tipoComprobante">
+            {{ tipo.tipoComprobante }} - {{ tipo.nombreTipoComprobante }}
+          </option>
+        </select>
+      </div>
+
+      <!-- NÚMERO -->
+      <div class="campo">
+        <label for="consultaNumero">Número</label>
+        <input id="consultaNumero" name="numero" type="text"
+               [(ngModel)]="filtros.numeroComprobante"
+               placeholder="Ej. 0007116" autocomplete="off" />
+      </div>
+
+      <!-- FECHA DESDE -->
+      <div class="campo">
+        <label for="consultaDesde">Desde</label>
+        <input id="consultaDesde" name="desde" type="date"
+               [(ngModel)]="filtros.fechaDesde" />
+      </div>
+
+      <!-- FECHA HASTA -->
+      <div class="campo">
+        <label for="consultaHasta">Hasta</label>
+        <input id="consultaHasta" name="hasta" type="date"
+               [(ngModel)]="filtros.fechaHasta" />
+      </div>
+
+      <!-- CONCEPTO GENERAL -->
+      <div class="campo campo-concepto">
+        <label for="consultaConcepto">Concepto general</label>
+        <input id="consultaConcepto" name="concepto" type="text"
+               [(ngModel)]="filtros.concepto"
+               placeholder="Buscar por concepto" />
+      </div>
+
+      <!-- ACCIONES -->
+      <div class="acciones">
+        <button type="submit" class="btn btn-primary"
+                [disabled]="buscando || cargando || cargandoTipos">
+          {{ buscando ? 'Buscando...' : 'Buscar' }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- RESULTADOS DE BÚSQUEDA -->
+  <!-- ===================================================== -->
+  <section class="card" *ngIf="!seleccionado || modoSeleccion">
+    <div class="section-header">
+      <h3>
+        Resultados
+        <small *ngIf="consultado">({{ resultados.length }}, máximo 100 en pantalla)</small>
+      </h3>
+      <button *ngIf="puedeExportar && consultado" type="button" class="btn btn-secondary"
+              (click)="exportarImpresionGeneral()"
+              [disabled]="exportando || buscando || cargando">
+        {{ exportando ? 'Exportando...' : 'Exportar impresión general' }}
+      </button>
+      <button *ngIf="puedeExportar && consultado" type="button" class="btn btn-secondary"
+              (click)="exportarConsulta()"
+              [disabled]="exportando || buscando || cargando">
+        {{ exportando ? 'Exportando...' : 'Exportar consulta a Excel' }}
+      </button>
+    </div>
+    <div class="tabla-contenedor">
+      <table>
+        <thead>
+        <tr>
+          <th>Agencia</th>
+          <th>Tipo</th>
+          <th>Número</th>
+          <th>Fecha</th>
+          <th>Concepto</th>
+          <th>Estado</th>
+          <th>Mov.</th>
+          <th>Débito</th>
+          <th>Crédito</th>
+          <th>Acción</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let comprobante of resultados">
+          <!-- AGENCIA -->
+          <td>
+            {{ comprobante.codigoAgencia || comprobante.idAgencia }}
+            - {{ comprobante.nombreAgencia || 'Sin descripción' }}
+          </td>
+          <!-- TIPO -->
+          <td>
+            {{ comprobante.tipoComprobante }}
+            <span *ngIf="comprobante.nombreTipoComprobante">
+                - {{ comprobante.nombreTipoComprobante }}
+              </span>
+          </td>
+          <!-- NÚMERO -->
+          <td>{{ comprobante.numeroComprobante }}</td>
+          <!-- FECHA -->
+          <td>
+            {{ comprobante.fechaContable
+            ? (comprobante.fechaContable | date:'dd/MM/yyyy':'UTC')
+            : '—' }}
+          </td>
+          <!-- CONCEPTO -->
+          <td>{{ comprobante.conceptoComprobante || 'Sin concepto registrado' }}</td>
+          <!-- ESTADO -->
+          <td>{{ comprobante.estadoOrigen }}</td>
+          <!-- CANTIDAD DE MOVIMIENTOS -->
+          <td>{{ comprobante.cantidadMovimientos }}</td>
+          <!-- DÉBITO -->
+          <td class="importe">{{ moneda.format(comprobante.totalDebito) }}</td>
+          <!-- CRÉDITO -->
+          <td class="importe">{{ moneda.format(comprobante.totalCredito) }}</td>
+          <!-- ACCIÓN -->
+          <td>
+            <button type="button" class="btn btn-secondary"
+                    (click)="seleccionar(comprobante)" [disabled]="cargando">
+              {{ modoSeleccion ? 'Seleccionar' : 'Consultar' }}
+            </button>
+          </td>
+        </tr>
+        <!-- SIN RESULTADOS -->
+        <tr *ngIf="consultado && resultados.length === 0">
+          <td colspan="10">No se encontraron comprobantes con los filtros indicados.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- COMPROBANTE SELECCIONADO -->
+  <!-- ===================================================== -->
+  <section class="card" *ngIf="seleccionado && !modoSeleccion">
+
+    <!-- NAVEGACIÓN Y EXPORTACIÓN DEL COMPROBANTE -->
+    <div class="acciones">
+      <button type="button" class="btn btn-secondary"
+              (click)="volverAResultados()">
+        ← Volver a resultados
+      </button>
+      <button *ngIf="puedeExportar" type="button" class="btn btn-secondary"
+              (click)="exportarComprobante()"
+              [disabled]="exportando || cargando">
+        {{ exportando ? 'Exportando...' : 'Exportar comprobante a Excel' }}
+      </button>
+    </div>
+
+    <!-- ENCABEZADO DEL COMPROBANTE -->
+    <div class="section-header">
+      <div>
+        <h3>
+          {{ seleccionado.cabecera.tipoComprobante }}
+          - {{ seleccionado.cabecera.numeroComprobante }}
+        </h3>
+        <p>{{ seleccionado.cabecera.nombreTipoComprobante || 'Comprobante contable' }}</p>
+        <p>
+          {{ seleccionado.cabecera.fechaContable
+          ? (seleccionado.cabecera.fechaContable | date:'dd/MM/yyyy':'UTC')
+          : 'Sin fecha contable' }}
+          · {{ seleccionado.cabecera.codigoAgencia || seleccionado.cabecera.idAgencia }}
+          - {{ seleccionado.cabecera.nombreAgencia || 'Sin descripción' }}
+        </p>
+        <p>
+          <strong>Origen:</strong> {{ seleccionado.cabecera.origenTipo }}
+          · <strong>Módulo:</strong> {{ seleccionado.cabecera.moduloOrigen }}
+          · <strong>Proceso:</strong> {{ seleccionado.cabecera.procesoOrigen || '—' }}
+          · <strong>Estado:</strong> {{ seleccionado.cabecera.estadoOrigen }}
+        </p>
+      </div>
+
+      <!-- EDICIÓN EXCLUSIVA DE COMPROBANTES MANUALES ACTIVOS -->
+      <button *ngIf="esEditable()" type="button" class="btn btn-primary"
+              (click)="editar()">
+        Editar comprobante
+      </button>
+    </div>
+
+    <!-- CONCEPTO GENERAL -->
+    <p>
+      <strong>Concepto general:</strong>
+      {{ seleccionado.cabecera.conceptoComprobante || 'Sin concepto registrado' }}
+    </p>
+
+    <!-- SIN MOVIMIENTOS -->
+    <p *ngIf="seleccionado.movimientos.length === 0">
+      Este registro no tiene movimientos contables asociados.
+    </p>
+
+    <!-- =================================================== -->
+    <!-- MOVIMIENTOS CONTABLES -->
+    <!-- =================================================== -->
+    <div class="tabla-contenedor" *ngIf="seleccionado.movimientos.length > 0">
+      <table>
+        <thead>
+        <tr>
+          <th>Cuenta contable</th>
+          <th>Tercero</th>
+          <th>Detalle</th>
+          <th>Estado</th>
+          <th>Base</th>
+          <th>Débito</th>
+          <th>Crédito</th>
+          <th>Control</th>
+          <th>Documento</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let movimiento of seleccionado.movimientos">
+          <!-- CUENTA CONTABLE -->
+          <td>
+            <strong>{{ movimiento.codigoCuenta || movimiento.idCatalogoCuenta }}</strong>
+            <div>{{ movimiento.nombreCuenta || 'Cuenta sin descripción' }}</div>
+          </td>
+          <!-- TERCERO -->
+          <td>
+            <strong>{{ movimiento.documentoTercero || '—' }}</strong>
+            <div>{{ movimiento.nombreTercero || 'Sin tercero' }}</div>
+          </td>
+          <!-- DETALLE -->
+          <td>{{ movimiento.detalleMovimiento }}</td>
+          <!-- ESTADO -->
+          <td>{{ movimiento.estadoMovimiento }}</td>
+          <!-- BASE -->
+          <td class="importe">{{ moneda.format(movimiento.valorBase || 0) }}</td>
+          <!-- DÉBITO -->
+          <td class="importe">{{ moneda.format(movimiento.valorDebito || 0) }}</td>
+          <!-- CRÉDITO -->
+          <td class="importe">{{ moneda.format(movimiento.valorCredito || 0) }}</td>
+          <!-- CONTROL DOCUMENTAL -->
+          <td>{{ movimiento.idTiposControl ?? '—' }}</td>
+          <!-- NÚMERO DOCUMENTO -->
+          <td>{{ movimiento.numeroDocumento || '—' }}</td>
+        </tr>
+        </tbody>
+        <!-- TOTALES -->
+        <tfoot>
+        <tr>
+          <th colspan="5">Totales</th>
+          <th class="importe">{{ moneda.format(total('valorDebito')) }}</th>
+          <th class="importe">{{ moneda.format(total('valorCredito')) }}</th>
+          <th colspan="2"></th>
+        </tr>
+        <!-- DIFERENCIA -->
+        <tr>
+          <th colspan="5">Diferencia</th>
+          <th colspan="2" class="importe">
+            {{ moneda.format(total('valorDebito') - total('valorCredito')) }}
+          </th>
+          <th colspan="2"></th>
+        </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+</div>

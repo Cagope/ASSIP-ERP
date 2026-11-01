@@ -1,0 +1,419 @@
+<div class="reversion-pagos-page">
+  <!-- ENCABEZADO -->
+  <header class="page-header">
+    <div>
+      <h2>Reversión de Pagos de Cuotas</h2>
+      <p class="page-subtitle">
+        Consulta, validación y reversión controlada de pagos de Cartera · Versión 1
+      </p>
+    </div>
+    <span class="estado-proceso">
+      Reversión contable y financiera · Operaciones de Caja sujetas a confirmación
+    </span>
+  </header>
+
+  <!-- BÚSQUEDA DEL ASOCIADO -->
+  <app-consulta-creditos-buscador
+    *ngIf="!creditoSeleccionado"
+    [bloqueado]="ocupado"
+    (asociadoSeleccionado)="seleccionarAsociado($event)"
+    (busquedaLimpiada)="limpiarAsociado()">
+  </app-consulta-creditos-buscador>
+
+  <!-- MENSAJES -->
+  <div *ngIf="error" class="alert alert--danger" role="alert">
+    <strong>No fue posible completar la operación.</strong>
+    <span>{{ error }}</span>
+  </div>
+  <div *ngIf="mensaje && !error"
+       class="alert alert--info"
+       role="status">
+    {{ mensaje }}
+  </div>
+
+  <!-- ASOCIADO SELECCIONADO -->
+  <section *ngIf="asociado as persona"
+           class="consulta-bloque asociado-seleccionado">
+    <div class="bloque-encabezado">
+      <div>
+        <span class="bloque-etiqueta">Asociado seleccionado</span>
+        <h2>{{ persona.nombreCompleto }}</h2>
+        <span>Documento: {{ persona.documento || '—' }}</span>
+      </div>
+      <div class="asociado-datos">
+        <span *ngIf="persona.nombreTipoDocumento || persona.tipoDocumento">
+          {{ persona.nombreTipoDocumento || persona.tipoDocumento }}
+        </span>
+        <span>Créditos encontrados: {{ creditos.length }}</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CRÉDITOS DEL ASOCIADO -->
+  <section *ngIf="asociado && !creditoSeleccionado"
+           class="consulta-bloque">
+    <div class="bloque-encabezado">
+      <div>
+        <h2>Créditos del asociado</h2>
+        <span>Seleccione el pagaré cuyos pagos desea consultar.</span>
+      </div>
+      <span class="contador-registros">
+        {{ creditos.length }} crédito(s)
+      </span>
+    </div>
+    <div *ngIf="cargandoCreditos" class="estado-consulta">
+      Consultando créditos del asociado...
+    </div>
+    <p *ngIf="!cargandoCreditos && creditos.length === 0"
+       class="estado-vacio">
+      No se encontraron créditos para el asociado seleccionado.
+    </p>
+    <div *ngIf="creditos.length > 0" class="tabla-contenedor">
+      <table class="tabla-creditos">
+        <thead>
+        <tr>
+          <th>Pagaré</th>
+          <th>Estado</th>
+          <th class="columna-numero">Saldo capital</th>
+          <th class="columna-accion">Acción</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let credito of creditos">
+          <td>
+            <strong>{{ credito.pagareCartera || '—' }}</strong>
+          </td>
+          <td>{{ credito.codigoEstadoCartera || '—' }}</td>
+          <td class="columna-numero">
+            {{ credito.saldoActual | number:'1.2-2':'es-CO' }}
+          </td>
+          <td class="columna-accion">
+            <button type="button"
+                    class="btn btn--primary"
+                    [disabled]="ocupado"
+                    (click)="seleccionarCredito(credito)">
+              Consultar pagos
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- CRÉDITO SELECCIONADO -->
+  <section *ngIf="creditoSeleccionado as credito"
+           class="consulta-bloque">
+    <div class="bloque-encabezado">
+      <div>
+        <span class="bloque-etiqueta">Crédito seleccionado</span>
+        <h2>Pagaré {{ credito.pagareCartera || '—' }}</h2>
+        <span>Estado: {{ credito.codigoEstadoCartera || '—' }}</span>
+      </div>
+      <button type="button"
+              class="btn btn--cancel"
+              [disabled]="ocupado"
+              (click)="limpiarAsociado()">
+        Nueva búsqueda
+      </button>
+    </div>
+    <div class="datos-credito-grid">
+      <div class="dato-financiero">
+        <span>Saldo de capital</span>
+        <strong>
+          {{ credito.saldoActual | number:'1.2-2':'es-CO' }}
+        </strong>
+      </div>
+      <div class="dato-financiero">
+        <span>Pagos registrados</span>
+        <strong>{{ pagos.length }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- HISTORIAL DE PAGOS -->
+  <section *ngIf="creditoSeleccionado"
+           class="consulta-bloque">
+    <div class="bloque-encabezado">
+      <div>
+        <h2>Pagos registrados</h2>
+        <span>Solo el último pago vigente puede ser elegible para reversión.</span>
+      </div>
+      <button type="button"
+              class="btn btn--cancel"
+              [disabled]="ocupado"
+              (click)="actualizarPagos()">
+        Actualizar pagos
+      </button>
+    </div>
+    <div *ngIf="cargandoPagos" class="estado-consulta">
+      Consultando pagos del crédito...
+    </div>
+    <p *ngIf="!cargandoPagos && pagos.length === 0"
+       class="estado-vacio">
+      No se encontraron pagos registrados.
+    </p>
+    <div *ngIf="pagos.length > 0" class="tabla-contenedor">
+      <table class="tabla-creditos">
+        <thead>
+        <tr>
+          <th>Pago</th>
+          <th>Fecha de pago</th>
+          <th>Fecha contable</th>
+          <th class="columna-numero">Valor</th>
+          <th>Estado</th>
+          <th class="columna-accion">Acción</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let pago of pagos"
+            [class.fila-seleccionada]="pagoSeleccionado?.idPago === pago.idPago">
+          <td>{{ pago.idPago }}</td>
+          <td>{{ pago.fechaPago || '—' }}</td>
+          <td>{{ pago.fechaContable || '—' }}</td>
+          <td class="columna-numero">
+            {{ pago.valor | number:'1.2-2':'es-CO' }}
+          </td>
+          <td>
+            <span class="estado-consulta">{{ pago.estado }}</span>
+          </td>
+          <td class="columna-accion">
+            <button type="button"
+                    class="btn btn--primary"
+                    [disabled]="ocupado || resultado !== null"
+                    (click)="seleccionarPago(pago)">
+              Analizar pago
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- VALIDACIÓN DEL PAGO -->
+  <section *ngIf="pagoSeleccionado"
+           class="consulta-bloque">
+    <div class="bloque-encabezado">
+      <div>
+        <span class="bloque-etiqueta">Análisis de reversión</span>
+        <h2>Pago {{ pagoSeleccionado.idPago }}</h2>
+        <span>Validaciones financieras y contables del backend.</span>
+      </div>
+    </div>
+    <div *ngIf="cargandoAnalisis" class="estado-consulta">
+      Validando pago, comprobante contable y restitución del crédito...
+    </div>
+    <ng-container *ngIf="vistaPrevia as vista">
+      <div class="alert"
+           [ngClass]="vista.elegibleParaAnalisis ? 'alert--info' : 'alert--danger'">
+        <strong>
+          {{ vista.elegibleParaAnalisis
+          ? 'Pago habilitado para análisis'
+          : 'Pago no elegible para reversión' }}
+        </strong>
+        <span>{{ vista.observacion }}</span>
+      </div>
+      <div class="datos-credito-grid">
+        <div class="dato-financiero">
+          <span>Último pago aplicado</span>
+          <strong>{{ vista.ultimoPagoAplicado ?? '—' }}</strong>
+        </div>
+        <div class="dato-financiero">
+          <span>Comprobante original</span>
+          <strong>
+            {{ vista.pago.tipoComprobante || '—' }}
+            {{ vista.pago.numeroComprobante || '' }}
+          </strong>
+        </div>
+      </div>
+    </ng-container>
+  </section>
+
+  <!-- COMPROBANTE CONTRARIO -->
+  <section *ngIf="comprobante as contable"
+           class="consulta-bloque">
+    <div class="bloque-encabezado">
+      <div>
+        <h2>Comprobante contable contrario</h2>
+        <span>
+          Comprobante original:
+          {{ contable.tipoOriginal }} {{ contable.numeroOriginal }}
+        </span>
+      </div>
+    </div>
+    <div class="tabla-contenedor">
+      <table class="tabla-creditos">
+        <thead>
+        <tr>
+          <th>Cuenta</th>
+          <th>Tercero</th>
+          <th>Detalle</th>
+          <th class="columna-numero">Débito</th>
+          <th class="columna-numero">Crédito</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let linea of contable.lineas">
+          <td>
+            <strong>{{ linea.codigoCuenta || '—' }}</strong>
+            <div>{{ linea.nombreCuenta || '—' }}</div>
+          </td>
+          <td>
+            <strong>{{ linea.documentoTercero || '—' }}</strong>
+            <div>{{ linea.nombreTercero || '—' }}</div>
+          </td>
+          <td>{{ linea.detalleOriginal || '—' }}</td>
+          <td class="columna-numero">
+            {{ linea.debito | number:'1.2-2':'es-CO' }}
+          </td>
+          <td class="columna-numero">
+            {{ linea.credito | number:'1.2-2':'es-CO' }}
+          </td>
+        </tr>
+        </tbody>
+        <tfoot>
+        <tr>
+          <th colspan="3">Totales</th>
+          <th class="columna-numero">
+            {{ contable.totalDebitos | number:'1.2-2':'es-CO' }}
+          </th>
+          <th class="columna-numero">
+            {{ contable.totalCreditos | number:'1.2-2':'es-CO' }}
+          </th>
+        </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+
+  <!-- RESTITUCIÓN DEL CRÉDITO -->
+  <section *ngIf="restitucion as estado"
+           class="consulta-bloque">
+    <div class="bloque-encabezado">
+      <div>
+        <h2>Estado de restitución</h2>
+        <span>Resultado de las verificaciones de Cartera.</span>
+      </div>
+    </div>
+    <div class="alert"
+         [ngClass]="estado.consistente ? 'alert--info' : 'alert--danger'">
+      <strong>
+        {{ estado.consistente
+        ? 'Validaciones satisfactorias'
+        : 'Inconsistencia detectada' }}
+      </strong>
+      <span>{{ estado.observacion }}</span>
+    </div>
+    <div class="datos-credito-grid">
+      <div class="dato-financiero">
+        <span>Saldo actual</span>
+        <strong>
+          {{ estado.saldoActual | number:'1.2-2':'es-CO' }}
+        </strong>
+      </div>
+      <div class="dato-financiero">
+        <span>Capital a restituir</span>
+        <strong>
+          {{ estado.saldoRestituible | number:'1.2-2':'es-CO' }}
+        </strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONFIRMACIÓN -->
+  <section *ngIf="restitucion?.consistente && vistaPrevia?.elegibleParaAnalisis && !resultado"
+           class="consulta-bloque">
+    <div class="bloque-encabezado">
+      <div>
+        <h2>Confirmación de reversión</h2>
+        <span>Registre la fecha y justificación de la operación.</span>
+      </div>
+    </div>
+    <div class="filtros-grid">
+      <div class="f-row">
+        <label for="fechaReversion">Fecha de reversión</label>
+        <input id="fechaReversion"
+               type="date"
+               name="fechaReversion"
+               [(ngModel)]="fechaReversion"
+               [disabled]="confirmando">
+      </div>
+      <div class="f-row">
+        <label for="motivoReversion">Motivo de reversión</label>
+        <textarea id="motivoReversion"
+                  name="motivoReversion"
+                  rows="4"
+                  maxlength="1000"
+                  [(ngModel)]="motivo"
+                  [disabled]="confirmando"
+                  placeholder="Describa el motivo de la reversión.">
+        </textarea>
+      </div>
+    </div>
+    <div class="confirmacion-control">
+      <label>
+        <input type="checkbox"
+               name="confirmacionAceptada"
+               [(ngModel)]="confirmacionAceptada"
+               [disabled]="confirmando">
+        Confirmo que revisé el pago, las contrapartidas contables y los valores
+        que serán restituidos. Autorizo ejecutar la reversión.
+      </label>
+    </div>
+    <div class="filtros-acciones">
+      <button type="button"
+              class="btn btn--primary"
+              [disabled]="!puedeConfirmar"
+              (click)="confirmarReversion()">
+        {{ confirmando ? 'Procesando reversión...' : 'Confirmar reversión' }}
+      </button>
+    </div>
+  </section>
+
+  <!-- RESULTADO -->
+  <section *ngIf="resultado as operacion"
+           class="consulta-bloque">
+    <div class="bloque-encabezado">
+      <div>
+        <span class="bloque-etiqueta">Operación finalizada</span>
+        <h2>Reversión registrada correctamente</h2>
+        <span>Pago original: {{ operacion.idPago }}</span>
+      </div>
+    </div>
+    <div class="alert alert--info" role="status">
+      La operación financiera fue confirmada por el servidor.
+    </div>
+    <div class="datos-credito-grid">
+      <div class="dato-financiero">
+        <span>Comprobante de reversión</span>
+        <strong>{{ operacion.numeroComprobante }}</strong>
+      </div>
+      <div class="dato-financiero">
+        <span>Capital restituido</span>
+        <strong>
+          {{ operacion.saldoRestituido | number:'1.2-2':'es-CO' }}
+        </strong>
+      </div>
+      <div class="dato-financiero">
+        <span>Devolución a ahorros</span>
+        <strong>
+          {{ operacion.valorAhorros | number:'1.2-2':'es-CO' }}
+        </strong>
+      </div>
+      <div class="dato-financiero">
+        <span>Egreso pendiente en Caja</span>
+        <strong>
+          {{ operacion.valorCajaPendiente | number:'1.2-2':'es-CO' }}
+        </strong>
+      </div>
+    </div>
+    <div class="filtros-acciones">
+      <button type="button"
+              class="btn btn--primary"
+              (click)="actualizarPagos()">
+        Actualizar historial de pagos
+      </button>
+    </div>
+  </section>
+</div>

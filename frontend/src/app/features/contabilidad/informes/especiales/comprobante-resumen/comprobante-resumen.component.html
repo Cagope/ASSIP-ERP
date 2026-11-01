@@ -1,0 +1,75 @@
+<section class="comprobante-resumen">
+  <header class="encabezado">
+    <h2>Comprobante resumen</h2>
+    <p>Consolidado de movimientos contables por cuenta y período.</p>
+  </header>
+
+  <div class="filtros">
+    <label>
+      <span>Agencia</span>
+      <select [(ngModel)]="filtros.idAgencia" (ngModelChange)="cambiarFiltros()" [disabled]="cargando">
+        <option [ngValue]="0">Seleccione una agencia</option>
+        <option *ngFor="let agencia of agencias" [ngValue]="agencia.idAgencia">
+          {{ agencia.codigoAgencia }} - {{ agencia.nombreAgencia }}
+        </option>
+      </select>
+    </label>
+    <label>
+      <span>Fecha inicial</span>
+      <input type="date" [(ngModel)]="filtros.fechaInicial" (ngModelChange)="cambiarFiltros()" [disabled]="cargando">
+    </label>
+    <label>
+      <span>Fecha final</span>
+      <input type="date" [(ngModel)]="filtros.fechaFinal" (ngModelChange)="cambiarFiltros()" [disabled]="cargando">
+    </label>
+    <div class="acciones">
+      <button type="button" class="primario" (click)="ejecutar()" [disabled]="cargando">
+        {{ cargando ? 'Consultando...' : 'Ejecutar' }}
+      </button>
+      <button type="button" (click)="exportarExcel()"
+        [disabled]="cargando || !resultadoVigente || !informe?.filas?.length">
+        Exportar Excel
+      </button>
+    </div>
+  </div>
+
+  <p class="error" *ngIf="mensajeError">{{ mensajeError }}</p>
+
+  <ng-container *ngIf="resultadoVigente && informe as resultado">
+    <div class="resumen">
+      <div><strong>Agencia:</strong> {{ nombreAgenciaInforme }}</div>
+      <div><strong>Período:</strong> {{ resultado.fechaInicial }} al {{ resultado.fechaFinal }}</div>
+      <div><strong>Cuentas:</strong> {{ resultado.cantidadCuentas }}</div>
+    </div>
+    <div class="tabla-contenedor" *ngIf="resultado.filas.length; else sinMovimientos">
+      <table>
+        <thead>
+          <tr>
+            <th>Código cuenta</th>
+            <th>Nombre de la cuenta</th>
+            <th class="numero">Débitos</th>
+            <th class="numero">Créditos</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let fila of resultado.filas">
+            <td>{{ fila.codigoCuenta }}</td>
+            <td>{{ fila.nombreCuenta }}</td>
+            <td class="numero">{{ fila.totalDebitos | number:'1.2-2':'es-CO' }}</td>
+            <td class="numero">{{ fila.totalCreditos | number:'1.2-2':'es-CO' }}</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <th colspan="2">TOTAL DEL INFORME</th>
+            <th class="numero">{{ resultado.totalDebitos | number:'1.2-2':'es-CO' }}</th>
+            <th class="numero">{{ resultado.totalCreditos | number:'1.2-2':'es-CO' }}</th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <ng-template #sinMovimientos>
+      <p class="sin-datos">No hay movimientos activos en el período consultado.</p>
+    </ng-template>
+  </ng-container>
+</section>

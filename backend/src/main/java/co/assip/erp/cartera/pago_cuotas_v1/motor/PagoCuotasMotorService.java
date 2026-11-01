@@ -131,6 +131,38 @@ public class PagoCuotasMotorService {
                 requiereConfirmacionCaja);
     }
 
+    /**
+     * Bloquea crédito y cuentas de ahorro para un recaudo de prórroga.
+     * No calcula cuotas ni modifica el cronograma del crédito.
+     * Debe invocarse dentro de la misma transacción que contabiliza el recaudo.
+     */
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.MANDATORY)
+    public OperacionRecaudoValidada validarRecaudoProrrogaConBloqueo(
+            Integer idCarteraCredito,
+            Integer idAgenciaReceptora,
+            BigDecimal totalConceptos,
+            List<PagoCuotasMedioRecaudoDTO> medios) {
+        if (idCarteraCredito == null || idCarteraCredito <= 0) {
+            throw new IllegalArgumentException("Debe seleccionar un crédito válido.");
+        }
+        if (idAgenciaReceptora == null || idAgenciaReceptora <= 0) {
+            throw new IllegalArgumentException("Debe indicar una agencia receptora válida.");
+        }
+        usuarioSesionService.validarAgencia(idAgenciaReceptora);
+        var credito = repository.bloquearCredito(idCarteraCredito);
+        comprobar("A".equals(credito.estado()), "El crédito ya no se encuentra activo.");
+        comprobar(Objects.equals(credito.idAgencia(), idAgenciaReceptora),
+                "La agencia receptora no corresponde a la agencia del crédito.");
+        comprobar(credito.saldo() != null && credito.saldo().signum() > 0,
+                "El crédito no tiene saldo pendiente.");
+        comprobar(!repository.existePagoPendienteCaja(idCarteraCredito),
+                "El crédito tiene un pago pendiente de confirmación en Caja.");
+        OperacionRecaudoValidada recaudo = validarOperacionRecaudo(
+                totalConceptos, medios, idAgenciaReceptora);
+        bloquearCuentasAhorroRecaudo(idCarteraCredito, recaudo.medios());
+        return recaudo;
+    }
+
     /** Resultado inmutable de la validación; no representa un pago registrado. */
     public record OperacionRecaudoValidada(
             BigDecimal total,
@@ -627,10 +659,29 @@ public class PagoCuotasMotorService {
                 "No fue posible registrar el extracto de Cartera.");
         repository.actualizarCredito(aplicacion, idUsuario);
         repository.marcarPagoAhorrosAplicado(idPago, idExtracto, "CC", numero, idUsuario);
+        cerrarProrrogaPorCuotaPagada(operacion.idCarteraCredito(), aplicacion, simulacion, idUsuario);
         publicarCxCTesoreria(idPago, operacion.idCarteraCredito(),
                 operacion.idAgenciaReceptora(), operacion.fechaPago(),
                 recaudo.medios(), idUsuario);
         return idPago;
+    }
+
+    /** Cierra la última prórroga activa cuando el pago aplicado cubre una cuota completa. */
+    private void cerrarProrrogaPorCuotaPagada(
+            Integer idCredito,
+            ResultadoAplicacion aplicacion,
+            PagoCuotasV1Service.SimulacionPago simulacion,
+            Integer idUsuario) {
+        if (aplicacion == null || simulacion == null || simulacion.liquidacion() == null
+                || !aplicacion.candidatoRegularizacionProrroga()
+                || simulacion.liquidacion().cuotasConsideradas() <= 0) {
+            return;
+        }
+        if (repository.tieneProrrogaVigente(idCredito)) {
+            if (!repository.cerrarUltimaProrrogaAplicada(idCredito, idUsuario)) {
+                throw new IllegalStateException("No fue posible cerrar la prórroga activa del crédito.");
+            }
+        }
     }
 
     /** Suma únicamente el componente CxC, sin incluir Caja ni AHORROS. */
@@ -643,9 +694,9 @@ public class PagoCuotasMotorService {
 
     /** Publica la CxC aplicada por Cartera como entrada pendiente de recaudo en Tesorería. */
     private void publicarCxCTesoreria(Long idPago, Integer idCredito,
-                                     Integer idAgencia, LocalDate fechaPago,
-                                     List<PagoCuotasMedioRecaudoDTO> medios,
-                                     Integer idUsuario) {
+                                      Integer idAgencia, LocalDate fechaPago,
+                                      List<PagoCuotasMedioRecaudoDTO> medios,
+                                      Integer idUsuario) {
         BigDecimal valor = valorCxC(medios);
         if (valor.signum() == 0) {
             return;
@@ -988,17 +1039,6 @@ public class PagoCuotasMotorService {
         return valor;
     }
 
-    /**
-     * Proyección sin persistencia.
-     *
-     * Conserva las fechas y la altura originales para validar
-     * concurrencia, y las proyectadas para aplicar el pago.
-     *
-     * candidatoRegularizacionProrroga NO autoriza por sí solo
-     * cerrar una prórroga: la operación final debe validar
-     * el estado y la cobertura real.
-     */
-
     // Validación de confirmación integrada; sin aplicar aún movimientos financieros.
     @Transactional
     public PagoValidado validarPendiente(Long idPago, Long idMovimientoCaja, Long idCaja) {
@@ -1175,6 +1215,7 @@ public class PagoCuotasMotorService {
         repository.marcarPagoAplicado(
                 pago.idPago(), pago.idMovimientoCaja(), idExtracto,
                 extracto.tipoComprobante(), extracto.numeroComprobante(), idUsuario);
+        cerrarProrrogaPorCuotaPagada(pago.idCarteraCredito(), aplicacion, simulacion, idUsuario);
         return idExtracto;
     }
 
@@ -1582,6 +1623,140 @@ public class PagoCuotasMotorService {
         return List.copyOf(movimientos);
     }
 
+
+    /**
+     * Construye los asientos de una prórroga sin simular ni aplicar un pago ordinario.
+     * No modifica cuotas, fechas, saldos ni genera consecutivos.
+     * Los conceptos sin parametrización específica se rechazan.
+     */
+    @Transactional(readOnly = true)
+    public List<MovimientoContableDTO> construirMovimientosContablesProrroga(
+            Integer idCredito, Integer idAgencia, LocalDate fechaContable,
+            List<PagoCuotasMedioRecaudoDTO> medios,
+            BigDecimal capital, BigDecimal interesCorriente, BigDecimal interesMora,
+            BigDecimal seguro, BigDecimal aportes, BigDecimal fondoGarantia,
+            BigDecimal otrosConceptos) {
+
+        comprobar(idCredito != null && idCredito > 0 && idAgencia != null
+                        && idAgencia > 0 && fechaContable != null,
+                "Crédito, agencia y fecha contable son obligatorios.");
+
+        BigDecimal vCapital = importeProrroga(capital);
+        BigDecimal vInteres = importeProrroga(interesCorriente);
+        BigDecimal vMora = importeProrroga(interesMora);
+        BigDecimal vSeguro = importeProrroga(seguro);
+        BigDecimal vAportes = importeProrroga(aportes);
+        BigDecimal vFondo = importeProrroga(fondoGarantia);
+        BigDecimal vOtros = importeProrroga(otrosConceptos);
+
+        comprobar(vInteres.signum() > 0,
+                "La prórroga requiere intereses corrientes positivos.");
+
+        comprobar(vAportes.signum() == 0 && vFondo.signum() == 0
+                        && vOtros.signum() == 0,
+                "Aportes, fondo de garantía y otros conceptos requieren parametrización contable específica.");
+
+        BigDecimal total = vCapital.add(vInteres).add(vMora).add(vSeguro);
+
+        var recaudo = validarOperacionRecaudo(total, medios, idAgencia);
+        usuarioSesionService.validarAgencia(idAgencia);
+
+        var credito = pagoCuotasV1Service.consultarCredito(idCredito);
+        comprobar(idAgencia.equals(credito.idAgencia()),
+                "La agencia del recaudo no corresponde al crédito.");
+
+        var datos = repository.consultarDatosCredito(idCredito);
+        comprobar(idAgencia.equals(datos.idAgencia()),
+                "La parametrización contable corresponde a otra agencia.");
+
+        var titular = repository.consultarIdentificacionTitular(idCredito);
+        comprobar(credito.pagareCartera() != null
+                        && !credito.pagareCartera().isBlank(),
+                "El crédito no tiene pagaré para identificar el comprobante.");
+
+        String referencia = "PRÓRROGA - PAGARÉ "
+                + credito.pagareCartera().trim()
+                + " - CÉDULA " + titular.documento();
+
+        Integer tercero = credito.idDatosPersonal();
+        var movimientos = new java.util.ArrayList<MovimientoContableDTO>();
+
+        for (var medio : recaudo.medios()) {
+            switch (medio.tipoMedio()) {
+                case CAJA -> movimientos.add(lineaPagoCaja(
+                        cajasMovimientosService.obtenerCuentaContableCaja(medio.idCaja()),
+                        idAgencia, tercero, fechaContable,
+                        medio.valor(), BigDecimal.ZERO,
+                        "RECAUDO EFECTIVO - " + referencia));
+
+                case AHORROS -> {
+                    Integer idCuenta = Math.toIntExact(medio.idCuentaAhorro());
+                    Integer cuenta = repository.resolverCuentaContableAhorroRecaudo(
+                            idCredito, idCuenta);
+                    movimientos.add(lineaPagoCaja(
+                            cuenta, idAgencia, tercero, fechaContable,
+                            medio.valor(), BigDecimal.ZERO,
+                            "RECAUDO AHORROS - CUENTA " + idCuenta
+                                    + " - " + referencia));
+                }
+
+                case CXP -> {
+                    var cuenta = repository.resolverParametroContable(
+                            idAgencia, "RECAUDO_BANCARIO");
+                    movimientos.add(lineaPagoCaja(
+                            cuenta.idCatalogoCuenta(), idAgencia,
+                            tercero, fechaContable,
+                            medio.valor(), BigDecimal.ZERO,
+                            "RECAUDO CONSIGNACIÓN O TRANSFERENCIA - " + referencia));
+                }
+            }
+        }
+
+        agregarCreditoPago(movimientos, datos, "CAPITAL", vCapital,
+                idAgencia, tercero, fechaContable, referencia);
+
+        agregarCreditoPago(movimientos, datos, "INTERES", vInteres,
+                idAgencia, tercero, fechaContable, referencia);
+
+        agregarCreditoPago(movimientos, datos, "INGRESO_INTERES_MORA", vMora,
+                idAgencia, tercero, fechaContable, referencia);
+
+        if (vSeguro.signum() > 0) {
+            var cuenta = repository.resolverParametroContable(idAgencia, "SEGUROS");
+            movimientos.add(lineaPagoCaja(
+                    cuenta.idCatalogoCuenta(), idAgencia,
+                    tercero, fechaContable,
+                    BigDecimal.ZERO, vSeguro,
+                    "PAGO SEGUROS - " + referencia));
+        }
+
+        BigDecimal debitos = BigDecimal.ZERO;
+        BigDecimal creditos = BigDecimal.ZERO;
+
+        for (var movimiento : movimientos) {
+            debitos = debitos.add(movimiento.getValorDebito());
+            creditos = creditos.add(movimiento.getValorCredito());
+        }
+
+        comprobar(debitos.compareTo(total) == 0
+                        && creditos.compareTo(total) == 0,
+                "El comprobante de la prórroga no cuadra con el recaudo.");
+
+        return List.copyOf(movimientos);
+    }
+
+    /** Normaliza conceptos opcionales y rechaza valores negativos o fraccionarios. */
+    private static BigDecimal importeProrroga(BigDecimal valor) {
+        if (valor == null) {
+            return BigDecimal.ZERO;
+        }
+        comprobar(valor.signum() >= 0
+                        && valor.stripTrailingZeros().scale() <= 0,
+                "Los importes de la prórroga deben ser pesos enteros no negativos.");
+        return valor;
+    }
+
+
     /** Vista contable anterior al envío a Caja; no persiste ni reserva consecutivos. */
     @Transactional(readOnly = true)
     public ComprobantePrevio previsualizarOperacionPreparada(OperacionPagoPreparada operacion) {
@@ -1650,9 +1825,9 @@ public class PagoCuotasMotorService {
 
     /** Conserva la firma anterior para otros constructores de movimientos. */
     private void agregarCreditoPago(List<MovimientoContableDTO> movimientos,
-            PagoCuotasMotorRepository.DatosContablesCredito credito,
-            String concepto, BigDecimal valor,
-            Integer idAgencia, Integer idDatosPersonal, LocalDate fechaContable) {
+                                    PagoCuotasMotorRepository.DatosContablesCredito credito,
+                                    String concepto, BigDecimal valor,
+                                    Integer idAgencia, Integer idDatosPersonal, LocalDate fechaContable) {
         agregarCreditoPago(movimientos, credito, concepto, valor,
                 idAgencia, idDatosPersonal, fechaContable, null);
     }

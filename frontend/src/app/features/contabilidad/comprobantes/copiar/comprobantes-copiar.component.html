@@ -1,0 +1,178 @@
+<div class="comprobantes-page">
+  <!-- Encabezado del proceso independiente de copia. -->
+  <header class="page-header" *ngIf="!origen">
+    <div>
+      <h2>Copiar comprobantes</h2>
+      <p>Busque un comprobante de cualquier módulo, revise sus movimientos e indique el destino. El original no se modifica.</p>
+    </div>
+  </header>
+
+  <div *ngIf="error" class="mensaje mensaje-error" role="alert">{{ error }}</div>
+  <div *ngIf="creado" class="mensaje mensaje-exito" role="status">
+    {{ creado.mensaje }} Nuevo comprobante: {{ creado.tipoComprobante }} - {{ creado.numeroComprobante }} (agencia {{ creado.idAgencia }}).
+  </div>
+
+  <ng-container *ngIf="!origen">
+    <section class="card">
+      <h3>Buscar comprobante de origen</h3>
+      <form class="filtros" (ngSubmit)="buscar()">
+        <div class="campo">
+          <label for="copiarAgencia">Agencia</label>
+          <select id="copiarAgencia" name="agencia" [(ngModel)]="filtros.idAgencia"
+                  (ngModelChange)="cargarTiposComprobantes()">
+            <option [ngValue]="undefined">Todas las autorizadas</option>
+            <option *ngFor="let agencia of agencias" [ngValue]="agencia.idAgencia">
+              {{ agencia.codigoAgencia }} - {{ agencia.nombreAgencia }}
+            </option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="copiarTipo">Tipo de comprobante</label>
+          <select id="copiarTipo" name="tipo" [(ngModel)]="filtros.tipoComprobante"
+                  [disabled]="cargandoTiposOrigen">
+            <option [ngValue]="undefined">{{ cargandoTiposOrigen ? 'Cargando tipos...' : 'Todos los tipos' }}</option>
+            <option *ngFor="let tipo of tiposComprobantes" [ngValue]="tipo.tipoComprobante">
+              {{ tipo.tipoComprobante }} - {{ tipo.nombreTipoComprobante }}
+            </option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="copiarNumero">Número</label>
+          <input id="copiarNumero" name="numero" type="text" [(ngModel)]="filtros.numeroComprobante"
+                 placeholder="Ej. 0007116" autocomplete="off" />
+        </div>
+        <div class="campo">
+          <label for="copiarDesde">Desde</label>
+          <input id="copiarDesde" name="desde" type="date" [(ngModel)]="filtros.fechaDesde" />
+        </div>
+        <div class="campo">
+          <label for="copiarHasta">Hasta</label>
+          <input id="copiarHasta" name="hasta" type="date" [(ngModel)]="filtros.fechaHasta" />
+        </div>
+        <div class="campo campo-concepto">
+          <label for="copiarConcepto">Concepto general</label>
+          <input id="copiarConcepto" name="concepto" type="text" [(ngModel)]="filtros.concepto"
+                 placeholder="Buscar por concepto" />
+        </div>
+        <div class="acciones">
+          <button type="submit" class="btn btn-primary"
+                  [disabled]="buscando || cargando || cargandoTiposOrigen">
+            {{ buscando ? 'Buscando...' : 'Buscar' }}
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h3>Resultados <small *ngIf="consultado">({{ resultados.length }}, máximo 100)</small></h3>
+      <div class="tabla-contenedor">
+        <table>
+          <thead><tr>
+            <th>Agencia</th><th>Tipo</th><th>Número</th><th>Fecha</th><th>Concepto</th>
+            <th>Estado</th><th>Mov.</th><th>Débito</th><th>Crédito</th><th>Acción</th>
+          </tr></thead>
+          <tbody>
+            <tr *ngFor="let r of resultados">
+              <td>{{ r.codigoAgencia || r.idAgencia }} - {{ r.nombreAgencia || 'Sin descripción' }}</td>
+              <td>{{ r.tipoComprobante }}<span *ngIf="r.nombreTipoComprobante"> - {{ r.nombreTipoComprobante }}</span></td>
+              <td>{{ r.numeroComprobante }}</td>
+              <td>{{ r.fechaContable ? (r.fechaContable | date:'dd/MM/yyyy':'UTC') : '—' }}</td>
+              <td>{{ r.conceptoComprobante || 'Sin concepto registrado' }}</td>
+              <td>{{ r.estadoOrigen }}</td>
+              <td>{{ r.cantidadMovimientos }}</td>
+              <td class="importe">{{ moneda.format(r.totalDebito) }}</td>
+              <td class="importe">{{ moneda.format(r.totalCredito) }}</td>
+              <td><button type="button" class="btn btn-secondary" (click)="seleccionar(r)" [disabled]="cargando">Seleccionar</button></td>
+            </tr>
+            <tr *ngIf="consultado && resultados.length === 0">
+              <td colspan="10">No se encontraron comprobantes con los filtros indicados.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+
+  <ng-container *ngIf="origen as c">
+    <section class="card">
+      <div class="acciones acciones-superiores">
+        <button type="button" class="btn btn-secondary" (click)="volver()" [disabled]="guardando">← Volver a resultados</button>
+      </div>
+      <div class="section-header">
+        <div>
+          <h3>{{ c.cabecera.tipoComprobante }} - {{ c.cabecera.numeroComprobante }}</h3>
+          <p>{{ c.cabecera.nombreTipoComprobante || 'Comprobante contable' }}</p>
+          <p>{{ c.cabecera.fechaContable ? (c.cabecera.fechaContable | date:'dd/MM/yyyy':'UTC') : 'Sin fecha contable' }}
+            · {{ c.cabecera.codigoAgencia || c.cabecera.idAgencia }} - {{ c.cabecera.nombreAgencia || 'Sin descripción' }}</p>
+          <p><strong>Origen:</strong> {{ c.cabecera.origenTipo }} · <strong>Módulo:</strong> {{ c.cabecera.moduloOrigen }}
+            · <strong>Proceso:</strong> {{ c.cabecera.procesoOrigen || '—' }} · <strong>Estado:</strong> {{ c.cabecera.estadoOrigen }}</p>
+        </div>
+        <span class="solo-lectura">Comprobante de origen · Solo lectura</span>
+      </div>
+      <p><strong>Concepto general:</strong> {{ c.cabecera.conceptoComprobante || 'Sin concepto registrado' }}</p>
+      <p *ngIf="c.movimientos.length === 0">Este registro no tiene movimientos contables asociados.</p>
+      <div class="tabla-contenedor" *ngIf="c.movimientos.length > 0">
+        <table>
+          <thead><tr><th>Cuenta contable</th><th>Tercero</th><th>Detalle</th><th>Estado</th>
+            <th>Base</th><th>Débito</th><th>Crédito</th><th>Control</th><th>Documento</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let m of c.movimientos">
+              <td><strong>{{ m.codigoCuenta || m.idCatalogoCuenta }}</strong><div>{{ m.nombreCuenta || 'Cuenta sin descripción' }}</div></td>
+              <td><strong>{{ m.documentoTercero || '—' }}</strong><div>{{ m.nombreTercero || 'Sin tercero' }}</div></td>
+              <td>{{ m.detalleMovimiento }}</td><td>{{ m.estadoMovimiento }}</td>
+              <td class="importe">{{ moneda.format(m.valorBase || 0) }}</td>
+              <td class="importe">{{ moneda.format(m.valorDebito || 0) }}</td>
+              <td class="importe">{{ moneda.format(m.valorCredito || 0) }}</td>
+              <td>{{ m.idTiposControl ?? '—' }}</td><td>{{ m.numeroDocumento || '—' }}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr><th colspan="5">Totales</th><th class="importe">{{ moneda.format(total('valorDebito')) }}</th>
+              <th class="importe">{{ moneda.format(total('valorCredito')) }}</th><th colspan="2"></th></tr>
+            <tr><th colspan="5">Diferencia</th><th colspan="2" class="importe">
+              {{ moneda.format(total('valorDebito') - total('valorCredito')) }}</th><th colspan="2"></th></tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>Datos del nuevo comprobante</h3>
+      <p>Los movimientos se copiarán sin cambios. El período contable del destino debe estar abierto.</p>
+      <form class="filtros" (ngSubmit)="copiar()">
+        <div class="campo">
+          <label for="destinoAgencia">Agencia destino</label>
+          <select id="destinoAgencia" name="agenciaDestino" [(ngModel)]="destino.idAgenciaDestino"
+                  (ngModelChange)="cargarTiposDestino()" [disabled]="guardando || !!creado" required>
+            <option [ngValue]="null">Seleccione</option>
+            <option *ngFor="let a of agencias" [ngValue]="a.idAgencia">{{ a.codigoAgencia }} - {{ a.nombreAgencia }}</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="destinoTipo">Tipo de comprobante destino</label>
+          <select id="destinoTipo" name="tipoDestino" [(ngModel)]="destino.tipoComprobanteDestino"
+                  [disabled]="cargandoTipos || guardando || !!creado" required>
+            <option value="">Seleccione</option>
+            <option *ngFor="let t of tiposDestino" [value]="t.tipoComprobante">{{ t.tipoComprobante }} - {{ t.nombreTipoComprobante }}</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="destinoFecha">Fecha contable destino</label>
+          <input id="destinoFecha" type="date" name="fechaDestino" [(ngModel)]="destino.fechaContableDestino"
+                 [disabled]="guardando || !!creado" required />
+        </div>
+        <div class="campo campo-concepto">
+          <label for="destinoConcepto">Concepto general destino</label>
+          <textarea id="destinoConcepto" name="conceptoDestino" rows="2"
+                    [(ngModel)]="destino.conceptoComprobanteDestino" [disabled]="guardando || !!creado" required></textarea>
+        </div>
+        <div class="acciones">
+          <button type="submit" class="btn btn-primary"
+                  [disabled]="guardando || cargandoTipos || !!creado || !c.movimientos.length">
+            {{ guardando ? 'Copiando...' : 'Copiar comprobante' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </ng-container>
+</div>

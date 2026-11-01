@@ -155,6 +155,13 @@
 			<version>1.78</version>
 		</dependency>
 
+		<!-- Lectura de archivos Excel XLS y XLSX para importación de comprobantes -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>5.4.1</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

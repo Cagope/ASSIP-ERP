@@ -721,17 +721,20 @@ public class TesoreriaOperacionesEjecucionesService {
                 List.copyOf(ids), "Recaudo contabilizado correctamente.");
     }
 
-    /** Limita el recaudo a entradas de Pago de Cuotas aún pendientes de ejecución. */
+    /** Valida recaudos CxC pendientes de Cartera, según el proceso y su tabla de origen. */
     private void validarEntradaCartera(Map<String, Object> operacion) {
         String estado = Objects.toString(operacion.get("estado"), "");
         if (!PENDIENTE.equals(estado) && !PARCIAL.equals(estado)) {
             throw new IllegalStateException("La operación no admite recaudos en estado " + estado);
         }
+        String proceso = Objects.toString(operacion.get("proceso_origen"), "");
+        String tabla = Objects.toString(operacion.get("tabla_origen"), "");
+        boolean origenValido = ("PAGO_CUOTAS".equals(proceso) && "cartera.pagos_cuotas".equals(tabla))
+                || ("PRORROGA".equals(proceso) && "cartera.creditos_prorrogas".equals(tabla));
         if (!"ENTRADA".equals(Objects.toString(operacion.get("naturaleza"), ""))
                 || !"CARTERA".equals(Objects.toString(operacion.get("modulo_origen"), ""))
-                || !"PAGO_CUOTAS".equals(Objects.toString(operacion.get("proceso_origen"), ""))
-                || !"cartera.pagos_cuotas".equals(Objects.toString(operacion.get("tabla_origen"), ""))) {
-            throw new IllegalStateException("El recaudo solo admite CxC originadas en Pago de Cuotas.");
+                || !origenValido) {
+            throw new IllegalStateException("El recaudo solo admite CxC de Pago de Cuotas o Prórrogas de Cartera.");
         }
     }
 

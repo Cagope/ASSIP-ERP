@@ -130,7 +130,7 @@ public class ConsultaCreditosRepository {
             """;
 
     // =========================================================
-    // SQL: extracto
+    // SQL: extracto operativo (solo movimientos activos)
     // =========================================================
 
     private static final String SQL_LISTAR_EXTRACTO = """
@@ -138,6 +138,7 @@ public class ConsultaCreditosRepository {
                 e.*
             FROM cartera.vw_cartera_extractos_total e
             WHERE e.id_cartera_credito = :idCarteraCredito
+              AND e.estado = 'A'
             ORDER BY
                 e.fecha_pago DESC NULLS LAST,
                 e.hora DESC NULLS LAST,
@@ -442,6 +443,7 @@ public class ConsultaCreditosRepository {
     // Extracto
     // =========================================================
 
+    /** Consulta solo movimientos activos; conserva R y V en la base para auditoría. */
     public List<ConsultaCreditoExtractoDTO> listarExtracto(
             Integer idCarteraCredito
     ) {
