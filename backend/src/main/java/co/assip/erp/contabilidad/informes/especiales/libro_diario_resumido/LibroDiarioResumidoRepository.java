@@ -63,7 +63,7 @@ public class LibroDiarioResumidoRepository {
                    AND c.id_agencia = a.id_agencia
                 WHERE a.id_agencia = :idAgencia
                   AND a.fecha_auxiliar BETWEEN :fechaInicial AND :fechaFinal
-                  AND a.estado_movimiento = 'A'
+                  AND TRIM(a.estado_movimiento) IN ('A', 'C')
                 GROUP BY
                     a.fecha_auxiliar,
                     c.codigo_cuenta,
@@ -105,7 +105,7 @@ public class LibroDiarioResumidoRepository {
                    AND t.id_agencia = a.id_agencia
                 WHERE a.id_agencia = :idAgencia
                   AND a.fecha_auxiliar BETWEEN :fechaInicial AND :fechaFinal
-                  AND a.estado_movimiento = 'A'
+                  AND TRIM(a.estado_movimiento) IN ('A', 'C')
                 GROUP BY
                     a.fecha_auxiliar,
                     a.tipo_comprobante,

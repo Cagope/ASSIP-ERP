@@ -706,7 +706,7 @@ public class PagoCuotasMotorService {
                 idAgencia, "CARTERA", "PAGO_CUOTAS", "cartera.pagos_cuotas",
                 idPago, idDatosPersonal, "ENTRADA", fechaPago,
                 "RECAUDO CXC - " + conceptoGeneralPago(idCredito, valor) + " (PC-" + idPago + ")",
-                valor, idUsuario);
+                valor, idUsuario, null, null, "RECAUDO_PAGO_CUOTAS");
     }
 
     /** Bloquea AHORROS en orden estable y valida saldo antes de registrar Caja y Cartera. */
@@ -1627,15 +1627,14 @@ public class PagoCuotasMotorService {
     /**
      * Construye los asientos de una prórroga sin simular ni aplicar un pago ordinario.
      * No modifica cuotas, fechas, saldos ni genera consecutivos.
-     * Los conceptos sin parametrización específica se rechazan.
+     * Reutiliza las cuentas parametrizadas de Pago de Cuotas para los seis conceptos.
      */
     @Transactional(readOnly = true)
     public List<MovimientoContableDTO> construirMovimientosContablesProrroga(
             Integer idCredito, Integer idAgencia, LocalDate fechaContable,
             List<PagoCuotasMedioRecaudoDTO> medios,
             BigDecimal capital, BigDecimal interesCorriente, BigDecimal interesMora,
-            BigDecimal seguro, BigDecimal aportes, BigDecimal fondoGarantia,
-            BigDecimal otrosConceptos) {
+            BigDecimal seguro, BigDecimal alivios, BigDecimal costasJudiciales) {
 
         comprobar(idCredito != null && idCredito > 0 && idAgencia != null
                         && idAgencia > 0 && fechaContable != null,
@@ -1645,18 +1644,14 @@ public class PagoCuotasMotorService {
         BigDecimal vInteres = importeProrroga(interesCorriente);
         BigDecimal vMora = importeProrroga(interesMora);
         BigDecimal vSeguro = importeProrroga(seguro);
-        BigDecimal vAportes = importeProrroga(aportes);
-        BigDecimal vFondo = importeProrroga(fondoGarantia);
-        BigDecimal vOtros = importeProrroga(otrosConceptos);
+        BigDecimal vAlivios = importeProrroga(alivios);
+        BigDecimal vCostas = importeProrroga(costasJudiciales);
 
         comprobar(vInteres.signum() > 0,
                 "La prórroga requiere intereses corrientes positivos.");
 
-        comprobar(vAportes.signum() == 0 && vFondo.signum() == 0
-                        && vOtros.signum() == 0,
-                "Aportes, fondo de garantía y otros conceptos requieren parametrización contable específica.");
-
-        BigDecimal total = vCapital.add(vInteres).add(vMora).add(vSeguro);
+        BigDecimal total = vCapital.add(vInteres).add(vMora)
+                .add(vSeguro).add(vAlivios).add(vCostas);
 
         var recaudo = validarOperacionRecaudo(total, medios, idAgencia);
         usuarioSesionService.validarAgencia(idAgencia);
@@ -1719,6 +1714,12 @@ public class PagoCuotasMotorService {
                 idAgencia, tercero, fechaContable, referencia);
 
         agregarCreditoPago(movimientos, datos, "INGRESO_INTERES_MORA", vMora,
+                idAgencia, tercero, fechaContable, referencia);
+
+        agregarCreditoPago(movimientos, datos, "ALIVIOS", vAlivios,
+                idAgencia, tercero, fechaContable, referencia);
+
+        agregarCreditoPago(movimientos, datos, "COSTAS_JUDICIALES", vCostas,
                 idAgencia, tercero, fechaContable, referencia);
 
         if (vSeguro.signum() > 0) {

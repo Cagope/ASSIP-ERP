@@ -1,0 +1,196 @@
+
+<div class="causacion-extraordinaria-seguros-page">
+  <header class="pagina-encabezado">
+    <div>
+      <h1>Causación extraordinaria de seguros</h1>
+      <p>Registro excepcional de cargos de seguro omitidos o que requieren corrección. La operación genera una nota contable NC.</p>
+    </div>
+  </header>
+
+  <div *ngIf="error" class="alert alert--danger" role="alert">{{ error }}</div>
+  <div *ngIf="aviso" class="alert alert--success" role="status">{{ aviso }}</div>
+  <p *ngIf="cargando" role="status">Consultando información del crédito...</p>
+  <p *ngIf="procesando" role="status">Procesando la operación...</p>
+
+  <section class="consulta-bloque">
+    <div class="bloque-encabezado">
+      <div>
+        <h2>Buscar asociado</h2>
+        <span>Consulte por cédula, nombres o apellidos y seleccione el asociado.</span>
+      </div>
+      <button *ngIf="asociadoSeleccionado" type="button" class="btn btn--secondary btn-sm"
+              (click)="limpiarBusqueda()" [disabled]="cargando || procesando">Nueva búsqueda</button>
+    </div>
+    <app-consulta-creditos-buscador
+      [bloqueado]="cargando || procesando"
+      (asociadoSeleccionado)="seleccionarAsociado($event)">
+    </app-consulta-creditos-buscador>
+  </section>
+
+  <section *ngIf="asociadoSeleccionado && !creditoSeleccionado" class="consulta-bloque">
+    <div class="bloque-encabezado">
+      <div>
+        <h2>{{ asociadoSeleccionado.nombreCompleto }}</h2>
+        <span>Documento: {{ asociadoSeleccionado.documento }}</span>
+      </div>
+    </div>
+    <h3>Créditos activos con saldo</h3>
+    <p *ngIf="!cargando && creditos.length === 0" class="estado-vacio">No se encontraron créditos activos con saldo para este asociado.</p>
+    <div *ngIf="creditos.length > 0" class="tabla-contenedor">
+      <table class="tabla-datos">
+        <thead>
+        <tr>
+          <th>Pagaré</th>
+          <th>Línea de crédito</th>
+          <th>Estado</th>
+          <th class="valor">Saldo de capital</th>
+          <th>Acción</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let credito of creditos">
+          <td>{{ credito.pagareCartera || '—' }}</td>
+          <td>{{ credito.descripcionLineaCredito || credito.codigoLineaCredito || '—' }}</td>
+          <td>{{ credito.descripcionEstadoCartera || credito.codigoEstadoCartera || '—' }}</td>
+          <td class="valor">{{ credito.saldoActual | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</td>
+          <td>
+            <button type="button" class="btn btn--primary btn-sm"
+                    (click)="seleccionarCredito(credito)"
+                    [disabled]="cargando || procesando">
+              Seleccionar
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section *ngIf="creditoSeleccionado as credito" class="consulta-bloque">
+    <div class="bloque-encabezado">
+      <div>
+        <h2>Seguro del pagaré {{ credito.pagareCartera || '—' }}</h2>
+        <span>Los porcentajes provienen de la configuración vigente y no se modifican en este proceso.</span>
+      </div>
+      <button type="button" class="btn btn--secondary btn-sm"
+              (click)="cambiarCredito()" [disabled]="procesando">Cambiar crédito</button>
+    </div>
+
+    <ng-container *ngIf="sugerencia as datos">
+      <div class="form-grid">
+        <div class="f-row">
+          <span>Porcentaje base del seguro</span>
+          <strong>{{ datos.porcentajeBaseSeguro | number:'1.2-4':'es-CO' }} %</strong>
+        </div>
+        <div class="f-row">
+          <span>Porcentaje de extraprima</span>
+          <strong>{{ datos.porcentajeExtraprima | number:'1.2-4':'es-CO' }} %</strong>
+        </div>
+        <div class="f-row">
+          <span>Porcentaje aplicado</span>
+          <strong>{{ datos.porcentajeAplicar | number:'1.2-4':'es-CO' }} %</strong>
+        </div>
+        <div class="f-row">
+          <span>Saldo actual del seguro</span>
+          <strong>{{ datos.saldoSeguro | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong>
+        </div>
+      </div>
+    </ng-container>
+
+    <form *ngIf="solicitud as registro" #causacionForm="ngForm" (ngSubmit)="previsualizar()" class="formulario-seguro">
+      <h3>Datos de la causación extraordinaria</h3>
+      <div class="form-grid">
+        <label class="f-row">
+          <span>Fecha de causación</span>
+          <input type="date" name="fechaMovimiento" [(ngModel)]="registro.fechaMovimiento"
+                 (ngModelChange)="invalidarVistaPrevia()" required [disabled]="procesando">
+        </label>
+        <label class="f-row">
+          <span>Saldo base ($)</span>
+          <input type="text" inputmode="decimal" name="saldoBase"
+                 prorrogasNumericFormat
+                 [(ngModel)]="registro.saldoBase"
+                 (ngModelChange)="cambiarSaldoBase()"
+                 required [disabled]="procesando" class="valor">
+        </label>
+        <label class="f-row">
+          <span>Valor sugerido ($)</span>
+          <span class="valor">{{ sugerencia?.valorSugerido | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</span>
+        </label>
+        <label class="f-row">
+          <span>Valor de causación ($)</span>
+          <input type="text" inputmode="decimal" name="valor"
+                 prorrogasNumericFormat
+                 [(ngModel)]="registro.valor"
+                 (ngModelChange)="cambiarValor()"
+                 required [disabled]="procesando" class="valor">
+        </label>
+      </div>
+      <label class="f-row">
+        <span>Justificación de la causación extraordinaria</span>
+        <textarea name="justificacion" [(ngModel)]="registro.justificacion"
+                  (ngModelChange)="invalidarVistaPrevia()" rows="3" required
+                  [disabled]="procesando" placeholder="Explique el motivo del cargo extraordinario"></textarea>
+      </label>
+      <p class="nota">La causación afecta exclusivamente el saldo del seguro y genera una NC. No modifica el capital, los intereses ni la configuración del seguro.</p>
+      <div class="acciones">
+        <button type="submit" class="btn btn--primary"
+                [disabled]="procesando || cargando">
+          Generar vista previa de NC
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section *ngIf="vistaPrevia as vista" class="consulta-bloque">
+    <div class="bloque-encabezado">
+      <div>
+        <h2>Vista previa de nota contable</h2>
+        <span>{{ vista.tipoComprobante }} {{ vista.numeroSugerido }} · Fecha: {{ vista.fechaMovimiento }}</span>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="f-row"><span>Saldo base</span><strong>{{ vista.saldoBase | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong></div>
+      <div class="f-row"><span>Porcentaje aplicado</span><strong>{{ vista.porcentajeAplicar | number:'1.2-4':'es-CO' }} %</strong></div>
+      <div class="f-row"><span>Valor a causar</span><strong>{{ vista.valor | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong></div>
+    </div>
+    <p><strong>Justificación:</strong> {{ vista.justificacion }}</p>
+    <div class="tabla-contenedor">
+      <table class="tabla-datos">
+        <thead>
+        <tr><th>Cuenta</th><th>Nombre de cuenta</th><th>Documento del tercero</th><th class="valor">Débito</th><th class="valor">Crédito</th></tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let linea of vista.movimientos">
+          <td>{{ linea.codigoCuenta }}</td>
+          <td>{{ linea.nombreCuenta }}</td>
+          <td>{{ linea.documentoTercero }}</td>
+          <td class="valor">{{ linea.debito | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</td>
+          <td class="valor">{{ linea.credito | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</td>
+        </tr>
+        </tbody>
+        <tfoot>
+        <tr>
+          <th colspan="3">Totales</th>
+          <th class="valor">{{ vista.valor | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</th>
+          <th class="valor">{{ vista.valor | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</th>
+        </tr>
+        </tfoot>
+      </table>
+    </div>
+    <p class="nota">Esta vista previa no registra movimientos. El consecutivo definitivo se asigna al confirmar.</p>
+    <div class="acciones">
+      <button type="button" class="btn btn--primary" (click)="confirmar()"
+              [disabled]="procesando || cargando">Confirmar causación y generar NC</button>
+      <button type="button" class="btn btn--secondary" (click)="invalidarVistaPrevia()"
+              [disabled]="procesando">Volver a editar</button>
+    </div>
+  </section>
+
+  <section *ngIf="resultado as registrado" class="consulta-bloque" role="status">
+    <h2>Causación extraordinaria registrada</h2>
+    <p><strong>Comprobante:</strong> {{ registrado.tipoComprobante }} {{ registrado.numeroComprobante }}</p>
+    <p><strong>Saldo del seguro:</strong> {{ registrado.saldoSeguro | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</p>
+    <button type="button" class="btn btn--secondary" (click)="cambiarCredito()">Seleccionar otro crédito</button>
+  </section>
+</div>

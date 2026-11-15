@@ -1,5 +1,7 @@
 package co.assip.erp.tesoreria.operaciones_pendientes;
 
+import co.assip.erp.general.operaciones_financieras.TiposOperacionesFinancierasService;
+import co.assip.erp.general.operaciones_financieras.dto.TipoOperacionFinancieraDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -22,6 +24,7 @@ import java.util.Objects;
 public class TesoreriaOperacionesPendientesService {
 
     private final TesoreriaOperacionesPendientesRepository repository;
+    private final TiposOperacionesFinancierasService tiposOperacionesFinancierasService;
 
     /**
      * Publica una operación pendiente dentro de la transacción
@@ -44,6 +47,55 @@ public class TesoreriaOperacionesPendientesService {
             BigDecimal valorOriginal,
             Integer idUsuario
     ) {
+        return publicar(idAgencia, moduloOrigen, procesoOrigen, tablaOrigen,
+                idOrigen, idDatosPersonal, naturaleza, fechaDocumento,
+                concepto, valorOriginal, idUsuario, null, null);
+    }
+
+    /** Publica una obligación con referencias al comprobante y CxP históricos. */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public Long publicar(
+            Integer idAgencia,
+            String moduloOrigen,
+            String procesoOrigen,
+            String tablaOrigen,
+            Long idOrigen,
+            Integer idDatosPersonal,
+            String naturaleza,
+            LocalDate fechaDocumento,
+            String concepto,
+            BigDecimal valorOriginal,
+            Integer idUsuario,
+            Integer idOrigenComprobante,
+            Integer idCatalogoCuentaCxp
+    ) {
+        return publicar(idAgencia, moduloOrigen, procesoOrigen, tablaOrigen,
+                idOrigen, idDatosPersonal, naturaleza, fechaDocumento,
+                concepto, valorOriginal, idUsuario, idOrigenComprobante,
+                idCatalogoCuentaCxp, null);
+    }
+
+    /**
+     * Publica una obligación identificada por su código financiero.
+     * Valida el catálogo y conserva su referencia sin modificar el origen.
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public Long publicar(
+            Integer idAgencia,
+            String moduloOrigen,
+            String procesoOrigen,
+            String tablaOrigen,
+            Long idOrigen,
+            Integer idDatosPersonal,
+            String naturaleza,
+            LocalDate fechaDocumento,
+            String concepto,
+            BigDecimal valorOriginal,
+            Integer idUsuario,
+            Integer idOrigenComprobante,
+            Integer idCatalogoCuentaCxp,
+            String codigoOperacionFinanciera
+    ) {
         validar(
                 idAgencia,
                 moduloOrigen,
@@ -57,6 +109,16 @@ public class TesoreriaOperacionesPendientesService {
                 idUsuario
         );
 
+        // Mantiene la publicación anterior y habilita la identificación específica.
+        TipoOperacionFinancieraDTO configuracion =
+                codigoOperacionFinanciera == null
+                        ? tiposOperacionesFinancierasService.validarOperacion(
+                        moduloOrigen, procesoOrigen, tablaOrigen,
+                        "TESORERIA", naturaleza, false)
+                        : tiposOperacionesFinancierasService.validarOperacionPorCodigo(
+                        moduloOrigen, procesoOrigen, tablaOrigen,
+                        codigoOperacionFinanciera, "TESORERIA", naturaleza, false);
+
         Long idOperacion = repository.publicar(
                 idAgencia,
                 moduloOrigen.trim(),
@@ -64,11 +126,14 @@ public class TesoreriaOperacionesPendientesService {
                 tablaOrigen.trim(),
                 idOrigen,
                 idDatosPersonal,
-                naturaleza.trim().toUpperCase(),
+                naturalezaNormalizada(naturaleza),
                 fechaDocumento,
                 concepto.trim(),
                 valorOriginal,
-                idUsuario
+                idUsuario,
+                idOrigenComprobante,
+                idCatalogoCuentaCxp,
+                configuracion.getIdTipoOperacion()
         );
 
         if (idOperacion == null) {
@@ -78,6 +143,48 @@ public class TesoreriaOperacionesPendientesService {
         }
 
         return idOperacion;
+    }
+
+
+    /**
+     * Publicación estricta para reversiones: conserva el control único de origen.
+     * Las validaciones de banco y de saldos permanecen en el módulo de Cartera.
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public Long publicarEstricto(
+            Integer idAgencia, String moduloOrigen, String procesoOrigen,
+            String tablaOrigen, Long idOrigen, Integer idDatosPersonal,
+            String naturaleza, LocalDate fechaDocumento, String concepto,
+            BigDecimal valorOriginal, Integer idUsuario,
+            String codigoOperacionFinanciera, String perfilEsperado,
+            boolean exigirSinParciales
+    ) {
+        validar(idAgencia, moduloOrigen, procesoOrigen, tablaOrigen,
+                idOrigen, naturaleza, fechaDocumento, concepto, valorOriginal, idUsuario);
+
+        TipoOperacionFinancieraDTO configuracion = codigoOperacionFinanciera == null
+                ? tiposOperacionesFinancierasService.validarOperacion(
+                        moduloOrigen, procesoOrigen, tablaOrigen,
+                        "TESORERIA", naturaleza, false)
+                : tiposOperacionesFinancierasService.validarOperacionPorCodigo(
+                        moduloOrigen, procesoOrigen, tablaOrigen,
+                        codigoOperacionFinanciera, "TESORERIA", naturaleza, false);
+
+        if (!perfilEsperado.equals(configuracion.getPerfilEjecucion())) {
+            throw new IllegalStateException(
+                    "El perfil financiero de la devolución no corresponde al esperado.");
+        }
+        if (exigirSinParciales && Boolean.TRUE.equals(configuracion.getPermiteParciales())) {
+            throw new IllegalStateException(
+                    "La devolución de prórroga no permite ejecuciones parciales.");
+        }
+
+        return repository.publicarEstricto(
+                idAgencia, moduloOrigen.trim(), procesoOrigen.trim(),
+                tablaOrigen.trim(), idOrigen, idDatosPersonal,
+                naturalezaNormalizada(naturaleza), fechaDocumento,
+                concepto.trim(), valorOriginal, idUsuario,
+                configuracion.getIdTipoOperacion());
     }
 
     /**

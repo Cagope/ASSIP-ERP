@@ -4,64 +4,70 @@
   width: 100%;
 }
 
+// =========================================================
+// CONTENEDOR PRINCIPAL
+// ESTÁNDAR RESUMEN DIARIO DETALLADO
+// =========================================================
+
 .libro-diario-resumido {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
   width: 100%;
   padding: 20px;
-  color: #263238;
+  color: #243247;
   box-sizing: border-box;
 }
 
-/* =========================================================
-   ENCABEZADO
-   ========================================================= */
+// =========================================================
+// ENCABEZADO
+// ESTÁNDAR RESUMEN DIARIO DETALLADO
+// =========================================================
 
 .encabezado {
-  margin-bottom: 22px;
-
+  h1,
   h2 {
     margin: 0 0 6px;
-    font-size: 22px;
-    font-weight: 600;
+    font-size: 1.5rem;
+    font-weight: 700;
     color: #17365d;
   }
 
   p {
     margin: 0;
-    font-size: 13px;
     color: #64748b;
-    line-height: 1.5;
+    font-size: 0.9rem;
   }
 }
 
-/* =========================================================
-   PANELES
-   ========================================================= */
+// =========================================================
+// PANELES
+// =========================================================
 
 .panel-filtros,
 .panel-resultados {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
   padding: 20px;
-  margin-bottom: 20px;
-  box-sizing: border-box;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
 }
 
-.panel-filtros h3,
-.panel-resultados h3 {
-  margin: 0 0 18px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #17365d;
+.panel-filtros {
+  h3 {
+    margin: 0 0 18px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #17365d;
+  }
 }
 
-/* =========================================================
-   FILTROS
-   ========================================================= */
+// =========================================================
+// FILTROS
+// =========================================================
 
 .filtros-grid {
   display: grid;
-  grid-template-columns: minmax(200px, 1.5fr) repeat(2, minmax(150px, 1fr));
+  grid-template-columns: minmax(260px, 2fr) repeat(2, minmax(160px, 1fr));
   gap: 16px;
   align-items: end;
 }
@@ -69,11 +75,11 @@
 .campo {
   display: flex;
   flex-direction: column;
+  gap: 6px;
   min-width: 0;
 
   label {
-    margin-bottom: 6px;
-    font-size: 13px;
+    font-size: 0.85rem;
     font-weight: 600;
     color: #475569;
   }
@@ -84,22 +90,23 @@
     min-height: 38px;
     padding: 8px 10px;
     border: 1px solid #cbd5e1;
-    border-radius: 5px;
-    background: #ffffff;
-    color: #263238;
-    font-size: 13px;
+    border-radius: 6px;
+    background: #fff;
+    color: #243247;
+    font: inherit;
+    font-size: 0.9rem;
     box-sizing: border-box;
     outline: none;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    transition: border-color 0.15s, box-shadow 0.15s;
 
     &:focus {
       border-color: #2563eb;
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+      box-shadow: 0 0 0 3px rgb(37 99 235 / 10%);
     }
 
     &:disabled {
       background: #f1f5f9;
-      color: #64748b;
+      color: #94a3b8;
       cursor: not-allowed;
     }
   }
@@ -114,15 +121,15 @@
   max-width: 420px;
 }
 
-/* =========================================================
-   ACCIONES
-   ========================================================= */
+// =========================================================
+// BOTONES
+// =========================================================
 
 .acciones {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: 18px;
 }
 
 .btn-consultar {
@@ -130,22 +137,22 @@
   justify-content: center;
   align-items: center;
   min-height: 38px;
-  padding: 9px 22px;
+  padding: 8px 22px;
   border: 1px solid #1d4ed8;
-  border-radius: 5px;
+  border-radius: 6px;
   background: #1d4ed8;
-  color: #ffffff;
-  font-size: 13px;
+  color: #fff;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s;
 
   &:hover:not(:disabled) {
     background: #1e40af;
   }
 
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.55;
     cursor: not-allowed;
   }
 }
@@ -332,9 +339,13 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .campo-agencia {
+    grid-column: 1 / -1;
+  }
+
   .campo-modalidad {
-    grid-column: auto;
-    max-width: none;
+    grid-column: 1 / -1;
+    max-width: 420px;
   }
 }
 
@@ -353,11 +364,18 @@
     grid-template-columns: 1fr;
   }
 
-  .acciones {
-    justify-content: stretch;
+  .campo-agencia,
+  .campo-modalidad {
+    grid-column: auto;
+    max-width: none;
   }
 
-  .btn-consultar {
+  .acciones {
+    justify-content: stretch;
+    flex-wrap: wrap;
+  }
+
+  .acciones button {
     width: 100%;
   }
 
@@ -413,5 +431,101 @@
 @media print {
   .acciones-exportacion {
     display: none !important;
+  }
+}
+
+/* =========================================================
+   PRESENTACIÓN CONTABLE POR FECHA - ESTILO CAJA DIARIO
+   ========================================================= */
+
+.panel-resultados {
+  padding: 16px;
+}
+
+.resultado-encabezado {
+  margin-bottom: 12px;
+
+  h3 {
+    margin: 0 0 6px;
+    font-size: 15px;
+    color: #17365d;
+  }
+
+  .resultado-subtitulo {
+    margin: 0;
+    font-size: 11px;
+    color: #64748b;
+  }
+}
+
+.tabla-informe {
+  thead {
+    background: #dce8f5;
+    color: #17365d;
+  }
+
+  th,
+  td {
+    padding: 9px 11px;
+  }
+
+  .descripcion {
+    white-space: normal;
+    min-width: 250px;
+  }
+
+  .fila-fecha {
+    background: #e8eef5;
+
+    td {
+      color: #17365d;
+      font-weight: 700;
+      padding: 10px 11px;
+    }
+  }
+
+  .fila-movimiento {
+    background: #ffffff;
+
+    &:hover {
+      background: #eff6ff;
+    }
+  }
+
+  .fila-total-dia {
+    background: #f0f4f9;
+
+    td {
+      font-weight: 700;
+      color: #17365d;
+      border-top: 1px solid #cbd5e1;
+    }
+  }
+
+  .fila-totales {
+    background: #dce8f5;
+  }
+}
+
+
+
+// Botón de exportación dentro del panel de parámetros.
+.panel-filtros .acciones .btn-exportar {
+  min-height: 38px;
+  padding: 8px 18px;
+  border: 1px solid #1d4ed8;
+  border-radius: 6px;
+  background: #1d4ed8;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  &:hover:not(:disabled) {
+    background: #1e40af;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
   }
 }

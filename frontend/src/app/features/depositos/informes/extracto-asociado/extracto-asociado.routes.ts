@@ -9,7 +9,7 @@ export const EXTRACTO_ASOCIADO_ROUTES: Routes = [
         .then(m => m.ExtractoAsociadoComponent),
     canActivate: [permisoGuard],
     data: {
-      permiso: 'DEPOSITOS_INFORMES_VIEW'
+      permiso: 'DEPOSITOS_EXTRACTO_ASOCIADO_VIEW'
     }
   }
 ];

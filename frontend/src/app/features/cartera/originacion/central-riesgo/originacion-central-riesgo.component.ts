@@ -459,8 +459,17 @@ export class OriginacionCentralRiesgoComponent implements OnInit {
           detalle
         );
 
+        // Regresar al listado para continuar con el siguiente participante.
+        this.registroSeleccionado = null;
+        this.detalleActual = null;
+
         this.mensajeExito =
-          'La información de la central de riesgo fue guardada correctamente.';
+          'Información guardada. Seleccione el siguiente deudor pendiente en el listado.';
+
+        setTimeout(() => {
+          document.getElementById('listado-centrales-deudores')
+            ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 0);
       },
 
       error: (error) => {

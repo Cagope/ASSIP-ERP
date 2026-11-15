@@ -9,7 +9,7 @@ export const ESTADISTICOS_CDAT_ROUTES: Routes = [
         .then(m => m.EstadisticosCdatComponent),
     canActivate: [permisoGuard],
     data: {
-      permiso: 'CDAT_INFORMES_VIEW'
+      permiso: 'CDAT_ESTADISTICOS_VIEW'
     }
   }
 ];

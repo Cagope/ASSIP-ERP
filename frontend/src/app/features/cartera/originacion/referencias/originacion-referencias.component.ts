@@ -157,6 +157,11 @@ export class OriginacionReferenciasComponent implements OnInit {
 
   observacionCierre = '';
 
+  mostrarFormularioCierre = false;
+
+  // La bandeja abre por separado la gestión individual y el cierre general.
+  vistaSolicitud: 'gestion' | 'cierre' = 'gestion';
+
 
   // =========================================================
   // ESTADO DE PANTALLA
@@ -316,11 +321,14 @@ export class OriginacionReferenciasComponent implements OnInit {
 
 
   seleccionarSolicitud(
-    item: SolicitudReferenciaListado
+    item: SolicitudReferenciaListado,
+    vista: 'gestion' | 'cierre' = 'gestion'
   ): void {
 
+    this.vistaSolicitud = vista;
     this.solicitud = item;
     this.participante = null;
+    this.mostrarFormularioCierre = false;
 
     this.referenciaEditando = null;
     this.referenciaEntrevistando = null;
@@ -343,7 +351,9 @@ export class OriginacionReferenciasComponent implements OnInit {
   volverBandeja(): void {
 
     this.solicitud = null;
+    this.vistaSolicitud = 'gestion';
     this.participante = null;
+    this.mostrarFormularioCierre = false;
 
     this.referencias = [];
     this.participantes = [];
@@ -822,6 +832,32 @@ export class OriginacionReferenciasComponent implements OnInit {
   // CIERRE
   // =========================================================
 
+  get referenciasPendientesEntrevista(): SolicitudReferenciaPersonal[] {
+    return this.referencias.filter(referencia =>
+      !referencia.fechaHoraLlamada ||
+      !referencia.medioEntrevista ||
+      referencia.contactoEstablecido === null ||
+      referencia.contactoEstablecido === undefined ||
+      !referencia.fkSeguridadEntrevistador ||
+      (referencia.contactoEstablecido === true &&
+        !referencia.conceptoReferencia?.trim())
+    );
+  }
+
+  abrirCierre(): void {
+    if (!this.editable || !this.puedeEditar || this.ocupado ||
+        this.referenciasPendientesEntrevista.length > 0) {
+      return;
+    }
+    this.error = '';
+    this.mostrarFormularioCierre = true;
+  }
+
+  cancelarCierre(): void {
+    this.mostrarFormularioCierre = false;
+    this.error = '';
+  }
+
   cerrar(): void {
 
     if (
@@ -837,6 +873,16 @@ export class OriginacionReferenciasComponent implements OnInit {
         this.referencias.length
           ? 'CON_REFERENCIAS'
           : 'SIN_REFERENCIAS';
+
+    if (!this.mostrarFormularioCierre) {
+      return;
+    }
+
+    if (tipo === 'CON_REFERENCIAS' && this.referenciasPendientesEntrevista.length) {
+      this.error =
+        `No puede finalizar: hay ${this.referenciasPendientesEntrevista.length} referencia(s) sin entrevista registrada.`;
+      return;
+    }
 
     if (
       tipo === 'SIN_REFERENCIAS' &&
@@ -872,7 +918,8 @@ export class OriginacionReferenciasComponent implements OnInit {
                 .trim() || null
           }
         ),
-      'Gestión de referencias cerrada.'
+      'Gestión de referencias cerrada.',
+      () => { this.mostrarFormularioCierre = false; }
     );
   }
 

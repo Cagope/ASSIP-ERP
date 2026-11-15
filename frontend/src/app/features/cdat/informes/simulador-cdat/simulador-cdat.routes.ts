@@ -9,7 +9,7 @@ export const SIMULADOR_CDAT_ROUTES: Routes = [
         .then(m => m.SimuladorCdatComponent),
     canActivate: [permisoGuard],
     data: {
-      permiso: 'CDAT_INFORMES_VIEW'
+      permiso: 'CDAT_SIMULADOR_VIEW'
     }
   }
 ];

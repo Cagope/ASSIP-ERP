@@ -104,7 +104,7 @@ export const CDAT_ROUTES: Routes = [
   {
     path: 'informes/consulta-cdats',
     canActivate: [permisoGuard],
-    data: { permiso: 'CDAT_INFORMES_VIEW' },
+    data: { permiso: 'CDAT_CONSULTA_INFORME_VIEW' },
     children: CONSULTA_CDATS_ROUTES
   },
 
@@ -114,7 +114,7 @@ export const CDAT_ROUTES: Routes = [
   {
     path: 'informes/simulador-cdat',
     canActivate: [permisoGuard],
-    data: { permiso: 'CDAT_INFORMES_VIEW' },
+    data: { permiso: 'CDAT_SIMULADOR_VIEW' },
     loadChildren: () =>
       import('./informes/simulador-cdat/simulador-cdat.routes')
         .then(m => m.SIMULADOR_CDAT_ROUTES)
@@ -126,7 +126,7 @@ export const CDAT_ROUTES: Routes = [
   {
     path: 'informes/estadisticos-cdat',
     canActivate: [permisoGuard],
-    data: { permiso: 'CDAT_INFORMES_VIEW' },
+    data: { permiso: 'CDAT_ESTADISTICOS_VIEW' },
     children: ESTADISTICOS_CDAT_ROUTES
   },
 
@@ -136,7 +136,7 @@ export const CDAT_ROUTES: Routes = [
   {
     path: 'informes/fechas-cdat',
     canActivate: [permisoGuard],
-    data: { permiso: 'CDAT_INFORMES_VIEW' },
+    data: { permiso: 'CDAT_INFORMES_FECHAS_VIEW' },
     children: FECHAS_CDAT_ROUTES
   },
 

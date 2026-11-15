@@ -1226,6 +1226,16 @@ export class OriginacionFormalizacionComponent implements OnInit, DoCheck, OnDes
   }
 
 
+  // Nombre legible del ente aprobador, sin exponer identificadores internos.
+  nombreEnteAprobador(id: number | null | undefined): string {
+    switch (Number(id)) {
+      case 1: return 'Gerencia';
+      case 2: return 'Comité de Créditos';
+      case 3: return 'Consejo de Administración';
+      default: return '—';
+    }
+  }
+
   // =========================================================
   // VOLVER
   // =========================================================
@@ -1237,7 +1247,7 @@ export class OriginacionFormalizacionComponent implements OnInit, DoCheck, OnDes
     }
 
     void this.router.navigate([
-      '/cartera/originacion'
+      '/cartera/originacion/formalizacion'
     ]);
   }
 

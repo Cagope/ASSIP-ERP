@@ -219,6 +219,33 @@ export const CARTERA_ROUTES: Routes = [
   },
 
   // =======================================================
+  // ADMINISTRACIÓN DE COSTAS JUDICIALES
+  // =======================================================
+
+  {
+    path: 'costas-judiciales',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_COSTAS_JUDICIALES_VIEW'
+    },
+    loadComponent: () =>
+      import('./costas_judiciales/administracion/administracion-costas-judiciales.component')
+        .then(m => m.CostasJudicialesComponent)
+  },
+
+  // =======================================================
+  // PAGOS Y CORRECCIONES DE COSTAS JUDICIALES
+  // =======================================================
+  {
+    path: 'costas-judiciales/pago-extraordinario',
+    canActivate: [permisoGuard],
+    data: { permiso: 'CARTERA_COSTAS_JUDICIALES_VIEW' },
+    loadComponent: () =>
+      import('./costas_judiciales/pagoextraordinario/pago-extraordinario-costas-judiciales.component')
+        .then(m => m.PagoExtraordinarioCostasJudicialesComponent)
+  },
+
+  // =======================================================
   // REVERSIÓN DE PAGOS DE CUOTAS V1
   // =======================================================
   {
@@ -233,6 +260,73 @@ export const CARTERA_ROUTES: Routes = [
       ).then(
         m => m.ReversionPagosComponent
       )
+  },
+
+
+  // =======================================================
+  // REVERSIÓN DE PRÓRROGAS V1
+  // =======================================================
+  {
+    path: 'reversion-prorrogas',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_PAGO_CUOTAS_REVERSION_VIEW'
+    },
+    loadComponent: () =>
+      import(
+        './reversion-prorrogas/reversion-prorrogas.component'
+      ).then(
+        m => m.ReversionProrrogasComponent
+      )
+  },
+
+
+
+  // =======================================================
+  // ADMINISTRACIÓN DE SEGUROS
+  // =======================================================
+
+  {
+    path: 'seguros/administracion',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_SEGUROS_ADMIN_VIEW'
+    },
+    loadComponent: () =>
+      import('./seguros/administracion/administracion-seguros.component')
+        .then(m => m.AdministracionSegurosComponent)
+  },
+
+
+  // =======================================================
+  // CAUSACIÓN EXTRAORDINARIA DE SEGUROS
+  // =======================================================
+
+  {
+    path: 'seguros/causacion-extraordinaria',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_SEGUROS_ADMIN_VIEW'
+    },
+    loadComponent: () =>
+      import('./seguros/causacionextraordinaria/causacion-extraordinaria-seguros.component')
+        .then(m => m.CausacionExtraordinariaSegurosComponent)
+  },
+
+
+  // =======================================================
+  // PAGOS Y CORRECCIONES DE SEGUROS
+  // =======================================================
+
+  {
+    path: 'seguros/pago-extraordinario',
+    canActivate: [permisoGuard],
+    data: {
+      permiso: 'CARTERA_SEGUROS_ADMIN_VIEW'
+    },
+    loadComponent: () =>
+      import('./seguros/pagoextraordinario/pago-extraordinario-seguros.component')
+        .then(m => m.PagoExtraordinarioSegurosComponent)
   },
 
 
@@ -438,3 +532,4 @@ export const CARTERA_ROUTES: Routes = [
   }
 
 ];
+

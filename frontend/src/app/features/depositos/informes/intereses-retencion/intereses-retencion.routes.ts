@@ -9,7 +9,7 @@ export const INTERESES_RETENCION_ROUTES: Routes = [
         .then(m => m.InteresesRetencionComponent),
     canActivate: [permisoGuard],
     data: {
-      permiso: 'DEPOSITOS_INFORMES_VIEW'
+      permiso: 'DEPOSITOS_INTERESES_RETENCION_VIEW'
     }
   }
 ];

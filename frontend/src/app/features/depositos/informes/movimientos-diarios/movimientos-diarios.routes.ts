@@ -9,7 +9,7 @@ export const MOVIMIENTOS_DIARIOS_ROUTES: Routes = [
         .then(m => m.MovimientosDiariosComponent),
     canActivate: [permisoGuard],
     data: {
-      permiso: 'DEPOSITOS_INFORMES_VIEW'
+      permiso: 'DEPOSITOS_MOVIMIENTOS_DIARIOS_VIEW'
     }
   }
 ];

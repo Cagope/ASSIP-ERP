@@ -1,85 +1,110 @@
-
 :host {
   display: block;
   width: 100%;
 }
 
+
+// =========================================================
+// CONTENEDOR PRINCIPAL Y ENCABEZADO
+// ESTÁNDAR RESUMEN DIARIO DETALLADO
+// =========================================================
+
 .secuencial-comprobantes {
-  padding: 24px;
-  color: #263445;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+  color: #243247;
   font-size: 14px;
 }
 
 .encabezado {
-  margin-bottom: 24px;
-
-  h1 {
-    margin: 0 0 8px;
-    color: #183153;
-    font-size: 24px;
+  h1,
+  h2 {
+    margin: 0 0 6px;
+    font-size: 1.5rem;
     font-weight: 700;
+    line-height: 1.3;
+    color: #17365d;
   }
 
   p {
     margin: 0;
     color: #64748b;
-    line-height: 1.5;
+    font-size: 0.9rem;
   }
 }
 
-.panel {
-  margin-bottom: 24px;
-  padding: 24px;
-  background: #fff;
+
+// =========================================================
+// PANEL Y CAMPOS DE CONSULTA
+// =========================================================
+
+.panel-filtros,
+.panel-resultados {
+  padding: 20px;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  background: #fff;
 }
 
-.filtros-panel {
-  h2 {
-    margin: 0 0 20px;
-    color: #183153;
-    font-size: 17px;
+.panel-filtros,
+.filtros-panel,
+.panel-parametros {
+  h2,
+  h3 {
+    margin: 0 0 18px;
+    font-size: 1.05rem;
     font-weight: 600;
+    color: #17365d;
   }
+}
+
+.filtros-panel,
+.panel-parametros {
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
 }
 
 .filtros-grid {
   display: grid;
-  grid-template-columns: minmax(240px, 1.5fr) repeat(2, minmax(160px, 1fr));
+  grid-template-columns: minmax(260px, 2fr) repeat(2, minmax(160px, 1fr));
   gap: 16px;
+  align-items: end;
 }
 
 .campo {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 6px;
   min-width: 0;
 
   label {
-    color: #334155;
-    font-size: 13px;
+    color: #475569;
+    font-size: 0.85rem;
     font-weight: 600;
   }
 
   select,
   input {
     width: 100%;
-    min-height: 40px;
-    padding: 8px 12px;
-    color: #263445;
+    min-height: 38px;
+    padding: 8px 10px;
+    color: #243247;
     font: inherit;
+    font-size: 0.9rem;
     background: #fff;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
     box-sizing: border-box;
     outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition: border-color 0.15s, box-shadow 0.15s;
 
     &:focus {
       border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      box-shadow: 0 0 0 3px rgb(37 99 235 / 10%);
     }
 
     &:disabled {
@@ -90,31 +115,58 @@
   }
 }
 
+// =========================================================
+// BOTONES DE CONSULTA Y EXPORTACIÓN
+// =========================================================
+
 .acciones {
   display: flex;
   justify-content: flex-end;
-  margin-top: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
 }
 
 .btn-consultar {
-  min-height: 40px;
-  padding: 9px 22px;
+  min-height: 38px;
+  padding: 8px 22px;
   color: #fff;
-  font: inherit;
+  font-size: 0.9rem;
   font-weight: 600;
   background: #1d4ed8;
   border: 1px solid #1d4ed8;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.15s;
 
   &:hover:not(:disabled) {
     background: #1e40af;
   }
 
   &:disabled {
-    opacity: 0.6;
+    opacity: 0.55;
     cursor: not-allowed;
+  }
+}
+
+// El exportador del panel comparte el diseño estándar.
+// El botón de exportación de resultados conserva su estilo original.
+.panel-filtros .btn-exportar,
+.filtros-panel .btn-exportar,
+.panel-parametros .btn-exportar {
+  min-height: 38px;
+  padding: 8px 18px;
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  border-radius: 6px;
+  font-size: 0.9rem;
+
+  &:hover:not(:disabled) {
+    background: #1e40af;
+  }
+
+  &:disabled {
+    opacity: 0.55;
   }
 }
 
@@ -406,6 +458,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .campo-agencia {
+    grid-column: 1 / -1;
+  }
+
   .totales-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -416,13 +472,19 @@
     padding: 12px;
   }
 
-  .encabezado h1 {
-    font-size: 21px;
+  .panel-filtros,
+  .filtros-panel,
+  .panel-parametros {
+    padding: 14px;
   }
 
   .panel,
   .resultado-panel {
     padding: 16px;
+  }
+
+  .campo-agencia {
+    grid-column: auto;
   }
 
   .filtros-grid,
@@ -434,8 +496,8 @@
     justify-content: stretch;
   }
 
-  .btn-consultar,
-  .btn-exportar {
+  .acciones .btn-consultar,
+  .acciones .btn-exportar {
     width: 100%;
   }
 
@@ -460,7 +522,9 @@
   }
 
   .encabezado,
+  .panel-filtros,
   .filtros-panel,
+  .panel-parametros,
   .acciones,
   .mensaje,
   .resultado-resumen,

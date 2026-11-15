@@ -26,13 +26,10 @@ import java.util.Map;
 public class SolicitudAprobacionController {
 
     private static final String PERMISO_VIEW =
-            "CARTERA_ORIGINACION_VIEW";
+            "CARTERA_ORIGINACION_APROBACION_VIEW";
 
     private static final String PERMISO_EDIT =
             "CARTERA_ORIGINACION_EDIT";
-
-    private static final String PERMISO_APROBACION =
-            "CARTERA_ORIGINACION_APROBACION";
 
     // =========================================================
     // DEPENDENCIAS
@@ -194,10 +191,9 @@ public class SolicitudAprobacionController {
 
     private void validarAprobacion() {
 
-        accessValidator.validarAcceso(
-                usuarioActual(),
-                PERMISO_APROBACION
-        );
+        // El servicio valida el permiso específico del ente actual
+        // después de bloquear la solicitud.
+        validarConsulta();
     }
 
     private Usuario usuarioActual() {

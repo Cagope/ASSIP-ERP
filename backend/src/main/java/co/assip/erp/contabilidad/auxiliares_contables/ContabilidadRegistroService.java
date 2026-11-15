@@ -2,6 +2,7 @@
 package co.assip.erp.contabilidad.auxiliares_contables;
 
 import co.assip.erp.contabilidad.conceptos_contables.ConceptosContablesRepository;
+import co.assip.erp.contabilidad.periodos.PeriodosContablesService;
 import co.assip.erp.contabilidad.origen_comprobantes.OrigenComprobantesRepository;
 import co.assip.erp.contabilidad.plan_cuentas.PlanCuentaRepository;
 import co.assip.erp.contabilidad.auxiliares_contables.dto.MovimientoContableDTO;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -30,19 +32,22 @@ public class ContabilidadRegistroService {
     private final AuxiliaresContablesRepository auxiliaresRepo;
     private final PlanCuentaRepository planCuentaRepository;
     private final ControlesAuxiliaresRepository controlesRepo;
+    private final PeriodosContablesService periodosContablesService;
 
     public ContabilidadRegistroService(
             ConceptosContablesRepository conceptosRepo,
             OrigenComprobantesRepository origenRepo,
             AuxiliaresContablesRepository auxiliaresRepo,
             PlanCuentaRepository planCuentaRepository,
-            ControlesAuxiliaresRepository controlesRepo
+            ControlesAuxiliaresRepository controlesRepo,
+            PeriodosContablesService periodosContablesService
     ) {
         this.conceptosRepo = conceptosRepo;
         this.origenRepo = origenRepo;
         this.auxiliaresRepo = auxiliaresRepo;
         this.planCuentaRepository = planCuentaRepository;
         this.controlesRepo = controlesRepo;
+        this.periodosContablesService = periodosContablesService;
     }
 
     /**
@@ -266,7 +271,26 @@ public class ContabilidadRegistroService {
             );
         }
 
-        // 3. Registrar cabecera.
+        // 3. Validar y bloquear todos los períodos afectados antes de escribir.
+        // Ordenar las fechas evita inversiones de bloqueo entre transacciones.
+        List<LocalDate> fechasContables = movimientos.stream()
+                .map(m -> {
+                    if (m == null || m.getFechaAuxiliar() == null) {
+                        throw new IllegalArgumentException(
+                                "Todos los movimientos deben tener fechaAuxiliar."
+                        );
+                    }
+                    return m.getFechaAuxiliar();
+                })
+                .distinct()
+                .sorted()
+                .toList();
+
+        for (LocalDate fechaContable : fechasContables) {
+            periodosContablesService.validarPeriodoAbierto(idAgencia, fechaContable);
+        }
+
+        // 4. Registrar cabecera.
 
         if (creacionEstricta) {
             conceptosRepo.insertarConceptoNuevo(
@@ -286,7 +310,7 @@ public class ContabilidadRegistroService {
             );
         }
 
-        // 4. Registrar origen.
+        // 5. Registrar origen.
 
         if (origen != null) {
 
@@ -297,7 +321,7 @@ public class ContabilidadRegistroService {
             origenRepo.insertarOrigen(origen, idUsuario);
         }
 
-        // 5. Registrar auxiliares y controles.
+        // 6. Registrar auxiliares y controles.
 
         int indiceMovimiento = 0;
 

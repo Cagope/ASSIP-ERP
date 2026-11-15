@@ -77,11 +77,22 @@ export class OriginacionAprobacionComponent
   private readonly session =
       inject(SessionService);
 
+  // La autorización depende del ente actual, no del permiso general.
   get puedeAprobar(): boolean {
+    const idEnte = this.solicitudSeleccionada?.idEnteActual;
 
-    return this.session.tienePermiso(
-      'CARTERA_ORIGINACION_APROBACION'
-    );
+    const permisoPorEnte: Record<number, string> = {
+      [ENTES_APROBACION.GERENCIA]: 'CARTERA_ORIGINACION_APROBACION_GERENCIA',
+      [ENTES_APROBACION.COMITE]: 'CARTERA_ORIGINACION_APROBACION_COMITE',
+      [ENTES_APROBACION.CONSEJO]: 'CARTERA_ORIGINACION_APROBACION_CONSEJO'
+    };
+
+    if (idEnte == null) {
+      return false;
+    }
+
+    const permiso = permisoPorEnte[idEnte];
+    return !!permiso && this.session.tienePermiso(permiso);
   }
 
   // =========================================================
@@ -585,6 +596,95 @@ export class OriginacionAprobacionComponent
         decision.idAprobacionDecision ===
         this.idAprobacionDecision
     ) ?? null;
+  }
+
+
+  // =========================================================
+  // CONCEPTOS SUGERIDOS POR ENTE Y DECISIÓN
+  // =========================================================
+
+  private ultimoConceptoSugerido = '';
+
+  private normalizarDecision(valor: string): string {
+    return (valor ?? '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase()
+      .replace(/[^A-Z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '');
+  }
+
+  private obtenerTipoDecision(): 'APROBADA' | 'NO_VIABLE' | 'SOLICITA_AJUSTES' | null {
+    const seleccionada = this.decisionSeleccionada;
+    if (!seleccionada) {
+      return null;
+    }
+
+    const codigo = this.normalizarDecision(seleccionada.codigoDecision);
+    const nombre = this.normalizarDecision(seleccionada.nombreDecision);
+
+    if (codigo === 'APROBADA' || codigo === 'APROBADO' || nombre === 'APROBADA' || nombre === 'APROBADO') {
+      return 'APROBADA';
+    }
+
+    if (codigo === 'NO_VIABLE' || codigo === 'NO_APROBADA' || nombre === 'NO_VIABLE' || nombre === 'NO_APROBADA') {
+      return 'NO_VIABLE';
+    }
+
+    if (codigo === 'SOLICITA_AJUSTES' || codigo === 'SOLICITAR_AJUSTES' || nombre === 'SOLICITA_AJUSTES' || nombre === 'SOLICITAR_AJUSTES') {
+      return 'SOLICITA_AJUSTES';
+    }
+
+    return null;
+  }
+
+  // Al cambiar la decisión, retirar solo el texto generado automáticamente.
+  // Una observación editada por el funcionario permanece intacta.
+  alCambiarDecision(): void {
+    if (this.ultimoConceptoSugerido && this.concepto === this.ultimoConceptoSugerido) {
+      this.concepto = '';
+    }
+    this.ultimoConceptoSugerido = '';
+  }
+
+  get puedeSugerirConcepto(): boolean {
+    return !this.registrandoDecision
+      && this.obtenerTipoDecision() !== null
+      && (!this.concepto.trim() || this.concepto === this.ultimoConceptoSugerido);
+  }
+
+  sugerirConcepto(): void {
+    if (!this.puedeSugerirConcepto) {
+      return;
+    }
+
+    const decision = this.obtenerTipoDecision();
+    const ente = this.solicitudSeleccionada?.idEnteActual;
+    if (!decision || ente == null) {
+      return;
+    }
+
+    const nombreEnte = this.nombreEnteActual;
+    let sugerencia = '';
+
+    switch (decision) {
+      case 'APROBADA':
+        sugerencia = ente === ENTES_APROBACION.CONSEJO
+          ? 'El Consejo de Administración emite concepto favorable sobre la solicitud de crédito presentada, de conformidad con la documentación y las condiciones sometidas a su consideración. Se aprueba la solicitud para continuar con las etapas posteriores previstas en el procedimiento institucional.'
+          : `Se registra concepto favorable de ${nombreEnte} sobre la solicitud de crédito, con base en la información presentada para esta actuación. Se autoriza continuar el trámite ante la siguiente instancia que corresponda, conforme al procedimiento institucional.`;
+        break;
+
+      case 'NO_VIABLE':
+        sugerencia = `${nombreEnte} determina que la solicitud de crédito no es viable. Motivos específicos que sustentan la decisión: [describir los motivos evaluados]. Esta decisión da por terminado el trámite de la solicitud.`;
+        break;
+
+      case 'SOLICITA_AJUSTES':
+        sugerencia = `${nombreEnte} solicita ajustes a la solicitud de crédito antes de emitir una decisión definitiva. Ajustes, aclaraciones o documentos requeridos: [detallar los requerimientos]. Una vez atendidos, la solicitud podrá presentarse nuevamente conforme al procedimiento institucional.`;
+        break;
+    }
+
+    this.concepto = sugerencia;
+    this.ultimoConceptoSugerido = sugerencia;
   }
 
 

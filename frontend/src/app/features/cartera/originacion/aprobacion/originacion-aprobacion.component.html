@@ -812,6 +812,7 @@
               id="decisionAprobacion"
               class="form-select"
               [(ngModel)]="idAprobacionDecision"
+              (ngModelChange)="alCambiarDecision()"
               [disabled]="registrandoDecision">
 
               <option [ngValue]="null">
@@ -907,6 +908,17 @@
               <span class="required">*</span>
 
             </label>
+
+            <!-- Sugerencia institucional editable, según ente y decisión. -->
+            <div class="concepto-sugerencia-accion">
+              <button
+                type="button"
+                class="btn btn-outline-secondary"
+                (click)="sugerirConcepto()"
+                [disabled]="!puedeSugerirConcepto">
+                SUGERIR CONCEPTO
+              </button>
+            </div>
 
             <textarea
               id="conceptoAprobacion"

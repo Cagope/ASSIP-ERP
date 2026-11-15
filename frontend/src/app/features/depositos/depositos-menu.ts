@@ -20,12 +20,6 @@ export const depositosMenu = {
           label: 'Documentos soporte',
           route: '/depositos/cuentas-ahorro/documentos-soporte',
           permiso: 'DEPOSITOS_DOCUMENTOS_SOPORTE_VIEW'
-        },
-
-        {
-          label: 'Formas de ahorro',
-          route: '/depositos/formas-ahorro',
-          permiso: 'DEPOSITOS_FORMAS_AHORRO_VIEW'
         }
 
       ]
@@ -159,7 +153,7 @@ export const depositosMenu = {
             {
               label: 'Extracto de cuenta',
               route: '/depositos/informes/extracto-cuenta',
-              permiso: 'DEPOSITOS_INFORMES_VIEW'
+              permiso: 'DEPOSITOS_EXTRACTO_CUENTA_VIEW'
             }
 
           ]
@@ -181,13 +175,13 @@ export const depositosMenu = {
             {
               label: 'Movimientos por meses',
               route: '/depositos/informes/movimientos-por-meses',
-              permiso: 'DEPOSITOS_INFORMES_VIEW'
+              permiso: 'DEPOSITOS_MOVIMIENTOS_MESES_VIEW'
             },
 
             {
               label: 'Movimientos diarios',
               route: '/depositos/informes/movimientos-diarios',
-              permiso: 'DEPOSITOS_INFORMES_VIEW'
+              permiso: 'DEPOSITOS_MOVIMIENTOS_DIARIOS_VIEW'
             },
 
             {
@@ -205,13 +199,13 @@ export const depositosMenu = {
             {
               label: 'Extracto asociado',
               route: '/depositos/informes/extracto-asociado',
-              permiso: 'DEPOSITOS_INFORMES_VIEW'
+              permiso: 'DEPOSITOS_EXTRACTO_ASOCIADO_VIEW'
             },
 
             {
               label: 'Intereses y retención',
               route: '/depositos/informes/intereses-retencion',
-              permiso: 'DEPOSITOS_INFORMES_VIEW'
+              permiso: 'DEPOSITOS_INTERESES_RETENCION_VIEW'
             },
 
             {

@@ -1,0 +1,89 @@
+<div class="reversion-pagos-page">
+  <header class="page-header">
+    <div><h1>Reversión de Prórrogas V1</h1><p>Consulta de prórrogas aplicadas y restitución contractual y financiera.</p></div>
+  </header>
+  <app-consulta-creditos-buscador *ngIf="!credito" [bloqueado]="ocupado"
+    (asociadoSeleccionado)="seleccionarAsociado($event)"
+    (busquedaLimpiada)="nuevaBusqueda()"></app-consulta-creditos-buscador>
+  <div *ngIf="error" class="alert alert--danger" role="alert">{{ error }}</div>
+  <div *ngIf="mensaje && !error" class="alert alert--info" role="status">{{ mensaje }}</div>
+  <section *ngIf="asociado as persona" class="consulta-bloque">
+    <div class="bloque-encabezado"><div><span class="bloque-etiqueta">Asociado</span><h2>{{ persona.nombreCompleto }}</h2><span>Documento: {{ persona.documento || '—' }}</span></div></div>
+  </section>
+  <section *ngIf="asociado && !credito" class="consulta-bloque">
+    <div class="bloque-encabezado"><h2>Créditos del asociado</h2><span>{{ creditos.length }} crédito(s)</span></div>
+    <div *ngIf="cargando" class="estado-consulta">Consultando créditos...</div>
+    <div *ngIf="creditos.length" class="tabla-contenedor"><table class="tabla-creditos"><thead><tr><th>Pagaré</th><th>Estado</th><th class="columna-numero">Saldo capital</th><th>Acción</th></tr></thead><tbody>
+      <tr *ngFor="let item of creditos"><td>{{ item.pagareCartera || '—' }}</td><td>{{ item.codigoEstadoCartera }}</td><td class="columna-numero">{{ item.saldoActual | number:'1.2-2':'es-CO' }}</td><td><button class="btn btn--primary" type="button" [disabled]="ocupado" (click)="seleccionarCredito(item)">Consultar prórrogas</button></td></tr>
+    </tbody></table></div>
+  </section>
+  <section *ngIf="credito as actual" class="consulta-bloque">
+    <div class="bloque-encabezado"><div><span class="bloque-etiqueta">Crédito seleccionado</span><h2>Pagaré {{ actual.pagareCartera || '—' }}</h2></div><button class="btn btn--cancel" type="button" [disabled]="ocupado" (click)="nuevaBusqueda()">Nueva búsqueda</button></div>
+    <div class="datos-credito-grid"><div class="dato-financiero"><span>Saldo de capital</span><strong>{{ actual.saldoActual | number:'1.2-2':'es-CO' }}</strong></div><div class="dato-financiero"><span>Prórrogas registradas</span><strong>{{ prorrogas.length }}</strong></div></div>
+  </section>
+  <section *ngIf="credito" class="consulta-bloque">
+    <div class="bloque-encabezado"><div><h2>Historial de prórrogas</h2><span>La elegibilidad definitiva se valida al confirmar.</span></div><button class="btn btn--cancel" type="button" [disabled]="ocupado" (click)="actualizar()">Actualizar</button></div>
+    <div *ngIf="cargando" class="estado-consulta">Consultando prórrogas...</div>
+    <p *ngIf="!cargando && !prorrogas.length" class="estado-vacio">No se encontraron prórrogas.</p>
+    <div *ngIf="prorrogas.length" class="tabla-contenedor"><table class="tabla-creditos"><thead><tr><th>Número</th><th>Fecha aplicación</th><th>Estado</th><th>CC original</th><th class="columna-numero">Valor pagado</th><th>Acción</th></tr></thead><tbody>
+      <tr *ngFor="let item of prorrogas" [class.fila-seleccionada]="seleccionada?.idProrroga === item.idProrroga"><td>{{ item.numeroProrroga }}</td><td>{{ item.fechaAplicacion || '—' }}</td><td>{{ item.estado === 'A' ? 'Aplicada' : item.estado === 'R' ? 'Reversada' : item.estado }}</td><td>{{ item.tipoComprobante || '—' }} {{ item.numeroComprobante || '' }}</td><td class="columna-numero">{{ item.valorTotal | number:'1.2-2':'es-CO' }}</td><td><button class="btn btn--primary" type="button" [disabled]="ocupado || !!resultado" (click)="seleccionarProrroga(item)">Ver detalle</button></td></tr>
+    </tbody></table></div>
+  </section>
+  <section *ngIf="seleccionada as item" class="consulta-bloque">
+    <div class="bloque-encabezado"><div><span class="bloque-etiqueta">Prórroga {{ item.numeroProrroga }}</span><h2>Restitución de fechas contractuales</h2><span>Se restaurarán las fechas anteriores si el backend confirma la elegibilidad.</span></div></div>
+    <div class="tabla-contenedor"><table class="tabla-creditos"><thead><tr><th>Concepto</th><th>Antes de prórroga</th><th>Después de prórroga</th></tr></thead><tbody>
+      <tr><td>Próximo capital</td><td>{{ item.capitalAnterior || '—' }}</td><td>{{ item.capitalNueva || '—' }}</td></tr>
+      <tr><td>Próximo interés</td><td>{{ item.interesAnterior || '—' }}</td><td>{{ item.interesNueva || '—' }}</td></tr>
+      <tr><td>Vencimiento</td><td>{{ item.vencimientoAnterior || '—' }}</td><td>{{ item.vencimientoNueva || '—' }}</td></tr>
+    </tbody></table></div>
+    <div *ngIf="item.estado !== 'A'" class="alert alert--danger">Esta prórroga no está en estado aplicada; no puede solicitarse su reversión.</div>
+    <section *ngIf="item.estado === 'A' && !resultado" class="vista-previa-financiera" aria-label="Vista previa financiera">
+      <div class="bloque-encabezado">
+        <div><span class="bloque-etiqueta">Solo consulta</span><h2>Vista previa financiera</h2></div>
+      </div>
+      <p *ngIf="consultandoVistaPrevia" role="status">Consultando efectos financieros de la reversión...</p>
+      <ng-container *ngIf="vistaPrevia as vista">
+        <div class="datos-credito-grid">
+          <div class="dato-financiero"><span>Valor del pago original</span><strong>{{ (vista.valorTotal ?? 0) | number:'1.2-2':'es-CO' }}</strong></div>
+          <div class="dato-financiero"><span>Capital a restituir</span><strong>{{ vista.capitalARestituir | number:'1.2-2':'es-CO' }}</strong></div>
+          <div class="dato-financiero"><span>Ahorros a devolver (222)</span><strong>{{ vista.ahorrosADevolver | number:'1.2-2':'es-CO' }}</strong></div>
+          <div class="dato-financiero"><span>Caja por regularizar</span><strong>{{ vista.cajaPorRegularizar | number:'1.2-2':'es-CO' }}</strong></div>
+          <div class="dato-financiero"><span>Tesorería por regularizar</span><strong>{{ vista.tesoreriaPorRegularizar | number:'1.2-2':'es-CO' }}</strong></div>
+          <div class="dato-financiero"><span>Comprobante original</span><strong>CC {{ vista.comprobanteOriginal || '—' }}</strong></div>
+        </div>
+        <div *ngIf="vista.elegiblePreliminar" class="alert alert--info" role="status">
+          Sin impedimentos preliminares. La elegibilidad se comprobará nuevamente al confirmar.
+        </div>
+        <div *ngIf="!vista.elegiblePreliminar" class="alert alert--danger" role="alert">
+          <strong>La reversión no es elegible por ahora.</strong>
+          <ul><li *ngFor="let impedimento of vista.impedimentos">{{ impedimento }}</li></ul>
+        </div>
+      </ng-container>
+      <div *ngIf="!consultandoVistaPrevia && !vistaPrevia" class="alert alert--info">
+        No se dispone de una vista previa válida. La confirmación permanecerá deshabilitada.
+      </div>
+    </section>
+    <ng-container *ngIf="item.estado === 'A' && !resultado">
+      <div class="alert alert--info">Los importes son informativos. El servidor repetirá las validaciones al confirmar.</div>
+      <div class="filtros-grid"><div class="f-row"><label for="fechaProrroga">Fecha de reversión</label><input id="fechaProrroga" type="date" [(ngModel)]="fechaReversion" [disabled]="ocupado"></div><div class="f-row"><label for="motivoProrroga">Motivo de reversión</label><textarea id="motivoProrroga" [(ngModel)]="motivo" [disabled]="ocupado" maxlength="1000" placeholder="Describa la justificación de la reversión"></textarea></div></div>
+      <div class="confirmacion-control">
+        <label class="confirmacion-opcion">
+          <input type="checkbox"
+                 name="confirmacionProrrogaAceptada"
+                 [(ngModel)]="aceptado"
+                 [disabled]="ocupado">
+          <span class="confirmacion-opcion-texto">
+            <strong>Autorizo la reversión de la prórroga</strong>
+            <small>Confirmo que revisé la prórroga y solicito su reversión financiera y contractual.</small>
+          </span>
+        </label>
+      </div>
+      <div class="filtros-acciones"><button type="button" class="btn btn--primary" [disabled]="!puedeConfirmar" (click)="confirmar()">{{ confirmando ? 'Procesando...' : 'Confirmar reversión' }}</button></div>
+    </ng-container>
+  </section>
+  <section *ngIf="resultado as r" class="consulta-bloque">
+    <div class="bloque-encabezado"><div><h2>Reversión registrada</h2><span>Comprobante contrario: CC {{ r.numeroComprobante }}</span></div></div>
+    <div class="datos-credito-grid"><div class="dato-financiero"><span>Capital restituido</span><strong>{{ r.capitalRestituido | number:'1.2-2':'es-CO' }}</strong></div><div class="dato-financiero"><span>Ahorros devueltos</span><strong>{{ r.ahorrosDevueltos | number:'1.2-2':'es-CO' }}</strong></div></div>
+    <div class="filtros-acciones"><button type="button" class="btn btn--cancel" (click)="actualizar()">Actualizar historial</button></div>
+  </section>
+</div>

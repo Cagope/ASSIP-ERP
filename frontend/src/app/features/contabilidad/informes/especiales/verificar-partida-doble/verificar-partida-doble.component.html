@@ -5,7 +5,7 @@
   </header>
 
   <section class="panel">
-    <h3>Parámetros de verificación</h3>
+    <h3>Parámetros de consulta</h3>
     <form #formConsulta="ngForm" (ngSubmit)="ejecutar()">
       <div class="filtros-grid">
         <div class="campo agencia">
@@ -32,10 +32,10 @@
         </div>
       </div>
       <div class="acciones">
-        <button class="btn-principal" type="submit" [disabled]="cargando || formConsulta.invalid">
-          {{ cargando ? 'Verificando...' : 'Ejecutar' }}
+        <button class="btn-consultar" type="submit" [disabled]="cargando || formConsulta.invalid">
+          {{ cargando ? 'Consultando...' : 'Consultar' }}
         </button>
-        <button class="btn-secundario" type="button" (click)="exportarExcel()"
+        <button class="btn-consultar" type="button" (click)="exportarExcel()"
                 [disabled]="cargando || !resultadoVigente || !informe?.filas?.length">
           Exportar Excel
         </button>

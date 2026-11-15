@@ -1,6 +1,9 @@
 package co.assip.erp.contabilidad.plan_cuentas;
 
 import org.springframework.web.bind.annotation.*;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
 
 import java.util.List;
 
@@ -9,9 +12,13 @@ import java.util.List;
 public class PlanCuentaController {
 
     private final PlanCuentaService service;
+    private final AccessValidator accessValidator;
+    private final UsuarioSesionService usuarioSesionService;
 
-    public PlanCuentaController(PlanCuentaService service) {
+    public PlanCuentaController(PlanCuentaService service, AccessValidator accessValidator, UsuarioSesionService usuarioSesionService) {
         this.service = service;
+        this.accessValidator = accessValidator;
+        this.usuarioSesionService = usuarioSesionService;
     }
 
     // ==========================================================
@@ -38,6 +45,7 @@ public class PlanCuentaController {
     // ==========================================================
     @PostMapping
     public PlanCuenta crear(@RequestBody PlanCuenta dto) {
+        validarAdministracion();
         return service.guardar(dto);
     }
 
@@ -48,6 +56,7 @@ public class PlanCuentaController {
     @PutMapping("/{id}")
     public PlanCuenta actualizar(@PathVariable Integer id, @RequestBody PlanCuenta dto) {
         dto.setId(id); // nos aseguramos que use el id de la URL
+        validarAdministracion();
         return service.guardar(dto);
     }
 
@@ -57,6 +66,7 @@ public class PlanCuentaController {
     // ==========================================================
     @DeleteMapping("/{id}")
     public void eliminar(@PathVariable Integer id) {
+        validarAdministracion();
         service.eliminar(id);
     }
 
@@ -74,5 +84,11 @@ public class PlanCuentaController {
         }
 
         return service.buscarPorAgenciaYTexto(idAgencia, q.trim());
+    }
+    /** Exige el permiso funcional vigente para modificar la parametrización. */
+    private void validarAdministracion() {
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(usuarioSesionService.idUsuario());
+        accessValidator.validarAcceso(usuario, "CONTABILIDAD_PARAMETRIZACION_ADMIN");
     }
 }

@@ -1,3 +1,4 @@
+
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/auth.guard';
 import { LoginComponent } from './core/auth/login/login.component';
@@ -24,12 +25,21 @@ export const routes: Routes = [
 
     children: [
 
+      // === PANTALLA PRINCIPAL ===
+      {
+        path: '',
+        pathMatch: 'full',
+        loadComponent: () =>
+          import('./features/inicio/inicio.component')
+            .then(m => m.InicioComponent)
+      },
+
       // === GENERAL ===
       {
         path: 'general',
         loadChildren: () =>
           import('./features/general/general.routes')
-            .then(m => m.GENERAL_ROUTES),
+            .then(m => m.GENERAL_ROUTES)
       },
 
       // === HOJA DE VIDA ===
@@ -37,7 +47,7 @@ export const routes: Routes = [
         path: 'hoja-vida',
         loadChildren: () =>
           import('./features/hoja-vida/hoja-vida.routes')
-            .then(m => m.HOJA_VIDA_ROUTES),
+            .then(m => m.HOJA_VIDA_ROUTES)
       },
 
       // === DEPÓSITOS ===
@@ -45,7 +55,7 @@ export const routes: Routes = [
         path: 'depositos',
         loadChildren: () =>
           import('./features/depositos/depositos.routes')
-            .then(m => m.DEPOSITOS_ROUTES),
+            .then(m => m.DEPOSITOS_ROUTES)
       },
 
       // === CARTERA ===
@@ -53,7 +63,7 @@ export const routes: Routes = [
         path: 'cartera',
         loadChildren: () =>
           import('./features/cartera/cartera.routes')
-            .then(m => m.CARTERA_ROUTES),
+            .then(m => m.CARTERA_ROUTES)
       },
 
       // === CDAT ===
@@ -61,7 +71,7 @@ export const routes: Routes = [
         path: 'cdat',
         loadChildren: () =>
           import('./features/cdat/cdat.routes')
-            .then(m => m.CDAT_ROUTES),
+            .then(m => m.CDAT_ROUTES)
       },
 
       // === CONSULTAS ===
@@ -69,7 +79,7 @@ export const routes: Routes = [
         path: 'consultas',
         loadChildren: () =>
           import('./features/consultas/consultas.routes')
-            .then(m => m.CONSULTAS_ROUTES),
+            .then(m => m.CONSULTAS_ROUTES)
       },
 
       // === CAJAS ===
@@ -77,7 +87,7 @@ export const routes: Routes = [
         path: 'cajas',
         loadChildren: () =>
           import('./features/cajas/cajas.routes')
-            .then(m => m.CAJAS_ROUTES),
+            .then(m => m.CAJAS_ROUTES)
       },
 
       // === TESORERÍA ===
@@ -85,7 +95,7 @@ export const routes: Routes = [
         path: 'tesoreria',
         loadChildren: () =>
           import('./features/tesoreria/tesoreria.routes')
-            .then(m => m.TESORERIA_ROUTES),
+            .then(m => m.TESORERIA_ROUTES)
       },
 
       // === SARLAFT ===
@@ -93,7 +103,7 @@ export const routes: Routes = [
         path: 'sarlaft',
         loadChildren: () =>
           import('./features/sarlaft/sarlaft.routes')
-            .then(m => m.SARLAFT_ROUTES),
+            .then(m => m.SARLAFT_ROUTES)
       },
 
       // === SEGURIDAD ===
@@ -101,7 +111,7 @@ export const routes: Routes = [
         path: 'seguridad',
         loadChildren: () =>
           import('./features/seguridad/seguridad.routes')
-            .then(m => m.SEGURIDAD_ROUTES),
+            .then(m => m.SEGURIDAD_ROUTES)
       },
 
       // === CONTABILIDAD ===
@@ -109,7 +119,7 @@ export const routes: Routes = [
         path: 'contabilidad',
         loadChildren: () =>
           import('./features/contabilidad/contabilidad.routes')
-            .then(m => m.CONTABILIDAD_ROUTES),
+            .then(m => m.CONTABILIDAD_ROUTES)
       },
 
       // === ACTIVOS FIJOS ===
@@ -117,7 +127,7 @@ export const routes: Routes = [
         path: 'activos-fijos',
         loadChildren: () =>
           import('./features/activos-fijos/activos-fijos.routes')
-            .then(m => m.ACTIVOS_FIJOS_ROUTES),
+            .then(m => m.ACTIVOS_FIJOS_ROUTES)
       },
 
       // === NÓMINA ===
@@ -125,7 +135,7 @@ export const routes: Routes = [
         path: 'nomina',
         loadChildren: () =>
           import('./features/nomina/nomina.routes')
-            .then(m => m.NOMINA_ROUTES),
+            .then(m => m.NOMINA_ROUTES)
       },
 
       // === SUPERINTENDENCIA SES ===
@@ -133,10 +143,10 @@ export const routes: Routes = [
         path: 'ses',
         loadChildren: () =>
           import('./features/ses/ses.routes')
-            .then(m => m.sesRoutes),
-      },
+            .then(m => m.sesRoutes)
+      }
 
-    ],
+    ]
   },
 
   {

@@ -180,7 +180,7 @@ export const ORIGINACION_ROUTES:
     path: 'aprobacion',
     canActivate: [permisoGuard],
     data: {
-      permiso: 'CARTERA_ORIGINACION_VIEW'
+      permiso: 'CARTERA_ORIGINACION_APROBACION_VIEW'
     },
     loadComponent: () =>
       import(

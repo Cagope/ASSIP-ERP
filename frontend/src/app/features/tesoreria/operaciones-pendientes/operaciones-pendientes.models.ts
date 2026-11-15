@@ -47,6 +47,7 @@ export interface OperacionPendiente {
   id_origen: number;
 
   id_datos_personal: number | null;
+  nombre_tercero: string | null;
 
   naturaleza: NaturalezaOperacion;
   fecha_documento: string;

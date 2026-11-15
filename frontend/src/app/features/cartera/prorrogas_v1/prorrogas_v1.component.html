@@ -94,19 +94,92 @@
 
     <section class="bloque">
       <h3>4. Conceptos del recaudo</h3>
-      <label>Fecha contable <input type="date" [(ngModel)]="fechaContable" (ngModelChange)="liquidar()"></label>
-      <button type="button" class="secundario" [disabled]="cargando" (click)="liquidar()">Liquidar prórroga</button>
-      <p class="nota">Intereses y mora calculados por el backend. Capital opcional.</p>
+
+      <label>
+        Fecha contable
+        <input
+          type="date"
+          [(ngModel)]="fechaContable"
+          (ngModelChange)="liquidar()">
+      </label>
+
+      <button
+        type="button"
+        class="secundario"
+        [disabled]="cargando"
+        (click)="liquidar()">
+        Liquidar prórroga
+      </button>
+
+      <p class="nota">
+        Intereses corrientes y de mora calculados por el backend.
+        El abono a capital es opcional y debe ser inferior al saldo del crédito.
+        Seguros, alivios y costas judiciales se recaudan únicamente
+        hasta el saldo pendiente informado por el servidor.
+      </p>
+
       <div class="campos">
-        <label>Intereses corrientes *<input type="text" [value]="formatoPesos(interesCorriente)" readonly></label>
-        <label>Intereses de mora<input type="text" [value]="formatoPesos(interesMora)" readonly></label>
-        <label>Abono a capital<input type="text" prorrogasNumericFormat inputmode="decimal" [(ngModel)]="capital" (ngModelChange)="actualizarConceptos()"></label>
-        <label>Seguros<input type="text" prorrogasNumericFormat inputmode="decimal" [(ngModel)]="seguro" (ngModelChange)="actualizarConceptos()"></label>
-        <label>Aportes<input type="text" prorrogasNumericFormat inputmode="decimal" [(ngModel)]="aportes" (ngModelChange)="actualizarConceptos()"></label>
-        <label>Fondo de garantía<input type="text" prorrogasNumericFormat inputmode="decimal" [(ngModel)]="fondoGarantia" (ngModelChange)="actualizarConceptos()"></label>
-        <label>Otros conceptos<input type="text" prorrogasNumericFormat inputmode="decimal" [(ngModel)]="otrosConceptos" (ngModelChange)="actualizarConceptos()"></label>
+        <label>
+          Intereses corrientes *
+          <input
+            type="text"
+            [value]="formatoPesos(interesCorriente)"
+            readonly>
+        </label>
+
+        <label>
+          Intereses de mora
+          <input
+            type="text"
+            [value]="formatoPesos(interesMora)"
+            readonly>
+        </label>
+
+        <label>
+          Abono a capital
+          <input
+            type="text"
+            prorrogasNumericFormat
+            inputmode="decimal"
+            [(ngModel)]="capital"
+            (ngModelChange)="actualizarConceptos()">
+        </label>
+
+        <label>
+          Seguros
+          <input
+            type="text"
+            prorrogasNumericFormat
+            inputmode="decimal"
+            [(ngModel)]="seguro"
+            (ngModelChange)="actualizarConceptos()">
+        </label>
+
+        <label>
+          Alivios
+          <input
+            type="text"
+            prorrogasNumericFormat
+            inputmode="decimal"
+            [(ngModel)]="alivios"
+            (ngModelChange)="actualizarConceptos()">
+        </label>
+
+        <label>
+          Costas judiciales
+          <input
+            type="text"
+            prorrogasNumericFormat
+            inputmode="decimal"
+            [(ngModel)]="costasJudiciales"
+            (ngModelChange)="actualizarConceptos()">
+        </label>
       </div>
-      <div class="total">Total conceptos: {{ totalConceptos | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</div>
+
+      <div class="total">
+        Total conceptos:
+        {{ totalConceptos | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+      </div>
     </section>
 
     <section class="bloque distribucion-recaudo">

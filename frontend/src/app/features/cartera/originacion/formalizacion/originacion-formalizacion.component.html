@@ -21,48 +21,11 @@
       (click)="volver()"
       [disabled]="procesando">
 
-      Volver a solicitudes
+      Volver a bandeja
 
     </button>
 
   </div>
-
-
-  <!-- ===================================================== -->
-  <!-- CONSULTA -->
-  <!-- ===================================================== -->
-
-  <section class="card consulta">
-
-    <label for="idFormalizacion">
-      Identificador de solicitud
-    </label>
-
-    <div class="consulta-acciones">
-
-      <input
-        id="idFormalizacion"
-        class="form-control"
-        type="number"
-        min="1"
-        [(ngModel)]="idBusqueda"
-        (keyup.enter)="buscar()"
-        [disabled]="procesando"
-        placeholder="ID de solicitud">
-
-      <button
-        type="button"
-        class="btn btn-outline-primary"
-        (click)="buscar()"
-        [disabled]="procesando">
-
-        Consultar
-
-      </button>
-
-    </div>
-
-  </section>
 
 
   <!-- ===================================================== -->
@@ -184,10 +147,10 @@
       <div class="datos-grid">
 
         <div>
-          <small>Ente (código)</small>
+          <small>Ente aprobador</small>
 
           <strong>
-            {{ d.idEnteAprobacion ?? '—' }}
+            {{ nombreEnteAprobador(d.idEnteAprobacion) }}
           </strong>
         </div>
 
@@ -246,6 +209,94 @@
       </p>
 
     </section>
+
+
+    <!-- =================================================== -->
+    <!-- RESULTADO DE VALIDACIÓN -->
+    <!-- =================================================== -->
+
+    <section
+      class="card"
+      *ngIf="resultadoValidacion as v">
+
+      <div class="card-header">
+
+        <h3>
+          Validación de formalización
+        </h3>
+
+        <span
+          class="badge"
+          [class.badge-warning]="!validacionVigente">
+
+          {{
+            validacionVigente
+              ? 'Validación satisfactoria'
+              : 'Validación no vigente o con bloqueos'
+          }}
+
+        </span>
+
+      </div>
+
+
+      <div
+        *ngIf="validacionVigente"
+        class="alert alert-success">
+
+        Las condiciones digitadas superaron
+        las validaciones de formalización.
+
+      </div>
+
+
+      <div
+        *ngIf="!validacionVigente"
+        class="alert alert-warning">
+
+        {{
+        v.puedeContinuar
+        ? 'Las condiciones cambiaron. La validación se actualizará automáticamente.'
+        : 'La formalización presenta bloqueos que deben resolverse antes de guardar.'
+        }}
+
+      </div>
+
+
+      <div
+        *ngIf="v.bloqueos && v.bloqueos.length > 0"
+        class="alert alert-danger validacion-bloqueos">
+
+        <div *ngFor="let bloqueo of v.bloqueos">
+          {{ bloqueo.mensaje }}
+        </div>
+
+      </div>
+
+
+      <div
+        class="datos-grid"
+        *ngIf="v.tasa?.tasaEfectivaAnual != null">
+
+        <div>
+
+          <small>
+            Tasa efectiva anual calculada
+          </small>
+
+          <strong>
+            {{
+            v.tasa?.tasaEfectivaAnual
+            | number:'1.4-4'
+            }}
+          </strong>
+
+        </div>
+
+      </div>
+
+    </section>
+
 
 
     <!-- =================================================== -->
@@ -524,7 +575,7 @@
       <!-- CONCEPTO DEL ASESOR DE FORMALIZACIÓN -->
       <div class="concepto-formalizacion">
         <label for="conceptoFormalizacion">
-          Concepto final del asesor de formalización
+          Concepto de formalización
           <span class="concepto-requerido" *ngIf="editable && cambiosPendientes">*</span>
         </label>
         <small class="concepto-ayuda">
@@ -563,93 +614,6 @@
         Existen cambios frente a la última formalización
         guardada. Debe guardar nuevamente
         antes de generar el pagaré.
-
-      </div>
-
-    </section>
-
-
-    <!-- =================================================== -->
-    <!-- RESULTADO DE VALIDACIÓN -->
-    <!-- =================================================== -->
-
-    <section
-      class="card"
-      *ngIf="resultadoValidacion as v">
-
-      <div class="card-header">
-
-        <h3>
-          Validación de formalización
-        </h3>
-
-        <span
-          class="badge"
-          [class.badge-warning]="!validacionVigente">
-
-          {{
-            validacionVigente
-              ? 'Validación satisfactoria'
-              : 'Validación no vigente o con bloqueos'
-          }}
-
-        </span>
-
-      </div>
-
-
-      <div
-        *ngIf="validacionVigente"
-        class="alert alert-success">
-
-        Las condiciones digitadas superaron
-        las validaciones de formalización.
-
-      </div>
-
-
-      <div
-        *ngIf="!validacionVigente"
-        class="alert alert-warning">
-
-        {{
-        v.puedeContinuar
-        ? 'Las condiciones cambiaron. La validación se actualizará automáticamente.'
-        : 'La formalización presenta bloqueos que deben resolverse antes de guardar.'
-        }}
-
-      </div>
-
-
-      <div
-        *ngIf="v.bloqueos && v.bloqueos.length > 0"
-        class="alert alert-danger validacion-bloqueos">
-
-        <div *ngFor="let bloqueo of v.bloqueos">
-          {{ bloqueo.mensaje }}
-        </div>
-
-      </div>
-
-
-      <div
-        class="datos-grid"
-        *ngIf="v.tasa?.tasaEfectivaAnual != null">
-
-        <div>
-
-          <small>
-            Tasa efectiva anual calculada
-          </small>
-
-          <strong>
-            {{
-            v.tasa?.tasaEfectivaAnual
-            | number:'1.4-4'
-            }}
-          </strong>
-
-        </div>
 
       </div>
 
@@ -698,6 +662,26 @@
       </p>
     </section>
 
+
+    <!-- Guardar las condiciones después de revisar la simulación. -->
+    <div class="acciones" *ngIf="formalizacionAbierta">
+      <button
+        type="button"
+        class="btn btn-primary btn-guardar-formalizacion"
+        (click)="guardar()"
+        [disabled]="
+          !puedeEditar
+          || !puedeGuardar
+        ">
+
+        {{
+        guardando
+        ? 'Guardando...'
+        : 'Guardar formalización'
+        }}
+
+      </button>
+    </div>
 
     <!-- =================================================== -->
     <!-- RESULTADO FINANCIERO GUARDADO -->
@@ -970,39 +954,7 @@
 
       </p>
 
-    </section>
-
-    <!-- =================================================== -->
-    <!-- ACCIONES -->
-    <!-- =================================================== -->
-
-    <div
-      class="acciones"
-      *ngIf="formalizacionAbierta">
-
-
-      <!-- GUARDAR -->
-
-      <button
-        type="button"
-        class="btn btn-primary"
-        (click)="guardar()"
-        [disabled]="
-          !puedeEditar
-          || !puedeGuardar
-        ">
-
-        {{
-        guardando
-        ? 'Guardando...'
-        : 'Guardar formalización'
-        }}
-
-      </button>
-
-
-      <!-- GENERAR PAGARÉ -->
-
+      <div class="acciones" *ngIf="formalizacionAbierta">
       <button
         type="button"
         class="btn btn-outline-success"
@@ -1020,13 +972,15 @@
         }}
 
       </button>
+      </div>
 
+    </section>
 
-      <!-- FINALIZAR -->
-
+    <!-- Finalizar únicamente cuando se cumplan todas las validaciones. -->
+    <div class="acciones" *ngIf="formalizacionAbierta">
       <button
         type="button"
-        class="btn btn-success"
+        class="btn btn-success btn-finalizar-formalizacion"
         (click)="finalizar()"
         [disabled]="
           !puedeEditar
@@ -1040,9 +994,7 @@
         }}
 
       </button>
-
     </div>
-
 
     <!-- =================================================== -->
     <!-- MODO CONSULTA -->

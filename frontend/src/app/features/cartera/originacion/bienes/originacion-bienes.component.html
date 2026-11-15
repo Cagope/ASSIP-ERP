@@ -77,17 +77,15 @@
               *ngFor="let bien of bienes; trackBy: trackByBienPersona"
               [class.row-selected]="bien.seleccionado">
 
-              <input
-                type="checkbox"
-                [checked]="bien.seleccionado"
-                [disabled]="
-                  !puedeEditar
-                  || guardandoIdBienPersona !== null
-                "
-                              (change)="cambiarSeleccion(
-                  bien,
-                  $any($event.target).checked
-                )">
+              <td class="text-center">
+                <input
+                  class="bien-switch"
+                  type="checkbox"
+                  [checked]="bien.seleccionado"
+                  [disabled]="!puedeEditar || guardandoIdBienPersona !== null"
+                  [attr.aria-label]="'Seleccionar bien de ' + (bien.nombreCompleto || 'participante')"
+                  (change)="cambiarSeleccion(bien, $any($event.target).checked)">
+              </td>
 
               <td>
                 <div class="participant-name">{{ bien.nombreCompleto || '-' }}</div>

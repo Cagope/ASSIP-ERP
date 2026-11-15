@@ -112,6 +112,23 @@ export class PagoCuotasV1Api {
     );
   }
 
+  /** Consulta el comprobante definitivo del pago aplicado. */
+  consultarConfirmacionPago(idPago: number): Observable<{
+    idPago: number;
+    valorPago: number;
+    estado: string;
+    tipoComprobante: string | null;
+    numeroComprobante: string | null;
+  }> {
+    return this.http.get<{
+      idPago: number;
+      valorPago: number;
+      estado: string;
+      tipoComprobante: string | null;
+      numeroComprobante: string | null;
+    }>(`${this.baseUrl}/pagos/${idPago}/confirmacion`);
+  }
+
   /** Pagos consolidados por comprobante, consultados en Pago de Cuotas V1. */
   listarPagosRealizados(
     idCarteraCredito: number

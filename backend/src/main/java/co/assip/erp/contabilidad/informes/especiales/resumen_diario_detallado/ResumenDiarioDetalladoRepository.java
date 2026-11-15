@@ -10,8 +10,16 @@ import java.time.LocalDate;
 import java.util.List;
 
 /**
- * Consulta los movimientos individuales del Resumen diario detallado.
- * Utiliza auxiliares contables activos y conserva la información de trazabilidad.
+ * Consulta los movimientos individuales del Resumen Diario Detallado.
+ *
+ * Incluye movimientos contables en estados:
+ * A - Activo.
+ * C - Contabilizado.
+ *
+ * Excluye los movimientos anulados en estado N.
+ *
+ * Conserva una fila por auxiliar contable, incluyendo
+ * información del tercero, cuenta y trazabilidad.
  */
 @Repository
 @RequiredArgsConstructor
@@ -20,14 +28,18 @@ public class ResumenDiarioDetalladoRepository {
     private final NamedParameterJdbcTemplate jdbc;
 
     /**
-     * Recupera todos los movimientos activos de una agencia y período.
-     * Conserva una fila por auxiliar, sin agrupar ni modificar valores contables.
+     * Recupera los movimientos contables de una agencia y período.
+     *
+     * No agrupa ni modifica los valores originales.
+     * La validación de acceso a la agencia corresponde
+     * a la capa de servicio.
      */
     public List<ResumenDiarioDetalladoFilaDTO> consultar(
             Integer idAgencia,
             LocalDate fechaInicial,
             LocalDate fechaFinal
     ) {
+
         String sql = """
                 SELECT
                     ac.id_auxiliar_contable,
@@ -67,7 +79,7 @@ public class ResumenDiarioDetalladoRepository {
                     ON dp.id_datos_personal = ac.id_datos_personal
                 WHERE ac.id_agencia = :idAgencia
                   AND ac.fecha_auxiliar BETWEEN :fechaInicial AND :fechaFinal
-                  AND ac.estado_movimiento = 'A'
+                  AND TRIM(ac.estado_movimiento) IN ('A', 'C')
                 ORDER BY
                     ac.fecha_auxiliar,
                     ac.id_auxiliar_contable
@@ -78,8 +90,10 @@ public class ResumenDiarioDetalladoRepository {
                 .addValue("fechaInicial", fechaInicial)
                 .addValue("fechaFinal", fechaFinal);
 
-        return jdbc.query(sql, parametros, (rs, rowNum) ->
-                new ResumenDiarioDetalladoFilaDTO(
+        return jdbc.query(
+                sql,
+                parametros,
+                (rs, rowNum) -> new ResumenDiarioDetalladoFilaDTO(
                         rs.getObject("id_auxiliar_contable", Integer.class),
                         rs.getObject("fecha", LocalDate.class),
                         rs.getString("tipo_comprobante"),

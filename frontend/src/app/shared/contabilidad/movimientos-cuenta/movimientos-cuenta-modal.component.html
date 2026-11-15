@@ -1,0 +1,158 @@
+
+<div class="movimientos-modal-fondo" (click)="cerrarVentana()">
+  <section
+    class="movimientos-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="movimientos-modal-titulo"
+    (click)="$event.stopPropagation()">
+
+    <header class="movimientos-modal-encabezado">
+      <div>
+        <p class="movimientos-modal-agencia">
+          <strong>Agencia:</strong>
+          {{ nombreAgencia || 'Consolidado institucional' }}
+        </p>
+
+        <h2 id="movimientos-modal-titulo">
+          Movimientos de cuenta contable
+        </h2>
+
+        <p>
+          <strong>{{ codigoCuenta }}</strong> · {{ nombreCuenta }}
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="boton-cerrar"
+        (click)="cerrarVentana()"
+        aria-label="Cerrar ventana de movimientos">
+        ×
+      </button>
+    </header>
+
+    <div class="movimientos-modal-informacion">
+      <span>
+        <strong>Desde:</strong>
+        {{ formatearFecha(fechaInicial) }}
+      </span>
+
+      <span>
+        <strong>Hasta:</strong>
+        {{ formatearFecha(fechaFinal) }}
+      </span>
+    </div>
+
+    <div
+      *ngIf="error"
+      class="movimientos-modal-error"
+      role="alert">
+      {{ error }}
+    </div>
+
+    <div
+      *ngIf="cargando"
+      class="movimientos-modal-cargando"
+      role="status">
+      Consultando movimientos...
+    </div>
+
+    <div class="movimientos-modal-tabla-contenedor">
+      <table class="movimientos-modal-tabla">
+        <thead>
+        <tr>
+          <th scope="col">Fecha</th>
+          <th scope="col">Agencia</th>
+          <th scope="col">Comprobante</th>
+          <th scope="col">Concepto</th>
+          <th scope="col" class="numero">Débito</th>
+          <th scope="col" class="numero">Crédito</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr *ngFor="let movimiento of pagina?.movimientos">
+          <td>
+            {{ formatearFecha(movimiento.fechaAuxiliar) }}
+          </td>
+
+          <td>
+            {{ movimiento.codigoAgencia }} -
+            {{ movimiento.nombreAgencia }}
+          </td>
+
+          <td>
+            <button
+              type="button"
+              class="comprobante-enlace"
+              [disabled]="cargando"
+              (click)="abrirComprobante(movimiento)"
+              [attr.aria-label]="
+                  'Consultar comprobante ' +
+                  movimiento.tipoComprobante + ' ' +
+                  movimiento.numeroComprobante
+                ">
+              {{ movimiento.tipoComprobante }}
+              {{ movimiento.numeroComprobante }}
+            </button>
+          </td>
+
+          <td class="concepto">
+            {{ movimiento.detalleMovimiento }}
+          </td>
+
+          <td class="numero">
+            {{ dinero(movimiento.valorDebito) }}
+          </td>
+
+          <td class="numero">
+            {{ dinero(movimiento.valorCredito) }}
+          </td>
+        </tr>
+
+        <tr
+          *ngIf="
+              !cargando &&
+              !error &&
+              pagina?.movimientos?.length === 0
+            ">
+          <td colspan="6" class="sin-movimientos">
+            No se encontraron movimientos para esta cuenta
+            en el rango de fechas seleccionado.
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <footer class="movimientos-modal-pie">
+      <div class="paginacion" *ngIf="pagina as resultado">
+        <button
+          type="button"
+          (click)="anterior()"
+          [disabled]="cargando || resultado.pagina === 0">
+          Anterior
+        </button>
+
+        <span>
+          Página {{ resultado.pagina + 1 }}
+        </span>
+
+        <button
+          type="button"
+          (click)="siguiente()"
+          [disabled]="cargando || !resultado.hayMas">
+          Siguiente
+        </button>
+      </div>
+
+      <button
+        type="button"
+        class="boton-salir"
+        (click)="cerrarVentana()">
+        Cerrar
+      </button>
+    </footer>
+  </section>
+</div>

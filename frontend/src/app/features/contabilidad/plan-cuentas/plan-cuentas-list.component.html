@@ -2,6 +2,7 @@
 
   <app-header-actions
     titulo="Plan de Cuentas"
+    [mostrarNuevo]="puedeAdministrar"
     (nuevo)="nuevaCuenta()"
     (imprimir)="imprimirListado()"
     (exportar)="exportarExcel()">
@@ -20,7 +21,7 @@
       <th>Naturaleza</th>
       <th>Nivel</th>
       <th>Operable</th>
-      <th>Acciones</th>
+      <th *ngIf="puedeAdministrar">Acciones</th>
     </tr>
     </thead>
 
@@ -33,7 +34,7 @@
       <td>{{ c.nivel }}</td>
       <td>{{ c.operable ? 'Sí' : 'No' }}</td>
 
-      <td>
+      <td *ngIf="puedeAdministrar">
         <div class="acciones">
           <button
             class="btn-action-edit"

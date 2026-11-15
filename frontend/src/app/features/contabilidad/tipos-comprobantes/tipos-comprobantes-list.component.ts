@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { SessionService } from '../../../core/auth/session.service';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
 import {
@@ -19,6 +20,11 @@ export class TiposComprobantesListComponent implements OnInit {
 
   private readonly api = inject(TiposComprobantesApi);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
+
+  get puedeAdministrar(): boolean {
+    return this.session.tienePermiso('CONTABILIDAD_PARAMETRIZACION_ADMIN');
+  }
 
   tipos: TipoComprobante[] = [];
   cargando = false;

@@ -1,4 +1,3 @@
-
 package co.assip.erp.cartera.prorrogas_v1;
 
 import co.assip.erp.cartera.pago_cuotas_v1.PagoCuotasV1Service;
@@ -107,9 +106,6 @@ public class ProrrogasV1Service {
                 solicitud.valorInteresCorriente(),
                 importe(solicitud.valorInteresMora()),
                 importe(solicitud.valorSeguro()),
-                importe(solicitud.valorAportes()),
-                importe(solicitud.valorFondoGarantia()),
-                importe(solicitud.valorOtrosConceptos()),
                 total,
                 "CC",
                 numeroCC,
@@ -221,7 +217,10 @@ public class ProrrogasV1Service {
                             + credito.idCredito()
                             + " (PR-" + idProrroga + ")",
                     banco,
-                    idUsuario);
+                    idUsuario,
+                    null,
+                    null,
+                    "RECAUDO_PRORROGA");
         }
 
         var extracto = new PagoCuotasMotorRepository.ExtractoPago(
@@ -236,9 +235,8 @@ public class ProrrogasV1Service {
                 importe(solicitud.valorInteresMora()),
                 0,
                 importe(solicitud.valorSeguro()),
-                importe(solicitud.valorAportes())
-                        .add(importe(solicitud.valorFondoGarantia()))
-                        .add(importe(solicitud.valorOtrosConceptos())),
+                importe(solicitud.valorAlivios())
+                        .add(importe(solicitud.valorCostasJudiciales())),
                 efectivo,
                 BigDecimal.ZERO,
                 ahorros,
@@ -256,6 +254,14 @@ public class ProrrogasV1Service {
                 fechas.capitalNueva(),
                 fechas.interesNueva(),
                 idUsuario);
+
+        // Aplica abonos a los saldos auxiliares usando el mismo comprobante CC.
+        pagoCuotasMotorRepository.registrarAbonosAuxiliares(
+                credito.idCredito(),
+                importe(solicitud.valorSeguro()),
+                importe(solicitud.valorAlivios()),
+                importe(solicitud.valorCostasJudiciales()),
+                "CC", numeroCC, idUsuario);
 
         Integer idExtracto = pagoCuotasMotorRepository
                 .registrarExtracto(extracto);
@@ -277,9 +283,8 @@ public class ProrrogasV1Service {
         liquidacionPago.put("valorInteresCorriente", solicitud.valorInteresCorriente());
         liquidacionPago.put("valorInteresMora", importe(solicitud.valorInteresMora()));
         liquidacionPago.put("valorSeguro", importe(solicitud.valorSeguro()));
-        liquidacionPago.put("valorAportes", importe(solicitud.valorAportes()));
-        liquidacionPago.put("valorFondoGarantia", importe(solicitud.valorFondoGarantia()));
-        liquidacionPago.put("valorOtrosConceptos", importe(solicitud.valorOtrosConceptos()));
+        liquidacionPago.put("valorAlivios", importe(solicitud.valorAlivios()));
+        liquidacionPago.put("valorCostasJudiciales", importe(solicitud.valorCostasJudiciales()));
         liquidacionPago.put("valorTotalPagado", total);
 
         Long idPagoProrroga = repository.registrarPagoProrroga(
@@ -311,14 +316,14 @@ public class ProrrogasV1Service {
                 fechas.capitalNueva(),
                 credito.proximaFechaInteres(),
                 fechas.interesNueva(),
-                null,
-                null,
+                credito.fechaFinal(),
+                fechas.vencimientoNuevo(),
+                importe(solicitud.valorCapital()),
                 solicitud.valorInteresCorriente(),
                 importe(solicitud.valorInteresMora()),
                 importe(solicitud.valorSeguro()),
-                importe(solicitud.valorAportes()),
-                importe(solicitud.valorFondoGarantia()),
-                importe(solicitud.valorOtrosConceptos()),
+                importe(solicitud.valorAlivios()),
+                importe(solicitud.valorCostasJudiciales()),
                 total,
                 "CC",
                 numeroCC,
@@ -594,9 +599,8 @@ public class ProrrogasV1Service {
                         solicitud.valorInteresCorriente(),
                         importe(solicitud.valorInteresMora()),
                         importe(solicitud.valorSeguro()),
-                        importe(solicitud.valorAportes()),
-                        importe(solicitud.valorFondoGarantia()),
-                        importe(solicitud.valorOtrosConceptos()));
+                        importe(solicitud.valorAlivios()),
+                        importe(solicitud.valorCostasJudiciales()));
     }
 
     /** Comprueba que débitos y créditos coincidan con el recaudo total. */
@@ -695,6 +699,13 @@ public class ProrrogasV1Service {
             throw new IllegalArgumentException(
                     "El recaudo de seguros supera el saldo pendiente.");
         }
+        if (importe(solicitud.valorAlivios()).compareTo(liquidacion.valorAlivios()) > 0) {
+            throw new IllegalArgumentException("El recaudo de alivios supera el saldo pendiente.");
+        }
+        if (importe(solicitud.valorCostasJudiciales()).compareTo(
+                liquidacion.valorCostasJudiciales()) > 0) {
+            throw new IllegalArgumentException("El recaudo de costas judiciales supera el saldo pendiente.");
+        }
     }
 
     /** Verifica el estado, saldo y ausencia de otra prórroga activa. */
@@ -762,16 +773,12 @@ public class ProrrogasV1Service {
                 "seguros",
                 false);
         validarImporte(
-                solicitud.valorAportes(),
-                "aportes",
+                solicitud.valorAlivios(),
+                "alivios",
                 false);
         validarImporte(
-                solicitud.valorFondoGarantia(),
-                "fondo de garantía",
-                false);
-        validarImporte(
-                solicitud.valorOtrosConceptos(),
-                "otros conceptos",
+                solicitud.valorCostasJudiciales(),
+                "costas judiciales",
                 false);
     }
 
@@ -814,9 +821,8 @@ public class ProrrogasV1Service {
                 .add(importe(solicitud.valorInteresMora()))
                 .add(importe(solicitud.valorCapital()))
                 .add(importe(solicitud.valorSeguro()))
-                .add(importe(solicitud.valorAportes()))
-                .add(importe(solicitud.valorFondoGarantia()))
-                .add(importe(solicitud.valorOtrosConceptos()));
+                .add(importe(solicitud.valorAlivios()))
+                .add(importe(solicitud.valorCostasJudiciales()));
     }
 
     /** Normaliza los importes opcionales ausentes a cero. */

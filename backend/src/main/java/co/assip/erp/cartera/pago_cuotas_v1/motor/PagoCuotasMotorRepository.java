@@ -476,7 +476,7 @@ public class PagoCuotasMotorRepository {
                 CAST(:medios AS jsonb),
                 TRUE,
                 :caja,
-                'PENDIENTE_CAJA',
+                'APLICADO',
                 :usuario
             )
             RETURNING id_pago
@@ -787,7 +787,7 @@ public class PagoCuotasMotorRepository {
             UPDATE cartera.pagos_cuotas
             SET id_movimiento_caja = :movimiento
             WHERE id_pago = :pago
-              AND estado = 'PENDIENTE_CAJA'
+              AND estado = 'APLICADO'
               AND requiere_confirmacion_caja = TRUE
               AND id_movimiento_caja IS NULL
               AND EXISTS (
@@ -837,7 +837,7 @@ public class PagoCuotasMotorRepository {
                 WHERE id_pago = :pago
                   AND id_movimiento_caja = :movimiento
                   AND id_caja = :caja
-                  AND estado = 'PENDIENTE_CAJA'
+                  AND estado = 'APLICADO'
                   AND requiere_confirmacion_caja = TRUE
                   AND EXISTS (
                       SELECT 1
@@ -924,7 +924,7 @@ public class PagoCuotasMotorRepository {
                     fecha_aplicacion = CURRENT_TIMESTAMP
                 WHERE pc.id_pago = :pago
                   AND pc.id_movimiento_caja = :movimiento
-                  AND pc.estado = 'PENDIENTE_CAJA'
+                  AND pc.estado = 'APLICADO'
                   AND pc.requiere_confirmacion_caja = TRUE
                   AND pc.id_extracto_cartera IS NULL
                   AND pc.fecha_aplicacion IS NULL
@@ -980,9 +980,17 @@ public class PagoCuotasMotorRepository {
         String sql = """
             SELECT EXISTS (
                 SELECT 1
-                FROM cartera.pagos_cuotas
-                WHERE id_cartera_credito = :credito
-                  AND estado = 'PENDIENTE_CAJA'
+                FROM cartera.pagos_cuotas pc
+                JOIN cajas.movimientos_caja mc
+                  ON mc.id_movimiento_caja = pc.id_movimiento_caja
+                 AND mc.modulo_origen = 'CARTERA'
+                 AND mc.proceso_origen = 'PAGO_CUOTAS'
+                 AND mc.tabla_origen = 'cartera.pagos_cuotas'
+                 AND mc.id_origen = pc.id_pago
+                WHERE pc.id_cartera_credito = :credito
+                  AND pc.estado = 'APLICADO'
+                  AND pc.requiere_confirmacion_caja = TRUE
+                  AND mc.estado = 'PENDIENTE'
             )
             """;
 
@@ -1480,7 +1488,7 @@ public class PagoCuotasMotorRepository {
             String valoresExtra = "";
             if ("costas".equals(concepto)) {
                 columnasExtra = ", tipo_movimiento";
-                valoresExtra = ", 'A'";
+                valoresExtra = ", 'C'";
             }
             String sql = "INSERT INTO cartera." + detalle + " (" + clave
                     + ", fecha_movimiento, valor_debito, valor_credito, tipo_comprobante, "

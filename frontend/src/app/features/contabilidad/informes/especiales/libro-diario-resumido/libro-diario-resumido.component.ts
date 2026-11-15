@@ -7,10 +7,19 @@ import { SessionService } from '../../../../../core/auth/session.service';
 import { LibroDiarioResumidoService } from './libro-diario-resumido.service';
 import { LibroDiarioResumidoExporterService } from './libro-diario-resumido-exporter.service';
 import {
+  LibroDiarioResumidoFila,
   LibroDiarioResumidoFiltro,
   LibroDiarioResumidoResponse,
   LIBRO_DIARIO_RESUMIDO_MODALIDADES
 } from './libro-diario-resumido.models';
+
+/** Filas y subtotales de una fecha contable. */
+interface GrupoDiario {
+  fecha: string;
+  filas: LibroDiarioResumidoFila[];
+  totalDebitos: number;
+  totalCreditos: number;
+}
 
 /** Agencia autorizada para el usuario autenticado. */
 interface AgenciaOpcion {
@@ -43,6 +52,7 @@ export class LibroDiarioResumidoComponent implements OnInit {
   consultado = false;
   mensajeError = '';
   informe: LibroDiarioResumidoResponse | null = null;
+  gruposDiarios: GrupoDiario[] = [];
 
   filtros: LibroDiarioResumidoFiltro = {
     idAgencia: 0,
@@ -129,6 +139,7 @@ export class LibroDiarioResumidoComponent implements OnInit {
     ).subscribe({
       next: informe => {
         this.informe = informe;
+        this.gruposDiarios = this.agruparPorFecha(informe.filas);
         this.consultado = true;
       },
       error: error => {
@@ -244,9 +255,35 @@ export class LibroDiarioResumidoComponent implements OnInit {
     return '';
   }
 
+  /** Agrupa las filas consultadas y calcula subtotales sin alterar el backend. */
+  private agruparPorFecha(filas: LibroDiarioResumidoFila[]): GrupoDiario[] {
+    const grupos = new Map<string, GrupoDiario>();
+
+    for (const fila of filas) {
+      let grupo = grupos.get(fila.fecha);
+
+      if (!grupo) {
+        grupo = {
+          fecha: fila.fecha,
+          filas: [],
+          totalDebitos: 0,
+          totalCreditos: 0
+        };
+        grupos.set(fila.fecha, grupo);
+      }
+
+      grupo.filas.push(fila);
+      grupo.totalDebitos += Number(fila.totalDebitos ?? 0);
+      grupo.totalCreditos += Number(fila.totalCreditos ?? 0);
+    }
+
+    return Array.from(grupos.values()).sort((a, b) => a.fecha.localeCompare(b.fecha));
+  }
+
   /** Descarta el resultado sin modificar los filtros seleccionados. */
   private limpiarResultado(): void {
     this.informe = null;
+    this.gruposDiarios = [];
     this.consultado = false;
   }
 }

@@ -9,7 +9,7 @@ export const MOVIMIENTOS_POR_MESES_ROUTES: Routes = [
         .then(m => m.MovimientosPorMesesComponent),
     canActivate: [permisoGuard],
     data: {
-      permiso: 'DEPOSITOS_INFORMES_VIEW'
+      permiso: 'DEPOSITOS_MOVIMIENTOS_MESES_VIEW'
     }
   }
 ];

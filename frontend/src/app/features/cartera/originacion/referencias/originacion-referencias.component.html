@@ -7,11 +7,12 @@
   <header class="page-header">
 
     <div>
-      <h2>Referencias personales</h2>
+      <h2>Entrevista</h2>
 
       <p>
-        Gestión independiente de referencias para el
-        solicitante y sus codeudores.
+        Proceso obligatorio de referencias personales del
+        solicitante y sus codeudores. Puede finalizarse sin referencias,
+        con justificación, o con todas las referencias entrevistadas.
       </p>
     </div>
 
@@ -275,16 +276,21 @@
 
             <td>
 
-              <button
-                type="button"
-                class="btn btn-small btn-primary"
-                (click)="
-                    seleccionarSolicitud(item)
-                  ">
-
-                Gestionar
-
-              </button>
+              <div class="actions">
+                <button
+                  type="button"
+                  class="btn btn-small btn-primary"
+                  (click)="seleccionarSolicitud(item, 'gestion')">
+                  Gestionar
+                </button>
+                <button
+                  *ngIf="item.estadoReferencias !== 'CERRADO' && puedeEditar"
+                  type="button"
+                  class="btn btn-small btn-secondary"
+                  (click)="seleccionarSolicitud(item, 'cierre')">
+                  Cerrar referencias
+                </button>
+              </div>
 
             </td>
 
@@ -490,6 +496,90 @@
     </section>
 
 
+      <!-- ================================================= -->
+      <!-- CIERRE GENERAL DE REFERENCIAS -->
+      <!-- ================================================= -->
+
+      <section *ngIf="editable && !cargandoDetalle && vistaSolicitud === 'cierre'" class="card close-card">
+
+        <div class="section-header">
+          <div>
+            <h3>Cierre de referencias personales</h3>
+            <p>
+              Este cierre corresponde a todos los participantes de la solicitud.
+              La gestión de referencias debe completarse antes de Formalización,
+              pero no detiene Originación.
+            </p>
+          </div>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <span>Referencias activas</span>
+            <strong>{{ referencias.length }}</strong>
+          </div>
+          <div class="info-item">
+            <span>Pendientes de entrevista</span>
+            <strong>{{ referenciasPendientesEntrevista.length }}</strong>
+          </div>
+        </div>
+
+        <p *ngIf="referenciasPendientesEntrevista.length > 0" class="muted">
+          Antes de finalizar, registre la entrevista o el intento de contacto
+          de todas las referencias pendientes. Vuelva a solicitudes y seleccione GESTIONAR
+          para completar las entrevistas.
+        </p>
+
+        <div *ngIf="!mostrarFormularioCierre" class="actions">
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="abrirCierre()"
+            [disabled]="!puedeEditar || ocupado || referenciasPendientesEntrevista.length > 0">
+            {{ referencias.length ? 'Finalizar con referencias' : 'Cerrar sin referencias' }}
+          </button>
+        </div>
+
+        <div *ngIf="mostrarFormularioCierre">
+          <p>
+            <strong>
+              {{ referencias.length ? 'Cierre con referencias entrevistadas' : 'Cierre sin referencias' }}
+            </strong>
+          </p>
+
+          <label>
+            {{ referencias.length ? 'Observación general del cierre' : 'Justificación del cierre sin referencias' }}
+            <span *ngIf="referencias.length === 0" class="required">*</span>
+            <textarea
+              name="observacionCierre"
+              rows="3"
+              [(ngModel)]="observacionCierre"
+              placeholder="Registre la observación correspondiente al cierre.">
+            </textarea>
+          </label>
+
+          <div class="actions">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              (click)="cancelarCierre()"
+              [disabled]="ocupado">
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="cerrar()"
+              [disabled]="!puedeEditar || ocupado || referenciasPendientesEntrevista.length > 0">
+              Confirmar y cerrar referencias
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+
+
     <!-- =================================================== -->
     <!-- CARGANDO DETALLE -->
     <!-- =================================================== -->
@@ -503,7 +593,7 @@
     </p>
 
 
-    <ng-container *ngIf="!cargandoDetalle">
+    <ng-container *ngIf="!cargandoDetalle && vistaSolicitud === 'gestion'">
 
       <!-- ================================================= -->
       <!-- PARTICIPANTES -->
@@ -520,8 +610,8 @@
             </h3>
 
             <p>
-              Seleccione el principal o codeudor
-              para gestionar sus referencias.
+              Utilice el botón GESTIONAR del principal o codeudor
+              para consultar y registrar sus referencias.
             </p>
 
           </div>
@@ -529,60 +619,54 @@
         </div>
 
 
-        <div class="participant-grid">
+        <div class="table-wrap">
 
-          <button
-            *ngFor="
-              let p of participantes
-            "
-            type="button"
-            class="participant"
-            [class.participant--selected]="
-              participante?.idSolicitudDeudor ===
-              p.idSolicitudDeudor
-            "
-            (click)="
-              seleccionarParticipante(p)
-            ">
+          <table class="table">
 
-            <span class="participant-type">
-              {{ p.tipoDeudor }}
-            </span>
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Participante</th>
+                <th>Documento</th>
+                <th class="number">Referencias</th>
+                <th class="number">Contactadas</th>
+                <th class="number">No contactadas</th>
+                <th class="number">Pendientes</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
 
-            <strong>
-              {{ p.nombreCompleto }}
-            </strong>
+            <tbody>
+              <tr *ngFor="let p of participantes">
+                <td>{{ p.tipoDeudor }}</td>
+                <td><strong>{{ p.nombreCompleto }}</strong></td>
+                <td>{{ p.tipoDocumento }} {{ p.documento }}</td>
+                <td class="number">{{ p.cantidadReferencias }}</td>
+                <td class="number">{{ p.cantidadContactadas }}</td>
+                <td class="number">{{ p.cantidadNoContactadas }}</td>
+                <td class="number">{{ p.cantidadPendientes }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="btn btn-small btn-primary"
+                    (click)="seleccionarParticipante(p)">
+                    {{ participante?.idSolicitudDeudor === p.idSolicitudDeudor
+                      ? 'SELECCIONADO'
+                      : 'GESTIONAR' }}
+                  </button>
+                </td>
+              </tr>
 
-            <small>
-              {{ p.tipoDocumento }}
-              {{ p.documento }}
-            </small>
+              <tr *ngIf="participantes.length === 0">
+                <td colspan="8" class="empty">
+                  La solicitud no tiene participantes activos.
+                </td>
+              </tr>
+            </tbody>
 
-            <span class="participant-counts">
-              {{ p.cantidadReferencias }}
-              referencias ·
-              {{ p.cantidadContactadas }}
-              contactadas ·
-              {{ p.cantidadNoContactadas }}
-              no contactadas ·
-              {{ p.cantidadPendientes }}
-              pendientes
-            </span>
-
-          </button>
+          </table>
 
         </div>
-
-
-        <p
-          *ngIf="
-            participantes.length === 0
-          "
-          class="empty">
-
-          La solicitud no tiene participantes activos.
-
-        </p>
 
       </section>
 
@@ -1323,112 +1407,6 @@
 
       </ng-container>
 
-
-      <!-- ================================================= -->
-      <!-- CIERRE -->
-      <!-- ================================================= -->
-
-      <section
-        *ngIf="editable"
-        class="card close-card">
-
-        <div class="section-header">
-
-          <div>
-
-            <h3>
-              Cerrar gestión de referencias
-            </h3>
-
-            <p>
-              El cierre es definitivo. Puede cerrar
-              sin referencias con justificación.
-            </p>
-
-          </div>
-
-        </div>
-
-
-        <div class="info-grid">
-
-          <div class="info-item">
-
-            <span>
-              Tipo de cierre
-            </span>
-
-            <strong>
-              {{
-              referencias.length
-              ? 'CON REFERENCIAS'
-              : 'SIN REFERENCIAS'
-              }}
-            </strong>
-
-          </div>
-
-
-          <div class="info-item">
-
-            <span>
-              Referencias activas
-            </span>
-
-            <strong>
-              {{ referencias.length }}
-            </strong>
-
-          </div>
-
-        </div>
-
-
-        <label>
-
-          Observación de cierre
-
-          <span
-            *ngIf="
-              referencias.length === 0
-            "
-            class="required">
-
-            *
-
-          </span>
-
-          <textarea
-            name="observacionCierre"
-            rows="3"
-            [(ngModel)]="observacionCierre"
-            placeholder="
-              Describa la gestión realizada o
-              justifique el cierre sin referencias.
-            ">
-          </textarea>
-
-        </label>
-
-
-        <div class="actions">
-
-          <button
-            type="button"
-            class="btn btn-primary"
-            (click)="cerrar()"
-            [disabled]="
-              !puedeEditar
-              || ocupado
-            ">
-
-            Cerrar gestión definitivamente
-
-          </button>
-
-        </div>
-
-      </section>
 
     </ng-container>
 

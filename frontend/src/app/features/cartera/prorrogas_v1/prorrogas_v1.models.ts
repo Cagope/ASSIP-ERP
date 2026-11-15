@@ -1,10 +1,16 @@
-import type { PagoCuotasCreditoResumen, PagoCuotasCreditoDetalle, PagoCuotasCajaRecaudo, PagoCuotasCuentaAhorro } from '../pago-cuotas_v1/pago-cuotas_v1.models';
+import type {
+  PagoCuotasCreditoResumen,
+  PagoCuotasCreditoDetalle,
+  PagoCuotasCajaRecaudo,
+  PagoCuotasCuentaAhorro
+} from '../pago-cuotas_v1/pago-cuotas_v1.models';
 
 /** Contratos reutilizados de Pago de Cuotas para consultas y medios disponibles. */
 export type ProrrogasCreditoResumen = PagoCuotasCreditoResumen;
 export type ProrrogasCreditoDetalle = PagoCuotasCreditoDetalle;
 export type ProrrogasCaja = PagoCuotasCajaRecaudo;
 export type ProrrogasCuentaAhorro = PagoCuotasCuentaAhorro;
+
 export type ProrrogasTipoMedio = 'CAJA' | 'AHORROS' | 'CXP';
 
 /** Coincide con PagoCuotasMedioRecaudoDTO del backend. */
@@ -16,7 +22,7 @@ export interface ProrrogasMedioRecaudo {
   idCuentaPorPagar: number | null;
 }
 
-/** Coincide con ProrrogasV1RequestDTO; importes en pesos enteros. */
+/** Solicitud de prórroga con los seis conceptos financieros. */
 export interface ProrrogasSolicitud {
   idCarteraCredito: number;
   mesesProrroga: 1 | 2 | 3;
@@ -24,14 +30,13 @@ export interface ProrrogasSolicitud {
   valorInteresMora: number;
   valorCapital: number;
   valorSeguro: number;
-  valorAportes: number;
-  valorFondoGarantia: number;
-  valorOtrosConceptos: number;
+  valorAlivios: number;
+  valorCostasJudiciales: number;
   mediosRecaudo: ProrrogasMedioRecaudo[];
   observacion: string;
 }
 
-/** Coincide con ProrrogasV1PreviewDTO del backend. */
+/** Vista previa de prórroga calculada por el backend. */
 export interface ProrrogasPreview {
   idCarteraCredito: number;
   idAgencia: number;
@@ -55,16 +60,15 @@ export interface ProrrogasPreview {
   valorInteresMora: number;
   valorCapital: number;
   valorSeguro: number;
-  valorAportes: number;
-  valorFondoGarantia: number;
-  valorOtrosConceptos: number;
+  valorAlivios: number;
+  valorCostasJudiciales: number;
   valorTotalRecaudo: number;
   tieneProrrogaActiva: boolean;
   permiteProrroga: boolean;
   mensajeValidacion: string | null;
 }
 
-/** Coincide con ProrrogasV1ResponseDTO del backend. */
+/** Resultado de la aplicación financiera de la prórroga. */
 export interface ProrrogasResultado {
   idCreditoProrroga: number;
   idCarteraCredito: number;
@@ -78,12 +82,12 @@ export interface ProrrogasResultado {
   proximaFechaInteresNueva: string | null;
   fechaVencimientoAnterior: string | null;
   fechaVencimientoNueva: string | null;
+  valorCapital: number;
   valorInteresCorriente: number;
   valorInteresMora: number;
   valorSeguro: number;
-  valorAportes: number;
-  valorFondoGarantia: number;
-  valorOtrosConceptos: number;
+  valorAlivios: number;
+  valorCostasJudiciales: number;
   valorTotalPagado: number;
   tipoComprobante: string;
   numeroComprobante: string;
@@ -92,13 +96,13 @@ export interface ProrrogasResultado {
   mensaje: string;
 }
 
-/** Coincide con ProrrogasV1HistorialDTO del backend. */
+/** Historial contractual y financiero de prórrogas. */
 export interface ProrrogasHistorial {
   idCreditoProrroga: number;
   idCarteraCredito: number;
   numeroProrroga: number;
   fechaProrroga: string;
-  diasProrroga: number;
+  diasProrroga: number | null;
   mesesProrroga: number;
   proximaFechaCapitalAnterior: string | null;
   proximaFechaInteresAnterior: string | null;
@@ -108,23 +112,23 @@ export interface ProrrogasHistorial {
   proximaFechaInteresNueva: string | null;
   fechaVencimientoNueva: string | null;
   plazoNuevo: number | null;
+  valorCapital: number;
   valorInteresCorriente: number;
   valorInteresMora: number;
   valorSeguro: number;
-  valorAportes: number;
-  valorFondoGarantia: number;
-  valorOtrosConceptos: number;
+  valorAlivios: number;
+  valorCostasJudiciales: number;
   valorTotalPagado: number;
   tipoComprobante: string;
   numeroComprobante: string;
   fechaComprobante: string;
-  idAgencia: number;
+  idAgencia: number | null;
   estadoProrroga: string;
   fechaAplicacion: string | null;
   observacion: string | null;
 }
 
-/** Coincide con MovimientoContableDTO (clase Java con getters). */
+/** Movimientos del comprobante contable generado por el backend. */
 export interface ProrrogasMovimientoContable {
   codigoCuenta: string;
   nombreCuenta: string;
@@ -144,8 +148,7 @@ export interface ProrrogasLiquidacion {
   valorInteresMora: number;
   valorCapital: number;
   valorSeguro: number;
-  valorAportes: number;
-  valorFondoGarantia: number;
-  valorOtrosConceptos: number;
+  valorAlivios: number;
+  valorCostasJudiciales: number;
   valorTotalSugerido: number;
 }

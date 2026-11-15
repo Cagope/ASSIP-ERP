@@ -1,0 +1,590 @@
+
+:host {
+  display: block;
+  color: #172b4d;
+}
+
+.balance-pagina {
+  padding: 18px 20px;
+  background: #f5f7fa;
+  min-height: 100%;
+}
+
+.encabezado {
+  margin-bottom: 18px;
+
+  h2 {
+    margin: 0 0 5px;
+    font-size: 21px;
+    font-weight: 700;
+    color: #172b4d;
+  }
+
+  p {
+    margin: 0;
+    font-size: 13px;
+    color: #66788a;
+  }
+}
+
+.panel {
+  background: #fff;
+  border: 1px solid #dce4ed;
+  border-radius: 9px;
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 6px rgba(20, 45, 75, 0.03);
+
+  h3 {
+    margin: 0 0 17px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #183153;
+  }
+}
+
+// =========================================================
+// FILTROS
+// =========================================================
+
+.filtros {
+  display: grid;
+  grid-template-columns: minmax(260px, 2fr) 1fr 1fr 1fr;
+  gap: 14px;
+  align-items: end;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #33465c;
+    min-width: 0;
+  }
+
+  input,
+  select {
+    width: 100%;
+    min-height: 37px;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    background: #fff;
+    color: #172b4d;
+    border: 1px solid #c7d2df;
+    border-radius: 5px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 400;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    &:focus {
+      border-color: #23639a;
+      box-shadow: 0 0 0 3px rgba(35, 99, 154, 0.12);
+    }
+
+    &:disabled {
+      background: #f1f4f7;
+      color: #8190a0;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// =========================================================
+// OPCIONES DEL INFORME
+// =========================================================
+
+.opciones {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.opcion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  min-height: 66px;
+  box-sizing: border-box;
+  border: 1px solid #dbe4ed;
+  border-radius: 7px;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover {
+    background: #f0f6fc;
+    border-color: #b4cce3;
+  }
+
+  &:has(input:checked) {
+    background: #edf5fc;
+    border-color: #75a9d2;
+  }
+
+  &:has(input:focus-visible) {
+    outline: 2px solid #23639a;
+    outline-offset: 2px;
+  }
+
+  input[type='checkbox'] {
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 22px;
+    margin: 0;
+    border: 1px solid #b9c5d1;
+    border-radius: 20px;
+    background: #cbd5df;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+      transition: transform 0.2s;
+    }
+
+    &:checked {
+      background: #1e6095;
+      border-color: #1e6095;
+
+      &::before {
+        transform: translateX(16px);
+      }
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.opcion-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+
+  strong {
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 650;
+    color: #233b53;
+  }
+
+  small {
+    font-size: 11px;
+    line-height: 1.4;
+    color: #718196;
+  }
+}
+
+// =========================================================
+// BOTONES
+// =========================================================
+
+.acciones {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 20px;
+
+  button {
+    min-height: 37px;
+    padding: 9px 18px;
+    border: 1px solid #195b90;
+    border-radius: 5px;
+    background: #195b90;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover:not(:disabled) {
+      background: #124b78;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #195b90;
+      outline-offset: 3px;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &.secundario {
+      background: #fff;
+      color: #195b90;
+      border-color: #b8cadb;
+
+      &:hover:not(:disabled) {
+        background: #eaf2f9;
+      }
+    }
+  }
+}
+
+// =========================================================
+// RESULTADO DEL BALANCE
+// =========================================================
+
+.resultado {
+  margin-bottom: 15px;
+
+  h3 {
+    margin-bottom: 5px;
+    font-size: 16px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 12px;
+    color: #6a7d91;
+  }
+}
+
+.tabla-contenedor {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #dce4ed;
+  border-radius: 6px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+
+  thead {
+    background: #eaf0f6;
+
+    th {
+      padding: 11px 12px;
+      text-align: left;
+      color: #263e55;
+      font-weight: 700;
+      border-bottom: 2px solid #cad7e4;
+      white-space: nowrap;
+    }
+
+    th.numero {
+      text-align: right;
+    }
+  }
+
+  tbody {
+    tr {
+      border-bottom: 1px solid #edf0f4;
+
+      &:hover {
+        background: #f5f9fd;
+      }
+
+      &.agrupadora {
+        background: #f1f5f9;
+        font-weight: 700;
+        color: #173b5c;
+      }
+    }
+
+    td {
+      padding: 8px 12px;
+      vertical-align: middle;
+    }
+
+    td:first-child {
+      white-space: nowrap;
+      font-weight: 600;
+    }
+  }
+
+  tfoot {
+    background: #dceaf5;
+
+    th {
+      padding: 12px;
+      border-top: 2px solid #9bbbd5;
+      font-weight: 700;
+      color: #173b5c;
+      text-align: left;
+    }
+
+    th.numero {
+      text-align: right;
+    }
+  }
+
+  .numero {
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// =========================================================
+// INDICADORES Y RESUMEN FINANCIERO
+// =========================================================
+
+.indicadores-financieros,
+.resumen-financiero {
+  margin-bottom: 24px;
+
+  h3 {
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #dce4ed;
+    font-size: 14px;
+    font-weight: 700;
+    color: #183153;
+  }
+}
+
+.indicadores-tabla-contenedor,
+.resumen-tabla-contenedor {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #dce4ed;
+  border-radius: 6px;
+}
+
+.tabla-resumen {
+  min-width: 600px;
+  table-layout: fixed;
+
+  th,
+  td {
+    box-sizing: border-box;
+  }
+
+  th:first-child,
+  td:first-child {
+    width: 40%;
+    text-align: left;
+  }
+
+  th:not(:first-child),
+  td:not(:first-child) {
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  tbody {
+    th {
+      padding: 9px 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    tr.fila-destacada {
+      background: #e1edf7;
+      color: #173b5c;
+      font-weight: 700;
+
+      th,
+      td {
+        border-top: 2px solid #a7c1d8;
+      }
+    }
+  }
+}
+
+.indicadores-financieros .tabla-resumen {
+  th:nth-child(2),
+  td:nth-child(2),
+  th:nth-child(3),
+  td:nth-child(3) {
+    width: 30%;
+  }
+}
+
+.resumen-financiero .tabla-resumen {
+  th:first-child,
+  td:first-child {
+    width: 34%;
+  }
+
+  th:not(:first-child),
+  td:not(:first-child) {
+    width: 22%;
+  }
+}
+
+.diferencia-alerta {
+  color: #b42318;
+  font-weight: 700;
+}
+
+// =========================================================
+// CUENTAS AUXILIARES SELECCIONABLES
+// =========================================================
+
+.ayuda-movimientos {
+  margin: -6px 0 12px;
+  color: #66788a;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.enlace-cuenta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 4px;
+  margin: -3px -4px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #075b9c;
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-color: #7da9cd;
+  text-underline-offset: 3px;
+  cursor: pointer;
+
+  &::after {
+    content: '↗';
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  &:hover:not(:disabled) {
+    background: #e8f2fa;
+    color: #003f73;
+    text-decoration-color: currentColor;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #195b90;
+    outline-offset: 3px;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.sin-resultados {
+  padding: 20px 12px !important;
+  color: #718196;
+  text-align: center;
+  font-style: italic;
+}
+
+// =========================================================
+// FIRMAS
+// =========================================================
+
+.firmas {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 25px;
+  margin-top: 45px;
+  padding-top: 22px;
+  text-align: center;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding-top: 12px;
+    border-top: 1px solid #8da0b4;
+    min-width: 0;
+
+    strong {
+      font-size: 12px;
+      color: #203b57;
+    }
+
+    span,
+    small {
+      font-size: 11px;
+      color: #64778a;
+    }
+  }
+}
+
+// =========================================================
+// MENSAJES
+// =========================================================
+
+.error {
+  padding: 12px 14px;
+  margin: 15px 0;
+  background: #fff3f3;
+  border: 1px solid #f1b0b0;
+  border-radius: 5px;
+  color: #b42318;
+  font-size: 12px;
+}
+
+// =========================================================
+// RESPONSIVE
+// =========================================================
+
+@media (max-width: 1000px) {
+  .filtros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .opciones {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .balance-pagina {
+    padding: 12px;
+  }
+
+  .panel {
+    padding: 14px;
+  }
+
+  .filtros {
+    grid-template-columns: 1fr;
+  }
+
+  .acciones {
+    button {
+      flex: 1 1 auto;
+    }
+  }
+
+  .firmas {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}
+
+@media (max-width: 600px) {
+  .indicadores-financieros,
+  .resumen-financiero {
+    margin-bottom: 20px;
+  }
+}

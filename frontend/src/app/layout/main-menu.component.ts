@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import {
@@ -13,7 +13,6 @@ import {
   Settings,
   LockKeyhole,
   PiggyBank,
-  Gauge,
   Wallet,
   HandCoins,
   Search
@@ -26,10 +25,15 @@ import {
   NavigationEnd
 } from '@angular/router';
 
-import { filter } from 'rxjs/operators';
+import { Subject, filter, takeUntil } from 'rxjs';
 
 import { SessionService } from '../core/auth/session.service';
 import { MENU_REGISTRY } from './menu-registry';
+import { MenuNavigationService } from './menu-navigation.service';
+
+/* =========================================================
+   MODELOS DEL MENÚ
+   ========================================================= */
 
 export interface MenuItem {
   label: string;
@@ -44,6 +48,17 @@ export interface MenuSection {
   items: MenuItem[];
 }
 
+interface RutaMenu {
+  sectionIndex: number;
+  groupIndex: number;
+  subGroupIndex: number | null;
+  route: string;
+}
+
+/* =========================================================
+   COMPONENTE PRINCIPAL
+   ========================================================= */
+
 @Component({
   standalone: true,
   selector: 'app-main-menu',
@@ -54,9 +69,9 @@ export interface MenuSection {
     LucideAngularModule
   ],
   templateUrl: './main-menu.component.html',
-  styleUrls: ['./main-menu.component.scss'],
+  styleUrls: ['./main-menu.component.scss']
 })
-export class MainMenuComponent implements OnInit {
+export class MainMenuComponent implements OnInit, OnDestroy {
 
   menu: MenuSection[] = MENU_REGISTRY;
 
@@ -77,22 +92,77 @@ export class MainMenuComponent implements OnInit {
     consultas: Search
   };
 
+  /* Estado de expansión */
+
   openedIndex: number | null = null;
   openedGroupIndex: number | null = null;
   openedSubGroupKey: string | null = null;
 
+  /* Identificación independiente de la ruta activa */
+
+  activeSectionIndex: number | null = null;
+
+  // Conserva el módulo desde el cual se abrió una ruta compartida.
+  private origenNavegacionIndex: number | null = null;
+
+  private readonly destroy$ = new Subject<void>();
+
   constructor(
     private session: SessionService,
-    private router: Router
+    private router: Router,
+    private menuNavigation: MenuNavigationService
   ) {}
 
+  /* =========================================================
+     CICLO DE VIDA
+     ========================================================= */
+
   ngOnInit(): void {
+
+    // Identificar el módulo correspondiente a la ruta actual.
     this.abrirSegunRuta();
 
+    // Actualizar el menú cuando cambia la ruta.
     this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe(() => this.abrirSegunRuta());
+      .pipe(
+        filter(
+          (event): event is NavigationEnd =>
+            event instanceof NavigationEnd
+        ),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        this.abrirSegunRuta();
+      });
+
+    // Abrir módulos desde las tarjetas de la pantalla principal.
+    this.menuNavigation.abrirModulo$
+      .pipe(
+        takeUntil(this.destroy$)
+      )
+      .subscribe((index: number) => {
+
+        if (index < 0 || index >= this.menu.length) {
+          return;
+        }
+
+        // Expandir el módulo seleccionado.
+        this.openedIndex = index;
+
+        // Cerrar grupos y subgrupos anteriores.
+        this.openedGroupIndex = null;
+        this.openedSubGroupKey = null;
+      });
   }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  /* =========================================================
+     NIVEL 1 - MÓDULOS
+     ========================================================= */
 
   isOpen(index: number): boolean {
     return this.openedIndex === index;
@@ -111,6 +181,21 @@ export class MainMenuComponent implements OnInit {
     this.openedSubGroupKey = null;
   }
 
+  /**
+   * Solo el módulo identificado por la ruta
+   * puede tener el estado active-section.
+   */
+  seccionActiva(section: MenuSection): boolean {
+    const index = this.menu.indexOf(section);
+
+    return index >= 0 &&
+      this.activeSectionIndex === index;
+  }
+
+  /* =========================================================
+     NIVEL 2 - GRUPOS
+     ========================================================= */
+
   isGroupOpen(index: number): boolean {
     return this.openedGroupIndex === index;
   }
@@ -125,6 +210,10 @@ export class MainMenuComponent implements OnInit {
     this.openedGroupIndex = index;
     this.openedSubGroupKey = null;
   }
+
+  /* =========================================================
+     NIVEL 3 - SUBGRUPOS
+     ========================================================= */
 
   isSubGroupOpen(
     groupIndex: number,
@@ -146,106 +235,249 @@ export class MainMenuComponent implements OnInit {
         : key;
   }
 
-  closeMenu(): void {
-    this.abrirSegunRuta();
-  }
+  /* =========================================================
+     SEGURIDAD
+     ========================================================= */
 
   tienePermiso(item: MenuItem): boolean {
-    if (!item?.permiso) {
+    if (item.permiso && !this.session.tienePermiso(item.permiso)) {
+      return false;
+    }
+    // Un grupo solo aparece cuando contiene opciones autorizadas.
+    if (item.children?.length) {
+      return item.children.some(child => this.tienePermiso(child));
+    }
+    // Las opciones sin permiso se mantienen provisionalmente hasta
+    // completar la auditoría de los demás módulos.
+    return true;
+  }
+
+  seccionVisible(section: MenuSection): boolean {
+    return section.items.some(item => this.tienePermiso(item));
+  }
+
+  /* =========================================================
+     IDENTIFICACIÓN DE RUTAS
+     ========================================================= */
+
+  /**
+   * Normaliza las rutas sin parámetros de consulta,
+   * fragmentos ni barras finales.
+   */
+  private normalizarRuta(url: string): string {
+    const ruta = url
+      .split(/[?#]/)[0]
+      .replace(/\/+$/, '');
+
+    return ruta || '/';
+  }
+
+  /**
+   * Exige coincidencia completa o un segmento hijo.
+   * Evita confundir rutas con prefijos similares.
+   */
+  private rutaCoincide(
+    rutaMenu: string,
+    urlActual: string
+  ): boolean {
+    const ruta = this.normalizarRuta(rutaMenu);
+    const actual = this.normalizarRuta(urlActual);
+
+    if (ruta === actual) {
       return true;
     }
 
-    return this.session.tienePermiso(
-      item.permiso
-    );
+    if (ruta === '/') {
+      return false;
+    }
+
+    return actual.startsWith(`${ruta}/`);
   }
 
+  /**
+   * Localiza la ruta más específica dentro del
+   * registro completo de módulos.
+   *
+   * Así se evita que una ruta padre tenga prioridad
+   * sobre una opción más específica.
+   */
+  private buscarRutaActiva(
+    url: string
+  ): RutaMenu | null {
+    let resultado: RutaMenu | null = null;
+
+    this.menu.forEach((section, sectionIndex) => {
+      section.items.forEach((item, groupIndex) => {
+
+        const recorrer = (
+          actual: MenuItem,
+          subGroupIndex: number | null
+        ): void => {
+
+          if (
+            actual.route &&
+            this.rutaCoincide(actual.route, url)
+          ) {
+            if (
+              !resultado ||
+              this.normalizarRuta(actual.route).length >
+                this.normalizarRuta(resultado.route).length
+            ) {
+              resultado = {
+                sectionIndex,
+                groupIndex,
+                subGroupIndex,
+                route: actual.route
+              };
+            }
+          }
+
+          actual.children?.forEach(
+            (child, childIndex) => {
+              recorrer(
+                child,
+                subGroupIndex === null &&
+                !!child.children?.length
+                  ? childIndex
+                  : subGroupIndex
+              );
+            }
+          );
+        };
+
+        recorrer(item, null);
+      });
+    });
+
+    return resultado;
+  }
+
+  /**
+   * Busca una coincidencia solo en el módulo desde el que se navegó.
+   * Respeta el permiso de cada opción y prioriza la ruta más específica.
+   */
+  private buscarRutaEnSeccion(
+    url: string,
+    sectionIndex: number
+  ): RutaMenu | null {
+    const section = this.menu[sectionIndex];
+    if (!section) {
+      return null;
+    }
+
+    let resultado: RutaMenu | null = null;
+
+    section.items.forEach((item, groupIndex) => {
+      const recorrer = (
+        actual: MenuItem,
+        subGroupIndex: number | null
+      ): void => {
+        if (!this.tienePermiso(actual)) {
+          return;
+        }
+
+        if (actual.route && this.rutaCoincide(actual.route, url)) {
+          if (!resultado ||
+              this.normalizarRuta(actual.route).length >
+              this.normalizarRuta(resultado.route).length) {
+            resultado = {
+              sectionIndex,
+              groupIndex,
+              subGroupIndex,
+              route: actual.route
+            };
+          }
+        }
+
+        actual.children?.forEach((child, childIndex) => {
+          recorrer(
+            child,
+            subGroupIndex === null && !!child.children?.length
+              ? childIndex
+              : subGroupIndex
+          );
+        });
+      };
+
+      recorrer(item, null);
+    });
+
+    return resultado;
+  }
+
+  /**
+   * Determina si un grupo contiene la ruta actual.
+   */
   grupoActivo(item: MenuItem): boolean {
     const url = this.router.url;
 
-    return this.itemContieneRuta(
-      item,
-      url
-    );
-  }
-
-  private abrirSegunRuta(): void {
-    const url = this.router.url;
-
-    this.menu.forEach(
-      (section, sectionIndex) => {
-
-        const tieneRutaDirecta =
-          section.items.some(item =>
-            !!item.route &&
-            url.startsWith(item.route)
-          );
-
-        const groupIndex =
-          section.items.findIndex(item =>
-            this.itemContieneRuta(
-              item,
-              url
-            )
-          );
-
-        if (
-          tieneRutaDirecta ||
-          groupIndex >= 0
-        ) {
-          this.openedIndex = sectionIndex;
-
-          this.openedGroupIndex =
-            groupIndex >= 0
-              ? groupIndex
-              : null;
-
-          this.openedSubGroupKey = null;
-
-          if (groupIndex >= 0) {
-            const group =
-              section.items[groupIndex];
-
-            const subGroupIndex =
-              group.children?.findIndex(
-                child =>
-                  child.children?.some(
-                    subchild =>
-                      !!subchild.route &&
-                      url.startsWith(
-                        subchild.route
-                      )
-                  )
-              ) ?? -1;
-
-            if (subGroupIndex >= 0) {
-              this.openedSubGroupKey =
-                `${groupIndex}-${subGroupIndex}`;
-            }
-          }
-        }
-      }
-    );
-  }
-
-  private itemContieneRuta(
-    item: MenuItem,
-    url: string
-  ): boolean {
     if (
       item.route &&
-      url.startsWith(item.route)
+      this.rutaCoincide(item.route, url)
     ) {
       return true;
     }
 
-    return !!item.children?.some(
-      child =>
-        this.itemContieneRuta(
-          child,
-          url
-        )
+    return !!item.children?.some(child =>
+      this.grupoActivo(child)
     );
+  }
+
+  /* =========================================================
+     APERTURA AUTOMÁTICA
+     ========================================================= */
+
+  private abrirSegunRuta(): void {
+    const rutaActiva = this.buscarRutaActiva(
+      this.router.url
+    );
+
+    // Cuando una ruta se comparte, se prioriza el módulo elegido por el usuario.
+    // Al salir de esa ruta, se vuelve a la identificación normal por URL.
+    let seleccion = rutaActiva;
+
+    if (this.origenNavegacionIndex !== null) {
+      const origen = this.buscarRutaEnSeccion(
+        this.router.url,
+        this.origenNavegacionIndex
+      );
+
+      if (origen) {
+        seleccion = origen;
+      } else {
+        this.origenNavegacionIndex = null;
+      }
+    }
+
+    this.activeSectionIndex = seleccion?.sectionIndex ?? null;
+
+    if (!seleccion) {
+      return;
+    }
+
+    this.openedIndex = seleccion.sectionIndex;
+
+    const section = this.menu[seleccion.sectionIndex];
+    const item = section.items[seleccion.groupIndex];
+
+    this.openedGroupIndex = item.children?.length
+      ? seleccion.groupIndex
+      : null;
+
+    this.openedSubGroupKey =
+      seleccion.subGroupIndex !== null &&
+      this.openedGroupIndex !== null
+        ? `${seleccion.groupIndex}-${seleccion.subGroupIndex}`
+        : null;
+  }
+
+  /* =========================================================
+     NAVEGACIÓN Y SESIÓN
+     ========================================================= */
+
+  closeMenu(sectionIndex: number): void {
+    // La misma ruta puede existir en Gestión Gerencial y en su módulo de origen.
+    this.origenNavegacionIndex = sectionIndex;
   }
 
   logout(): void {

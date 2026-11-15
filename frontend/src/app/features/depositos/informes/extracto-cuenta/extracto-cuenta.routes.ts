@@ -9,7 +9,7 @@ export const EXTRACTO_CUENTA_ROUTES: Routes = [
         .then(m => m.ExtractoCuentaComponent),
     canActivate: [permisoGuard],
     data: {
-      permiso: 'DEPOSITOS_INFORMES_VIEW'
+      permiso: 'DEPOSITOS_EXTRACTO_CUENTA_VIEW'
     }
   }
 ];

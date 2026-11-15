@@ -179,7 +179,8 @@ public class CausacionSegurosRepository {
     // =========================================================
     // LIMPIAR CAUSACION AUTOMATICA NO CONTABILIZADA
     //
-    // Permite volver a ejecutar el cierre mientras esté en P.
+    // Permite recalcular solo con cierre C y sin causaciones contabilizadas.
+    // El Service valida el estado del cierre.
     //
     // NO elimina:
     // - pagos
@@ -246,6 +247,7 @@ public class CausacionSegurosRepository {
         );
     }
 
+
     // =========================================================
     // CAUSAR SEGUROS
     //
@@ -257,23 +259,21 @@ public class CausacionSegurosRepository {
     //      TRUE  -> saldo_actual de la foto
     //      FALSE -> valor_desembolsado de la foto
     //
-    // 3. incluye_intereses_causados:
-    //      TRUE  -> suma valor_intereses_causados_mes
-    //      FALSE -> suma cero
+    // 3. Los intereses causados se conservan como información
+    //    para informes de la aseguradora.
+    //    NUNCA forman parte de la base de causación.
     //
     // 4. base_calculo:
-    //      saldo_base
-    //      + intereses_causados_base
-    //      + otros_base
+    //      saldo_base (exclusivamente capital).
     //
     // 5. porcentaje_aplicar:
-    //      se toma de la configuración de creditos_seguros.
+    //      se toma de cartera.creditos_seguros.
     //
     // 6. valor_debito:
     //      ROUND(base_calculo * porcentaje_aplicar / 100, 0)
     //
-    // 7. Se deja registro incluso cuando el resultado sea cero,
-    //    siempre que exista seguro activo aplicable al corte.
+    // 7. Se registra la causación incluso si el resultado es
+    //    cero, siempre que exista seguro activo aplicable.
     // =========================================================
 
     public int causarSeguros(
@@ -287,15 +287,11 @@ public class CausacionSegurosRepository {
                 SELECT
                     f.id_cierre_cartera_credito,
                     f.id_cartera_credito,
-
                     c.fecha_corte,
-
                     s.id_credito_seguro,
-
                     s.porcentaje_base_seguro,
                     s.porcentaje_extraprima,
                     s.porcentaje_aplicar,
-
                     s.sobre_saldo_actual,
                     s.incluye_intereses_causados,
 
@@ -305,22 +301,16 @@ public class CausacionSegurosRepository {
                             f.saldo_actual,
                             0
                         )
-
                         ELSE COALESCE(
                             f.valor_desembolsado,
                             0
                         )
                     END AS saldo_base,
 
-                    CASE
-                        WHEN s.incluye_intereses_causados = TRUE
-                        THEN COALESCE(
-                            r.valor_intereses_causados_mes,
-                            0
-                        )
-
-                        ELSE 0
-                    END AS intereses_causados_base
+                    COALESCE(
+                        r.valor_intereses_causados_mes,
+                        0
+                    ) AS intereses_causados_base
 
                 FROM cartera.cierres_cartera_creditos f
 
@@ -341,14 +331,10 @@ public class CausacionSegurosRepository {
 
                    AND s.activo = TRUE
 
-                   AND
-                   (
+                   AND (
                        s.fecha_inicial_cobro IS NULL
-
-                       OR
-
-                       s.fecha_inicial_cobro <=
-                       c.fecha_corte
+                       OR s.fecha_inicial_cobro <=
+                          c.fecha_corte
                    )
 
                 WHERE f.id_cierre_cartera =
@@ -363,11 +349,7 @@ public class CausacionSegurosRepository {
                     0::numeric(18,2)
                         AS otros_base,
 
-                    (
-                        b.saldo_base
-                        +
-                        b.intereses_causados_base
-                    )::numeric(18,2)
+                    b.saldo_base::numeric(18,2)
                         AS base_calculo
 
                 FROM base b
@@ -395,7 +377,6 @@ public class CausacionSegurosRepository {
             INSERT INTO cartera.creditos_seguros_detalle
             (
                 id_credito_seguro,
-
                 fecha_movimiento,
 
                 saldo_base,
@@ -425,7 +406,6 @@ public class CausacionSegurosRepository {
 
             SELECT
                 r.id_credito_seguro,
-
                 r.fecha_corte,
 
                 r.saldo_base,
@@ -543,10 +523,7 @@ public class CausacionSegurosRepository {
                                  AND d.observacion_seguro =
                                      :observacion
 
-                                 AND COALESCE(
-                                     d.estado,
-                                     'A'
-                                 ) <> 'I'
+                                 AND d.estado = 'A'
 
                                 THEN
                                     d.valor_debito
@@ -569,10 +546,7 @@ public class CausacionSegurosRepository {
                                 WHEN d.fecha_movimiento <=
                                      c.fecha_corte
 
-                                 AND COALESCE(
-                                     d.estado,
-                                     'A'
-                                 ) <> 'I'
+                                 AND d.estado = 'A'
 
                                 THEN
                                     d.valor_debito

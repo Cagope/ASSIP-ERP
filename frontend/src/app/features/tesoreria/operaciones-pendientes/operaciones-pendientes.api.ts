@@ -38,6 +38,7 @@ export interface OperacionPagoRequest {
 
 export interface OperacionComprobantePreview {
   idOperacion: number;
+  tipoComprobante: 'CI' | 'CE';
   idAgencia: number;
   idBeneficiario: number;
   valorOriginal: number;

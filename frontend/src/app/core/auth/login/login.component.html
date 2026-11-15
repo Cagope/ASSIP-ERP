@@ -1,23 +1,25 @@
-<div class="auth-wrap">
+<!-- Acceso institucional COOPVALLE. La autenticación conserva su flujo original. -->
+<section class="login-page">
+  <main class="login-panel">
+    <div class="login-brand">
+      <img src="assets/login-logo.png" alt="COOPVALLE - Valle de San José" />
+    </div>
 
-  <header class="auth-header">
-    <img
-      src="assets/logo-web.png"
-      alt="Logo de la empresa"
-      class="logo"
-    />
-
-    <h1 class="auth-title">
-      {{
-      etapa() === 'ACTIVACION'
-      ? 'Activar cuenta'
-      : etapa() === 'RECUPERACION'
-      ? 'Restablecer contraseña'
-      : 'Iniciar sesión'
-      }}
-    </h1>
-  </header>
-
+    <div class="login-form-container">
+      <h2 class="login-welcome">Bienvenido a <span>COOPVALLE</span></h2>
+      <div class="login-accent" aria-hidden="true"></div>
+      <p class="login-description">
+        Bienvenido a una plataforma diseñada para facilitar tu trabajo y fortalecer nuestro crecimiento.
+      </p>
+      <h1 class="auth-title">
+        {{
+          etapa() === 'ACTIVACION'
+            ? 'Activar cuenta'
+            : etapa() === 'RECUPERACION'
+              ? 'Restablecer contraseña'
+              : 'Iniciar sesión'
+        }}
+      </h1>
   <form
     class="auth-form"
     [formGroup]="form"
@@ -334,4 +336,11 @@
 
   </form>
 
-</div>
+    </div>
+  </main>
+
+  <!-- Ilustración independiente: no contiene los controles del formulario. -->
+  <aside class="login-visual" aria-label="Innovación y crecimiento COOPVALLE">
+    <img src="assets/login-background.png" alt="Innovación, eficiencia y crecimiento cooperativo de COOPVALLE" />
+  </aside>
+</section>

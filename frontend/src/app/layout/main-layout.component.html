@@ -1,32 +1,174 @@
+<!-- =========================================================
+     ASSIP ERP - LAYOUT PRINCIPAL
+     COOPVALLE
+     ========================================================= -->
+
 <div class="layout">
 
-  <!-- ================== SIDEBAR ================== -->
+  <!-- ================= MENÚ LATERAL ================= -->
   <aside class="sidebar">
+
+    <!-- Logotipo institucional y acceso a inicio -->
     <div class="sidebar-brand">
-      <span class="title">ASSIP-ERP</span>
+
+      <img
+        class="brand-logo"
+        src="assets/logo-web.png"
+        alt="COOPVALLE">
+
+      <a
+        class="home-button"
+        routerLink="/"
+        title="Ir a Inicio"
+        aria-label="Ir a Inicio">
+
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true">
+
+          <path d="m3 10 9-7 9 7" />
+          <path d="M5 9v12h14V9" />
+          <path d="M9 21v-7h6v7" />
+
+        </svg>
+
+      </a>
+
     </div>
 
+    <!-- Navegación principal -->
     <app-main-menu></app-main-menu>
+
   </aside>
 
-  <!-- ================== ÁREA DERECHA ================== -->
+  <!-- ================= ÁREA DERECHA ================= -->
   <div class="content-area">
 
-    <!-- ================== HEADER SUPERIOR ================== -->
+    <!-- ================= ENCABEZADO ================= -->
     <header class="header">
 
-      <div class="header-left" *ngIf="agenciaActual">
-        {{ agenciaActual.codigoAgencia }} — {{ agenciaActual.nombreAgencia }}
+      <!-- Agencia activa -->
+      <div class="header-left">
+
+        <div
+          class="agency-info"
+          *ngIf="agenciaActual">
+
+          <div class="agency-details">
+
+            <span class="agency-name">
+              {{ agenciaActual.nombreAgencia }}
+            </span>
+
+            <span class="agency-code">
+              Agencia {{ agenciaActual.codigoAgencia }}
+            </span>
+
+          </div>
+
+        </div>
+
       </div>
 
+      <!-- Funcionario y sesión -->
       <div class="header-right">
-        <span class="user">👤 {{ username }}</span>
-        <button class="logout" (click)="logout()">Cerrar sesión</button>
+
+        <div class="user-info">
+
+          <!-- Icono del funcionario -->
+          <span class="user-avatar" aria-hidden="true">
+
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round">
+
+              <circle cx="12" cy="8" r="4" />
+              <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
+
+            </svg>
+
+          </span>
+
+          <div class="user-details">
+
+            <span class="user">
+              {{ username }}
+            </span>
+
+            <span class="user-status">
+              Sesión activa
+            </span>
+
+          </div>
+
+        </div>
+
+        <!-- Cerrar sesión -->
+        <button
+          type="button"
+          class="logout"
+          (click)="logout()">
+
+          Cerrar sesión
+
+        </button>
+
       </div>
 
     </header>
 
-    <!-- ================== CONTENIDO ================== -->
+    <!-- =====================================================
+         RUTA DE NAVEGACIÓN - BREADCRUMB
+         ===================================================== -->
+    <nav
+      class="breadcrumb-bar"
+      *ngIf="breadcrumbs.length > 0"
+      aria-label="Ruta de navegación">
+
+      <ol class="breadcrumb-list">
+
+        <li
+          class="breadcrumb-item"
+          *ngFor="let item of breadcrumbs; let first = first; let last = last"
+          [class.breadcrumb-current]="last">
+
+          <!-- Separador antes de cada nivel, excepto el primero -->
+          <span
+            class="breadcrumb-separator"
+            *ngIf="!first"
+            aria-hidden="true">
+            /
+          </span>
+
+          <!-- Nombre del módulo, grupo o pantalla -->
+          <span
+            class="breadcrumb-label"
+            [attr.aria-current]="last ? 'page' : null">
+            {{ item.label }}
+          </span>
+
+        </li>
+
+      </ol>
+
+    </nav>
+
+    <!-- ================= CONTENIDO ================= -->
     <main class="main">
       <router-outlet></router-outlet>
     </main>

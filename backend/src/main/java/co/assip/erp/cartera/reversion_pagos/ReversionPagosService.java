@@ -9,6 +9,7 @@ import co.assip.erp.contabilidad.origen_comprobantes.dto.OrigenComprobanteDTO;
 import co.assip.erp.depositos.movimientos.DepositosMovimientoService;
 import co.assip.erp.depositos.movimientos.dto.DepositosMovimientoDTO;
 
+import co.assip.erp.tesoreria.operaciones_pendientes.TesoreriaOperacionesPendientesService;
 import co.assip.erp.seguridad.sesion.UsuarioSesionService;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -17,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Service;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +47,8 @@ public class ReversionPagosService {
 
     private final DepositosMovimientoService depositosMovimientoService;
     private final ObjectMapper objectMapper;
+    private final JdbcTemplate jdbcTemplate;
+    private final TesoreriaOperacionesPendientesService operacionesPendientesService;
 
     // =========================================================
     // CONSULTA DE CRÉDITOS
@@ -143,11 +147,41 @@ public class ReversionPagosService {
                 ? "El pago no tiene comprobante CC válido."
                 : "Elegible para continuar las validaciones financieras.";
 
+        // Estado físico del recaudo: informativo, no bloquea la reversión.
+        // La ejecución vuelve a comprobarlo bajo bloqueo transaccional.
+        String estadoCaja = null;
+        BigDecimal valorCaja = BigDecimal.ZERO;
+        Long idMovimientoCaja = pago.idMovimientoCaja();
+
+        if (idMovimientoCaja != null) {
+            var movimientosCaja = jdbcTemplate.queryForList("""
+                    SELECT m.estado, m.valor
+                      FROM cajas.movimientos_caja m
+                     WHERE m.id_movimiento_caja = ?
+                       AND m.modulo_origen = 'CARTERA'
+                       AND m.proceso_origen = 'PAGO_CUOTAS'
+                       AND m.tabla_origen = 'cartera.pagos_cuotas'
+                       AND m.id_origen = ?
+                       AND m.naturaleza = 'INGRESO'
+                       AND m.medio_pago = 'EFECTIVO'
+                    """, idMovimientoCaja, idPago);
+            if (movimientosCaja.size() != 1) {
+                throw new IllegalStateException(
+                        "No se encontró el movimiento de efectivo vinculado al pago.");
+            }
+            var movimientoCaja = movimientosCaja.get(0);
+            estadoCaja = (String) movimientoCaja.get("estado");
+            valorCaja = (BigDecimal) movimientoCaja.get("valor");
+        }
+
         return new VistaPrevia(
                 pago,
                 ultimo,
                 aplicado && ultimoAplicado && comprobanteValido,
-                observacion
+                observacion,
+                estadoCaja,
+                valorCaja,
+                idMovimientoCaja
         );
     }
 
@@ -375,6 +409,82 @@ public class ReversionPagosService {
         return numero;
     }
 
+
+    /**
+     * Registra el CC contrario de una prórroga a partir de los auxiliares originales.
+     * No utiliza las validaciones de elegibilidad de Pago de Cuotas V1.
+     * Debe invocarse dentro de la transacción coordinadora de la reversión.
+     */
+    @Transactional(propagation = Propagation.MANDATORY, readOnly = false)
+    public String registrarComprobanteReversionProrroga(
+            Long idProrroga, Long idPago, Integer idAgencia,
+            String tipoOriginal, String numeroOriginal,
+            BigDecimal valorOriginal, LocalDate fechaReversion, Integer idUsuario) {
+        if (idProrroga == null || idProrroga <= 0 || idPago == null || idPago <= 0
+                || idAgencia == null || idAgencia <= 0
+                || !"CC".equals(tipoOriginal)
+                || numeroOriginal == null || numeroOriginal.isBlank()
+                || valorOriginal == null || valorOriginal.signum() <= 0
+                || fechaReversion == null || idUsuario == null || idUsuario <= 0) {
+            throw new IllegalArgumentException("Datos inválidos del CC original de prórroga.");
+        }
+        var referencia = new ReversionPagosRepository.PagoDetalle(
+                idPago, null, idAgencia, null, null, valorOriginal,
+                "APLICADO", null, tipoOriginal, numeroOriginal, null, null);
+        var lineas = repository.consultarContrapartidas(referencia);
+        if (lineas.isEmpty()) {
+            throw new IllegalStateException("El CC original de la prórroga no tiene auxiliares activos.");
+        }
+        BigDecimal debitos = BigDecimal.ZERO;
+        BigDecimal creditos = BigDecimal.ZERO;
+        for (var linea : lineas) {
+            if (linea.idCuenta() == null || linea.idCuenta() <= 0
+                    || linea.debito() == null || linea.credito() == null
+                    || linea.debito().signum() < 0 || linea.credito().signum() < 0
+                    || (linea.debito().signum() > 0) == (linea.credito().signum() > 0)) {
+                throw new IllegalStateException("El CC original tiene líneas no reversables.");
+            }
+            debitos = debitos.add(linea.debito());
+            creditos = creditos.add(linea.credito());
+        }
+        if (debitos.compareTo(creditos) != 0 || debitos.compareTo(valorOriginal) != 0) {
+            throw new IllegalStateException("El CC original no cuadra con el valor de la prórroga.");
+        }
+        String numeroNuevo = consecutivosComprobantesService.generarNumeroDefinitivo(
+                "CC", idAgencia, idUsuario);
+        List<MovimientoContableDTO> movimientos = new ArrayList<>();
+        for (var linea : lineas) {
+            MovimientoContableDTO movimiento = new MovimientoContableDTO();
+            movimiento.setIdCatalogoCuenta(linea.idCuenta());
+            movimiento.setIdAgencia(idAgencia);
+            movimiento.setIdDatosPersonal(linea.idTercero());
+            movimiento.setFechaAuxiliar(fechaReversion);
+            movimiento.setTipoComprobante("CC");
+            movimiento.setNumeroComprobante(numeroNuevo);
+            movimiento.setValorDebito(linea.debito());
+            movimiento.setValorCredito(linea.credito());
+            movimiento.setDetalleMovimiento("REVERSIÓN PRÓRROGA " + idProrroga);
+            movimiento.setOrigenModulo("CARTERA");
+            movimiento.setDocumentoOrigen("PR-" + idProrroga);
+            movimientos.add(movimiento);
+        }
+        OrigenComprobanteDTO origen = new OrigenComprobanteDTO();
+        origen.setIdAgencia(idAgencia);
+        origen.setTipoComprobante("CC");
+        origen.setNumeroComprobante(numeroNuevo);
+        origen.setOrigenTipo("AUTO");
+        origen.setModuloOrigen("CARTERA");
+        origen.setProcesoOrigen("REVERSION_PRORROGA");
+        origen.setTablaOrigen("cartera.creditos_prorrogas");
+        origen.setIdOrigen(idProrroga);
+        contabilidadRegistroService.registrarComprobanteNuevo(
+                idAgencia, "CC", numeroNuevo,
+                "REVERSIÓN PRÓRROGA " + idProrroga + " / CC ORIGINAL " + numeroOriginal,
+                origen, movimientos, idUsuario);
+        return numeroNuevo;
+    }
+
+
     // =========================================================
     // DEVOLUCIÓN DE AHORROS - MOVIMIENTO 222
     // =========================================================
@@ -386,16 +496,38 @@ public class ReversionPagosService {
      * Reutiliza el CC contrario sin generar otro comprobante.
      * Exige una transacción financiera externa.
      */
-    @Transactional(
-            propagation = Propagation.MANDATORY,
-            readOnly = false
-    )
+    /** Conserva el origen original para la reversión de Pago de Cuotas V1. */
+    @Transactional(propagation = Propagation.MANDATORY, readOnly = false)
     public BigDecimal devolverAhorros(
             ReversionPagosRepository.PagoDetalle pago,
             String numeroComprobanteReversion,
             LocalDate fechaReversion,
             Integer idUsuario
     ) {
+        return devolverAhorros(
+                pago, numeroComprobanteReversion, fechaReversion,
+                idUsuario, "REVERSION_PAGO_CUOTAS",
+                pago == null ? null : pago.idPago()
+        );
+    }
+
+    /** Devuelve ahorros con la identificación del proceso que origina la reversión. */
+    @Transactional(propagation = Propagation.MANDATORY, readOnly = false)
+    public BigDecimal devolverAhorros(
+            ReversionPagosRepository.PagoDetalle pago,
+            String numeroComprobanteReversion,
+            LocalDate fechaReversion,
+            Integer idUsuario,
+            String procesoOrigen,
+            Long idOrigen
+    ) {
+        if (!"REVERSION_PAGO_CUOTAS".equals(procesoOrigen)
+                && !"REVERSION_PRORROGA".equals(procesoOrigen)) {
+            throw new IllegalArgumentException("Proceso de reversión de ahorros inválido.");
+        }
+        if (idOrigen == null || idOrigen <= 0) {
+            throw new IllegalArgumentException("Identificador de origen inválido.");
+        }
         if (pago == null
                 || pago.idPago() == null
                 || numeroComprobanteReversion == null
@@ -518,13 +650,8 @@ public class ReversionPagosService {
             dto.setTarjeta("N");
             dto.setModuloOrigen("CARTERA");
 
-            dto.setProcesoOrigen(
-                    "REVERSION_PAGO_CUOTAS"
-            );
-
-            dto.setIdOrigen(
-                    pago.idPago()
-            );
+            dto.setProcesoOrigen(procesoOrigen);
+            dto.setIdOrigen(idOrigen);
 
             depositosMovimientoService.registrarCredito(
                     dto,
@@ -596,6 +723,9 @@ public class ReversionPagosService {
             throw new IllegalStateException(estado.observacion());
         }
         consultarComprobanteContrario(idPago);
+        // Impide una reversión parcial de Seguros, Alivios o Costas Judiciales.
+        repository.validarAbonosAuxiliaresPago(
+                idPago, pago.idCredito(), pago.numeroComprobante());
         String numeroCC = registrarComprobanteReversion(
                 pago, fechaReversion, idUsuario);
         repository.revertirAbonosAuxiliares(
@@ -613,8 +743,260 @@ public class ReversionPagosService {
                 pago, numeroCC, fechaReversion, motivo, idUsuario);
         repository.marcarPagoReversado(
                 idPago, numeroCC, fechaReversion, motivo, idUsuario);
+        registrarReversionEnTesoreria(idPago, pago.idAgencia(), medios, motivo, idUsuario);
+        BigDecimal cajaPendiente = anularMovimientoCajaPendiente(
+                idPago, medios, idUsuario);
         return new ResultadoReversion(
-                idPago, numeroCC, saldoRestituido, ahorros, BigDecimal.ZERO);
+                idPago, numeroCC, saldoRestituido, ahorros, cajaPendiente);
+    }
+
+    /**
+     * Resuelve el efectivo de Caja dentro de la misma transacción de reversión.
+     * Un ingreso pendiente se anula; uno registrado conserva su historia y
+     * genera una devolución pendiente que Caja ejecutará posteriormente.
+     */
+    private BigDecimal anularMovimientoCajaPendiente(
+            Long idPago, JsonNode medios, Integer idUsuario) {
+        BigDecimal efectivo = BigDecimal.ZERO;
+        for (JsonNode medio : medios) {
+            if ("CAJA".equals(medio.path("tipoMedio").asText())) {
+                efectivo = efectivo.add(medio.path("valor").decimalValue());
+            }
+        }
+        if (efectivo.signum() == 0) {
+            return BigDecimal.ZERO;
+        }
+
+        List<java.util.Map<String, Object>> movimientos = jdbcTemplate.queryForList("""
+                SELECT m.id_movimiento_caja, m.id_provision, m.id_caja,
+                       m.id_departamento_operativo, m.estado, m.valor,
+                       m.codigo_referencia
+                  FROM cajas.movimientos_caja m
+                  JOIN cartera.pagos_cuotas pc
+                    ON pc.id_pago = m.id_origen
+                   AND pc.id_movimiento_caja = m.id_movimiento_caja
+                   AND pc.id_caja = m.id_caja
+                 WHERE pc.id_pago = ?
+                   AND m.modulo_origen = 'CARTERA'
+                   AND m.proceso_origen = 'PAGO_CUOTAS'
+                   AND m.tabla_origen = 'cartera.pagos_cuotas'
+                   AND m.naturaleza = 'INGRESO'
+                   AND m.medio_pago = 'EFECTIVO'
+                 FOR UPDATE OF m
+                """, idPago);
+        if (movimientos.size() != 1) {
+            throw new IllegalStateException(
+                    "El pago con efectivo no tiene un único movimiento de Caja vinculado.");
+        }
+        var movimiento = movimientos.get(0);
+        Long idMovimiento = ((Number) movimiento.get("id_movimiento_caja")).longValue();
+        BigDecimal valor = (BigDecimal) movimiento.get("valor");
+        if (valor.compareTo(efectivo) != 0) {
+            throw new IllegalStateException(
+                    "El valor de Caja no coincide con el efectivo del pago original.");
+        }
+
+        String estadoCaja = movimiento.get("estado").toString();
+        if ("PENDIENTE".equals(estadoCaja)) {
+            int anulados = jdbcTemplate.update("""
+                    UPDATE cajas.movimientos_caja
+                       SET estado = 'ANULADO',
+                           fk_seguridad_edicion = ?,
+                           fecha_edicion = CURRENT_TIMESTAMP
+                     WHERE id_movimiento_caja = ?
+                       AND estado = 'PENDIENTE'
+                    """, idUsuario, idMovimiento);
+            if (anulados != 1) {
+                throw new IllegalStateException(
+                        "No fue posible anular el movimiento pendiente de Caja.");
+            }
+            return BigDecimal.ZERO;
+        }
+        if (!"REGISTRADO".equals(estadoCaja)) {
+            throw new IllegalStateException(
+                    "Estado de Caja incompatible con la reversión: " + estadoCaja);
+        }
+
+        // La fila original está bloqueada por FOR UPDATE, evitando dos
+        // devoluciones concurrentes del mismo recaudo.
+        Integer duplicados = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                  FROM cajas.movimientos_caja
+                 WHERE modulo_origen = 'CARTERA'
+                   AND proceso_origen = 'REVERSA_PAGO_CUOTAS'
+                   AND tabla_origen = 'cartera.pagos_cuotas'
+                   AND id_origen = ?
+                   AND naturaleza = 'EGRESO'
+                """, Integer.class, idPago);
+        if (duplicados == null || duplicados != 0) {
+            throw new IllegalStateException(
+                    "Ya existe una devolución de Caja para este pago.");
+        }
+
+        int creados = jdbcTemplate.update("""
+                INSERT INTO cajas.movimientos_caja (
+                    id_provision, id_caja, fecha_contable,
+                    id_departamento_operativo, id_operacion_caja,
+                    modulo_origen, proceso_origen, tabla_origen, id_origen,
+                    codigo_referencia, naturaleza, medio_pago, valor, concepto,
+                    estado, fk_seguridad_creacion, fk_seguridad_edicion
+                )
+                SELECT ?, ?, CURRENT_DATE, ?, o.id_operacion_caja,
+                       'CARTERA', 'REVERSA_PAGO_CUOTAS',
+                       'cartera.pagos_cuotas', ?, ?,
+                       'EGRESO', 'EFECTIVO', ?,
+                       'Devolución de efectivo por reversión de pago de cuotas. Movimiento original ' || ?,
+                       'PENDIENTE', ?, ?
+                  FROM cajas.operaciones_caja o
+                 WHERE o.codigo_operacion = 'REVERSA_PAGO_CUOTAS'
+                   AND o.naturaleza = 'EGRESO'
+                   AND o.afecta_efectivo = TRUE
+                   AND o.estado = 'A'
+                """,
+                movimiento.get("id_provision"),
+                movimiento.get("id_caja"),
+                movimiento.get("id_departamento_operativo"),
+                idPago,
+                movimiento.get("codigo_referencia"),
+                efectivo,
+                idMovimiento,
+                idUsuario,
+                idUsuario);
+        if (creados != 1) {
+            throw new IllegalStateException(
+                    "No se encontró una única operación activa REVERSA_PAGO_CUOTAS para Caja.");
+        }
+        return efectivo;
+    }
+
+    /** Bloquea nuevas ejecuciones de Tesorería y conserva los recaudos bancarios confirmados. */
+    private void registrarReversionEnTesoreria(
+            Long idPago, Integer idAgencia, JsonNode medios,
+            String motivo, Integer idUsuario) {
+        BigDecimal cxC = BigDecimal.ZERO;
+        for (JsonNode medio : medios) {
+            if ("CXP".equals(medio.path("tipoMedio").asText())) {
+                cxC = cxC.add(medio.path("valor").decimalValue());
+            }
+        }
+        if (cxC.signum() == 0) {
+            return;
+        }
+        List<java.util.Map<String, Object>> operaciones = jdbcTemplate.queryForList("""
+                SELECT id_operacion_pendiente, id_datos_personal, valor_original, valor_ejecutado, estado
+                FROM tesoreria.operaciones_pendientes
+                WHERE modulo_origen = 'CARTERA'
+                  AND proceso_origen = 'PAGO_CUOTAS'
+                  AND tabla_origen = 'cartera.pagos_cuotas'
+                  AND id_origen = ?
+                  AND id_agencia = ?
+                FOR UPDATE
+                """, idPago, idAgencia);
+        if (operaciones.size() != 1) {
+            throw new IllegalStateException(
+                    "No se encontró una única operación de Tesorería para el recaudo CxC del pago.");
+        }
+        var operacion = operaciones.get(0);
+        Long idOperacion = ((Number) operacion.get("id_operacion_pendiente")).longValue();
+        BigDecimal original = (BigDecimal) operacion.get("valor_original");
+        BigDecimal ejecutado = (BigDecimal) operacion.get("valor_ejecutado");
+        String estado = operacion.get("estado").toString();
+        if (original.compareTo(cxC) != 0) {
+            throw new IllegalStateException(
+                    "La CxC del pago no coincide con la obligación publicada en Tesorería.");
+        }
+        if ("ANULADA".equals(estado)) {
+            throw new IllegalStateException("La operación de Tesorería ya está anulada.");
+        }
+        if (ejecutado.signum() == 0) {
+            if (!"PENDIENTE".equals(estado)) {
+                throw new IllegalStateException(
+                        "La operación sin recaudos no está en estado PENDIENTE.");
+            }
+            jdbcTemplate.update("""
+                    UPDATE tesoreria.operaciones_pendientes
+                    SET estado = 'ANULADA', fk_seguridad_edicion = ?,
+                        fecha_edicion = CURRENT_TIMESTAMP
+                    WHERE id_operacion_pendiente = ?
+                    """, idUsuario, idOperacion);
+        } else if (!"PARCIAL".equals(estado) && !"COMPLETADA".equals(estado)) {
+            throw new IllegalStateException(
+                    "La operación tiene recaudos pero su estado no es válido: " + estado);
+        }
+        jdbcTemplate.update("""
+                INSERT INTO tesoreria.operaciones_reversiones_origen (
+                    id_operacion_pendiente, modulo_origen, proceso_origen,
+                    tabla_origen, id_origen, motivo, estado_regularizacion,
+                    fk_seguridad_creacion)
+                VALUES (?, 'CARTERA', 'PAGO_CUOTAS', 'cartera.pagos_cuotas',
+                        ?, ?, ?, ?)
+                """, idOperacion, idPago, motivo.trim(),
+                ejecutado.signum() == 0 ? "NO_REQUIERE" : "PENDIENTE", idUsuario);
+
+        if (ejecutado.signum() > 0) {
+            publicarDevolucionBancaria(idPago, idAgencia, idOperacion,
+                    operacion, ejecutado, idUsuario);
+        }
+    }
+
+    /**
+     * Publica una única devolución por pago reversado. La ejecución bancaria original
+     * se conserva intacta; Tesorería debe usar su cuenta bancaria y generar el CE.
+     * La restricción única de origen en operaciones_pendientes impide duplicaciones.
+     */
+    private void publicarDevolucionBancaria(
+            Long idPago,
+            Integer idAgencia,
+            Long idOperacionOriginal,
+            java.util.Map<String, Object> operacionOriginal,
+            BigDecimal valorRecaudado,
+            Integer idUsuario
+    ) {
+        List<java.util.Map<String, Object>> ejecuciones = jdbcTemplate.queryForList("""
+                SELECT id_operacion_ejecucion, id_cuenta_bancaria, valor
+                FROM tesoreria.operaciones_ejecuciones
+                WHERE id_operacion_pendiente = ?
+                  AND estado = 'CONFIRMADA'
+                ORDER BY id_operacion_ejecucion
+                FOR UPDATE
+                """, idOperacionOriginal);
+
+        if (ejecuciones.isEmpty()) {
+            throw new IllegalStateException(
+                    "La operación recaudada no tiene ejecuciones bancarias confirmadas.");
+        }
+        BigDecimal totalConfirmado = BigDecimal.ZERO;
+        Long cuentaOriginal = null;
+        for (var ejecucion : ejecuciones) {
+            if (!(ejecucion.get("id_cuenta_bancaria") instanceof Number numeroCuenta)) {
+                throw new IllegalStateException(
+                        "La ejecución original no identifica una cuenta bancaria.");
+            }
+            long cuenta = numeroCuenta.longValue();
+            if (cuentaOriginal != null && cuentaOriginal.longValue() != cuenta) {
+                throw new IllegalStateException(
+                        "El recaudo se ejecutó en varias cuentas bancarias; "
+                                + "no puede publicarse una devolución única.");
+            }
+            cuentaOriginal = cuenta;
+            totalConfirmado = totalConfirmado.add((BigDecimal) ejecucion.get("valor"));
+        }
+        if (totalConfirmado.compareTo(valorRecaudado) != 0) {
+            throw new IllegalStateException(
+                    "Las ejecuciones bancarias confirmadas no coinciden con el recaudo.");
+        }
+
+        // La cuenta original se obtiene al ejecutar; no se selecciona libremente.
+        operacionesPendientesService.publicarEstricto(
+                idAgencia, "CARTERA", "REVERSA_PAGO_CUOTAS",
+                "cartera.pagos_cuotas", idPago,
+                (Integer) operacionOriginal.get("id_datos_personal"),
+                "SALIDA", LocalDate.now(),
+                "Devolución del recaudo bancario de Cartera. Operación original "
+                        + idOperacionOriginal + ", cuenta bancaria original " + cuentaOriginal,
+                valorRecaudado, idUsuario,
+                null, "DEVOLUCION_CXC_CARTERA", false);
+
     }
 
     /** Lee y valida la estructura JSON de los medios originales del pago. */
@@ -676,8 +1058,10 @@ public class ReversionPagosService {
             ReversionPagosRepository.PagoDetalle pago,
             Long ultimoPagoAplicado,
             boolean elegibleParaAnalisis,
-            String observacion
+            String observacion,
+            String estadoCaja,
+            BigDecimal valorCaja,
+            Long idMovimientoCaja
     ) {
     }
 }
-

@@ -214,6 +214,29 @@
         </strong>
         <span>{{ vista.observacion }}</span>
       </div>
+      <!-- ESTADO DEL EFECTIVO RECIBIDO EN CAJA -->
+      <div *ngIf="vista.estadoCaja === 'REGISTRADO'"
+           class="aviso-devolucion-caja"
+           role="status">
+        <strong>El efectivo ya fue recibido en Caja</strong>
+        <p>
+          El movimiento de Caja {{ vista.idMovimientoCaja }} está registrado por
+          <strong>{{ vista.valorCaja | number:'1.2-2':'es-CO' }}</strong>.
+          Al confirmar la reversión, Cartera restituirá las obligaciones financieras
+          y generará una devolución pendiente en la bandeja de Caja.
+          La entrega física del dinero será responsabilidad del cajero.
+        </p>
+      </div>
+      <div *ngIf="vista.estadoCaja === 'PENDIENTE'"
+           class="aviso-caja-pendiente"
+           role="status">
+        <strong>El recaudo en Caja aún está pendiente</strong>
+        <p>
+          El movimiento {{ vista.idMovimientoCaja }} por
+          {{ vista.valorCaja | number:'1.2-2':'es-CO' }} será anulado
+          durante la reversión. No se generará una devolución de efectivo.
+        </p>
+      </div>
       <div class="datos-credito-grid">
         <div class="dato-financiero">
           <span>Último pago aplicado</span>
@@ -352,13 +375,15 @@
       </div>
     </div>
     <div class="confirmacion-control">
-      <label>
+      <label class="confirmacion-opcion">
         <input type="checkbox"
                name="confirmacionAceptada"
                [(ngModel)]="confirmacionAceptada"
                [disabled]="confirmando">
-        Confirmo que revisé el pago, las contrapartidas contables y los valores
-        que serán restituidos. Autorizo ejecutar la reversión.
+        <span class="confirmacion-opcion-texto">
+          <strong>Autorizo la reversión del pago</strong>
+          <small>Confirmo que revisé el pago, las contrapartidas contables y los valores que serán restituidos.</small>
+        </span>
       </label>
     </div>
     <div class="filtros-acciones">

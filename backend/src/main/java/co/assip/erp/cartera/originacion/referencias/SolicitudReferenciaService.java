@@ -663,6 +663,36 @@ public class SolicitudReferenciaService {
                                 + "personales activas."
                 );
             }
+
+            // Todas las referencias activas de la solicitud deben tener
+            // una gestión de entrevista persistida, incluso si no hubo contacto.
+            List<SolicitudReferenciaPersonalDTO> pendientes =
+                    referencias.stream()
+                            .filter(referencia ->
+                                    referencia.getFechaHoraLlamada() == null
+                                            || referencia.getMedioEntrevista() == null
+                                            || referencia.getContactoEstablecido() == null
+                                            || referencia.getFkSeguridadEntrevistador() == null
+                                            || (Boolean.TRUE.equals(referencia.getContactoEstablecido())
+                                            && limpiar(referencia.getConceptoReferencia()) == null)
+                            )
+                            .toList();
+
+            if (!pendientes.isEmpty()) {
+                String nombres = pendientes.stream()
+                        .map(SolicitudReferenciaPersonalDTO::getNombreCompleto)
+                        .distinct()
+                        .limit(5)
+                        .reduce((primero, siguiente) -> primero + ", " + siguiente)
+                        .orElse("Sin identificar");
+
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "No puede finalizar la gestión: " + pendientes.size()
+                                + " referencia(s) sin entrevista registrada. Pendientes: "
+                                + nombres
+                );
+            }
         }
 
         // -----------------------------------------------------

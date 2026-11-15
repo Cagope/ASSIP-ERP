@@ -1,0 +1,552 @@
+
+/* ============================================================
+   LIBRO MAYOR Y BALANCE
+   Estilos del formulario, opciones y resultados del informe
+   Diseño unificado con Libro Caja - Diario
+   ============================================================ */
+
+
+/* ============================================================
+   1. CONTENEDOR PRINCIPAL
+   ============================================================ */
+
+:host {
+  display: block;
+  min-width: 0;
+  color: #172b4d;
+}
+
+.mayor-balance {
+  padding: 18px 20px;
+  background: #f5f7fa;
+  min-height: 100%;
+}
+
+
+/* ============================================================
+   2. ENCABEZADO DEL INFORME
+   ============================================================ */
+
+header {
+  margin-bottom: 18px;
+}
+
+header h2 {
+  margin: 0 0 5px;
+  font-size: 21px;
+  font-weight: 700;
+  color: #172b4d;
+}
+
+header p {
+  margin: 0;
+  font-size: 13px;
+  color: #66788a;
+}
+
+
+/* ============================================================
+   3. PANEL DE PARÁMETROS
+   ============================================================ */
+
+.panel {
+  background: #ffffff;
+  border: 1px solid #dce4ed;
+  border-radius: 9px;
+
+  padding: 20px;
+  margin-bottom: 18px;
+
+  box-shadow: 0 2px 6px rgba(20, 45, 75, 0.03);
+}
+
+.panel h3 {
+  margin: 0 0 17px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #183153;
+}
+
+
+/* ============================================================
+   4. DISTRIBUCIÓN DE FILTROS
+   Agencia / Año / Mes / Nivel contable
+   ============================================================ */
+
+.filtros {
+  display: grid;
+
+  grid-template-columns:
+    minmax(260px, 2fr)
+    repeat(3, minmax(0, 1fr));
+
+  gap: 14px;
+  align-items: end;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+
+  min-width: 0;
+
+  font-size: 12px;
+  font-weight: 600;
+  color: #33465c;
+}
+
+.campo label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #33465c;
+}
+
+
+/* ============================================================
+   5. CAMPOS DE ENTRADA Y SELECTORES
+   ============================================================ */
+
+.campo select,
+.campo input {
+  width: 100%;
+  min-height: 37px;
+  box-sizing: border-box;
+
+  padding: 8px 10px;
+
+  background: #ffffff;
+  color: #172b4d;
+
+  border: 1px solid #c7d2df;
+  border-radius: 5px;
+
+  font: inherit;
+  font-size: 13px;
+  font-weight: 400;
+
+  outline: none;
+}
+
+
+/* Campos seleccionados */
+
+.campo select:focus,
+.campo input:focus {
+  border-color: #23639a;
+
+  box-shadow: 0 0 0 3px rgba(35, 99, 154, 0.12);
+}
+
+
+/* Campos deshabilitados */
+
+.campo select:disabled,
+.campo input:disabled {
+  background: #f1f4f7;
+  color: #8190a0;
+  cursor: not-allowed;
+}
+
+
+/* ============================================================
+   6. OPCIONES DEL INFORME
+   Mensual / Anual
+   Impresión interna / Oficial
+   ============================================================ */
+
+.opciones {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.opcion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  min-height: 66px;
+  box-sizing: border-box;
+
+  padding: 13px 14px;
+
+  border: 1px solid #dbe4ed;
+  border-radius: 7px;
+
+  background: #f8fafc;
+  cursor: pointer;
+
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+
+/* Efecto al pasar el cursor */
+
+.opcion:hover {
+  background: #f0f6fc;
+  border-color: #b4cce3;
+}
+
+
+/* Recuadro de una opción activada */
+
+.opcion:has(input:checked) {
+  background: #edf5fc;
+  border-color: #75a9d2;
+}
+
+
+/* Accesibilidad mediante teclado */
+
+.opcion:has(input:focus-visible) {
+  outline: 2px solid #23639a;
+  outline-offset: 2px;
+}
+
+
+/* ============================================================
+   7. INTERRUPTORES DESLIZANTES
+   Gris: desactivado
+   Azul: activado
+   ============================================================ */
+
+.opcion input[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+
+  position: relative;
+  flex: 0 0 38px;
+
+  width: 38px;
+  height: 22px;
+  margin: 0;
+
+  border: 1px solid #b9c5d1;
+  border-radius: 20px;
+
+  background: #cbd5df;
+  cursor: pointer;
+
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+}
+
+
+/* Círculo blanco del interruptor */
+
+.opcion input[type='checkbox']::before {
+  content: '';
+
+  position: absolute;
+  top: 2px;
+  left: 2px;
+
+  width: 16px;
+  height: 16px;
+
+  border-radius: 50%;
+  background: #ffffff;
+
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+
+  transition: transform 0.2s;
+}
+
+
+/* Interruptor activado */
+
+.opcion input[type='checkbox']:checked {
+  background: #1e6095;
+  border-color: #1e6095;
+}
+
+.opcion input[type='checkbox']:checked::before {
+  transform: translateX(16px);
+}
+
+
+/* ============================================================
+   8. TEXTOS DE LAS OPCIONES
+   ============================================================ */
+
+.opcion-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  min-width: 0;
+}
+
+.opcion-texto strong {
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 650;
+  color: #233b53;
+}
+
+.opcion-texto small {
+  font-size: 11px;
+  line-height: 1.4;
+  color: #718196;
+}
+
+
+/* ============================================================
+   9. BOTONES DE ACCIÓN
+   Consultar / PDF / Excel
+   ============================================================ */
+
+.acciones {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+
+  gap: 9px;
+  margin-top: 20px;
+}
+
+.acciones button {
+  min-height: 37px;
+  padding: 9px 18px;
+
+  border: 1px solid #195b90;
+  border-radius: 5px;
+
+  background: #195b90;
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+
+/* Botón principal */
+
+.acciones button:hover:not(:disabled) {
+  background: #124b78;
+}
+
+
+/* Botones secundarios: PDF y Excel */
+
+.acciones button.secundario {
+  background: #ffffff;
+  color: #195b90;
+  border-color: #b8cadb;
+}
+
+.acciones button.secundario:hover:not(:disabled) {
+  background: #eaf2f9;
+}
+
+
+/* Botones deshabilitados */
+
+.acciones button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+/* ============================================================
+   10. CONTENEDOR DE RESULTADOS
+   ============================================================ */
+
+.resultado {
+  margin-top: 18px;
+  padding: 20px;
+
+  background: #ffffff;
+
+  border: 1px solid #dce4ed;
+  border-radius: 9px;
+
+  overflow: hidden;
+}
+
+.resultado h3 {
+  margin: 18px 0 8px;
+
+  color: #19365b;
+  font-size: 16px;
+}
+
+.resultado p {
+  font-size: 12px;
+  color: #66788a;
+}
+
+
+/* ============================================================
+   11. CONTENEDOR DE LA TABLA CONTABLE
+   ============================================================ */
+
+.tabla-scroll {
+  overflow-x: auto;
+
+  border: 1px solid #d5e0eb;
+  border-radius: 6px;
+}
+
+
+/* ============================================================
+   12. TABLA DEL MAYOR Y BALANCE
+   Ocho columnas contables
+   ============================================================ */
+
+table {
+  width: 100%;
+  min-width: 1150px;
+
+  border-collapse: collapse;
+
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+th,
+td {
+  padding: 9px 12px;
+
+  border-bottom: 1px solid #e8eef4;
+  text-align: left;
+}
+
+
+/* Encabezados de columnas */
+
+th {
+  background: #dce8f3;
+  color: #173b5c;
+
+  font-weight: 700;
+
+  border-bottom: 2px solid #8eafca;
+}
+
+
+/* Encabezados agrupados:
+   Saldo anterior / Movimiento / Nuevo saldo */
+
+th.grupo {
+  text-align: center;
+  background: #dfeaf5;
+}
+
+
+/* Código y cuenta ocupan dos filas de encabezado */
+
+th[rowspan] {
+  vertical-align: middle;
+}
+
+
+/* Resaltado de filas */
+
+tbody tr:hover {
+  background: #f3f8fc;
+}
+
+
+/* ============================================================
+   13. VALORES MONETARIOS
+   ============================================================ */
+
+th.valor,
+td.valor {
+  text-align: right;
+  white-space: nowrap;
+
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ============================================================
+   14. TOTALES GENERALES
+   ============================================================ */
+
+.total {
+  background: #e1edf7;
+  font-weight: 700;
+}
+
+
+/* ============================================================
+   15. MENSAJES DE ERROR
+   ============================================================ */
+
+.error {
+  margin: 15px 0;
+  padding: 12px 14px;
+
+  background: #fff3f3;
+  color: #b42318;
+
+  border: 1px solid #f1b0b0;
+  border-radius: 5px;
+
+  font-size: 12px;
+}
+
+
+/* ============================================================
+   16. VALIDACIONES CONTABLES
+   ============================================================ */
+
+.cuadre {
+  margin-top: 15px;
+  text-align: right;
+}
+
+.alerta {
+  color: #991b1b;
+  font-weight: 700;
+}
+
+
+/* ============================================================
+   17. ADAPTACIÓN A PANTALLAS MEDIANAS
+   ============================================================ */
+
+@media (max-width: 1000px) {
+
+  .filtros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+/* ============================================================
+   18. ADAPTACIÓN A PANTALLAS PEQUEÑAS
+   ============================================================ */
+
+@media (max-width: 600px) {
+
+  .mayor-balance {
+    padding: 12px;
+  }
+
+  .panel {
+    padding: 14px;
+  }
+
+  .filtros,
+  .opciones {
+    grid-template-columns: 1fr;
+  }
+
+  .acciones button {
+    flex: 1 1 auto;
+  }
+
+}

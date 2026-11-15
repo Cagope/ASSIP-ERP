@@ -25,6 +25,8 @@ public record OperacionComprobantePreviewDTO(
 
         Long idOperacion,
 
+        String tipoComprobante,
+
         Integer idAgencia,
 
         Integer idBeneficiario,

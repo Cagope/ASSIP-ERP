@@ -1,20 +1,26 @@
+
 import { hojaVidaMenu } from '../features/hoja-vida/hoja-vida-menu';
 import { depositosMenu } from '../features/depositos/depositos-menu';
 import { carteraMenu } from '../features/cartera/cartera-menu';
 import { cdatMenu } from '../features/cdat/cdat-menu';
-import { consultasMenu } from '../features/consultas/consultas-menu';
 import { cajasMenu } from '../features/cajas/cajas.menu';
 import { tesoreriaMenu } from '../features/tesoreria/tesoreria-menu';
-
-import { sarlaftMenu } from '../features/sarlaft/sarlaft-menu';
-import { contabilidadMenu } from '../features/contabilidad/contabilidad-menu';
-
-import { sesMenu } from '../features/ses/ses-menu';
-import { seguridadMenu } from '../features/seguridad/seguridad-menu';
 import { activosFijosMenu } from '../features/activos-fijos/activos-fijos-menu';
 import { nominaMenu } from '../features/nomina/nomina-menu';
+import { contabilidadMenu } from '../features/contabilidad/contabilidad-menu';
+import { consultasMenu } from '../features/consultas/consultas-menu';
+import { sarlaftMenu } from '../features/sarlaft/sarlaft-menu';
+import { sesMenu } from '../features/ses/ses-menu';
 import { generalMenu } from '../features/general/general-menu';
+import { seguridadMenu } from '../features/seguridad/seguridad-menu';
 
+/**
+ * Registro central del menú principal ASSIP ERP.
+ * Orden funcional aprobado para COOPVALLE.
+ *
+ * Se conservan las rutas, permisos y submenús
+ * definidos en cada módulo.
+ */
 export const MENU_REGISTRY = [
 
   { ...hojaVidaMenu, icon: 'hojaVida' },
@@ -25,8 +31,6 @@ export const MENU_REGISTRY = [
 
   { ...cdatMenu, icon: 'cdat' },
 
-  { ...consultasMenu, icon: 'consultas' },
-
   { ...cajasMenu, icon: 'cajas' },
 
   { ...tesoreriaMenu, icon: 'tesoreria' },
@@ -36,6 +40,9 @@ export const MENU_REGISTRY = [
   { ...nominaMenu, icon: 'nomina' },
 
   { ...contabilidadMenu, icon: 'contabilidad' },
+
+  // Gestión Gerencial: consultas y dashboards institucionales.
+  { ...consultasMenu, icon: 'consultas' },
 
   { ...sarlaftMenu, icon: 'sarlaf' },
 

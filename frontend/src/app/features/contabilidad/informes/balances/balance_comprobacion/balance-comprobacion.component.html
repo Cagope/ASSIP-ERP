@@ -1,0 +1,412 @@
+
+<div class="balance-pagina">
+  <header class="encabezado">
+    <h2>Balance de comprobación</h2>
+    <p>Balance de comprobación · Consulta y exportación institucional</p>
+  </header>
+
+  <section class="panel" *ngIf="puedeConsultar; else sinPermiso">
+    <h3>Parámetros del informe</h3>
+
+    <form (ngSubmit)="consultar()" #form="ngForm">
+      <div class="filtros">
+        <label>
+          Agencia
+          <select
+            name="agencia"
+            [(ngModel)]="filtro.idAgencia"
+            (ngModelChange)="cambiarFiltros()"
+            [disabled]="cargando || !!exportando"
+            required>
+            <option [ngValue]="0">Seleccione una agencia</option>
+            <option *ngFor="let a of agencias" [ngValue]="a.idAgencia">
+              {{ a.codigoAgencia }} - {{ a.nombreAgencia }}
+            </option>
+          </select>
+        </label>
+
+        <label>
+          Año
+          <input
+            type="number"
+            name="ano"
+            min="1900"
+            max="9999"
+            [(ngModel)]="filtro.ano"
+            (ngModelChange)="cambiarFiltros()"
+            [disabled]="cargando || !!exportando"
+            required>
+        </label>
+
+        <label>
+          Mes
+          <select
+            name="mes"
+            [(ngModel)]="filtro.mes"
+            (ngModelChange)="cambiarFiltros()"
+            [disabled]="cargando || !!exportando">
+            <option *ngFor="let mes of meses; index as i" [ngValue]="i + 1">
+              {{ mes }}
+            </option>
+          </select>
+        </label>
+
+        <label>
+          Nivel máximo
+          <select
+            name="nivel"
+            [(ngModel)]="filtro.nivel"
+            (ngModelChange)="cambiarFiltros()"
+            [disabled]="cargando || !!exportando">
+            <option *ngFor="let n of niveles" [ngValue]="n">
+              Nivel {{ n }}
+            </option>
+          </select>
+        </label>
+      </div>
+
+      <div class="opciones">
+        <label class="opcion">
+          <input
+            type="checkbox"
+            name="soloBalance"
+            [(ngModel)]="filtro.soloBalance"
+            (ngModelChange)="cambiarFiltros()"
+            [disabled]="cargando || !!exportando">
+          <span class="opcion-texto">
+            <strong>Solo clases 1, 2 y 3</strong>
+            <small>Activo, Pasivo y Patrimonio</small>
+          </span>
+        </label>
+
+        <label class="opcion">
+          <input
+            type="checkbox"
+            name="firmas"
+            [(ngModel)]="filtro.incluirFirmas"
+            (ngModelChange)="cambiarFiltros()"
+            [disabled]="cargando || !!exportando">
+          <span class="opcion-texto">
+            <strong>Incluir firmas</strong>
+            <small>Firmas institucionales del informe</small>
+          </span>
+        </label>
+      </div>
+
+      <div class="acciones">
+        <button
+          type="submit"
+          [disabled]="cargando || !!exportando || !form.valid || !filtro.idAgencia">
+          {{ cargando ? 'Consultando…' : 'Consultar balance' }}
+        </button>
+
+        <button
+          type="button"
+          class="secundario"
+          (click)="exportar('pdf')"
+          [disabled]="!informe || cargando || !!exportando">
+          {{ exportando === 'pdf' ? 'Generando PDF…' : 'PDF' }}
+        </button>
+
+        <button
+          type="button"
+          class="secundario"
+          (click)="exportar('excel')"
+          [disabled]="!informe || cargando || !!exportando">
+          {{ exportando === 'excel' ? 'Generando Excel…' : 'Excel' }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <ng-template #sinPermiso>
+    <p class="error">
+      No tiene permiso para consultar balances contables.
+    </p>
+  </ng-template>
+
+  <p *ngIf="mensajeError" class="error" role="alert">
+    {{ mensajeError }}
+  </p>
+
+  <ng-container *ngIf="informe as balance">
+    <section class="panel">
+      <header class="resultado">
+        <h3>{{ balance.codigoAgencia }} - {{ balance.nombreAgencia }}</h3>
+        <p>
+          {{ meses[balance.mes - 1] }} de {{ balance.ano }}
+          · Nivel {{ balance.nivel }}
+        </p>
+      </header>
+
+      <div
+        class="indicadores-financieros"
+        *ngIf="balance.indicadoresFinancieros as indicadores">
+
+        <h3>Indicadores financieros</h3>
+
+        <div class="indicadores-tabla-contenedor">
+          <table class="tabla-resumen">
+            <thead>
+            <tr>
+              <th>Concepto</th>
+              <th class="numero">Movimiento del mes</th>
+              <th class="numero">Valor acumulado</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <th>Activo</th>
+              <td class="numero">
+                {{ dinero(indicadores.activo.valorMes) }}
+              </td>
+              <td class="numero">
+                {{ dinero(indicadores.activo.valorAcumulado) }}
+              </td>
+            </tr>
+            <tr>
+              <th>Pasivo</th>
+              <td class="numero">
+                {{ dinero(indicadores.pasivo.valorMes) }}
+              </td>
+              <td class="numero">
+                {{ dinero(indicadores.pasivo.valorAcumulado) }}
+              </td>
+            </tr>
+            <tr>
+              <th>Patrimonio</th>
+              <td class="numero">
+                {{ dinero(indicadores.patrimonio.valorMes) }}
+              </td>
+              <td class="numero">
+                {{ dinero(indicadores.patrimonio.valorAcumulado) }}
+              </td>
+            </tr>
+            <tr>
+              <th>Ingresos</th>
+              <td class="numero">
+                {{ dinero(indicadores.ingresos.valorMes) }}
+              </td>
+              <td class="numero">
+                {{ dinero(indicadores.ingresos.valorAcumulado) }}
+              </td>
+            </tr>
+            <tr>
+              <th>Costos y gastos</th>
+              <td class="numero">
+                {{ dinero(indicadores.costosGastos.valorMes) }}
+              </td>
+              <td class="numero">
+                {{ dinero(indicadores.costosGastos.valorAcumulado) }}
+              </td>
+            </tr>
+            <tr class="fila-destacada">
+              <th>Ganancias / pérdidas</th>
+              <td class="numero">
+                {{ dinero(indicadores.gananciasPerdidas.valorMes) }}
+              </td>
+              <td class="numero">
+                {{ dinero(indicadores.gananciasPerdidas.valorAcumulado) }}
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div
+        class="resumen-financiero"
+        *ngIf="balance.resumenFinanciero as resumen">
+
+        <h3>Resumen financiero</h3>
+
+        <div class="resumen-tabla-contenedor">
+          <table class="tabla-resumen">
+            <thead>
+            <tr>
+              <th>Concepto</th>
+              <th class="numero">Débitos</th>
+              <th class="numero">Créditos</th>
+              <th class="numero">Diferencia</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <th>Acumulado anterior</th>
+              <td class="numero">
+                {{ dinero(resumen.acumuladoAnterior.debitos) }}
+              </td>
+              <td class="numero">
+                {{ dinero(resumen.acumuladoAnterior.creditos) }}
+              </td>
+              <td class="numero">
+                {{ dinero(
+                resumen.acumuladoAnterior.debitos -
+                resumen.acumuladoAnterior.creditos
+                ) }}
+              </td>
+            </tr>
+
+            <tr>
+              <th>Movimientos del mes</th>
+              <td class="numero">
+                {{ dinero(resumen.movimientosMes.debitos) }}
+              </td>
+              <td class="numero">
+                {{ dinero(resumen.movimientosMes.creditos) }}
+              </td>
+              <td
+                class="numero"
+                [class.diferencia-alerta]="resumen.diferenciaMes !== 0">
+                {{ dinero(resumen.diferenciaMes) }}
+              </td>
+            </tr>
+
+            <tr class="fila-destacada">
+              <th>Acumulado final</th>
+              <td class="numero">
+                {{ dinero(resumen.acumuladoFinal.debitos) }}
+              </td>
+              <td class="numero">
+                {{ dinero(resumen.acumuladoFinal.creditos) }}
+              </td>
+              <td
+                class="numero"
+                [class.diferencia-alerta]="resumen.diferenciaAcumulada !== 0">
+                {{ dinero(resumen.diferenciaAcumulada) }}
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h3>Detalle de cuentas contables</h3>
+
+      <p class="ayuda-movimientos">
+        Seleccione el nombre de una cuenta auxiliar operable para consultar
+        sus movimientos y abrir los comprobantes correspondientes.
+      </p>
+
+      <div class="tabla-contenedor">
+        <table>
+          <thead>
+          <tr>
+            <th>Código</th>
+            <th>Cuenta contable</th>
+            <th class="numero">Saldo mes anterior</th>
+            <th class="numero">Débitos del mes</th>
+            <th class="numero">Créditos del mes</th>
+            <th class="numero">Saldo mes solicitado</th>
+          </tr>
+          </thead>
+
+          <tbody>
+          <tr
+            *ngFor="let fila of balance.filas"
+            [class.agrupadora]="!fila.cuentaOperable">
+
+            <td>{{ fila.codigoCuenta }}</td>
+
+            <td [style.padding-left.px]="8 + (fila.nivelCuenta - 1) * 12">
+              <button
+                *ngIf="fila.cuentaOperable; else cuentaAgrupadora"
+                type="button"
+                class="enlace-cuenta"
+                [attr.aria-label]="'Consultar movimientos de ' + fila.codigoCuenta + ' - ' + fila.nombreCuenta"
+                (click)="abrirMovimientos(fila)">
+                {{ fila.nombreCuenta }}
+              </button>
+
+              <ng-template #cuentaAgrupadora>
+                {{ fila.nombreCuenta }}
+              </ng-template>
+            </td>
+
+            <td class="numero">
+              {{ dinero(fila.saldoAnterior) }}
+            </td>
+            <td class="numero">
+              {{ dinero(fila.valorDebitoMes) }}
+            </td>
+            <td class="numero">
+              {{ dinero(fila.valorCreditoMes) }}
+            </td>
+            <td class="numero">
+              {{ dinero(fila.saldoFinal) }}
+            </td>
+          </tr>
+
+          <tr *ngIf="balance.filas.length === 0">
+            <td colspan="6" class="sin-resultados">
+              No se encontraron cuentas contables para los parámetros
+              seleccionados.
+            </td>
+          </tr>
+          </tbody>
+
+          <tfoot>
+          <tr>
+            <th colspan="2">Totales (cuentas de nivel 1)</th>
+            <th class="numero">
+              {{ dinero(balance.totales.saldoAnterior) }}
+            </th>
+            <th class="numero">
+              {{ dinero(balance.totales.valorDebitoMes) }}
+            </th>
+            <th class="numero">
+              {{ dinero(balance.totales.valorCreditoMes) }}
+            </th>
+            <th class="numero">
+              {{ dinero(balance.totales.saldoFinal) }}
+            </th>
+          </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="firmas" *ngIf="balance.incluirFirmas && balance.firmas">
+        <div
+          *ngFor="let f of [
+            balance.firmas.firmante1,
+            balance.firmas.firmante2,
+            balance.firmas.firmante3
+          ]">
+
+          <ng-container *ngIf="f">
+            <strong>{{ f.nombre }}</strong>
+            <span>{{ f.titulo }}</span>
+            <small *ngIf="f.tarjetaProfesional">
+              T. P. {{ f.tarjetaProfesional }}
+            </small>
+          </ng-container>
+        </div>
+      </div>
+    </section>
+  </ng-container>
+
+
+  <!-- Modal de movimientos: conserva la cuenta y la página consultada. -->
+  <app-movimientos-cuenta-modal
+    *ngIf="cuentaSeleccionada as cuenta"
+    [codigoCuenta]="cuenta.codigoCuenta"
+    [nombreCuenta]="cuenta.nombreCuenta"
+    [nombreAgencia]="informe?.nombreAgencia ?? ''"
+    [fechaInicial]="fechaInicialMovimientos"
+    [fechaFinal]="fechaFinalMovimientos"
+    [cargando]="cargandoMovimientos"
+    [error]="errorMovimientos"
+    [pagina]="movimientos"
+    (cerrar)="cerrarMovimientos()"
+    (cambiarPagina)="consultarPaginaMovimientos($event)"
+    (seleccionarComprobante)="seleccionarComprobante($event)">
+  </app-movimientos-cuenta-modal>
+
+
+  <!-- Modal compartido: consulta completa del comprobante seleccionado. -->
+  <app-comprobante-consulta-modal
+    *ngIf="referenciaComprobanteSeleccionado"
+    [referencia]="referenciaComprobanteSeleccionado"
+    (cerrar)="cerrarComprobante()">
+  </app-comprobante-consulta-modal>
+</div>

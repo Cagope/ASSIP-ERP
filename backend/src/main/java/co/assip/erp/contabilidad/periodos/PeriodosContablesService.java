@@ -1,4 +1,3 @@
-
 package co.assip.erp.contabilidad.periodos;
 
 import co.assip.erp.seguridad.autorizacion.AccessValidator;
@@ -41,6 +40,7 @@ public class PeriodosContablesService {
     private static final int ID_ROL_CONTADOR = 15;
 
     private final PeriodosContablesRepository repository;
+    private final PeriodosDiariosRepository periodosDiariosRepository;
     private final UsuarioSesionService usuarioSesionService;
     private final UsuarioRepository usuarioRepository;
     private final UsuarioRolService usuarioRolService;
@@ -117,7 +117,25 @@ public class PeriodosContablesService {
             );
         }
 
-        // 4. Registra el historial solo si el período fue creado.
+        // 4. Crea y bloquea el día contable, siempre después del mes.
+        periodosDiariosRepository.crearAbiertoSiNoExiste(
+                idAgencia,
+                fechaContable,
+                idUsuario
+        );
+        var dia = periodosDiariosRepository.bloquearDia(
+                idAgencia,
+                fechaContable
+        ).orElseThrow(() -> new IllegalStateException(
+                "No fue posible obtener el período diario."
+        ));
+        if (!"A".equals(dia.estado())) {
+            throw new IllegalStateException(
+                    "El día contable está cerrado. No se permite contabilizar."
+            );
+        }
+
+        // 5. Registra el historial solo si el período mensual fue creado.
         // Registra la apertura del período creado por el primer movimiento.
         if (periodoCreado) {
             repository.registrarHistorial(
@@ -174,10 +192,9 @@ public class PeriodosContablesService {
     }
 
     /**
-     * Cierra un período abierto de la agencia indicada.
-     *
-     * Bloquea la fila y registra el cambio de estado
-     * y su historial en una misma transacción.
+     * Impide cerrar períodos directamente desde la administración general.
+     * El cierre mensual debe consolidar los saldos contables y registrar
+     * el cambio de estado dentro de una única transacción.
      */
     @Transactional
     public void cerrarPeriodo(
@@ -188,42 +205,10 @@ public class PeriodosContablesService {
         validarPeriodo(ano, mes);
         autorizar(PERMISO_ADMIN, idAgencia);
 
-        var periodo = repository.bloquearPeriodo(
-                idAgencia,
-                ano,
-                mes
-        ).orElseThrow(() -> new IllegalStateException(
-                "El período contable no existe."
-        ));
-
-        if (!ABIERTO.equals(periodo.estado())) {
-            throw new IllegalStateException(
-                    "El período contable ya está cerrado."
-            );
-        }
-
-        Integer idUsuario = usuarioSesionService.idUsuario();
-
-        boolean actualizado = repository.cambiarEstado(
-                periodo.idPeriodoContable(),
-                ABIERTO,
-                CERRADO,
-                idUsuario
-        );
-
-        if (!actualizado) {
-            throw new IllegalStateException(
-                    "No fue posible cerrar el período contable."
-            );
-        }
-
-        repository.registrarHistorial(
-                periodo.idPeriodoContable(),
-                ABIERTO,
-                CERRADO,
-                "CIERRE",
-                null,
-                idUsuario
+        throw new IllegalStateException(
+                "El cierre del período debe realizarse desde "
+                        + "Contabilidad > Cierre Mensual Contable, "
+                        + "para garantizar la consolidación de saldos."
         );
     }
 

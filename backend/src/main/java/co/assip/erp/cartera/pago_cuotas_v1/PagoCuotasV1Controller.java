@@ -10,6 +10,7 @@ import co.assip.erp.seguridad.usuarios.Usuario;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,6 +38,7 @@ public class PagoCuotasV1Controller {
     private final PagoCuotasMotorService motorService;
     private final UsuarioSesionService usuarioSesionService;
     private final AccessValidator accessValidator;
+    private final JdbcTemplate jdbc;
     private static final String PERMISO_VIEW = "CARTERA_PAGO_CUOTAS_VIEW";
     private static final String PERMISO_EXECUTE = "CARTERA_PAGO_CUOTAS_EXECUTE";
 
@@ -66,6 +68,32 @@ public class PagoCuotasV1Controller {
 
         return service.listarPagosRealizados(idCarteraCredito);
     }
+
+    /** Comprobante definitivo de un pago, con validación de permiso y agencia. */
+    @GetMapping("/pagos/{idPago}/confirmacion")
+    public ConfirmacionPago consultarConfirmacionPago(@PathVariable Long idPago) {
+        validarPermiso(PERMISO_VIEW);
+        if (idPago == null || idPago <= 0) {
+            throw new IllegalArgumentException("Debe indicar un pago válido.");
+        }
+        ConfirmacionPago resultado = jdbc.queryForObject("""
+                SELECT id_pago, id_agencia_receptora, valor_pago, estado,
+                       tipo_comprobante, numero_comprobante
+                FROM cartera.pagos_cuotas WHERE id_pago = ?
+                """, (rs, rowNum) -> new ConfirmacionPago(
+                rs.getLong("id_pago"),
+                rs.getInt("id_agencia_receptora"),
+                rs.getBigDecimal("valor_pago"),
+                rs.getString("estado"),
+                rs.getString("tipo_comprobante"),
+                rs.getString("numero_comprobante")), idPago);
+        usuarioSesionService.validarAgencia(resultado.idAgenciaReceptora());
+        return resultado;
+    }
+
+    public record ConfirmacionPago(Long idPago, Integer idAgenciaReceptora,
+            BigDecimal valorPago, String estado, String tipoComprobante,
+            String numeroComprobante) { }
 
     @GetMapping("/creditos/{idCarteraCredito}/datos-previos")
     public PagoCuotasV1Service.DatosPrevios consultarDatosPrevios(

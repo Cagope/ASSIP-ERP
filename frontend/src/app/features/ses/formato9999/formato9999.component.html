@@ -1,0 +1,264 @@
+
+<div class="asociados-container">
+
+  <!-- Encabezado -->
+  <div class="page-header">
+    <div class="page-title">
+      <h2>Asociados</h2>
+      <p>Superintendencia de la Economía Solidaria</p>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <section class="filtros-panel">
+    <div class="filtros-contenido">
+
+      <div class="filtro-campo">
+        <label for="anoSeleccionado">Año</label>
+        <input
+          id="anoSeleccionado"
+          type="number"
+          min="1900"
+          max="9999"
+          step="1"
+          [(ngModel)]="anoSeleccionado"
+          (ngModelChange)="cambiarPeriodo()"
+          [disabled]="cargando() || generando()"
+        />
+      </div>
+
+      <div class="filtro-campo filtro-mes">
+        <label for="mesSeleccionado">Mes</label>
+        <select
+          id="mesSeleccionado"
+          [(ngModel)]="mesSeleccionado"
+          (ngModelChange)="cambiarPeriodo()"
+          [disabled]="cargando() || generando()"
+        >
+          @for (mes of meses; track mes.numero) {
+          <option [ngValue]="mes.numero">
+            {{ mes.nombre }}
+          </option>
+          }
+        </select>
+      </div>
+
+      <div class="filtros-acciones">
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="buscar()"
+          [disabled]="cargando() || generando()"
+        >
+          {{ cargando() ? 'Consultando...' : 'Consultar' }}
+        </button>
+
+        @if (sessionSES.tienePermiso('SES_FORMATOS_GENERAR')) {
+        <button
+          type="button"
+          class="btn btn-success"
+          (click)="generarPlano()"
+          [disabled]="cargando() || generando()"
+        >
+          Generar plano TXT
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-excel"
+          (click)="exportarExcel()"
+          [disabled]="cargando() || generando()"
+        >
+          Exportar Excel
+        </button>
+        }
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="limpiar()"
+          [disabled]="cargando() || generando()"
+        >
+          Limpiar
+        </button>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Mensajes -->
+  @if (mensajeError()) {
+  <div class="mensaje mensaje-error" role="alert">
+    {{ mensajeError() }}
+  </div>
+  }
+
+  @if (mensajeExito()) {
+  <div class="mensaje mensaje-exito" role="status">
+    {{ mensajeExito() }}
+  </div>
+  }
+
+  <!-- Estadísticas -->
+  @if (estadistica; as datos) {
+  <section class="estadisticas">
+
+    <div class="estadistica-card total">
+        <span class="estadistica-label">
+          Total asociados
+        </span>
+      <strong class="estadistica-valor">
+        {{ datos.total | number:'1.0-0':'es-CO' }}
+      </strong>
+    </div>
+
+    <div class="estadistica-card">
+        <span class="estadistica-label">
+          Masculino
+        </span>
+      <strong class="estadistica-valor">
+        {{ datos.masculino | number:'1.0-0':'es-CO' }}
+      </strong>
+    </div>
+
+    <div class="estadistica-card">
+        <span class="estadistica-label">
+          Femenino
+        </span>
+      <strong class="estadistica-valor">
+        {{ datos.femenino | number:'1.0-0':'es-CO' }}
+      </strong>
+    </div>
+
+    <div class="estadistica-card">
+        <span class="estadistica-label">
+          Persona jurídica
+        </span>
+      <strong class="estadistica-valor">
+        {{ datos.juridica | number:'1.0-0':'es-CO' }}
+      </strong>
+    </div>
+
+    <div class="estadistica-card">
+        <span class="estadistica-label">
+          Otros
+        </span>
+      <strong class="estadistica-valor">
+        {{ datos.otro | number:'1.0-0':'es-CO' }}
+      </strong>
+    </div>
+
+  </section>
+  }
+
+  <!-- Resultados -->
+  @if (items.length > 0) {
+  <section class="resultados-panel">
+
+    <div class="resultados-encabezado">
+      <div>
+        <h3>Resultado de la consulta</h3>
+        <span>
+            {{ items.length | number:'1.0-0':'es-CO' }}
+            registros encontrados
+          </span>
+      </div>
+    </div>
+
+    <div class="tabla-contenedor">
+      <table class="tabla-asociados">
+
+        <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Identificación</th>
+          <th>Primer apellido</th>
+          <th>Segundo apellido</th>
+          <th>Nombres</th>
+          <th>Fecha ingreso</th>
+          <th>Género</th>
+          <th class="columna-valor">
+            Saldo aportes
+          </th>
+        </tr>
+        </thead>
+
+        <tbody>
+        @for (asociado of items; track $index) {
+        <tr>
+
+          <td>
+            {{ asociado.tipoIdentificacion }}
+          </td>
+
+          <td>
+            {{ asociado.numeroIdentificacion }}
+          </td>
+
+          <td>
+            {{ asociado.primerApellido }}
+          </td>
+
+          <td>
+            {{ asociado.segundoApellido }}
+          </td>
+
+          <td>
+            {{ asociado.nombres }}
+          </td>
+
+          <td>
+            {{ asociado.fechaIngreso }}
+          </td>
+
+          <td>
+            @switch (asociado.genero) {
+            @case (1) {
+            Masculino
+            }
+            @case (2) {
+            Femenino
+            }
+            @case (3) {
+            Jurídica
+            }
+            @default {
+            Sin clasificar
+            }
+            }
+          </td>
+
+          <td class="columna-valor">
+            {{
+            (asociado.saldoAportes ?? 0)
+            | number:'1.2-2':'es-CO'
+            }}
+          </td>
+
+        </tr>
+        }
+        </tbody>
+
+      </table>
+    </div>
+
+  </section>
+  } @else if (!cargando() && estadistica) {
+  <div class="sin-resultados">
+    No se encontraron asociados para el período seleccionado.
+  </div>
+  }
+
+  <!-- Indicador de proceso -->
+  @if (cargando() || generando()) {
+  <div class="estado-proceso" role="status">
+    {{
+    cargando()
+    ? 'Consultando información de asociados...'
+    : 'Preparando archivo de exportación...'
+    }}
+  </div>
+  }
+
+</div>

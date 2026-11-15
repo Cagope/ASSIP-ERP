@@ -911,6 +911,40 @@
     </section>
 
 
+    <!-- PASO 1: CALCULAR Y GUARDAR -->
+    <section *ngIf="!deudorSeleccionado" class="card">
+      <div class="section-header">
+        <div>
+          <h3>1. Calcular y guardar análisis</h3>
+          <p>Guarde los resultados de todos los participantes antes de validar el expediente.</p>
+        </div>
+      </div>
+      <div class="page-footer-actions">
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="
+          !puedeAnalizar ||
+          cargando ||
+          guardando ||
+          validandoAprobacion ||
+          enviandoAprobacion ||
+          !idSolicitudCredito
+        "
+        (click)="persistirAnalisis()">
+
+        <span *ngIf="!guardando">
+          Calcular y guardar análisis
+        </span>
+
+        <span *ngIf="guardando">
+          Procesando...
+        </span>
+
+      </button>
+      </div>
+    </section>
+
     <!-- =================================================== -->
     <!-- CIERRE DEL ANÁLISIS / ENVÍO A APROBACIÓN -->
     <!-- =================================================== -->
@@ -922,7 +956,7 @@
       <div class="section-header">
 
         <div>
-          <h3>Concepto del asesor</h3>
+          <h3>2. Concepto del asesor</h3>
 
           <p>
             Registre el concepto final de la solicitud antes
@@ -987,6 +1021,10 @@
       </div>
 
 
+      <p class="field-help" *ngIf="!validacionAprobacion && conceptoAsesorValido">
+        Después de registrar o modificar el concepto, valide el expediente para habilitar el envío.
+      </p>
+
       <!-- =============================================== -->
       <!-- ACCIONES DE APROBACIÓN -->
       <!-- =============================================== -->
@@ -1004,7 +1042,7 @@
           (click)="validarParaAprobacion()">
 
           <span *ngIf="!validandoAprobacion">
-            Validar expediente
+            3. Validar expediente
           </span>
 
           <span *ngIf="validandoAprobacion">
@@ -1027,7 +1065,7 @@
           (click)="enviarAprobacion()">
 
           <span *ngIf="!enviandoAprobacion">
-            Enviar a aprobación
+            4. Enviar a aprobación
           </span>
 
           <span *ngIf="enviandoAprobacion">
@@ -1062,28 +1100,7 @@
 
       </button>
 
-      <button
-        type="button"
-        class="btn btn-primary"
-        [disabled]="
-          !puedeAnalizar ||
-          cargando ||
-          guardando ||
-          validandoAprobacion ||
-          enviandoAprobacion ||
-          !idSolicitudCredito
-        "
-        (click)="persistirAnalisis()">
 
-        <span *ngIf="!guardando">
-          Calcular y guardar análisis
-        </span>
-
-        <span *ngIf="guardando">
-          Procesando...
-        </span>
-
-      </button>
 
     </div>
 

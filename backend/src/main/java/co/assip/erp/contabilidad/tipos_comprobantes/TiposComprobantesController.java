@@ -2,6 +2,9 @@ package co.assip.erp.contabilidad.tipos_comprobantes;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.usuarios.Usuario;
 
 import java.util.List;
 
@@ -11,6 +14,8 @@ import java.util.List;
 public class TiposComprobantesController {
 
     private final TiposComprobantesService service;
+    private final AccessValidator accessValidator;
+    private final UsuarioSesionService usuarioSesionService;
 
     // =================================================
     // LISTAR POR AGENCIA (ACTIVOS + INACTIVOS)
@@ -37,6 +42,7 @@ public class TiposComprobantesController {
     // =================================================
     @PostMapping
     public void crear(@RequestBody TipoComprobante t) {
+        validarAdministracion();
         service.crear(t);
     }
 
@@ -45,6 +51,7 @@ public class TiposComprobantesController {
     // =================================================
     @PutMapping
     public void actualizar(@RequestBody TipoComprobante t) {
+        validarAdministracion();
         service.actualizar(t);
     }
 
@@ -60,4 +67,10 @@ public class TiposComprobantesController {
 
     
 
+    /** Exige el permiso funcional vigente para modificar la parametrización. */
+    private void validarAdministracion() {
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(usuarioSesionService.idUsuario());
+        accessValidator.validarAcceso(usuario, "CONTABILIDAD_PARAMETRIZACION_ADMIN");
+    }
 }

@@ -1,0 +1,247 @@
+
+<section class="pyg-individual">
+  <header class="pyg-encabezado">
+    <div>
+      <h2>Estado de Excedentes o Pérdidas</h2>
+      <p>Informe con formato individual — un período contable</p>
+    </div>
+  </header>
+
+  <form class="pyg-filtros" (ngSubmit)="consultar()">
+    <div class="pyg-campo">
+      <label for="pyg-agencia">Agencia</label>
+      <select
+        id="pyg-agencia"
+        name="idAgencia"
+        [(ngModel)]="idAgencia"
+        (ngModelChange)="limpiarResultado()"
+        [disabled]="consultando || exportando !== null"
+        required
+      >
+        <option [ngValue]="null">Seleccione una agencia</option>
+        <option
+          *ngFor="let agencia of agencias"
+          [ngValue]="agencia.idAgencia"
+        >
+          {{ agencia.codigoAgencia }} - {{ agencia.nombreAgencia }}
+        </option>
+      </select>
+    </div>
+
+    <div class="pyg-campo">
+      <label for="pyg-ano">Año contable</label>
+      <input
+        id="pyg-ano"
+        name="ano"
+        type="number"
+        min="1900"
+        max="9999"
+        step="1"
+        [(ngModel)]="ano"
+        (ngModelChange)="limpiarResultado()"
+        [disabled]="consultando || exportando !== null"
+        required
+      />
+    </div>
+
+    <div class="pyg-campo">
+      <label for="pyg-mes">Mes contable</label>
+      <select
+        id="pyg-mes"
+        name="mes"
+        [(ngModel)]="mes"
+        (ngModelChange)="limpiarResultado()"
+        [disabled]="consultando || exportando !== null"
+        required
+      >
+        <option
+          *ngFor="let item of meses"
+          [ngValue]="item.numero"
+        >
+          {{ item.nombre }}
+        </option>
+      </select>
+    </div>
+
+    <div class="pyg-opciones">
+      <label class="pyg-opcion">
+        <input
+          type="checkbox"
+          name="incluirDetalle"
+          [(ngModel)]="incluirDetalle"
+          (ngModelChange)="limpiarResultado()"
+          [disabled]="consultando || exportando !== null"
+        />
+        <span class="pyg-opcion-texto">
+          <strong>Incluir detalle de subcuentas</strong>
+          <small>
+            Mostrar las cuentas contables de mayor nivel
+          </small>
+        </span>
+      </label>
+
+      <label class="pyg-opcion">
+        <input
+          type="checkbox"
+          name="incluirFirmas"
+          [(ngModel)]="incluirFirmas"
+          [disabled]="exportando !== null"
+        />
+        <span class="pyg-opcion-texto">
+          <strong>Incluir firmas</strong>
+          <small>
+            Firmas institucionales únicamente en el PDF
+          </small>
+        </span>
+      </label>
+    </div>
+
+    <div class="pyg-acciones">
+      <button
+        type="submit"
+        [disabled]="!puedeConsultar"
+      >
+        {{ consultando ? 'Consultando…' : 'Consultar informe' }}
+      </button>
+
+      <button
+        type="button"
+        class="secundario"
+        (click)="exportarPdf()"
+        [disabled]="!puedeExportar"
+      >
+        {{ exportando === 'pdf' ? 'Generando PDF…' : 'PDF' }}
+      </button>
+
+      <button
+        type="button"
+        class="secundario"
+        (click)="exportarExcel()"
+        [disabled]="!puedeExportar"
+      >
+        {{ exportando === 'excel' ? 'Generando Excel…' : 'Excel' }}
+      </button>
+    </div>
+  </form>
+
+  <div
+    *ngIf="!tienePermiso"
+    class="pyg-mensaje-error"
+    role="alert"
+  >
+    No tiene permiso para consultar informes contables.
+  </div>
+
+  <div
+    *ngIf="mensajeError"
+    class="pyg-mensaje-error"
+    role="alert"
+  >
+    {{ mensajeError }}
+  </div>
+
+  <div
+    *ngIf="consultando"
+    class="pyg-cargando"
+    role="status"
+  >
+    Consultando movimientos contables del período...
+  </div>
+
+  <section
+    *ngIf="resultado as informe"
+    class="pyg-resultado"
+  >
+    <div class="pyg-titulo-informe">
+      <h3>Estado de Excedentes o Pérdidas</h3>
+      <p><strong>Agencia:</strong> {{ nombreAgencia }}</p>
+      <p>
+        <strong>Período:</strong>
+        {{ nombrePeriodo }}
+      </p>
+      <p>
+        <strong>Presentación:</strong>
+        {{ informe.incluirDetalle
+        ? 'Con detalle de subcuentas'
+        : 'Sin detalle de subcuentas' }}
+      </p>
+    </div>
+
+    <div class="pyg-tabla-contenedor">
+      <table class="pyg-tabla">
+        <thead>
+        <tr>
+          <th scope="col">Código</th>
+          <th scope="col">Concepto</th>
+          <th scope="col" class="pyg-numero">
+            {{ nombrePeriodo }}
+          </th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr
+          *ngFor="let fila of informe.filas; trackBy: identificarFila"
+          [class.pyg-cuenta-grupo]="fila.tipo === 'GRUPO'"
+          [class.pyg-subtotal]="fila.tipo === 'TOTAL'"
+          [class.pyg-resultado-final]="fila.tipo === 'RESULTADO'"
+          [class.pyg-perdida]="fila.codigo === 'TT' && fila.valor < 0"
+        >
+          <td>{{ fila.codigo }}</td>
+          <td
+            [class.pyg-cuenta-detalle]="fila.tipo === 'CUENTA'"
+            [style.padding-left.px]="
+                fila.tipo === 'CUENTA'
+                  ? 12 + (fila.nivel - 2) * 12
+                  : null
+              "
+          >
+            {{ fila.nombre }}
+          </td>
+          <td class="pyg-numero">
+            {{ formatearValor(fila.valor) }}
+          </td>
+        </tr>
+
+        <tr *ngIf="informe.filas.length === 0">
+          <td colspan="3" class="pyg-sin-datos">
+            No se encontraron cuentas de resultados para el período seleccionado.
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div
+      class="pyg-resumen"
+      *ngIf="informe.filas.length > 0"
+    >
+      <h4>Resultado del ejercicio</h4>
+
+      <table class="pyg-tabla-resumen">
+        <thead>
+        <tr>
+          <th scope="col">Concepto</th>
+          <th scope="col" class="pyg-numero">
+            {{ nombrePeriodo }}
+          </th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr
+          class="pyg-resultado-final"
+          [class.pyg-perdida]="!esExcedente"
+        >
+          <th scope="row">
+            {{ nombreResultado }}
+          </th>
+          <td class="pyg-numero">
+            {{ formatearValor(resultadoEjercicio) }}
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>

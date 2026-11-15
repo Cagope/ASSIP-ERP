@@ -1,3 +1,4 @@
+
 package co.assip.erp.cartera.prorrogas_v1;
 
 import co.assip.erp.cartera.pago_cuotas_v1.PagoCuotasV1Repository;
@@ -96,18 +97,23 @@ public class ProrrogasV1LiquidacionService {
                 pagoCuotasV1Repository.consultarSaldoSeguros(idCredito),
                 "seguros");
 
+        // Consulta saldos independientes sin generar nuevas causaciones.
+        BigDecimal alivios = validarImporte(
+                pagoCuotasV1Repository.consultarSaldoAlivios(idCredito),
+                "alivios");
+
+        BigDecimal costasJudiciales = validarImporte(
+                pagoCuotasV1Repository.consultarSaldoCostasJudiciales(idCredito),
+                "costas judiciales");
+
         BigDecimal capital = CERO;
-        BigDecimal aportes = CERO;
-        BigDecimal fondoGarantia = CERO;
-        BigDecimal otrosConceptos = CERO;
 
         BigDecimal total = intereses
                 .add(mora)
                 .add(capital)
                 .add(seguros)
-                .add(aportes)
-                .add(fondoGarantia)
-                .add(otrosConceptos);
+                .add(alivios)
+                .add(costasJudiciales);
 
         return new LiquidacionProrroga(
                 idCredito,
@@ -119,9 +125,8 @@ public class ProrrogasV1LiquidacionService {
                 mora,
                 capital,
                 seguros,
-                aportes,
-                fondoGarantia,
-                otrosConceptos,
+                alivios,
+                costasJudiciales,
                 total);
     }
 
@@ -256,20 +261,28 @@ public class ProrrogasV1LiquidacionService {
 
         LocalDate proximaCapital = fechaRequerida(
                 credito.proximaFechaCapital(), "próxima fecha de capital");
+
         Integer amortizacion = credito.amortizacionCapital();
+
         if (amortizacion == null || amortizacion <= 0) {
             throw new IllegalStateException(
                     "El crédito no tiene una periodicidad de capital válida.");
         }
+
         if (!proximaCapital.isBefore(fechaLiquidacion)
                 && amortizacion != periodoInteresMeses) {
             return CERO;
         }
 
-        int altura = credito.alturaCuota() == null ? 0 : credito.alturaCuota();
+        int altura = credito.alturaCuota() == null
+                ? 0
+                : credito.alturaCuota();
+
         BigDecimal cuota = pagoCuotasV1Service.valorCuotaCapitalRegistrada(
                 credito, altura == 0);
-        return cuota.min(valorRequerido(credito.saldoActual(), "saldo actual"));
+
+        return cuota.min(
+                valorRequerido(credito.saldoActual(), "saldo actual"));
     }
 
     /**
@@ -373,9 +386,8 @@ public class ProrrogasV1LiquidacionService {
             BigDecimal valorInteresMora,
             BigDecimal valorCapital,
             BigDecimal valorSeguro,
-            BigDecimal valorAportes,
-            BigDecimal valorFondoGarantia,
-            BigDecimal valorOtrosConceptos,
+            BigDecimal valorAlivios,
+            BigDecimal valorCostasJudiciales,
             BigDecimal valorTotalSugerido) {
     }
 }

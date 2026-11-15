@@ -42,6 +42,72 @@
   </div>
 
   <!-- ================================================== -->
+  <!-- CONFIRMACIÓN CONTABLE PERSISTENTE -->
+  <!-- ================================================== -->
+
+  <section
+    *ngIf="resultadoPago as resultado"
+    class="card"
+    role="status"
+    aria-live="polite">
+
+    <div class="card-header">
+      <div>
+        <h3>Operación contabilizada correctamente</h3>
+        <p>
+          La ejecución fue registrada en Tesorería.
+          Conserve el número de comprobante como soporte.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn-outline-secondary btn-sm"
+        (click)="cerrarResultadoPago()">
+        Cerrar confirmación
+      </button>
+    </div>
+
+    <div class="detalle-grid">
+      <div class="detalle-campo">
+        <span>Operación</span>
+        <strong>{{ resultado.idOperacion }}</strong>
+      </div>
+
+      <div class="detalle-campo">
+        <span>Comprobante generado</span>
+        <strong>
+          {{ resultado.tipoComprobante }}-{{ resultado.numeroComprobante.trim() }}
+        </strong>
+      </div>
+
+      <div class="detalle-campo">
+        <span>Valor ejecutado</span>
+        <strong>
+          {{ resultado.valorPagado | currency:'COP':'symbol':'1.0-0':'es-CO' }}
+        </strong>
+      </div>
+
+      <div class="detalle-campo">
+        <span>Estado de la operación</span>
+        <strong>{{ resultado.estadoOperacion }}</strong>
+      </div>
+
+      <div class="detalle-campo">
+        <span>Saldo pendiente</span>
+        <strong>
+          {{ resultado.saldoPendiente | currency:'COP':'symbol':'1.0-0':'es-CO' }}
+        </strong>
+      </div>
+
+      <div class="detalle-campo">
+        <span>Fecha de contabilización</span>
+        <strong>{{ resultado.fechaContabilizacion | date:'dd/MM/yyyy' }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================================================== -->
   <!-- INDICADORES -->
   <!-- ================================================== -->
 
@@ -104,7 +170,7 @@
         <thead>
         <tr>
           <th>Operación</th>
-          <th>Naturaleza</th>
+          <th>Tercero</th>
           <th>Origen</th>
           <th>Fecha</th>
           <th>Concepto</th>
@@ -129,6 +195,10 @@
 
           <td>
             {{ operacion.id_operacion_pendiente }}
+          </td>
+
+          <td>
+            {{ operacion.nombre_tercero || 'Sin tercero registrado' }}
           </td>
 
           <td>
@@ -229,9 +299,9 @@
         </div>
 
         <div class="detalle-campo">
-          <span>Beneficiario (ID)</span>
+          <span>Tercero</span>
           <strong>
-            {{ operacion.id_datos_personal || 'No registrado' }}
+            {{ operacion.nombre_tercero || 'Sin tercero registrado' }}
           </strong>
         </div>
 
@@ -299,6 +369,7 @@
           <button
             type="button"
             class="btn btn-primary btn-sm"
+            *ngIf="!esDevolucionCartera"
             (click)="agregarLineaPago()"
             [disabled]="cargandoDetalle || cargandoCuentas || !!errorCuentas">
             + Agregar línea
@@ -321,7 +392,7 @@
         <button
           type="button"
           class="btn btn-outline-danger btn-sm ms-2"
-          (click)="consultarCuentasParaPago()">
+          (click)="consultarCuentasParaOperacion()">
           Reintentar
         </button>
       </div>
@@ -364,6 +435,7 @@
             <button
               type="button"
               class="btn btn-outline-danger btn-sm"
+              *ngIf="!esDevolucionCartera"
               (click)="eliminarLineaPago(linea.idTemporal)">
               Quitar línea
             </button>
@@ -375,6 +447,7 @@
               <label>{{ operacion.naturaleza === 'ENTRADA' ? 'Medio de recaudo' : 'Medio de pago' }}</label>
               <select
                 class="form-select form-select-sm"
+                [disabled]="esDevolucionCartera"
                 [ngModel]="linea.medioPago"
                 (ngModelChange)="cambiarMedioPago(linea, $event); sugerirObservacion(linea)">
 
@@ -394,7 +467,7 @@
                 class="form-select form-select-sm"
                 [(ngModel)]="linea.idCuentaBancaria"
                 (ngModelChange)="distribucionModificada(); sugerirObservacion(linea)"
-                [disabled]="cargandoCuentas || cuentasParaPago.length === 0">
+                [disabled]="esDevolucionCartera || cargandoCuentas || cuentasParaPago.length === 0">
 
                 <option [ngValue]="null">
                   Seleccione una cuenta bancaria
@@ -444,6 +517,7 @@
                   inputmode="decimal"
                   autocomplete="off"
                   placeholder="0"
+                  [readonly]="esDevolucionCartera"
                   [(ngModel)]="linea.valor"
                   (ngModelChange)="distribucionModificada()">
               </div>
@@ -527,9 +601,11 @@
       <!-- ACCIONES -->
       <div class="card-actions">
         <span class="nota-informativa">
-          La vista previa no registra pagos ni movimientos contables.
+          {{ esDevolucionCartera
+            ? 'La devolución utiliza exclusivamente la cuenta bancaria del recaudo original.'
+            : 'La vista previa no registra pagos ni movimientos contables.' }}
         </span>
-        <button type="button" class="btn btn-primary"
+        <button *ngIf="puedeEjecutarOperaciones" type="button" class="btn btn-primary"
                 [disabled]="cargandoDetalle || cargandoCuentas || !!errorCuentas ||
             cuentasParaPago.length === 0 || lineasPago.length === 0 ||
             cargandoVistaPrevia || confirmandoPago"
@@ -543,8 +619,9 @@
     <section class="card" *ngIf="vistaPrevia as comprobante">
       <div class="card-header">
         <div>
-          <h3>Vista previa del comprobante contable</h3>
-          <p>Revise las cuentas y los valores antes de confirmar el pago.</p>
+          <h3>Vista previa del comprobante contable — {{ comprobante.tipoComprobante }} ({{ comprobante.tipoComprobante === 'CI' ? 'Comprobante de Ingreso' : 'Comprobante de Egreso' }})</h3>
+          <p>Agencia: {{ comprobante.idAgencia }} · Operación: {{ comprobante.idOperacion }} · Número: Se asignará al confirmar.</p>
+          <p>Revise las cuentas y los valores antes de confirmar la operación.</p>
         </div>
       </div>
 
@@ -591,7 +668,7 @@
           Al confirmar se registrará el comprobante y se actualizará únicamente el saldo pendiente de Tesorería.
         </span>
         <button type="button" class="btn btn-primary"
-                [disabled]="!comprobante.cuadrado || confirmandoPago || cargandoVistaPrevia"
+                [disabled]="!puedeEjecutarOperaciones || !comprobante.cuadrado || confirmandoPago || cargandoVistaPrevia"
                 (click)="confirmarPago()">
           {{ confirmandoPago ? 'Contabilizando...' : (operacion.naturaleza === 'ENTRADA' ? 'Confirmar recaudo bancario' : 'Confirmar y contabilizar pago') }}
         </button>

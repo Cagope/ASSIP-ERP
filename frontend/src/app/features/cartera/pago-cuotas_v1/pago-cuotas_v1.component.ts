@@ -75,6 +75,14 @@ export class PagoCuotasV1Component implements OnDestroy {
   cargandoPagos = false;
   error: string | null = null;
   aviso: string | null = null;
+  confirmacionUltimoPago: {
+    idPago: number;
+    valorPago: number;
+    estado: string;
+    tipoComprobante: string | null;
+    numeroComprobante: string | null;
+    incluyeCaja: boolean;
+  } | null = null;
 
   constructor(private readonly api: PagoCuotasV1Api) {}
 
@@ -131,6 +139,7 @@ export class PagoCuotasV1Component implements OnDestroy {
     this.limpiarCredito();
     this.error = null;
     this.aviso = null;
+    this.confirmacionUltimoPago = null;
   }
 
   seleccionarCredito(credito: PagoCuotasCreditoResumen): void {
@@ -564,9 +573,20 @@ export class PagoCuotasV1Component implements OnDestroy {
         this.comprobantePrevio = null;
         this.solicitudRevisada = null;
         if (asociado) this.seleccionarAsociado(asociado);
-        this.aviso = incluyeCaja
-          ? `Pago N.º ${idPago} aplicado en Cartera y enviado a Caja para confirmación física.`
-          : `Pago N.º ${idPago} aplicado en Cartera. Verifique el comprobante y los extractos.`;
+        this.aviso = `Pago N.º ${idPago} aplicado. Consultando comprobante definitivo...`;
+        this.confirmacionUltimoPago = null;
+        this.api.consultarConfirmacionPago(idPago)
+          .pipe(takeUntil(this.destruir$))
+          .subscribe({
+            next: confirmacion => {
+              this.confirmacionUltimoPago = { ...confirmacion, incluyeCaja };
+              this.aviso = null;
+            },
+            error: () => {
+              // El pago fue aplicado: un fallo de consulta no lo deshace.
+              this.aviso = `Pago N.º ${idPago} aplicado correctamente. No fue posible consultar el comprobante definitivo; consulte el historial de pagos.`;
+            }
+          });
       },
       error: error => {
         this.enviandoCaja = false;

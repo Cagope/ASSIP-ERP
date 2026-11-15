@@ -144,7 +144,10 @@ public class CdatCancelacionService {
                     "CUENTA POR PAGAR CANCELACION CDAT "
                             + cdat.getCodigoCdat(),
                     dto.getValorCuentaPorPagar(),
-                    idUsuario
+                    idUsuario,
+                    null,
+                    null,
+                    "PAGO_CANCELACION_CDAT"
             );
         }
 

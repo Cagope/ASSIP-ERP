@@ -1,6 +1,7 @@
 import {
   inject
 } from '@angular/core';
+import { map } from 'rxjs';
 
 import {
   CanActivateFn,
@@ -47,29 +48,17 @@ export const permisoGuard: CanActivateFn = (
     route.data?.['permiso'] as
       string | undefined;
 
-  /*
-   * Si la ruta no declara un permiso específico,
-   * este guard no agrega restricciones adicionales.
-   */
-  if (!permisoRequerido) {
-    return true;
-  }
-
-  /*
-   * La resolución de permisos pertenece al
-   * SessionService.
-   *
-   * Esto incluye el acceso total de ADMIN.
-   */
-  if (
-    session.tienePermiso(
-      permisoRequerido
-    )
-  ) {
-    return true;
-  }
-
-  return router.createUrlTree([
-    '/acceso-denegado'
-  ]);
+  return session.validarContexto().pipe(
+    map(valido => {
+      if (!valido) {
+        return router.createUrlTree([
+          session.isAuthenticated() ? '/acceso-denegado' : '/login'
+        ]);
+      }
+      if (!permisoRequerido || session.tienePermiso(permisoRequerido)) {
+        return true;
+      }
+      return router.createUrlTree(['/acceso-denegado']);
+    })
+  );
 };

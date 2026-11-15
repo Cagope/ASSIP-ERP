@@ -9,7 +9,7 @@ export const FECHAS_CDAT_ROUTES: Routes = [
         .then(m => m.FechasCdatComponent),
     canActivate: [permisoGuard],
     data: {
-      permiso: 'CDAT_INFORMES_VIEW'
+      permiso: 'CDAT_INFORMES_FECHAS_VIEW'
     }
   }
 ];

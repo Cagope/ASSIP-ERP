@@ -1,0 +1,543 @@
+
+<div class="formato9026">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO DEL FORMATO -->
+  <!-- ===================================================== -->
+
+  <header class="formato9026__encabezado">
+
+    <div class="formato9026__titulo">
+
+      <h1>Formato 9026 - Ahorros</h1>
+
+      <p>
+        Superintendencia de la Economía Solidaria.
+        Consulta consolidada de cuentas de ahorro y CDAT
+        con base en los cierres mensuales históricos
+        de Depósitos y CDAT.
+      </p>
+
+    </div>
+
+  </header>
+
+  <!-- ===================================================== -->
+  <!-- FILTROS Y ACCIONES - ESTÁNDAR SES 9999 -->
+  <!-- ===================================================== -->
+
+  <section class="formato9026__panel formato9026__panel--filtros">
+
+    <div class="formato9026__barra-filtros">
+
+      <div class="formato9026__campo formato9026__campo--ano">
+        <label for="formato9026-ano">Año</label>
+        <input
+          id="formato9026-ano"
+          name="anoSeleccionado"
+          type="number"
+          min="1900"
+          max="9999"
+          step="1"
+          [(ngModel)]="anoSeleccionado"
+          (ngModelChange)="cambiarPeriodo()"
+          [disabled]="cargando() || generando()"
+        />
+      </div>
+
+      <div class="formato9026__campo formato9026__campo--mes">
+        <label for="formato9026-mes">Mes</label>
+        <select
+          id="formato9026-mes"
+          name="mesSeleccionado"
+          [(ngModel)]="mesSeleccionado"
+          (ngModelChange)="cambiarPeriodo()"
+          [disabled]="cargando() || generando()"
+        >
+          <option *ngFor="let mes of meses" [ngValue]="mes.numero">
+            {{ mes.nombre }}
+          </option>
+        </select>
+      </div>
+
+      <div class="formato9026__campo formato9026__campo--fecha">
+        <label>Fecha de corte</label>
+        <div class="formato9026__fecha-corte">
+          {{ obtenerFechaCorteVisual() }}
+        </div>
+      </div>
+
+      <div class="formato9026__acciones">
+
+        <button
+          type="button"
+          class="formato9026__boton formato9026__boton--primario"
+          (click)="buscar()"
+          [disabled]="cargando() || generando()"
+        >
+          {{ cargando() ? 'CONSULTANDO...' : 'CONSULTAR' }}
+        </button>
+
+        <button
+          type="button"
+          class="formato9026__boton formato9026__boton--plano"
+          (click)="generarPlano()"
+          [disabled]="!puedeGenerar"
+        >
+          GENERAR TXT SES
+        </button>
+
+        <button
+          type="button"
+          class="formato9026__boton formato9026__boton--excel"
+          (click)="exportarExcel()"
+          [disabled]="!puedeGenerar"
+        >
+          EXPORTAR EXCEL
+        </button>
+
+        <button
+          type="button"
+          class="formato9026__boton formato9026__boton--secundario"
+          (click)="limpiar()"
+          [disabled]="cargando() || generando()"
+        >
+          LIMPIAR
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- MENSAJES -->
+  <!-- ===================================================== -->
+
+  <div
+    *ngIf="mensajeError()"
+    class="formato9026__mensaje formato9026__mensaje--error"
+    role="alert"
+  >
+    {{ mensajeError() }}
+  </div>
+
+  <div
+    *ngIf="mensajeExito()"
+    class="formato9026__mensaje formato9026__mensaje--exito"
+    role="status"
+  >
+    {{ mensajeExito() }}
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- RESULTADOS DE LA CONSULTA -->
+  <!-- ===================================================== -->
+
+  <ng-container *ngIf="consultaVigente">
+
+    <!-- =================================================== -->
+    <!-- RESUMEN FINANCIERO -->
+    <!-- =================================================== -->
+
+    <section class="formato9026__panel">
+
+      <div class="formato9026__panel-titulo">
+
+        <h2>Resumen de ahorros y CDAT</h2>
+
+        <span class="formato9026__periodo">
+          Corte: {{ obtenerFechaCorteVisual() }}
+        </span>
+
+      </div>
+
+      <div class="formato9026__resumen">
+
+        <!-- Cuentas de ahorro -->
+
+        <div class="formato9026__indicador">
+
+          <span class="formato9026__indicador-etiqueta">
+            Cuentas de ahorro
+          </span>
+
+          <strong class="formato9026__indicador-valor">
+            {{ totales.cuentasAhorro | number:'1.0-0':'es-CO' }}
+          </strong>
+
+        </div>
+
+        <!-- CDAT -->
+
+        <div class="formato9026__indicador">
+
+          <span class="formato9026__indicador-etiqueta">
+            CDAT
+          </span>
+
+          <strong class="formato9026__indicador-valor">
+            {{ totales.cdats | number:'1.0-0':'es-CO' }}
+          </strong>
+
+        </div>
+
+        <!-- Total registros -->
+
+        <div class="formato9026__indicador">
+
+          <span class="formato9026__indicador-etiqueta">
+            Total registros
+          </span>
+
+          <strong class="formato9026__indicador-valor">
+            {{ totales.registros | number:'1.0-0':'es-CO' }}
+          </strong>
+
+        </div>
+
+        <!-- Saldo Depósitos -->
+
+        <div class="formato9026__indicador">
+
+          <span class="formato9026__indicador-etiqueta">
+            Saldo Depósitos
+          </span>
+
+          <strong class="formato9026__indicador-valor">
+            {{ totales.saldoDepositos | number:'1.2-2':'es-CO' }}
+          </strong>
+
+        </div>
+
+        <!-- Saldo CDAT -->
+
+        <div class="formato9026__indicador">
+
+          <span class="formato9026__indicador-etiqueta">
+            Saldo CDAT
+          </span>
+
+          <strong class="formato9026__indicador-valor">
+            {{ totales.saldoCdats | number:'1.2-2':'es-CO' }}
+          </strong>
+
+        </div>
+
+        <!-- Saldo consolidado -->
+
+        <div class="formato9026__indicador">
+
+          <span class="formato9026__indicador-etiqueta">
+            Saldo consolidado
+          </span>
+
+          <strong class="formato9026__indicador-valor">
+            {{ totales.saldoTotal | number:'1.2-2':'es-CO' }}
+          </strong>
+
+        </div>
+
+      </div>
+
+      <p class="formato9026__nota">
+        Los saldos corresponden a los detalles históricos de los
+        cierres mensuales de Depósitos y CDAT. No se incluyen
+        Aportes Sociales, reportados en el Formato 9013.
+      </p>
+
+    </section>
+
+    <!-- =================================================== -->
+    <!-- DETALLE DESPLEGABLE DE AHORROS Y CDAT -->
+    <!-- =================================================== -->
+
+    <section class="formato9026__panel formato9026__panel--detalle">
+
+      <div class="formato9026__panel-titulo">
+
+        <h2>Detalle de ahorros</h2>
+
+        <div class="formato9026__detalle-acciones">
+
+          <span class="formato9026__cantidad">
+            {{ items.length | number:'1.0-0':'es-CO' }}
+            registros
+          </span>
+
+          <button
+            type="button"
+            class="formato9026__boton formato9026__boton--secundario"
+            (click)="alternarDetalle()"
+            [attr.aria-expanded]="mostrarDetalle()"
+            aria-controls="formato9026-tabla-detalle"
+          >
+            {{ mostrarDetalle() ? 'Ocultar detalle' : 'Mostrar detalle' }}
+          </button>
+
+        </div>
+
+      </div>
+
+      <!-- La tabla permanece oculta hasta solicitar su visualización -->
+
+      <ng-container *ngIf="mostrarDetalle()">
+
+        <div
+          *ngIf="items.length > 0; else sinRegistros"
+          id="formato9026-tabla-detalle"
+          class="formato9026__tabla-contenedor"
+        >
+
+          <table class="formato9026__tabla">
+
+            <thead>
+            <tr>
+
+              <th scope="col">N.º</th>
+              <th scope="col">Origen</th>
+              <th scope="col">Agencia</th>
+              <th scope="col">Tipo ID</th>
+              <th scope="col">Identificación</th>
+              <th scope="col">Titular</th>
+              <th scope="col">Cuenta / CDAT</th>
+              <th scope="col">Producto</th>
+              <th scope="col">Tipo ahorro</th>
+              <th scope="col">Código contable</th>
+              <th scope="col">Apertura</th>
+              <th scope="col">Vencimiento</th>
+
+              <th
+                scope="col"
+                class="formato9026__numero"
+              >
+                Plazo
+              </th>
+
+              <th
+                scope="col"
+                class="formato9026__numero"
+              >
+                Tasa nominal
+              </th>
+
+              <th
+                scope="col"
+                class="formato9026__numero"
+              >
+                Tasa efectiva
+              </th>
+
+              <th
+                scope="col"
+                class="formato9026__numero"
+              >
+                Intereses causados
+              </th>
+
+              <th
+                scope="col"
+                class="formato9026__numero"
+              >
+                Depósito inicial
+              </th>
+
+              <th
+                scope="col"
+                class="formato9026__numero"
+              >
+                Saldo al corte
+              </th>
+
+              <th scope="col">Amortización</th>
+              <th scope="col">Modalidad</th>
+              <th scope="col">Exenta GMF</th>
+              <th scope="col">Fecha GMF</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Bajo monto</th>
+
+              <th
+                scope="col"
+                class="formato9026__numero"
+              >
+                Cotitulares
+              </th>
+
+              <th scope="col">Conjunta / colectiva</th>
+              <th scope="col">Paso</th>
+
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr *ngFor="let item of items">
+
+              <td>
+                {{ item.consecutivo }}
+              </td>
+
+              <td>
+                {{ item.moduloOrigen }}
+              </td>
+
+              <td>
+                {{ item.idAgencia }}
+              </td>
+
+              <td>
+                {{ item.tipoIdentificacion || '—' }}
+              </td>
+
+              <td>
+                {{ item.nit || '—' }}
+              </td>
+
+              <td class="formato9026__titular">
+                {{ item.nombreTitular || '—' }}
+              </td>
+
+              <td class="formato9026__cuenta">
+                {{ item.numeroCuenta }}
+              </td>
+
+              <td>
+                {{ item.nombreDeposito }}
+              </td>
+
+              <td>
+                {{ item.tipoAhorro }}
+              </td>
+
+              <td>
+                {{ item.codigoContable || '—' }}
+              </td>
+
+              <td>
+                {{ item.fechaApertura || '—' }}
+              </td>
+
+              <td>
+                {{ item.fechaVencimiento || '—' }}
+              </td>
+
+              <td class="formato9026__numero">
+                {{ item.plazo }}
+              </td>
+
+              <td class="formato9026__numero">
+                {{ item.tasaInteresNominal | number:'1.2-6':'es-CO' }}
+              </td>
+
+              <td class="formato9026__numero">
+                {{ item.tasaInteresEfectiva | number:'1.2-6':'es-CO' }}
+              </td>
+
+              <td class="formato9026__numero">
+                {{ item.interesesCausados | number:'1.2-2':'es-CO' }}
+              </td>
+
+              <td class="formato9026__numero">
+                {{ item.depositoInicial | number:'1.2-2':'es-CO' }}
+              </td>
+
+              <td class="formato9026__numero">
+                {{ item.saldo | number:'1.2-2':'es-CO' }}
+              </td>
+
+              <td>
+                {{ item.amortizacion || '—' }}
+              </td>
+
+              <td>
+                {{ item.modalidad || '—' }}
+              </td>
+
+              <td>
+                {{ item.exentaGmf || '—' }}
+              </td>
+
+              <td>
+                {{ item.fechaAceptacionGmf || '—' }}
+              </td>
+
+              <td>
+                {{ item.estado || '—' }}
+              </td>
+
+              <td>
+                {{ item.ctaBajoMonto || '—' }}
+              </td>
+
+              <td class="formato9026__numero">
+                {{ item.cotitulares ?? '—' }}
+              </td>
+
+              <td>
+                {{ item.conjuntaColectivo || '—' }}
+              </td>
+
+              <td>
+                {{ item.paso || '—' }}
+              </td>
+
+            </tr>
+
+            </tbody>
+
+            <tfoot>
+            <tr>
+
+              <th colspan="15">
+                TOTALES
+              </th>
+
+              <td class="formato9026__numero">
+                {{ totales.interesesCausadosTotal | number:'1.2-2':'es-CO' }}
+              </td>
+
+              <td class="formato9026__numero">
+                {{ totales.depositoInicialTotal | number:'1.2-2':'es-CO' }}
+              </td>
+
+              <td class="formato9026__numero">
+                {{ totales.saldoTotal | number:'1.2-2':'es-CO' }}
+              </td>
+
+              <td colspan="9"></td>
+
+            </tr>
+            </tfoot>
+
+          </table>
+
+        </div>
+
+        <!-- Sin registros -->
+
+        <ng-template #sinRegistros>
+
+          <div
+            id="formato9026-tabla-detalle"
+            class="formato9026__sin-registros"
+          >
+            No se encontraron cuentas de ahorro ni CDAT
+            para el período seleccionado.
+          </div>
+
+        </ng-template>
+
+        <p class="formato9026__nota">
+          Los campos pendientes de validación regulatoria se muestran
+          con un guion. El TXT oficial solo podrá generarse cuando
+          se completen los campos obligatorios.
+        </p>
+
+      </ng-container>
+
+    </section>
+
+  </ng-container>
+
+</div>

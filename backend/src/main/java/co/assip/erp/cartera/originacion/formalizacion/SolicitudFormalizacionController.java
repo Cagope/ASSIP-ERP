@@ -129,6 +129,9 @@ public class SolicitudFormalizacionController {
 
         validarEdicion();
 
+        // Impide validar solicitudes de agencias ajenas mediante la API.
+        service.consultar(idSolicitudCredito);
+
         SolicitudFormalizacionValidacionService.ResultadoValidacionFormalizacion resultado =
                 validacionService.validar(
                         idSolicitudCredito,

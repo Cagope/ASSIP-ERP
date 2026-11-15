@@ -42,6 +42,21 @@ export const contabilidadMenu = {
               permiso: 'CONTABILIDAD_NEW'
             }
           ]
+        },
+        {
+          label: 'Cierres',
+          children: [
+            {
+              label: 'Cierre diario',
+              route: '/contabilidad/cierres/diario',
+              permiso: 'CONTABILIDAD_PERIODOS_VIEW'
+            },
+            {
+              label: 'Cierre mensual contable',
+              route: '/contabilidad/cierres/mensual',
+              permiso: 'CONTABILIDAD_PERIODOS_VIEW'
+            }
+          ]
         }
       ]
     },
@@ -59,9 +74,95 @@ export const contabilidadMenu = {
               label: 'Auxiliar por cuentas',
               route: '/contabilidad/informes/auxiliares/cuentas',
               permiso: 'CONTABILIDAD_AUXILIAR_CUENTAS_VIEW'
+            },
+            {
+              label: 'Exportación de auxiliares',
+              route: '/contabilidad/informes/auxiliares/exportacion',
+              permiso: 'CONTABILIDAD_AUXILIAR_CUENTAS_VIEW'
             }
           ]
         },
+
+        // =====================================================
+        // BALANCES
+        // =====================================================
+        {
+          label: 'Balances',
+          children: [
+            {
+              label: 'Balance detallado mensual',
+              route: '/contabilidad/informes/balances',
+              permiso: 'CONTABILIDAD_BALANCE_DETALLADO_MENSUAL_VIEW'
+            },
+            {
+              label: 'Balance de comprobación',
+              route: '/contabilidad/informes/balances/comprobacion',
+              permiso: 'CONTABILIDAD_BALANCE_DETALLADO_MENSUAL_VIEW'
+            },
+            {
+              label: 'Balance comparado mensual',
+              route: '/contabilidad/informes/balances/comparado-mensual',
+              permiso: 'CONTABILIDAD_BALANCE_DETALLADO_MENSUAL_VIEW'
+            },
+            {
+              label: 'Estado de cuentas',
+              route: '/contabilidad/informes/balances/estado-cuentas',
+              permiso: 'CONTABILIDAD_BALANCE_DETALLADO_MENSUAL_VIEW'
+            },
+            {
+              label: 'Balances por vigencias',
+              route: '/contabilidad/informes/balances/vigencias',
+              permiso: 'CONTABILIDAD_BALANCE_DETALLADO_MENSUAL_VIEW'
+            }
+          ]
+        },
+
+        // =====================================================
+        // EXCEDENTES O PÉRDIDAS (PyG)
+        // =====================================================
+        {
+          label: 'Excedentes o Pérdidas',
+          children: [
+            {
+              label: 'Excedentes o pérdidas sin formato',
+              route: '/contabilidad/informes/pyg/sin-formato',
+              permiso: 'CONTABILIDAD_EXCEDENTES_PERDIDAS_VIEW'
+            },
+            {
+              label: 'Excedentes o pérdidas con formato comparado',
+              route: '/contabilidad/informes/pyg/comparado',
+              permiso: 'CONTABILIDAD_EXCEDENTES_PERDIDAS_VIEW'
+            },
+            {
+              label: 'Excedentes o pérdidas con formato individual',
+              route: '/contabilidad/informes/pyg/individual',
+              permiso: 'CONTABILIDAD_EXCEDENTES_PERDIDAS_VIEW'
+            }
+          ]
+        },
+
+        // =====================================================
+        // INFORMES OFICIALES
+        // =====================================================
+        {
+          label: 'Oficiales',
+          children: [
+            {
+              label: 'Caja - Diario',
+              route: '/contabilidad/informes/oficiales/caja-diario',
+              permiso: 'CONTABILIDAD_INFORMES_OFICIALES_VIEW'
+            },
+            {
+              label: 'Mayor y Balance',
+              route: '/contabilidad/informes/oficiales/mayor-balance',
+              permiso: 'CONTABILIDAD_INFORMES_OFICIALES_VIEW'
+            }
+          ]
+        },
+
+        // =====================================================
+        // INFORMES ESPECIALES
+        // =====================================================
         {
           label: 'Informes especiales',
           children: [

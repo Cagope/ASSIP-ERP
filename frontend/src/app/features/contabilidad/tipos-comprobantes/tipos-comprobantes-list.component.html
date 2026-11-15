@@ -2,6 +2,7 @@
 
   <app-header-actions
     titulo="Tipos de Comprobantes"
+    [mostrarNuevo]="puedeAdministrar"
     (nuevo)="nuevo()">
   </app-header-actions>
 
@@ -17,7 +18,7 @@
       <th>Nombre</th>
       <th class="text-right">Consecutivo</th>
       <th>Activo</th>
-      <th>Acciones</th>
+      <th *ngIf="puedeAdministrar">Acciones</th>
     </tr>
     </thead>
 
@@ -29,7 +30,7 @@
       <td class="text-right">{{ t.cscComprobante }}</td>
       <td>{{ t.comprobanteActivo ? 'Sí' : 'No' }}</td>
 
-      <td>
+      <td *ngIf="puedeAdministrar">
         <div class="acciones">
           <button
             class="btn-action-edit"

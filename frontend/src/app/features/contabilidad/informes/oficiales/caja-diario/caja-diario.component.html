@@ -1,0 +1,482 @@
+
+<section class="caja-diario">
+
+  <!-- ===================================================== -->
+  <!-- ENCABEZADO                                            -->
+  <!-- ===================================================== -->
+  <header>
+    <h2>Libro Caja – Diario</h2>
+    <p>Contabilidad / Informes / Oficiales</p>
+  </header>
+
+  <!-- ===================================================== -->
+  <!-- PARÁMETROS DEL INFORME                                -->
+  <!-- ===================================================== -->
+  <section class="panel panel-parametros">
+
+    <h3>Parámetros del informe</h3>
+
+    <form (ngSubmit)="consultar()">
+
+      <!-- =============================================== -->
+      <!-- FILTROS PRINCIPALES                             -->
+      <!-- =============================================== -->
+      <div class="filtros">
+
+        <!-- Agencia -->
+        <label class="campo agencia" for="agencia">
+          Agencia
+
+          <select
+            id="agencia"
+            name="agencia"
+            [(ngModel)]="idAgencia"
+            (ngModelChange)="limpiar()"
+          >
+            <option [ngValue]="null">
+              Seleccione una agencia
+            </option>
+
+            <option
+              *ngFor="let a of agencias"
+              [ngValue]="a.idAgencia"
+            >
+              {{ a.codigoAgencia }} - {{ a.nombreAgencia }}
+            </option>
+          </select>
+        </label>
+
+        <!-- Año -->
+        <label class="campo" for="ano">
+          Año
+
+          <input
+            id="ano"
+            name="ano"
+            type="number"
+            min="1900"
+            max="9999"
+            [(ngModel)]="ano"
+            (ngModelChange)="limpiar()"
+          >
+        </label>
+
+        <!-- Mes -->
+        <label class="campo" for="mes">
+          Mes
+
+          <select
+            id="mes"
+            name="mes"
+            [disabled]="acumuladoAnual"
+            [(ngModel)]="mes"
+            (ngModelChange)="limpiar()"
+          >
+            <option
+              *ngFor="let nombre of meses; let i = index"
+              [ngValue]="i + 1"
+            >
+              {{ nombre }}
+            </option>
+          </select>
+        </label>
+
+        <!-- Nivel contable -->
+        <label class="campo" for="nivel">
+          Nivel contable
+
+          <select
+            id="nivel"
+            name="nivel"
+            [(ngModel)]="nivel"
+            (ngModelChange)="limpiar()"
+          >
+            <option
+              *ngFor="let n of niveles"
+              [ngValue]="n"
+            >
+              Nivel {{ n }}
+            </option>
+          </select>
+        </label>
+
+      </div>
+
+      <!-- =============================================== -->
+      <!-- OPCIONES DEL INFORME                            -->
+      <!-- =============================================== -->
+      <div class="opciones">
+
+        <!-- Tipo de informe: Mensual / Anual -->
+        <label class="opcion">
+
+          <input
+            type="checkbox"
+            name="acumuladoAnual"
+            [(ngModel)]="acumuladoAnual"
+            (ngModelChange)="limpiar()"
+          >
+
+          <span class="opcion-texto">
+
+            <strong>
+              {{ acumuladoAnual ? 'Informe anual' : 'Informe mensual' }}
+            </strong>
+
+            <small *ngIf="acumuladoAnual">
+              Del 1 de enero al 31 de diciembre
+            </small>
+
+            <small *ngIf="!acumuladoAnual">
+              Mes seleccionado
+            </small>
+
+          </span>
+
+        </label>
+
+        <!-- Formato de impresión: Interno / Oficial -->
+        <label class="opcion">
+
+          <input
+            type="checkbox"
+            name="impresionOficial"
+            [ngModel]="formato === 'OFICIAL'"
+            (ngModelChange)="formato = $event ? 'OFICIAL' : 'INTERNO'"
+          >
+
+          <span class="opcion-texto">
+
+            <strong>
+              {{ formato === 'OFICIAL'
+                ? 'Impresión oficial'
+                : 'Impresión interna' }}
+            </strong>
+
+            <small *ngIf="formato === 'OFICIAL'">
+              Papel preimpreso y foliado
+            </small>
+
+            <small *ngIf="formato !== 'OFICIAL'">
+              Con encabezado institucional
+            </small>
+
+          </span>
+
+        </label>
+
+      </div>
+
+      <!-- =============================================== -->
+      <!-- BOTONES DE ACCIÓN                               -->
+      <!-- =============================================== -->
+      <div class="acciones">
+
+        <button
+          type="submit"
+          [disabled]="!puedeConsultar"
+        >
+          {{ consultando ? 'Consultando…' : 'Consultar' }}
+        </button>
+
+        <button
+          type="button"
+          class="secundario"
+          [disabled]="!puedeExportar"
+          (click)="exportar('pdf')"
+        >
+          {{ exportando === 'pdf' ? 'Generando…' : 'PDF' }}
+        </button>
+
+        <button
+          type="button"
+          class="secundario"
+          [disabled]="!puedeExportar"
+          (click)="exportar('excel')"
+        >
+          {{ exportando === 'excel' ? 'Generando…' : 'Excel' }}
+        </button>
+
+      </div>
+
+    </form>
+
+  </section>
+
+  <!-- ===================================================== -->
+  <!-- MENSAJES DE ERROR                                    -->
+  <!-- ===================================================== -->
+  <p
+    class="error"
+    *ngIf="error"
+    role="alert"
+  >
+    {{ error }}
+  </p>
+
+  <p
+    class="error"
+    *ngIf="!tienePermiso"
+    role="alert"
+  >
+    No tiene permiso para consultar libros contables.
+  </p>
+
+  <!-- ===================================================== -->
+  <!-- RESULTADO DEL INFORME                                -->
+  <!-- ===================================================== -->
+  <section
+    class="resultado"
+    *ngIf="resultado as r"
+  >
+
+    <h3>Libro Caja – Diario</h3>
+
+    <p>
+      {{ r.codigoAgencia }} - {{ r.nombreAgencia }}
+      · {{ r.desde }} a {{ r.hasta }}
+      · Nivel {{ r.nivel }}
+    </p>
+
+    <!-- =============================================== -->
+    <!-- DETALLE DIARIO CON CORTES POR FECHA             -->
+    <!-- =============================================== -->
+    <div class="tabla-scroll">
+
+      <table>
+
+        <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Código</th>
+          <th>Cuenta</th>
+          <th class="valor">Débito</th>
+          <th class="valor">Crédito</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <ng-container
+          *ngFor="let x of r.diario; let i = index"
+        >
+
+          <!-- Encabezado de cada fecha -->
+          <tr
+            class="grupo-fecha"
+            *ngIf="
+                i === 0 ||
+                r.diario[i - 1].fecha !== x.fecha
+              "
+          >
+            <td colspan="5">
+              FECHA: {{ x.fecha }}
+            </td>
+          </tr>
+
+          <!-- Movimiento contable -->
+          <tr>
+
+            <td>
+              {{ x.fecha }}
+            </td>
+
+            <td>
+              {{ x.codigo }}
+            </td>
+
+            <td>
+              {{ x.nombre }}
+            </td>
+
+            <td class="valor">
+              {{ numero(x.debito) }}
+            </td>
+
+            <td class="valor">
+              {{ numero(x.credito) }}
+            </td>
+
+          </tr>
+
+          <!-- Subtotal al finalizar cada fecha -->
+          <ng-container
+            *ngIf="
+                i === r.diario.length - 1 ||
+                r.diario[i + 1].fecha !== x.fecha
+              "
+          >
+
+            <ng-container
+              *ngFor="let total of r.totalesDias"
+            >
+
+              <tr
+                class="subtotal-fecha"
+                *ngIf="total.fecha === x.fecha"
+              >
+
+                <td colspan="3">
+                  TOTAL DEL DÍA {{ x.fecha }}
+                </td>
+
+                <td class="valor">
+                  {{ numero(total.debito) }}
+                </td>
+
+                <td class="valor">
+                  {{ numero(total.credito) }}
+                </td>
+
+              </tr>
+
+            </ng-container>
+
+          </ng-container>
+
+        </ng-container>
+
+        <!-- Total general del informe -->
+        <tr class="total">
+
+          <td colspan="3">
+            Total del informe
+          </td>
+
+          <td class="valor">
+            {{ numero(r.totalDebito) }}
+          </td>
+
+          <td class="valor">
+            {{ numero(r.totalCredito) }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <!-- =============================================== -->
+    <!-- TOTALES POR FECHA                               -->
+    <!-- =============================================== -->
+    <h3>Totales por fecha</h3>
+
+    <div class="tabla-scroll">
+
+      <table>
+
+        <thead>
+        <tr>
+          <th>Fecha</th>
+          <th class="valor">Débito</th>
+          <th class="valor">Crédito</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let x of r.totalesDias">
+
+          <td>
+            {{ x.fecha }}
+          </td>
+
+          <td class="valor">
+            {{ numero(x.debito) }}
+          </td>
+
+          <td class="valor">
+            {{ numero(x.credito) }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <!-- =============================================== -->
+    <!-- RESUMEN POR CUENTA                              -->
+    <!-- =============================================== -->
+    <h3>Resumen por cuenta</h3>
+
+    <div class="tabla-scroll">
+
+      <table>
+
+        <thead>
+        <tr>
+          <th>Código</th>
+          <th>Cuenta</th>
+          <th class="valor">Débito</th>
+          <th class="valor">Crédito</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr *ngFor="let x of r.resumen">
+
+          <td>
+            {{ x.codigo }}
+          </td>
+
+          <td>
+            {{ x.nombre }}
+          </td>
+
+          <td class="valor">
+            {{ numero(x.debito) }}
+          </td>
+
+          <td class="valor">
+            {{ numero(x.credito) }}
+          </td>
+
+        </tr>
+
+        <!-- Total general del resumen -->
+        <tr class="total">
+
+          <td colspan="2">
+            Total del informe
+          </td>
+
+          <td class="valor">
+            {{ numero(r.totalDebito) }}
+          </td>
+
+          <td class="valor">
+            {{ numero(r.totalCredito) }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <!-- =============================================== -->
+    <!-- VALIDACIÓN DE CUADRE CONTABLE                   -->
+    <!-- =============================================== -->
+    <p
+      class="cuadre"
+      [class.alerta]="r.diferencia !== 0"
+    >
+      Diferencia débito - crédito:
+
+      <strong>
+        {{ numero(r.diferencia) }}
+      </strong>
+    </p>
+
+  </section>
+
+</section>

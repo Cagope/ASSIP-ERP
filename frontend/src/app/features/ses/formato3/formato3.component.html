@@ -1,0 +1,129 @@
+
+<div class="formato3-page">
+
+  <!-- ========================================
+       ENCABEZADO
+       ======================================== -->
+
+  <header class="encabezado">
+    <h2>Formato 3 - Saldos Contables</h2>
+    <p>Superintendencia de la Economía Solidaria</p>
+  </header>
+
+  <!-- ========================================
+       PANEL DE FILTROS
+       ======================================== -->
+
+  <section class="panel-filtros">
+
+
+    <!-- Año y mes independientes; solo ofrecen períodos cerrados. -->
+    <div class="barra-periodo">
+      <div class="campo campo-ano">
+        <label for="ano">Año</label>
+        <select id="ano" [ngModel]="anoSeleccionado"
+                (ngModelChange)="seleccionarAno(+$event)"
+                [disabled]="generando() || consultando() || !periodos().length">
+          @for (ano of anosDisponibles; track ano) {
+            <option [ngValue]="ano">{{ ano }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="campo campo-mes">
+        <label for="mes">Mes</label>
+        <select id="mes" [ngModel]="mesSeleccionado"
+                (ngModelChange)="seleccionarMes(+$event)"
+                [disabled]="generando() || consultando() || !mesesDisponibles.length">
+          @for (mes of mesesDisponibles; track mes.numero) {
+            <option [ngValue]="mes.numero">{{ mes.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="acciones">
+        @if (sessionSES.tienePermiso('SES_FORMATOS_GENERAR')) {
+          <button type="button" class="btn-consultar" (click)="consultar()"
+                  [disabled]="generando() || consultando() || !periodos().length">
+            {{ consultando() ? 'Consultando...' : 'Consultar' }}
+          </button>
+          <button type="button" class="btn-plano" (click)="generarArchivo()"
+                  [disabled]="generando() || consultando() || !consulta()">
+            {{ generando() ? 'Generando...' : 'Generar plano TXT' }}
+          </button>
+          <button type="button" class="btn-excel" (click)="exportarExcel()"
+                  [disabled]="generando() || consultando() || !consulta()">Exportar Excel</button>
+        }
+        <button type="button" class="btn-limpiar" (click)="limpiar()"
+                [disabled]="generando()">Limpiar</button>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ========================================
+       MENSAJES
+       ======================================== -->
+
+  @if (mensajeError()) {
+  <div
+    class="mensaje mensaje--error"
+    role="alert"
+  >
+    {{ mensajeError() }}
+  </div>
+  }
+
+  @if (mensajeExito()) {
+  <div
+    class="mensaje mensaje--exito"
+    role="status"
+  >
+    {{ mensajeExito() }}
+  </div>
+  }
+
+  @if (generando()) {
+  <div
+    class="mensaje"
+    role="status"
+  >
+    Generando archivo del Formato 3...
+  </div>
+  }
+
+  @if (consulta(); as resultado) {
+    <section class="panel-resultados">
+      <h3>Resumen contable — {{ resultado.fechaCorte }}</h3>
+      <div class="tarjetas">
+        <div class="tarjeta"><span>Renglones SES</span><strong>{{ resultado.cantidadRenglones }}</strong></div>
+        @for (item of resumenClases; track item.clase) {
+          <div class="tarjeta">
+            <span>{{ ['Activo', 'Pasivo', 'Patrimonio', 'Ingresos', 'Gastos', 'Costos'][+item.clase - 1] }}</span>
+            <strong>{{ item.saldo | number:'1.2-2':'es-CO' }}</strong>
+          </div>
+        }
+        <div class="tarjeta tarjeta-resultado">
+          <span>Excedente / Pérdida del ejercicio</span>
+          <strong>{{ excedenteEjercicio | number:'1.2-2':'es-CO' }}</strong>
+        </div>
+      </div>
+      <div class="campo buscador">
+        <label for="buscarRenglon">Buscar código o descripción</label>
+        <input id="buscarRenglon" type="text" [(ngModel)]="filtroDetalle" />
+      </div>
+      <div class="tabla-scroll">
+        <table>
+          <thead><tr><th>Código</th><th>Descripción</th><th class="numero">Saldo</th></tr></thead>
+          <tbody>
+            @for (r of detalleFiltrado; track r.codigoRenglon) {
+              <tr><td>{{ r.codigoRenglon }}</td><td>{{ r.descripcion }}</td>
+                <td class="numero">{{ r.saldo | number:'1.2-2':'es-CO' }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+
+</div>

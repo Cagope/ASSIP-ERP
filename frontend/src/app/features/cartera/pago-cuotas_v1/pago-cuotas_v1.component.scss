@@ -843,3 +843,8 @@
     overflow-wrap: anywhere;
   }
 }
+
+/* Confirmación con comprobante definitivo y estado operativo. */
+.confirmacion-pago { margin: 12px 0; padding: 14px 16px; border: 1px solid #a7d5c3; border-radius: 8px; background: #effaf4; color: #174f3a; }
+.confirmacion-pago__datos { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 10px; }
+.confirmacion-pago__datos span { font-size: 0.875rem; }

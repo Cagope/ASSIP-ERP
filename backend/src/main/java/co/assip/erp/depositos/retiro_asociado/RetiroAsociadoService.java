@@ -310,12 +310,21 @@ public class RetiroAsociadoService {
             depositosMovimientoService.registrarRetiroIntegral(movimiento, idUsuario);
 
             if (distribucion.cxp().signum() > 0) {
+                // Vincula la obligación individual con el NC consolidado y su CxP histórica.
+                Integer idOrigenComprobante = obtenerIdOrigenComprobanteRetiro(
+                        cuenta.idAgencia(), tipoCuenta, numeroComprobante);
+                Integer idCuentaCxp = cuentasContables.get(cuenta.idCuentaAhorro()).idCuentaCxp();
+                if (idCuentaCxp == null) {
+                    throw new IllegalStateException("No se identificó la CxP del retiro de la cuenta "
+                            + cuenta.codigoCuenta());
+                }
                 tesoreriaOperacionesPendientesService.publicar(
                         cuenta.idAgencia(), "DEPOSITOS", "RETIRO_ASOCIADO",
                         "depositos.cuentas_ahorro", cuenta.idCuentaAhorro().longValue(),
                         entrada.idDatosPersonal(), "SALIDA", entrada.fechaProceso(),
                         "RETIRO ASOCIADO - CUENTA " + cuenta.codigoCuenta(),
-                        distribucion.cxp(), idUsuario);
+                        distribucion.cxp(), idUsuario,
+                        idOrigenComprobante, idCuentaCxp, "PAGO_RETIRO_ASOCIADO");
             }
 
         }
@@ -342,6 +351,27 @@ public class RetiroAsociadoService {
                     entrada.idDatosPersonal(), "RETIRO-" + entrada.idDatosPersonal(),
                     tipoGlobal, numeroCaja, idUsuario);
         }
+    }
+
+    /** Recupera el identificador del comprobante original sin depender de su cuenta origen consolidada. */
+    private Integer obtenerIdOrigenComprobanteRetiro(
+            Integer idAgencia, String tipoComprobante, String numeroComprobante) {
+        List<Integer> ids = jdbc.queryForList("""
+                SELECT id_origen_comprobante
+                FROM contabilidad.origen_comprobantes
+                WHERE id_agencia = ?
+                  AND TRIM(tipo_comprobante) = ?
+                  AND TRIM(numero_comprobante) = ?
+                  AND modulo_origen = 'DEPOSITOS'
+                  AND proceso_origen = 'RETIRO_ASOCIADO'
+                  AND tabla_origen = 'depositos.cuentas_ahorro'
+                  AND estado_origen = 'ACTIVO'
+                """, Integer.class, idAgencia, tipoComprobante, numeroComprobante.trim());
+        if (ids.size() != 1) {
+            throw new IllegalStateException("No se identificó un comprobante original único para el retiro "
+                    + tipoComprobante + " " + numeroComprobante + " de la agencia " + idAgencia);
+        }
+        return ids.get(0);
     }
 
     private List<RetiroAsociadoRepository.CuentaRetiro> seleccionarPendientes(

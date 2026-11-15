@@ -1,5 +1,6 @@
 
 import { Routes } from '@angular/router';
+import { permisoGuard } from '../../core/auth/permiso.guard';
 
 export const TESORERIA_ROUTES: Routes = [
 
@@ -9,6 +10,8 @@ export const TESORERIA_ROUTES: Routes = [
   // =========================================================
   {
     path: 'movimientos-fondos',
+    canActivate: [permisoGuard],
+    data: { permiso: 'TESORERIA_MOVIMIENTOS_FONDOS_VIEW' },
     loadComponent: () =>
       import('./movimientos-fondos/movimientos-fondos')
         .then(m => m.MovimientosFondosComponent)
@@ -20,6 +23,8 @@ export const TESORERIA_ROUTES: Routes = [
   // =========================================================
   {
     path: 'operaciones-pendientes',
+    canActivate: [permisoGuard],
+    data: { permiso: 'TESORERIA_OPERACIONES_PENDIENTES_VIEW' },
     loadComponent: () =>
       import('./operaciones-pendientes/operaciones-pendientes.component')
         .then(m => m.OperacionesPendientesComponent)
@@ -31,6 +36,8 @@ export const TESORERIA_ROUTES: Routes = [
   // =========================================================
   {
     path: 'autorizacion-comprobantes',
+    canActivate: [permisoGuard],
+    data: { permiso: 'TESORERIA_AUTORIZACION_COMPROBANTES_VIEW' },
     loadComponent: () =>
       import('./autorizacion-comprobantes/autorizacion-comprobantes')
         .then(m => m.AutorizacionComprobantesComponent)

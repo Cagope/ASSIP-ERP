@@ -1,7 +1,8 @@
 package co.assip.erp.tesoreria.operaciones_pendientes;
 
 import co.assip.erp.seguridad.sesion.UsuarioSesionService;
-import co.assip.erp.cdat.cancelacion.CdatCancelacionRepository;
+import co.assip.erp.general.operaciones_financieras.TiposOperacionesFinancierasService;
+import co.assip.erp.general.operaciones_financieras.dto.TipoOperacionFinancieraDTO;
 import co.assip.erp.contabilidad.auxiliares_contables.ContabilidadRegistroService;
 import co.assip.erp.contabilidad.consecutivos_comprobantes.ConsecutivosComprobantesService;
 import co.assip.erp.contabilidad.origen_comprobantes.dto.OrigenComprobanteDTO;
@@ -35,8 +36,9 @@ public class TesoreriaOperacionesEjecucionesService {
 
     private final TesoreriaOperacionesEjecucionesRepository repository;
     private final UsuarioSesionService usuarioSesionService;
+    private final TiposOperacionesFinancierasService tiposOperacionesFinancierasService;
+    private final List<TesoreriaOrigenFinancieroValidator> validadoresOrigen;
     private final JdbcTemplate jdbcTemplate;
-    private final CdatCancelacionRepository cdatCancelacionRepository;
     private final ContabilidadRegistroService contabilidadRegistroService;
     private final ConsecutivosComprobantesService consecutivosComprobantesService;
 
@@ -123,6 +125,10 @@ public class TesoreriaOperacionesEjecucionesService {
         validarAgencia(operacion);
         validarEstadoPreparacion(operacion);
 
+        if (esDevolucionCartera(operacion)) {
+            return generarVistaPreviaDevolucion(request, operacion);
+        }
+
         Integer idAgencia = numeroEntero(operacion, "id_agencia");
         Integer idBeneficiario = numeroEntero(operacion, "id_datos_personal");
 
@@ -165,6 +171,8 @@ public class TesoreriaOperacionesEjecucionesService {
                         && "DESEMBOLSO_CREDITO".equals(proceso)
                         && "cartera.carteras_creditos".equals(tabla);
 
+        validarPerfilTesoreria(operacion, "PAGO_CXP", false);
+
         if (!esCdat && !esRetiroAsociado && !esDesembolsoCredito) {
             throw new IllegalStateException(
                     "No existe contabilización de pagos para "
@@ -177,26 +185,24 @@ public class TesoreriaOperacionesEjecucionesService {
         // =========================================================
 
         Integer cuentaPorPagar;
-
-        if (esCdat) {
-            cuentaPorPagar =
-                    cdatCancelacionRepository.obtenerCuentaConceptoCancelacionCdat(
-                            idAgencia,
-                            "CUENTA_POR_PAGAR_CDAT"
-                    );
-        } else if (esRetiroAsociado) {
+        if (esRetiroAsociado) {
+            // El NC consolidado puede respaldar varias obligaciones individuales.
             cuentaPorPagar = obtenerCuentaPorPagarRetiroAsociado(
-                    numeroLong(operacion, "id_origen"),
-                    idAgencia,
-                    idBeneficiario
-            );
+                    operacion, idAgencia, idBeneficiario);
+        } else if (operacion.get("id_origen_comprobante") instanceof Number
+                && operacion.get("id_catalogo_cuenta_cxp") instanceof Number) {
+            // Para obligaciones con referencia histórica explícita se valida el respaldo
+            // sin depender del detalle descriptivo del movimiento contable.
+            cuentaPorPagar = obtenerCuentaPorPagarHistorica(
+                    operacion, idAgencia, idBeneficiario, original);
+        } else if (esCdat) {
+            cuentaPorPagar = obtenerCuentaPorPagarCancelacionCdat(
+                    numeroLong(operacion, "id_origen"), idAgencia,
+                    idBeneficiario, original);
         } else {
             cuentaPorPagar = obtenerCuentaPorPagarDesembolsoCredito(
-                    numeroLong(operacion, "id_origen"),
-                    idAgencia,
-                    idBeneficiario,
-                    original
-            );
+                    numeroLong(operacion, "id_origen"), idAgencia,
+                    idBeneficiario, original);
         }
 
         // =========================================================
@@ -306,6 +312,8 @@ public class TesoreriaOperacionesEjecucionesService {
             );
         }
 
+        validarPerfilTesoreria(operacion, "PAGO_CXP", total.compareTo(disponible) < 0);
+
         // =========================================================
         // DÉBITO A LA CUENTA POR PAGAR
         // =========================================================
@@ -333,6 +341,7 @@ public class TesoreriaOperacionesEjecucionesService {
 
         return new OperacionComprobantePreviewDTO(
                 idOperacion,
+                "CE",
                 idAgencia,
                 idBeneficiario,
                 original,
@@ -348,6 +357,229 @@ public class TesoreriaOperacionesEjecucionesService {
         );
     }
 
+    /** Identifica devoluciones bancarias de Pago de Cuotas y Prórrogas. */
+    private boolean esDevolucionCartera(Map<String, Object> operacion) {
+        if (!"CARTERA".equals(Objects.toString(operacion.get("modulo_origen"), ""))) {
+            return false;
+        }
+        String proceso = Objects.toString(operacion.get("proceso_origen"), "");
+        String tabla = Objects.toString(operacion.get("tabla_origen"), "");
+        return ("REVERSA_PAGO_CUOTAS".equals(proceso)
+                    && "cartera.pagos_cuotas".equals(tabla))
+                || ("REVERSA_PRORROGA".equals(proceso)
+                    && "cartera.creditos_prorrogas".equals(tabla));
+    }
+
+    /** Vincula cada devolución con el proceso y la tabla de su recaudo original. */
+    private String procesoRecaudoOriginal(Map<String, Object> devolucion) {
+        String proceso = Objects.toString(devolucion.get("proceso_origen"), "");
+        if ("REVERSA_PAGO_CUOTAS".equals(proceso)) {
+            return "PAGO_CUOTAS";
+        }
+        if ("REVERSA_PRORROGA".equals(proceso)) {
+            return "PRORROGA";
+        }
+        throw new IllegalArgumentException("La operación no es una devolución de Cartera válida.");
+    }
+
+    private String tablaRecaudoOriginal(Map<String, Object> devolucion) {
+        return "PRORROGA".equals(procesoRecaudoOriginal(devolucion))
+                ? "cartera.creditos_prorrogas" : "cartera.pagos_cuotas";
+    }
+
+    /**
+     * Prepara una devolución completa y distribuida por los bancos del recaudo original.
+     * Cada banco debe devolverse exactamente por lo efectivamente recibido en él.
+     * Las distintas líneas se contabilizan en un único CE, sin pagos parciales.
+     */
+    private OperacionComprobantePreviewDTO generarVistaPreviaDevolucion(
+            OperacionPagoRequestDTO request,
+            Map<String, Object> devolucion
+    ) {
+        validarPerfilTesoreria(devolucion, "DEVOLUCION_CXC_CARTERA", false);
+        Long idDevolucion = numeroLong(devolucion, "id_operacion_pendiente");
+        Long idOrigen = numeroLong(devolucion, "id_origen");
+        Integer agencia = numeroEntero(devolucion, "id_agencia");
+        Integer tercero = numeroEntero(devolucion, "id_datos_personal");
+        BigDecimal original = numeroDecimal(devolucion, "valor_original");
+        BigDecimal ejecutado = numeroDecimal(devolucion, "valor_ejecutado");
+        BigDecimal disponible = calcularSaldoDisponible(idDevolucion, devolucion);
+        if (original.signum() <= 0 || ejecutado.signum() != 0
+                || disponible.compareTo(original) != 0) {
+            throw new IllegalStateException(
+                    "La devolución debe ejecutarse una sola vez y por su valor total.");
+        }
+
+        List<Map<String, Object>> originales = jdbcTemplate.queryForList("""
+                SELECT o.id_operacion_pendiente, o.valor_ejecutado,
+                       r.estado_regularizacion
+                FROM tesoreria.operaciones_pendientes o
+                JOIN tesoreria.operaciones_reversiones_origen r
+                  ON r.id_operacion_pendiente = o.id_operacion_pendiente
+                WHERE o.id_agencia = ?
+                  AND o.modulo_origen = 'CARTERA'
+                  AND o.proceso_origen = ?
+                  AND o.tabla_origen = ?
+                  AND o.id_origen = ?
+                  AND o.estado IN ('COMPLETADA', 'PARCIAL')
+                  AND r.estado_regularizacion = 'PENDIENTE'
+                """, agencia, procesoRecaudoOriginal(devolucion),
+                tablaRecaudoOriginal(devolucion), idOrigen);
+        if (originales.size() != 1) {
+            throw new IllegalStateException(
+                    "No existe una única regularización bancaria pendiente para esta operación de Cartera.");
+        }
+        Long idOriginal = numeroLong(originales.get(0), "id_operacion_pendiente");
+        if (numeroDecimal(originales.get(0), "valor_ejecutado").compareTo(original) != 0) {
+            throw new IllegalStateException(
+                    "El importe a devolver no coincide con el recaudo bancario.");
+        }
+
+        List<Map<String, Object>> ejecuciones = jdbcTemplate.queryForList("""
+                SELECT id_cuenta_bancaria, valor, tipo_comprobante,
+                       numero_comprobante, fecha_ejecucion
+                FROM tesoreria.operaciones_ejecuciones
+                WHERE id_operacion_pendiente = ? AND estado = 'CONFIRMADA'
+                ORDER BY id_operacion_ejecucion
+                """, idOriginal);
+        if (ejecuciones.isEmpty()) {
+            throw new IllegalStateException(
+                    "No hay ejecuciones bancarias originales confirmadas.");
+        }
+
+        Map<Long, BigDecimal> importesPorBanco = new LinkedHashMap<>();
+        Map<Long, Integer> cuentasContablesPorBanco = new LinkedHashMap<>();
+        Integer cuentaCxC = null;
+        BigDecimal totalRecaudado = BigDecimal.ZERO;
+
+        for (Map<String, Object> ejecucion : ejecuciones) {
+            Long idBanco = numeroLong(ejecucion, "id_cuenta_bancaria");
+            BigDecimal valor = numeroDecimal(ejecucion, "valor");
+            if (valor.signum() <= 0
+                    || !"CI".equals(Objects.toString(ejecucion.get("tipo_comprobante"), "").trim())
+                    || ejecucion.get("numero_comprobante") == null
+                    || ejecucion.get("fecha_ejecucion") == null) {
+                throw new IllegalStateException(
+                        "Una ejecución bancaria original carece de valor, fecha o comprobante CI válido.");
+            }
+
+            // Se cruza también la fecha: los números de comprobante pueden repetirse
+            // entre ejercicios históricos migrados.
+            List<Map<String, Object>> movimientosCI = jdbcTemplate.queryForList("""
+                    SELECT ac.id_catalogo_cuenta, ac.valor_debito, ac.valor_credito,
+                           ac.id_datos_personal,
+                           cba.id_cuenta_bancaria AS banco_asociado
+                    FROM contabilidad.auxiliares_contables ac
+                    LEFT JOIN tesoreria.cuentas_bancarias_agencias cba
+                      ON cba.id_agencia = ac.id_agencia
+                     AND cba.id_cuenta_contable = ac.id_catalogo_cuenta
+                     AND cba.id_cuenta_bancaria = ?
+                    WHERE ac.id_agencia = ?
+                      AND TRIM(ac.tipo_comprobante) = 'CI'
+                      AND TRIM(ac.numero_comprobante) = TRIM(CAST(? AS VARCHAR))
+                      AND ac.fecha_auxiliar = CAST(? AS DATE)
+                      AND ac.estado_movimiento = 'A'
+                    """, idBanco, agencia, ejecucion.get("numero_comprobante"),
+                    ejecucion.get("fecha_ejecucion"));
+
+            Integer bancoContable = null;
+            Integer cxcCI = null;
+            BigDecimal debitoBanco = BigDecimal.ZERO;
+            BigDecimal creditoCxC = BigDecimal.ZERO;
+            for (Map<String, Object> movimiento : movimientosCI) {
+                BigDecimal debito = numeroDecimal(movimiento, "valor_debito");
+                BigDecimal credito = numeroDecimal(movimiento, "valor_credito");
+                if (movimiento.get("banco_asociado") != null && debito.signum() > 0
+                        && credito.signum() == 0) {
+                    Integer cuenta = numeroEntero(movimiento, "id_catalogo_cuenta");
+                    if (bancoContable != null && !bancoContable.equals(cuenta)) {
+                        throw new IllegalStateException("El CI tiene varias cuentas bancarias de débito.");
+                    }
+                    bancoContable = cuenta;
+                    debitoBanco = debitoBanco.add(debito);
+                } else if (Objects.equals(movimiento.get("id_datos_personal"), tercero)
+                        && credito.signum() > 0 && debito.signum() == 0) {
+                    Integer cuenta = numeroEntero(movimiento, "id_catalogo_cuenta");
+                    if (cxcCI != null && !cxcCI.equals(cuenta)) {
+                        throw new IllegalStateException("El CI tiene varias cuentas por cobrar.");
+                    }
+                    cxcCI = cuenta;
+                    creditoCxC = creditoCxC.add(credito);
+                }
+            }
+            if (bancoContable == null || cxcCI == null
+                    || debitoBanco.compareTo(valor) != 0
+                    || creditoCxC.compareTo(valor) != 0) {
+                throw new IllegalStateException(
+                        "El CI original no respalda exactamente el banco y la CxC del recaudo.");
+            }
+            if (cuentaCxC != null && !cuentaCxC.equals(cxcCI)) {
+                throw new IllegalStateException("Los CI originales utilizan distintas cuentas por cobrar.");
+            }
+            cuentaCxC = cxcCI;
+            Integer anterior = cuentasContablesPorBanco.putIfAbsent(idBanco, bancoContable);
+            if (anterior != null && !anterior.equals(bancoContable)) {
+                throw new IllegalStateException("El mismo banco utiliza cuentas contables distintas en los CI.");
+            }
+            importesPorBanco.merge(idBanco, valor, BigDecimal::add);
+            totalRecaudado = totalRecaudado.add(valor);
+        }
+        if (totalRecaudado.compareTo(original) != 0) {
+            throw new IllegalStateException("Los CI originales no respaldan el importe a devolver.");
+        }
+        if (request.lineas().size() != importesPorBanco.size()) {
+            throw new IllegalArgumentException(
+                    "Debe indicar una línea de devolución por cada cuenta bancaria original.");
+        }
+
+        Map<Long, OperacionPagoLineaDTO> lineasPorBanco = new LinkedHashMap<>();
+        BigDecimal totalSolicitado = BigDecimal.ZERO;
+        for (OperacionPagoLineaDTO linea : request.lineas()) {
+            if (linea == null || linea.idCuentaBancaria() == null) {
+                throw new IllegalArgumentException("Cada devolución debe identificar su banco original.");
+            }
+            validarValor(linea.valor());
+            validarBeneficiario(devolucion, linea.idBeneficiario());
+            String medio = normalizarMedioPago(linea.medioPago());
+            if (!TRANSFERENCIA.equals(medio) && !CHEQUE.equals(medio)) {
+                throw new IllegalArgumentException("Medio de devolución no permitido.");
+            }
+            if (limpiar(linea.numeroDocumento()) == null) {
+                throw new IllegalArgumentException("Cada devolución requiere referencia bancaria o número de cheque.");
+            }
+            Long banco = linea.idCuentaBancaria().longValue();
+            if (lineasPorBanco.putIfAbsent(banco, linea) != null) {
+                throw new IllegalArgumentException("No puede repetir una cuenta bancaria en la devolución.");
+            }
+            BigDecimal esperado = importesPorBanco.get(banco);
+            if (esperado == null || esperado.compareTo(linea.valor()) != 0) {
+                throw new IllegalArgumentException(
+                        "Cada banco debe devolver exactamente el importe recibido en él.");
+            }
+            totalSolicitado = totalSolicitado.add(linea.valor());
+        }
+        if (totalSolicitado.compareTo(original) != 0) {
+            throw new IllegalArgumentException("La devolución debe cubrir la totalidad del recaudo original.");
+        }
+
+        List<MovimientoContableDTO> movimientos = new ArrayList<>();
+        movimientos.add(movimiento(agencia, tercero, cuentaCxC, original,
+                BigDecimal.ZERO, "Devolución recaudo Cartera - operación " + idOriginal,
+                "OPERACION-" + idOriginal, idDevolucion));
+        for (Map.Entry<Long, BigDecimal> banco : importesPorBanco.entrySet()) {
+            OperacionPagoLineaDTO linea = lineasPorBanco.get(banco.getKey());
+            movimientos.add(movimiento(agencia, tercero,
+                    cuentasContablesPorBanco.get(banco.getKey()), BigDecimal.ZERO,
+                    banco.getValue(), "Egreso bancario devolución Cartera - operación "
+                            + idOriginal + " - banco " + banco.getKey(),
+                    limpiar(linea.numeroDocumento()), idDevolucion));
+        }
+        return new OperacionComprobantePreviewDTO(idDevolucion, "CE", agencia, tercero,
+                original, ejecutado, disponible, original, BigDecimal.ZERO,
+                original, original, true, List.copyOf(movimientos),
+                consultarCuentasContables(agencia, movimientos));
+    }
+
     private String detallePago(
             String concepto,
             String medio,
@@ -360,37 +592,156 @@ public class TesoreriaOperacionesEjecucionesService {
         return referencia == null ? detalle : detalle + " N.º " + referencia;
     }
 
-    private Integer obtenerCuentaPorPagarRetiroAsociado(
-            Long idCuentaAhorro,
+    /** Valida una CxP explícita contra el comprobante original y el importe publicado. */
+    private Integer obtenerCuentaPorPagarHistorica(
+            Map<String, Object> operacion,
             Integer idAgencia,
-            Integer idBeneficiario
+            Integer idBeneficiario,
+            BigDecimal valorOriginal
     ) {
-        List<Integer> cuentas = jdbcTemplate.queryForList("""
-                SELECT cc.id_catalogo_cuenta
-                FROM depositos.cuentas_ahorro ca
-                JOIN depositos.formas_ahorro fa
-                  ON fa.id_forma_ahorro = ca.id_forma_ahorro
+        Integer idOrigenComprobante = numeroEntero(operacion, "id_origen_comprobante");
+        Integer idCuentaCxp = numeroEntero(operacion, "id_catalogo_cuenta_cxp");
+        List<BigDecimal> respaldos = jdbcTemplate.queryForList("""
+                SELECT SUM(ac.valor_credito)
+                FROM contabilidad.origen_comprobantes oc
+                JOIN contabilidad.auxiliares_contables ac
+                  ON ac.id_agencia = oc.id_agencia
+                 AND TRIM(ac.tipo_comprobante) = TRIM(oc.tipo_comprobante)
+                 AND TRIM(ac.numero_comprobante) = TRIM(oc.numero_comprobante)
                 JOIN contabilidad.catalogo_cuentas cc
-                  ON cc.id_agencia = ca.id_agencia
-                 AND cc.codigo_cuenta = CASE
-                     WHEN TRIM(fa.codigo_forma) = '01'
-                         THEN '24650501'
-                     ELSE '24651001'
-                 END
-                WHERE ca.id_cuenta_ahorro = ?
-                  AND ca.id_agencia = ?
-                  AND ca.id_datos_personal = ?
+                  ON cc.id_catalogo_cuenta = ac.id_catalogo_cuenta
+                 AND cc.id_agencia = oc.id_agencia
+                WHERE oc.id_origen_comprobante = ?
+                  AND oc.id_agencia = ?
+                  AND oc.modulo_origen = ?
+                  AND oc.proceso_origen = ?
+                  AND oc.tabla_origen = ?
+                  AND oc.id_origen = ?
+                  AND oc.origen_tipo = 'AUTO'
+                  AND oc.estado_origen = 'ACTIVO'
+                  AND ac.id_catalogo_cuenta = ?
+                  AND ac.id_datos_personal = ?
+                  AND ac.estado_movimiento = 'A'
+                  AND ac.valor_debito = 0
+                  AND ac.valor_credito > 0
                   AND cc.naturaleza_cuenta = 'C'
                   AND cc.cuenta_operable = TRUE
-                """, Integer.class, idCuentaAhorro, idAgencia, idBeneficiario);
+                """, BigDecimal.class,
+                idOrigenComprobante, idAgencia,
+                Objects.toString(operacion.get("modulo_origen"), "").trim(),
+                Objects.toString(operacion.get("proceso_origen"), "").trim(),
+                Objects.toString(operacion.get("tabla_origen"), "").trim(),
+                numeroLong(operacion, "id_origen"), idCuentaCxp, idBeneficiario);
+        BigDecimal respaldo = respaldos.isEmpty() ? null : respaldos.get(0);
+        if (respaldo == null || respaldo.compareTo(valorOriginal) != 0) {
+            throw new IllegalStateException(
+                    "La cuenta por pagar histórica no respalda exactamente el valor "
+                            + "publicado en la operación de Tesorería.");
+        }
+        return idCuentaCxp;
+    }
 
+    /** Recupera la CxP efectivamente acreditada en la cancelación CDAT original. */
+    private Integer obtenerCuentaPorPagarCancelacionCdat(
+            Long idCuentaCdat,
+            Integer idAgencia,
+            Integer idBeneficiario,
+            BigDecimal valorOriginal
+    ) {
+        List<Integer> cuentas = jdbcTemplate.queryForList("""
+                SELECT ac.id_catalogo_cuenta
+                FROM contabilidad.origen_comprobantes oc
+                JOIN contabilidad.auxiliares_contables ac
+                  ON ac.id_agencia = oc.id_agencia
+                 AND ac.tipo_comprobante = oc.tipo_comprobante
+                 AND ac.numero_comprobante = oc.numero_comprobante
+                JOIN contabilidad.catalogo_cuentas cc
+                  ON cc.id_catalogo_cuenta = ac.id_catalogo_cuenta
+                 AND cc.id_agencia = ac.id_agencia
+                WHERE oc.id_agencia = ?
+                  AND oc.origen_tipo = 'AUTO'
+                  AND oc.modulo_origen = 'CDAT'
+                  AND oc.proceso_origen = 'CANCELACION_CDAT'
+                  AND oc.tabla_origen = 'cdat.cuentas_cdats'
+                  AND oc.id_origen = ?
+                  AND ac.id_datos_personal = ?
+                  AND ac.detalle_movimiento = 'Cancelación CDAT - cuenta por pagar'
+                  AND ac.valor_credito = ?
+                  AND ac.valor_debito = 0
+                  AND ac.estado_movimiento = 'A'
+                  AND cc.naturaleza_cuenta = 'C'
+                  AND cc.cuenta_operable = TRUE
+                """, Integer.class,
+                idAgencia, idCuentaCdat, idBeneficiario, valorOriginal);
         if (cuentas.size() != 1 || cuentas.get(0) == null) {
             throw new IllegalStateException(
-                    "No se encontró una única cuenta por pagar "
-                            + "para el retiro integral de la cuenta " + idCuentaAhorro
+                    "No se encontró una única cuenta por pagar contabilizada "
+                            + "en la cancelación original del CDAT " + idCuentaCdat + "."
             );
         }
         return cuentas.get(0);
+    }
+
+    /**
+     * Valida la CxP histórica contra el NC consolidado, sin depender del texto descriptivo.
+     * La cuenta puede respaldar varias obligaciones individuales del mismo retiro.
+     */
+    private Integer obtenerCuentaPorPagarRetiroAsociado(
+            Map<String, Object> operacion,
+            Integer idAgencia,
+            Integer idBeneficiario
+    ) {
+        Long idCuentaAhorro = numeroLong(operacion, "id_origen");
+        Object origen = operacion.get("id_origen_comprobante");
+        Object cuenta = operacion.get("id_catalogo_cuenta_cxp");
+        if (!(origen instanceof Number) || !(cuenta instanceof Number)) {
+            throw new IllegalStateException(
+                    "El retiro integral de la cuenta " + idCuentaAhorro
+                            + " no tiene referencias contables históricas completas. "
+                            + "Se requiere regularización antes del pago."
+            );
+        }
+        Integer idOrigenComprobante = ((Number) origen).intValue();
+        Integer idCuentaCxp = ((Number) cuenta).intValue();
+        List<BigDecimal> respaldos = jdbcTemplate.queryForList("""
+                SELECT SUM(ac.valor_credito) AS total_credito
+                FROM depositos.cuentas_ahorro ca
+                JOIN contabilidad.origen_comprobantes oc
+                  ON oc.id_origen_comprobante = ?
+                 AND oc.id_agencia = ca.id_agencia
+                 AND oc.modulo_origen = 'DEPOSITOS'
+                 AND oc.proceso_origen = 'RETIRO_ASOCIADO'
+                 AND oc.tabla_origen = 'depositos.cuentas_ahorro'
+                 AND TRIM(oc.tipo_comprobante) = 'NC'
+                 AND oc.estado_origen = 'ACTIVO'
+                JOIN contabilidad.auxiliares_contables ac
+                  ON ac.id_agencia = oc.id_agencia
+                 AND TRIM(ac.tipo_comprobante) = TRIM(oc.tipo_comprobante)
+                 AND TRIM(ac.numero_comprobante) = TRIM(oc.numero_comprobante)
+                 AND ac.id_catalogo_cuenta = ?
+                 AND ac.id_datos_personal = ca.id_datos_personal
+                JOIN contabilidad.catalogo_cuentas cc
+                  ON cc.id_catalogo_cuenta = ac.id_catalogo_cuenta
+                 AND cc.id_agencia = ca.id_agencia
+                WHERE ca.id_cuenta_ahorro = ?
+                  AND ca.id_agencia = ?
+                  AND ca.id_datos_personal = ?
+                  AND ac.valor_credito > 0
+                  AND ac.valor_debito = 0
+                  AND ac.estado_movimiento = 'A'
+                  AND cc.naturaleza_cuenta = 'C'
+                  AND cc.cuenta_operable = TRUE
+                """, BigDecimal.class,
+                idOrigenComprobante, idCuentaCxp,
+                idCuentaAhorro, idAgencia, idBeneficiario);
+        BigDecimal respaldo = respaldos.isEmpty() ? null : respaldos.get(0);
+        if (respaldo == null || respaldo.compareTo(numeroDecimal(operacion, "valor_original")) < 0) {
+            throw new IllegalStateException(
+                    "La CxP histórica del retiro integral " + idCuentaAhorro
+                            + " no tiene respaldo suficiente en el comprobante NC original."
+            );
+        }
+        return idCuentaCxp;
     }
 
     /** Recupera la cuenta efectivamente acreditada en el desembolso original. */
@@ -572,6 +923,30 @@ public class TesoreriaOperacionesEjecucionesService {
                 idUsuario
         );
 
+        if (esDevolucionCartera(operacion)) {
+            if (!"COMPLETADA".equals(estado)) {
+                throw new IllegalStateException("La devolución bancaria debe ejecutarse completamente.");
+            }
+            int actualizadas = jdbcTemplate.update("""
+                    UPDATE tesoreria.operaciones_reversiones_origen r
+                    SET estado_regularizacion = 'REGULARIZADA',
+                        fk_seguridad_edicion = ?, fecha_edicion = CURRENT_TIMESTAMP
+                    FROM tesoreria.operaciones_pendientes o
+                    WHERE o.id_operacion_pendiente = r.id_operacion_pendiente
+                      AND o.modulo_origen = 'CARTERA'
+                      AND o.proceso_origen = ?
+                      AND o.tabla_origen = ?
+                      AND o.id_origen = ?
+                      AND o.id_agencia = ?
+                      AND r.estado_regularizacion = 'PENDIENTE'
+                    """, idUsuario, procesoRecaudoOriginal(operacion),
+                    tablaRecaudoOriginal(operacion),
+                    numeroLong(operacion, "id_origen"), idAgencia);
+            if (actualizadas != 1) {
+                throw new IllegalStateException("No se pudo regularizar de forma única la reversión de Cartera.");
+            }
+        }
+
         return new OperacionPagoResponseDTO(
                 idOperacion, idAgencia, tipo, numero, LocalDateTime.now(),
                 total, nuevoEjecutado, saldo, estado, ids.size(),
@@ -588,6 +963,10 @@ public class TesoreriaOperacionesEjecucionesService {
         Map<String, Object> operacion = obtenerOperacion(request.idOperacion());
         validarAgencia(operacion);
         validarEntradaCartera(operacion);
+        validarSinReversionOrigen(operacion);
+        // El validador concreto conserva las reglas de vigencia y comprobante del origen.
+        TesoreriaOrigenFinancieroValidator validador = resolverValidadorOrigen(operacion);
+        validador.validarVistaPrevia(operacion);
         Integer agencia = numeroEntero(operacion, "id_agencia");
         Integer tercero = numeroEntero(operacion, "id_datos_personal");
         BigDecimal original = numeroDecimal(operacion, "valor_original");
@@ -597,21 +976,15 @@ public class TesoreriaOperacionesEjecucionesService {
             throw new IllegalStateException("La cuenta por cobrar no tiene saldo pendiente.");
         }
 
-        // Utiliza la misma parametrización general que el comprobante de Cartera.
-        List<Integer> cuentasCxC = jdbcTemplate.queryForList("""
-                SELECT pc.id_catalogo_cuenta
-                FROM cartera.parametros_contables pc
-                JOIN contabilidad.catalogo_cuentas cc
-                  ON cc.id_catalogo_cuenta = pc.id_catalogo_cuenta
-                 AND cc.id_agencia = pc.id_agencia
-                WHERE pc.id_agencia = ? AND pc.concepto = 'RECAUDO_BANCARIO'
-                  AND pc.activo = TRUE AND pc.id_linea_credito IS NULL
-                  AND cc.cuenta_operable = TRUE
-                """, Integer.class, agencia);
-        if (cuentasCxC.size() != 1 || cuentasCxC.get(0) == null) {
-            throw new IllegalStateException("La cuenta CxC RECAUDO_BANCARIO no está parametrizada de forma única.");
+        // Recupera la CxC del comprobante histórico, nunca de parámetros actuales.
+        Integer cuentaCxC = validador.obtenerCuentaCxCOriginal(operacion);
+        TipoOperacionFinancieraDTO configuracion = validarPerfilTesoreria(
+                operacion, "RECAUDO_CXC_CARTERA", false);
+        String conceptoRecaudo = configuracion.getNombreOperacion();
+        if (conceptoRecaudo == null || conceptoRecaudo.isBlank()) {
+            throw new IllegalStateException("El catálogo no tiene nombre para esta operación financiera.");
         }
-
+        conceptoRecaudo = conceptoRecaudo.trim();
         BigDecimal total = BigDecimal.ZERO;
         List<MovimientoContableDTO> movimientos = new ArrayList<>();
         for (OperacionPagoLineaDTO linea : request.lineas()) {
@@ -647,17 +1020,18 @@ public class TesoreriaOperacionesEjecucionesService {
                 throw new IllegalArgumentException("La cuenta bancaria no está activa para recaudos en esta agencia.");
             }
             movimientos.add(movimiento(agencia, tercero, cuentasBanco.get(0),
-                    linea.valor(), BigDecimal.ZERO, "Recaudo bancario de cuotas Cartera",
+                    linea.valor(), BigDecimal.ZERO, "Recaudo bancario Cartera - " + conceptoRecaudo,
                     referencia, request.idOperacion()));
             total = total.add(linea.valor());
         }
         if (total.compareTo(disponible) > 0) {
             throw new IllegalArgumentException("El recaudo supera el saldo de la cuenta por cobrar.");
         }
-        movimientos.add(movimiento(agencia, tercero, cuentasCxC.get(0),
-                BigDecimal.ZERO, total, "Cancelación CxC de recaudo bancario Cartera",
+        validarPerfilTesoreria(operacion, "RECAUDO_CXC_CARTERA", total.compareTo(disponible) < 0);
+        movimientos.add(movimiento(agencia, tercero, cuentaCxC,
+                BigDecimal.ZERO, total, "Cancelación CxC de recaudo bancario Cartera - " + conceptoRecaudo,
                 "OPERACION-" + request.idOperacion(), request.idOperacion()));
-        return new OperacionComprobantePreviewDTO(request.idOperacion(), agencia, tercero,
+        return new OperacionComprobantePreviewDTO(request.idOperacion(), "CI", agencia, tercero,
                 original, ejecutado, disponible, total, disponible.subtract(total),
                 total, total, true, List.copyOf(movimientos),
                 consultarCuentasContables(agencia, movimientos));
@@ -670,9 +1044,24 @@ public class TesoreriaOperacionesEjecucionesService {
             throw new IllegalArgumentException("La solicitud es obligatoria.");
         }
         validarId(request.idOperacion(), "La operación");
+        // Mantiene el orden de bloqueo: origen financiero antes de operación de Tesorería.
+        Map<String, Object> consulta = obtenerOperacion(request.idOperacion());
+        validarAgencia(consulta);
+        // Bloquea y valida el origen antes de bloquear la operación de Tesorería.
+        TesoreriaOrigenFinancieroValidator validador = resolverValidadorOrigen(consulta);
+        validador.validarConfirmacion(consulta);
         Map<String, Object> operacion = repository.bloquearOperacion(request.idOperacion());
         validarAgencia(operacion);
         validarEntradaCartera(operacion);
+        if (!validador.soporta(operacion)
+                || !Objects.equals(consulta.get("modulo_origen"), operacion.get("modulo_origen"))
+                || !Objects.equals(consulta.get("proceso_origen"), operacion.get("proceso_origen"))
+                || !Objects.equals(consulta.get("tabla_origen"), operacion.get("tabla_origen"))
+                || !Objects.equals(consulta.get("id_origen"), operacion.get("id_origen"))
+                || !Objects.equals(consulta.get("id_agencia"), operacion.get("id_agencia"))) {
+            throw new IllegalStateException("El origen de la operación cambió durante la confirmación.");
+        }
+        validarSinReversionOrigen(operacion);
         OperacionComprobantePreviewDTO preview = generarVistaPreviaRecaudo(request);
         Integer agencia = numeroEntero(operacion, "id_agencia");
         Integer usuario = usuarioSesionService.idUsuario();
@@ -721,21 +1110,88 @@ public class TesoreriaOperacionesEjecucionesService {
                 List.copyOf(ids), "Recaudo contabilizado correctamente.");
     }
 
-    /** Valida recaudos CxC pendientes de Cartera, según el proceso y su tabla de origen. */
+    /** Recupera del CC original la CxC bancaria de Seguros o Costas, con importe y origen verificados. */
+    /** Resuelve un único validador para el origen, rechazando ausencias y ambigüedades. */
+    private TesoreriaOrigenFinancieroValidator resolverValidadorOrigen(Map<String, Object> operacion) {
+        TesoreriaOrigenFinancieroValidator encontrado = null;
+        for (TesoreriaOrigenFinancieroValidator candidato : validadoresOrigen) {
+            if (candidato.soporta(operacion)) {
+                if (encontrado != null) {
+                    throw new IllegalStateException("Existe más de un validador para el origen financiero.");
+                }
+                encontrado = candidato;
+            }
+        }
+        if (encontrado == null) {
+            throw new IllegalStateException("El perfil de recaudo no tiene un validador financiero para este origen.");
+        }
+        return encontrado;
+    }
+
+    /** Impide nuevos recaudos cuando el origen fue reversado, incluso si el estado es PARCIAL. */
+    private void validarSinReversionOrigen(Map<String, Object> operacion) {
+        Boolean reversada = jdbcTemplate.queryForObject("""
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM tesoreria.operaciones_reversiones_origen
+                    WHERE id_operacion_pendiente = ?
+                )
+                """, Boolean.class, numeroLong(operacion, "id_operacion_pendiente"));
+        if (Boolean.TRUE.equals(reversada)) {
+            throw new IllegalStateException(
+                    "La operación fue afectada por una reversión de origen; no admite nuevos recaudos.");
+        }
+    }
+
+    /** Valida el estado de la bandeja y exige un perfil de recaudo implementado. */
     private void validarEntradaCartera(Map<String, Object> operacion) {
         String estado = Objects.toString(operacion.get("estado"), "");
         if (!PENDIENTE.equals(estado) && !PARCIAL.equals(estado)) {
             throw new IllegalStateException("La operación no admite recaudos en estado " + estado);
         }
-        String proceso = Objects.toString(operacion.get("proceso_origen"), "");
-        String tabla = Objects.toString(operacion.get("tabla_origen"), "");
-        boolean origenValido = ("PAGO_CUOTAS".equals(proceso) && "cartera.pagos_cuotas".equals(tabla))
-                || ("PRORROGA".equals(proceso) && "cartera.creditos_prorrogas".equals(tabla));
-        if (!"ENTRADA".equals(Objects.toString(operacion.get("naturaleza"), ""))
-                || !"CARTERA".equals(Objects.toString(operacion.get("modulo_origen"), ""))
-                || !origenValido) {
-            throw new IllegalStateException("El recaudo solo admite CxC de Pago de Cuotas o Prórrogas de Cartera.");
+        validarPerfilTesoreria(operacion, "RECAUDO_CXC_CARTERA", false);
+        // El catálogo habilita el perfil; el validador de origen controla el documento.
+        resolverValidadorOrigen(operacion);
+    }
+
+    /** Verifica la configuración del proceso sin asumir que el catálogo valida el documento original. */
+    private TipoOperacionFinancieraDTO validarPerfilTesoreria(
+            Map<String, Object> operacion, String perfilEsperado, boolean parcial) {
+        // Usa la configuración vinculada al publicar; conserva el origen para registros históricos.
+        Object idRegistrado = operacion.get("id_tipo_operacion");
+        TipoOperacionFinancieraDTO configuracion;
+        if (idRegistrado == null) {
+            configuracion = tiposOperacionesFinancierasService.validarOperacion(
+                    Objects.toString(operacion.get("modulo_origen"), ""),
+                    Objects.toString(operacion.get("proceso_origen"), ""),
+                    Objects.toString(operacion.get("tabla_origen"), ""),
+                    "TESORERIA",
+                    Objects.toString(operacion.get("naturaleza"), ""),
+                    parcial);
+        } else {
+            Long idTipoOperacion = ((Number) idRegistrado).longValue();
+            TipoOperacionFinancieraDTO tipo = tiposOperacionesFinancierasService.listarParaTesoreria()
+                    .stream()
+                    .filter(item -> idTipoOperacion.equals(item.getIdTipoOperacion()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException(
+                            "La configuración financiera vinculada a la operación no está activa o habilitada para Tesorería."));
+            configuracion = tiposOperacionesFinancierasService.validarOperacionPorCodigo(
+                    Objects.toString(operacion.get("modulo_origen"), ""),
+                    Objects.toString(operacion.get("proceso_origen"), ""),
+                    Objects.toString(operacion.get("tabla_origen"), ""),
+                    tipo.getCodigoOperacionFinanciera(),
+                    "TESORERIA",
+                    Objects.toString(operacion.get("naturaleza"), ""),
+                    parcial);
+            if (!idTipoOperacion.equals(configuracion.getIdTipoOperacion())) {
+                throw new IllegalStateException("La configuración financiera no corresponde a la operación publicada.");
+            }
         }
+        if (!perfilEsperado.equals(configuracion.getPerfilEjecucion())) {
+            throw new IllegalStateException("El perfil de ejecución no corresponde al flujo contable solicitado.");
+        }
+        return configuracion;
     }
 
     // =========================================================

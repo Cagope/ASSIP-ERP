@@ -712,6 +712,13 @@ public class SolicitudCreditoService {
                                         )
                         );
 
+        // La consistencia de catálogos aplica también a los borradores.
+        validarCatalogosGarantia(
+                request.getCodigoGarantiaCredito(),
+                request.getCodigoSubgarantia(),
+                fondoGarantia.codigoFondo()
+        );
+
         BigDecimal porcentajeFondoAplicado =
                 fondoGarantia.porcentajeFondo();
 
@@ -1483,6 +1490,52 @@ public class SolicitudCreditoService {
                 );
 
         // ---------------------------------------------------------
+        // CONSISTENCIA DE GARANTÍAS Y RESPALDOS REALES
+        // ---------------------------------------------------------
+
+        String codigoSubgarantia = repository
+                .consultarCodigoSubgarantiaSolicitud(idSolicitudCredito)
+                .orElse(null);
+        String codigoFondo = solicitud.idFondoGarantia() == null
+                ? null
+                : repository.buscarFondoGarantia(solicitud.idFondoGarantia())
+                        .map(SolicitudCreditoRepository.FondoGarantiaAplicable::codigoFondo)
+                        .orElse(null);
+
+        String errorGarantia = errorCatalogosGarantia(
+                solicitud.codigoGarantiaCredito(),
+                codigoSubgarantia,
+                codigoFondo
+        );
+
+        SolicitudCreditoRepository.RespaldosSolicitud respaldos =
+                repository.consultarRespaldosSolicitud(idSolicitudCredito);
+
+        if (errorGarantia == null) {
+            String garantia = solicitud.codigoGarantiaCredito().trim();
+            boolean fondoAntioquia = "1".equals(codigoFondo);
+            if ("1".equals(garantia)) {
+                if (fondoAntioquia && respaldos.cantidadCodeudores() > 0) {
+                    errorGarantia = "No se permite combinar el fondo con codeudores.";
+                } else if (!fondoAntioquia && respaldos.cantidadCodeudores() == 0) {
+                    errorGarantia = "La garantía no idónea requiere codeudor o fondo.";
+                } else if (respaldos.cantidadGarantiasReales() > 0) {
+                    errorGarantia = "La garantía no idónea no admite bienes en garantía real.";
+                }
+            } else if ("2".equals(garantia)) {
+                if (respaldos.cantidadGarantiasReales() == 0) {
+                    errorGarantia = "La garantía real requiere un bien asignado como garantía real.";
+                }
+            } else if ("15".equals(garantia)) {
+                if (respaldos.cantidadCodeudores() > 0
+                        || respaldos.cantidadGarantiasReales() > 0) {
+                    errorGarantia = "La solicitud sin garantía no admite codeudores ni garantías reales.";
+                }
+            }
+        }
+        boolean garantiasCompletas = errorGarantia == null;
+
+        // ---------------------------------------------------------
         // ENTE APROBADOR
         // ---------------------------------------------------------
 
@@ -1498,6 +1551,7 @@ public class SolicitudCreditoService {
                 solicitudCompleta
                         && deudoresCompletos
                         && bienesCompletos
+                        && garantiasCompletas
                         && financieroCompleto
                         && centralRiesgoCompleta
                         && analisisCompleto
@@ -1519,6 +1573,10 @@ public class SolicitudCreditoService {
 
             mensaje =
                     "La solicitud no tiene deudores activos correctamente registrados.";
+
+        } else if (!garantiasCompletas) {
+
+            mensaje = errorGarantia;
 
         } else if (!bienesCompletos) {
 
@@ -1556,7 +1614,7 @@ public class SolicitudCreditoService {
                 solicitud.numeroSolicitud(),
                 solicitudCompleta,
                 deudoresCompletos,
-                bienesCompletos,
+                bienesCompletos && garantiasCompletas,
                 financieroCompleto,
                 centralRiesgoCompleta,
                 analisisCompleto,
@@ -1564,6 +1622,47 @@ public class SolicitudCreditoService {
                 puedeEnviarAprobacion,
                 mensaje
         );
+    }
+
+    // =========================================================
+    // REGLAS DE CATÁLOGO: NO REQUIEREN RESPALDOS EN BORRADOR
+    // =========================================================
+
+    private void validarCatalogosGarantia(
+            String garantia, String subgarantia, String fondo
+    ) {
+        String error = errorCatalogosGarantia(garantia, subgarantia, fondo);
+        if (error != null) {
+            throw new IllegalArgumentException(error);
+        }
+    }
+
+    private String errorCatalogosGarantia(
+            String garantia, String subgarantia, String fondo
+    ) {
+        if (garantia == null || subgarantia == null || fondo == null) {
+            return "Debe seleccionar garantía, subgarantía y fondo.";
+        }
+        garantia = garantia.trim();
+        subgarantia = subgarantia.trim();
+        fondo = fondo.trim();
+        return switch (garantia) {
+            case "1" -> {
+                if ("4".equals(subgarantia) && "1".equals(fondo)) {
+                    yield null;
+                }
+                if (Set.of("1", "2", "3", "6").contains(subgarantia)
+                        && "0".equals(fondo)) {
+                    yield null;
+                }
+                yield "La garantía no idónea exige subgarantía personal sin fondo o subgarantía 4 con Fondo de Antioquia.";
+            }
+            case "2" -> "5".equals(subgarantia) && "0".equals(fondo)
+                    ? null : "La garantía real requiere subgarantía REAL (5) y sin fondo.";
+            case "15" -> "6".equals(subgarantia) && "0".equals(fondo)
+                    ? null : "La solicitud sin garantía requiere subgarantía PERSONAL (6) y sin fondo.";
+            default -> "La garantía seleccionada no está habilitada para este flujo de Originación.";
+        };
     }
 
     // =========================================================
@@ -2255,6 +2354,13 @@ public class SolicitudCreditoService {
 
             throw new IllegalArgumentException(
                     "La amortización de capital no puede ser mayor que el plazo solicitado."
+            );
+        }
+
+        // Solo se admiten períodos completos de amortización de capital.
+        if (request.getPlazoSolicitado() % request.getAmortizacionCapital() != 0) {
+            throw new IllegalArgumentException(
+                    "El plazo solicitado debe ser múltiplo de la amortización de capital."
             );
         }
 

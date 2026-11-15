@@ -1,0 +1,491 @@
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.pyg-sin-formato {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  color: #253247;
+}
+
+.pyg-encabezado {
+  padding-bottom: 14px;
+  border-bottom: 1px solid #dce3eb;
+
+  h2 {
+    margin: 0 0 6px;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #19365b;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #64748b;
+  }
+}
+
+.pyg-filtros {
+  display: grid;
+  grid-template-columns:
+    minmax(220px, 2fr)
+    minmax(120px, 1fr)
+    minmax(160px, 1fr);
+  align-items: end;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid #dce3eb;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.pyg-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+
+  label {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #334155;
+  }
+
+  select,
+  input {
+    width: 100%;
+    height: 39px;
+    padding: 8px 10px;
+    box-sizing: border-box;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    background: #fff;
+    color: #1e293b;
+    font-size: 0.9rem;
+    outline: none;
+
+    &:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+    }
+
+    &:disabled {
+      background: #f1f5f9;
+      cursor: not-allowed;
+    }
+  }
+}
+
+/* Opción de firmas siguiendo el patrón institucional de Balances. */
+.pyg-opciones {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 6px;
+  grid-column: 1 / -1;
+}
+
+.pyg-opcion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 66px;
+  box-sizing: border-box;
+  padding: 13px 14px;
+  border: 1px solid #dbe4ed;
+  border-radius: 7px;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover {
+    background: #f0f6fc;
+    border-color: #b4cce3;
+  }
+
+  &:has(input:checked) {
+    background: #edf5fc;
+    border-color: #75a9d2;
+  }
+
+  &:has(input:focus-visible) {
+    outline: 2px solid #23639a;
+    outline-offset: 2px;
+  }
+
+  input[type='checkbox'] {
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 22px;
+    margin: 0;
+    border: 1px solid #b9c5d1;
+    border-radius: 20px;
+    background: #cbd5df;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+      transition: transform 0.2s;
+    }
+
+    &:checked {
+      background: #1e6095;
+      border-color: #1e6095;
+
+      &::before {
+        transform: translateX(16px);
+      }
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.pyg-opcion-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+
+  strong {
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 650;
+    color: #233b53;
+  }
+
+  small {
+    font-size: 11px;
+    line-height: 1.4;
+    color: #718196;
+  }
+}
+
+/* Botones de consulta y exportación agrupados. */
+.pyg-acciones {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 6px;
+  grid-column: 1 / -1;
+
+  button {
+    min-height: 39px;
+    padding: 9px 18px;
+    border: 1px solid #195b90;
+    border-radius: 5px;
+    background: #195b90;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+
+    &:hover:not(:disabled) {
+      background: #124b78;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #195b90;
+      outline-offset: 3px;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &.secundario {
+      background: #fff;
+      color: #195b90;
+      border-color: #b8cadb;
+
+      &:hover:not(:disabled) {
+        background: #eaf2f9;
+      }
+    }
+  }
+}
+
+.pyg-mensaje-error {
+  padding: 12px 14px;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 0.88rem;
+}
+
+.pyg-cargando {
+  padding: 16px;
+  text-align: center;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.pyg-resultado {
+  padding: 22px;
+  border: 1px solid #dce3eb;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.pyg-titulo-informe {
+  margin-bottom: 22px;
+  text-align: center;
+
+  h3 {
+    margin: 0 0 12px;
+    color: #19365b;
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  p {
+    margin: 4px 0;
+    color: #475569;
+    font-size: 0.88rem;
+  }
+}
+
+.pyg-tabla-contenedor {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.pyg-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+
+  th,
+  td {
+    padding: 9px 11px;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: middle;
+  }
+
+  thead th {
+    background: #eaf0f7;
+    color: #19365b;
+    font-weight: 700;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  tbody tr:hover {
+    background: #f8fafc;
+  }
+
+  td:first-child {
+    width: 110px;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  td:nth-child(2) {
+    min-width: 260px;
+  }
+
+  .pyg-cuenta-principal {
+    background: #eaf0f7;
+    font-weight: 700;
+
+    td {
+      border-top: 1px solid #cbd5e1;
+    }
+  }
+
+  .pyg-cuenta-grupo {
+    background: #f1f5f9;
+    font-weight: 600;
+  }
+}
+
+.pyg-numero {
+  text-align: right !important;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.pyg-sin-datos {
+  padding: 24px !important;
+  text-align: center;
+  color: #64748b;
+}
+
+.pyg-resumen {
+  width: 100%;
+  max-width: 560px;
+  margin: 26px 0 0 auto;
+
+  h4 {
+    margin: 0 0 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #19365b;
+  }
+}
+
+.pyg-tabla-resumen {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.91rem;
+
+  th,
+  td {
+    padding: 11px 13px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  th {
+    font-weight: 600;
+    text-align: left;
+  }
+
+  td {
+    font-weight: 600;
+  }
+}
+
+.pyg-resultado-final {
+  background: #e8f3ec;
+  color: #166534;
+
+  th,
+  td {
+    padding-top: 14px;
+    padding-bottom: 14px;
+    border-top: 2px solid #86b69a;
+    font-weight: 700;
+  }
+}
+
+.pyg-perdida {
+  background: #fef2f2;
+  color: #991b1b;
+
+  th,
+  td {
+    border-top-color: #fca5a5;
+  }
+}
+
+@media (max-width: 1050px) {
+  .pyg-filtros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pyg-opciones,
+  .pyg-acciones {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .pyg-sin-formato {
+    padding: 12px;
+    gap: 14px;
+  }
+
+  .pyg-filtros {
+    grid-template-columns: 1fr;
+    padding: 14px;
+  }
+
+  .pyg-opciones {
+    grid-template-columns: 1fr;
+  }
+
+  .pyg-acciones {
+    grid-column: 1 / -1;
+    flex-direction: column;
+    align-items: stretch;
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .pyg-resultado {
+    padding: 14px;
+  }
+
+  .pyg-titulo-informe h3 {
+    font-size: 1.05rem;
+  }
+
+  .pyg-tabla {
+    min-width: 760px;
+  }
+
+  .pyg-resumen {
+    max-width: 100%;
+  }
+}
+
+@media print {
+  .pyg-encabezado,
+  .pyg-filtros,
+  .pyg-mensaje-error,
+  .pyg-cargando {
+    display: none !important;
+  }
+
+  .pyg-sin-formato {
+    padding: 0;
+    gap: 0;
+  }
+
+  .pyg-resultado {
+    padding: 0;
+    border: 0;
+  }
+
+  .pyg-tabla-contenedor {
+    overflow: visible;
+  }
+
+  .pyg-tabla {
+    font-size: 9pt;
+  }
+
+  .pyg-tabla thead {
+    display: table-header-group;
+  }
+
+  .pyg-tabla tr,
+  .pyg-tabla-resumen tr {
+    break-inside: avoid;
+  }
+
+  .pyg-resumen {
+    break-inside: avoid;
+  }
+}

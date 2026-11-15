@@ -30,12 +30,15 @@ public class TesoreriaOperacionesEjecucionesRepository {
         String sql = """
             SELECT
                 id_operacion_pendiente,
+                id_tipo_operacion,
                 id_agencia,
                 id_datos_personal,
                 modulo_origen,
                 proceso_origen,
                 tabla_origen,
                 id_origen,
+                id_origen_comprobante,
+                id_catalogo_cuenta_cxp,
                 naturaleza,
                 concepto,
                 valor_original,
@@ -65,12 +68,15 @@ public class TesoreriaOperacionesEjecucionesRepository {
         String sql = """
             SELECT
                 id_operacion_pendiente,
+                id_tipo_operacion,
                 id_agencia,
                 id_datos_personal,
                 modulo_origen,
                 proceso_origen,
                 tabla_origen,
                 id_origen,
+                id_origen_comprobante,
+                id_catalogo_cuenta_cxp,
                 naturaleza,
                 concepto,
                 valor_original,

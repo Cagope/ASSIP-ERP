@@ -1,6 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { SessionService } from '../../../core/auth/session.service';
 
 import { HeaderActionsComponent } from '../../../shared/header-actions/header-actions.component';
 import { PlanCuentasApi, PlanCuenta } from './plan-cuentas.api';
@@ -26,6 +27,11 @@ export class PlanCuentasListComponent implements OnInit {
   private readonly exporter = inject(PlanCuentasExporterService);
   private readonly printer = inject(PlanCuentasPrintService);
   private readonly router = inject(Router);
+  private readonly session = inject(SessionService);
+
+  get puedeAdministrar(): boolean {
+    return this.session.tienePermiso('CONTABILIDAD_PARAMETRIZACION_ADMIN');
+  }
 
   cuentas: PlanCuenta[] = [];
   cargando = false;

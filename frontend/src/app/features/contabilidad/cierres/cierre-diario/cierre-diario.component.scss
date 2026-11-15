@@ -1,0 +1,548 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.cierre-diario {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+  color: #243247;
+}
+
+/* ENCABEZADO */
+
+.encabezado {
+  h2 {
+    margin: 0 0 6px;
+    font-size: 1.5rem;
+    color: #17365d;
+  }
+
+  p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+}
+
+/* PANELES */
+
+.panel {
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+
+  h3 {
+    margin: 0 0 16px;
+    color: #17365d;
+    font-size: 1.05rem;
+  }
+}
+
+.panel-titulo {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+
+  h3 {
+    margin-bottom: 6px;
+  }
+
+  p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+}
+
+/* FILTROS */
+
+.filtros {
+  display: grid;
+  grid-template-columns: minmax(260px, 2fr) minmax(120px, 1fr) minmax(180px, 1fr) auto;
+  gap: 16px;
+  align-items: end;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+
+  label {
+    color: #475569;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  select,
+  input,
+  textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font: inherit;
+    color: #243247;
+    background: #fff;
+
+    &:focus {
+      outline: 2px solid #bfdbfe;
+      border-color: #2563eb;
+    }
+  }
+
+  textarea {
+    resize: vertical;
+  }
+}
+
+.acciones-filtro {
+  display: flex;
+  align-items: flex-end;
+}
+
+/* BOTONES */
+
+.btn {
+  min-height: 38px;
+  padding: 8px 20px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primario {
+  background: #1d4ed8;
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: #1e40af;
+  }
+}
+
+.btn-secundario {
+  background: #fff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+
+  &:hover:not(:disabled) {
+    background: #eff6ff;
+  }
+}
+
+.btn-advertencia {
+  background: #fff;
+  border-color: #b45309;
+  color: #92400e;
+
+  &:hover:not(:disabled) {
+    background: #fffbeb;
+  }
+}
+
+/* ESTADOS CONTABLES */
+
+.estado {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: #dcfce7;
+  color: #166534;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+
+  &.cerrado {
+    background: #f1f5f9;
+    color: #334155;
+  }
+}
+
+.periodo,
+.conteos {
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+/* INDICADORES MENSUALES */
+
+.indicadores-mensuales {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.indicador {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+
+  span {
+    color: #64748b;
+    font-size: 0.82rem;
+  }
+
+  strong {
+    color: #17365d;
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &.indicador-cerrado {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+
+    strong {
+      color: #166534;
+    }
+  }
+
+  &.indicador-alerta {
+    background: #fef2f2;
+    border-color: #fecaca;
+
+    strong {
+      color: #b91c1c;
+    }
+  }
+}
+
+/* RESUMEN DE VALORES */
+
+.resumen {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.dato {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+
+  span {
+    color: #64748b;
+    font-size: 0.82rem;
+  }
+
+  strong {
+    color: #17365d;
+    font-size: 1.1rem;
+  }
+
+  &.diferencia {
+    background: #fef2f2;
+    border-color: #fecaca;
+
+    strong {
+      color: #b91c1c;
+    }
+  }
+}
+
+/* TABLAS CONTABLES */
+
+.tabla-contenedor {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+table {
+  width: 100%;
+  min-width: 650px;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+th,
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+  vertical-align: middle;
+}
+
+thead {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+tfoot {
+  background: #dbeafe;
+  color: #17365d;
+  font-weight: 700;
+}
+
+tbody tr {
+  &:hover {
+    background: #f8fafc;
+  }
+
+  &:last-child td {
+    border-bottom: none;
+  }
+}
+
+.numero {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* TABLA MENSUAL */
+
+.tabla-dias {
+  min-width: 1120px;
+
+  th,
+  td {
+    padding: 9px 10px;
+  }
+
+  td:last-child {
+    white-space: nowrap;
+  }
+
+  .btn {
+    min-height: 32px;
+    padding: 5px 12px;
+    font-size: 0.8rem;
+  }
+}
+
+.fila-seleccionada {
+  background: #eff6ff !important;
+
+  td:first-child {
+    border-left: 3px solid #2563eb;
+  }
+}
+
+.fila-diferencia {
+  background: #fff7ed;
+
+  &:hover {
+    background: #ffedd5;
+  }
+}
+
+.valor-diferencia {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+/* VALIDACIONES Y ADVERTENCIAS */
+
+.validacion {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.validacion-correcta {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.validacion-error {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.validacion-sin-movimientos {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.advertencia {
+  margin: 14px 0;
+  padding: 12px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  color: #b91c1c;
+  font-size: 0.9rem;
+}
+
+.advertencia-informativa {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.nota-control {
+  margin: 12px 0 0;
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+/* MENSAJES */
+
+.mensaje {
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.mensaje-error {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.mensaje-exito {
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.mensaje-info {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.sin-datos {
+  padding: 14px;
+  color: #64748b;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* OPERACIONES DE CIERRE */
+
+.operaciones-cierre {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.campo-motivo {
+  margin-bottom: 14px;
+}
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.campo-filtro-estado {
+  min-width: 190px;
+}
+
+/* DISEÑO RESPONSIVO */
+
+@media (max-width: 1100px) {
+  .filtros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .acciones-filtro {
+    grid-column: 1 / -1;
+  }
+
+  .indicadores-mensuales {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+  .resumen {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 540px) {
+  .cierre-diario {
+    padding: 12px;
+  }
+
+  .panel {
+    padding: 14px;
+  }
+
+  .filtros {
+    grid-template-columns: 1fr;
+  }
+
+  .acciones-filtro {
+    grid-column: auto;
+  }
+
+  .panel-titulo {
+    flex-direction: column;
+  }
+
+  .indicadores-mensuales {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .acciones {
+    justify-content: stretch;
+
+    .btn {
+      width: 100%;
+    }
+  }
+}
+
+/* Alinea y separa las acciones del informe contable diario. */
+.acciones-informe {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+  margin-bottom: 16px;
+}
+
+.acciones-informe .btn {
+  min-width: 160px;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .acciones-informe {
+    justify-content: stretch;
+  }
+
+  .acciones-informe .btn {
+    flex: 1 1 100%;
+  }
+}

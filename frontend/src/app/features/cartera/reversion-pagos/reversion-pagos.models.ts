@@ -31,6 +31,12 @@ export interface ReversionVistaPrevia {
   ultimoPagoAplicado: number | null;
   elegibleParaAnalisis: boolean;
   observacion: string;
+  /** Estado del ingreso original en Caja; null cuando no hubo efectivo. */
+  estadoCaja: string | null;
+  /** Valor del efectivo asociado al pago original. */
+  valorCaja: number;
+  /** Movimiento de ingreso original en Caja. */
+  idMovimientoCaja: number | null;
 }
 
 /** Contrapartida contable del comprobante original, con datos descriptivos. */

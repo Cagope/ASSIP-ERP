@@ -47,6 +47,11 @@ export class OperacionesPendientesComponent implements OnInit {
   private readonly session = inject(SessionService);
   private readonly destroyRef = inject(DestroyRef);
 
+  // Permiso independiente para ejecutar operaciones financieras.
+  get puedeEjecutarOperaciones(): boolean {
+    return this.session.tienePermiso('TESORERIA_OPERACIONES_PENDIENTES_EXECUTE');
+  }
+
   // =====================================================
   // ESTADO GENERAL
   // =====================================================
@@ -106,6 +111,94 @@ export class OperacionesPendientesComponent implements OnInit {
     }
   ];
 
+  // Devolución bancaria: el origen se fija por la operación original.
+  get esDevolucionCartera(): boolean {
+    return this.operacionSeleccionada?.modulo_origen === 'CARTERA'
+      && ['REVERSA_PAGO_CUOTAS', 'REVERSA_PRORROGA'].includes(
+        this.operacionSeleccionada?.proceso_origen ?? ''
+      );
+  }
+
+  private cuentaOriginalDevolucion(): number | null {
+    if (!this.esDevolucionCartera) return null;
+    const concepto = this.operacionSeleccionada?.concepto ?? '';
+    const coincidencia = /cuenta bancaria original\s+(\d+)/i.exec(concepto);
+    const cuenta = coincidencia ? Number(coincidencia[1]) : NaN;
+    return Number.isSafeInteger(cuenta) && cuenta > 0 ? cuenta : null;
+  }
+
+  /** Bancos e importes originales publicados por Cartera para la reversión de prórroga. */
+  private bancosOriginalesProrroga(): Map<number, number> | null {
+    if (this.operacionSeleccionada?.proceso_origen !== 'REVERSA_PRORROGA') {
+      return null;
+    }
+
+    const concepto = this.operacionSeleccionada.concepto ?? '';
+    const coincidencia = /Bancos e importes originales:\s*\{([^}]*)\}/i.exec(concepto);
+    if (!coincidencia) return null;
+
+    const importes = new Map<number, number>();
+    for (const elemento of coincidencia[1].split(',')) {
+      const partes = /^\s*(\d+)\s*=\s*(\d+(?:\.\d{1,2})?)\s*$/.exec(elemento);
+      if (!partes) return null;
+      const cuenta = Number(partes[1]);
+      const valor = Number(partes[2]);
+      if (!Number.isSafeInteger(cuenta) || cuenta <= 0 ||
+          !Number.isFinite(valor) || valor <= 0 || importes.has(cuenta)) {
+        return null;
+      }
+      importes.set(cuenta, Math.round(valor * 100));
+    }
+    return importes.size > 0 ? importes : null;
+  }
+
+  /** Prepara únicamente las cuentas originales; las referencias son editables. */
+  private prepararDevolucion(): void {
+    if (!this.esDevolucionCartera || this.cargandoDetalle || this.cargandoCuentas) return;
+    if (this.saldoDisponible <= 0) return;
+
+    let distribucion: Map<number, number>;
+    if (this.operacionSeleccionada?.proceso_origen === 'REVERSA_PRORROGA') {
+      const bancos = this.bancosOriginalesProrroga();
+      if (!bancos) {
+        this.mensajeError = 'La devolución no identifica los bancos e importes originales.';
+        return;
+      }
+      distribucion = bancos;
+    } else {
+      const cuentaOriginal = this.cuentaOriginalDevolucion();
+      if (!cuentaOriginal) {
+        this.mensajeError = 'La devolución no identifica la cuenta bancaria original.';
+        return;
+      }
+      distribucion = new Map([[cuentaOriginal, Math.round(this.saldoDisponible * 100)]]);
+    }
+
+    const totalCentavos = [...distribucion.values()].reduce((total, valor) => total + valor, 0);
+    if (totalCentavos !== Math.round(this.saldoDisponible * 100)) {
+      this.mensajeError = 'Los importes originales no coinciden con el saldo de devolución.';
+      return;
+    }
+    if ([...distribucion.keys()].some(id =>
+      !this.cuentasParaPago.some(c => Number(c.id_cuenta_bancaria) === id))) {
+      this.mensajeError = 'Una cuenta bancaria original no está habilitada para egresos en esta agencia.';
+      return;
+    }
+
+    this.lineasPago = [...distribucion.entries()].map(([idCuenta, centavos]) => ({
+      idTemporal: this.siguienteIdTemporal++,
+      medioPago: 'TRANSFERENCIA' as MedioPagoOperacion,
+      idBeneficiario: this.operacionSeleccionada?.id_datos_personal ?? null,
+      idCuentaBancaria: idCuenta,
+      numeroDocumento: '',
+      valor: centavos / 100,
+      observaciones: ''
+    }));
+    this.invalidarVistaPrevia();
+    this.lineasPago.forEach(linea => this.sugerirObservacion(linea));
+    this.mensajeError = '';
+  }
+
   // =====================================================
   // INICIALIZACIÓN
   // =====================================================
@@ -123,7 +216,7 @@ export class OperacionesPendientesComponent implements OnInit {
     }
 
     this.consultarOperaciones();
-    this.consultarCuentasParaPago();
+
   }
 
   // =====================================================
@@ -237,7 +330,7 @@ export class OperacionesPendientesComponent implements OnInit {
   // =====================================================
 
   /** Consulta cuentas según naturaleza y evita ofrecer cuentas de egreso en recaudos. */
-  private consultarCuentasParaOperacion(): void {
+  public consultarCuentasParaOperacion(): void {
     if (!this.idAgencia || !this.operacionSeleccionada) return;
     const idAgencia = this.idAgencia;
     this.cargandoCuentas = true;
@@ -249,7 +342,12 @@ export class OperacionesPendientesComponent implements OnInit {
     consulta.pipe(takeUntilDestroyed(this.destroyRef), finalize(() => {
       this.cargandoCuentas = false;
     })).subscribe({
-      next: cuentas => { this.cuentasParaPago = cuentas ?? []; },
+      next: cuentas => {
+        if (this.idAgencia !== idAgencia || !this.operacionSeleccionada) return;
+        this.cuentasParaPago = cuentas ?? [];
+        this.cargandoCuentas = false;
+        this.prepararDevolucion();
+      },
       error: error => {
         this.errorCuentas = error?.error?.message ?? 'No fue posible consultar las cuentas bancarias.';
       }
@@ -265,6 +363,7 @@ export class OperacionesPendientesComponent implements OnInit {
     const versionActual = this.versionDetalle;
 
     this.operacionSeleccionada = operacion;
+    this.resultadoPago = null;
     // Carga cuentas aptas para ingresos, incluso si no están habilitadas para pagos.
     this.consultarCuentasParaOperacion();
 
@@ -302,6 +401,8 @@ export class OperacionesPendientesComponent implements OnInit {
 
           this.saldoDisponible =
             respuesta.saldo.saldoDisponible ?? 0;
+          this.cargandoDetalle = false;
+          this.prepararDevolucion();
         },
         error: error => {
 
@@ -341,6 +442,11 @@ export class OperacionesPendientesComponent implements OnInit {
     this.mensajeInformativo = '';
   }
 
+  /** Cierra el resumen de contabilización a petición del funcionario. */
+  cerrarResultadoPago(): void {
+    this.resultadoPago = null;
+  }
+
   // =====================================================
   // AGREGAR LÍNEA DE PAGO
   // =====================================================
@@ -348,6 +454,7 @@ export class OperacionesPendientesComponent implements OnInit {
   agregarLineaPago(): void {
 
     if (
+      this.esDevolucionCartera ||
       !this.operacionSeleccionada ||
       this.cargandoDetalle ||
       !['SALIDA', 'ENTRADA'].includes(this.operacionSeleccionada.naturaleza)
@@ -388,6 +495,8 @@ export class OperacionesPendientesComponent implements OnInit {
     idTemporal: number
   ): void {
 
+    if (this.esDevolucionCartera) return;
+
     this.invalidarVistaPrevia();
     this.observacionesSugeridas.delete(idTemporal);
     this.lineasPago = this.lineasPago.filter(
@@ -404,6 +513,7 @@ export class OperacionesPendientesComponent implements OnInit {
     medioPago: MedioPagoOperacion
   ): void {
 
+    if (this.esDevolucionCartera) return;
     this.invalidarVistaPrevia();
     linea.medioPago = medioPago;
 
@@ -455,7 +565,9 @@ export class OperacionesPendientesComponent implements OnInit {
 
     const origen = operacion.modulo_origen || 'ERP';
 
-    let observacion = operacion.naturaleza === 'ENTRADA'
+    let observacion = this.esDevolucionCartera
+      ? 'Devolución de recaudo bancario CARTERA'
+      : operacion.naturaleza === 'ENTRADA'
       ? `Recaudo de cuenta por cobrar ${origen}`
       : `Pago de obligación ${origen}`;
 
@@ -604,6 +716,37 @@ export class OperacionesPendientesComponent implements OnInit {
       return false;
     }
 
+    if (this.esDevolucionCartera) {
+      const esProrroga = this.operacionSeleccionada?.proceso_origen === 'REVERSA_PRORROGA';
+      const originales = esProrroga
+        ? this.bancosOriginalesProrroga()
+        : (() => {
+            const cuenta = this.cuentaOriginalDevolucion();
+            return cuenta ? new Map([[cuenta, Math.round(this.saldoDisponible * 100)]]) : null;
+          })();
+
+      if (!originales || this.lineasPago.length !== originales.size ||
+          Math.round(this.totalDistribuido * 100) !== Math.round(this.saldoDisponible * 100)) {
+        this.mensajeError = 'La devolución debe cubrir exactamente los bancos e importes originales.';
+        return false;
+      }
+      const cuentasVistas = new Set<number>();
+      for (const linea of this.lineasPago) {
+        const cuenta = Number(linea.idCuentaBancaria);
+        if (cuentasVistas.has(cuenta) || !originales.has(cuenta) ||
+            linea.medioPago !== 'TRANSFERENCIA' ||
+            Math.round(Number(linea.valor) * 100) !== originales.get(cuenta)) {
+          this.mensajeError = 'Cada transferencia debe corresponder al banco y valor originalmente recaudados.';
+          return false;
+        }
+        cuentasVistas.add(cuenta);
+        if (!linea.numeroDocumento.trim()) {
+          this.mensajeError = 'Registre la referencia bancaria de cada devolución.';
+          return false;
+        }
+      }
+    }
+
     for (const linea of this.lineasPago) {
 
       if (
@@ -670,7 +813,6 @@ export class OperacionesPendientesComponent implements OnInit {
   private invalidarVistaPrevia(): void {
     this.versionVistaPrevia++;
     this.vistaPrevia = null;
-    this.resultadoPago = null;
   }
 
   /** Llamar desde (ngModelChange) de cada campo editable. */
@@ -696,6 +838,7 @@ export class OperacionesPendientesComponent implements OnInit {
   }
 
   generarComprobante(): void {
+    if (!this.puedeEjecutarOperaciones) return;
     if (this.cargandoVistaPrevia || this.confirmandoPago) return;
     if (!this.validarDistribucion()) return;
     this.invalidarVistaPrevia();
@@ -730,6 +873,7 @@ export class OperacionesPendientesComponent implements OnInit {
   }
 
   confirmarPago(): void {
+    if (!this.puedeEjecutarOperaciones) return;
     if (this.confirmandoPago || this.cargandoVistaPrevia || !this.vistaPrevia) return;
     if (!this.validarDistribucion()) return;
     const solicitud = this.construirSolicitudPago();
@@ -750,17 +894,17 @@ export class OperacionesPendientesComponent implements OnInit {
       .subscribe({
         next: resultado => {
           this.invalidarVistaPrevia();
-          this.resultadoPago = resultado;
           this.lineasPago = [];
-          this.consultarOperaciones();
           if (this.operacionSeleccionada && resultado.saldoPendiente > 0) {
             this.seleccionarOperacion(this.operacionSeleccionada);
           } else {
             this.limpiarSeleccion();
           }
-          this.mensajeInformativo =
-            `Operación contabilizada. Comprobante ${resultado.tipoComprobante} ` +
-            `${resultado.numeroComprobante}. Saldo: ${resultado.saldoPendiente}.`;
+          this.consultarOperaciones();
+          this.resultadoPago = resultado;
+          // El resumen permanece visible aunque la operación completada
+          // desaparezca de la bandeja durante la actualización.
+          this.mensajeInformativo = '';
         },
         error: error => {
           console.error('Error confirmando pago', error);

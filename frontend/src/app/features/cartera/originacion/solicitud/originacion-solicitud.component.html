@@ -1194,7 +1194,7 @@
           [(ngModel)]="formulario.codigoGarantiaCredito"
           name="garantia"
           [disabled]="!solicitudEditable || guardandoCredito"
-          (ngModelChange)="previsualizarEnteAprobador()">
+          (ngModelChange)="alCambiarGarantia()">
 
           <option value="">
             Seleccione
@@ -1233,14 +1233,15 @@
           id="subgarantia"
           [(ngModel)]="formulario.codigoSubgarantia"
           name="subgarantia"
-          [disabled]="!solicitudEditable || guardandoCredito">
+          [disabled]="!solicitudEditable || guardandoCredito"
+          (ngModelChange)="alCambiarSubgarantia()">
 
           <option value="">
             No aplica
           </option>
 
           <option
-            *ngFor="let item of subgarantias"
+            *ngFor="let item of subgarantiasPermitidas"
             [value]="item.codigoSubgarantia">
 
             {{ item.descripcionSubgarantia }}
@@ -1273,7 +1274,7 @@
           </option>
 
           <option
-            *ngFor="let item of fondosGarantias"
+            *ngFor="let item of fondosPermitidos"
             [ngValue]="item.idFondoGarantia">
 
             {{ item.nombreFondo }}

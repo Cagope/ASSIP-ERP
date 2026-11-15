@@ -180,7 +180,7 @@ public class ReversionPagosRepository {
                             rs.getInt("id"), rs.getBigDecimal("valor")));
 
             String extraColumna = concepto.costas() ? ", tipo_movimiento" : "";
-            String extraValor = concepto.costas() ? ", 'A'" : "";
+            String extraValor = concepto.costas() ? ", 'D'" : "";
             String sql = "INSERT INTO " + tabla + " (" + clave
                     + ", fecha_movimiento, valor_debito, valor_credito, tipo_comprobante, "
                     + "numero_comprobante, " + concepto.observacion()
@@ -221,6 +221,66 @@ public class ReversionPagosRepository {
     private record AbonoAuxiliar(Integer id, BigDecimal valor) {}
 
     public record ResumenAuxiliares(int movimientos, BigDecimal valorRestituido) {}
+
+    /**
+     * Verifica, antes de emitir el CC contrario, que los abonos de cada concepto
+     * coincidan exactamente con los importes aplicados en el pago original.
+     * Un concepto en cero no debe tener abonos vinculados a ese pago.
+     */
+    public void validarAbonosAuxiliaresPago(Long idPago, Integer idCredito,
+                                           String comprobanteOriginal) {
+        if (idPago == null || idPago <= 0 || idCredito == null || idCredito <= 0
+                || comprobanteOriginal == null || comprobanteOriginal.isBlank()) {
+            throw new IllegalArgumentException("Identificación del pago incompleta.");
+        }
+
+        List<java.util.Map<String, Object>> pagos = jdbc.queryForList("""
+                SELECT liquidacion #>> '{simulacion,segurosAplicados}' AS seguros,
+                       liquidacion #>> '{simulacion,aliviosAplicados}' AS alivios,
+                       liquidacion #>> '{simulacion,costasJudicialesAplicadas}' AS costas
+                FROM cartera.pagos_cuotas
+                WHERE id_pago = ? AND id_cartera_credito = ?
+                  AND tipo_comprobante = 'CC'
+                  AND TRIM(numero_comprobante) = TRIM(?)
+                  AND estado = 'APLICADO'
+                """, idPago, idCredito, comprobanteOriginal);
+        if (pagos.size() != 1) {
+            throw new IllegalStateException("No se encontró el pago aplicado para validar auxiliares.");
+        }
+        var valores = pagos.get(0);
+        String[] nombres = {"Seguros", "Alivios", "Costas Judiciales"};
+        String[] campos = {"seguros", "alivios", "costas"};
+        for (int i = 0; i < CONCEPTOS_AUXILIARES.size(); i++) {
+            var concepto = CONCEPTOS_AUXILIARES.get(i);
+            Object esperadoTexto = valores.get(campos[i]);
+            if (esperadoTexto == null) {
+                throw new IllegalStateException("El pago no conserva el valor aplicado a "
+                        + nombres[i] + ". No se puede validar su reversión.");
+            }
+            BigDecimal esperado;
+            try {
+                esperado = new BigDecimal(esperadoTexto.toString());
+            } catch (NumberFormatException ex) {
+                throw new IllegalStateException("Valor aplicado inválido para " + nombres[i] + ".", ex);
+            }
+            if (esperado.signum() < 0) {
+                throw new IllegalStateException("Valor aplicado negativo para " + nombres[i] + ".");
+            }
+            String sql = "SELECT COALESCE(SUM(d.valor_credito), 0) FROM cartera."
+                    + concepto.detalle() + " d JOIN cartera." + concepto.cabecera()
+                    + " h ON h." + concepto.clave() + " = d." + concepto.clave()
+                    + " WHERE h.id_cartera_credito = ? AND d.estado = 'A'"
+                    + " AND d.tipo_comprobante = 'CC' AND TRIM(d.numero_comprobante) = TRIM(?)"
+                    + " AND d.valor_debito = 0 AND d.valor_credito > 0";
+            BigDecimal encontrado = jdbc.queryForObject(sql, BigDecimal.class,
+                    idCredito, comprobanteOriginal);
+            if (encontrado == null || esperado.compareTo(encontrado) != 0) {
+                throw new IllegalStateException("No coincide el abono de " + nombres[i]
+                        + " del pago original. Aplicado: " + esperado
+                        + "; registrado: " + encontrado + ". Reversión cancelada.");
+            }
+        }
+    }
 
     // ================================================================
     // VALIDACIÓN DEL ESTADO DEL CRÉDITO

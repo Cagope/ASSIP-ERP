@@ -1,0 +1,42 @@
+<div class="auxiliar-exportacion">
+  <header class="encabezado">
+    <h2>Exportación de auxiliares contables</h2>
+    <p>Movimientos por tercero y cuenta, con identificación tributaria y alertas de información.</p>
+  </header>
+
+  <section class="panel-filtros">
+    <h3>Parámetros de consulta</h3>
+    <form #formulario="ngForm" (ngSubmit)="exportar()">
+      <div class="filtros-grid">
+        <div class="campo campo-agencia">
+          <label for="agencia">Agencia</label>
+          <select id="agencia" name="agencia" [(ngModel)]="filtros.idAgencia" [disabled]="cargando" required>
+            <option [ngValue]="0">Seleccione una agencia</option>
+            <option *ngFor="let agencia of agencias" [ngValue]="agencia.idAgencia">
+              {{ agencia.codigoAgencia }} - {{ agencia.nombreAgencia }}
+            </option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="fechaInicial">Fecha inicial</label>
+          <input id="fechaInicial" name="fechaInicial" type="date" [(ngModel)]="filtros.fechaInicial" [disabled]="cargando" required />
+        </div>
+        <div class="campo">
+          <label for="fechaFinal">Fecha final</label>
+          <input id="fechaFinal" name="fechaFinal" type="date" [(ngModel)]="filtros.fechaFinal" [disabled]="cargando" required />
+        </div>
+      </div>
+      <div class="modalidad">
+        <span>Presentación del auxiliar</span>
+        <label><input type="radio" name="modalidad" [(ngModel)]="filtros.modalidad" value="RESUMIDO" [disabled]="cargando" /> Resumido por tercero y cuenta</label>
+        <label><input type="radio" name="modalidad" [(ngModel)]="filtros.modalidad" value="DETALLADO" [disabled]="cargando" /> Detallado por movimiento</label>
+      </div>
+      <div class="acciones">
+        <button class="btn-consultar" type="submit" [disabled]="cargando || formulario.invalid || !filtros.idAgencia">
+          {{ cargando ? 'Generando...' : 'Exportar Excel' }}
+        </button>
+      </div>
+    </form>
+  </section>
+  <div class="mensaje-error" *ngIf="mensajeError" role="alert">{{ mensajeError }}</div>
+</div>

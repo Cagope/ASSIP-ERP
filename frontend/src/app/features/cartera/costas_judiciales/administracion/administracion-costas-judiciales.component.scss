@@ -1,0 +1,443 @@
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.costas-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  color: var(--text-color, #253247);
+}
+
+.encabezado {
+  h2 {
+    margin: 0 0 5px;
+    font-size: 1.5rem;
+    font-weight: 650;
+  }
+
+  p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+}
+
+.bloque {
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+
+  h3 {
+    margin: 0 0 18px;
+    font-size: 1.05rem;
+    font-weight: 650;
+    color: #1e3a5f;
+  }
+
+  h4 {
+    margin: 0 0 12px;
+    font-size: 0.95rem;
+  }
+}
+
+.datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 8px;
+  background: #f8fafc;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+  }
+
+  small {
+    font-size: 0.75rem;
+    color: #64748b;
+  }
+
+  strong {
+    font-size: 0.9rem;
+    overflow-wrap: anywhere;
+  }
+}
+
+.formulario {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #fff;
+    color: inherit;
+    font: inherit;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 78px;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgb(37 99 235 / 10%);
+  }
+
+  input:disabled,
+  select:disabled,
+  textarea:disabled {
+    background: #f1f5f9;
+    cursor: not-allowed;
+  }
+
+  /* Estándar monetario del ERP. */
+  input.importe-monetario {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.campo-completo {
+  grid-column: 1 / -1;
+}
+
+/* =========================================================
+   CONTRAPARTIDA CONTABLE
+   ========================================================= */
+
+.tercero {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: #f8fbff;
+
+  h4 {
+    margin-bottom: 12px;
+  }
+
+  p {
+    margin: 8px 0;
+    font-size: 0.88rem;
+  }
+
+  .ayuda {
+    color: #64748b;
+    font-size: 0.8rem;
+  }
+
+  .datos {
+    margin-top: 10px;
+  }
+}
+
+/* =========================================================
+   BÚSQUEDA DE TERCEROS
+   Patrón visual de Contabilidad - Crear Comprobantes
+   ========================================================= */
+
+.campo-busqueda {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  width: 100%;
+  max-width: 440px;
+  min-width: 0;
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+  }
+
+  input {
+    display: block;
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #fff;
+    color: #253247;
+    font: inherit;
+    font-size: 0.88rem;
+    box-sizing: border-box;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgb(37 99 235 / 10%);
+  }
+
+  input:disabled {
+    background: #f1f5f9;
+    cursor: not-allowed;
+  }
+
+  > small {
+    color: #64748b;
+    font-size: 0.78rem;
+  }
+}
+
+/* Lista desplegable de coincidencias. */
+.resultados-busqueda {
+  position: absolute;
+  top: calc(100% - 1px);
+  left: 0;
+  z-index: 1000;
+  width: 100%;
+  max-height: 260px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 6px 18px rgb(15 23 42 / 15%);
+  box-sizing: border-box;
+
+  button {
+    display: block;
+    width: 100%;
+    min-height: 34px;
+    margin: 0;
+    padding: 8px 10px;
+    border: 0;
+    border-bottom: 1px solid #edf2f7;
+    border-radius: 0;
+    background: #fff;
+    color: #253247;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 400;
+    line-height: 1.35;
+    text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    cursor: pointer;
+    box-sizing: border-box;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    &:hover,
+    &:focus-visible {
+      background: #eff6ff;
+      color: #1d4ed8;
+      outline: none;
+    }
+  }
+}
+
+/* =========================================================
+   TABLAS
+   ========================================================= */
+
+.tabla-contenedor {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 12px;
+}
+
+.tabla-creditos,
+.tabla-comprobante {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+
+  th,
+  td {
+    padding: 11px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  thead {
+    background: #f1f5f9;
+  }
+
+  th {
+    color: #334155;
+    font-weight: 650;
+  }
+
+  tbody tr:hover {
+    background: #f8fafc;
+  }
+
+  .numero {
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  tfoot {
+    background: #f1f5f9;
+    font-weight: 700;
+  }
+}
+
+/* =========================================================
+   ACCIONES Y BOTONES
+   ========================================================= */
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+button {
+  min-height: 36px;
+  padding: 8px 15px;
+  border: 1px solid #2563eb;
+  border-radius: 6px;
+  background: #2563eb;
+  color: #fff;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: #1d4ed8;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  &.confirmar {
+    background: #15803d;
+    border-color: #15803d;
+
+    &:hover:not(:disabled) {
+      background: #166534;
+    }
+  }
+}
+
+/* =========================================================
+   MENSAJES Y RESULTADOS
+   ========================================================= */
+
+.mensaje {
+  padding: 12px 15px;
+  border-radius: 7px;
+  font-size: 0.9rem;
+
+  &.error {
+    border: 1px solid #fecaca;
+    background: #fef2f2;
+    color: #991b1b;
+  }
+
+  &.exito {
+    border: 1px solid #bbf7d0;
+    background: #f0fdf4;
+    color: #166534;
+  }
+}
+
+.resultado {
+  border-color: #bbf7d0;
+
+  h3 {
+    color: #166534;
+  }
+
+  p {
+    margin: 8px 0;
+  }
+}
+
+/* =========================================================
+   DISEÑO RESPONSIVO
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .formulario {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .costas-page {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .bloque {
+    padding: 14px;
+  }
+
+  .formulario {
+    grid-template-columns: 1fr;
+  }
+
+  .campo-completo {
+    grid-column: auto;
+  }
+
+  .campo-busqueda {
+    max-width: 100%;
+  }
+
+  .resultados-busqueda {
+    max-height: 220px;
+  }
+
+  .acciones {
+    flex-direction: column;
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .tabla-creditos,
+  .tabla-comprobante {
+    min-width: 500px;
+  }
+}

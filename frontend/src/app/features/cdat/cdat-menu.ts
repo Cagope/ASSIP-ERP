@@ -92,25 +92,25 @@ export const cdatMenu = {
         {
           label: 'Consulta de CDATs',
           route: '/cdat/informes/consulta-cdats',
-          permiso: 'CDAT_INFORMES_VIEW'
+          permiso: 'CDAT_CONSULTA_INFORME_VIEW'
         },
 
         {
           label: 'Simulador CDAT',
           route: '/cdat/informes/simulador-cdat',
-          permiso: 'CDAT_INFORMES_VIEW'
+          permiso: 'CDAT_SIMULADOR_VIEW'
         },
 
         {
           label: 'Estadísticos CDAT',
           route: '/cdat/informes/estadisticos-cdat',
-          permiso: 'CDAT_INFORMES_VIEW'
+          permiso: 'CDAT_ESTADISTICOS_VIEW'
         },
 
         {
           label: 'Informes por fechas CDAT',
           route: '/cdat/informes/fechas-cdat',
-          permiso: 'CDAT_INFORMES_VIEW'
+          permiso: 'CDAT_INFORMES_FECHAS_VIEW'
         }
 
       ]

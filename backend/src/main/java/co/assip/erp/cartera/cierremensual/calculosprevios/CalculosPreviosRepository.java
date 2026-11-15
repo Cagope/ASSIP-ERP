@@ -1575,7 +1575,9 @@ public class CalculosPreviosRepository {
                 ) AS identificacion_bien,
 
                 chvb.valor_comercial
-                    AS valor_bien_fecha_corte
+                    AS valor_bien_fecha_corte,
+
+                chvb.fecha_ultimo_avaluo
 
             FROM hoja_vida.cierres_hoja_vida_bienes chvb
 
@@ -1612,6 +1614,7 @@ public class CalculosPreviosRepository {
                 fb.identificacion_bien,
 
                 fb.valor_bien_fecha_corte,
+                fb.fecha_ultimo_avaluo,
 
                 tb.cantidad_creditos_bien,
 
@@ -1700,6 +1703,7 @@ public class CalculosPreviosRepository {
                 d.identificacion_bien,
 
                 d.valor_bien_fecha_corte,
+                d.fecha_ultimo_avaluo,
 
                 d.cantidad_creditos_bien,
                 d.saldo_total_creditos_bien,
@@ -1742,6 +1746,7 @@ public class CalculosPreviosRepository {
             identificacion_bien,
 
             valor_bien_fecha_corte,
+            fecha_ultimo_avaluo,
 
             cantidad_creditos_bien,
             saldo_total_creditos_bien,
@@ -1770,6 +1775,7 @@ public class CalculosPreviosRepository {
             d.identificacion_bien,
 
             d.valor_bien_fecha_corte,
+                d.fecha_ultimo_avaluo,
 
             d.cantidad_creditos_bien,
             d.saldo_total_creditos_bien,
@@ -2958,8 +2964,8 @@ public class CalculosPreviosRepository {
                                 // =============================
 
                                 rs.getObject(
-                                    "id_cierre_cartera",
-                                    Integer.class
+                                        "id_cierre_cartera",
+                                        Integer.class
                                 ),
 
                                 rs.getObject(

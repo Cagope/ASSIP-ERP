@@ -1,29 +1,318 @@
-:host { display: block; }
-.comprobante-resumen { padding: 20px; color: var(--text-color, #243044); }
-.encabezado h2 { margin: 0 0 6px; font-size: 1.45rem; }
-.encabezado p { margin: 0 0 20px; opacity: .75; }
-.filtros { display: flex; flex-wrap: wrap; align-items: end; gap: 14px; padding: 18px;
-  border: 1px solid #dce2ea; border-radius: 10px; margin-bottom: 18px; }
-.filtros label { display: flex; flex-direction: column; gap: 6px; min-width: 165px; flex: 1; }
-.filtros label:first-child { flex: 2; min-width: 235px; }
-.filtros input, .filtros select { padding: 9px 11px; border: 1px solid #cbd5e1;
-  border-radius: 6px; min-height: 40px; background: #fff; color: #243044; }
-.acciones { display: flex; flex-wrap: wrap; gap: 8px; }
-button { min-height: 40px; padding: 8px 14px; border-radius: 6px; border: 1px solid #94a3b8;
-  background: #fff; cursor: pointer; }
-button.primario { background: #1e40af; border-color: #1e40af; color: #fff; }
-button:disabled { opacity: .5; cursor: not-allowed; }
-.error { color: #b91c1c; }
-.resumen { display: flex; flex-wrap: wrap; gap: 20px; padding: 12px 0; }
-.tabla-contenedor { overflow-x: auto; border: 1px solid #dce2ea; border-radius: 8px; }
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: 10px 12px; border-bottom: 1px solid #e2e8f0; text-align: left; }
-thead { background: #f1f5f9; }
-tbody tr:nth-child(even) { background: #f8fafc; }
-tfoot { background: #e2e8f0; }
-.numero { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.sin-datos { padding: 16px; }
-@media (max-width: 720px) {
-  .comprobante-resumen { padding: 12px; }
-  .filtros label, .filtros label:first-child { flex: 1 1 100%; }
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+// =========================================================
+// CONTENEDOR PRINCIPAL
+// =========================================================
+
+.comprobante-resumen {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+  color: var(--text-color, #243044);
+}
+
+// =========================================================
+// ENCABEZADO
+// ESTÁNDAR RESUMEN DIARIO DETALLADO
+// =========================================================
+
+.encabezado {
+  h2 {
+    margin: 0 0 6px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #17365d;
+  }
+
+  p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+}
+
+// =========================================================
+// PANEL DE FILTROS
+// =========================================================
+
+.panel-filtros,
+.filtros-panel,
+.panel-parametros {
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+
+  h2,
+  h3 {
+    margin: 0 0 18px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #17365d;
+  }
+}
+
+// =========================================================
+// DISTRIBUCIÓN DE FILTROS
+// =========================================================
+
+.filtros-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 2fr) repeat(2, minmax(160px, 1fr));
+  gap: 16px;
+  align-items: end;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+  }
+
+  select,
+  input {
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #fff;
+    color: #243247;
+    font: inherit;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    &:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgb(37 99 235 / 10%);
+    }
+
+    &:disabled {
+      background: #f1f5f9;
+      color: #94a3b8;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// =========================================================
+// COMPATIBILIDAD CON FILTROS ORIGINALES
+// =========================================================
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  margin-bottom: 18px;
+  background: #fff;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 165px;
+    flex: 1;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+
+    &:first-child {
+      flex: 2;
+      min-width: 235px;
+    }
+  }
+
+  input,
+  select {
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #fff;
+    color: #243247;
+    font: inherit;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    &:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgb(37 99 235 / 10%);
+    }
+
+    &:disabled {
+      background: #f1f5f9;
+      color: #94a3b8;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// =========================================================
+// BOTONES
+// ESTÁNDAR RESUMEN DIARIO DETALLADO
+// =========================================================
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.acciones button {
+  min-height: 38px;
+  padding: 8px 22px;
+  border: 1px solid #94a3b8;
+  border-radius: 6px;
+  background: #fff;
+  color: #243247;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.acciones .btn-consultar,
+.acciones button.primario {
+  border-color: #1d4ed8;
+  background: #1d4ed8;
+  color: #fff;
+
+  &:hover:not(:disabled) {
+    background: #1e40af;
+  }
+}
+
+.acciones button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+// =========================================================
+// MENSAJES Y RESUMEN
+// SIN CAMBIOS
+// =========================================================
+
+.error {
+  color: #b91c1c;
+}
+
+.resumen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 12px 0;
+}
+
+// =========================================================
+// TABLA DE RESULTADOS
+// CONSERVA EL DISEÑO ORIGINAL
+// =========================================================
+
+.tabla-contenedor {
+  overflow-x: auto;
+  border: 1px solid #dce2ea;
+  border-radius: 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+thead {
+  background: #f1f5f9;
+}
+
+tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+tfoot {
+  background: #e2e8f0;
+}
+
+.numero {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.sin-datos {
+  padding: 16px;
+}
+
+// =========================================================
+// DISEÑO RESPONSIVO
+// =========================================================
+
+@media (max-width: 900px) {
+  .filtros-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .campo-agencia {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 600px) {
+  .comprobante-resumen {
+    padding: 12px;
+  }
+
+  .panel-filtros,
+  .filtros-panel,
+  .panel-parametros {
+    padding: 14px;
+  }
+
+  .filtros-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .campo-agencia {
+    grid-column: auto;
+  }
+
+  .filtros label,
+  .filtros label:first-child {
+    flex: 1 1 100%;
+  }
+
+  .acciones {
+    justify-content: stretch;
+  }
+
+  .acciones button {
+    width: 100%;
+  }
 }

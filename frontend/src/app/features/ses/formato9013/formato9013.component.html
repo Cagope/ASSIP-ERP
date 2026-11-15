@@ -1,0 +1,399 @@
+
+<div class="formato9013">
+
+  <!-- Encabezado -->
+  <header class="formato9013__encabezado">
+
+    <div class="formato9013__titulo">
+      <h1>Formato 9013 - Aportes Sociales</h1>
+
+      <p>
+        Superintendencia de la Economía Solidaria.
+        Consulta de aportes sociales con base en
+        los cierres mensuales definitivos de Depósitos.
+      </p>
+    </div>
+
+  </header>
+
+  <!-- Filtros y acciones: diseño estándar SES 9999 -->
+  <section class="formato9013__panel formato9013__panel--filtros">
+    <div class="formato9013__filtros">
+
+      <div class="formato9013__campo formato9013__campo--ano">
+        <label for="formato9013-ano">Año</label>
+        <input
+          id="formato9013-ano"
+          name="anoSeleccionado"
+          type="number"
+          min="1900"
+          max="9999"
+          step="1"
+          [(ngModel)]="anoSeleccionado"
+          (ngModelChange)="cambiarPeriodo()"
+          [disabled]="cargando() || generando()"
+        />
+      </div>
+
+      <div class="formato9013__campo formato9013__campo--mes">
+        <label for="formato9013-mes">Mes</label>
+        <select
+          id="formato9013-mes"
+          name="mesSeleccionado"
+          [(ngModel)]="mesSeleccionado"
+          (ngModelChange)="cambiarPeriodo()"
+          [disabled]="cargando() || generando()"
+        >
+          <option *ngFor="let mes of meses" [ngValue]="mes.numero">
+            {{ mes.nombre }}
+          </option>
+        </select>
+      </div>
+
+      <div class="formato9013__campo formato9013__campo--fecha">
+        <label>Fecha de corte</label>
+        <div class="formato9013__fecha-corte">
+          {{ obtenerFechaCorteVisual() }}
+        </div>
+      </div>
+
+      <div class="formato9013__acciones">
+        <button
+          type="button"
+          class="formato9013__boton formato9013__boton--primario"
+          (click)="buscar()"
+          [disabled]="cargando() || generando()"
+        >
+          {{ cargando() ? 'Consultando...' : 'Consultar' }}
+        </button>
+
+        <button
+          type="button"
+          class="formato9013__boton formato9013__boton--plano"
+          (click)="generarPlano()"
+          [disabled]="!puedeGenerar"
+        >
+          Generar TXT SES
+        </button>
+
+        <button
+          type="button"
+          class="formato9013__boton formato9013__boton--excel"
+          (click)="exportarExcel()"
+          [disabled]="!puedeGenerar"
+        >
+          Exportar Excel
+        </button>
+
+        <button
+          type="button"
+          class="formato9013__boton formato9013__boton--limpiar"
+          (click)="limpiar()"
+          [disabled]="cargando() || generando()"
+        >
+          Limpiar
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Mensajes -->
+  <div
+    *ngIf="mensajeError()"
+    class="formato9013__mensaje formato9013__mensaje--error"
+    role="alert"
+  >
+    {{ mensajeError() }}
+  </div>
+
+  <div
+    *ngIf="mensajeExito()"
+    class="formato9013__mensaje formato9013__mensaje--exito"
+    role="status"
+  >
+    {{ mensajeExito() }}
+  </div>
+
+  <!-- Resultados -->
+  <ng-container *ngIf="consultaVigente">
+
+    <!-- Resumen financiero -->
+    <section class="formato9013__panel">
+
+      <div class="formato9013__panel-titulo">
+        <h2>Resumen de aportes sociales</h2>
+
+        <span class="formato9013__periodo">
+          Corte: {{ obtenerFechaCorteVisual() }}
+        </span>
+      </div>
+
+      <div class="formato9013__resumen">
+
+        <div class="formato9013__indicador">
+          <span class="formato9013__indicador-etiqueta">
+            Asociados
+          </span>
+
+          <strong class="formato9013__indicador-valor">
+            {{ totales.registros | number:'1.0-0':'es-CO' }}
+          </strong>
+        </div>
+
+        <div class="formato9013__indicador">
+          <span class="formato9013__indicador-etiqueta">
+            Saldo de aportes
+          </span>
+
+          <strong class="formato9013__indicador-valor">
+            {{ totales.saldoAportes | number:'1.2-2':'es-CO' }}
+          </strong>
+        </div>
+
+        <div class="formato9013__indicador">
+          <span class="formato9013__indicador-etiqueta">
+            Aportes ordinarios
+          </span>
+
+          <strong class="formato9013__indicador-valor">
+            {{ totales.aportesOrdinarios | number:'1.2-2':'es-CO' }}
+          </strong>
+        </div>
+
+        <div class="formato9013__indicador">
+          <span class="formato9013__indicador-etiqueta">
+            Revalorización
+          </span>
+
+          <strong class="formato9013__indicador-valor">
+            {{ totales.valorRevalorizacion | number:'1.2-2':'es-CO' }}
+          </strong>
+        </div>
+
+        <div class="formato9013__indicador">
+          <span class="formato9013__indicador-etiqueta">
+            Monto promedio
+          </span>
+
+          <strong class="formato9013__indicador-valor">
+            {{ totales.montoPromedio | number:'1.2-2':'es-CO' }}
+          </strong>
+        </div>
+
+      </div>
+
+      <p class="formato9013__nota">
+        Los saldos corresponden al cierre mensual definitivo
+        de Depósitos. El monto promedio se calcula sobre
+        el período histórico de 365 días.
+      </p>
+
+    </section>
+
+    <!-- Detalle de asociados -->
+    <section class="formato9013__panel">
+
+      <div class="formato9013__panel-titulo">
+        <h2>Detalle de asociados</h2>
+
+        <span class="formato9013__cantidad">
+          {{ items.length | number:'1.0-0':'es-CO' }}
+          registros
+        </span>
+      </div>
+
+      <div
+        *ngIf="items.length > 0; else sinRegistros"
+        class="formato9013__tabla-contenedor"
+      >
+
+        <table class="formato9013__tabla">
+
+          <thead>
+          <tr>
+            <th scope="col">N.º</th>
+            <th scope="col">Tipo</th>
+            <th scope="col">Identificación</th>
+            <th scope="col">Asociado</th>
+
+            <th
+              scope="col"
+              class="formato9013__numero"
+            >
+              Saldo
+            </th>
+
+            <th
+              scope="col"
+              class="formato9013__numero"
+            >
+              Aporte mensual
+            </th>
+
+            <th
+              scope="col"
+              class="formato9013__numero"
+            >
+              Ordinario
+            </th>
+
+            <th
+              scope="col"
+              class="formato9013__numero"
+            >
+              Extraordinario
+            </th>
+
+            <th
+              scope="col"
+              class="formato9013__numero"
+            >
+              Revalorización
+            </th>
+
+            <th
+              scope="col"
+              class="formato9013__numero"
+            >
+              Promedio
+            </th>
+
+            <th scope="col">
+              Última fecha
+            </th>
+
+            <th
+              scope="col"
+              class="formato9013__numero"
+            >
+              Contribuciones
+            </th>
+          </tr>
+          </thead>
+
+          <tbody>
+
+          <tr *ngFor="let item of items">
+
+            <td>
+              {{ item.consecutivo }}
+            </td>
+
+            <td>
+              {{ item.tipoIdentificacion }}
+            </td>
+
+            <td>
+              {{ item.numeroIdentificacion }}
+            </td>
+
+            <td class="formato9013__asociado">
+              {{
+              (
+              (item.primerApellido || '') + ' ' +
+              (item.segundoApellido || '') + ' ' +
+              (item.nombres || '')
+              ).trim()
+              }}
+            </td>
+
+            <!-- Saldo de aportes -->
+            <td class="formato9013__numero">
+              {{ item.saldoAportes | number:'1.2-2':'es-CO' }}
+            </td>
+
+            <!-- Aporte mensual -->
+            <td class="formato9013__numero">
+              {{ (item.valorAporteMensual ?? 0) | number:'1.2-2':'es-CO' }}
+            </td>
+
+            <!-- Aportes ordinarios -->
+            <td class="formato9013__numero">
+              {{ (item.aportesOrdinarios ?? 0) | number:'1.2-2':'es-CO' }}
+            </td>
+
+            <!-- Aportes extraordinarios -->
+            <td class="formato9013__numero">
+              {{ (item.aportesExtraordinarios ?? 0) | number:'1.2-2':'es-CO' }}
+            </td>
+
+            <!-- Revalorización -->
+            <td class="formato9013__numero">
+              {{ (item.valorRevalorizacion ?? 0) | number:'1.2-2':'es-CO' }}
+            </td>
+
+            <!-- Monto promedio -->
+            <td class="formato9013__numero">
+              {{ (item.montoPromedio ?? 0) | number:'1.2-2':'es-CO' }}
+            </td>
+
+            <!-- Última fecha -->
+            <td>
+              {{ item.ultimaFecha || '—' }}
+            </td>
+
+            <!-- Contribuciones -->
+            <td class="formato9013__numero">
+              {{ (item.contribuciones ?? 0) | number:'1.2-2':'es-CO' }}
+            </td>
+
+          </tr>
+
+          </tbody>
+
+          <tfoot>
+          <tr>
+
+            <th colspan="4">
+              TOTALES
+            </th>
+
+            <td class="formato9013__numero">
+              {{ totales.saldoAportes | number:'1.2-2':'es-CO' }}
+            </td>
+
+            <td class="formato9013__numero">
+              {{ totales.valorAporteMensual | number:'1.2-2':'es-CO' }}
+            </td>
+
+            <td class="formato9013__numero">
+              {{ totales.aportesOrdinarios | number:'1.2-2':'es-CO' }}
+            </td>
+
+            <td class="formato9013__numero">
+              {{ totales.aportesExtraordinarios | number:'1.2-2':'es-CO' }}
+            </td>
+
+            <td class="formato9013__numero">
+              {{ totales.valorRevalorizacion | number:'1.2-2':'es-CO' }}
+            </td>
+
+            <td class="formato9013__numero">
+              {{ totales.montoPromedio | number:'1.2-2':'es-CO' }}
+            </td>
+
+            <td></td>
+
+            <td class="formato9013__numero">
+              {{ totales.contribuciones | number:'1.2-2':'es-CO' }}
+            </td>
+
+          </tr>
+          </tfoot>
+
+        </table>
+
+      </div>
+
+      <ng-template #sinRegistros>
+        <div class="formato9013__sin-registros">
+          No se encontraron registros para el período seleccionado.
+        </div>
+      </ng-template>
+
+    </section>
+
+  </ng-container>
+
+</div>

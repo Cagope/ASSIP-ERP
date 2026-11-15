@@ -30,9 +30,8 @@ export class ProrrogasV1Component implements OnDestroy {
   interesMora = 0;
   capital = 0;
   seguro = 0;
-  aportes = 0;
-  fondoGarantia = 0;
-  otrosConceptos = 0;
+  alivios = 0;
+  costasJudiciales = 0;
   observacion = '';
   cajas: ProrrogasCaja[] = [];
   cuentasAhorro: ProrrogasCuentaAhorro[] = [];
@@ -162,9 +161,8 @@ export class ProrrogasV1Component implements OnDestroy {
     this.interesMora = 0;
     this.capital = 0;
     this.seguro = 0;
-    this.aportes = 0;
-    this.fondoGarantia = 0;
-    this.otrosConceptos = 0;
+    this.alivios = 0;
+    this.costasJudiciales = 0;
     this.mesesProrroga = 1;
     this.observacion = '';
     this.error = null;
@@ -194,9 +192,8 @@ export class ProrrogasV1Component implements OnDestroy {
           this.interesMora = l.valorInteresMora;
           this.seguro = l.valorSeguro;
           this.capital = 0;
-          this.aportes = l.valorAportes;
-          this.fondoGarantia = l.valorFondoGarantia;
-          this.otrosConceptos = l.valorOtrosConceptos;
+          this.alivios = l.valorAlivios;
+          this.costasJudiciales = l.valorCostasJudiciales;
           this.efectivo = this.idCaja != null ? this.totalConceptos : 0;
           this.actualizarRestante();
           this.cargando = false;
@@ -314,7 +311,7 @@ export class ProrrogasV1Component implements OnDestroy {
 
   get totalConceptos(): number {
     return [this.interesCorriente, this.interesMora, this.capital, this.seguro,
-      this.aportes, this.fondoGarantia, this.otrosConceptos]
+      this.alivios, this.costasJudiciales]
       .reduce((total, valor) => total + (Number(valor) || 0), 0);
   }
 
@@ -350,7 +347,7 @@ export class ProrrogasV1Component implements OnDestroy {
     return fechaCalculada.toISOString().slice(0, 10);
   }
 
-  /** Estructura exacta del request del servicio Java, aún sin endpoint público de prórrogas. */
+  /** Construye la solicitud conforme al contrato vigente de Prórrogas V1. */
   construirSolicitud(): ProrrogasSolicitud | null {
     if (!this.credito) return null;
     const medios: ProrrogasMedioRecaudo[] = [];
@@ -375,9 +372,8 @@ export class ProrrogasV1Component implements OnDestroy {
       valorInteresMora: Number(this.interesMora) || 0,
       valorCapital: Number(this.capital) || 0,
       valorSeguro: Number(this.seguro) || 0,
-      valorAportes: Number(this.aportes) || 0,
-      valorFondoGarantia: Number(this.fondoGarantia) || 0,
-      valorOtrosConceptos: Number(this.otrosConceptos) || 0,
+      valorAlivios: Number(this.alivios) || 0,
+      valorCostasJudiciales: Number(this.costasJudiciales) || 0,
       mediosRecaudo: medios,
       observacion: this.observacion.trim()
     };
@@ -389,7 +385,7 @@ export class ProrrogasV1Component implements OnDestroy {
     if (this.credito.codigoEstadoCartera !== 'A' || (this.credito.saldoActual ?? 0) <= 0)
       return 'El crédito debe estar activo y tener saldo.';
     const importes = [this.interesCorriente, this.interesMora, this.capital, this.seguro,
-      this.aportes, this.fondoGarantia, this.otrosConceptos, this.efectivo, this.transferencia,
+      this.alivios, this.costasJudiciales, this.efectivo, this.transferencia,
       ...this.ahorros.map(a => a.valor)];
     if (importes.some(v => !Number.isSafeInteger(Number(v)) || Number(v) < 0))
       return 'Todos los valores deben ser pesos enteros no negativos.';
@@ -410,8 +406,12 @@ export class ProrrogasV1Component implements OnDestroy {
       return 'Un débito supera el saldo de la cuenta de Ahorros.';
     if (this.transferencia > 0 && this.idCuentaCxc == null)
       return this.errorCuentaCxc || 'Consultando la cuenta CxC parametrizada para esta agencia.';
-    if (this.aportes > 0 || this.fondoGarantia > 0 || this.otrosConceptos > 0)
-      return 'Falta parametrización contable para aportes, fondo de garantía u otros conceptos.';
+    if (this.seguro > this.liquidacion.valorSeguro)
+      return 'El recaudo de seguros supera el saldo pendiente.';
+    if (this.alivios > this.liquidacion.valorAlivios)
+      return 'El recaudo de alivios supera el saldo pendiente.';
+    if (this.costasJudiciales > this.liquidacion.valorCostasJudiciales)
+      return 'El recaudo de costas judiciales supera el saldo pendiente.';
     return null;
   }
 

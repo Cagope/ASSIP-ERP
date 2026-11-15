@@ -4,34 +4,63 @@
     <p>Consolidado de movimientos contables por cuenta y período.</p>
   </header>
 
-  <div class="filtros">
-    <label>
-      <span>Agencia</span>
-      <select [(ngModel)]="filtros.idAgencia" (ngModelChange)="cambiarFiltros()" [disabled]="cargando">
-        <option [ngValue]="0">Seleccione una agencia</option>
-        <option *ngFor="let agencia of agencias" [ngValue]="agencia.idAgencia">
-          {{ agencia.codigoAgencia }} - {{ agencia.nombreAgencia }}
-        </option>
-      </select>
-    </label>
-    <label>
-      <span>Fecha inicial</span>
-      <input type="date" [(ngModel)]="filtros.fechaInicial" (ngModelChange)="cambiarFiltros()" [disabled]="cargando">
-    </label>
-    <label>
-      <span>Fecha final</span>
-      <input type="date" [(ngModel)]="filtros.fechaFinal" (ngModelChange)="cambiarFiltros()" [disabled]="cargando">
-    </label>
+  <section class="panel-filtros">
+    <h3>Parámetros de consulta</h3>
+    <div class="filtros-grid">
+      <div class="campo campo-agencia">
+        <label for="idAgencia">Agencia</label>
+        <select
+          id="idAgencia"
+          [(ngModel)]="filtros.idAgencia"
+          (ngModelChange)="cambiarFiltros()"
+          [disabled]="cargando"
+        >
+          <option [ngValue]="0">Seleccione una agencia</option>
+          <option *ngFor="let agencia of agencias" [ngValue]="agencia.idAgencia">
+            {{ agencia.codigoAgencia }} - {{ agencia.nombreAgencia }}
+          </option>
+        </select>
+      </div>
+      <div class="campo">
+        <label for="fechaInicial">Fecha inicial</label>
+        <input
+          id="fechaInicial"
+          type="date"
+          [(ngModel)]="filtros.fechaInicial"
+          (ngModelChange)="cambiarFiltros()"
+          [disabled]="cargando"
+        />
+      </div>
+      <div class="campo">
+        <label for="fechaFinal">Fecha final</label>
+        <input
+          id="fechaFinal"
+          type="date"
+          [(ngModel)]="filtros.fechaFinal"
+          (ngModelChange)="cambiarFiltros()"
+          [disabled]="cargando"
+        />
+      </div>
+    </div>
     <div class="acciones">
-      <button type="button" class="primario" (click)="ejecutar()" [disabled]="cargando">
-        {{ cargando ? 'Consultando...' : 'Ejecutar' }}
+      <button
+        type="button"
+        class="btn-consultar"
+        (click)="ejecutar()"
+        [disabled]="cargando || !filtros.idAgencia || !filtros.fechaInicial || !filtros.fechaFinal || filtros.fechaInicial > filtros.fechaFinal"
+      >
+        {{ cargando ? 'Consultando...' : 'Consultar' }}
       </button>
-      <button type="button" (click)="exportarExcel()"
-        [disabled]="cargando || !resultadoVigente || !informe?.filas?.length">
+      <button
+        type="button"
+        class="btn-consultar"
+        (click)="exportarExcel()"
+        [disabled]="cargando || !resultadoVigente || !informe?.filas?.length"
+      >
         Exportar Excel
       </button>
     </div>
-  </div>
+  </section>
 
   <p class="error" *ngIf="mensajeError">{{ mensajeError }}</p>
 

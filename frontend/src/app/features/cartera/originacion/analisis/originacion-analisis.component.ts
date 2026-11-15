@@ -356,6 +356,9 @@ export class OriginacionAnalisisComponent
 
     this.guardando = true;
 
+    // Un nuevo cálculo requiere una nueva validación del expediente.
+    this.validacionAprobacion = null;
+
     this.error = '';
     this.mensaje = '';
     this.resultadoPersistencia = null;

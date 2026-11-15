@@ -1,6 +1,7 @@
 import {
   inject
 } from '@angular/core';
+import { map } from 'rxjs';
 
 import {
   CanActivateFn,
@@ -25,11 +26,16 @@ export const authGuard: CanActivateFn = () => {
   const session =
     inject(SessionService);
 
-  if (session.isAuthenticated()) {
-    return true;
+  if (!session.isAuthenticated()) {
+    return router.createUrlTree(['/login']);
   }
 
-  return router.createUrlTree([
-    '/login'
-  ]);
+  return session.validarContexto().pipe(
+    map(valido => valido
+      ? true
+      : router.createUrlTree([
+          session.isAuthenticated() ? '/acceso-denegado' : '/login'
+        ])
+    )
+  );
 };

@@ -1,130 +1,196 @@
-.auth-wrap {
-  max-width: 420px;
-  margin: 48px auto;
-  padding: 24px;
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06);
-}
 
-.auth-header {
-  display: grid;
-  justify-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
+/* =========================================================
+   ACCESO COOPVALLE
+   Imagen institucional y formulario Angular
+   ========================================================= */
 
-.logo {
-  height: 100px;
-  width: auto;
-  object-fit: contain;
-  image-rendering: -webkit-optimize-contrast;
+:host {
   display: block;
-  margin-inline: auto;
+  min-height: 100dvh;
 }
 
-.auth-title {
+.login-page {
+  display: flex;
+  min-height: 100dvh;
+  background: #ffffff;
+}
+
+/* Panel izquierdo: centrado vertical del contenido. */
+.login-panel {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 31%;
+  width: 31%;
+  min-width: 360px;
+  min-height: 100dvh;
+  padding: 28px clamp(24px, 3.5vw, 56px);
+  background: #ffffff;
+  box-shadow: none;
+  z-index: 1;
+}
+
+/* Logo institucional. */
+.login-brand {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: clamp(24px, 3vh, 36px);
+}
+
+.login-brand img {
+  display: block;
+  width: min(245px, 85%);
+  height: auto;
+}
+
+/* Contenedor principal del formulario. */
+.login-form-container {
+  width: 100%;
+  max-width: 425px;
+  margin: 0 auto;
+}
+
+/* Mensaje de bienvenida. */
+.login-welcome {
   margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-  text-align: center;
+  color: #0c2d24;
+  font-size: clamp(25px, 2.2vw, 32px);
+  font-weight: 800;
+  line-height: 1.2;
 }
 
-.auth-description {
-  margin: 0 0 4px;
-  color: #64748b;
-  font-size: 13px;
-  line-height: 1.5;
+.login-welcome span {
+  color: #00852e;
+}
+
+.login-accent {
+  width: 70px;
+  height: 6px;
+  margin: 12px 0 16px;
+  border-radius: 4px;
+  background: #ffcd00;
+}
+
+.login-description {
+  margin: 0 0 26px;
+  color: #263444;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+/* Título de autenticación. */
+.auth-title {
+  margin: 0 0 18px;
+  color: #064d28;
+  font-size: 23px;
+  font-weight: 750;
+  text-align: left;
+}
+
+/* Organización del formulario. */
+.auth-form,
+.form-row {
+  display: grid;
+  gap: 8px;
 }
 
 .auth-form {
-  display: grid;
-  gap: 12px;
+  gap: 15px;
 }
 
-.form-row {
-  display: grid;
-  gap: 6px;
+.form-row label {
+  color: #102b23;
+  font-size: 15px;
+  font-weight: 700;
 }
 
-label {
-  font-weight: 600;
-}
-
-input {
+/* Campos de entrada. */
+.form-row input:not([type='checkbox']) {
+  box-sizing: border-box;
   width: 100%;
   min-width: 0;
-  box-sizing: border-box;
-  padding: 10px 12px;
-  border: 1px solid #ccc;
+  height: 46px;
+  padding: 10px 13px;
+  border: 1px solid #b2d4b6;
   border-radius: 10px;
-  outline: none;
+  background: rgba(255, 255, 255, 0.94);
+  color: #10233c;
   font: inherit;
+  font-size: 15px;
+  outline: none;
 }
 
-input:focus {
-  border-color: #0a7;
-  box-shadow: 0 0 0 3px rgba(0, 170, 119, 0.15);
+.form-row input:focus {
+  border-color: #07863b;
+  box-shadow: 0 0 0 3px rgba(8, 137, 58, 0.13);
 }
 
-input[readonly] {
+.form-row input[readonly] {
   background: #f1f5f9;
   color: #475569;
 }
 
-small {
-  color: #a00;
+.form-row small {
+  color: #b91c1c;
 }
 
+/* Campo de contraseña. */
 .password-field {
   position: relative;
-  display: grid;
-  align-items: center;
-
-  input {
-    padding-right: 44px;
-  }
-
-  .eye-btn {
-    position: absolute;
-    right: 6px;
-    top: 50%;
-    transform: translateY(-50%);
-    border: 0;
-    background: transparent;
-    font-size: 18px;
-    line-height: 1;
-    cursor: pointer;
-    padding: 4px 6px;
-    opacity: 0.75;
-  }
-
-  .eye-btn:hover {
-    opacity: 1;
-  }
 }
 
+.password-field input {
+  padding-right: 48px !important;
+}
+
+.eye-btn {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  padding: 5px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Recordar usuario y recuperar contraseña. */
 .form-row.inline {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-}
-
-.password-actions {
-  display: inline-flex;
-  align-items: center;
   gap: 10px;
 }
 
-.forgot-password-btn {
+.checkbox,
+.password-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checkbox {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+.checkbox input {
+  accent-color: #07863b;
+}
+
+.forgot-password-btn,
+.change-password-icon {
   padding: 0;
   border: 0;
   background: transparent;
-  color: #047857;
+  color: #087a32;
   font: inherit;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 650;
   cursor: pointer;
 }
 
@@ -132,99 +198,232 @@ small {
   text-decoration: underline;
 }
 
-.forgot-password-btn:disabled {
-  opacity: 0.6;
-  cursor: default;
-  text-decoration: none;
-}
-
-.checkbox {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 500;
-  user-select: none;
-
-  input[type='checkbox'] {
-    width: auto;
-    transform: translateY(1px);
-    accent-color: #0a7;
-  }
-}
-
-.msg {
-  margin-top: 4px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 13px;
+/* Descripciones de autenticación. */
+.auth-description {
+  margin: 0;
+  color: #475569;
+  font-size: 14px;
   line-height: 1.5;
-
-  &.error {
-    background: #fee;
-    color: #900;
-  }
-
-  &.warning {
-    background: #fffbeb;
-    color: #92400e;
-    border: 1px solid #fde68a;
-  }
-
-  &.success {
-    background: #ecfdf5;
-    color: #047857;
-  }
 }
 
+/* Política de contraseñas. */
+.password-policy {
+  padding: 10px 12px;
+  border: 1px solid #d6e8d8;
+  border-radius: 10px;
+  background: #f7fbf7;
+  color: #334155;
+  font-size: 13px;
+}
+
+.password-policy-title {
+  font-weight: 700;
+}
+
+.password-policy ul {
+  margin: 6px 0 0;
+  padding-left: 18px;
+}
+
+/* Mensajes y validaciones. */
+.msg {
+  padding: 10px 12px;
+  border-radius: 9px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.msg.error {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.msg.warning {
+  border: 1px solid #fde68a;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.msg.success {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+/* Acciones principales. */
 .actions {
   display: grid;
   gap: 10px;
-  margin-top: 8px;
+  margin-top: 10px;
+}
+
+.btn,
+.btn-secondary {
+  width: 100%;
+  min-height: 47px;
+  padding: 11px 14px;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 750;
+  cursor: pointer;
 }
 
 .btn {
-  width: 100%;
-  padding: 10px 14px;
   border: 0;
-  border-radius: 10px;
-  background: #0a7;
-  color: #fff;
-  font-weight: 700;
-  cursor: pointer;
+  background: linear-gradient(180deg, #16a01a, #007c24);
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(0, 100, 35, 0.18);
 }
 
 .btn-secondary {
-  width: 100%;
-  padding: 10px 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 10px;
-  background: #fff;
-  color: #475569;
-  font-weight: 600;
-  cursor: pointer;
+  border: 1px solid #b7d2bb;
+  background: #ffffff;
+  color: #087a32;
 }
 
-.btn[disabled],
-.btn-secondary[disabled] {
+.btn:disabled,
+.btn-secondary:disabled,
+.forgot-password-btn:disabled {
   opacity: 0.6;
   cursor: default;
 }
 
-@media (max-width: 480px) {
-  .auth-wrap {
-    margin: 24px 12px;
-    padding: 16px;
-  }
+/* Panel derecho: se conserva sin modificaciones. */
+.login-visual {
+  flex: 1 1 69%;
+  min-width: 0;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #ffffff;
+}
 
-  .logo {
-    height: 72px;
+.login-visual img {
+  display: block;
+  width: 100%;
+  height: 100dvh;
+  object-fit: cover;
+  object-position: left center;
+}
+
+/* Adaptación a pantallas medianas. */
+@media (max-width: 900px) {
+  .login-panel {
+    flex: 0 0 43%;
+    width: 43%;
+    min-width: 320px;
+    padding: 28px 24px;
   }
 }
 
-.password-actions {
-  gap: 6px;
+/* Adaptación a dispositivos móviles. */
+@media (max-width: 520px) {
+  .login-panel {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    min-height: 100dvh;
+    padding: 24px;
+  }
+
+  .login-visual {
+    display: none;
+  }
+
+  .login-brand img {
+    width: min(210px, 80%);
+  }
+
+  .login-description {
+    margin-bottom: 20px;
+  }
 }
 
-.forgot-password-btn {
-  font-size: 12px;
+
+/* =========================================================
+   AJUSTE VISUAL DEL PANEL IZQUIERDO
+   Centrado vertical y mayor legibilidad
+   ========================================================= */
+
+@media (min-width: 521px) {
+  .login-panel {
+    justify-content: center;
+    padding-top: 36px;
+    padding-bottom: 36px;
+  }
+
+  .login-brand {
+    margin-bottom: 38px;
+  }
+
+  .login-welcome {
+    font-size: 30px;
+    line-height: 1.25;
+  }
+
+  .login-description {
+    font-size: 17px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+  }
+
+  .auth-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  .form-row label {
+    font-size: 16px;
+  }
+
+  .form-row input:not([type='checkbox']) {
+    height: 49px;
+    font-size: 16px;
+  }
+
+  .auth-form {
+    gap: 17px;
+  }
+
+  .checkbox,
+  .forgot-password-btn,
+  .change-password-icon {
+    font-size: 14px !important;
+  }
+
+  .btn,
+  .btn-secondary {
+    min-height: 50px;
+    font-size: 16px;
+  }
+}
+
+/* =========================================================
+   DEGRADADO DEL PANEL IZQUIERDO HACIA LA IMAGEN
+   ========================================================= */
+
+@media (min-width: 521px) {
+  .login-panel {
+    position: relative;
+    z-index: 2;
+  }
+
+  .login-panel::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 100%;
+    width: 130px;
+    pointer-events: none;
+    background: linear-gradient(
+      to right,
+      #ffffff 0%,
+      rgba(255, 255, 255, 0.85) 25%,
+      rgba(255, 255, 255, 0.45) 65%,
+      rgba(255, 255, 255, 0) 100%
+    );
+  }
 }

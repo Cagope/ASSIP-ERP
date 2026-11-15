@@ -94,6 +94,15 @@
         >
           {{ cargando ? 'Consultando...' : 'Consultar' }}
         </button>
+        <button
+          type="button"
+          class="btn-consultar"
+          (click)="exportarExcel()"
+          [disabled]="cargando || !resultadoVigente || !tieneResultados"
+          title="Exportar los movimientos consultados a Excel"
+        >
+          Exportar Excel
+        </button>
       </div>
     </form>
   </section>
@@ -112,102 +121,62 @@
     Consultando movimientos contables...
   </div>
 
-  <!-- RESULTADO -->
+  <!-- INFORME EN PANTALLA: MISMA ESTRUCTURA DE CAJA - DIARIO -->
   <section
     *ngIf="resultadoVigente && informe as resultado"
     class="panel-resultados"
   >
     <div class="resultado-encabezado">
       <div>
-        <h3>Resultado de la consulta</h3>
-        <p class="resultado-agencia">
-          <strong>Agencia:</strong>
-          {{ nombreAgenciaInforme }}
-        </p>
-        <p>
-          <strong>Período:</strong>
-          {{ resultado.fechaInicial | date:'dd/MM/yyyy':'UTC' }}
-          al
-          {{ resultado.fechaFinal | date:'dd/MM/yyyy':'UTC' }}
-        </p>
-        <p>
-          <strong>Agrupación:</strong>
+        <h3>Libro Diario Resumido</h3>
+        <p class="resultado-subtitulo">
+          {{ nombreAgenciaInforme }} ·
+          {{ resultado.fechaInicial }} a {{ resultado.fechaFinal }} ·
           {{ nombreModalidadInforme }}
         </p>
       </div>
 
-      <!-- EXPORTACIÓN DEL INFORME -->
-      <div *ngIf="tieneResultados" class="acciones-exportacion">
-        <button
-          type="button"
-          class="btn-exportar"
-          (click)="exportarExcel()"
-          [disabled]="cargando || !resultadoVigente || !tieneResultados"
-          title="Exportar el Libro diario resumido a Excel"
-        >
-          Exportar a Excel
-        </button>
-      </div>
+
     </div>
 
-    <!-- TABLA -->
-    <div
-      *ngIf="tieneResultados; else sinResultados"
-      class="tabla-contenedor"
-    >
+    <div *ngIf="tieneResultados; else sinResultados" class="tabla-contenedor">
       <table class="tabla-informe">
         <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>
-            {{
-            resultado.modalidad === 'CUENTA'
-            ? 'Código cuenta'
-            : 'Tipo comprobante'
-            }}
-          </th>
-          <th>
-            {{
-            resultado.modalidad === 'CUENTA'
-            ? 'Nombre cuenta'
-            : 'Descripción comprobante'
-            }}
-          </th>
-          <th class="numero">Débitos</th>
-          <th class="numero">Créditos</th>
-        </tr>
+          <tr>
+            <th>Fecha</th>
+            <th>{{ resultado.modalidad === 'CUENTA' ? 'Código' : 'Tipo' }}</th>
+            <th>{{ resultado.modalidad === 'CUENTA' ? 'Cuenta' : 'Comprobante' }}</th>
+            <th class="numero">Débito</th>
+            <th class="numero">Crédito</th>
+          </tr>
         </thead>
-        <tbody>
-        <tr *ngFor="let fila of resultado.filas">
-          <td>
-            {{ fila.fecha | date:'dd/MM/yyyy':'UTC' }}
-          </td>
-          <td class="codigo">
-            {{ fila.codigoAgrupacion }}
-          </td>
-          <td>
-            {{ fila.nombreAgrupacion }}
-          </td>
-          <td class="numero">
-            {{ fila.totalDebitos | number:'1.2-2':'es-CO' }}
-          </td>
-          <td class="numero">
-            {{ fila.totalCreditos | number:'1.2-2':'es-CO' }}
-          </td>
-        </tr>
+
+        <tbody *ngFor="let grupo of gruposDiarios">
+          <tr class="fila-fecha">
+            <td colspan="5">FECHA: {{ grupo.fecha }}</td>
+          </tr>
+
+          <tr *ngFor="let fila of grupo.filas" class="fila-movimiento">
+            <td>{{ fila.fecha }}</td>
+            <td class="codigo">{{ fila.codigoAgrupacion }}</td>
+            <td class="descripcion">{{ fila.nombreAgrupacion }}</td>
+            <td class="numero">{{ fila.totalDebitos | number:'1.2-2':'es-CO' }}</td>
+            <td class="numero">{{ fila.totalCreditos | number:'1.2-2':'es-CO' }}</td>
+          </tr>
+
+          <tr class="fila-total-dia">
+            <td colspan="3">TOTAL DEL DÍA {{ grupo.fecha }}</td>
+            <td class="numero">{{ grupo.totalDebitos | number:'1.2-2':'es-CO' }}</td>
+            <td class="numero">{{ grupo.totalCreditos | number:'1.2-2':'es-CO' }}</td>
+          </tr>
         </tbody>
+
         <tfoot>
-        <tr class="fila-totales">
-          <td colspan="3">
-            TOTALES GENERALES
-          </td>
-          <td class="numero">
-            {{ resultado.totalDebitos | number:'1.2-2':'es-CO' }}
-          </td>
-          <td class="numero">
-            {{ resultado.totalCreditos | number:'1.2-2':'es-CO' }}
-          </td>
-        </tr>
+          <tr class="fila-totales">
+            <td colspan="3">TOTAL GENERAL</td>
+            <td class="numero">{{ resultado.totalDebitos | number:'1.2-2':'es-CO' }}</td>
+            <td class="numero">{{ resultado.totalCreditos | number:'1.2-2':'es-CO' }}</td>
+          </tr>
         </tfoot>
       </table>
     </div>

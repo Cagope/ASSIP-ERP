@@ -1,0 +1,214 @@
+-- ASSIP ERP | Auditoria integral reutilizable de migracion contable
+-- VERSION 3 | SOLO LECTURA DE TABLAS PERMANENTES
+-- Ejecutar en Query Tool (pgAdmin) con autocommit habilitado.
+-- Ajustar exclusivamente los parametros en la primera CREATE TEMP TABLE.
+-- No ejecuta BEGIN/COMMIT/ROLLBACK ni modifica registros permanentes.
+-- Las tablas temporales se eliminan al cerrar la conexion o en la siguiente ejecucion.
+-- Un solo resultado: RESUMEN, INCIDENCIA y CONTROL (ordenados).
+-- IMPORTANTE: no compara conteos/saldos con Access; requiere conciliacion externa.
+-- REGLA: solo auxiliares en estado A o C; N y otros estados se excluyen de todos los controles de auxiliares/comprobantes.
+
+DROP TABLE IF EXISTS pg_temp.audit_mig_incidencias;
+DROP TABLE IF EXISTS pg_temp.audit_mig_comp;
+DROP TABLE IF EXISTS pg_temp.audit_mig_aux;
+DROP TABLE IF EXISTS pg_temp.audit_mig_param;
+
+CREATE TEMP TABLE audit_mig_param AS
+SELECT ARRAY[2,3]::integer[] AS agencias, 2024::integer AS ano_inicio, 2026::integer AS ano_fin;
+
+-- Materializar una sola vez el universo de auxiliares: evita relecturas en cada control.
+CREATE TEMP TABLE audit_mig_aux AS
+SELECT a.id_auxiliar_contable, a.id_agencia, a.id_catalogo_cuenta,
+       EXTRACT(YEAR FROM a.fecha_auxiliar)::integer AS ejercicio,
+       btrim(a.tipo_comprobante) AS tipo, btrim(a.numero_comprobante) AS numero,
+       a.valor_debito, a.valor_credito, a.estado_movimiento
+FROM contabilidad.auxiliares_contables a
+CROSS JOIN audit_mig_param p
+WHERE a.id_agencia=ANY(p.agencias)
+  AND a.fecha_auxiliar >= make_date(p.ano_inicio,1,1)
+  AND a.fecha_auxiliar < make_date(p.ano_fin+1,1,1)
+  AND a.estado_movimiento IN ('A','C');
+CREATE INDEX ON audit_mig_aux (id_agencia,tipo,numero);
+CREATE INDEX ON audit_mig_aux (id_agencia,ejercicio,tipo,numero);
+ANALYZE audit_mig_aux;
+
+CREATE TEMP TABLE audit_mig_comp AS
+SELECT id_agencia, ejercicio, tipo, numero,
+       count(*) AS movimientos,
+       sum(coalesce(valor_debito,0)) AS debitos,
+       sum(coalesce(valor_credito,0)) AS creditos,
+       string_agg(DISTINCT coalesce(btrim(estado_movimiento),'(NULO)'),', ') AS estados
+FROM audit_mig_aux
+GROUP BY id_agencia,ejercicio,tipo,numero;
+CREATE INDEX ON audit_mig_comp (id_agencia,tipo,numero);
+ANALYZE audit_mig_comp;
+
+-- Una sola materializacion de hallazgos. Detalles acotados por comprobante o registro.
+CREATE TEMP TABLE audit_mig_incidencias AS
+WITH hallazgos AS (
+  SELECT 'AUXILIARES'::text area,'CUENTA_INEXISTENTE'::text codigo,a.id_agencia,a.ejercicio,
+         a.id_auxiliar_contable::text referencia,'Cuenta '||coalesce(a.id_catalogo_cuenta::text,'NULL') AS detalle
+  FROM audit_mig_aux a LEFT JOIN contabilidad.catalogo_cuentas c ON c.id_catalogo_cuenta=a.id_catalogo_cuenta
+  WHERE c.id_catalogo_cuenta IS NULL
+  UNION ALL
+  SELECT 'AUXILIARES','CUENTA_DE_OTRA_AGENCIA',a.id_agencia,a.ejercicio,a.id_auxiliar_contable::text,
+         'Cuenta '||a.id_catalogo_cuenta||' de agencia '||coalesce(c.id_agencia::text,'NULL')
+  FROM audit_mig_aux a JOIN contabilidad.catalogo_cuentas c ON c.id_catalogo_cuenta=a.id_catalogo_cuenta
+  WHERE c.id_agencia IS DISTINCT FROM a.id_agencia
+  UNION ALL
+  SELECT 'AUXILIARES','TIPO_NUMERO_VACIO',id_agencia,ejercicio,id_auxiliar_contable::text,
+         'Tipo='||coalesce(tipo,'NULL')||'; numero='||coalesce(numero,'NULL')
+  FROM audit_mig_aux WHERE nullif(tipo,'') IS NULL OR nullif(numero,'') IS NULL
+  UNION ALL
+  SELECT 'AUXILIARES','IMPORTE_NEGATIVO',id_agencia,ejercicio,id_auxiliar_contable::text,
+         'D='||coalesce(valor_debito::text,'NULL')||'; C='||coalesce(valor_credito::text,'NULL')
+  FROM audit_mig_aux WHERE valor_debito<0 OR valor_credito<0
+  UNION ALL
+  SELECT 'AUXILIARES','AMBOS_IMPORTES_POSITIVOS',id_agencia,ejercicio,id_auxiliar_contable::text,
+         'D='||valor_debito||'; C='||valor_credito
+  FROM audit_mig_aux WHERE valor_debito>0 AND valor_credito>0
+  UNION ALL
+  SELECT 'AUXILIARES','AMBOS_IMPORTES_CERO',id_agencia,ejercicio,id_auxiliar_contable::text,
+         'D='||coalesce(valor_debito::text,'NULL')||'; C='||coalesce(valor_credito::text,'NULL')
+  FROM audit_mig_aux WHERE coalesce(valor_debito,0)=0 AND coalesce(valor_credito,0)=0
+  UNION ALL
+  SELECT 'COMPROBANTES','DESCUADRE_ESTADOS_A_C',id_agencia,ejercicio,
+         coalesce(tipo,'NULL')||'-'||coalesce(numero,'NULL'),
+         'Mov='||movimientos||'; D='||debitos||'; C='||creditos||'; dif='||(debitos-creditos)||'; estados='||estados
+  FROM audit_mig_comp WHERE debitos<>creditos
+  UNION ALL
+  SELECT 'COMPROBANTES','CLAVE_REUTILIZADA_EN_ANOS',c.id_agencia,c.ejercicio,
+         coalesce(c.tipo,'NULL')||'-'||coalesce(c.numero,'NULL'), 'Misma clave en varios ejercicios'
+  FROM audit_mig_comp c JOIN (
+      SELECT id_agencia,tipo,numero FROM audit_mig_comp
+      WHERE tipo IS NOT NULL AND numero IS NOT NULL
+      GROUP BY id_agencia,tipo,numero HAVING count(DISTINCT ejercicio)>1
+  ) r ON r.id_agencia=c.id_agencia AND r.tipo=c.tipo AND r.numero=c.numero
+  UNION ALL
+  SELECT 'COMPROBANTES','CONCEPTO_FALTANTE',c.id_agencia,c.ejercicio,c.tipo||'-'||c.numero,
+         'Sin concepto para agencia/tipo/numero'
+  FROM audit_mig_comp c LEFT JOIN contabilidad.conceptos_contables x
+    ON x.id_agencia=c.id_agencia AND x.tipo_comprobante=c.tipo AND x.numero_comprobante=c.numero
+  WHERE x.id_conceptos_contables IS NULL
+  UNION ALL
+  SELECT 'COMPROBANTES','ORIGEN_FALTANTE',c.id_agencia,c.ejercicio,c.tipo||'-'||c.numero,
+         'Sin origen para agencia/tipo/numero'
+  FROM audit_mig_comp c LEFT JOIN contabilidad.origen_comprobantes o
+    ON o.id_agencia=c.id_agencia AND o.tipo_comprobante=c.tipo AND o.numero_comprobante=c.numero
+  WHERE o.id_origen_comprobante IS NULL
+  UNION ALL
+  SELECT 'COMPROBANTES','TIPO_NO_CATALOGADO',c.id_agencia,c.ejercicio,
+         coalesce(c.tipo,'NULL')||'-'||coalesce(c.numero,'NULL'),'Tipo ausente en tipos_comprobantes'
+  FROM audit_mig_comp c LEFT JOIN contabilidad.tipos_comprobantes t
+    ON t.id_agencia=c.id_agencia AND t.tipo_comprobante=c.tipo
+  WHERE t.tipo_comprobante IS NULL
+  UNION ALL
+  SELECT 'CATALOGO','CUENTA_SIN_PADRE',c.id_agencia,NULL::integer,c.codigo_cuenta,
+         'No existe prefijo padre de longitud anterior'
+  FROM contabilidad.catalogo_cuentas c CROSS JOIN audit_mig_param p
+  WHERE c.id_agencia=ANY(p.agencias) AND length(c.codigo_cuenta)>1
+    AND NOT EXISTS (
+      SELECT 1 FROM contabilidad.catalogo_cuentas padre
+      WHERE padre.id_agencia=c.id_agencia
+        AND padre.codigo_cuenta=left(c.codigo_cuenta,CASE length(c.codigo_cuenta)
+          WHEN 2 THEN 1 WHEN 4 THEN 2 WHEN 6 THEN 4 WHEN 8 THEN 6 WHEN 11 THEN 8 ELSE 0 END)
+    )
+  UNION ALL
+  SELECT 'CATALOGO','NATURALEZA_NULA',c.id_agencia,NULL::integer,c.codigo_cuenta,'Naturaleza sin definir'
+  FROM contabilidad.catalogo_cuentas c CROSS JOIN audit_mig_param p
+  WHERE c.id_agencia=ANY(p.agencias) AND c.naturaleza_cuenta IS NULL
+  UNION ALL
+  SELECT 'CIERRES_MENSUALES','CUENTA_INEXISTENTE',m.id_agencia,m.ano,m.id_cierre_mensual::text,
+         'Mes='||coalesce(m.mes::text,'NULL')||'; cuenta='||coalesce(m.id_catalogo_cuenta::text,'NULL')
+  FROM contabilidad.cierres_mensuales m CROSS JOIN audit_mig_param p
+  LEFT JOIN contabilidad.catalogo_cuentas c ON c.id_catalogo_cuenta=m.id_catalogo_cuenta
+  WHERE m.id_agencia=ANY(p.agencias) AND m.ano BETWEEN p.ano_inicio AND p.ano_fin AND c.id_catalogo_cuenta IS NULL
+  UNION ALL
+  SELECT 'CIERRES_MENSUALES','CUENTA_DE_OTRA_AGENCIA',m.id_agencia,m.ano,m.id_cierre_mensual::text,
+         'Cuenta='||m.id_catalogo_cuenta||'; agencia cuenta='||coalesce(c.id_agencia::text,'NULL')
+  FROM contabilidad.cierres_mensuales m JOIN contabilidad.catalogo_cuentas c ON c.id_catalogo_cuenta=m.id_catalogo_cuenta
+  CROSS JOIN audit_mig_param p
+  WHERE m.id_agencia=ANY(p.agencias) AND m.ano BETWEEN p.ano_inicio AND p.ano_fin AND c.id_agencia IS DISTINCT FROM m.id_agencia
+  UNION ALL
+  SELECT 'CIERRES_MENSUALES','MES_INVALIDO',m.id_agencia,m.ano,m.id_cierre_mensual::text,
+         'Mes='||coalesce(m.mes::text,'NULL')
+  FROM contabilidad.cierres_mensuales m CROSS JOIN audit_mig_param p
+  WHERE m.id_agencia=ANY(p.agencias) AND m.ano BETWEEN p.ano_inicio AND p.ano_fin
+    AND (m.mes IS NULL OR m.mes NOT BETWEEN 1 AND 12)
+  UNION ALL
+  SELECT 'CIERRES_MENSUALES','IMPORTE_NEGATIVO',m.id_agencia,m.ano,m.id_cierre_mensual::text,
+         'D='||coalesce(m.valor_debito::text,'NULL')||'; C='||coalesce(m.valor_credito::text,'NULL')
+  FROM contabilidad.cierres_mensuales m CROSS JOIN audit_mig_param p
+  WHERE m.id_agencia=ANY(p.agencias) AND m.ano BETWEEN p.ano_inicio AND p.ano_fin
+    AND (m.valor_debito<0 OR m.valor_credito<0)
+  UNION ALL
+  SELECT 'CIERRES_ANUALES','CUENTA_INEXISTENTE',m.id_agencia,m.ano,m.id_cierre_anual::text,
+         'Cuenta='||coalesce(m.id_catalogo_cuenta::text,'NULL')
+  FROM contabilidad.cierres_anuales m CROSS JOIN audit_mig_param p
+  LEFT JOIN contabilidad.catalogo_cuentas c ON c.id_catalogo_cuenta=m.id_catalogo_cuenta
+  WHERE m.id_agencia=ANY(p.agencias) AND m.ano BETWEEN p.ano_inicio AND p.ano_fin AND c.id_catalogo_cuenta IS NULL
+  UNION ALL
+  SELECT 'CIERRES_ANUALES','CUENTA_DE_OTRA_AGENCIA',m.id_agencia,m.ano,m.id_cierre_anual::text,
+         'Cuenta='||m.id_catalogo_cuenta||'; agencia cuenta='||coalesce(c.id_agencia::text,'NULL')
+  FROM contabilidad.cierres_anuales m JOIN contabilidad.catalogo_cuentas c ON c.id_catalogo_cuenta=m.id_catalogo_cuenta
+  CROSS JOIN audit_mig_param p
+  WHERE m.id_agencia=ANY(p.agencias) AND m.ano BETWEEN p.ano_inicio AND p.ano_fin AND c.id_agencia IS DISTINCT FROM m.id_agencia
+  UNION ALL
+  SELECT 'CIERRES_ANUALES','IMPORTE_NEGATIVO',m.id_agencia,m.ano,m.id_cierre_anual::text,
+         'D='||coalesce(m.valor_debito::text,'NULL')||'; C='||coalesce(m.valor_credito::text,'NULL')
+  FROM contabilidad.cierres_anuales m CROSS JOIN audit_mig_param p
+  WHERE m.id_agencia=ANY(p.agencias) AND m.ano BETWEEN p.ano_inicio AND p.ano_fin
+    AND (m.valor_debito<0 OR m.valor_credito<0)
+), historicos AS (
+  SELECT 2 AS id_agencia,2025 AS ejercicio,'MH'::text AS tipo,lpad(n::text,7,'0') AS numero
+  FROM generate_series(71955,71966) n
+  UNION ALL SELECT 3,2025,'MH',lpad(n::text,7,'0') FROM generate_series(2858,2866) n
+  UNION ALL SELECT 2,2026,'CO',lpad(n::text,7,'0') FROM generate_series(71955,71966) n
+  UNION ALL SELECT 3,2026,'CO',lpad(n::text,7,'0') FROM generate_series(2858,2866) n
+), historicos_hallazgos AS (
+  SELECT 'HISTORICOS'::text area,'COMPROBANTE_ESPERADO_AUSENTE'::text codigo,h.id_agencia,h.ejercicio,
+         h.tipo||'-'||h.numero AS referencia,'No existe en auxiliares'::text AS detalle
+  FROM historicos h CROSS JOIN audit_mig_param p
+  WHERE h.id_agencia=ANY(p.agencias) AND h.ejercicio BETWEEN p.ano_inicio AND p.ano_fin
+    AND NOT EXISTS (SELECT 1 FROM audit_mig_comp c WHERE c.id_agencia=h.id_agencia
+      AND c.ejercicio=h.ejercicio AND c.tipo=h.tipo AND c.numero=h.numero)
+  UNION ALL
+  SELECT 'HISTORICOS','TIPO_INCORRECTO',c.id_agencia,c.ejercicio,c.tipo||'-'||c.numero,
+         'Tipo esperado='||h.tipo
+  FROM audit_mig_comp c JOIN historicos h ON h.id_agencia=c.id_agencia
+    AND h.ejercicio=c.ejercicio AND h.numero=c.numero WHERE c.tipo<>h.tipo
+)
+SELECT * FROM hallazgos UNION ALL SELECT * FROM historicos_hallazgos;
+CREATE INDEX ON audit_mig_incidencias (area,codigo,id_agencia,ejercicio);
+ANALYZE audit_mig_incidencias;
+
+-- RESULTADO UNICO: primero totales por control; despues detalle y conteos operativos.
+WITH salida AS (
+  SELECT 1 AS orden,'RESUMEN'::text AS clase,area,codigo,id_agencia,ejercicio,
+         count(*)::bigint AS cantidad,NULL::text AS referencia,NULL::text AS detalle
+  FROM audit_mig_incidencias GROUP BY area,codigo,id_agencia,ejercicio
+  UNION ALL
+  SELECT 2,'INCIDENCIA',area,codigo,id_agencia,ejercicio,
+         1::bigint,referencia,detalle FROM audit_mig_incidencias
+  UNION ALL
+  SELECT 3,'CONTROL','AUXILIARES','MOVIMIENTOS_ESTADOS_A_C',a.id_agencia,a.ejercicio,
+         count(*)::bigint,coalesce(btrim(a.estado_movimiento),'(NULO)'),
+         'Debitos='||sum(coalesce(a.valor_debito,0))||'; creditos='||sum(coalesce(a.valor_credito,0))
+  FROM audit_mig_aux a GROUP BY a.id_agencia,a.ejercicio,a.estado_movimiento
+  UNION ALL
+  SELECT 3,'CONTROL','CIERRES_MENSUALES','REGISTROS',m.id_agencia,m.ano,
+         count(*)::bigint,NULL::text,
+         'Debitos='||sum(coalesce(m.valor_debito,0))||'; creditos='||sum(coalesce(m.valor_credito,0))
+  FROM contabilidad.cierres_mensuales m CROSS JOIN audit_mig_param p
+  WHERE m.id_agencia=ANY(p.agencias) AND m.ano BETWEEN p.ano_inicio AND p.ano_fin
+  GROUP BY m.id_agencia,m.ano
+  UNION ALL
+  SELECT 3,'CONTROL','CIERRES_ANUALES','REGISTROS',m.id_agencia,m.ano,
+         count(*)::bigint,NULL::text,
+         'Debitos='||sum(coalesce(m.valor_debito,0))||'; creditos='||sum(coalesce(m.valor_credito,0))
+  FROM contabilidad.cierres_anuales m CROSS JOIN audit_mig_param p
+  WHERE m.id_agencia=ANY(p.agencias) AND m.ano BETWEEN p.ano_inicio AND p.ano_fin
+  GROUP BY m.id_agencia,m.ano
+)
+SELECT clase,area,codigo,id_agencia,ejercicio,cantidad,referencia,detalle
+FROM salida ORDER BY orden,area,codigo,id_agencia,ejercicio,referencia;

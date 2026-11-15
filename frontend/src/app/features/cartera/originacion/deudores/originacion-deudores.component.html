@@ -471,22 +471,20 @@
 
               <button
                 type="button"
-                class="btn-link"
+                class="btn-action btn-action--contexto"
                 [disabled]="
-                    personaYaVinculada(
-                      persona.idDatosPersonal
-                    )
-                  "
+                  personaYaVinculada(persona.idDatosPersonal)
+                  || cargandoContextoCandidato
+                  || agregandoCodeudor
+                "
                 (click)="seleccionarCandidato(persona)">
-
                 {{
-                personaYaVinculada(
-                persona.idDatosPersonal
-                )
-                ? 'Ya vinculado'
-                : 'Seleccionar'
+                  cargandoContextoCandidato
+                    ? 'CONSULTANDO...'
+                    : personaYaVinculada(persona.idDatosPersonal)
+                      ? 'YA VINCULADO'
+                      : 'SELECCIONAR'
                 }}
-
               </button>
 
             </td>

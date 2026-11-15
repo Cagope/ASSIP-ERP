@@ -270,7 +270,7 @@ export class OriginacionSolicitudComponent
 
   cargandoContextoAsociado = false;
 
-  reciprocidadSimulada = 50;
+  reciprocidadSimulada = 0;
 
   // =========================================================
   // FINALIZAR SOLICITUD
@@ -1135,7 +1135,8 @@ export class OriginacionSolicitudComponent
   // =========================================================
 
   private cargarDetalleSolicitud(
-    idSolicitudCredito: number
+    idSolicitudCredito: number,
+    desplazarAlFinal = false
   ): void {
 
     this.api
@@ -1158,6 +1159,16 @@ export class OriginacionSolicitudComponent
 
           this.cargandoSolicitud =
             false;
+
+          // Desplazar solo tras crear y cargar el detalle de la solicitud.
+          if (desplazarAlFinal) {
+            setTimeout(() => {
+              window.scrollTo({
+                top: document.documentElement.scrollHeight,
+                behavior: 'smooth'
+              });
+            }, 0);
+          }
 
         },
 
@@ -1288,16 +1299,6 @@ export class OriginacionSolicitudComponent
       return;
     }
 
-    if (
-      !this.solicitud
-      && this.solicitudExistente
-    ) {
-
-      this.error =
-        'El asociado tiene una solicitud activa. Retómela antes de continuar.';
-
-      return;
-    }
 
     const validacion =
       this.validarFormulario();
@@ -1505,7 +1506,8 @@ export class OriginacionSolicitudComponent
             false;
 
           this.cargarDetalleSolicitud(
-            respuesta.idSolicitudCredito
+            respuesta.idSolicitudCredito,
+            true
           );
         },
 
@@ -1659,6 +1661,23 @@ export class OriginacionSolicitudComponent
       return 'Seleccione el fondo de garantías.';
     }
 
+    const codigoGarantia = this.formulario.codigoGarantiaCredito;
+    const codigoSubgarantia = this.formulario.codigoSubgarantia;
+    const fondo = this.fondosGarantias.find(item =>
+      item.idFondoGarantia === Number(this.formulario.idFondoGarantia)
+    );
+    if (codigoSubgarantia && !this.subgarantiasPermitidas.some(item =>
+      item.codigoSubgarantia === codigoSubgarantia
+    )) {
+      return 'La subgarantía no corresponde a la garantía seleccionada.';
+    }
+    if (fondo && (
+      (codigoGarantia === '1' && codigoSubgarantia === '4' && fondo.codigoFondo !== '1')
+      || (!(codigoGarantia === '1' && codigoSubgarantia === '4') && fondo.codigoFondo !== '0')
+    )) {
+      return 'El fondo de garantías no corresponde al respaldo seleccionado.';
+    }
+
     if (
       !this.formulario
         .codigoFormaPago
@@ -1705,6 +1724,14 @@ export class OriginacionSolicitudComponent
       ) <= 0
     ) {
       return 'El plazo solicitado debe ser mayor que cero.';
+    }
+
+    // El plazo debe contener períodos completos de amortización.
+    if (
+      Number(this.formulario.plazoSolicitado)
+      % Number(this.formulario.amortizacionCapital) !== 0
+    ) {
+      return 'El plazo solicitado debe ser múltiplo de la amortización de capital.';
     }
 
     if (
@@ -1794,7 +1821,7 @@ export class OriginacionSolicitudComponent
 
     this.contextoAsociado = null;
 
-    this.reciprocidadSimulada = 50;
+    this.reciprocidadSimulada = 0;
 
     this.formulario =
       this.crearFormularioVacio();
@@ -2138,6 +2165,48 @@ export class OriginacionSolicitudComponent
       this.lineaCreditoSeleccionada
         ?.permiteCreditosSimultaneos === false
     );
+  }
+
+  // Opciones de subgarantía coherentes con la garantía principal.
+  get subgarantiasPermitidas(): SubgarantiaCredito[] {
+    const codigo = this.formulario.codigoGarantiaCredito;
+    const permitidas: Record<string, string[]> = {
+      '1': ['1', '2', '3', '4', '6'],
+      '2': ['5'],
+      '15': ['6']
+    };
+    const codigos = permitidas[codigo];
+    return codigos
+      ? this.subgarantias.filter(item => codigos.includes(item.codigoSubgarantia))
+      : this.subgarantias;
+  }
+
+  get fondosPermitidos(): FondoGarantia[] {
+    const requiereFondo = this.formulario.codigoGarantiaCredito === '1'
+      && this.formulario.codigoSubgarantia === '4';
+    return this.fondosGarantias.filter(item =>
+      item.codigoFondo === (requiereFondo ? '1' : '0')
+    );
+  }
+
+  private asignarFondoPorCodigo(codigo: string): void {
+    this.formulario.idFondoGarantia =
+      this.fondosGarantias.find(item => item.codigoFondo === codigo)
+        ?.idFondoGarantia ?? null;
+  }
+
+  alCambiarGarantia(): void {
+    const codigo = this.formulario.codigoGarantiaCredito;
+    this.formulario.codigoSubgarantia =
+      codigo === '2' ? '5' : codigo === '15' ? '6' : '';
+    this.asignarFondoPorCodigo('0');
+    this.previsualizarEnteAprobador();
+  }
+
+  alCambiarSubgarantia(): void {
+    const requiereFondo = this.formulario.codigoGarantiaCredito === '1'
+      && this.formulario.codigoSubgarantia === '4';
+    this.asignarFondoPorCodigo(requiereFondo ? '1' : '0');
   }
 
   get garantiaSeleccionada(): GarantiaCredito | null {
@@ -2904,7 +2973,7 @@ export class OriginacionSolicitudComponent
           this.reciprocidadSimulada =
             contexto.reciprocidad
               ?.reciprocidadInicial
-            ?? 50;
+            ?? 0;
 
           this.cargandoContextoAsociado =
             false;

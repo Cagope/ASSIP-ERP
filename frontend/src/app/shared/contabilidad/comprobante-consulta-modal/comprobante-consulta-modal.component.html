@@ -1,0 +1,252 @@
+
+<div class="modal-overlay" (click)="cerrarVentana()">
+  <section
+    class="modal-contenedor"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="tituloComprobante"
+    (click)="$event.stopPropagation()">
+
+    <!-- ENCABEZADO -->
+    <header class="modal-encabezado">
+      <div class="encabezado-informacion">
+        <h2 id="tituloComprobante">
+          Consulta de comprobante contable
+        </h2>
+        <p *ngIf="referencia">
+          {{ referencia.tipoComprobante }} -
+          {{ referencia.numeroComprobante }}
+        </p>
+      </div>
+      <button
+        type="button"
+        class="btn-cerrar"
+        aria-label="Cerrar consulta de comprobante"
+        (click)="cerrarVentana()">
+        &times;
+      </button>
+    </header>
+
+    <!-- CONTENIDO -->
+    <div class="modal-contenido">
+
+      <!-- CARGANDO -->
+      <div *ngIf="cargando" class="estado-consulta">
+        Consultando comprobante contable...
+      </div>
+
+      <!-- ERROR -->
+      <div *ngIf="error && !cargando" class="mensaje-error" role="alert">
+        {{ error }}
+      </div>
+
+      <!-- COMPROBANTE -->
+      <ng-container *ngIf="comprobante && !cargando">
+
+        <!-- IDENTIFICACIÓN -->
+        <section class="seccion-comprobante">
+          <div class="seccion-titulo">
+            <h3>Información general</h3>
+          </div>
+
+          <div class="informacion-grid">
+            <div class="dato">
+              <span class="dato-etiqueta">Agencia</span>
+              <strong>
+                {{ comprobante.cabecera.codigoAgencia || comprobante.cabecera.idAgencia }}
+                -
+                {{ comprobante.cabecera.nombreAgencia || 'Sin descripción' }}
+              </strong>
+            </div>
+
+            <div class="dato">
+              <span class="dato-etiqueta">Tipo de comprobante</span>
+              <strong>
+                {{ comprobante.cabecera.tipoComprobante }}
+                -
+                {{ comprobante.cabecera.nombreTipoComprobante || 'Sin descripción' }}
+              </strong>
+            </div>
+
+            <div class="dato">
+              <span class="dato-etiqueta">Número de comprobante</span>
+              <strong>
+                {{ comprobante.cabecera.numeroComprobante }}
+              </strong>
+            </div>
+
+            <div class="dato">
+              <span class="dato-etiqueta">Fecha contable</span>
+              <strong>
+                {{ formatearFecha(comprobante.cabecera.fechaContable) }}
+              </strong>
+            </div>
+
+            <div class="dato">
+              <span class="dato-etiqueta">Origen</span>
+              <strong>
+                {{ comprobante.cabecera.origenTipo || '—' }}
+              </strong>
+            </div>
+
+            <div class="dato">
+              <span class="dato-etiqueta">Módulo de origen</span>
+              <strong>
+                {{ comprobante.cabecera.moduloOrigen || '—' }}
+              </strong>
+            </div>
+
+            <div class="dato">
+              <span class="dato-etiqueta">Proceso de origen</span>
+              <strong>
+                {{ comprobante.cabecera.procesoOrigen || '—' }}
+              </strong>
+            </div>
+
+            <div class="dato">
+              <span class="dato-etiqueta">Estado</span>
+              <strong>
+                {{ comprobante.cabecera.estadoOrigen || '—' }}
+              </strong>
+            </div>
+          </div>
+        </section>
+
+        <!-- CONCEPTO -->
+        <section class="seccion-comprobante">
+          <div class="seccion-titulo">
+            <h3>Concepto general</h3>
+          </div>
+          <p class="concepto">
+            {{ comprobante.cabecera.conceptoComprobante || 'Sin concepto registrado' }}
+          </p>
+        </section>
+
+        <!-- MOVIMIENTOS -->
+        <section class="seccion-comprobante">
+          <div class="seccion-titulo">
+            <h3>Movimientos contables</h3>
+            <span class="cantidad-movimientos">
+              {{ comprobante.movimientos.length }} movimientos
+            </span>
+          </div>
+
+          <div
+            *ngIf="comprobante.movimientos.length === 0"
+            class="estado-consulta">
+            Este comprobante no tiene movimientos contables asociados.
+          </div>
+
+          <div
+            *ngIf="comprobante.movimientos.length > 0"
+            class="tabla-contenedor">
+
+            <table class="tabla-movimientos">
+              <thead>
+              <tr>
+                <th scope="col">Cuenta contable</th>
+                <th scope="col">Tercero</th>
+                <th scope="col">Detalle del movimiento</th>
+                <th scope="col">Estado</th>
+                <th scope="col" class="importe">Base</th>
+                <th scope="col" class="importe">Débito</th>
+                <th scope="col" class="importe">Crédito</th>
+                <th scope="col">Control</th>
+                <th scope="col">Documento</th>
+              </tr>
+              </thead>
+
+              <tbody>
+              <tr *ngFor="let movimiento of comprobante.movimientos">
+                <td>
+                  <strong>
+                    {{ movimiento.codigoCuenta || movimiento.idCatalogoCuenta }}
+                  </strong>
+                  <div class="texto-secundario">
+                    {{ movimiento.nombreCuenta || 'Cuenta sin descripción' }}
+                  </div>
+                </td>
+
+                <td>
+                  <strong>
+                    {{ movimiento.documentoTercero || '—' }}
+                  </strong>
+                  <div class="texto-secundario">
+                    {{ movimiento.nombreTercero || 'Sin tercero' }}
+                  </div>
+                </td>
+
+                <td>
+                  {{ movimiento.detalleMovimiento || '—' }}
+                </td>
+
+                <td>
+                  {{ movimiento.estadoMovimiento || '—' }}
+                </td>
+
+                <td class="importe">
+                  {{ dinero(movimiento.valorBase || 0) }}
+                </td>
+
+                <td class="importe">
+                  {{ dinero(movimiento.valorDebito || 0) }}
+                </td>
+
+                <td class="importe">
+                  {{ dinero(movimiento.valorCredito || 0) }}
+                </td>
+
+                <td>
+                  {{ movimiento.idTiposControl ?? '—' }}
+                </td>
+
+                <td>
+                  {{ movimiento.numeroDocumento || '—' }}
+                </td>
+              </tr>
+              </tbody>
+
+              <tfoot>
+              <tr class="fila-totales">
+                <th colspan="5" scope="row">
+                  Totales
+                </th>
+                <th class="importe">
+                  {{ dinero(total('valorDebito')) }}
+                </th>
+                <th class="importe">
+                  {{ dinero(total('valorCredito')) }}
+                </th>
+                <th colspan="2"></th>
+              </tr>
+
+              <tr class="fila-diferencia">
+                <th colspan="5" scope="row">
+                  Diferencia
+                </th>
+                <th colspan="2" class="importe">
+                  {{ dinero(total('valorDebito') - total('valorCredito')) }}
+                </th>
+                <th colspan="2"></th>
+              </tr>
+              </tfoot>
+            </table>
+          </div>
+        </section>
+      </ng-container>
+    </div>
+
+    <!-- PIE DEL MODAL -->
+    <footer class="modal-pie">
+      <span class="texto-solo-consulta">
+        Documento contable de solo consulta
+      </span>
+      <button
+        type="button"
+        class="btn btn-secondary"
+        (click)="cerrarVentana()">
+        Cerrar
+      </button>
+    </footer>
+  </section>
+</div>

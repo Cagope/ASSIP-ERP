@@ -1,0 +1,120 @@
+<div class="balance-pagina">
+  <header class="encabezado">
+    <h2>Balance Comparado Mensual</h2>
+    <p>Comparación de saldos contables entre dos períodos seleccionados</p>
+  </header>
+
+  <section class="panel" *ngIf="puedeConsultar; else sinPermiso">
+    <h3>Parámetros del informe</h3>
+    <form (ngSubmit)="consultar()" #form="ngForm">
+      <div class="filtros">
+        <label>
+          Agencia
+          <select name="agencia" [(ngModel)]="filtro.idAgencia" (ngModelChange)="cambiarFiltros()"
+                  [disabled]="cargando || !!exportando" required>
+            <option [ngValue]="0">Seleccione una agencia</option>
+            <option *ngFor="let a of agencias" [ngValue]="a.idAgencia">
+              {{ a.codigoAgencia }} - {{ a.nombreAgencia }}
+            </option>
+          </select>
+        </label>
+        <label>
+          Año período 1
+          <input type="number" name="anoPeriodo1" min="1900" max="9999"
+                 [(ngModel)]="filtro.anoPeriodo1" (ngModelChange)="cambiarFiltros()" required>
+        </label>
+        <label>
+          Mes período 1
+          <select name="mesPeriodo1" [(ngModel)]="filtro.mesPeriodo1" (ngModelChange)="cambiarFiltros()">
+            <option *ngFor="let mes of meses; index as i" [ngValue]="i + 1">{{ mes }}</option>
+          </select>
+        </label>
+        <label>
+          Año período 2
+          <input type="number" name="anoPeriodo2" min="1900" max="9999"
+                 [(ngModel)]="filtro.anoPeriodo2" (ngModelChange)="cambiarFiltros()" required>
+        </label>
+        <label>
+          Mes período 2
+          <select name="mesPeriodo2" [(ngModel)]="filtro.mesPeriodo2" (ngModelChange)="cambiarFiltros()">
+            <option *ngFor="let mes of meses; index as i" [ngValue]="i + 1">{{ mes }}</option>
+          </select>
+        </label>
+        <label>
+          Nivel máximo
+          <select name="nivel" [(ngModel)]="filtro.nivel" (ngModelChange)="cambiarFiltros()">
+            <option *ngFor="let n of niveles" [ngValue]="n">Nivel {{ n }}</option>
+          </select>
+        </label>
+      </div>
+      <div class="opciones">
+        <label class="opcion">
+          <input type="checkbox" name="soloBalance" [(ngModel)]="filtro.soloBalance" (ngModelChange)="cambiarFiltros()">
+          <span class="opcion-texto"><strong>Solo clases 1, 2 y 3</strong><small>Activo, Pasivo y Patrimonio</small></span>
+        </label>
+        <label class="opcion">
+          <input type="checkbox" name="firmas" [(ngModel)]="filtro.incluirFirmas" (ngModelChange)="cambiarFiltros()">
+          <span class="opcion-texto"><strong>Incluir firmas</strong><small>Firmas institucionales del informe</small></span>
+        </label>
+      </div>
+      <div class="acciones">
+        <button type="submit" [disabled]="cargando || !!exportando || !form.valid || !filtro.idAgencia">
+          {{ cargando ? 'Consultando…' : 'Consultar balance' }}
+        </button>
+        <button type="button" class="secundario" (click)="exportar('pdf')"
+                [disabled]="!informe || cargando || !!exportando">PDF</button>
+        <button type="button" class="secundario" (click)="exportar('excel')"
+                [disabled]="!informe || cargando || !!exportando">Excel</button>
+      </div>
+    </form>
+  </section>
+  <ng-template #sinPermiso><p class="error">No tiene permiso para consultar balances contables.</p></ng-template>
+  <p *ngIf="mensajeError" class="error" role="alert">{{ mensajeError }}</p>
+
+  <section *ngIf="informe" class="panel">
+    <header class="resultado">
+      <h3>{{ informe.codigoAgencia }} - {{ informe.nombreAgencia }}</h3>
+      <p>{{ meses[informe.mesPeriodo1 - 1] }} de {{ informe.anoPeriodo1 }}
+         frente a {{ meses[informe.mesPeriodo2 - 1] }} de {{ informe.anoPeriodo2 }}
+         · Nivel {{ informe.nivel }}</p>
+    </header>
+    <div class="tabla-contenedor">
+      <table>
+        <thead><tr>
+          <th>Código</th>
+          <th>Cuenta contable</th>
+          <th class="numero">Saldo {{ meses[informe.mesPeriodo1 - 1] }} {{ informe.anoPeriodo1 }}</th>
+          <th class="numero">Saldo {{ meses[informe.mesPeriodo2 - 1] }} {{ informe.anoPeriodo2 }}</th>
+          <th class="numero">Variación $</th>
+          <th class="numero">Variación %</th>
+        </tr></thead>
+        <tbody>
+          <tr *ngFor="let fila of informe.filas" [class.agrupadora]="!fila.cuentaOperable">
+            <td>{{ fila.codigoCuenta }}</td>
+            <td [style.padding-left.px]="8 + (fila.nivelCuenta - 1) * 12">{{ fila.nombreCuenta }}</td>
+            <td class="numero">{{ dinero(fila.saldoPeriodo1) }}</td>
+            <td class="numero">{{ dinero(fila.saldoPeriodo2) }}</td>
+            <td class="numero">{{ dinero(fila.variacionValor) }}</td>
+            <td class="numero">{{ variacion(fila.variacionPorcentaje) }}</td>
+          </tr>
+        </tbody>
+        <tfoot><tr>
+          <th colspan="2">Totales (cuentas de nivel 1)</th>
+          <th class="numero">{{ dinero(informe.totales.saldoPeriodo1) }}</th>
+          <th class="numero">{{ dinero(informe.totales.saldoPeriodo2) }}</th>
+          <th class="numero">{{ dinero(informe.totales.variacionValor) }}</th>
+          <th class="numero">{{ variacion(informe.totales.variacionPorcentaje) }}</th>
+        </tr></tfoot>
+      </table>
+    </div>
+    <div class="firmas" *ngIf="informe.incluirFirmas && informe.firmas">
+      <div *ngFor="let f of [informe.firmas.firmante1, informe.firmas.firmante2, informe.firmas.firmante3]">
+        <ng-container *ngIf="f">
+          <strong>{{ f.nombre }}</strong>
+          <span>{{ f.titulo }}</span>
+          <small *ngIf="f.tarjetaProfesional">T. P. {{ f.tarjetaProfesional }}</small>
+        </ng-container>
+      </div>
+    </div>
+  </section>
+</div>

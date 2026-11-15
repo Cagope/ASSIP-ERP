@@ -1,0 +1,140 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.auxiliar-exportacion {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+  color: #243247;
+}
+
+.encabezado {
+  h2 {
+    margin: 0 0 6px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #17365d;
+  }
+
+  p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+}
+
+.panel-filtros {
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+
+  h3 {
+    margin: 0 0 18px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #17365d;
+  }
+}
+
+.filtros-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 2fr) repeat(2, minmax(160px, 1fr));
+  gap: 16px;
+  align-items: end;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+  }
+
+  select,
+  input {
+    width: 100%;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #fff;
+    color: #243247;
+    font: inherit;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+  }
+}
+
+.modalidad {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 18px;
+  align-items: center;
+
+  span {
+    font-weight: 600;
+    color: #475569;
+  }
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.btn-consultar {
+  min-height: 38px;
+  padding: 8px 22px;
+  border: 1px solid #1d4ed8;
+  border-radius: 6px;
+  background: #1d4ed8;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.mensaje-error {
+  padding: 12px;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+@media (max-width: 900px) {
+  .filtros-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .campo-agencia { grid-column: 1 / -1; }
+}
+
+@media (max-width: 600px) {
+  .auxiliar-exportacion { padding: 12px; }
+  .panel-filtros { padding: 14px; }
+  .filtros-grid { grid-template-columns: 1fr; }
+  .campo-agencia { grid-column: auto; }
+  .acciones { justify-content: stretch; }
+  .btn-consultar { width: 100%; }
+}

@@ -269,6 +269,68 @@ public class PeriodosContablesRepository {
     }
 
     /**
+     * Verifica que el mes inmediatamente anterior esté cerrado.
+     * Enero se validará contra el cierre anual del año anterior.
+     */
+    public boolean mesAnteriorCerrado(
+            Integer idAgencia, int ano, int mes) {
+
+        if (mes == 1) {
+            throw new IllegalArgumentException(
+                    "Enero requiere validar el cierre anual anterior."
+            );
+        }
+
+        String sql = """
+        SELECT EXISTS (
+            SELECT 1
+              FROM contabilidad.periodos_contables
+             WHERE id_agencia = :idAgencia
+               AND ano = :ano
+               AND mes = :mesAnterior
+               AND estado = 'CERRADO'
+        )
+        """;
+
+        Boolean cerrado = jdbc.queryForObject(
+                sql,
+                new MapSqlParameterSource()
+                        .addValue("idAgencia", idAgencia)
+                        .addValue("ano", ano)
+                        .addValue("mesAnterior", mes - 1),
+                Boolean.class
+        );
+
+        return Boolean.TRUE.equals(cerrado);
+    }
+
+    /** Impide reabrir si existe un cierre mensual posterior en el mismo ejercicio. */
+    public boolean existeMesPosteriorCerrado(Integer idAgencia, int ano, int mes) {
+        String sql = """
+            SELECT EXISTS (
+                SELECT 1 FROM contabilidad.periodos_contables
+                 WHERE id_agencia = :idAgencia AND ano = :ano
+                   AND mes > :mes AND estado = 'CERRADO'
+            )
+            """;
+        return Boolean.TRUE.equals(jdbc.queryForObject(
+                sql, parametrosPeriodo(idAgencia, ano, mes), Boolean.class));
+    }
+
+    /** Verifica la existencia de una consolidación anual del ejercicio a reabrir. */
+    public boolean existeCierreAnual(Integer idAgencia, int ano) {
+        String sql = """
+            SELECT EXISTS (
+                SELECT 1 FROM contabilidad.cierres_anuales
+                 WHERE id_agencia = :idAgencia AND ano = :ano
+            )
+            """;
+        return Boolean.TRUE.equals(jdbc.queryForObject(sql,
+                new MapSqlParameterSource().addValue("idAgencia", idAgencia)
+                        .addValue("ano", ano), Boolean.class));
+    }
+
+    /**
      * Construye los parámetros comunes de agencia y período.
      */
     private MapSqlParameterSource parametrosPeriodo(

@@ -1712,7 +1712,10 @@ public class SolicitudDesembolsoService {
                     fechaContable,
                     "DESEMBOLSO CREDITO " + credito.pagareCartera(),
                     normalizar(valorCuentaPorPagar),
-                    idUsuario
+                    idUsuario,
+                    null,
+                    null,
+                    "PAGO_DESEMBOLSO_CREDITO"
             );
         }
 

@@ -6,6 +6,9 @@ import co.assip.erp.cartera.originacion.aprobacion.dto.SolicitudAprobacionDecisi
 import co.assip.erp.cartera.originacion.aprobacion.dto.SolicitudAprobacionFotosDTO;
 import co.assip.erp.cartera.originacion.aprobacion.dto.SolicitudAprobacionDecisionRequestDTO;
 import co.assip.erp.seguridad.sesion.UsuarioSesionService;
+import co.assip.erp.seguridad.autorizacion.AccessValidator;
+import co.assip.erp.seguridad.usuarios.Usuario;
+import java.util.ArrayList;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,15 +25,38 @@ public class SolicitudAprobacionService {
     private final SolicitudAprobacionRepository repository;
     private final UsuarioSesionService usuarioSesionService;
     private final ObjectMapper objectMapper;
+    private final AccessValidator accessValidator;
 
     public SolicitudAprobacionService(
             SolicitudAprobacionRepository repository,
             UsuarioSesionService usuarioSesionService,
-            ObjectMapper objectMapper
+            ObjectMapper objectMapper,
+            AccessValidator accessValidator
     ) {
         this.repository = repository;
         this.usuarioSesionService = usuarioSesionService;
         this.objectMapper = objectMapper;
+        this.accessValidator = accessValidator;
+    }
+
+    // Permisos efectivos por ente; ADMIN se resuelve en AccessValidator.
+    private List<Integer> entesAutorizados() {
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(usuarioSesionService.idUsuario());
+        List<Integer> entes = new ArrayList<>();
+        if (accessValidator.tienePermiso(usuario,
+                "CARTERA_ORIGINACION_APROBACION_GERENCIA")) {
+            entes.add(1);
+        }
+        if (accessValidator.tienePermiso(usuario,
+                "CARTERA_ORIGINACION_APROBACION_COMITE")) {
+            entes.add(2);
+        }
+        if (accessValidator.tienePermiso(usuario,
+                "CARTERA_ORIGINACION_APROBACION_CONSEJO")) {
+            entes.add(3);
+        }
+        return entes;
     }
 
     // =========================================================
@@ -39,9 +65,7 @@ public class SolicitudAprobacionService {
 
     public List<SolicitudAprobacionBandejaDTO> listarBandeja() {
 
-        Integer idUsuario = usuarioSesionService.idUsuario();
-
-        return repository.listarBandeja(idUsuario);
+        return repository.listarBandeja(entesAutorizados());
     }
 
     // =========================================================
@@ -273,7 +297,7 @@ public class SolicitudAprobacionService {
 
         if (!repository.usuarioPuedeActuar(
                 idSolicitudCredito,
-                idUsuario
+                entesAutorizados()
         )) {
             throw new IllegalStateException(
                     "El usuario autenticado no está autorizado "
@@ -451,7 +475,29 @@ public class SolicitudAprobacionService {
         }
 
         // -----------------------------------------------------
-        // 10. RETORNAR ACTUACIÓN REGISTRADA
+        // 10. NO_VIABLE: cierre definitivo e inmediato.
+        // Se ejecuta en la misma transacción que registra la
+        // actuación y sus fotografías, para evitar cierres parciales.
+        // Aplica a Gerencia, Comité y Consejo.
+        // -----------------------------------------------------
+
+        if ("NO_VIABLE".equals(codigoDecision)) {
+
+            int actualizados = repository.finalizarNoViable(
+                    idSolicitudCredito,
+                    idUsuario
+            );
+
+            if (actualizados != 1) {
+                throw new IllegalStateException(
+                        "La decisión NO_VIABLE fue registrada, "
+                                + "pero no fue posible cerrar la solicitud."
+                );
+            }
+        }
+
+        // -----------------------------------------------------
+        // 11. RETORNAR ACTUACIÓN REGISTRADA
         // -----------------------------------------------------
 
         return idActuacion;
@@ -530,6 +576,13 @@ public class SolicitudAprobacionService {
         switch (accionNormalizada) {
 
             case "RETOMAR" -> {
+
+                if (!"SOLICITA_AJUSTES".equals(conceptoVigente)) {
+                    throw new IllegalStateException(
+                            "Solo se puede retomar una solicitud "
+                                    + "cuando el aprobador solicita ajustes."
+                    );
+                }
 
                 actualizados = repository.devolverADocumentacion(
                         idSolicitudCredito,
@@ -611,12 +664,9 @@ public class SolicitudAprobacionService {
 
         validarIdSolicitud(idSolicitudCredito);
 
-        Integer idUsuario =
-                usuarioSesionService.idUsuario();
-
         if (!repository.usuarioPuedeActuar(
                 idSolicitudCredito,
-                idUsuario
+                entesAutorizados()
         )) {
             throw new IllegalStateException(
                     "El usuario autenticado no está autorizado "
@@ -642,7 +692,8 @@ public class SolicitudAprobacionService {
 
         if (!repository.usuarioPuedeConsultar(
                 idSolicitudCredito,
-                idUsuario
+                idUsuario,
+                entesAutorizados()
         )) {
 
             throw new IllegalStateException(

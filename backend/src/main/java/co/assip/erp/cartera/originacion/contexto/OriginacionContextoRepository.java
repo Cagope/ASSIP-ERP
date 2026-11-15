@@ -73,6 +73,29 @@ public class OriginacionContextoRepository {
     }
 
 
+    // Factor de simulación inicial por agencia (parámetro 645).
+    // La ausencia de configuración debe impedir mostrar un cupo incorrecto.
+    public java.math.BigDecimal obtenerFactorReciprocidadInicial(Integer idAgencia) {
+        String sql = """
+                SELECT valor_parametro
+                FROM general.parametros
+                WHERE codigo_parametro = 645
+                  AND id_agencia = :idAgencia
+                """;
+        java.util.List<java.math.BigDecimal> valores = jdbc.query(
+                sql,
+                new MapSqlParameterSource("idAgencia", idAgencia),
+                (rs, rowNum) -> rs.getBigDecimal("valor_parametro")
+        );
+        if (valores.size() != 1 || valores.get(0) == null
+                || valores.get(0).signum() <= 0) {
+            throw new IllegalStateException(
+                    "El parámetro 645 de reciprocidad inicial no está configurado correctamente para la agencia."
+            );
+        }
+        return valores.get(0);
+    }
+
     // =========================================================
     // INFORMACIÓN ECONÓMICA
     // =========================================================

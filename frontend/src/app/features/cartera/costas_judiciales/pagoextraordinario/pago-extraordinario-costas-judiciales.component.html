@@ -1,0 +1,158 @@
+<div class="causacion-extraordinaria-costas judicialess-page">
+  <header class="pagina-encabezado">
+    <div>
+      <h1>Pagos y correcciones de costas judiciales</h1>
+      <p>Disminuya el saldo pendiente de costas judiciales mediante Caja, Depósitos, Bancos/CxC o corrección contable. Un solo comprobante CC.</p>
+    </div>
+  </header>
+
+  <div *ngIf="error" class="alert alert--danger" role="alert">{{ error }}</div>
+  <p *ngIf="cargando" role="status">Consultando información del crédito...</p>
+  <p *ngIf="procesando" role="status">Procesando la operación...</p>
+
+  <section class="consulta-bloque">
+    <div class="bloque-encabezado">
+      <div><h2>Buscar asociado</h2><span>Busque por cédula, nombres o apellidos.</span></div>
+      <button *ngIf="asociadoSeleccionado" type="button" class="btn btn--secondary btn-sm" (click)="limpiarBusqueda()" [disabled]="cargando || procesando">Nueva búsqueda</button>
+    </div>
+    <app-consulta-creditos-buscador [bloqueado]="cargando || procesando" (asociadoSeleccionado)="seleccionarAsociado($event)"></app-consulta-creditos-buscador>
+  </section>
+
+  <section *ngIf="asociadoSeleccionado && !creditoSeleccionado" class="consulta-bloque">
+    <div class="bloque-encabezado"><div><h2>{{ asociadoSeleccionado.nombreCompleto }}</h2><span>Documento: {{ asociadoSeleccionado.documento }}</span></div></div>
+    <h3>Créditos activos con saldo</h3>
+    <p *ngIf="!cargando && creditos.length === 0" class="estado-vacio">No se encontraron créditos activos con saldo.</p>
+    <div *ngIf="creditos.length > 0" class="tabla-contenedor">
+      <table class="tabla-datos">
+        <thead><tr><th>Pagaré</th><th>Línea</th><th>Estado</th><th class="valor">Saldo capital</th><th>Acción</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let credito of creditos">
+            <td>{{ credito.pagareCartera || '—' }}</td>
+            <td>{{ credito.descripcionLineaCredito || credito.codigoLineaCredito || '—' }}</td>
+            <td>{{ credito.descripcionEstadoCartera || credito.codigoEstadoCartera || '—' }}</td>
+            <td class="valor">{{ credito.saldoActual | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</td>
+            <td><button type="button" class="btn btn--primary btn-sm" (click)="seleccionarCredito(credito)" [disabled]="cargando || procesando">Seleccionar</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section *ngIf="creditoSeleccionado as credito" class="consulta-bloque">
+    <div class="bloque-encabezado">
+      <div><h2>Costas judiciales del pagaré {{ credito.pagareCartera || '—' }}</h2><span>Agencia del crédito y saldo verificados en el backend.</span></div>
+      <button type="button" class="btn btn--secondary btn-sm" (click)="cambiarCredito()" [disabled]="procesando">Cambiar crédito</button>
+    </div>
+    <div class="form-grid">
+      <div class="f-row"><span>Saldo pendiente de costas judiciales</span><strong class="valor">{{ saldoCostas | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong></div>
+      <div class="f-row"><span>Total a disminuir</span><strong class="valor">{{ totalAplicado | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong></div>
+      <div class="f-row"><span>Saldo después de aplicar</span><strong class="valor">{{ saldoRestante | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong></div>
+    </div>
+
+    <form *ngIf="!resultado && !cargando && saldoCostas > 0" (ngSubmit)="previsualizar()" class="formulario-costas judiciales distribucion">
+      <div class="distribucion__encabezado">
+        <div>
+          <h3>Distribución del pago y/o corrección</h3>
+          <p class="nota">Distribuya el valor entre Caja, Ahorros, Bancos/CxC y corrección contable. Puede combinar los cuatro medios.</p>
+        </div>
+        <div class="distribucion__total"><span>Total aplicado</span><strong>{{ totalAplicado | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong></div>
+      </div>
+      <div class="distribucion__fecha">
+        <label class="f-row"><span>Fecha del movimiento</span><input type="date" name="fechaMovimiento" [(ngModel)]="fechaMovimiento" (ngModelChange)="invalidarVistaPrevia()" required [disabled]="procesando"></label>
+      </div>
+      <div class="medio-bloque">
+        <h4>1. Efectivo en Caja</h4>
+        <div class="medio-panel medio-panel--dos">
+          <label class="f-row"><span>Caja receptora</span>
+            <select name="idCaja" [(ngModel)]="idCaja" (ngModelChange)="invalidarVistaPrevia()" [disabled]="procesando || valorCaja <= 0" [required]="valorCaja > 0">
+              <option [ngValue]="null">Seleccione una caja</option>
+              <option *ngFor="let caja of cajas" [ngValue]="caja.idCaja">{{ caja.codigoCaja }} – {{ caja.descripcion }}</option>
+            </select>
+          </label>
+          <label class="f-row"><span>Valor en efectivo ($)</span><input type="text" inputmode="decimal" name="valorCaja" prorrogasNumericFormat [(ngModel)]="valorCaja" (ngModelChange)="cambiarMedios()" [disabled]="procesando" class="valor importe"></label>
+        </div>
+        <p *ngIf="valorCaja > 0 && cajas.length === 0" class="nota aviso">No hay cajas disponibles para la agencia de este crédito.</p>
+      </div>
+      <div class="medio-bloque">
+        <div class="medio-titulo">
+          <h4>2. Débitos a cuentas de ahorros</h4>
+          <button type="button" class="btn btn--secondary btn-sm" (click)="agregarAhorro()" [disabled]="procesando || cuentasAhorro.length === 0">Agregar cuenta</button>
+        </div>
+        <p class="nota">Puede distribuir el valor entre varias cuentas del asociado.</p>
+        <div *ngFor="let ahorro of ahorros; let i = index" class="medio-panel medio-panel--ahorros">
+          <label class="f-row"><span>Cuenta de ahorros {{ i + 1 }}</span>
+            <select [name]="'cuentaAhorro' + i" [(ngModel)]="ahorro.idCuentaAhorro" (ngModelChange)="invalidarVistaPrevia()" [disabled]="procesando">
+              <option [ngValue]="null">Seleccione una cuenta</option>
+              <option *ngFor="let cuenta of cuentasAhorro" [ngValue]="cuenta.idCuentaAhorro">{{ cuenta.codigoCuenta }} – {{ cuenta.nombreForma }} ({{ cuenta.saldoDisponible | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }})</option>
+            </select>
+          </label>
+          <label class="f-row"><span>Valor a debitar ($)</span><input type="text" inputmode="decimal" [name]="'valorAhorro' + i" prorrogasNumericFormat [(ngModel)]="ahorro.valor" (ngModelChange)="cambiarMedios()" [disabled]="procesando" class="valor importe"></label>
+          <button type="button" class="btn btn--secondary btn-sm medio-quitar" (click)="quitarAhorro(i)" [disabled]="procesando">Quitar</button>
+        </div>
+        <p *ngIf="ahorros.length === 0" class="nota">No se han agregado cuentas de ahorros.</p>
+      </div>
+      <div class="medio-bloque">
+        <h4>3. Consignación o transferencia — Bancos/CxC</h4>
+        <div class="medio-panel medio-panel--valor">
+          <div class="medio-descripcion">Tesorería recibirá posteriormente el recaudo bancario mediante la bandeja existente.</div>
+          <label class="f-row"><span>Valor Bancos/CxC ($)</span><input type="text" inputmode="decimal" name="valorBancos" prorrogasNumericFormat [(ngModel)]="valorBancos" (ngModelChange)="cambiarMedios()" [disabled]="procesando" class="valor importe"></label>
+        </div>
+      </div>
+      <div class="medio-bloque">
+        <h4>4. Corrección contable de costas judiciales</h4>
+        <div class="medio-panel medio-panel--valor">
+          <div class="medio-descripcion">Disminuye el saldo global de costas judiciales mediante la contrapartida parametrizada por agencia, sin seleccionar cargos originales ni mover dinero.</div>
+          <label class="f-row"><span>Valor de corrección ($)</span><input type="text" inputmode="decimal" name="valorCorreccion" prorrogasNumericFormat [(ngModel)]="valorCorreccion" (ngModelChange)="cambiarMedios()" [disabled]="procesando" class="valor importe"></label>
+        </div>
+      </div>
+      <div class="resumen-distribucion">
+        <h4>Resumen de distribución</h4>
+        <div class="resumen-distribucion__filas">
+          <div><span>Saldo anterior</span><strong>{{ saldoCostas | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong></div>
+          <div><span>Total aplicado</span><strong>{{ totalAplicado | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong></div>
+          <div class="resumen-distribucion__final"><span>Saldo posterior</span><strong [class.importe-error]="saldoRestante < 0">{{ saldoRestante | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong></div>
+        </div>
+        <p *ngIf="saldoRestante < 0" class="aviso" role="alert">El total aplicado supera el saldo pendiente de costas judiciales.</p>
+      </div>
+      <label class="f-row concepto"><span>Justificación / observación <strong *ngIf="valorCorreccion > 0">(obligatoria para corrección)</strong></span>
+        <textarea name="justificacion" [ngModel]="justificacion" (ngModelChange)="editarConcepto($event)" rows="3" maxlength="430" [disabled]="procesando" placeholder="Concepto sugerido automáticamente; puede editarlo. Para correcciones, indique el motivo específico."></textarea>
+      </label>
+      <p class="nota">El total no puede superar el saldo pendiente. Caja y Tesorería recibirán sus operaciones en las bandejas existentes; Depósitos registra el débito de cada cuenta.</p>
+      <div class="acciones"><button type="submit" class="btn btn--primary" [disabled]="procesando || cargando || totalAplicado <= 0 || saldoRestante < 0">Ver comprobante contable</button></div>
+    </form>
+    <p *ngIf="!cargando && saldoCostas <= 0" class="nota">Este crédito no tiene saldo de costas judiciales pendiente.</p>
+  </section>
+
+  <section *ngIf="vistaPrevia as vista" class="consulta-bloque">
+    <div class="bloque-encabezado"><div><h2>Vista previa del comprobante</h2><span>{{ vista.tipoComprobante }} {{ vista.numeroSugerido }} · El número definitivo se asigna al confirmar.</span></div></div>
+    <div class="form-grid">
+      <div class="f-row"><span>Saldo anterior</span><strong class="valor">{{ vista.saldoAnterior | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong></div>
+      <div class="f-row"><span>Total aplicado</span><strong class="valor">{{ vista.totalAplicado | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong></div>
+      <div class="f-row"><span>Saldo posterior</span><strong class="valor">{{ vista.saldoPosterior | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</strong></div>
+    </div>
+    <div class="tabla-contenedor">
+      <table class="tabla-datos">
+        <thead><tr><th>Cuenta</th><th>Nombre de cuenta</th><th>Tercero (Cédula/NIT)</th><th>Detalle</th><th class="valor">Débito</th><th class="valor">Crédito</th></tr></thead>
+        <tbody><tr *ngFor="let linea of vista.lineas">
+          <td>{{ linea.codigoCuenta }}</td><td>{{ linea.nombreCuenta }}</td><td>{{ linea.documentoTercero }}</td><td>{{ linea.detalle }}</td>
+          <td class="valor">{{ linea.debito | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</td>
+          <td class="valor">{{ linea.credito | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</td>
+        </tr></tbody>
+        <tfoot><tr><th colspan="4">Totales</th><th class="valor">{{ totalDebitos | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</th><th class="valor">{{ totalCreditos | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</th></tr></tfoot>
+      </table>
+    </div>
+    <div class="acciones">
+      <button type="button" class="btn btn--primary" (click)="confirmar()" [disabled]="procesando || cargando">Confirmar pago / corrección y generar CC</button>
+      <button type="button" class="btn btn--secondary" (click)="invalidarVistaPrevia()" [disabled]="procesando">Volver a editar</button>
+    </div>
+  </section>
+
+  <section *ngIf="resultado as registrado" class="consulta-bloque" role="status">
+    <h2>Disminución de costas judiciales registrada</h2>
+    <p><strong>Comprobante:</strong> {{ registrado.tipoComprobante }} {{ registrado.numeroComprobante }}</p>
+    <p><strong>Saldo pendiente:</strong> {{ registrado.saldoPosterior | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}</p>
+    <p *ngIf="registrado.movimientosCaja.length">Movimientos de Caja: {{ registrado.movimientosCaja.length }}</p>
+    <p *ngIf="registrado.operacionTesoreria">Operación enviada a Tesorería.</p>
+    <button type="button" class="btn btn--secondary" (click)="cambiarCredito()">Seleccionar otro crédito</button>
+  </section>
+</div>

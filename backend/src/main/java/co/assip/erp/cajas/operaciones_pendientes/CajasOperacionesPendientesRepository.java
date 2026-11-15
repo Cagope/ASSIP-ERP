@@ -80,10 +80,12 @@ public class CajasOperacionesPendientesRepository {
                    
                 LEFT JOIN cartera.pagos_cuotas pc
                     ON m.modulo_origen = 'CARTERA'
-                   AND m.proceso_origen = 'PAGO_CUOTAS'
+                   AND m.proceso_origen IN ('PAGO_CUOTAS', 'REVERSA_PAGO_CUOTAS')
                    AND m.tabla_origen = 'cartera.pagos_cuotas'
                    AND pc.id_pago = m.id_origen
-                   AND pc.id_movimiento_caja = m.id_movimiento_caja
+                   AND (pc.id_movimiento_caja = m.id_movimiento_caja
+                        OR (m.proceso_origen = 'REVERSA_PAGO_CUOTAS'
+                            AND pc.id_caja = m.id_caja))
 
                 LEFT JOIN cartera.carteras_creditos cc
                     ON (m.tabla_origen = 'cartera.carteras_creditos'
@@ -103,7 +105,10 @@ public class CajasOperacionesPendientesRepository {
                      )
 
                 WHERE m.id_caja = :idCaja
-                  AND m.fecha_contable = :fechaContable
+                  AND (m.fecha_contable = :fechaContable
+                       OR (m.modulo_origen = 'CARTERA'
+                           AND m.proceso_origen = 'REVERSA_PAGO_CUOTAS'
+                           AND m.fecha_contable < :fechaContable))
                   AND m.estado = 'PENDIENTE'
 
                 ORDER BY
@@ -303,7 +308,9 @@ public class CajasOperacionesPendientesRepository {
                       SELECT 1
                       FROM cartera.pagos_cuotas pc
                       WHERE pc.id_pago = :idPago
-                        AND pc.id_movimiento_caja = m.id_movimiento_caja
+                        AND (pc.id_movimiento_caja = m.id_movimiento_caja
+                        OR (m.proceso_origen = 'REVERSA_PAGO_CUOTAS'
+                            AND pc.id_caja = m.id_caja))
                         AND pc.id_caja = m.id_caja
                         AND pc.estado = 'APLICADO'
                   )

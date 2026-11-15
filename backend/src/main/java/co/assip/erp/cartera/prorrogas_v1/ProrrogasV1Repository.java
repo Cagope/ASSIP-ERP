@@ -85,20 +85,24 @@ public class ProrrogasV1Repository {
     public List<ProrrogasV1HistorialDTO> listarHistorial(Integer idCredito) {
         validarCredito(idCredito);
         String sql = """
-                SELECT id_credito_prorroga, id_cartera_credito, numero_prorroga,
-                       fecha_prorroga, dias_prorroga, meses_prorroga,
-                       proxima_fecha_capital_anterior, proxima_fecha_interes_anterior,
-                       fecha_vencimiento_anterior, plazo_anterior,
-                       proxima_fecha_capital_nueva, proxima_fecha_interes_nueva,
-                       fecha_vencimiento_nueva, plazo_nuevo,
-                       valor_interes_corriente, valor_interes_mora, valor_seguro,
-                       valor_aportes, valor_fondo_garantia, valor_otros_conceptos,
-                       valor_total_pagado, tipo_comprobante, numero_comprobante,
-                       fecha_comprobante, id_agencia, estado_prorroga,
-                       fecha_aplicacion, observacion
-                FROM cartera.creditos_prorrogas
-                WHERE id_cartera_credito = :credito
-                ORDER BY numero_prorroga DESC, id_credito_prorroga DESC
+                SELECT p.*,
+                       COALESCE((pc.liquidacion ->> 'valorCapital')::numeric, 0) AS capital_recaudado,
+                       COALESCE((pc.liquidacion ->> 'valorAlivios')::numeric, 0) AS alivios_recaudados,
+                       COALESCE((pc.liquidacion ->> 'valorCostasJudiciales')::numeric, 0) AS costas_recaudadas
+                FROM cartera.creditos_prorrogas p
+                LEFT JOIN LATERAL (
+                    SELECT pg.liquidacion
+                    FROM cartera.pagos_cuotas pg
+                    WHERE pg.id_cartera_credito = p.id_cartera_credito
+                      AND pg.tipo_operacion = 'PRORROGA'
+                      AND pg.tipo_comprobante = p.tipo_comprobante
+                      AND TRIM(pg.numero_comprobante) = TRIM(p.numero_comprobante)
+                      AND pg.id_agencia_receptora = p.id_agencia
+                    ORDER BY pg.id_pago DESC
+                    LIMIT 1
+                ) pc ON TRUE
+                WHERE p.id_cartera_credito = :credito
+                ORDER BY p.numero_prorroga DESC, p.id_credito_prorroga DESC
                 """;
         return jdbc.query(sql, new MapSqlParameterSource("credito", idCredito),
                 (rs, i) -> new ProrrogasV1HistorialDTO(
@@ -116,12 +120,12 @@ public class ProrrogasV1Repository {
                         fecha(rs.getDate("proxima_fecha_interes_nueva")),
                         fecha(rs.getDate("fecha_vencimiento_nueva")),
                         rs.getObject("plazo_nuevo", Integer.class),
+                        rs.getBigDecimal("capital_recaudado"),
                         rs.getBigDecimal("valor_interes_corriente"),
                         rs.getBigDecimal("valor_interes_mora"),
                         rs.getBigDecimal("valor_seguro"),
-                        rs.getBigDecimal("valor_aportes"),
-                        rs.getBigDecimal("valor_fondo_garantia"),
-                        rs.getBigDecimal("valor_otros_conceptos"),
+                        rs.getBigDecimal("alivios_recaudados"),
+                        rs.getBigDecimal("costas_recaudadas"),
                         rs.getBigDecimal("valor_total_pagado"),
                         rs.getString("tipo_comprobante"),
                         rs.getString("numero_comprobante"),
@@ -167,8 +171,8 @@ public class ProrrogasV1Repository {
                     :credito, :numero, :fecha, :dias, :meses,
                     :capitalAnterior, :interesAnterior, :vencimientoAnterior, :plazoAnterior,
                     :capitalNueva, :interesNueva, :vencimientoNuevo, :plazoNuevo,
-                    :interesCorriente, :interesMora, :seguro, :aportes, :fondo,
-                    :otros, :total, :tipoComprobante, :numeroComprobante,
+                    :interesCorriente, :interesMora, :seguro, 0, 0,
+                    0, :total, :tipoComprobante, :numeroComprobante,
                     :fechaComprobante, :agencia, 'A', CURRENT_TIMESTAMP,
                     :observacion, :usuario
                 ) RETURNING id_credito_prorroga
@@ -190,9 +194,6 @@ public class ProrrogasV1Repository {
                 .addValue("interesCorriente", registro.interesCorriente())
                 .addValue("interesMora", cero(registro.interesMora()))
                 .addValue("seguro", cero(registro.seguro()))
-                .addValue("aportes", cero(registro.aportes()))
-                .addValue("fondo", cero(registro.fondoGarantia()))
-                .addValue("otros", cero(registro.otrosConceptos()))
                 .addValue("total", registro.totalPagado())
                 .addValue("tipoComprobante", registro.tipoComprobante())
                 .addValue("numeroComprobante", registro.numeroComprobante())
@@ -394,8 +395,7 @@ public class ProrrogasV1Repository {
             Integer plazoAnterior, LocalDate proximaCapitalNueva,
             LocalDate proximaInteresNueva, LocalDate vencimientoNuevo,
             Integer plazoNuevo, BigDecimal interesCorriente, BigDecimal interesMora,
-            BigDecimal seguro, BigDecimal aportes, BigDecimal fondoGarantia,
-            BigDecimal otrosConceptos, BigDecimal totalPagado,
+            BigDecimal seguro, BigDecimal totalPagado,
             String tipoComprobante, String numeroComprobante,
             LocalDate fechaComprobante, String observacion) {
     }

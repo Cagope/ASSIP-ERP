@@ -51,7 +51,7 @@ public class SolicitudFormalizacionService {
     // BANDEJA DE FORMALIZACIÓN
     //
     // Consulta las solicitudes aprobadas pendientes de
-    // formalización asignadas al asesor autenticado.
+    // formalización de las agencias autorizadas.
     //
     // No modifica información.
     // =========================================================
@@ -59,10 +59,19 @@ public class SolicitudFormalizacionService {
     @Transactional(readOnly = true)
     public List<SolicitudFormalizacionBandejaDTO> listarBandeja() {
 
-        Integer idUsuario =
-                usuarioSesionService.idUsuario();
+        boolean accesoTotal = usuarioSesionService.tieneAccesoTotal();
+        List<Integer> agencias = usuarioSesionService.agencias();
 
-        return repository.listarBandeja(idUsuario);
+        // Una lista vacía nunca debe abrir el acceso a todas las agencias.
+        if (!accesoTotal && (agencias == null || agencias.isEmpty())) {
+            return List.of();
+        }
+
+        // Para ADMIN se pasa una lista no vacía que evita un IN () inválido.
+        return repository.listarBandeja(
+                accesoTotal,
+                agencias == null || agencias.isEmpty() ? List.of(-1) : agencias
+        );
     }
 
     // =========================================================
@@ -79,13 +88,16 @@ public class SolicitudFormalizacionService {
 
         validarIdSolicitud(idSolicitudCredito);
 
-        return repository.buscarPorId(idSolicitudCredito)
+        SolicitudFormalizacionDetalleDTO solicitud = repository.buscarPorId(idSolicitudCredito)
                 .orElseThrow(
                         () -> new IllegalArgumentException(
                                 "No existe la solicitud de crédito "
                                         + idSolicitudCredito
                         )
                 );
+
+        usuarioSesionService.validarAgencia(solicitud.getIdAgencia());
+        return solicitud;
     }
 
     // =========================================================
@@ -249,8 +261,8 @@ public class SolicitudFormalizacionService {
             throw new IllegalStateException(
                     "No fue posible guardar la formalización. "
                             + "Verifique que la solicitud continúe "
-                            + "en Formalización y que usted sea "
-                            + "el asesor responsable."
+                            + "en Formalización y pertenezca "
+                            + "a una agencia autorizada."
             );
         }
 
@@ -723,17 +735,7 @@ public class SolicitudFormalizacionService {
             );
         }
 
-        boolean asignadaAlAsesor = repository.listarBandeja(idUsuario)
-                .stream()
-                .anyMatch(item -> Objects.equals(
-                        item.getIdSolicitudCredito(), idSolicitudCredito
-                ));
-
-        if (!asignadaAlAsesor) {
-            throw new IllegalStateException(
-                    "La solicitud no está asignada al asesor autenticado."
-            );
-        }
+        // consultar() ya validó la agencia autorizada del funcionario.
 
         Long consecutivoProvisional =
                 repository.consultarConsecutivoProvisionalPagare(
@@ -908,14 +910,8 @@ public class SolicitudFormalizacionService {
             );
         }
 
-        if (!Objects.equals(
-                contexto.idAsesor(),
-                idUsuario
-        )) {
-            throw new IllegalStateException(
-                    "La solicitud pertenece a otro asesor."
-            );
-        }
+        // El asesor original se conserva; el acceso se valida por agencia.
+        usuarioSesionService.validarAgencia(contexto.idAgencia());
 
         if (contexto.formalizacionFinalizada()) {
             throw new IllegalStateException(

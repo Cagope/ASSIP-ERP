@@ -1,0 +1,345 @@
+
+<div class="costas-page">
+  <header class="encabezado">
+    <div>
+      <h2>Costas Judiciales</h2>
+      <p>Registro y contabilización de costas judiciales de cartera</p>
+    </div>
+  </header>
+
+  <div *ngIf="error" class="mensaje error" role="alert">
+    {{ error }}
+  </div>
+
+  <div *ngIf="aviso" class="mensaje exito" role="status">
+    {{ aviso }}
+  </div>
+
+  <!-- 1. BÚSQUEDA DEL ASOCIADO -->
+  <section class="bloque">
+    <h3>1. Buscar asociado</h3>
+
+    <app-consulta-creditos-buscador
+      [bloqueado]="cargando"
+      (asociadoSeleccionado)="seleccionarAsociado($event)"
+      (busquedaLimpiada)="limpiarAsociado()">
+    </app-consulta-creditos-buscador>
+
+    <div class="datos" *ngIf="asociado as a">
+      <div>
+        <small>Asociado</small>
+        <strong>{{ a.nombreCompleto }}</strong>
+      </div>
+      <div>
+        <small>Documento</small>
+        <strong>{{ a.documento }}</strong>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. SELECCIÓN DEL CRÉDITO -->
+  <section class="bloque" *ngIf="asociado">
+    <h3>2. Seleccionar crédito</h3>
+
+    <p *ngIf="cargando && !credito">
+      Consultando información...
+    </p>
+
+    <p *ngIf="!cargando && creditos.length === 0 && !credito">
+      No se encontraron créditos disponibles.
+    </p>
+
+    <!-- La lista se oculta cuando existe un crédito seleccionado. -->
+    <div class="tabla-contenedor" *ngIf="creditos.length > 0 && !credito">
+      <table class="tabla-creditos">
+        <thead>
+        <tr>
+          <th>Pagaré</th>
+          <th>Estado</th>
+          <th>Saldo de capital</th>
+          <th>Acción</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let item of creditos">
+          <td>{{ item.pagareCartera }}</td>
+          <td>{{ item.codigoEstadoCartera }}</td>
+          <td>
+            {{ item.saldoActual | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+          </td>
+          <td>
+            <button
+              type="button"
+              [disabled]="cargando"
+              (click)="seleccionarCredito(item.idCarteraCredito)">
+              Seleccionar
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Resumen del crédito seleccionado. -->
+    <ng-container *ngIf="credito as c">
+      <div class="datos">
+        <div>
+          <small>Crédito seleccionado</small>
+          <strong>{{ c.pagareCartera }}</strong>
+        </div>
+        <div>
+          <small>Saldo capital</small>
+          <strong>
+            {{ c.saldoActual | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+          </strong>
+        </div>
+        <div>
+          <small>Estado</small>
+          <strong>{{ c.codigoEstadoCartera }}</strong>
+        </div>
+      </div>
+
+      <div class="acciones">
+        <button
+          type="button"
+          [disabled]="cargando"
+          (click)="limpiarCredito()">
+          Cambiar crédito
+        </button>
+      </div>
+    </ng-container>
+  </section>
+
+  <!-- 3. DATOS DE LAS COSTAS JUDICIALES -->
+  <section class="bloque" *ngIf="credito">
+    <h3>3. Datos de las costas judiciales</h3>
+
+    <div class="formulario">
+      <div class="campo">
+        <label for="fechaMovimiento">Fecha del movimiento</label>
+        <input
+          id="fechaMovimiento"
+          type="date"
+          name="fechaMovimiento"
+          [(ngModel)]="fechaMovimiento"
+          (ngModelChange)="datosModificados()"
+          [disabled]="cargando">
+      </div>
+
+      <div class="campo">
+        <label for="tipoComprobante">Tipo de comprobante</label>
+        <select
+          id="tipoComprobante"
+          name="tipoComprobante"
+          [(ngModel)]="tipoComprobante"
+          (ngModelChange)="datosModificados()"
+          [disabled]="cargando">
+          <option value="NC">NC - Nota contable</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label for="valorCostas">Valor de las costas</label>
+        <input
+          id="valorCostas"
+          type="text"
+          class="importe-monetario"
+          prorrogasNumericFormat
+          inputmode="decimal"
+          name="valorCostas"
+          [(ngModel)]="valor"
+          (ngModelChange)="datosModificados()"
+          [disabled]="cargando"
+          autocomplete="off">
+      </div>
+
+      <div class="campo campo-completo">
+        <label for="observacion">Descripción</label>
+        <textarea
+          id="observacion"
+          name="observacion"
+          rows="3"
+          maxlength="500"
+          [(ngModel)]="observacion"
+          (ngModelChange)="datosModificados()"
+          [disabled]="cargando">
+        </textarea>
+      </div>
+    </div>
+
+    <!-- BÚSQUEDA DE TERCEROS -->
+    <div class="tercero">
+      <h4>Contrapartida contable</h4>
+
+      <div class="campo-busqueda" *ngIf="tercero === null">
+        <label for="buscarTercero">Buscar tercero (opcional)</label>
+
+        <input
+          id="buscarTercero"
+          type="text"
+          name="buscarTercero"
+          [ngModel]="textoBusquedaTercero"
+          (ngModelChange)="buscarTerceros($event)"
+          (blur)="cerrarResultadosTerceros()"
+          placeholder="Documento, nombres o apellidos"
+          autocomplete="off"
+          [disabled]="cargando">
+
+        <div
+          class="resultados-busqueda"
+          *ngIf="mostrarResultadosTerceros && terceros.length > 0">
+
+          <button
+            type="button"
+            *ngFor="let persona of terceros"
+            (mousedown)="$event.preventDefault(); seleccionarTercero(persona)">
+            {{ persona.documento }} - {{ persona.nombreCompleto }}
+          </button>
+        </div>
+
+        <small *ngIf="buscandoTerceros">
+          Buscando terceros...
+        </small>
+      </div>
+
+      <div *ngIf="tercero !== null">
+        <div class="datos">
+          <div>
+            <small>Tercero seleccionado</small>
+            <strong>{{ terceroSeleccionado }}</strong>
+          </div>
+          <div>
+            <small>Contrapartida</small>
+            <strong>Cuentas por pagar a tercero</strong>
+          </div>
+        </div>
+
+        <div class="acciones">
+          <button
+            type="button"
+            [disabled]="cargando"
+            (click)="quitarTercero()">
+            Quitar tercero
+          </button>
+        </div>
+      </div>
+
+      <p>
+        <strong>Modalidad:</strong> {{ modalidadContable }}
+      </p>
+
+      <p *ngIf="tercero === null" class="ayuda">
+        Sin tercero seleccionado, la contrapartida se contabilizará
+        en Sucursales y Agencias.
+      </p>
+
+      <p *ngIf="tercero !== null" class="ayuda">
+        Con tercero seleccionado, se utilizará la cuenta por pagar
+        parametrizada para la agencia.
+      </p>
+    </div>
+
+    <div class="acciones">
+      <button
+        type="button"
+        [disabled]="cargando"
+        (click)="previsualizar()">
+        {{ cargando ? 'Procesando...' : 'Previsualizar comprobante' }}
+      </button>
+    </div>
+  </section>
+
+  <!-- 4. VISTA PREVIA DEL COMPROBANTE -->
+  <section class="bloque" *ngIf="vistaPrevia as vista">
+    <h3>4. Vista previa del comprobante</h3>
+
+    <div class="datos">
+      <div>
+        <small>Tipo</small>
+        <strong>{{ vista.tipoComprobante }}</strong>
+      </div>
+      <div>
+        <small>Número sugerido</small>
+        <strong>{{ vista.numeroSugerido }}</strong>
+      </div>
+      <div>
+        <small>Fecha</small>
+        <strong>{{ vista.fecha | date:'dd/MM/yyyy' }}</strong>
+      </div>
+      <div>
+        <small>Valor</small>
+        <strong>
+          {{ vista.valor | currency:'COP':'symbol-narrow':'1.0-2':'es-CO' }}
+        </strong>
+      </div>
+    </div>
+
+    <div class="tabla-contenedor">
+      <table class="tabla-comprobante">
+        <thead>
+        <tr>
+          <th>Código cuenta</th>
+          <th>Nombre de la cuenta</th>
+          <th>Cédula / NIT</th>
+          <th class="numero">Débito</th>
+          <th class="numero">Crédito</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let linea of vista.movimientos">
+          <td>{{ linea.codigoCuenta }}</td>
+          <td>{{ linea.nombreCuenta }}</td>
+          <td>{{ linea.documentoTercero || '—' }}</td>
+          <td class="numero">
+            {{ linea.debito | currency:'COP':'symbol-narrow':'1.0-2':'es-CO' }}
+          </td>
+          <td class="numero">
+            {{ linea.credito | currency:'COP':'symbol-narrow':'1.0-2':'es-CO' }}
+          </td>
+        </tr>
+        </tbody>
+        <tfoot>
+        <tr>
+          <th>Total</th>
+          <th></th>
+          <th></th>
+          <th class="numero">
+            {{ vista.valor | currency:'COP':'symbol-narrow':'1.0-2':'es-CO' }}
+          </th>
+          <th class="numero">
+            {{ vista.valor | currency:'COP':'symbol-narrow':'1.0-2':'es-CO' }}
+          </th>
+        </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="acciones">
+      <button
+        type="button"
+        class="confirmar"
+        [disabled]="cargando"
+        (click)="confirmar()">
+        Confirmar y contabilizar
+      </button>
+    </div>
+  </section>
+
+  <!-- 5. RESULTADO -->
+  <section class="bloque resultado" *ngIf="resultado as r">
+    <h3>Comprobante registrado</h3>
+
+    <p>
+      <strong>
+        {{ r.tipoComprobante }} {{ r.numeroComprobante }}
+      </strong>
+    </p>
+
+    <p>
+      Saldo de costas judiciales:
+      <strong>
+        {{ r.saldoCostasJudiciales | currency:'COP':'symbol-narrow':'1.0-2':'es-CO' }}
+      </strong>
+    </p>
+  </section>
+</div>

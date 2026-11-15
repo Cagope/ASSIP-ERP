@@ -1,0 +1,541 @@
+
+<div class="cierre-diario">
+  <header class="encabezado">
+    <h2>Cierre diario de Contabilidad</h2>
+    <p>Control mensual de movimientos contables, diferencias y cierres diarios por agencia.</p>
+  </header>
+
+  <!-- FILTROS DEL PERÍODO -->
+  <section class="panel" aria-label="Filtros del cierre diario">
+    <form #formConsulta="ngForm" (ngSubmit)="consultarMes()">
+      <div class="filtros">
+        <div class="campo">
+          <label for="agencia">Agencia</label>
+          <select
+            id="agencia"
+            name="agencia"
+            [(ngModel)]="idAgencia"
+            (ngModelChange)="cambiarFiltros()"
+            required>
+            <option [ngValue]="0">Seleccione una agencia</option>
+            <option *ngFor="let agencia of agencias" [ngValue]="agencia.idAgencia">
+              {{ agencia.codigoAgencia }} - {{ agencia.nombreAgencia }}
+            </option>
+          </select>
+        </div>
+
+        <div class="campo">
+          <label for="ano">Año contable</label>
+          <input
+            id="ano"
+            name="ano"
+            type="number"
+            min="1900"
+            max="9999"
+            step="1"
+            [(ngModel)]="ano"
+            (ngModelChange)="cambiarFiltros()"
+            required />
+        </div>
+
+        <div class="campo">
+          <label for="mes">Mes contable</label>
+          <select
+            id="mes"
+            name="mes"
+            [(ngModel)]="mes"
+            (ngModelChange)="cambiarFiltros()"
+            required>
+            <option *ngFor="let opcion of meses" [ngValue]="opcion.valor">
+              {{ opcion.nombre }}
+            </option>
+          </select>
+        </div>
+
+        <div class="acciones-filtro">
+          <button
+            type="submit"
+            class="btn btn-primario"
+            [disabled]="cargando || cargandoDetalle || !formConsulta.valid || !idAgencia">
+            {{ cargando ? 'Consultando...' : 'Consultar mes' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <!-- MENSAJES -->
+  <div *ngIf="mensajeError" class="mensaje mensaje-error" role="alert">
+    {{ mensajeError }}
+  </div>
+
+  <div *ngIf="mensajeExito" class="mensaje mensaje-exito" role="status">
+    {{ mensajeExito }}
+  </div>
+
+  <div *ngIf="cargando" class="mensaje mensaje-info">
+    Consultando información contable...
+  </div>
+
+  <ng-container *ngIf="mensual as control">
+
+    <!-- VISTA MENSUAL -->
+    <ng-container *ngIf="!diaSeleccionado">
+
+      <!-- INDICADORES Y TOTALES DEL MES -->
+      <section class="panel">
+        <div class="panel-titulo">
+          <div>
+            <h3>Control mensual de cierres diarios</h3>
+            <p>
+              {{ nombreAgencia }}
+              · {{ meses[control.mes - 1].nombre }} de {{ control.ano }}
+            </p>
+          </div>
+
+          <span
+            class="estado"
+            [class.cerrado]="control.estadoPeriodoMensual === 'CERRADO'">
+            Período: {{ control.estadoPeriodoMensual }}
+          </span>
+        </div>
+
+        <div class="indicadores-mensuales">
+          <div class="indicador">
+            <span>Días abiertos</span>
+            <strong>{{ control.diasAbiertos }}</strong>
+          </div>
+
+          <div class="indicador indicador-cerrado">
+            <span>Días cerrados</span>
+            <strong>{{ control.diasCerrados }}</strong>
+          </div>
+
+          <div
+            class="indicador"
+            [class.indicador-alerta]="control.diasConDiferencias > 0">
+            <span>Con diferencias</span>
+            <strong>{{ control.diasConDiferencias }}</strong>
+          </div>
+
+          <div class="indicador">
+            <span>Sin movimientos</span>
+            <strong>{{ control.diasSinMovimientos }}</strong>
+          </div>
+        </div>
+
+        <div class="resumen">
+          <div class="dato">
+            <span>Total débitos del mes</span>
+            <strong class="numero">
+              {{ control.totalDebitos | number:'1.2-2':'es-CO' }}
+            </strong>
+          </div>
+
+          <div class="dato">
+            <span>Total créditos del mes</span>
+            <strong class="numero">
+              {{ control.totalCreditos | number:'1.2-2':'es-CO' }}
+            </strong>
+          </div>
+
+          <div
+            class="dato"
+            [class.diferencia]="control.diferencia !== 0">
+            <span>Diferencia del mes</span>
+            <strong class="numero">
+              {{ control.diferencia | number:'1.2-2':'es-CO' }}
+            </strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- TABLA DE DÍAS -->
+      <section class="panel">
+        <div class="panel-titulo">
+          <div>
+            <h3>Estado de los días del mes</h3>
+            <p>
+              Seleccione una fecha para consultar su detalle y ejecutar
+              las operaciones permitidas.
+            </p>
+          </div>
+
+          <div class="campo campo-filtro-estado">
+            <label for="filtroEstado">Mostrar</label>
+            <select
+              id="filtroEstado"
+              name="filtroEstado"
+              [(ngModel)]="filtroEstado">
+              <option value="TODOS">Todos los días</option>
+              <option value="ABIERTOS">Días abiertos</option>
+              <option value="CERRADOS">Días cerrados</option>
+              <option value="DIFERENCIAS">Con diferencias</option>
+              <option value="SIN_MOVIMIENTOS">Sin movimientos</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="tabla-contenedor">
+          <table class="tabla-dias">
+            <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Estado</th>
+              <th class="numero">Comprobantes</th>
+              <th class="numero">Movimientos</th>
+              <th class="numero">Débitos</th>
+              <th class="numero">Créditos</th>
+              <th class="numero">Diferencia</th>
+              <th>Validación</th>
+              <th>Acción</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr
+              *ngFor="let dia of diasFiltrados"
+              [class.fila-diferencia]="!dia.cuadrado">
+              <td>{{ dia.fecha | date:'dd/MM/yyyy':'UTC' }}</td>
+
+              <td>
+                  <span
+                    class="estado"
+                    [class.cerrado]="dia.estado === 'C'">
+                    {{ dia.estado === 'C' ? 'C - Cerrado' : 'A - Abierto' }}
+                  </span>
+              </td>
+
+              <td class="numero">
+                {{ dia.cantidadComprobantes | number:'1.0-0':'es-CO' }}
+              </td>
+
+              <td class="numero">
+                {{ dia.cantidadMovimientos | number:'1.0-0':'es-CO' }}
+              </td>
+
+              <td class="numero">
+                {{ dia.totalDebitos | number:'1.2-2':'es-CO' }}
+              </td>
+
+              <td class="numero">
+                {{ dia.totalCreditos | number:'1.2-2':'es-CO' }}
+              </td>
+
+              <td
+                class="numero"
+                [class.valor-diferencia]="!dia.cuadrado">
+                {{ dia.diferencia | number:'1.2-2':'es-CO' }}
+              </td>
+
+              <td>
+                  <span
+                    *ngIf="!dia.cuadrado"
+                    class="validacion validacion-error"
+                    [title]="dia.advertencia || ''">
+                    ⚠ Con diferencia
+                  </span>
+
+                <span
+                  *ngIf="dia.cuadrado && !dia.tieneMovimientos"
+                  class="validacion validacion-sin-movimientos"
+                  [title]="dia.advertencia || ''">
+                    Sin movimientos
+                  </span>
+
+                <span
+                  *ngIf="dia.cuadrado && dia.tieneMovimientos"
+                  class="validacion validacion-correcta">
+                    ✓ Cuadrado
+                  </span>
+              </td>
+
+              <td>
+                <button
+                  type="button"
+                  class="btn btn-secundario"
+                  [disabled]="cargando || cargandoDetalle"
+                  (click)="seleccionarDia(dia)">
+                  Consultar
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="diasFiltrados.length === 0">
+              <td colspan="9" class="sin-datos">
+                No hay fechas que correspondan al filtro seleccionado.
+              </td>
+            </tr>
+            </tbody>
+
+            <tfoot>
+            <tr>
+              <th colspan="4">TOTAL DEL MES</th>
+              <th class="numero">
+                {{ control.totalDebitos | number:'1.2-2':'es-CO' }}
+              </th>
+              <th class="numero">
+                {{ control.totalCreditos | number:'1.2-2':'es-CO' }}
+              </th>
+              <th
+                class="numero"
+                [class.valor-diferencia]="control.diferencia !== 0">
+                {{ control.diferencia | number:'1.2-2':'es-CO' }}
+              </th>
+              <th colspan="2"></th>
+            </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <p class="nota-control">
+          El estado del día es independiente de su validación contable.
+          Una diferencia de cero no significa que el día esté cerrado.
+        </p>
+      </section>
+    </ng-container>
+
+    <!-- VISTA DEL DÍA SELECCIONADO -->
+    <section class="panel" *ngIf="diaSeleccionado as dia">
+      <div class="panel-titulo">
+        <div>
+          <h3>Detalle del día seleccionado</h3>
+          <p>
+            {{ nombreAgencia }}
+            · {{ dia.fecha | date:'dd/MM/yyyy':'UTC' }}
+          </p>
+        </div>
+
+        <div class="acciones">
+          <button
+            type="button"
+            class="btn btn-secundario"
+            [disabled]="cargando || cargandoDetalle"
+            (click)="volverAlMes()">
+            Volver al mes
+          </button>
+
+          <span class="estado" [class.cerrado]="dia.estado === 'C'">
+            {{ dia.estado === 'C' ? 'C - Cerrado' : 'A - Abierto' }}
+          </span>
+        </div>
+      </div>
+
+      <div *ngIf="cargandoDetalle" class="mensaje mensaje-info">
+        Consultando movimientos de la fecha...
+      </div>
+
+      <ng-container *ngIf="resultadoVigente && resumen as resultado">
+        <p class="periodo">
+          Período mensual:
+          <strong>{{ resultado.estadoPeriodoMensual }}</strong>
+        </p>
+
+        <div class="resumen">
+          <div class="dato">
+            <span>Total débitos</span>
+            <strong class="numero">
+              {{ resultado.totalDebitos | number:'1.2-2':'es-CO' }}
+            </strong>
+          </div>
+
+          <div class="dato">
+            <span>Total créditos</span>
+            <strong class="numero">
+              {{ resultado.totalCreditos | number:'1.2-2':'es-CO' }}
+            </strong>
+          </div>
+
+          <div
+            class="dato"
+            [class.diferencia]="resultado.diferencia !== 0">
+            <span>Diferencia</span>
+            <strong class="numero">
+              {{ resultado.diferencia | number:'1.2-2':'es-CO' }}
+            </strong>
+          </div>
+        </div>
+
+        <p class="conteos">
+          Comprobantes:
+          <strong>
+            {{ resultado.cantidadComprobantes | number:'1.0-0':'es-CO' }}
+          </strong>
+          · Movimientos:
+          <strong>
+            {{ resultado.cantidadMovimientos | number:'1.0-0':'es-CO' }}
+          </strong>
+        </p>
+
+        <h3>Movimientos por cuenta contable</h3>
+
+        <div
+          class="tabla-contenedor"
+          *ngIf="resultado.detalleCuentas.length; else sinDetalle">
+          <table>
+            <thead>
+            <tr>
+              <th>Código</th>
+              <th>Cuenta contable</th>
+              <th class="numero">Movimientos</th>
+              <th class="numero">Débitos</th>
+              <th class="numero">Créditos</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr *ngFor="let cuenta of resultado.detalleCuentas">
+              <td>{{ cuenta.codigoCuenta }}</td>
+              <td>{{ cuenta.nombreCuenta }}</td>
+              <td class="numero">
+                {{ cuenta.cantidadMovimientos | number:'1.0-0':'es-CO' }}
+              </td>
+              <td class="numero">
+                {{ cuenta.totalDebitos | number:'1.2-2':'es-CO' }}
+              </td>
+              <td class="numero">
+                {{ cuenta.totalCreditos | number:'1.2-2':'es-CO' }}
+              </td>
+            </tr>
+            </tbody>
+
+            <tfoot>
+            <tr>
+              <th colspan="3">TOTAL</th>
+              <th class="numero">
+                {{ resultado.totalDebitos | number:'1.2-2':'es-CO' }}
+              </th>
+              <th class="numero">
+                {{ resultado.totalCreditos | number:'1.2-2':'es-CO' }}
+              </th>
+            </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <ng-template #sinDetalle>
+          <p class="sin-datos">
+            No se encontraron movimientos contables vigentes para esta fecha.
+          </p>
+        </ng-template>
+
+        <!-- CONSULTA DEL INFORME FORMAL DEL DÍA -->
+        <section class="informe-diario" aria-label="Informe contable del día">
+          <h3>Informe contable del día</h3>
+          <p>Consulte los movimientos individuales que respaldan el cierre diario.
+            La impresión y la exportación Excel utilizarán esta misma información.</p>
+          <div class="acciones">
+            <button
+              type="button"
+              class="btn btn-secundario"
+              [disabled]="cargando || cargandoDetalle || cargandoInforme"
+              (click)="consultarInforme()">
+              {{ cargandoInforme ? 'Preparando informe...' : 'Consultar informe del día' }}
+            </button>
+          </div>
+          <p *ngIf="cargandoInforme" class="mensaje mensaje-info" role="status">
+            Consultando el detalle contable del informe...
+          </p>
+          <ng-container *ngIf="informeVigente && informe as reporte">
+            <p class="conteos">
+              Informe: <strong>{{ reporte.codigoAgencia }} - {{ reporte.nombreAgencia }}</strong>
+              · {{ reporte.fecha | date:'dd/MM/yyyy':'UTC' }}
+              · {{ reporte.cantidadComprobantes | number:'1.0-0':'es-CO' }} comprobantes
+              · {{ reporte.cantidadMovimientos | number:'1.0-0':'es-CO' }} movimientos
+            </p>
+            <div class="resumen">
+              <div class="dato">
+                <span>Débitos del informe</span>
+                <strong class="numero">{{ reporte.totalDebitos | number:'1.2-2':'es-CO' }}</strong>
+              </div>
+              <div class="dato">
+                <span>Créditos del informe</span>
+                <strong class="numero">{{ reporte.totalCreditos | number:'1.2-2':'es-CO' }}</strong>
+              </div>
+              <div class="dato" [class.diferencia]="reporte.diferencia !== 0">
+                <span>Diferencia</span>
+                <strong class="numero">{{ reporte.diferencia | number:'1.2-2':'es-CO' }}</strong>
+              </div>
+            </div>
+            <div class="acciones acciones-informe">
+              <button
+                type="button"
+                class="btn btn-primario"
+                [disabled]="cargando || cargandoDetalle || cargandoInforme || !informeVigente"
+                (click)="imprimirInforme()">
+                Imprimir informe
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-secundario"
+                [disabled]="cargando || cargandoDetalle || cargandoInforme || !informeVigente"
+                (click)="exportarExcel()">
+                Exportar Excel
+              </button>
+            </div>
+
+            <p class="nota-control">
+              La impresión genera un documento contable independiente de esta pantalla.
+              La exportación Excel genera un archivo XLSX con el control,
+              el resumen por cuenta y el detalle de movimientos del día.
+            </p>
+          </ng-container>
+        </section>
+
+        <!-- ADVERTENCIAS -->
+        <p
+          *ngIf="resultado.diferencia !== 0"
+          class="advertencia">
+          ⚠ No se permite cerrar: los débitos y créditos no coinciden.
+        </p>
+
+        <p
+          *ngIf="resultado.cantidadMovimientos === 0"
+          class="advertencia advertencia-informativa">
+          Esta fecha no registra movimientos contables vigentes.
+        </p>
+
+        <!-- OPERACIONES DE CIERRE -->
+        <div
+          class="operaciones-cierre"
+          *ngIf="sessionTienePermisoAdmin() || sessionTienePermisoReopen()">
+          <h3>Operaciones de cierre</h3>
+
+          <div
+            *ngIf="resultado.estadoDia === 'C' && sessionTienePermisoReopen()"
+            class="campo campo-motivo">
+            <label for="justificacion">Justificación de reapertura</label>
+            <textarea
+              id="justificacion"
+              name="justificacion"
+              rows="3"
+              [(ngModel)]="justificacion"
+              placeholder="Indique el motivo de la reapertura">
+            </textarea>
+          </div>
+
+          <div class="acciones">
+            <button
+              type="button"
+              class="btn btn-primario"
+              *ngIf="sessionTienePermisoAdmin()"
+              [disabled]="!puedeCerrar"
+              (click)="cerrar()">
+              Cerrar día
+            </button>
+
+            <button
+              type="button"
+              class="btn btn-advertencia"
+              *ngIf="sessionTienePermisoReopen()"
+              [disabled]="!puedeReabrir || !justificacion.trim()"
+              (click)="reabrir()">
+              Reabrir día
+            </button>
+          </div>
+        </div>
+      </ng-container>
+    </section>
+  </ng-container>
+</div>

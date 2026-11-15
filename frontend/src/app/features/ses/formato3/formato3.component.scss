@@ -1,0 +1,520 @@
+
+/* =========================================================
+   FORMATO 3 - SALDOS CONTABLES
+   Diseño visual basado en Formato 9999 - Asociados
+   ========================================================= */
+
+
+/* =========================================================
+   CONTENEDOR PRINCIPAL
+   ========================================================= */
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.formato3-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+  color: #263445;
+}
+
+
+/* =========================================================
+   ENCABEZADO
+   ========================================================= */
+
+.encabezado {
+  display: flex;
+  flex-direction: column;
+}
+
+.encabezado h2 {
+  margin: 0;
+  color: #17365d;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.encabezado p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   PANEL DE FILTROS
+   ========================================================= */
+
+.panel-filtros {
+  width: 100%;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #dce3eb;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.barra-periodo {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+
+/* =========================================================
+   CAMPOS DE FILTROS
+   ========================================================= */
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.campo label {
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.campo-ano {
+  width: 110px;
+}
+
+.campo-mes {
+  width: 155px;
+}
+
+.campo select,
+.campo input {
+  width: 100%;
+  height: 36px;
+  padding: 6px 10px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+  color: #334155;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.campo select:focus,
+.campo input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+}
+
+.campo select:disabled,
+.campo input:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   CONTENEDOR DE BOTONES
+   ========================================================= */
+
+.acciones {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: 8px;
+}
+
+
+/* =========================================================
+   ESTILO GENERAL DE BOTONES
+   Mismas medidas del Formato 9999
+   ========================================================= */
+
+.acciones button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 36px;
+  padding: 7px 14px;
+
+  border: 1px solid transparent;
+  border-radius: 5px;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  cursor: pointer;
+  box-sizing: border-box;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.acciones button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.acciones button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+
+/* =========================================================
+   BOTÓN CONSULTAR
+   ========================================================= */
+
+.btn-consultar {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #ffffff;
+}
+
+.btn-consultar:hover:not(:disabled) {
+  background: #1e40af;
+  border-color: #1e40af;
+}
+
+
+/* =========================================================
+   BOTÓN GENERAR PLANO TXT
+   ========================================================= */
+
+.btn-plano {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #ffffff;
+}
+
+.btn-plano:hover:not(:disabled) {
+  background: #115e59;
+  border-color: #115e59;
+}
+
+
+/* =========================================================
+   BOTÓN EXPORTAR EXCEL
+   ========================================================= */
+
+.btn-excel {
+  background: #15803d;
+  border-color: #15803d;
+  color: #ffffff;
+}
+
+.btn-excel:hover:not(:disabled) {
+  background: #166534;
+  border-color: #166534;
+}
+
+
+/* =========================================================
+   BOTÓN LIMPIAR
+   ========================================================= */
+
+.btn-limpiar {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+.btn-limpiar:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+
+/* =========================================================
+   MENSAJES
+   ========================================================= */
+
+.mensaje {
+  padding: 11px 14px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.mensaje--error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.mensaje--exito {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+
+/* =========================================================
+   PANEL DE RESULTADOS
+   ========================================================= */
+
+.panel-resultados {
+  width: 100%;
+  min-width: 0;
+  margin-top: 18px;
+  padding: 20px;
+  box-sizing: border-box;
+
+  background: #ffffff;
+  border: 1px solid #dce3eb;
+  border-radius: 8px;
+}
+
+.panel-resultados h3 {
+  margin: 0 0 16px;
+  color: #17365d;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   TARJETAS DEL RESUMEN CONTABLE
+   ========================================================= */
+
+.tarjetas {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(185px, 1fr)
+  );
+  gap: 12px;
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+
+  min-height: 78px;
+  padding: 14px 16px;
+
+  background: #ffffff;
+  border: 1px solid #dce3eb;
+  border-radius: 7px;
+  box-sizing: border-box;
+}
+
+.tarjeta span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.tarjeta strong {
+  color: #17365d;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   TARJETA EXCEDENTE / PÉRDIDA DEL EJERCICIO
+   ========================================================= */
+
+.tarjeta-resultado {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.tarjeta-resultado strong {
+  color: #1d4ed8;
+}
+
+
+/* =========================================================
+   BUSCADOR
+   ========================================================= */
+
+.buscador {
+  margin: 18px 0 12px;
+  max-width: 340px;
+}
+
+.buscador input {
+  width: 100%;
+  height: 36px;
+  padding: 6px 10px;
+
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+
+  color: #334155;
+  font-family: inherit;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.buscador input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+}
+
+
+/* =========================================================
+   TABLA DE RESULTADOS
+   ========================================================= */
+
+.tabla-scroll {
+  width: 100%;
+  max-height: 520px;
+  overflow: auto;
+}
+
+.tabla-scroll table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.tabla-scroll th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+
+  padding: 11px 12px;
+
+  background: #f1f5f9;
+  border-bottom: 1px solid #cbd5e1;
+
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.tabla-scroll td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #e8edf3;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.tabla-scroll tbody tr:nth-child(even) {
+  background: #fafbfd;
+}
+
+.tabla-scroll tbody tr:hover {
+  background: #eff6ff;
+}
+
+.tabla-scroll tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tabla-scroll .numero {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   DISEÑO RESPONSIVO
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+  .formato3-page {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .encabezado h2 {
+    font-size: 19px;
+  }
+
+  .panel-filtros {
+    padding: 12px;
+  }
+
+  .acciones {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .tarjetas {
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  }
+
+  .tarjeta strong {
+    font-size: 18px;
+  }
+
+}
+
+
+@media (max-width: 480px) {
+
+  .campo-ano {
+    flex: 1 1 110px;
+  }
+
+  .campo-mes {
+    flex: 1 1 155px;
+  }
+
+  .acciones {
+    display: grid;
+    grid-template-columns: repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  }
+
+  .acciones button {
+    width: 100%;
+    white-space: normal;
+  }
+
+  .tarjetas {
+    grid-template-columns: 1fr;
+  }
+
+  .tarjeta {
+    min-height: 65px;
+  }
+
+}

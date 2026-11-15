@@ -45,7 +45,7 @@
         // =========================================================
 
         public List<SolicitudAprobacionBandejaDTO> listarBandeja(
-                Integer idUsuario
+                List<Integer> entesAutorizados
         ) {
 
             String sql = """
@@ -85,30 +85,23 @@
     
                     FROM cartera.vw_solicitudes_aprobacion_bandeja b
     
-                    INNER JOIN cartera.entes_aprobacion_usuarios eau
-                            ON eau.id_ente_aprobacion =
-                               b.id_ente_actual
-    
-                    WHERE eau.id_usuario = :idUsuario
-                      AND eau.activo = true
-                      AND eau.fecha_inicio <= CURRENT_DATE
-                      AND (
-                            eau.fecha_fin IS NULL
-                            OR eau.fecha_fin >= CURRENT_DATE
-                          )
-                      AND b.id_ente_actual IS NOT NULL
+                    WHERE b.id_ente_actual IN (:entesAutorizados)
     
                     ORDER BY
                         b.fecha_ultima_gestion,
                         b.id_solicitud_credito
                     """;
 
+            if (entesAutorizados.isEmpty()) {
+                return List.of();
+            }
+
             return jdbc.query(
                     sql,
                     new MapSqlParameterSource()
                             .addValue(
-                                    "idUsuario",
-                                    idUsuario
+                                    "entesAutorizados",
+                                    entesAutorizados
                             ),
                     BANDEJA_MAPPER
             );
@@ -204,57 +197,28 @@
 
         public boolean usuarioPuedeActuar(
                 Integer idSolicitudCredito,
-                Integer idUsuario
+                List<Integer> entesAutorizados
         ) {
+            if (entesAutorizados.isEmpty()) {
+                return false;
+            }
 
             String sql = """
-                    SELECT EXISTS
-                    (
+                    SELECT EXISTS (
                         SELECT 1
-    
                         FROM cartera.vw_solicitudes_aprobacion_bandeja b
-    
-                        INNER JOIN cartera.entes_aprobacion_usuarios eau
-                                ON eau.id_ente_aprobacion =
-                                   b.id_ente_actual
-    
-                        WHERE b.id_solicitud_credito =
-                              :idSolicitudCredito
-    
-                          AND b.id_ente_actual IS NOT NULL
-    
-                          AND eau.id_usuario =
-                              :idUsuario
-    
-                          AND eau.activo = true
-    
-                          AND eau.fecha_inicio <= CURRENT_DATE
-    
-                          AND (
-                                eau.fecha_fin IS NULL
-                                OR eau.fecha_fin >= CURRENT_DATE
-                              )
+                        WHERE b.id_solicitud_credito = :idSolicitudCredito
+                          AND b.id_ente_actual IN (:entesAutorizados)
                     )
                     """;
 
-            Boolean autorizado =
-                    jdbc.queryForObject(
-                            sql,
-                            new MapSqlParameterSource()
-                                    .addValue(
-                                            "idSolicitudCredito",
-                                            idSolicitudCredito
-                                    )
-                                    .addValue(
-                                            "idUsuario",
-                                            idUsuario
-                                    ),
-                            Boolean.class
-                    );
-
-            return Boolean.TRUE.equals(
-                    autorizado
-            );
+            return Boolean.TRUE.equals(jdbc.queryForObject(
+                    sql,
+                    new MapSqlParameterSource()
+                            .addValue("idSolicitudCredito", idSolicitudCredito)
+                            .addValue("entesAutorizados", entesAutorizados),
+                    Boolean.class
+            ));
         }
 
 
@@ -300,62 +264,41 @@
 
         public boolean usuarioPuedeConsultar(
                 Integer idSolicitudCredito,
-                Integer idUsuario
+                Integer idUsuario,
+                List<Integer> entesAutorizados
         ) {
-
             String sql = """
-                SELECT EXISTS (
-                    SELECT 1
-                    FROM cartera.solicitudes_creditos s
-                    WHERE s.id_solicitud_credito = :idSolicitudCredito
-                      AND s.activo = true
-                      AND (
-                          -- Puede consultar si está autorizado
-                          -- para actuar en la etapa actual.
-                          EXISTS (
-                              SELECT 1
-                              FROM cartera.vw_solicitudes_aprobacion_bandeja b
-                              INNER JOIN cartera.entes_aprobacion_usuarios eau
-                                  ON eau.id_ente_aprobacion = b.id_ente_actual
-                              WHERE b.id_solicitud_credito = s.id_solicitud_credito
-                                AND eau.id_usuario = :idUsuario
-                                AND eau.activo = true
-                                AND eau.fecha_inicio <= CURRENT_DATE
-                                AND (
-                                    eau.fecha_fin IS NULL
-                                    OR eau.fecha_fin >= CURRENT_DATE
-                                )
+                    SELECT EXISTS (
+                        SELECT 1
+                        FROM cartera.solicitudes_creditos s
+                        WHERE s.id_solicitud_credito = :idSolicitudCredito
+                          AND s.activo = true
+                          AND (
+                              EXISTS (
+                                  SELECT 1
+                                  FROM cartera.vw_solicitudes_aprobacion_bandeja b
+                                  WHERE b.id_solicitud_credito = s.id_solicitud_credito
+                                    AND b.id_ente_actual IN (:entesAutorizados)
+                              )
+                              OR EXISTS (
+                                  SELECT 1
+                                  FROM cartera.solicitudes_aprobaciones sa
+                                  WHERE sa.id_solicitud_credito = s.id_solicitud_credito
+                                    AND sa.id_usuario_decision = :idUsuario
+                              )
                           )
+                    )
+                    """;
 
-                          OR
-
-                          -- Puede consultar si participó
-                          -- anteriormente en esta solicitud.
-                          EXISTS (
-                              SELECT 1
-                              FROM cartera.solicitudes_aprobaciones sa
-                              WHERE sa.id_solicitud_credito = s.id_solicitud_credito
-                                AND sa.id_usuario_decision = :idUsuario
-                          )
-                      )
-                )
-                """;
-
-            Boolean autorizado = jdbc.queryForObject(
+            return Boolean.TRUE.equals(jdbc.queryForObject(
                     sql,
                     new MapSqlParameterSource()
-                            .addValue(
-                                    "idSolicitudCredito",
-                                    idSolicitudCredito
-                            )
-                            .addValue(
-                                    "idUsuario",
-                                    idUsuario
-                            ),
+                            .addValue("idSolicitudCredito", idSolicitudCredito)
+                            .addValue("idUsuario", idUsuario)
+                            .addValue("entesAutorizados", entesAutorizados.isEmpty()
+                                    ? List.of(-1) : entesAutorizados),
                     Boolean.class
-            );
-
-            return Boolean.TRUE.equals(autorizado);
+            ));
         }
 
 
@@ -457,11 +400,7 @@
 
           AND b.id_ultima_aprobacion IS NOT NULL
 
-          AND (
-                b.ultima_decision = 'SOLICITA_AJUSTES'
-
-                OR b.id_ente_ultima_actuacion = b.id_ente_final
-              )
+          AND b.ultima_decision = 'SOLICITA_AJUSTES'
         """;
 
             List<String> resultados = jdbc.query(
@@ -997,11 +936,7 @@
                 AND b.id_ente_actual IS NULL
                 AND b.id_ultima_aprobacion IS NOT NULL
 
-                AND (
-                    b.ultima_decision = 'SOLICITA_AJUSTES'
-
-                    OR b.id_ente_ultima_actuacion = b.id_ente_final
-                )
+                AND b.ultima_decision = 'SOLICITA_AJUSTES'
           )
         """;
 
@@ -1022,7 +957,7 @@
 
         // =========================================================
         // CERRAR POR NO VIABILIDAD
-        // Únicamente con concepto NO_VIABLE del ente final
+        // Cierre definitivo por NO_VIABLE de cualquier ente aprobador
         // =========================================================
 
         public int finalizarNoViable(
@@ -1052,8 +987,6 @@
                 AND b.id_ultima_aprobacion IS NOT NULL
 
                 AND b.ultima_decision = 'NO_VIABLE'
-
-                AND b.id_ente_ultima_actuacion = b.id_ente_final
           )
         """;
 

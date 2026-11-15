@@ -39,6 +39,67 @@ public class TesoreriaOperacionesPendientesRepository {
             BigDecimal valorOriginal,
             Integer idUsuario
     ) {
+        return publicar(idAgencia, moduloOrigen, procesoOrigen, tablaOrigen,
+                idOrigen, idDatosPersonal, naturaleza, fechaDocumento,
+                concepto, valorOriginal, idUsuario, null, null);
+    }
+
+    /**
+     * Publica una obligación con su comprobante y cuenta CxP históricos.
+     * Valida agencia y crédito original, y no sobrescribe publicaciones previas.
+     */
+    public Long publicar(
+            Integer idAgencia,
+            String moduloOrigen,
+            String procesoOrigen,
+            String tablaOrigen,
+            Long idOrigen,
+            Integer idDatosPersonal,
+            String naturaleza,
+            LocalDate fechaDocumento,
+            String concepto,
+            BigDecimal valorOriginal,
+            Integer idUsuario,
+            Integer idOrigenComprobante,
+            Integer idCatalogoCuentaCxp
+    ) {
+        return publicar(idAgencia, moduloOrigen, procesoOrigen, tablaOrigen,
+                idOrigen, idDatosPersonal, naturaleza, fechaDocumento,
+                concepto, valorOriginal, idUsuario, idOrigenComprobante,
+                idCatalogoCuentaCxp, null);
+    }
+
+    /**
+     * Publica una obligación con su configuración financiera identificada.
+     * Conserva las validaciones contables y la idempotencia del origen.
+     */
+    public Long publicar(
+            Integer idAgencia,
+            String moduloOrigen,
+            String procesoOrigen,
+            String tablaOrigen,
+            Long idOrigen,
+            Integer idDatosPersonal,
+            String naturaleza,
+            LocalDate fechaDocumento,
+            String concepto,
+            BigDecimal valorOriginal,
+            Integer idUsuario,
+            Integer idOrigenComprobante,
+            Integer idCatalogoCuentaCxp,
+            Long idTipoOperacion
+    ) {
+        if (idTipoOperacion != null && idTipoOperacion <= 0) {
+            throw new IllegalArgumentException(
+                    "El identificador de configuración financiera no es válido.");
+        }
+        if ((idOrigenComprobante == null) != (idCatalogoCuentaCxp == null)) {
+            throw new IllegalArgumentException(
+                    "El comprobante original y la cuenta CxP deben informarse juntos.");
+        }
+        if (idOrigenComprobante != null) {
+            validarRespaldoContable(idAgencia, idOrigenComprobante, idCatalogoCuentaCxp);
+        }
 
         String sql = """
                 INSERT INTO tesoreria.operaciones_pendientes (
@@ -52,9 +113,12 @@ public class TesoreriaOperacionesPendientesRepository {
                     fecha_documento,
                     concepto,
                     valor_original,
-                    fk_seguridad_creacion
+                    fk_seguridad_creacion,
+                    id_origen_comprobante,
+                    id_catalogo_cuenta_cxp,
+                    id_tipo_operacion
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT (
                     modulo_origen,
                     proceso_origen,
@@ -79,7 +143,10 @@ public class TesoreriaOperacionesPendientesRepository {
                 Date.valueOf(fechaDocumento),
                 concepto,
                 valorOriginal,
-                idUsuario
+                idUsuario,
+                idOrigenComprobante,
+                idCatalogoCuentaCxp,
+                idTipoOperacion
         );
 
         if (!insertados.isEmpty()) {
@@ -106,12 +173,49 @@ public class TesoreriaOperacionesPendientesRepository {
                 naturaleza,
                 fechaDocumento,
                 concepto,
-                valorOriginal
+                valorOriginal,
+                idOrigenComprobante,
+                idCatalogoCuentaCxp,
+                idTipoOperacion
         );
 
         return ((Number) existente.get(
                 "id_operacion_pendiente"
         )).longValue();
+    }
+
+
+    /**
+     * Publicación estricta: un origen de reversión solamente puede publicarse una vez.
+     * ON CONFLICT evita duplicaciones concurrentes sin abortar la transacción.
+     */
+    public Long publicarEstricto(
+            Integer idAgencia, String moduloOrigen, String procesoOrigen,
+            String tablaOrigen, Long idOrigen, Integer idDatosPersonal,
+            String naturaleza, LocalDate fechaDocumento, String concepto,
+            BigDecimal valorOriginal, Integer idUsuario, Long idTipoOperacion
+    ) {
+        String sql = """
+                INSERT INTO tesoreria.operaciones_pendientes (
+                    id_agencia, modulo_origen, proceso_origen, tabla_origen,
+                    id_origen, id_datos_personal, naturaleza, fecha_documento,
+                    concepto, valor_original, fk_seguridad_creacion, id_tipo_operacion
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT (modulo_origen, proceso_origen, tabla_origen, id_origen)
+                DO NOTHING
+                RETURNING id_operacion_pendiente
+                """;
+        List<Long> insertados = jdbcTemplate.queryForList(
+                sql, Long.class, idAgencia, moduloOrigen, procesoOrigen,
+                tablaOrigen, idOrigen, idDatosPersonal, naturaleza,
+                Date.valueOf(fechaDocumento), concepto, valorOriginal,
+                idUsuario, idTipoOperacion
+        );
+        if (insertados.size() != 1) {
+            throw new IllegalStateException(
+                    "Ya existe una operación financiera para este origen de reversión.");
+        }
+        return insertados.get(0);
     }
 
     /**
@@ -134,7 +238,10 @@ public class TesoreriaOperacionesPendientesRepository {
                     concepto,
                     valor_original,
                     valor_ejecutado,
-                    estado
+                    estado,
+                    id_origen_comprobante,
+                    id_catalogo_cuenta_cxp,
+                    id_tipo_operacion
                 FROM tesoreria.operaciones_pendientes
                 WHERE modulo_origen = ?
                   AND proceso_origen = ?
@@ -193,7 +300,10 @@ public class TesoreriaOperacionesPendientesRepository {
             String naturaleza,
             LocalDate fechaDocumento,
             String concepto,
-            BigDecimal valorOriginal
+            BigDecimal valorOriginal,
+            Integer idOrigenComprobante,
+            Integer idCatalogoCuentaCxp,
+            Long idTipoOperacion
     ) {
 
         Number agenciaExistente =
@@ -235,7 +345,14 @@ public class TesoreriaOperacionesPendientesRepository {
                         concepto
                 )
                         && valorExistente != null
-                        && valorExistente.compareTo(valorOriginal) == 0;
+                        && valorExistente.compareTo(valorOriginal) == 0
+                        && (idOrigenComprobante == null || Objects.equals(
+                        numeroEntero(existente.get("id_origen_comprobante")), idOrigenComprobante))
+                        && (idCatalogoCuentaCxp == null || Objects.equals(
+                        numeroEntero(existente.get("id_catalogo_cuenta_cxp")), idCatalogoCuentaCxp))
+                        && (idTipoOperacion == null
+                        || numeroLargo(existente.get("id_tipo_operacion")) == null
+                        || Objects.equals(numeroLargo(existente.get("id_tipo_operacion")), idTipoOperacion));
 
         if (!coincide) {
             throw new IllegalStateException(
@@ -243,6 +360,45 @@ public class TesoreriaOperacionesPendientesRepository {
                             + "pero sus datos no coinciden con "
                             + "la publicación original."
             );
+        }
+    }
+
+    /** Convierte una referencia JDBC opcional a Integer para validar idempotencia. */
+    private Integer numeroEntero(Object valor) {
+        return valor == null ? null : ((Number) valor).intValue();
+    }
+
+    /** Convierte una referencia BIGINT opcional para comprobar la configuración publicada. */
+    private Long numeroLargo(Object valor) {
+        return valor == null ? null : ((Number) valor).longValue();
+    }
+
+    /**
+     * Comprueba que la cuenta sea de la agencia y esté acreditada en el
+     * comprobante histórico indicado; no consulta parámetros actuales.
+     */
+    private void validarRespaldoContable(Integer idAgencia,
+                                         Integer idOrigenComprobante,
+                                         Integer idCatalogoCuentaCxp) {
+        Integer cantidad = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM contabilidad.origen_comprobantes oc
+                JOIN contabilidad.catalogo_cuentas cc
+                  ON cc.id_catalogo_cuenta = ?
+                 AND cc.id_agencia = oc.id_agencia
+                JOIN contabilidad.auxiliares_contables ac
+                  ON ac.id_agencia = oc.id_agencia
+                 AND ac.tipo_comprobante = oc.tipo_comprobante
+                 AND ac.numero_comprobante = oc.numero_comprobante
+                 AND ac.id_catalogo_cuenta = cc.id_catalogo_cuenta
+                WHERE oc.id_origen_comprobante = ?
+                  AND oc.id_agencia = ?
+                  AND ac.valor_credito > 0
+                """, Integer.class, idCatalogoCuentaCxp,
+                idOrigenComprobante, idAgencia);
+        if (cantidad == null || cantidad == 0) {
+            throw new IllegalStateException(
+                    "La cuenta por pagar no está acreditada en el comprobante original de la agencia.");
         }
     }
 
@@ -263,6 +419,7 @@ public class TesoreriaOperacionesPendientesRepository {
                     op.tabla_origen,
                     op.id_origen,
                     op.id_datos_personal,
+                    NULLIF(TRIM(CONCAT_WS(' ', dp.nombres, dp.primer_apellido, dp.segundo_apellido)), '') AS nombre_tercero,
                     op.naturaleza,
                     op.fecha_documento,
                     op.concepto,
@@ -275,6 +432,8 @@ public class TesoreriaOperacionesPendientesRepository {
                     op.estado,
                     op.fecha_creacion
                 FROM tesoreria.operaciones_pendientes op
+                LEFT JOIN hoja_vida.datos_personales dp
+                    ON dp.id_datos_personal = op.id_datos_personal
                 WHERE op.id_agencia = ?
                   AND op.estado IN (
                       'PENDIENTE',

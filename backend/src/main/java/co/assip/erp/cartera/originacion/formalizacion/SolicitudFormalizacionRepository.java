@@ -46,7 +46,8 @@ public class SolicitudFormalizacionRepository {
 // =========================================================
 
     public List<SolicitudFormalizacionBandejaDTO> listarBandeja(
-            Integer idUsuario
+            boolean accesoTotal,
+            List<Integer> agencias
     ) {
 
         String sql = """
@@ -107,7 +108,7 @@ public class SolicitudFormalizacionRepository {
 
           AND s.fecha_fin_formalizacion IS NULL
 
-          AND s.id_asesor = :idUsuario
+          AND (:accesoTotal = true OR s.id_agencia IN (:agencias))
 
         ORDER BY
             s.fecha_fin_aprobacion DESC NULLS LAST,
@@ -117,10 +118,8 @@ public class SolicitudFormalizacionRepository {
         return jdbc.query(
                 sql,
                 new MapSqlParameterSource()
-                        .addValue(
-                                "idUsuario",
-                                idUsuario
-                        ),
+                        .addValue("accesoTotal", accesoTotal)
+                        .addValue("agencias", agencias),
                 BANDEJA_MAPPER
         );
     }
@@ -365,7 +364,7 @@ public class SolicitudFormalizacionRepository {
               AND id_solicitud_resultado = 1
 
               AND fecha_fin_formalizacion IS NULL
-              AND id_asesor = :idUsuario
+
               AND id_cartera_credito IS NULL
             """;
 
@@ -505,8 +504,6 @@ public class SolicitudFormalizacionRepository {
               AND id_solicitud_resultado = 1
 
               AND fecha_fin_formalizacion IS NULL
-                
-              AND id_asesor = :idUsuario
 
               -- =====================================================
               -- CONDICIONES DEFINITIVAS COMPLETAS
@@ -830,7 +827,6 @@ public class SolicitudFormalizacionRepository {
               AND fecha_fin_formalizacion IS NULL
               AND id_cartera_credito IS NULL
 
-              AND id_asesor = :idUsuario
             """;
 
         return jdbc.update(
@@ -1007,8 +1003,6 @@ public class SolicitudFormalizacionRepository {
           AND s.fecha_fin_formalizacion IS NULL
 
           AND s.id_cartera_credito IS NULL
-
-          AND s.id_asesor = :idUsuario
 
           AND s.id_agencia IS NOT NULL
           AND s.id_linea_credito IS NOT NULL

@@ -1,0 +1,509 @@
+
+<section class="mayor-balance">
+
+  <!-- ===================================================== -->
+  <!-- 1. ENCABEZADO DEL INFORME                            -->
+  <!-- ===================================================== -->
+
+  <header>
+    <h2>Libro Mayor y Balance</h2>
+    <p>Contabilidad / Informes / Oficiales</p>
+  </header>
+
+
+  <!-- ===================================================== -->
+  <!-- 2. PARÁMETROS DEL INFORME                            -->
+  <!-- ===================================================== -->
+
+  <section class="panel panel-parametros">
+
+    <h3>Parámetros del informe</h3>
+
+    <form (ngSubmit)="consultar()">
+
+      <!-- =============================================== -->
+      <!-- 2.1 FILTROS PRINCIPALES                         -->
+      <!-- =============================================== -->
+
+      <div class="filtros">
+
+        <!-- Agencia -->
+
+        <div class="campo agencia">
+
+          <label for="agencia">
+            Agencia
+          </label>
+
+          <select
+            id="agencia"
+            name="agencia"
+            [(ngModel)]="idAgencia"
+            (ngModelChange)="limpiar()"
+          >
+
+            <option [ngValue]="null">
+              Seleccione una agencia
+            </option>
+
+            <option
+              *ngFor="let a of agencias"
+              [ngValue]="a.idAgencia"
+            >
+              {{ a.codigoAgencia }} - {{ a.nombreAgencia }}
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- Año -->
+
+        <div class="campo">
+
+          <label for="ano">
+            Año
+          </label>
+
+          <input
+            id="ano"
+            name="ano"
+            type="number"
+            min="1901"
+            max="9998"
+            [(ngModel)]="ano"
+            (ngModelChange)="limpiar()"
+          >
+
+        </div>
+
+
+        <!-- Mes -->
+
+        <div class="campo">
+
+          <label for="mes">
+            Mes
+          </label>
+
+          <select
+            id="mes"
+            name="mes"
+            [(ngModel)]="mes"
+            (ngModelChange)="limpiar()"
+            [disabled]="acumuladoAnual"
+          >
+
+            <option
+              *ngFor="let nombre of meses; let i = index"
+              [ngValue]="i + 1"
+            >
+              {{ nombre }}
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- Nivel contable fijo -->
+
+        <div class="campo">
+
+          <label for="nivel">
+            Nivel contable
+          </label>
+
+          <input
+            id="nivel"
+            type="text"
+            value="Nivel 3"
+            disabled
+          >
+
+        </div>
+
+      </div>
+
+
+      <!-- =============================================== -->
+      <!-- 2.2 OPCIONES DEL INFORME                        -->
+      <!-- =============================================== -->
+
+      <div class="opciones">
+
+        <!-- Informe mensual / anual -->
+
+        <label class="opcion">
+
+          <input
+            type="checkbox"
+            name="acumuladoAnual"
+            [(ngModel)]="acumuladoAnual"
+            (ngModelChange)="limpiar()"
+          >
+
+          <span class="opcion-texto">
+
+            <strong *ngIf="!acumuladoAnual">
+              Informe mensual
+            </strong>
+
+            <strong *ngIf="acumuladoAnual">
+              Informe anual
+            </strong>
+
+            <small *ngIf="!acumuladoAnual">
+              Mes seleccionado
+            </small>
+
+            <small *ngIf="acumuladoAnual">
+              Del 1 de enero al 31 de diciembre
+            </small>
+
+          </span>
+
+        </label>
+
+
+        <!-- Impresión interna / oficial -->
+
+        <label class="opcion">
+
+          <input
+            type="checkbox"
+            name="impresionOficial"
+            [ngModel]="formato === 'OFICIAL'"
+            (ngModelChange)="formato = $event ? 'OFICIAL' : 'INTERNO'"
+          >
+
+          <span class="opcion-texto">
+
+            <strong *ngIf="formato !== 'OFICIAL'">
+              Impresión interna
+            </strong>
+
+            <strong *ngIf="formato === 'OFICIAL'">
+              Impresión oficial
+            </strong>
+
+            <small *ngIf="formato !== 'OFICIAL'">
+              Con encabezado institucional
+            </small>
+
+            <small *ngIf="formato === 'OFICIAL'">
+              Papel preimpreso y foliado
+            </small>
+
+          </span>
+
+        </label>
+
+      </div>
+
+
+      <!-- =============================================== -->
+      <!-- 2.3 BOTONES DE ACCIÓN                           -->
+      <!-- =============================================== -->
+
+      <div class="acciones">
+
+        <!-- Consultar -->
+
+        <button
+          type="submit"
+          [disabled]="!puedeConsultar"
+        >
+          {{ consultando ? 'Consultando…' : 'Consultar' }}
+        </button>
+
+
+        <!-- Exportar PDF -->
+
+        <button
+          type="button"
+          class="secundario"
+          [disabled]="!puedeExportar"
+          (click)="exportar('pdf')"
+        >
+          {{ exportando === 'pdf' ? 'Generando…' : 'PDF' }}
+        </button>
+
+
+        <!-- Exportar Excel -->
+
+        <button
+          type="button"
+          class="secundario"
+          [disabled]="!puedeExportar"
+          (click)="exportar('excel')"
+        >
+          {{ exportando === 'excel' ? 'Generando…' : 'Excel' }}
+        </button>
+
+      </div>
+
+    </form>
+
+  </section>
+
+
+  <!-- ===================================================== -->
+  <!-- 3. MENSAJES DE ERROR                                 -->
+  <!-- ===================================================== -->
+
+  <p
+    class="error"
+    *ngIf="error"
+    role="alert"
+  >
+    {{ error }}
+  </p>
+
+  <p
+    class="error"
+    *ngIf="!tienePermiso"
+    role="alert"
+  >
+    No tiene permiso para consultar libros contables.
+  </p>
+
+
+  <!-- ===================================================== -->
+  <!-- 4. RESULTADO DEL INFORME                             -->
+  <!-- ===================================================== -->
+
+  <section
+    class="resultado"
+    *ngIf="resultado as r"
+  >
+
+    <h3>Libro Mayor y Balance</h3>
+
+    <p>
+      {{ r.codigoAgencia }} - {{ r.nombreAgencia }}
+      · {{ r.desde }} a {{ r.hasta }}
+      · Nivel 3
+    </p>
+
+
+    <!-- =============================================== -->
+    <!-- 4.1 TABLA DEL MAYOR Y BALANCE                   -->
+    <!-- =============================================== -->
+
+    <div class="tabla-scroll">
+
+      <table>
+
+        <thead>
+
+        <!-- Encabezados principales -->
+
+        <tr>
+
+          <th rowspan="2">
+            Código
+          </th>
+
+          <th rowspan="2">
+            Cuenta
+          </th>
+
+          <th
+            colspan="2"
+            class="grupo"
+          >
+            Saldo anterior
+          </th>
+
+          <th
+            colspan="2"
+            class="grupo"
+          >
+            Movimiento del período
+          </th>
+
+          <th
+            colspan="2"
+            class="grupo"
+          >
+            Nuevo saldo
+          </th>
+
+        </tr>
+
+
+        <!-- Encabezados de débitos y créditos -->
+
+        <tr>
+
+          <th class="valor">
+            Débito
+          </th>
+
+          <th class="valor">
+            Crédito
+          </th>
+
+          <th class="valor">
+            Débito
+          </th>
+
+          <th class="valor">
+            Crédito
+          </th>
+
+          <th class="valor">
+            Débito
+          </th>
+
+          <th class="valor">
+            Crédito
+          </th>
+
+        </tr>
+
+        </thead>
+
+
+        <tbody>
+
+        <!-- ========================================= -->
+        <!-- MOVIMIENTOS POR CUENTA                    -->
+        <!-- ========================================= -->
+
+        <tr *ngFor="let x of r.filas">
+
+          <!-- Código de cuenta -->
+
+          <td>
+            {{ x.codigo }}
+          </td>
+
+          <!-- Nombre de cuenta -->
+
+          <td>
+            {{ x.nombre }}
+          </td>
+
+          <!-- Saldo anterior débito -->
+
+          <td class="valor">
+            {{ numero(x.debitoAnterior) }}
+          </td>
+
+          <!-- Saldo anterior crédito -->
+
+          <td class="valor">
+            {{ numero(x.creditoAnterior) }}
+          </td>
+
+          <!-- Movimiento débito -->
+
+          <td class="valor">
+            {{ numero(x.debitoMovimiento) }}
+          </td>
+
+          <!-- Movimiento crédito -->
+
+          <td class="valor">
+            {{ numero(x.creditoMovimiento) }}
+          </td>
+
+          <!-- Nuevo saldo débito -->
+
+          <td class="valor">
+            {{ numero(x.debitoSaldo) }}
+          </td>
+
+          <!-- Nuevo saldo crédito -->
+
+          <td class="valor">
+            {{ numero(x.creditoSaldo) }}
+          </td>
+
+        </tr>
+
+
+        <!-- ========================================= -->
+        <!-- TOTALES GENERALES                         -->
+        <!-- ========================================= -->
+
+        <tr class="total">
+
+          <td colspan="2">
+            TOTAL
+          </td>
+
+          <td class="valor">
+            {{ numero(r.totales.debitoAnterior) }}
+          </td>
+
+          <td class="valor">
+            {{ numero(r.totales.creditoAnterior) }}
+          </td>
+
+          <td class="valor">
+            {{ numero(r.totales.debitoMovimiento) }}
+          </td>
+
+          <td class="valor">
+            {{ numero(r.totales.creditoMovimiento) }}
+          </td>
+
+          <td class="valor">
+            {{ numero(r.totales.debitoSaldo) }}
+          </td>
+
+          <td class="valor">
+            {{ numero(r.totales.creditoSaldo) }}
+          </td>
+
+        </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+
+    <!-- ================================================= -->
+    <!-- 4.2 VALIDACIÓN DE MOVIMIENTOS                    -->
+    <!-- ================================================= -->
+
+    <p
+      class="cuadre"
+      [class.alerta]="r.diferenciaMovimiento !== 0"
+    >
+
+      Diferencia movimiento (D - C):
+
+      <strong>
+        {{ numero(r.diferenciaMovimiento) }}
+      </strong>
+
+    </p>
+
+
+    <!-- ================================================= -->
+    <!-- 4.3 VALIDACIÓN DE SALDOS FINALES                 -->
+    <!-- ================================================= -->
+
+    <p
+      class="cuadre"
+      [class.alerta]="r.diferenciaSaldo !== 0"
+    >
+
+      Diferencia saldos finales (D - C):
+
+      <strong>
+        {{ numero(r.diferenciaSaldo) }}
+      </strong>
+
+    </p>
+
+  </section>
+
+</section>

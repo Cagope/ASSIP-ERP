@@ -1,0 +1,800 @@
+
+:host {
+  display: block;
+  color: #172b4d;
+}
+
+.balance-pagina {
+  padding: 18px 20px;
+  background: #f5f7fa;
+  min-height: 100%;
+}
+
+// =========================================================
+// ENCABEZADO Y TARJETAS
+// =========================================================
+
+.encabezado {
+  margin-bottom: 18px;
+
+  h2 {
+    margin: 0 0 5px;
+    font-size: 21px;
+    font-weight: 700;
+    color: #172b4d;
+  }
+
+  p {
+    margin: 0;
+    font-size: 13px;
+    color: #66788a;
+  }
+}
+
+.panel {
+  background: #fff;
+  border: 1px solid #dce4ed;
+  border-radius: 9px;
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 6px rgba(20, 45, 75, 0.03);
+
+  h3 {
+    margin: 0 0 17px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #183153;
+  }
+}
+
+// =========================================================
+// FILTROS
+// =========================================================
+
+.filtros {
+  display: grid;
+  grid-template-columns: minmax(260px, 2fr) repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  align-items: end;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: #33465c;
+  }
+
+  input,
+  select {
+    width: 100%;
+    min-height: 37px;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    background: #fff;
+    color: #172b4d;
+    border: 1px solid #c7d2df;
+    border-radius: 5px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 400;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+
+    &:focus {
+      border-color: #23639a;
+      box-shadow: 0 0 0 3px rgba(35, 99, 154, 0.12);
+    }
+
+    &:disabled {
+      background: #f1f4f7;
+      color: #8190a0;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// =========================================================
+// OPCIONES DEL INFORME
+// =========================================================
+
+.opciones {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.opcion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 66px;
+  box-sizing: border-box;
+  padding: 13px 14px;
+  border: 1px solid #dbe4ed;
+  border-radius: 7px;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover {
+    background: #f0f6fc;
+    border-color: #b4cce3;
+  }
+
+  &:has(input:checked) {
+    background: #edf5fc;
+    border-color: #75a9d2;
+  }
+
+  &:has(input:focus-visible) {
+    outline: 2px solid #23639a;
+    outline-offset: 2px;
+  }
+
+  input[type='checkbox'] {
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 22px;
+    margin: 0;
+    border: 1px solid #b9c5d1;
+    border-radius: 20px;
+    background: #cbd5df;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+      transition: transform 0.2s;
+    }
+
+    &:checked {
+      background: #1e6095;
+      border-color: #1e6095;
+
+      &::before {
+        transform: translateX(16px);
+      }
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.opcion-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+
+  strong {
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 650;
+    color: #233b53;
+  }
+
+  small {
+    font-size: 11px;
+    line-height: 1.4;
+    color: #718196;
+  }
+}
+
+// =========================================================
+// BOTONES
+// =========================================================
+
+.acciones {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin-top: 20px;
+
+  button {
+    min-height: 37px;
+    padding: 9px 18px;
+    border: 1px solid #195b90;
+    border-radius: 5px;
+    background: #195b90;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+
+    &:hover:not(:disabled) {
+      background: #124b78;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #195b90;
+      outline-offset: 3px;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    &.secundario {
+      background: #fff;
+      color: #195b90;
+      border-color: #b8cadb;
+
+      &:hover:not(:disabled) {
+        background: #eaf2f9;
+      }
+    }
+  }
+}
+
+// =========================================================
+// IDENTIFICACIÓN DEL BALANCE
+// =========================================================
+
+.panel-resultado {
+  .resultado {
+    margin-bottom: 0;
+  }
+}
+
+.resultado {
+  margin-bottom: 15px;
+
+  h3 {
+    margin-bottom: 5px;
+    font-size: 16px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 12px;
+    color: #6a7d91;
+  }
+}
+
+// =========================================================
+// TABLAS: ESTILOS COMPARTIDOS
+// =========================================================
+
+.tabla-contenedor {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #d5e0eb;
+  border-radius: 6px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+
+  thead {
+    background: #dce8f3;
+
+    th {
+      padding: 12px;
+      background: #dce8f3;
+      color: #173b5c;
+      font-weight: 700;
+      text-align: left;
+      border-bottom: 2px solid #8eafca;
+      white-space: nowrap;
+    }
+
+    th.numero {
+      text-align: right;
+    }
+  }
+
+  tbody {
+    tr {
+      background: #fff;
+      border-bottom: 1px solid #e8eef4;
+
+      &:hover {
+        background: #f3f8fc;
+      }
+
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+
+    td {
+      padding: 9px 12px;
+      vertical-align: middle;
+    }
+
+    td:first-child {
+      white-space: nowrap;
+      font-weight: 600;
+    }
+  }
+
+  tfoot {
+    background: #e1edf7;
+
+    th {
+      padding: 12px;
+      color: #173b5c;
+      font-weight: 700;
+      text-align: left;
+      border-top: 2px solid #a7c1d8;
+    }
+
+    th.numero {
+      text-align: right;
+    }
+  }
+
+  .numero {
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// =========================================================
+// INDICADORES Y RESUMEN FINANCIERO
+// =========================================================
+
+.resumen-financiero {
+  h3 {
+    margin: 0 0 6px;
+    color: #183153;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .resumen-descripcion {
+    margin: 0 0 16px;
+    color: #66788a;
+    font-size: 12px;
+  }
+
+  table {
+    min-width: 600px;
+    table-layout: fixed;
+
+    // La misma distribución se aplica al encabezado y al cuerpo.
+    th:first-child,
+    td:first-child {
+      width: 40%;
+      box-sizing: border-box;
+      text-align: left;
+    }
+
+    th:nth-child(2),
+    td:nth-child(2),
+    th:nth-child(3),
+    td:nth-child(3) {
+      width: 30%;
+      box-sizing: border-box;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    tbody tr.fila-destacada {
+      background: #e1edf7;
+      color: #173b5c;
+      font-weight: 700;
+
+      td {
+        border-top: 2px solid #a7c1d8;
+      }
+
+      &:hover {
+        background: #e1edf7;
+      }
+    }
+  }
+}
+
+// =========================================================
+// DETALLE CONTABLE
+// =========================================================
+
+.panel-detalle {
+  table {
+    tbody {
+      tr.agrupadora {
+        background: #fff;
+        color: #173b5c;
+        font-weight: 700;
+
+        &:hover {
+          background: #f3f8fc;
+        }
+      }
+    }
+  }
+}
+
+// =========================================================
+// FIRMAS
+// =========================================================
+
+.firmas {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 25px;
+  margin-top: 45px;
+  padding-top: 22px;
+  text-align: center;
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding-top: 12px;
+    border-top: 1px solid #8da0b4;
+    min-width: 0;
+
+    strong {
+      font-size: 12px;
+      color: #203b57;
+    }
+
+    span,
+    small {
+      font-size: 11px;
+      color: #64778a;
+    }
+  }
+}
+
+// =========================================================
+// MENSAJES
+// =========================================================
+
+.error {
+  padding: 12px 14px;
+  margin: 15px 0;
+  background: #fff3f3;
+  border: 1px solid #f1b0b0;
+  border-radius: 5px;
+  color: #b42318;
+  font-size: 12px;
+}
+
+// =========================================================
+// RESPONSIVE
+// =========================================================
+
+@media (max-width: 1000px) {
+  .filtros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .opciones {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .resumen-financiero {
+    table {
+      min-width: 540px;
+    }
+
+    thead th,
+    tbody td {
+      padding: 9px 10px;
+      font-size: 11px;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .balance-pagina {
+    padding: 12px;
+  }
+
+  .panel {
+    padding: 14px;
+  }
+
+  .filtros {
+    grid-template-columns: 1fr;
+  }
+
+  .acciones {
+    button {
+      flex: 1 1 auto;
+    }
+  }
+
+  .firmas {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}
+
+
+
+/* =========================================================
+   CUENTAS AUXILIARES SELECCIONABLES
+   ========================================================= */
+
+.panel-detalle {
+
+  .enlace-cuenta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 4px;
+    margin: -3px -4px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    box-shadow: none;
+    color: #075b9c;
+    font: inherit;
+    font-weight: 600;
+    line-height: 1.5;
+    text-align: left;
+    text-decoration: underline;
+    text-decoration-color: #7da9cd;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+
+    &::after {
+      content: '↗';
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    &:hover:not(:disabled) {
+      background: #e8f2fa;
+      color: #003f73;
+      text-decoration-color: currentColor;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #195b90;
+      outline-offset: 3px;
+    }
+
+    &:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+  }
+
+  .cuenta-seleccionada {
+    background: #edf5fc !important;
+
+    td {
+      border-top: 1px solid #b4cce3;
+      border-bottom: 1px solid #b4cce3;
+    }
+  }
+}
+
+/* =========================================================
+   DETALLE DE MOVIMIENTOS CONTABLES
+   ========================================================= */
+
+.panel-movimientos {
+  border-color: #b4cce3;
+
+  .movimientos-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 16px;
+
+    h3 {
+      margin: 0 0 6px;
+      color: #183153;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    p {
+      margin: 0;
+      color: #66788a;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+  }
+
+  .movimientos-cerrar {
+    min-height: 34px;
+    padding: 7px 13px;
+    border: 1px solid #b8cadb;
+    border-radius: 5px;
+    background: #fff;
+    color: #195b90;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover {
+      background: #eaf2f9;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #195b90;
+      outline-offset: 3px;
+    }
+  }
+
+  .tabla-contenedor {
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 850px;
+
+    thead th {
+      background: #dce8f3;
+    }
+
+    tbody td {
+      padding: 10px 12px;
+    }
+
+    td.numero,
+    th.numero {
+      text-align: right;
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+
+  .movimiento-comprobante {
+    color: #195b90;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .movimiento-concepto {
+    min-width: 180px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.5;
+  }
+
+  .movimientos-vacio {
+    padding: 22px 15px;
+    color: #66788a;
+    font-size: 12px;
+    text-align: center;
+  }
+
+  .movimientos-cargando {
+    padding: 15px;
+    color: #33465c;
+    font-size: 12px;
+    text-align: center;
+  }
+}
+
+/* =========================================================
+   PAGINACIÓN DE MOVIMIENTOS
+   ========================================================= */
+
+.movimientos-paginacion {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #e2eaf2;
+
+  .pagina-actual {
+    color: #33465c;
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .paginacion-acciones {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  button {
+    min-height: 34px;
+    padding: 7px 13px;
+    border: 1px solid #b8cadb;
+    border-radius: 5px;
+    background: #fff;
+    color: #195b90;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+      background: #eaf2f9;
+      border-color: #75a9d2;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #195b90;
+      outline-offset: 3px;
+    }
+
+    &:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+  }
+}
+
+/* =========================================================
+   ADAPTACIÓN RESPONSIVE DE MOVIMIENTOS
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .panel-movimientos {
+    .movimientos-encabezado {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .movimientos-cerrar {
+      align-self: flex-start;
+    }
+  }
+
+  .movimientos-paginacion {
+    flex-direction: column;
+    align-items: stretch;
+
+    .pagina-actual {
+      text-align: center;
+    }
+
+    .paginacion-acciones {
+      justify-content: center;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .panel-movimientos {
+    table {
+      min-width: 780px;
+    }
+  }
+
+  .movimientos-paginacion {
+    .paginacion-acciones {
+      button {
+        flex: 1 1 auto;
+      }
+    }
+  }
+}

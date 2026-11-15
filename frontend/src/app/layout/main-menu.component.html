@@ -1,18 +1,30 @@
+
+<!-- =========================================================
+     ASSIP ERP - MENÚ LATERAL
+     Navegación institucional COOPVALLE
+     ========================================================= -->
+
 <nav class="side-menu">
 
   <ul class="menu-root">
 
+    <!-- NIVEL 1: MÓDULOS PRINCIPALES -->
     <li
       class="menu-section"
       *ngFor="let section of menu; let i = index"
-      [class.open]="isOpen(i)">
+      [hidden]="!seccionVisible(section)"
+      [class.open]="isOpen(i)"
+      [class.open-section]="isOpen(i)"
+      [class.active-section]="seccionActiva(section)">
 
       <button
         type="button"
         class="menu-title"
+        [attr.aria-expanded]="isOpen(i)"
         (click)="toggleSection(i)">
 
         <span class="menu-title-content">
+
           <lucide-icon
             *ngIf="section.icon"
             [img]="icons[section.icon]"
@@ -20,25 +32,38 @@
           </lucide-icon>
 
           <span>{{ section.title }}</span>
+
         </span>
 
-        <span class="arrow">{{ isOpen(i) ? '▾' : '▸' }}</span>
+        <span class="arrow">
+          {{ isOpen(i) ? '▾' : '▸' }}
+        </span>
+
       </button>
 
-      <ul class="menu-items" *ngIf="isOpen(i)">
+      <!-- NIVEL 2: OPCIONES DEL MÓDULO -->
+      <ul
+        class="menu-items"
+        *ngIf="isOpen(i)">
 
-        <ng-container *ngFor="let item of section.items; let gi = index">
+        <ng-container
+          *ngFor="let item of section.items; let gi = index">
 
-          <!-- ITEM SIMPLE NIVEL 2 -->
-          <li *ngIf="tienePermiso(item) && !item.children">
+          <!-- OPCIÓN SIMPLE NIVEL 2 -->
+          <li
+            *ngIf="tienePermiso(item) && !item.children">
+
             <a
+              class="menu-item"
               [routerLink]="item.route"
               routerLinkActive="active"
               [routerLinkActiveOptions]="{ exact: true }"
-              class="menu-item"
-              (click)="closeMenu()">
+              (click)="closeMenu(i)">
+
               {{ item.label }}
+
             </a>
+
           </li>
 
           <!-- GRUPO NIVEL 2 -->
@@ -51,27 +76,40 @@
             <button
               type="button"
               class="menu-group-title"
+              [attr.aria-expanded]="isGroupOpen(gi)"
               (click)="toggleGroup(gi)">
+
               <span>{{ item.label }}</span>
+
               <span class="group-arrow">
                 {{ isGroupOpen(gi) ? '▾' : '▸' }}
               </span>
+
             </button>
 
-            <ul class="menu-subitems" *ngIf="isGroupOpen(gi)">
+            <!-- NIVEL 3: OPCIONES DEL GRUPO -->
+            <ul
+              class="menu-subitems"
+              *ngIf="isGroupOpen(gi)">
 
-              <ng-container *ngFor="let child of item.children; let si = index">
+              <ng-container
+                *ngFor="let child of item.children; let si = index">
 
-                <!-- ITEM SIMPLE NIVEL 3 -->
-                <li *ngIf="tienePermiso(child) && !child.children">
+                <!-- OPCIÓN SIMPLE NIVEL 3 -->
+                <li
+                  *ngIf="tienePermiso(child) && !child.children">
+
                   <a
+                    class="menu-subitem"
                     [routerLink]="child.route"
                     routerLinkActive="active"
                     [routerLinkActiveOptions]="{ exact: true }"
-                    class="menu-subitem"
-                    (click)="closeMenu()">
+                    (click)="closeMenu(i)">
+
                     {{ child.label }}
+
                   </a>
+
                 </li>
 
                 <!-- SUBGRUPO NIVEL 3 -->
@@ -84,26 +122,39 @@
                   <button
                     type="button"
                     class="menu-subgroup-title"
+                    [attr.aria-expanded]="isSubGroupOpen(gi, si)"
                     (click)="toggleSubGroup(gi, si)">
+
                     <span>{{ child.label }}</span>
+
                     <span class="subgroup-arrow">
                       {{ isSubGroupOpen(gi, si) ? '▾' : '▸' }}
                     </span>
+
                   </button>
 
-                  <ul class="menu-sublevel-items" *ngIf="isSubGroupOpen(gi, si)">
+                  <!-- NIVEL 4: OPCIONES DEL SUBGRUPO -->
+                  <ul
+                    class="menu-sublevel-items"
+                    *ngIf="isSubGroupOpen(gi, si)">
 
-                    <ng-container *ngFor="let subchild of child.children">
+                    <ng-container
+                      *ngFor="let subchild of child.children">
 
-                      <li *ngIf="tienePermiso(subchild)">
+                      <li
+                        *ngIf="tienePermiso(subchild)">
+
                         <a
+                          class="menu-sublevel-item"
                           [routerLink]="subchild.route"
                           routerLinkActive="active"
                           [routerLinkActiveOptions]="{ exact: true }"
-                          class="menu-sublevel-item"
-                          (click)="closeMenu()">
+                          (click)="closeMenu(i)">
+
                           {{ subchild.label }}
+
                         </a>
+
                       </li>
 
                     </ng-container>

@@ -1,0 +1,238 @@
+
+<div class="administracion-seguros-page">
+  <header class="pagina-encabezado">
+    <div>
+      <h1>Administración de seguros</h1>
+      <p>Consulta y mantenimiento de las condiciones particulares del seguro de los créditos.</p>
+    </div>
+  </header>
+
+  <div *ngIf="error" class="alert alert--danger" role="alert">
+    {{ error }}
+  </div>
+
+  <div *ngIf="aviso" class="alert alert--success" role="status">
+    {{ aviso }}
+  </div>
+
+  <app-consulta-creditos-buscador
+    [bloqueado]="cargando || guardando"
+    (asociadoSeleccionado)="seleccionarAsociado($event)">
+  </app-consulta-creditos-buscador>
+
+  <section
+    *ngIf="asociadoSeleccionado && !creditoSeleccionado"
+    class="consulta-bloque">
+
+    <div class="bloque-encabezado">
+      <div>
+        <h2>{{ asociadoSeleccionado.nombreCompleto }}</h2>
+        <span>Documento: {{ asociadoSeleccionado.documento }}</span>
+      </div>
+    </div>
+
+    <h3>Créditos del asociado con saldo</h3>
+
+    <p *ngIf="cargando" role="status">
+      Consultando créditos...
+    </p>
+
+    <p *ngIf="!cargando && creditos.length === 0" class="estado-vacio">
+      No se encontraron créditos activos con saldo para este asociado.
+    </p>
+
+    <div class="tabla-contenedor" *ngIf="creditos.length > 0">
+      <table class="tabla-datos">
+        <thead>
+        <tr>
+          <th>Pagaré</th>
+          <th>Línea</th>
+          <th>Estado</th>
+          <th class="valor">Saldo capital</th>
+          <th>Acción</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let credito of creditos">
+          <td>{{ credito.pagareCartera || '—' }}</td>
+          <td>
+            {{ credito.descripcionLineaCredito || credito.codigoLineaCredito || '—' }}
+          </td>
+          <td>
+            {{ credito.descripcionEstadoCartera || credito.codigoEstadoCartera || '—' }}
+          </td>
+          <td class="valor">
+            {{ credito.saldoActual | currency:'COP':'symbol-narrow':'1.0-0':'es-CO' }}
+          </td>
+          <td>
+            <button
+              type="button"
+              class="btn btn--primary btn-sm"
+              (click)="seleccionarCredito(credito)"
+              [disabled]="cargando || guardando">
+              Seleccionar
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section *ngIf="creditoSeleccionado as credito" class="consulta-bloque">
+    <div class="bloque-encabezado">
+      <div>
+        <h2>Seguro del pagaré {{ credito.pagareCartera || '—' }}</h2>
+        <span>Condiciones del seguro de vida deudores.</span>
+      </div>
+
+      <button
+        type="button"
+        class="btn btn--secondary btn-sm"
+        (click)="cambiarCredito()"
+        [disabled]="cargando || guardando">
+        Cambiar crédito
+      </button>
+
+      <button
+        type="button"
+        class="btn btn--secondary btn-sm"
+        (click)="consultarSeguros()"
+        [disabled]="cargando || guardando">
+        Actualizar consulta
+      </button>
+    </div>
+
+    <p *ngIf="cargando" role="status">
+      Consultando información...
+    </p>
+
+    <p *ngIf="!cargando && seguros.length === 0" class="estado-vacio">
+      El crédito no tiene seguro registrado. Puede crear uno utilizando
+      el porcentaje base parametrizado para la agencia.
+    </p>
+
+    <div *ngIf="!cargando && seguros.length > 0" class="seguros-lista">
+      <button
+        *ngFor="let seguro of seguros"
+        type="button"
+        class="seguro-opcion"
+        [class.seleccionado]="seguroSeleccionado?.idCreditoSeguro === seguro.idCreditoSeguro"
+        (click)="seleccionarSeguro(seguro)"
+        [disabled]="guardando">
+        Seguro {{ seguro.idCreditoSeguro }}
+        · {{ seguro.activo ? 'Activo' : 'Inactivo' }}
+      </button>
+    </div>
+
+    <form
+      *ngIf="!cargando && (seguros.length === 0 || seguroSeleccionado)"
+      (ngSubmit)="guardar()"
+      #seguroForm="ngForm"
+      class="formulario-seguro">
+
+      <div class="bloque-encabezado">
+        <div>
+          <h3>
+            {{ seguroSeleccionado
+            ? 'Modificar condiciones del seguro'
+            : 'Crear seguro del crédito' }}
+          </h3>
+          <span>
+            El porcentaje base y la extraprima pueden modificarse.
+            El porcentaje a aplicar se calcula automáticamente.
+          </span>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <label class="f-row">
+          <span>Porcentaje base (%)</span>
+          <input
+            type="number"
+            name="porcentajeBaseSeguro"
+            [(ngModel)]="configuracion.porcentajeBaseSeguro"
+            (ngModelChange)="calcularPorcentajeAplicar()"
+            min="0"
+            step="0.000001"
+            required
+            [disabled]="guardando">
+        </label>
+
+        <label class="f-row">
+          <span>Extraprima (%)</span>
+          <input
+            type="number"
+            name="porcentajeExtraprima"
+            [(ngModel)]="configuracion.porcentajeExtraprima"
+            (ngModelChange)="calcularPorcentajeAplicar()"
+            min="0"
+            step="0.01"
+            required
+            [disabled]="guardando">
+        </label>
+
+        <label class="f-row">
+          <span>Porcentaje a aplicar (%)</span>
+          <input
+            type="text"
+            [value]="configuracion.porcentajeAplicar | number:'1.4-6':'es-CO'"
+            readonly>
+        </label>
+
+        <label class="f-row">
+          <span>Estado del seguro</span>
+          <select
+            name="activo"
+            [(ngModel)]="activo"
+            [disabled]="guardando || !seguroSeleccionado">
+            <option [ngValue]="true">Activo</option>
+            <option [ngValue]="false">Inactivo</option>
+          </select>
+        </label>
+
+        <label class="f-row">
+          <span>Tipo de cobro</span>
+          <input
+            type="text"
+            [value]="configuracion.sobreSaldoActual
+              ? 'Sobre saldo de capital'
+              : 'Sobre capital inicial'"
+            readonly>
+        </label>
+
+        <label class="f-row">
+          <span>Fecha inicial de cobro</span>
+          <input
+            type="date"
+            name="fechaInicialCobro"
+            [(ngModel)]="configuracion.fechaInicialCobro"
+            [readonly]="!!seguroSeleccionado"
+            [disabled]="guardando"
+            [required]="!seguroSeleccionado">
+        </label>
+      </div>
+
+      <p class="nota">
+        La cooperativa asume el seguro base. Al asociado se le causa
+        únicamente la extraprima calculada sobre el capital del crédito.
+        Los intereses causados no forman parte de la base de cobro.
+      </p>
+
+      <p *ngIf="!activo" class="nota">
+        La desactivación solo se permite cuando el seguro no tiene saldo pendiente.
+      </p>
+
+      <div class="acciones-formulario">
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="!seguroForm.valid || guardando || !idAgencia">
+          {{ guardando
+          ? 'Guardando...'
+          : (seguroSeleccionado ? 'Guardar cambios' : 'Crear seguro') }}
+        </button>
+      </div>
+    </form>
+  </section>
+</div>

@@ -1,11 +1,16 @@
 import {
   Injectable,
+  inject,
   signal
 } from '@angular/core';
 
+import { HttpBackend, HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { Observable, catchError, finalize, map, of, shareReplay } from 'rxjs';
+
 import {
   AuthAgencia,
-  AuthRol
+  AuthRol,
+  MeResponse
 } from './auth.api';
 
 export interface AgenciaSesion {
@@ -18,6 +23,67 @@ export interface AgenciaSesion {
   providedIn: 'root'
 })
 export class SessionService {
+
+  // Cliente sin interceptores para evitar dependencia circular con authInterceptor.
+  private readonly http = new HttpClient(inject(HttpBackend));
+  private readonly contextoUrl = 'http://localhost:8080/api/v1/auth/me';
+  private tokenValidado: string | null = null;
+  private validacionPendiente: Observable<boolean> | null = null;
+  private tokenPendiente: string | null = null;
+
+  /** Sincroniza roles, agencias y permisos vigentes antes de autorizar rutas. */
+  validarContexto(): Observable<boolean> {
+    const token = this.getToken();
+    if (!token || !token.trim()) {
+      return of(false);
+    }
+    if (this.tokenValidado === token) {
+      return of(true);
+    }
+    if (this.validacionPendiente && this.tokenPendiente === token) {
+      return this.validacionPendiente;
+    }
+
+    // Se envía el JWT manualmente porque HttpBackend omite el interceptor.
+    const peticion = this.http.get<MeResponse>(this.contextoUrl, {
+      headers: new HttpHeaders({ Authorization: `Bearer ${token}` })
+    }).pipe(
+      map(contexto => {
+        if (this.getToken() !== token) {
+          return false;
+        }
+        this.setUser(contexto.username);
+        this.setRoles(contexto.roles ?? []);
+        this.setAgencias(contexto.agencias ?? []);
+        this.setPermisos(contexto.permisos ?? []);
+        this.tokenValidado = token;
+        return true;
+      }),
+      catchError((error: unknown) => {
+        if (this.getToken() === token) {
+          this.tokenValidado = null;
+          // Nunca autorizar con roles o permisos persistidos tras un fallo.
+          this.setRoles([]);
+          this.setPermisos([]);
+          if (error instanceof HttpErrorResponse && error.status === 401) {
+            this.logout();
+          }
+        }
+        return of(false);
+      }),
+      finalize(() => {
+        if (this.tokenPendiente === token) {
+          this.validacionPendiente = null;
+          this.tokenPendiente = null;
+        }
+      }),
+      shareReplay({ bufferSize: 1, refCount: false })
+    );
+    this.tokenPendiente = token;
+    this.validacionPendiente = peticion;
+    return peticion;
+  }
+
 
   private readonly tokenKey =
     'assip_token';
@@ -219,6 +285,8 @@ export class SessionService {
   setToken(
     token: string
   ): void {
+
+    this.tokenValidado = null;
 
     localStorage.setItem(
       this.tokenKey,
@@ -509,6 +577,10 @@ export class SessionService {
   // ============================================================
 
   logout(): void {
+
+    this.tokenValidado = null;
+    this.validacionPendiente = null;
+    this.tokenPendiente = null;
 
     localStorage.removeItem(
       this.tokenKey

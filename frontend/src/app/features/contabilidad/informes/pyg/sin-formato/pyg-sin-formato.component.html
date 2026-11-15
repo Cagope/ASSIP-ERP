@@ -1,0 +1,215 @@
+
+<section class="pyg-sin-formato">
+  <header class="pyg-encabezado">
+    <div>
+      <h2>Estado de Excedentes o Pérdidas</h2>
+      <p>Informe sin formato — movimientos del mes</p>
+    </div>
+  </header>
+
+  <form class="pyg-filtros" (ngSubmit)="consultar()">
+    <div class="pyg-campo">
+      <label for="pyg-agencia">Agencia</label>
+      <select
+        id="pyg-agencia"
+        name="idAgencia"
+        [(ngModel)]="idAgencia"
+        (ngModelChange)="limpiarResultado()"
+        [disabled]="consultando || exportando !== null"
+        required
+      >
+        <option [ngValue]="null">Seleccione una agencia</option>
+        <option
+          *ngFor="let agencia of agencias"
+          [ngValue]="agencia.idAgencia"
+        >
+          {{ agencia.codigoAgencia }} - {{ agencia.nombreAgencia }}
+        </option>
+      </select>
+    </div>
+
+    <div class="pyg-campo">
+      <label for="pyg-ano">Año</label>
+      <input
+        id="pyg-ano"
+        name="ano"
+        type="number"
+        min="1900"
+        max="9999"
+        step="1"
+        [(ngModel)]="ano"
+        (ngModelChange)="limpiarResultado()"
+        [disabled]="consultando || exportando !== null"
+        required
+      />
+    </div>
+
+    <div class="pyg-campo">
+      <label for="pyg-mes">Mes a trabajar</label>
+      <select
+        id="pyg-mes"
+        name="mes"
+        [(ngModel)]="mes"
+        (ngModelChange)="limpiarResultado()"
+        [disabled]="consultando || exportando !== null"
+        required
+      >
+        <option
+          *ngFor="let item of meses"
+          [ngValue]="item.numero"
+        >
+          {{ item.nombre }}
+        </option>
+      </select>
+    </div>
+
+    <div class="pyg-opciones">
+      <label class="pyg-opcion">
+        <input
+          type="checkbox"
+          name="incluirFirmas"
+          [(ngModel)]="incluirFirmas"
+          [disabled]="exportando !== null"
+        />
+        <span class="pyg-opcion-texto">
+          <strong>Incluir firmas</strong>
+          <small>Firmas institucionales del informe</small>
+        </span>
+      </label>
+    </div>
+
+    <div class="pyg-acciones">
+      <button
+        type="submit"
+        [disabled]="!puedeConsultar"
+      >
+        {{ consultando ? 'Consultando…' : 'Consultar informe' }}
+      </button>
+
+      <button
+        type="button"
+        class="secundario"
+        (click)="exportarPdf()"
+        [disabled]="!puedeExportar"
+      >
+        {{ exportando === 'pdf' ? 'Generando PDF…' : 'PDF' }}
+      </button>
+
+      <button
+        type="button"
+        class="secundario"
+        (click)="exportarExcel()"
+        [disabled]="!puedeExportar"
+      >
+        {{ exportando === 'excel' ? 'Generando Excel…' : 'Excel' }}
+      </button>
+    </div>
+  </form>
+
+  <div
+    *ngIf="mensajeError"
+    class="pyg-mensaje-error"
+    role="alert"
+  >
+    {{ mensajeError }}
+  </div>
+
+  <div
+    *ngIf="consultando"
+    class="pyg-cargando"
+    role="status"
+  >
+    Consultando movimientos contables...
+  </div>
+
+  <section
+    *ngIf="resultado as informe"
+    class="pyg-resultado"
+  >
+    <div class="pyg-titulo-informe">
+      <h3>Estado de Excedentes o Pérdidas</h3>
+      <p><strong>Agencia:</strong> {{ nombreAgencia }}</p>
+      <p>
+        <strong>Período:</strong>
+        {{ nombreMes }} de {{ informe.ano }}
+      </p>
+      <p><strong>Modalidad:</strong> Sin formato</p>
+    </div>
+
+    <div class="pyg-tabla-contenedor">
+      <table class="pyg-tabla">
+        <thead>
+        <tr>
+          <th scope="col">Código</th>
+          <th scope="col">Nombre de la cuenta</th>
+          <th scope="col" class="pyg-numero">Débitos</th>
+          <th scope="col" class="pyg-numero">Créditos</th>
+          <th scope="col" class="pyg-numero">Saldo</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr
+          *ngFor="let cuenta of informe.cuentas; trackBy: identificarCuenta"
+          [class.pyg-cuenta-principal]="cuenta.nivelCuenta === 1"
+          [class.pyg-cuenta-grupo]="cuenta.nivelCuenta === 2"
+        >
+          <td>{{ cuenta.codigoCuenta }}</td>
+          <td
+            [style.padding-left.px]="12 + (cuenta.nivelCuenta - 1) * 16"
+          >
+            {{ cuenta.nombreCuenta }}
+          </td>
+          <td class="pyg-numero">
+            {{ formatearValor(cuenta.debitos) }}
+          </td>
+          <td class="pyg-numero">
+            {{ formatearValor(cuenta.creditos) }}
+          </td>
+          <td class="pyg-numero">
+            {{ formatearValor(cuenta.saldo) }}
+          </td>
+        </tr>
+
+        <tr *ngIf="informe.cuentas.length === 0">
+          <td colspan="5" class="pyg-sin-datos">
+            No se encontraron cuentas de resultados para el período.
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pyg-resumen">
+      <h4>Resumen del período</h4>
+
+      <table class="pyg-tabla-resumen">
+        <tbody>
+        <tr>
+          <th scope="row">Total ingresos</th>
+          <td class="pyg-numero">
+            {{ formatearValor(informe.totalIngresos) }}
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">Total costos y gastos</th>
+          <td class="pyg-numero">
+            {{ formatearValor(informe.totalCostosGastos) }}
+          </td>
+        </tr>
+        <tr
+          class="pyg-resultado-final"
+          [class.pyg-perdida]="!esExcedente"
+        >
+          <th scope="row">
+            {{ esExcedente ? 'EXCEDENTE DEL PERÍODO' : 'PÉRDIDA DEL PERÍODO' }}
+          </th>
+          <td class="pyg-numero">
+            {{ formatearValor(informe.excedentePerdida) }}
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>

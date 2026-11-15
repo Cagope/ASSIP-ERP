@@ -20,7 +20,8 @@ export const cajasMenu = {
 
         {
           label: 'Caja / Ventanilla',
-          route: '/cajas/ventanilla'
+          route: '/cajas/ventanilla',
+          permiso: 'CAJAS_VENTANILLA_VIEW'
         },
 
         {
@@ -37,27 +38,32 @@ export const cajasMenu = {
 
         {
           label: 'Captura depósitos',
-          route: '/cajas/captura_depositos'
+          route: '/cajas/captura_depositos',
+          permiso: 'CAJAS_CAPTURA_DEPOSITOS_VIEW'
         },
 
         {
           label: 'Recaudos convenios',
-          route: '/cajas/recaudos-convenios'
+          route: '/cajas/recaudos-convenios',
+          permiso: 'CAJAS_RECAUDOS_CONVENIOS_VIEW'
         },
 
         {
           label: 'Movimientos interagencia',
-          route: '/cajas/movimientos-interagencia'
+          route: '/cajas/movimientos-interagencia',
+          permiso: 'CAJAS_MOVIMIENTOS_INTERAGENCIA_VIEW'
         },
 
         {
           label: 'Cierre recaudos convenios',
-          route: '/cajas/cierre-recaudos-convenios'
+          route: '/cajas/cierre-recaudos-convenios',
+          permiso: 'CAJAS_CIERRE_RECAUDOS_CONVENIOS_EXECUTE'
         },
 
         {
           label: 'Cierre de caja',
-          route: '/cajas/cierres'
+          route: '/cajas/cierres',
+          permiso: 'CAJAS_CIERRE_EXECUTE'
         }
 
       ]
@@ -72,7 +78,8 @@ export const cajasMenu = {
 
         {
           label: 'Convenios de recaudo',
-          route: '/cajas/convenios-recaudo'
+          route: '/cajas/convenios-recaudo',
+          permiso: 'CAJAS_CONVENIOS_RECAUDO_VIEW'
         }
 
       ]

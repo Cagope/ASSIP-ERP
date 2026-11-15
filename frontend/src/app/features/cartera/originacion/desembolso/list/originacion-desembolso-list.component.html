@@ -80,10 +80,10 @@
 
 
   <!-- ===================================================== -->
-  <!-- FILTRO -->
+  <!-- BÚSQUEDA DE CRÉDITOS -->
   <!-- ===================================================== -->
 
-  <div class="card">
+  <div class="card search-card">
 
     <div class="filter-row">
 
@@ -100,7 +100,7 @@
           class="form-control"
           autocomplete="off"
           [value]="filtro"
-          placeholder="Cédula, nombre, pagaré o línea"
+          placeholder="Buscar por cédula, nombre, apellido, pagaré o línea de crédito"
           (input)="
             cambiarFiltro(
               filtroInput.value
@@ -357,7 +357,7 @@
 
             <button
               type="button"
-              class="btn btn-primary btn-sm"
+              class="btn btn-primary btn-sm btn-desembolsar"
               (click)="abrir(credito)">
 
               Desembolsar

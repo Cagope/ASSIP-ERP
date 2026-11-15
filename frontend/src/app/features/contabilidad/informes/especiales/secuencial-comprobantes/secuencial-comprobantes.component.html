@@ -70,7 +70,16 @@
           class="btn-consultar"
           [disabled]="cargando || formConsulta.invalid"
         >
-          {{ cargando ? 'Consultando...' : 'Consultar informe' }}
+          {{ cargando ? 'Consultando...' : 'Consultar' }}
+        </button>
+        <button
+          type="button"
+          class="btn-consultar"
+          (click)="exportarExcel()"
+          [disabled]="cargando || !resultadoVigente || !tieneResultados"
+          title="Exportar los movimientos consultados a Excel"
+        >
+          Exportar Excel
         </button>
       </div>
     </form>
@@ -118,21 +127,7 @@
       </div>
     </div>
 
-    <!-- Acciones del resultado -->
-    <div
-      *ngIf="tieneResultados"
-      class="acciones acciones-resultado"
-    >
-      <button
-        type="button"
-        class="btn-exportar"
-        (click)="exportarExcel()"
-        [disabled]="cargando || !resultadoVigente || !tieneResultados"
-        title="Exportar el secuencial de comprobantes a Excel"
-      >
-        Exportar a Excel
-      </button>
-    </div>
+
 
     <ng-container *ngIf="tieneResultados; else sinResultados">
       <!-- Un corte por cada tipo de comprobante -->

@@ -9,7 +9,7 @@ export const CONSULTA_CDATS_ROUTES: Routes = [
         .then(m => m.ConsultaCdatsListComponent),
     canActivate: [permisoGuard],
     data: {
-      permiso: 'CDAT_INFORMES_VIEW'
+      permiso: 'CDAT_CONSULTA_INFORME_VIEW'
     }
   }
 ];

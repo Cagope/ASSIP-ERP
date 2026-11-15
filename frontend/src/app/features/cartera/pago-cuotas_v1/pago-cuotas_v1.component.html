@@ -53,6 +53,23 @@
   </div>
 
 
+  <section *ngIf="confirmacionUltimoPago as confirmacion"
+           class="confirmacion-pago" role="status" aria-live="polite">
+    <strong>Pago aplicado correctamente</strong>
+    <div class="confirmacion-pago__datos">
+      <span>Pago N.º <strong>{{ confirmacion.idPago }}</strong></span>
+      <span>Comprobante definitivo:
+        <strong>{{ confirmacion.tipoComprobante && confirmacion.numeroComprobante
+          ? confirmacion.tipoComprobante + '-' + confirmacion.numeroComprobante
+          : 'No disponible' }}</strong>
+      </span>
+      <span>Valor aplicado: <strong>{{ confirmacion.valorPago | number:'1.0-2' }}</strong></span>
+      <span>Cartera: <strong>{{ confirmacion.estado }}</strong></span>
+      <span *ngIf="confirmacion.incluyeCaja">Caja: <strong>Pendiente de confirmación física</strong></span>
+      <span *ngIf="!confirmacion.incluyeCaja">Sin efectivo pendiente en Caja</span>
+    </div>
+  </section>
+
   <!-- =======================================================
        ASOCIADO SELECCIONADO
        ======================================================= -->

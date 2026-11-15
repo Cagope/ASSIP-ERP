@@ -1,0 +1,73 @@
+
+<!-- =========================================================
+     ASSIP ERP - PANTALLA PRINCIPAL
+     COOPVALLE
+     ========================================================= -->
+
+<section class="inicio-page">
+
+  <!-- Accesos generados desde MENU_REGISTRY -->
+  <section
+    class="inicio-modulos"
+    aria-labelledby="inicio-modulos-titulo">
+
+    <div class="inicio-section-heading">
+
+      <h2 id="inicio-modulos-titulo">
+        Módulos del sistema
+      </h2>
+
+      <span class="inicio-section-description">
+        Accesos autorizados
+      </span>
+
+    </div>
+
+    <!-- Tarjetas de módulos autorizados -->
+    <div
+      class="inicio-grid"
+      *ngIf="modulos.length > 0; else sinModulos">
+
+      <button
+        *ngFor="let modulo of modulos; trackBy: trackByIndex"
+        type="button"
+        class="inicio-card"
+        (click)="abrirModulo(modulo.index)"
+        [attr.aria-label]="'Abrir módulo ' + modulo.title + ' en el menú lateral'">
+
+        <!-- Icono del módulo -->
+        <span
+          class="inicio-card-icon"
+          aria-hidden="true">
+
+          <lucide-icon
+            [img]="icons[modulo.icon || ''] || icons['general']"
+            [size]="28"
+            [strokeWidth]="1.8">
+          </lucide-icon>
+
+        </span>
+
+        <!-- Nombre del módulo -->
+        <span class="inicio-card-title">
+          {{ modulo.title }}
+        </span>
+
+        <!-- Descripción del módulo -->
+        <span class="inicio-card-action">
+          {{ modulo.descripcion }}
+        </span>
+
+      </button>
+
+    </div>
+
+    <ng-template #sinModulos>
+      <p class="inicio-empty">
+        No hay módulos disponibles para su usuario.
+      </p>
+    </ng-template>
+
+  </section>
+
+</section>

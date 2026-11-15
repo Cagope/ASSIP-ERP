@@ -3104,6 +3104,65 @@ public class SolicitudCreditoRepository {
     }
 
     // =========================================================
+    // RESPALDOS EFECTIVOS PARA VALIDACIÓN DE GARANTÍAS
+    // =========================================================
+
+    public record RespaldosSolicitud(
+            int cantidadCodeudores,
+            int cantidadGarantiasReales
+    ) {
+    }
+
+    public RespaldosSolicitud consultarRespaldosSolicitud(
+            Integer idSolicitudCredito
+    ) {
+        String sql = """
+                SELECT
+                    (SELECT COUNT(*)
+                     FROM cartera.solicitudes_deudores sd
+                     WHERE sd.id_solicitud_credito = :idSolicitudCredito
+                       AND sd.activo = true
+                       AND UPPER(TRIM(sd.tipo_deudor)) = 'CODEUDOR') AS codeudores,
+                    (SELECT COUNT(DISTINCT sgb.id_solicitud_garantia_bien)
+                     FROM cartera.solicitudes_garantias_bienes sgb
+                     JOIN cartera.solicitudes_deudores_bienes sdb
+                       ON sdb.id_solicitud_deudor_bien = sgb.id_solicitud_deudor_bien
+                     JOIN cartera.solicitudes_deudores sd
+                       ON sd.id_solicitud_deudor = sdb.id_solicitud_deudor
+                     WHERE sgb.id_solicitud_credito = :idSolicitudCredito
+                       AND sd.id_solicitud_credito = :idSolicitudCredito
+                       AND sd.activo = true
+                       AND sdb.activo = true
+                       AND sdb.es_garantia_real = true) AS garantias_reales
+                """;
+        return jdbc.queryForObject(
+                sql,
+                new MapSqlParameterSource("idSolicitudCredito", idSolicitudCredito),
+                (rs, rowNum) -> new RespaldosSolicitud(
+                        rs.getInt("codeudores"),
+                        rs.getInt("garantias_reales")
+                )
+        );
+    }
+
+    public Optional<String> consultarCodigoSubgarantiaSolicitud(
+            Integer idSolicitudCredito
+    ) {
+        String sql = """
+                SELECT codigo_subgarantia
+                FROM cartera.solicitudes_creditos
+                WHERE id_solicitud_credito = :idSolicitudCredito
+                  AND activo = true
+                """;
+        List<String> codigos = jdbc.query(
+                sql,
+                new MapSqlParameterSource("idSolicitudCredito", idSolicitudCredito),
+                (rs, rowNum) -> rs.getString("codigo_subgarantia")
+        );
+        return codigos.stream().findFirst();
+    }
+
+    // =========================================================
     // VALIDAR BIENES PARA ENVIAR A APROBACIÓN
     // =========================================================
 

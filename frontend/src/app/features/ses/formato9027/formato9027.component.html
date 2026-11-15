@@ -1,0 +1,99 @@
+<section class="ses9027">
+  <!-- Encabezado igual al formato 9999 -->
+  <header class="encabezado">
+    <h1>Cartera individual</h1>
+    <p>Superintendencia de la Economía Solidaria</p>
+  </header>
+
+  <!-- Filtros y acciones alineados con el formato 9999 -->
+  <section class="filtros-panel">
+    <div class="filtros-contenido">
+      <div class="filtro-campo">
+        <label for="ses9027-anio">Año</label>
+        <input id="ses9027-anio" type="number" min="1900" max="9999" step="1"
+               [(ngModel)]="anio" (ngModelChange)="cambiarPeriodo()" [disabled]="cargando()" />
+      </div>
+
+      <div class="filtro-campo filtro-mes">
+        <label for="ses9027-mes">Mes</label>
+        <select id="ses9027-mes" [(ngModel)]="mes" (ngModelChange)="cambiarPeriodo()"
+                [disabled]="cargando()">
+          <option *ngFor="let nombre of meses; let indice = index" [ngValue]="indice + 1">
+            {{ nombre }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filtros-acciones">
+        <button type="button" class="btn btn-primary" (click)="consultar()" [disabled]="cargando()">
+          {{ cargando() ? 'Consultando...' : 'Consultar' }}
+        </button>
+        <button type="button" class="btn btn-success" (click)="exportar()"
+                [disabled]="!consultaVigente || cargando()">Generar plano CSV</button>
+        <button type="button" class="btn btn-excel" (click)="exportarExcel()"
+                [disabled]="!consultaVigente || cargando()">Exportar Excel</button>
+        <button type="button" class="btn btn-secondary" (click)="limpiar()"
+                [disabled]="cargando()">Limpiar</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="error" *ngIf="error()" role="alert">{{ error() }}</p>
+
+  <section class="panel" *ngIf="consultaVigente">
+    <div class="panel-titulo">
+      <h2>Resumen de Cartera</h2>
+      <span class="periodo">Corte: {{ consultado | date:'dd/MM/yyyy':'':'es-CO' }}</span>
+    </div>
+    <div class="resumen">
+      <div class="indicador">
+        <span class="indicador-etiqueta">Créditos reportados</span>
+        <strong class="indicador-valor">{{ registros.length | number:'1.0-0':'es-CO' }}</strong>
+      </div>
+      <div class="indicador">
+        <span class="indicador-etiqueta">Valor de préstamos</span>
+        <strong class="indicador-valor">{{ valorPrestamos | number:'1.2-2':'es-CO' }}</strong>
+      </div>
+      <div class="indicador">
+        <span class="indicador-etiqueta">Saldo de capital</span>
+        <strong class="indicador-valor">{{ saldoCapital | number:'1.2-2':'es-CO' }}</strong>
+      </div>
+      <div class="indicador">
+        <span class="indicador-etiqueta">Saldo de intereses</span>
+        <strong class="indicador-valor">{{ saldoIntereses | number:'1.2-2':'es-CO' }}</strong>
+      </div>
+      <div class="indicador">
+        <span class="indicador-etiqueta">Columnas SES</span>
+        <strong class="indicador-valor">{{ campos.length }}</strong>
+      </div>
+      <div class="indicador">
+        <span class="indicador-etiqueta">Fecha de corte</span>
+        <strong class="indicador-valor">{{ consultado }}</strong>
+      </div>
+    </div>
+    <p class="nota">Los indicadores se calculan sobre los registros del cierre consultado.</p>
+  </section>
+
+  <section class="panel" *ngIf="consultaVigente">
+    <div class="panel-titulo">
+      <h2>Detalle del formato</h2>
+      <button type="button" class="secundario" (click)="mostrarDetalle = !mostrarDetalle">
+        {{ mostrarDetalle ? 'Ocultar vista previa' : 'Mostrar vista previa' }}
+      </button>
+    </div>
+    <p class="nota">El CSV oficial contiene 62 columnas, sin encabezados y separadas por punto y coma.</p>
+    <div class="tabla-contenedor" *ngIf="mostrarDetalle">
+      <table>
+        <thead>
+          <tr><th *ngFor="let campo of campos">{{ campo }}</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let registro of registros | slice:0:100">
+            <td *ngFor="let campo of campos">{{ registro[campo] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="nota" *ngIf="mostrarDetalle">Vista previa: primeros 100 créditos. Excel y CSV incluyen todos los registros.</p>
+  </section>
+</section>

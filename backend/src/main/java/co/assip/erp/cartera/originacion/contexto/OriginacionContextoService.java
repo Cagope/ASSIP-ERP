@@ -21,16 +21,6 @@ public class OriginacionContextoService {
     // CONSTANTES
     // =========================================================
 
-    /**
-     * Valor inicial únicamente para simulación en Originación.
-     *
-     * No reemplaza la reciprocidad definitiva determinada
-     * posteriormente por las condiciones de la operación.
-     */
-    private static final BigDecimal RECIPROCIDAD_INICIAL_SIMULACION =
-            BigDecimal.valueOf(50);
-
-
     // =========================================================
     // DEPENDENCIAS
     // =========================================================
@@ -192,7 +182,8 @@ public class OriginacionContextoService {
         contexto.setReciprocidad(
                 construirReciprocidad(
                         depositos,
-                        carteraActual
+                        carteraActual,
+                        idAgencia
                 )
         );
 
@@ -677,7 +668,8 @@ public class OriginacionContextoService {
     private OriginacionContextoDTO.ReciprocidadDTO
     construirReciprocidad(
             List<OriginacionContextoDTO.DepositoDTO> depositos,
-            List<OriginacionContextoDTO.CarteraDTO> carteraActual
+            List<OriginacionContextoDTO.CarteraDTO> carteraActual,
+            Integer idAgencia
     ) {
 
         OriginacionContextoDTO.ReciprocidadDTO dto =
@@ -729,12 +721,15 @@ public class OriginacionContextoService {
 
 
         // =====================================================
-        // SIMULACIÓN
+        // SIMULACIÓN: factor parametrizado por agencia (645)
         // =====================================================
+
+        BigDecimal factorReciprocidadInicial =
+                repository.obtenerFactorReciprocidadInicial(idAgencia);
 
         BigDecimal cupoReciprocidad =
                 saldoAportes.multiply(
-                        RECIPROCIDAD_INICIAL_SIMULACION
+                        factorReciprocidadInicial
                 );
 
 
@@ -762,7 +757,7 @@ public class OriginacionContextoService {
 
 
         dto.setReciprocidadInicial(
-                RECIPROCIDAD_INICIAL_SIMULACION
+                factorReciprocidadInicial
         );
 
 

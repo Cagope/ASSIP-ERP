@@ -1,12 +1,14 @@
+
 package co.assip.erp.cartera.prorrogas_v1.dto;
 
+import co.assip.erp.cartera.pago_cuotas_v1.motor.dto.PagoCuotasMedioRecaudoDTO;
 import java.math.BigDecimal;
 import java.util.List;
-import co.assip.erp.cartera.pago_cuotas_v1.motor.dto.PagoCuotasMedioRecaudoDTO;
 
 /**
  * Datos solicitados para simular y ejecutar una prórroga.
- * Los valores financieros serán validados por el servicio.
+ * Los importes financieros se validan en el servicio.
+ * Seguros, alivios y costas judiciales son recaudos independientes.
  */
 public record ProrrogasV1RequestDTO(
         Integer idCarteraCredito,
@@ -15,9 +17,8 @@ public record ProrrogasV1RequestDTO(
         BigDecimal valorInteresMora,
         BigDecimal valorCapital,
         BigDecimal valorSeguro,
-        BigDecimal valorAportes,
-        BigDecimal valorFondoGarantia,
-        BigDecimal valorOtrosConceptos,
+        BigDecimal valorAlivios,
+        BigDecimal valorCostasJudiciales,
         List<PagoCuotasMedioRecaudoDTO> mediosRecaudo,
         String observacion
 ) {
